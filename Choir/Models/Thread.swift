@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftUI
 
 class Thread: Identifiable, Hashable {
     let id: UUID
@@ -28,16 +29,22 @@ class Thread: Identifiable, Hashable {
     }
 }
 
-struct Message: Identifiable {
+struct Message: Identifiable, Equatable {
     let id: UUID
     let content: String
     let isUser: Bool
     let timestamp: Date
+    var chorusResponses: [Phase: [String]]?
 
-    init(content: String, isUser: Bool, timestamp: Date = Date()) {
+    init(content: String, isUser: Bool, timestamp: Date = Date(), chorusResponses: [Phase: [String]]? = nil) {
         self.id = UUID()
         self.content = content
         self.isUser = isUser
         self.timestamp = timestamp
+        self.chorusResponses = chorusResponses
+    }
+
+    static func == (lhs: Message, rhs: Message) -> Bool {
+        lhs.id == rhs.id
     }
 }
