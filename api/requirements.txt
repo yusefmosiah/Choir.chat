@@ -1,0 +1,16 @@
+fastapi>=0.115.0  # Latest version with significant improvements
+uvicorn>=0.27.1  # Latest stable version
+gunicorn
+python-dotenv
+litellm
+openai
+qdrant-client
+pydantic>=2.0.0  # Required by latest litellm
+pydantic-settings>=2.0.0  # Match pydantic version
+tiktoken==0.8.0
+tokenizers==0.15.2
+PyYAML==6.0.1
+# Testing dependencies
+pytest==8.0.0
+pytest-asyncio==0.23.5
+httpx==0.26.0  # Required for TestClient
