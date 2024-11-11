@@ -224,3 +224,152 @@ Referencing **tree.md**, the updated directory structure is as follows:
   - Monitor usage and costs on Render to optimize resource allocation.
 
 This updated checklist helps you separate the Python backend from the codebase and redeploy both the frontend and backend independently on Render, as per the updated directory structure in **tree.md**.
+
+# API Conversion Checklist
+
+## Convert WebSocket API to REST Endpoints
+
+1. **Core Chorus Cycle Endpoints**
+   - [ ] `POST /api/chorus/action`
+     - Input: User message content
+     - Output: Initial response
+   - [ ] `POST /api/chorus/experience`
+     - Input: User message + action response
+     - Output: Prior-enriched response
+   - [ ] `POST /api/chorus/intention`
+     - Input: Previous responses
+     - Output: Intent analysis
+   - [ ] `POST /api/chorus/observation`
+     - Input: Previous responses
+     - Output: Pattern observations
+   - [ ] `POST /api/chorus/understanding`
+     - Input: Previous responses
+     - Output: Loop decision
+   - [ ] `POST /api/chorus/yield`
+     - Input: All previous responses
+     - Output: Final synthesis
+
+2. **Vector Database Operations**
+   - [x] `POST /api/vectors/search`
+     - Input: Query vector
+     - Output: Similar vectors
+   - [x] `POST /api/vectors/store`
+     - Input: Content + vector
+     - Output: Storage confirmation
+   - [x] `GET /api/vectors/{id}`
+     - Output: Vector data
+
+3. **Embedding Generation**
+   - [x] `POST /api/embeddings/generate`
+     - Input: Text content
+     - Output: Embedding vector
+
+4. **Thread Management**
+   - [x] `POST /api/threads`
+     - Create new thread
+   - [x] `GET /api/threads/{id}`
+     - Get thread details
+   - [x] `GET /api/threads/{id}/messages`
+     - Get thread messages
+
+5. **Message Management**
+   - [ ] `POST /api/messages`
+     - Store new message
+   - [ ] `GET /api/messages/{id}`
+     - Get message details
+
+## API Implementation Tasks
+
+1. **Update FastAPI Routes**
+   - [ ] Remove WebSocket handler
+   - [ ] Create new router files for each domain
+   - [ ] Implement endpoint handlers
+   - [ ] Add request/response models
+
+2. **Update Database Layer**
+   - [ ] Simplify database client
+   - [ ] Remove WebSocket-specific code
+   - [ ] Add direct CRUD operations
+   - [ ] Optimize query patterns
+
+3. **Update Chorus Cycle**
+   - [ ] Convert to stateless operation
+   - [ ] Remove state management
+   - [ ] Accept full context in requests
+   - [ ] Return complete responses
+
+4. **Update Configuration**
+   - [ ] Remove WebSocket configs
+   - [ ] Add REST-specific settings
+   - [ ] Update CORS configuration
+   - [ ] Configure rate limiting
+
+5. **Update Dependencies**
+   - [ ] Remove WebSocket dependencies
+   - [ ] Add REST-specific packages
+   - [ ] Update requirements.txt
+   - [ ] Update Docker configuration
+
+## Testing Updates
+
+1. **Unit Tests**
+   - [ ] Add endpoint tests
+   - [ ] Add request validation tests
+   - [ ] Add response validation tests
+   - [ ] Add error handling tests
+
+2. **Integration Tests**
+   - [ ] Add API flow tests
+   - [ ] Add database operation tests
+   - [ ] Add embedding tests
+   - [ ] Add end-to-end tests
+
+## Documentation Updates
+
+1. **API Documentation**
+   - [ ] Create OpenAPI specs
+   - [ ] Document request/response formats
+   - [ ] Add example requests
+   - [ ] Document error responses
+
+2. **Deployment Documentation**
+   - [ ] Update deployment instructions
+   - [ ] Document environment variables
+   - [ ] Add monitoring guidelines
+   - [ ] Update scaling recommendations
+
+## Frontend Updates
+
+1. **Update API Client**
+   - [ ] Remove WebSocket client
+   - [ ] Add REST client
+   - [ ] Update response handling
+   - [ ] Add error handling
+
+2. **Update UI Components**
+   - [ ] Update loading states
+   - [ ] Add progress indicators
+   - [ ] Update error displays
+   - [ ] Optimize state management
+
+## Deployment Steps
+
+1. **Prepare New API**
+   - [ ] Test locally
+   - [ ] Update environment variables
+   - [ ] Test with production database
+   - [ ] Verify all endpoints
+
+2. **Deploy Updates**
+   - [ ] Deploy new API version
+   - [ ] Monitor for errors
+   - [ ] Verify all endpoints
+   - [ ] Check performance metrics
+
+3. **Update Frontend**
+   - [ ] Deploy frontend changes
+   - [ ] Verify integration
+   - [ ] Monitor error rates
+   - [ ] Check user experience
+
+This checklist outlines the steps needed to convert the current WebSocket-based API to a stateless HTTP API. Each section should be completed sequentially to ensure a smooth transition.
