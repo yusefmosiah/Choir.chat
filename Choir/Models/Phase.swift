@@ -1,6 +1,6 @@
 import Foundation
 
-enum Phase: CaseIterable {
+enum Phase: String, CaseIterable, Identifiable {
     case action
     case experience
     case intention
@@ -8,14 +8,27 @@ enum Phase: CaseIterable {
     case understanding
     case yield
 
+    var id: String { rawValue }
+
+    var description: String {
+        switch self {
+        case .action: return "Initial Response"
+        case .experience: return "Finding Context"
+        case .intention: return "Analyzing Intent"
+        case .observation: return "Observing Patterns"
+        case .understanding: return "Checking Understanding"
+        case .yield: return "Final Response"
+        }
+    }
+
     var symbol: String {
         switch self {
-        case .action: "bolt.fill"         // Immediate response
-        case .experience: "book.fill"      // Prior knowledge
-        case .intention: "target"          // Goal analysis
-        case .observation: "eye.fill"      // Pattern recognition
-        case .understanding: "brain"       // Deep thinking
-        case .yield: "checkmark.circle"    // Final synthesis
+        case .action: return "bolt.fill"
+        case .experience: return "brain.head.profile"
+        case .intention: return "target"
+        case .observation: return "eye.fill"
+        case .understanding: return "checkmark.circle.fill"
+        case .yield: return "arrow.down.circle.fill"
         }
     }
 }

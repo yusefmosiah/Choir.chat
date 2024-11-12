@@ -1,90 +1,124 @@
 import SwiftUI
 
 struct ChorusResponse: View {
-    enum Phase: CaseIterable {
-        case action
-        case experience
-        case intention
-        case observation
-        case understanding
-        case yield
+    @StateObject private var viewModel: ChorusViewModel
+    @State private var input = ""
 
-        var symbol: String {
-            switch self {
-            case .action: "bolt.fill"         // Immediate response
-            case .experience: "book.fill"      // Prior knowledge
-            case .intention: "target"          // Goal analysis
-            case .observation: "eye.fill"      // Pattern recognition
-            case .understanding: "brain"       // Deep thinking
-            case .yield: "checkmark.circle"    // Final synthesis
-            }
+    init() {
+        // Create the view model using a temporary one until async init completes
+        _viewModel = StateObject(wrappedValue: ChorusViewModel(coordinator: MockChorusCoordinator()))
+
+        // Then replace it with the real one
+        Task { @MainActor in
+            let realViewModel = await ChorusViewModel()
+            // Update the view model
+            _viewModel = StateObject(wrappedValue: realViewModel)
         }
     }
 
-    @State private var selectedPhase: Phase = .action
-    let responses: [Phase: String]
-
     var body: some View {
-        VStack(alignment: .leading) {
-            // Phase selector - only show phases with content
-            HStack(spacing: 0) {
-                ForEach(Phase.allCases.filter { responses[$0] != nil }, id: \.self) { phase in
-                    PhaseTab(phase: phase,
-                            isSelected: phase == selectedPhase,
-                            action: { selectedPhase = phase })
-                    if phase != Phase.allCases.last {
-                        Divider()
+        VStack {
+            // Phase tabs
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack {
+                    ForEach(Phase.allCases) { phase in
+                        PhaseTab(phase: phase,
+                                isActive: phase == viewModel.currentPhase,
+                                hasResponse: viewModel.responses[phase] != nil)
                     }
                 }
+                .padding(.horizontal)
             }
-            .frame(maxWidth: .infinity)
 
-            // Phase content
-            if let content = responses[selectedPhase] {
-                Text(content)
-                    .padding()
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .animation(.easeInOut, value: selectedPhase)
+            // Response area
+            ScrollView {
+                VStack(alignment: .leading, spacing: 12) {
+                    ForEach(Phase.allCases) { phase in
+                        if let response = viewModel.responses[phase] {
+                            ResponseCard(phase: phase, content: response)
+                        }
+                    }
+                }
+                .padding()
             }
-        }
-        .onChange(of: responses) { newResponses in
-            // Only auto-select yield when it becomes available
-            if newResponses[.yield] != nil {
-                selectedPhase = .yield
-            } else if selectedPhase == .yield {
-                // Reset to action if yield is no longer available
-                selectedPhase = .action
+
+            // Input area
+            HStack {
+                TextField("Enter message", text: $input)
+                    .textFieldStyle(.roundedBorder)
+                    .disabled(viewModel.isProcessing)
+
+                if viewModel.isProcessing {
+                    Button("Cancel") {
+                        viewModel.cancel()
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(.red)
+                } else {
+                    Button("Send") {
+                        guard !input.isEmpty else { return }
+                        viewModel.process(input)
+                        input = ""
+                    }
+                    .buttonStyle(.borderedProminent)
+                }
             }
+            .padding()
         }
-        .background(Color.gray.opacity(0.1))
-        .cornerRadius(12)
     }
 }
 
 struct PhaseTab: View {
-    let phase: ChorusResponse.Phase
-    let isSelected: Bool
-    let action: () -> Void
+    let phase: Phase
+    let isActive: Bool
+    let hasResponse: Bool
 
     var body: some View {
-        Button(action: action) {
+        VStack {
             Image(systemName: phase.symbol)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 8)
-                .foregroundColor(isSelected ? .white : .primary)
-                .background(isSelected ? Color.blue : Color.clear)
+                .foregroundColor(isActive ? .accentColor : .gray)
+
+            Text(phase.description)
+                .font(.caption)
+                .foregroundColor(isActive ? .primary : .secondary)
         }
+        .padding(8)
+        .background(
+            RoundedRectangle(cornerRadius: 8)
+                .fill(isActive ? Color.accentColor.opacity(0.1) : Color.clear)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 8)
+                .stroke(isActive ? Color.accentColor : Color.clear, lineWidth: 1)
+        )
+        .opacity(hasResponse || isActive ? 1 : 0.5)
+    }
+}
+
+struct ResponseCard: View {
+    let phase: Phase
+    let content: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Image(systemName: phase.symbol)
+                Text(phase.description)
+                    .font(.headline)
+                Spacer()
+            }
+            .foregroundColor(.accentColor)
+
+            Text(content)
+                .font(.body)
+        }
+        .padding()
+        .background(Color(.systemBackground))
+        .cornerRadius(12)
+        .shadow(radius: 2)
     }
 }
 
 #Preview {
-    ChorusResponse(responses: [
-        .action: "Direct response to query",
-        .experience: "Related prior knowledge",
-        .intention: "Goal analysis",
-        .observation: "Pattern recognition",
-        .understanding: "Deeper implications",
-        .yield: "Final synthesized response"
-    ])
-    .padding()
+    ChorusResponse()
 }
