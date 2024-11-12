@@ -90,3 +90,126 @@ class ExperienceResponse(BaseModel):
             }]
         }
     }
+
+class IntentionRequest(BaseModel):
+    content: str
+    thread_id: Optional[str] = None
+    action_response: str
+    experience_response: str
+    priors: Dict[str, Dict[str, Any]]  # Priors from experience phase
+
+class IntentionResponse(BaseModel):
+    reasoning: str  # Why these priors were selected
+    selected_priors: List[str]  # IDs of most relevant priors
+    response: str  # Analysis of intent
+    confidence: float
+
+    model_config = {
+        "json_schema_extra": {
+            "examples": [{
+                "reasoning": "Why these priors were selected",
+                "selected_priors": ["prior_id_1", "prior_id_2"],
+                "response": "Analysis of user's intent and relevant priors",
+                "confidence": 0.8
+            }]
+        }
+    }
+
+class ObservationRequest(BaseModel):
+    content: str
+    thread_id: Optional[str] = None
+    action_response: str
+    experience_response: str
+    intention_response: str
+    selected_priors: List[str]  # IDs from intention phase
+    priors: Dict[str, Dict[str, Any]]  # Full priors dictionary
+
+class ObservationResponse(BaseModel):
+    id: str
+    reasoning: str
+    patterns: List[Dict[str, Any]]
+    response: str
+    confidence: float
+
+    model_config = {
+        "json_schema_extra": {
+            "examples": [{
+                "reasoning": "Analysis of patterns in priors and responses",
+                "patterns": [
+                    {"type": "theme", "description": "Pattern description"},
+                    {"type": "insight", "description": "Insight description"}
+                ],
+                "response": "Synthesis of observations",
+                "confidence": 0.8
+            }]
+        }
+    }
+
+class UnderstandingRequest(BaseModel):
+    content: str
+    thread_id: Optional[str] = None
+    action_response: str
+    experience_response: str
+    intention_response: str
+    observation_response: str
+    patterns: List[Dict[str, Any]]  # Patterns from observation
+    selected_priors: List[str]  # Selected priors from intention
+
+class UnderstandingResponse(BaseModel):
+    reasoning: str  # Analysis of whether we have sufficient understanding
+    should_yield: bool  # Whether to proceed to yield or loop back
+    confidence: float
+    next_action: Optional[str] = None  # Suggested focus if looping back
+    next_prompt: Optional[str] = None  # The actual prompt to use in next action phase
+
+    model_config = {
+        "json_schema_extra": {
+            "examples": [{
+                "reasoning": "Analysis of understanding completeness",
+                "should_yield": True,
+                "confidence": 0.8,
+                "next_action": None,
+                "next_prompt": None
+            }, {
+                "reasoning": "Need to explore creative aspects",
+                "should_yield": False,
+                "confidence": 0.7,
+                "next_action": "Explore creative storytelling",
+                "next_prompt": "Tell me a story about a choir that incorporates themes of community and artistic expression"
+            }]
+        }
+    }
+
+class YieldRequest(BaseModel):
+    content: str
+    thread_id: Optional[str] = None
+    action_response: str
+    experience_response: str
+    intention_response: str
+    observation_response: str
+    understanding_response: str
+    selected_priors: List[str]  # Selected priors from intention
+    priors: Dict[str, Dict[str, Any]]  # Full priors dictionary
+
+class YieldResponse(BaseModel):
+    reasoning: str  # How the response incorporates priors and insights
+    citations: List[Dict[str, Any]]  # List of cited priors with context
+    response: str  # Final synthesized response
+    confidence: float
+
+    model_config = {
+        "json_schema_extra": {
+            "examples": [{
+                "reasoning": "How the response incorporates priors and insights",
+                "citations": [
+                    {
+                        "prior_id": "id1",
+                        "content": "cited content",
+                        "context": "how this prior was used"
+                    }
+                ],
+                "response": "Final synthesized response with inline citations",
+                "confidence": 0.9
+            }]
+        }
+    }

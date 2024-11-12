@@ -36,3 +36,18 @@ async def store_vector(request: VectorStoreRequest):
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/{vector_id}", response_model=APIResponse)
+async def get_vector(vector_id: str):
+    """Get a specific vector by ID."""
+    try:
+        result = await db.get_vector(vector_id)
+        if not result:
+            raise HTTPException(status_code=404, detail="Vector not found")
+
+        return APIResponse(
+            success=True,
+            data=result
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
