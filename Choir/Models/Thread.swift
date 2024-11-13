@@ -8,15 +8,23 @@
 import Foundation
 import SwiftUI
 
-class Thread: Identifiable, Hashable {
+class Thread: ObservableObject, Identifiable, Hashable {
     let id: UUID
-    let createdAt: Date
-    var messages: [Message]
+    let title: String
+    @Published var messages: [Message] = []
 
-    init(id: UUID = UUID(), createdAt: Date = Date(), messages: [Message] = []) {
+    init(id: UUID = UUID(), title: String? = nil) {
         self.id = id
-        self.createdAt = createdAt
-        self.messages = messages
+        self.title = title ?? "Thread \(DateFormatter.localizedString(from: Date(), dateStyle: .short, timeStyle: .short))"
+    }
+
+    func addMessage(_ content: String, isUser: Bool = true, chorusResult: MessageChorusResult? = nil) {
+        let message = Message(
+            content: content,
+            isUser: isUser,
+            chorusResult: chorusResult
+        )
+        messages.append(message)
     }
 
     // Hashable conformance
@@ -31,20 +39,36 @@ class Thread: Identifiable, Hashable {
 
 struct Message: Identifiable, Equatable {
     let id: UUID
-    let content: String
+    var content: String
     let isUser: Bool
     let timestamp: Date
-    var chorusResponses: [Phase: [String]]?
+    var chorusResult: MessageChorusResult?
 
-    init(content: String, isUser: Bool, timestamp: Date = Date(), chorusResponses: [Phase: [String]]? = nil) {
-        self.id = UUID()
+    init(id: UUID = UUID(),
+         content: String,
+         isUser: Bool,
+         timestamp: Date = Date(),
+         chorusResult: MessageChorusResult? = nil) {
+        self.id = id
         self.content = content
         self.isUser = isUser
         self.timestamp = timestamp
-        self.chorusResponses = chorusResponses
+        self.chorusResult = chorusResult
     }
 
+    // Equatable conformance
     static func == (lhs: Message, rhs: Message) -> Bool {
         lhs.id == rhs.id
+    }
+}
+
+struct MessageChorusResult: Equatable {
+    let phases: [Phase: String]
+    let citations: [Citation]?
+
+    // Equatable conformance
+    static func == (lhs: MessageChorusResult, rhs: MessageChorusResult) -> Bool {
+        lhs.phases == rhs.phases &&
+        lhs.citations?.map { $0.prior_id } == rhs.citations?.map { $0.prior_id }
     }
 }

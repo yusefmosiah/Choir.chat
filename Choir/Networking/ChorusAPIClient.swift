@@ -20,7 +20,7 @@ class ChorusAPIClient {
         session = URLSession(configuration: config)
     }
 
-    func post<T: Codable>(endpoint: String, body: [String: Any]) async throws -> APIResponse<T> {
+    func post<T: Codable, R: Codable>(endpoint: String, body: T) async throws -> APIResponse<R> {
         guard let url = URL(string: "\(baseURL)/\(endpoint)") else {
             throw APIError.invalidURL
         }
@@ -28,7 +28,9 @@ class ChorusAPIClient {
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.httpBody = try JSONSerialization.data(withJSONObject: body)
+
+        let encoder = JSONEncoder()
+        request.httpBody = try encoder.encode(body)
 
         do {
             let (data, response) = try await session.data(for: request)
@@ -42,7 +44,7 @@ class ChorusAPIClient {
             }
 
             let decoder = JSONDecoder()
-            let apiResponse = try decoder.decode(APIResponse<T>.self, from: data)
+            let apiResponse = try decoder.decode(APIResponse<R>.self, from: data)
 
             guard apiResponse.success else {
                 throw APIError.serverError(apiResponse.message ?? "Request failed")

@@ -5,15 +5,14 @@ struct ChorusResponse: View {
     @State private var input = ""
 
     init() {
-        // Create the view model using a temporary one until async init completes
+        // Create a mock coordinator for preview/testing
+        #if DEBUG
         _viewModel = StateObject(wrappedValue: ChorusViewModel(coordinator: MockChorusCoordinator()))
-
-        // Then replace it with the real one
-        Task { @MainActor in
-            let realViewModel = await ChorusViewModel()
-            // Update the view model
-            _viewModel = StateObject(wrappedValue: realViewModel)
-        }
+        #else
+        // Create REST coordinator for production
+        let coordinator = RESTChorusCoordinator()
+        _viewModel = StateObject(wrappedValue: ChorusViewModel(coordinator: coordinator))
+        #endif
     }
 
     var body: some View {
@@ -57,8 +56,16 @@ struct ChorusResponse: View {
                 } else {
                     Button("Send") {
                         guard !input.isEmpty else { return }
-                        viewModel.process(input)
+                        let content = input
                         input = ""
+
+                        Task {
+                            do {
+                                try await viewModel.process(content)
+                            } catch {
+                                print("Error processing message: \(error)")
+                            }
+                        }
                     }
                     .buttonStyle(.borderedProminent)
                 }

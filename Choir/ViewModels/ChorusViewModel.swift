@@ -17,12 +17,7 @@ class ChorusViewModel: ObservableObject {
         setupBindings()
     }
 
-    convenience init() async {
-        self.init(coordinator: await RESTChorusCoordinator())
-    }
-
     private func setupBindings() {
-        // Create tasks for each sequence
         let phaseTask = Task {
             for await phase in coordinator.currentPhaseSequence {
                 self.currentPhase = phase
@@ -31,17 +26,21 @@ class ChorusViewModel: ObservableObject {
 
         let responsesTask = Task {
             for await responses in coordinator.responsesSequence {
-                self.responses = responses
+                if self.isProcessing {
+                    self.responses = responses
+                }
             }
         }
 
         let processingTask = Task {
             for await isProcessing in coordinator.isProcessingSequence {
                 self.isProcessing = isProcessing
+                if !isProcessing {
+                    self.responses.removeAll()
+                }
             }
         }
 
-        // Store tasks for cleanup
         bindingTasks = [phaseTask, responsesTask, processingTask]
     }
 
@@ -49,16 +48,16 @@ class ChorusViewModel: ObservableObject {
         bindingTasks.forEach { $0.cancel() }
     }
 
-    func process(_ input: String) {
-        guard !isProcessing else { return }
-
+    func process(_ input: String) async throws {
+        // Clear previous state
+        responses.removeAll()
         error = nil
-        Task {
-            do {
-                try await coordinator.process(input)
-            } catch {
-                self.error = error
-            }
+
+        do {
+            try await coordinator.process(input)
+        } catch {
+            self.error = error
+            throw error
         }
     }
 

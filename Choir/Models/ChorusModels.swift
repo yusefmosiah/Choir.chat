@@ -7,6 +7,57 @@ struct APIResponse<T: Codable>: Codable {
     let data: T?
 }
 
+// Request body structs
+struct ActionRequestBody: Codable {
+    let content: String
+}
+
+struct ExperienceRequestBody: Codable {
+    let content: String
+    let action_response: String
+    let thread_id: String?
+}
+
+struct IntentionRequestBody: Codable {
+    let content: String
+    let action_response: String
+    let experience_response: String
+    let priors: [String: Prior]?
+}
+
+struct ObservationRequestBody: Codable {
+    let content: String
+    let action_response: String
+    let experience_response: String
+    let intention_response: String
+    let selected_priors: [String]
+    let priors: [String: Prior]?
+    let thread_id: String?
+}
+
+struct UnderstandingRequestBody: Codable {
+    let content: String
+    let action_response: String
+    let experience_response: String
+    let intention_response: String
+    let observation_response: String
+    let patterns: [Pattern]
+    let selected_priors: [String]
+    let thread_id: String?
+}
+
+struct YieldRequestBody: Codable {
+    let content: String
+    let action_response: String
+    let experience_response: String
+    let intention_response: String
+    let observation_response: String
+    let understanding_response: String
+    let selected_priors: [String]
+    let priors: [String: Prior]?
+    let thread_id: String?
+}
+
 // Base response metadata
 struct ResponseMetadata: Codable {
     let reasoning: String?
