@@ -175,7 +175,6 @@
     ├── prompt_wake_up.md
     ├── reward_model.md
     ├── scripts
-    │   ├── archive_web_stack.sh
     │   ├── combiner.sh
     │   └── update_tree.sh
     ├── self_creation_process.md
@@ -188,4 +187,4 @@
     ├── theory_theory.md
     └── tree.md
 
-41 directories, 145 files
+41 directories, 144 files

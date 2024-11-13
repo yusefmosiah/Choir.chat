@@ -462,3 +462,318 @@ docs_version: "0.1.0"
 [Action: Identify] [Noun: Patterns] [Modifier: Emerging] [Parameter: From_Collaboration]
 [Action: Enhance] [Noun: Understanding] [Modifier: Through] [Parameter: Collective_Insights]
 [Action: Explore] [Noun: Future_Opportunities] [Modifier: For] [Parameter: System_Evolution]
+
+=== File: docs/tree.md ===
+
+
+
+==
+tree.md
+==
+
+
+# Choir-Collective Directory Structure
+## Output of $ tree -I 'venv|node_modules|target|archive' | pbcopy
+
+.
+├── Choir
+│   ├── App
+│   │   └── ChoirApp.swift
+│   ├── Assets.xcassets
+│   │   ├── AccentColor.colorset
+│   │   │   └── Contents.json
+│   │   ├── AppIcon.appiconset
+│   │   │   └── Contents.json
+│   │   └── Contents.json
+│   ├── Choir.entitlements
+│   ├── ContentView.swift
+│   ├── Coordinators
+│   │   ├── MockChorusCoordinator.swift
+│   │   └── RESTChorusCoordinator.swift
+│   ├── Info.plist
+│   ├── Models
+│   │   ├── ChorusModels.swift
+│   │   ├── Phase.swift
+│   │   └── Thread.swift
+│   ├── Networking
+│   │   └── ChorusAPIClient.swift
+│   ├── Preview Content
+│   │   └── Preview Assets.xcassets
+│   │       └── Contents.json
+│   ├── Protocols
+│   │   └── ChorusCoordinator.swift
+│   ├── ViewModels
+│   │   └── ChorusViewModel.swift
+│   └── Views
+│       ├── ChorusCycleView.swift
+│       ├── ChorusResponse.swift
+│       ├── MessageRow.swift
+│       └── ThreadDetailView.swift
+├── Choir.xcodeproj
+│   ├── project.pbxproj
+│   ├── project.xcworkspace
+│   │   ├── contents.xcworkspacedata
+│   │   ├── xcshareddata
+│   │   │   └── swiftpm
+│   │   │       └── configuration
+│   │   └── xcuserdata
+│   │       └── wiz.xcuserdatad
+│   │           └── UserInterfaceState.xcuserstate
+│   └── xcuserdata
+│       └── wiz.xcuserdatad
+│           └── xcschemes
+│               └── xcschememanagement.plist
+├── ChoirTests
+│   ├── APIResponseTests.swift
+│   ├── ChoirTests.swift
+│   └── ChorusAPIClientTests.swift
+├── ChoirUITests
+│   ├── ChoirUITests.swift
+│   └── ChoirUITestsLaunchTests.swift
+├── api
+│   ├── Dockerfile
+│   ├── __init__.py
+│   ├── __pycache__
+│   │   └── main.cpython-311.pyc
+│   ├── app
+│   │   ├── __init__.py
+│   │   ├── __pycache__
+│   │   │   ├── __init__.cpython-311.pyc
+│   │   │   ├── config.cpython-311.pyc
+│   │   │   ├── database.cpython-311.pyc
+│   │   │   ├── models.cpython-311.pyc
+│   │   │   └── utils.cpython-311.pyc
+│   │   ├── chorus_cycle.py
+│   │   ├── config.py
+│   │   ├── database.py
+│   │   ├── models
+│   │   │   ├── __init__.py
+│   │   │   ├── __pycache__
+│   │   │   │   ├── __init__.cpython-311.pyc
+│   │   │   │   └── api.cpython-311.pyc
+│   │   │   └── api.py
+│   │   ├── routers
+│   │   │   ├── __pycache__
+│   │   │   │   ├── chorus.cpython-311.pyc
+│   │   │   │   ├── embeddings.cpython-311.pyc
+│   │   │   │   ├── threads.cpython-311.pyc
+│   │   │   │   ├── users.cpython-311.pyc
+│   │   │   │   └── vectors.cpython-311.pyc
+│   │   │   ├── chorus.py
+│   │   │   ├── embeddings.py
+│   │   │   ├── threads.py
+│   │   │   ├── users.py
+│   │   │   └── vectors.py
+│   │   ├── services
+│   │   │   ├── __init__.py
+│   │   │   ├── __pycache__
+│   │   │   │   ├── __init__.cpython-311.pyc
+│   │   │   │   └── chorus.cpython-311.pyc
+│   │   │   └── chorus.py
+│   │   └── utils.py
+│   ├── main.py
+│   ├── pyproject.toml
+│   ├── requirements.txt
+│   └── tests
+│       ├── __init__.py
+│       ├── conftest.py
+│       ├── test_chorus_endpoints.py
+│       ├── test_core_endpoints.py
+│       ├── test_main.py
+│       ├── test_model_compatibility.py
+│       ├── test_response_schemas.py
+│       ├── test_structured_outputs.py
+│       └── test_user_thread_endpoints.py
+└── docs
+    ├── CHANGELOG.md
+    ├── Impl_Security.md
+    ├── Meta_Evolution.md
+    ├── Model_Foundation_Evolution.md
+    ├── Model_Metastability.md
+    ├── core_architecture.md
+    ├── core_chorus.md
+    ├── core_core.md
+    ├── core_economics.md
+    ├── core_knowledge.md
+    ├── core_patterns.md
+    ├── core_state.md
+    ├── core_state_transitions.md
+    ├── data_engine_model.md
+    ├── docs_dev_principles.md
+    ├── docs_operators.md
+    ├── e_business.md
+    ├── e_concept.md
+    ├── e_questions.md
+    ├── e_reference.md
+    ├── goal_architecture.md
+    ├── goal_evolution.md
+    ├── goal_implementation.md
+    ├── goal_wed_nov_13_2024.md
+    ├── harmonic_intelligence.md
+    ├── issues
+    │   ├── issue_-1.md
+    │   ├── issue_0.md
+    │   ├── issue_1.md
+    │   ├── issue_10.md
+    │   ├── issue_11.md
+    │   ├── issue_12.md
+    │   ├── issue_13.md
+    │   ├── issue_14.md
+    │   ├── issue_15.md
+    │   ├── issue_2.md
+    │   ├── issue_3.md
+    │   ├── issue_4.md
+    │   ├── issue_5.md
+    │   ├── issue_6.md
+    │   ├── issue_7.md
+    │   ├── issue_8.md
+    │   └── issue_9.md
+    ├── levels
+    │   ├── level-1.md
+    │   ├── level0.md
+    │   ├── level1.md
+    │   ├── level2.md
+    │   ├── level3.md
+    │   ├── level4.md
+    │   ├── level5.md
+    │   └── level_organization.md
+    ├── plan_post-training.md
+    ├── plan_save_users_and_threads.md
+    ├── plan_swiftui_chorus_integration.md
+    ├── plan_thoughtspace.md
+    ├── plan_tokenomics.md
+    ├── prompt_chorus_cycle.md
+    ├── prompt_getting_started.md
+    ├── prompt_reentry.md
+    ├── prompt_summary_prompt.md
+    ├── prompt_wake_up.md
+    ├── reward_model.md
+    ├── scripts
+    │   ├── combiner.sh
+    │   └── update_tree.sh
+    ├── self_creation_process.md
+    ├── theory_choir_harmonics.md
+    ├── theory_dynamics.md
+    ├── theory_economics.md
+    ├── theory_foundation.md
+    ├── theory_harmonic_intelligence.md
+    ├── theory_oscillator_cooling.md
+    ├── theory_theory.md
+    └── tree.md
+
+41 directories, 144 files
+
+=== File: docs/CHANGELOG.md ===
+
+
+
+==
+CHANGELOG.md
+==
+
+
+# Changelog
+
+## [Unreleased]
+
+### Added
+- Initial Chorus cycle working in iOS simulator
+  - Basic message flow through phases
+  - Response handling
+  - State management
+
+### Documented
+- Created 15 comprehensive issues covering:
+  - Core message system implementation
+  - Type reconciliation with Qdrant
+  - API client updates
+  - Coordinator message flow
+  - User identity management
+  - Thread state management
+  - Integration testing
+  - Error handling strategy
+  - Performance monitoring
+  - State recovery
+  - Thread sheet implementation
+  - Thread contract implementation
+  - Message rewards system
+  - LanceDB migration
+  - Citation visualization
+
+### Architecture
+- Defined clear type system for messages
+- Planned migration to LanceDB
+- Structured multimodal support strategy
+- Documented quantum harmonic oscillator model implementation
+
+### Technical Debt
+- Identified areas needing more specification:
+  - Thread Sheet UI (marked as "AI SLOP")
+  - Reward formulas need verification
+  - Migration pipeline needs careful implementation
+
+## [0.4.1] - 2024-11-09
+
+### Added
+- Development principles with focus on groundedness
+- Basic chat interface implementation
+- SwiftData message persistence
+- Initial Action step foundation
+
+### Changed
+- Shifted to iterative, ground-up development approach
+- Simplified initial implementation scope
+- Focused on working software over theoretical architecture
+- Adopted step-by-step Chorus Cycle implementation strategy
+
+### Principles
+- Established groundedness as core development principle
+- Emphasized iterative growth and natural evolution
+- Prioritized practical progress over theoretical completeness
+- Introduced flexible, evidence-based development flow
+
+## [0.4.0] - 2024-11-08
+
+### Added
+- Self-creation process
+- Post-training concepts
+- Concurrent processing ideas
+- Democratic framing
+- Thoughtspace visualization
+
+### Changed
+- Renamed Update to Understanding
+- Enhanced step descriptions
+- Refined documentation focus
+- Improved pattern recognition
+
+## [0.3.0] - 2023-11-30
+
+### Added
+- Swift architecture plans
+- Frontend-driven design
+- Service layer concepts
+- Chorus cycle definition
+
+### Changed
+- Enhanced system architecture
+- Refined core patterns
+
+## [0.2.0] - 2016-06-20
+
+### Added
+- Phase4 party concept
+- Early democracy technology
+- Initial value systems
+
+### Changed
+- Moved beyond truth measurement framing
+- Refined core concepts
+
+## [0.1.0] - 2015-01-15
+
+### Added
+- Initial simulation hypothesis insight
+- Quantum information concepts
+- Planetary coherence vision
+- Core system ideas
