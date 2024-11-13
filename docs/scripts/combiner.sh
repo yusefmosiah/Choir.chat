@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Define level prefixes as simple arrays
-level0_prefixes=("Solana" "Frontend" "Backend" "Deploy" "Implementation")
+level0_prefixes=("")
 level1_prefixes=("doables" "Entry" "Dev" "Plan" "Tech" "Level" "Current" "core" "CHANGELOG")
 level2_prefixes=("plan" "State" "Summary" "Pivot" "goal" "e" "data" "Error" "reward" "Impl")
 level3_prefixes=("docs" "theory" "V10" "V12")
@@ -44,7 +44,6 @@ process_level() {
 
     # Special handling for level -1 (system files)
     if [ "$level" -eq -1 ]; then
-        # for special_file in "docs/getting_started.md" "docs/tree.md" "docs/scripts/combiner.sh" "docs/scripts/update_tree.sh"; do
         for special_file in "${SPECIAL_FILES[@]}"; do
             if [ -f "$special_file" ]; then
                 echo -e "\n=== File: $special_file ===\n" >> "$output_file"
@@ -54,6 +53,21 @@ process_level() {
             fi
         done
         return
+    fi
+
+    # Special handling for level 0 (include issues)
+    if [ "$level" -eq 0 ]; then
+        # Process issues first
+        if [ -d "docs/issues" ]; then
+            for issue in docs/issues/issue_*.md; do
+                if [ -f "$issue" ]; then
+                    echo -e "\n=== File: $issue ===\n" >> "$output_file"
+                    add_separator "$(basename "$issue" .md)" >> "$output_file"
+                    cat "$issue" >> "$output_file"
+                    echo "$issue" >> "/tmp/processed_files.txt"
+                fi
+            done
+        fi
     fi
 
     # Process all docs to find ones for this level
