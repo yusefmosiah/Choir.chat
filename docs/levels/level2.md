@@ -1598,133 +1598,283 @@ goal_wed_nov_13_2024
 
 VERSION goal_nov_13:
 invariants: {
-"User persistence",
-"Thread integrity",
-"Value distribution"
+"Type safety",
+"Data integrity",
+"Message coherence"
 }
 assumptions: {
-"Swift implementation",
-"API deployment",
-"Contract readiness"
+"Existing Qdrant setup",
+"~20k message points",
+"Existing ChorusModels"
 }
-docs_version: "0.1.0"
+docs_version: "0.1.4"
 
 ## Core Implementation Goals
 
-### 1. User & Thread Persistence
-- [ ] Implement `UserManager` with key generation
-  - [ ] Basic key pair generation
-  - [ ] UserDefaults storage (dev)
-  - [ ] Thread association
-- [ ] Create thread persistence layer
-  - [ ] Local storage
-  - [ ] API synchronization
-  - [ ] Message history
+### 1. Message Type Reconciliation
+- [ ] Create unified message types
+  ```swift
+  // Base message structure matching Qdrant
+  struct MessagePoint: Codable {
+      let id: String
+      let content: String
+      let threadId: String
+      let createdAt: String
+      let role: String?
+      let step: String?
 
-### 2. API Deployment & Device Integration
-- [ ] Deploy API to development environment
-  - [ ] Configure local testing
-  - [ ] Set up logging
-  - [ ] Enable CORS
-- [ ] Implement device sync
-  - [ ] API client integration
-  - [ ] Error handling
-  - [ ] Retry logic
+      // Existing chorus cycle results
+      let chorusResult: ChorusCycleResult?
 
-### 3. Reward Implementation
-- [ ] New Message Rewards
+      struct ChorusCycleResult: Codable {
+          let action: ActionResponse?
+          let experience: ExperienceResponseData?
+          let intention: IntentionResponseData?
+          let observation: ObservationResponseData?
+          let understanding: UnderstandingResponseData?
+          let yield: YieldResponseData?
+      }
+  }
+
+  // Thread message combining MessagePoint with UI state
+  struct ThreadMessage: Identifiable {
+      let id: String
+      let content: String
+      let isUser: Bool
+      let timestamp: Date
+      var chorusResult: ChorusCycleResult?
+
+      init(from point: MessagePoint) {
+          self.id = point.id
+          self.content = point.content
+          self.isUser = point.role == "user"
+          self.timestamp = DateFormatter.iso8601.date(from: point.createdAt) ?? Date()
+          self.chorusResult = point.chorusResult
+      }
+  }
   ```
-  R(t) = R_total × k/(1 + kt)ln(1 + kT)
+
+### 2. API Client Updates
+- [ ] Update request/response handling
+  ```swift
+  extension ChorusAPIClient {
+      // Get message with fallback for legacy points
+      func getMessage(_ id: String) async throws -> MessagePoint {
+          return try await post(endpoint: "messages/\(id)", body: EmptyBody())
+      }
+
+      // Store message with full metadata
+      func storeMessage(_ message: MessagePoint) async throws {
+          try await post(endpoint: "messages", body: message)
+      }
+
+      // Get thread messages with pagination
+      func getThreadMessages(_ threadId: String, limit: Int = 50) async throws -> [MessagePoint] {
+          return try await post(
+              endpoint: "threads/\(threadId)/messages",
+              body: GetMessagesRequest(limit: limit)
+          )
+      }
+  }
   ```
-  - [ ] Implement calculation
-  - [ ] Add distribution logic
-  - [ ] Test with sample data
 
-- [ ] Prior Rewards
+### 3. Coordinator Updates
+- [ ] Modify RESTChorusCoordinator to handle message types
+  ```swift
+  @MainActor
+  class RESTChorusCoordinator: ChorusCoordinator {
+      private(set) var currentMessage: ThreadMessage?
+
+      func process(_ input: String) async throws {
+          // Create initial message point
+          let messagePoint = MessagePoint(
+              id: UUID().uuidString,
+              content: input,
+              threadId: threadId,
+              createdAt: ISO8601DateFormatter().string(from: Date()),
+              role: "user",
+              step: "input"
+          )
+
+          // Process through chorus cycle
+          let result = try await processCycle(messagePoint)
+
+          // Update with final result
+          currentMessage = ThreadMessage(from: messagePoint)
+          currentMessage?.chorusResult = result
+      }
+  }
   ```
-  V(p) = B_t × Q(p)/∑Q(i)
+
+### 4. Testing Suite
+- [ ] Test message type handling
+  ```swift
+  class MessageTypeTests: XCTestCase {
+      // Test legacy message point decoding
+      func testLegacyMessageDecoding() async throws {
+          let json = """
+          {
+              "id": "123",
+              "content": "test",
+              "thread_id": "thread1",
+              "created_at": "2024-01-01"
+          }
+          """
+          let message = try JSONDecoder().decode(MessagePoint.self, from: json.data(using: .utf8)!)
+          XCTAssertNotNil(message)
+      }
+
+      // Test full message point with chorus results
+      func testFullMessageDecoding() async throws {
+          let message = try await api.getMessage(knownMessageId)
+          XCTAssertNotNil(message.chorusResult)
+      }
+
+      // Test thread message conversion
+      func testThreadMessageConversion() async throws {
+          let point = try await api.getMessage(knownMessageId)
+          let message = ThreadMessage(from: point)
+          XCTAssertEqual(message.id, point.id)
+      }
+  }
   ```
-  - [ ] Implement quality scoring
-  - [ ] Add treasury integration
-  - [ ] Test distribution
 
-### 4. UI Components
-- [ ] Thread Sheet
-  - [ ] Basic thread display
-  - [ ] Message list
-  - [ ] Co-author management
-  - [ ] Action buttons
+### 5. Database Integration
+- [ ] Ensure compatibility with existing Qdrant points
+  - [ ] Test vector search with existing points
+  - [ ] Verify payload structure matches
+  - [ ] Handle missing fields gracefully
 
-### 5. Smart Contract
-- [ ] Thread Contract
-  - [ ] Ownership tracking
-  - [ ] Token mechanics
-  - [ ] Temperature evolution
-  - [ ] Value distribution
+### 6. User Identity
+- [ ] Implement `UserManager` to work with existing user collection
+  ```swift
+  actor UserManager {
+      func createUser() async throws -> User {
+          let keyPair = try generateKeyPair()
+          let publicKey = try publicKeyToString(keyPair.publicKey)
 
-## Launch Preparation
-- [ ] Test environment setup
-- [ ] Sample data generation
-- [ ] User onboarding flow
-- [ ] Basic documentation
-- [ ] Launch event planning
+          // Create user in existing USERS_COLLECTION
+          let user = try await api.createUser(UserCreate(publicKey: publicKey))
+          return user
+      }
+
+      func getUser() async throws -> User {
+          // Get from existing collection
+          guard let publicKey = try await getCurrentPublicKey(),
+                let user = try await api.getUser(publicKey) else {
+              return try await createUser()
+          }
+          return user
+      }
+  }
+  ```
+
+### 7. Thread Management
+- [ ] Integrate with existing thread functionality
+  ```swift
+  class ThreadManager: ObservableObject {
+      @Published private(set) var threads: [Thread] = []
+
+      func loadThreads() async throws {
+          // Use existing get_user_threads endpoint
+          let userId = try await userManager.getCurrentUserId()
+          threads = try await api.getUserThreads(userId)
+      }
+
+      func createThread(_ name: String) async throws {
+          let userId = try await userManager.getCurrentUserId()
+          let thread = try await api.createThread(
+              ThreadCreate(name: name, userId: userId)
+          )
+          threads.append(thread)
+      }
+  }
+  ```
 
 ## Testing Strategy
-1. User Management
-   - [ ] Key generation
-   - [ ] Thread association
-   - [ ] Persistence
+1. Message Types
+   - [ ] Legacy point handling
+   - [ ] Full message decoding
+   - [ ] Chorus result integration
+   - [ ] Thread message conversion
 
-2. API Integration
-   - [ ] Endpoint testing
-   - [ ] Error scenarios
-   - [ ] Performance
+2. Database Integration
+   - [ ] Vector search
+   - [ ] Point storage
+   - [ ] Payload compatibility
+   - [ ] Error handling
 
-3. Reward System
-   - [ ] Calculation accuracy
-   - [ ] Distribution logic
-   - [ ] Edge cases
+3. End-to-End Flow
+   - [ ] Message creation
+   - [ ] Chorus cycle processing
+   - [ ] Thread integration
+   - [ ] UI updates
 
 ## Success Criteria
-1. Users can:
-   - Generate and persist keys
-   - Create and join threads
-   - Send and receive messages
+1. Type Safety:
+   - Clean message type hierarchy
+   - Graceful legacy handling
+   - Consistent serialization
 
-2. System can:
-   - Deploy and run stably
-   - Process rewards correctly
-   - Maintain thread state
+2. Data Integrity:
+   - Works with existing points
+   - Maintains metadata
+   - Preserves relationships
 
-3. Contract can:
-   - Track ownership
-   - Handle tokens
-   - Manage temperature
+3. User Experience:
+   - Smooth message flow
+   - Proper UI updates
+   - Error resilience
 
 ## Next Steps
 1. Morning
-   - Setup development environment
-   - Begin user implementation
-   - Deploy API
+   - Message type implementation
+   - Basic testing setup
+   - Legacy compatibility
 
 2. Afternoon
-   - Implement rewards
-   - Create thread sheet
-   - Test contract
+   - Coordinator updates
+   - Database integration
+   - Extended testing
 
 3. Evening
-   - Integration testing
+   - UI integration
+   - Final testing
    - Documentation
-   - Launch prep
 
 ## Notes
-- Focus on core functionality first
-- Keep implementation simple for initial release
-- Document key decisions
-- Maintain test coverage
-- Plan for iteration
+- Focus on type safety first
+- Test with existing data extensively
+- Document type conversions
+- Monitor performance
+- Plan for future schema evolution
 
-This plan aligns with our harmonic principles while focusing on practical implementation needs for launch.
+## Today's Scope
+- Focus on getting basic message flow working end-to-end
+- Ensure compatibility with existing ~20k points in Qdrant
+- Get basic user identity and thread management working
+- Defer advanced features to subsequent days
+
+## Current State
+- Have existing `ChorusModels.swift` with response types
+- Have working Qdrant setup with messages, users, threads collections
+- Need to reconcile Swift types with Qdrant schema
+
+## Tomorrow's Preview
+- Enhanced error handling
+- Advanced user features
+- More comprehensive testing
+- UI polish
+- Analytics integration
+
+## Development Rhythm
+1. Start with type safety and basic tests
+2. Build up to working message flow
+3. Add user and thread management
+4. Test with existing data
+5. Deploy to TestFlight
+
+Remember: Today's goal is a working foundation that we can build upon, not a complete feature set.
 
 === File: docs/plan_post-training.md ===
 

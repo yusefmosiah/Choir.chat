@@ -125,7 +125,7 @@
     ├── core_state.md
     ├── core_state_transitions.md
     ├── data_engine_model.md
-    ├── development_principles.md
+    ├── docs_dev_principles.md
     ├── docs_operators.md
     ├── e_business.md
     ├── e_concept.md
