@@ -1706,6 +1706,265 @@ This architecture enables:
 - System coherence
 - Natural evolution
 
+=== File: docs/plan_save_users_and_threads.md ===
+
+
+
+==
+plan_save_users_and_threads
+==
+
+
+# Choir: User and Thread Management Implementation Plan
+
+## 1. User Management
+- [ ] Implement secure key generation
+  - [ ] Create `UserManager` with public/private key generation
+  - [ ] Migrate from `UserDefaults` to iOS Keychain for production
+  - [ ] Add key backup and recovery mechanism
+
+- [ ] User Identification
+  - [ ] Use public key as user identifier
+  - [ ] Add optional display name or username
+  - [ ] Implement user profile management
+
+## 2. Thread Management
+- [ ] Thread Model Enhancements
+  - [ ] Add `userId` to `Thread` model
+  - [ ] Add metadata fields (created_at, last_accessed, etc.)
+  - [ ] Implement thread archiving/deletion
+
+- [ ] Backend API Endpoints
+  - [ ] Create `/threads` endpoints
+    - [ ] `GET /threads` - Retrieve user's threads
+    - [ ] `POST /threads` - Create new thread
+    - [ ] `DELETE /threads/{threadId}` - Delete thread
+    - [ ] `PUT /threads/{threadId}` - Update thread metadata
+
+- [ ] Frontend Thread Management
+  - [ ] Implement thread list view
+  - [ ] Add thread creation UI
+  - [ ] Develop thread selection and management logic
+
+## 3. Message Persistence
+- [ ] Message Storage
+  - [ ] Design message storage schema
+  - [ ] Implement message saving for each thread
+  - [ ] Add pagination for message retrieval
+
+- [ ] Sync Mechanisms
+  - [ ] Implement local caching of messages
+  - [ ] Design sync strategy for multiple devices
+
+## 4. Security Considerations
+- [ ] Authentication
+  - [ ] Implement request signing with private key
+  - [ ] Add token-based authentication
+  - [ ] Secure thread and message access
+
+- [ ] Data Protection
+  - [ ] Encrypt sensitive message data
+  - [ ] Implement secure key management
+  - [ ] Add biometric/passcode protection for app access
+
+## 5. API Client Updates
+- [ ] Add user ID to API requests
+- [ ] Implement robust error handling
+- [ ] Add retry mechanisms for network requests
+- [ ] Create comprehensive logging for debugging
+
+## 6. User Experience
+- [ ] Onboarding Flow
+  - [ ] First-time user key generation
+  - [ ] Explain key and thread management
+  - [ ] Provide clear user guidance
+
+- [ ] UI/UX Improvements
+  - [ ] Design thread list interface
+  - [ ] Create thread creation modal
+  - [ ] Implement thread search and filtering
+
+## 7. Testing
+- [ ] Unit Tests
+  - [ ] Test key generation
+  - [ ] Validate thread creation
+  - [ ] Check message storage and retrieval
+
+- [ ] Integration Tests
+  - [ ] Test API interactions
+  - [ ] Verify thread and message sync
+  - [ ] Check multi-device scenarios
+
+## 8. Performance Optimization
+- [ ] Implement efficient caching
+- [ ] Optimize database queries
+- [ ] Add lazy loading for messages
+- [ ] Monitor and improve API response times
+
+## 9. Future Enhancements
+- [ ] Multi-device synchronization
+- [ ] Collaborative thread features
+- [ ] Advanced search and filtering
+- [ ] Export/import thread functionality
+
+## 10. Compliance and Privacy
+- [ ] GDPR compliance
+- [ ] Data minimization
+- [ ] User consent mechanisms
+- [ ] Transparent data handling policies
+
+## Implementation Phases
+1. **MVP (Minimum Viable Product)**
+   - Basic key generation
+   - Simple thread creation
+   - Local message storage
+
+2. **Enhanced Version**
+   - Keychain integration
+   - Robust API interactions
+   - Advanced thread management
+
+3. **Production Ready**
+   - Complete security implementation
+   - Scalable architecture
+   - Comprehensive testing
+
+## Development Priorities
+1. User key management ⭐⭐⭐⭐⭐
+2. Thread CRUD operations ⭐⭐⭐⭐
+3. Message persistence ⭐⭐⭐
+4. Security enhancements ⭐⭐⭐⭐
+5. UX improvements ⭐⭐
+
+## Potential Challenges
+- Secure key management
+- Consistent API design
+- Cross-device synchronization
+- Performance with large message volumes
+
+## Recommended Tools/Libraries
+- CryptoKit (Key Management)
+- Keychain Services
+- CoreData/Realm (Local Storage)
+- Combine (Async Operations)
+
+=== File: docs/plan_swiftui_chorus_integration.md ===
+
+
+
+==
+plan_swiftui_chorus_integration
+==
+
+
+# SwiftUI Chorus Integration Plan
+
+## 1. Models & Types
+
+- [ ] Create Codable models matching API responses
+  - [ ] `ChorusResponse` with phase-specific fields
+  - [ ] `APIResponse<T>` wrapper type
+  - [ ] Phase-specific response models (Action, Experience, etc.)
+  - [ ] Error response models
+
+## 2. API Client Layer
+
+- [ ] Create base API client with error handling
+  - [ ] Configure URLSession with appropriate timeouts
+  - [ ] Handle common HTTP errors
+  - [ ] Add retry logic for transient failures
+- [ ] Add endpoints for each Chorus phase
+  - [ ] `/chorus/action`
+  - [ ] `/chorus/experience`
+  - [ ] `/chorus/intention`
+  - [ ] `/chorus/observation`
+  - [ ] `/chorus/understanding`
+  - [ ] `/chorus/yield`
+
+## 3. Concurrency & State Management
+
+- [ ] Create MessageActor for high-level message handling
+  - [ ] Support immediate cancellation
+  - [ ] Track current phase
+  - [ ] Handle task lifecycle
+- [ ] Create ChorusActor for Chorus cycle management
+  - [ ] Process phases sequentially
+  - [ ] Support cancellation between phases
+  - [ ] Handle phase transitions
+  - [ ] Support looping from understanding phase
+
+## 4. UI Components
+
+- [ ] Update ChorusResponse view
+  - [ ] Show current phase
+  - [ ] Display intermediate responses
+  - [ ] Add progress indicators
+  - [ ] Show citations in yield phase
+- [ ] Add cancellation button
+  - [ ] Visual feedback during cancellation
+  - [ ] Graceful state reset
+
+## 5. Error Handling & Recovery
+
+- [ ] Add error states to UI
+  - [ ] Network errors
+  - [ ] API errors
+  - [ ] Timeout handling
+- [ ] Implement retry mechanisms
+  - [ ] Automatic retry for transient failures
+  - [ ] Manual retry for user-initiated recovery
+
+## 6. Progress & Feedback
+
+- [ ] Add phase progress indicators
+  - [ ] Visual phase transitions
+  - [ ] Loading states
+  - [ ] Cancellation states
+- [ ] Improve response visualization
+  - [ ] Incremental updates
+  - [ ] Phase-specific formatting
+  - [ ] Citation highlighting
+
+## 7. Testing
+
+- [ ] Unit tests for models
+- [ ] Integration tests for API client
+- [ ] UI tests for cancellation
+- [ ] End-to-end flow tests
+
+## 8. Performance Optimization
+
+- [ ] Configure appropriate timeouts
+- [ ] Implement response caching
+- [ ] Optimize state updates
+- [ ] Profile memory usage
+
+## 9. Documentation
+
+- [ ] Add inline documentation
+- [ ] Document error handling
+- [ ] Add usage examples
+- [ ] Document testing approach
+
+## Implementation Order
+
+1. Models & API Client
+2. Basic Concurrency
+3. Simple UI Updates
+4. Cancellation
+5. Error Handling
+6. Progress Indicators
+7. Testing
+8. Polish & Optimization
+
+## Notes
+
+- Keep Python backend stateless
+- Handle all state in Swift
+- Support immediate cancellation
+- Show meaningful progress
+- Graceful error recovery
+
 === File: docs/plan_thoughtspace.md ===
 
 
