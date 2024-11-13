@@ -287,8 +287,8 @@ class ChorusService:
             IMPORTANT: When citing priors, use markdown links in this format:
             [cited text](choir://choir.chat/<prior_id>)
 
-            For example, if citing text from prior ID "abc-123", write:
-            [This is the cited text](choir://choir.chat/abc-123)
+            For example, if citing text from prior ID "dfd2bf18-9a54-07c0-540b-1f61c62588a7", write:
+            [This is the cited text](choir://choir.chat/dfd2bf18-9a54-07c0-540b-1f61c62588a7)
 
             Make sure to:
             - Include citations for key insights and quotes
