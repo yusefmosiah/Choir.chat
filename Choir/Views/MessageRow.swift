@@ -16,7 +16,7 @@ struct MessageRow: View {
             VStack(alignment: .leading, spacing: 0) {
                 // Message content with status indicator
                 HStack(alignment: .top, spacing: 8) {
-                    Text(message.content)
+                    Text(LocalizedStringKey(message.content))
                         .multilineTextAlignment(message.isUser ? .trailing : .leading)
                         .fixedSize(horizontal: false, vertical: true)
 
@@ -40,7 +40,6 @@ struct MessageRow: View {
                 if !message.isUser {
                     ChorusCycleView(
                         phases: isProcessing ? viewModel.responses : (message.chorusResult?.phases ?? [:]),
-                        metadata: [:],
                         isProcessing: isProcessing
                     )
                     .background(Color(.systemGray6))

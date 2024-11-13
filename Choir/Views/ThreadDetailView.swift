@@ -62,15 +62,12 @@ struct ThreadDetailView: View {
         do {
             try await viewModel.process(content)
 
-            // Update the AI message with final content
             if let yieldResponse = viewModel.yieldResponse,
                var lastMessage = thread.messages.last {
                 lastMessage.content = yieldResponse.content
                 lastMessage.chorusResult = MessageChorusResult(
-                    phases: viewModel.responses,
-                    citations: yieldResponse.citations
+                    phases: viewModel.responses
                 )
-                // Replace the last message
                 thread.messages[thread.messages.count - 1] = lastMessage
             }
         } catch {

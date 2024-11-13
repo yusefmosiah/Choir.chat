@@ -28,13 +28,13 @@ class ChorusService:
 
             result = await structured_chat_completion(
                 messages=messages,
-                config=self.config,
-                response_format=ActionResponse
+                config=self.config
             )
 
             if result["status"] == "error":
                 raise Exception(result["content"])
 
+            # Convert dict to Pydantic model
             return ActionResponse.model_validate(result["content"])
 
         except Exception as e:
@@ -51,26 +51,18 @@ class ChorusService:
             Current input: {content}
             Previous action response: {action_response}
 
-            Your response must follow this exact format:
-            {{
-                "response": "Your analysis of how these priors relate to the query",
-                "confidence": 0.0 to 1.0,
-                "synthesis": "Your synthesis of how these priors connect to the current context"
-            }}
-
             Relevant priors:
             {json.dumps(priors, indent=2)}
             """
 
             messages = [
                 {"role": "system", "content": experience_prompt},
-                {"role": "user", "content": "Please analyze these priors and provide your JSON response."}
+                {"role": "user", "content": "Please analyze these priors."}
             ]
 
             result = await structured_chat_completion(
                 messages=messages,
-                config=self.config,
-                response_format={"type": "json_object"}
+                config=self.config
             )
 
             if result["status"] == "error":
@@ -91,6 +83,12 @@ class ChorusService:
     ) -> IntentionResponse:
         """Process the intention phase - analyze intent and select relevant priors."""
         try:
+            # Format priors for better prompt readability
+            formatted_priors = "\n".join([
+                f"ID: {prior_id}\nContent: {prior_data['content']}\nSimilarity: {prior_data['similarity']}"
+                for prior_id, prior_data in priors.items()
+            ])
+
             intention_prompt = f"""
             This is the Intention phase of the Chorus Cycle. Analyze the user's intent and select
             the most relevant priors that could help inform a response.
@@ -99,16 +97,10 @@ class ChorusService:
             Action response: {action_response}
             Experience analysis: {experience_response}
 
-            Your json-formatted response must follow this exact format:
-            {{
-                "reasoning": "Why you selected these priors",
-                "selected_priors": ["id1", "id2", ...],  # IDs of up to 10 most relevant priors
-                "response": "Your analysis of the user's intent",
-                "confidence": 0.0 to 1.0,
-            }}
-
             Available priors:
-            {json.dumps(priors, indent=2)}
+            {formatted_priors}
+
+            Select the most relevant priors by their IDs and explain your reasoning.
             """
 
             messages = [
@@ -118,14 +110,22 @@ class ChorusService:
 
             result = await structured_chat_completion(
                 messages=messages,
-                config=self.config,
-                response_format={"type": "json_object"}
+                config=self.config
             )
 
             if result["status"] == "error":
                 raise Exception(result["content"])
 
-            return IntentionResponse.model_validate(result["content"])
+            # Ensure selected_priors is included in the response
+            response_data = result["content"]
+            if "selected_priors" not in response_data:
+                response_data["selected_priors"] = []
+
+            # Ensure step is set correctly
+            response_data["step"] = "intention"
+
+            # Validate and return the response
+            return IntentionResponse.model_validate(response_data)
 
         except Exception as e:
             logger.error(f"Error in process_intention: {e}")
@@ -139,8 +139,14 @@ class ChorusService:
         intention_response: str,
         selected_priors: Dict[str, Dict[str, Any]]
     ) -> ObservationResponse:
-        """Process the observation phase - analyze patterns and store insights."""
+        """Process the observation phase - analyze patterns and insights."""
         try:
+            # Format selected priors for better prompt readability
+            formatted_priors = "\n".join([
+                f"ID: {prior_id}\nContent: {prior_data['content']}\nSimilarity: {prior_data['similarity']}"
+                for prior_id, prior_data in selected_priors.items()
+            ])
+
             observation_prompt = f"""
             This is the Observation phase of the Chorus Cycle. Analyze patterns and insights
             from the selected priors and previous responses.
@@ -150,63 +156,27 @@ class ChorusService:
             Experience analysis: {experience_response}
             Intention analysis: {intention_response}
 
-            Your json-formatted response must follow this exact format:
-            {{
-                "reasoning": "Your analysis of patterns and insights",
-                "patterns": [
-                    {{"type": "theme|insight|connection", "description": "Pattern description"}},
-                    // Add more patterns...
-                ],
-                "response": "Your synthesis of observations",
-                "confidence": 0.0 to 1.0
-            }}
-
             Selected priors:
-            {json.dumps(selected_priors, indent=2)}
+            {formatted_priors}
+
+            Please analyze patterns and provide insights based on these responses and priors.
             """
 
             messages = [
                 {"role": "system", "content": observation_prompt},
-                {"role": "user", "content": "Please analyze patterns and provide your JSON response."}
+                {"role": "user", "content": "Please analyze patterns and provide insights."}
             ]
 
             result = await structured_chat_completion(
                 messages=messages,
-                config=self.config,
-                response_format={"type": "json_object"}
+                config=self.config
             )
 
             if result["status"] == "error":
                 raise Exception(result["content"])
 
-            observation_data = result["content"]
-
-            # Store the observation in the vector database
-            observation_text = f"""
-            Query: {content}
-            Observation: {observation_data['response']}
-            Patterns: {json.dumps(observation_data['patterns'])}
-            """
-
-            # Get embedding for the observation
-            embedding = await get_embedding(observation_text, self.config.EMBEDDING_MODEL)
-
-            # Store in database with metadata
-            save_result = await self.db.save_message({
-                "content": observation_text,
-                "vector": embedding,
-                "metadata": {
-                    "type": "observation",
-                    "patterns": observation_data["patterns"],
-                    "confidence": observation_data["confidence"],
-                    "reasoning": observation_data["reasoning"],
-                    "selected_priors": list(selected_priors.keys())
-                }
-            })
-
-            # Add ID to observation data and create response
-            observation_data["id"] = save_result["id"]
-            return ObservationResponse.model_validate(observation_data)
+            # Validate and return the response
+            return ObservationResponse.model_validate(result["content"])
 
         except Exception as e:
             logger.error(f"Error in process_observation: {e}")
@@ -219,7 +189,7 @@ class ChorusService:
         experience_response: str,
         intention_response: str,
         observation_response: str,
-        patterns: List[Dict[str, Any]],
+        patterns: List[Dict[str, str]],
         selected_priors: List[str]
     ) -> UnderstandingResponse:
         """Process the understanding phase - decide whether to yield or loop back."""
@@ -234,23 +204,13 @@ class ChorusService:
             Intention analysis: {intention_response}
             Observation response: {observation_response}
 
-            Patterns identified:
-            {json.dumps(patterns, indent=2)}
+            Selected priors: {len(selected_priors)} priors were used
+            Patterns identified: {json.dumps(patterns, indent=2)}
 
-            Selected priors: {len(selected_priors)} priors
-
-            Your json-formatted response must follow this exact format:
-            {{
-                "reasoning": "Your analysis of whether we have sufficient understanding",
-                "should_yield": true/false,  # Whether to proceed to yield or loop back
-                "confidence": 0.0 to 1.0,
-                "next_action": null or "description of what to explore next",
-                "next_prompt": null or "specific prompt for next action phase"  # This will be used directly in next iteration
-            }}
-
-            If should_yield is false, you MUST provide both next_action and next_prompt.
-            The next_prompt will be used verbatim as the input for the next action phase,
-            so make it clear and specific.
+            Based on these responses and analyses:
+            1. Determine if we have sufficient understanding to provide a final response
+            2. If not, specify what additional information or analysis is needed
+            3. Provide reasoning for the decision
             """
 
             messages = [
@@ -260,14 +220,20 @@ class ChorusService:
 
             result = await structured_chat_completion(
                 messages=messages,
-                config=self.config,
-                response_format={"type": "json_object"}
+                config=self.config
             )
 
             if result["status"] == "error":
                 raise Exception(result["content"])
 
-            return UnderstandingResponse.model_validate(result["content"])
+            # Ensure required fields are present
+            response_data = result["content"]
+            if "should_yield" not in response_data:
+                response_data["should_yield"] = True
+            if not response_data["should_yield"] and "next_prompt" not in response_data:
+                response_data["next_prompt"] = "Please provide more information."
+
+            return UnderstandingResponse.model_validate(response_data)
 
         except Exception as e:
             logger.error(f"Error in process_understanding: {e}")
@@ -281,13 +247,26 @@ class ChorusService:
         intention_response: str,
         observation_response: str,
         understanding_response: str,
-        selected_priors: Dict[str, Dict[str, Any]]
+        selected_priors: List[str],
+        priors: Dict[str, Dict[str, Any]]
     ) -> YieldResponse:
         """Process the yield phase - synthesize final response with citations."""
         try:
+            # Filter and format selected priors
+            selected_prior_data = {
+                prior_id: prior_data
+                for prior_id, prior_data in priors.items()
+                if prior_id in selected_priors
+            }
+
+            formatted_priors = "\n".join([
+                f"ID: {prior_id}\nContent: {prior_data['content']}\nSimilarity: {prior_data['similarity']}"
+                for prior_id, prior_data in selected_prior_data.items()
+            ])
+
             yield_prompt = f"""
             This is the Yield phase of the Chorus Cycle. Synthesize a final response that
-            incorporates insights from the selected priors and previous responses.
+            incorporates insights from all previous phases and selected priors.
 
             Current input: {content}
             Action response: {action_response}
@@ -296,27 +275,32 @@ class ChorusService:
             Observation response: {observation_response}
             Understanding response: {understanding_response}
 
-            Your json-formatted response must follow this exact format:
-            {{
-                "reasoning": "How you incorporated priors and insights",
-                "citations": [
-                    {{
-                        "prior_id": "id of cited prior",
-                        "content": "relevant content from prior",
-                        "context": "how this prior informed the response"
-                    }}
-                ],
-                "response": "Final synthesized response with inline citations [1], [2], etc.",
-                "confidence": 0.0 to 1.0
-            }}
-
             Selected priors:
-            {json.dumps(selected_priors, indent=2)}
+            {formatted_priors}
+
+            Please provide a comprehensive final response that:
+            1. Synthesizes insights from all phases
+            2. Incorporates relevant information from selected priors
+            3. Provides clear reasoning for conclusions
+            4. Maintains high confidence in the accuracy of the response
+
+            IMPORTANT: When citing priors, use markdown links in this format:
+            [cited text](choir://choir.chat/<prior_id>)
+
+            For example, if citing text from prior ID "abc-123", write:
+            [This is the cited text](choir://choir.chat/abc-123)
 
             Make sure to:
-1. Cite specific priors using [1], [2] etc. in the response
-2. Explain how each citation informed the response
-3. Maintain coherent flow while incorporating citations
+            - Include citations for key insights and quotes
+            - Use the exact prior IDs provided
+            - Keep cited text concise and relevant
+            - Integrate citations naturally into the response
+
+            Ensure the response includes:
+            - step: "yield"
+            - content: your synthesized response with citations
+            - confidence: a float between 0 and 1
+            - reasoning: explanation of your synthesis
             """
 
             messages = [
@@ -326,14 +310,18 @@ class ChorusService:
 
             result = await structured_chat_completion(
                 messages=messages,
-                config=self.config,
-                response_format={"type": "json_object"}
+                config=self.config
             )
 
             if result["status"] == "error":
                 raise Exception(result["content"])
 
-            return YieldResponse.model_validate(result["content"])
+            # Ensure the step is correctly set
+            response_data = result["content"]
+            if "step" not in response_data or response_data["step"].lower() != "yield":
+                response_data["step"] = "yield"
+
+            return YieldResponse.model_validate(response_data)
 
         except Exception as e:
             logger.error(f"Error in process_yield: {e}")

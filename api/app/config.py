@@ -22,8 +22,9 @@ class Config:
         "https://choir-collective.onrender.com"
     ]
 
-    # OpenAI configuration
+    # AI API configuration
     OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
+    ANTHROPIC_API_KEY: str = os.getenv("ANTHROPIC_API_KEY", "")
 
     # Azure configuration
     AZURE_API_KEY: str = os.getenv("AZURE_API_KEY", "")
@@ -32,8 +33,9 @@ class Config:
 
     # Model configuration
     EMBEDDING_MODEL: str = "text-embedding-ada-002"
-    CHAT_MODEL: str = "azure/gpt-4o-2024-08-06"
-    SUMMARY_MODEL: str = "azure/gpt-4o-mini"
+    CHAT_MODEL: str = "anthropic/claude-3-5-haiku-20241022"
+    SUMMARY_MODEL: str = "anthropic/claude-3-5-sonnet-20241022"
+    AZURE_CHAT_MODEL: str = "azure/gpt-4o-2024-08-06"
     MAX_TOKENS: int = 4000
     TEMPERATURE: float = 0.7
 

@@ -67,19 +67,17 @@ class MockChorusCoordinator: ChorusCoordinator, ObservableObject {
             try await Task.sleep(nanoseconds: UInt64(mockDelay * 1_000_000_000))
             try Task.checkCancellation()
 
-            let metadata = ResponseMetadata(
-                reasoning: "Mock reasoning",
-                synthesis: nil,
-                next_action: nil,
-                next_prompt: nil
-            )
+            let decoder = JSONDecoder()
+            let actionJSON = """
+            {
+                "step": "action",
+                "content": "I understand you said: \(input)",
+                "confidence": 0.9,
+                "reasoning": "The input directly states what the user is saying"
+            }
+            """.data(using: .utf8)!
 
-            actionResponse = ActionResponse(
-                step: "action",
-                content: "I understand you said: \(input)",
-                confidence: 0.9,
-                metadata: metadata
-            )
+            actionResponse = try decoder.decode(ActionResponse.self, from: actionJSON)
             responses[.action] = actionResponse?.content
             responsesContinuation?.yield(responses)
 
@@ -89,13 +87,17 @@ class MockChorusCoordinator: ChorusCoordinator, ObservableObject {
             try await Task.sleep(nanoseconds: UInt64(mockDelay * 1_000_000_000))
             try Task.checkCancellation()
 
-            experienceResponse = ExperienceResponse(
-                step: "experience",
-                content: "Based on my experience...",
-                confidence: 0.8,
-                priors: [:],
-                metadata: metadata
-            )
+            let experienceJSON = """
+            {
+                "step": "experience",
+                "content": "Based on previous interactions...",
+                "confidence": 0.85,
+                "reasoning": "Several prior conversations show similar patterns",
+                "priors": {}
+            }
+            """.data(using: .utf8)!
+
+            experienceResponse = try decoder.decode(ExperienceResponse.self, from: experienceJSON)
             responses[.experience] = experienceResponse?.content
             responsesContinuation?.yield(responses)
 
@@ -105,13 +107,17 @@ class MockChorusCoordinator: ChorusCoordinator, ObservableObject {
             try await Task.sleep(nanoseconds: UInt64(mockDelay * 1_000_000_000))
             try Task.checkCancellation()
 
-            intentionResponse = IntentionResponse(
-                step: "intention",
-                content: "Your intention seems to be...",
-                confidence: 0.85,
-                selected_priors: [],
-                metadata: metadata
-            )
+            let intentionJSON = """
+            {
+                "step": "intention",
+                "content": "Your intention appears to be...",
+                "confidence": 0.8,
+                "reasoning": "Based on your phrasing and context",
+                "selected_priors": ["id1", "id2"]
+            }
+            """.data(using: .utf8)!
+
+            intentionResponse = try decoder.decode(IntentionResponse.self, from: intentionJSON)
             responses[.intention] = intentionResponse?.content
             responsesContinuation?.yield(responses)
 
@@ -121,14 +127,20 @@ class MockChorusCoordinator: ChorusCoordinator, ObservableObject {
             try await Task.sleep(nanoseconds: UInt64(mockDelay * 1_000_000_000))
             try Task.checkCancellation()
 
-            observationResponse = ObservationResponse(
-                step: "observation",
-                id: UUID().uuidString,
-                content: "I observe that...",
-                confidence: 0.87,
-                patterns: [],
-                metadata: metadata
-            )
+            let observationJSON = """
+            {
+                "step": "observation",
+                "content": "I notice several patterns...",
+                "confidence": 0.85,
+                "reasoning": "Analyzing the selected priors reveals",
+                "patterns": [
+                    {"type": "theme", "description": "Recurring interest in..."},
+                    {"type": "style", "description": "Tendency to..."}
+                ]
+            }
+            """.data(using: .utf8)!
+
+            observationResponse = try decoder.decode(ObservationResponse.self, from: observationJSON)
             responses[.observation] = observationResponse?.content
             responsesContinuation?.yield(responses)
 
@@ -138,13 +150,18 @@ class MockChorusCoordinator: ChorusCoordinator, ObservableObject {
             try await Task.sleep(nanoseconds: UInt64(mockDelay * 1_000_000_000))
             try Task.checkCancellation()
 
-            understandingResponse = UnderstandingResponse(
-                step: "understanding",
-                content: "I now understand that...",
-                confidence: 0.9,
-                should_yield: true,
-                metadata: metadata
-            )
+            let understandingJSON = """
+            {
+                "step": "understanding",
+                "content": "I now understand that...",
+                "confidence": 0.9,
+                "reasoning": "The patterns and context indicate",
+                "should_yield": true,
+                "next_prompt": null
+            }
+            """.data(using: .utf8)!
+
+            understandingResponse = try decoder.decode(UnderstandingResponse.self, from: understandingJSON)
             responses[.understanding] = understandingResponse?.content
             responsesContinuation?.yield(responses)
 
@@ -154,13 +171,23 @@ class MockChorusCoordinator: ChorusCoordinator, ObservableObject {
             try await Task.sleep(nanoseconds: UInt64(mockDelay * 1_000_000_000))
             try Task.checkCancellation()
 
-            yieldResponse = YieldResponse(
-                step: "yield",
-                content: "Here's my response to: \(input)",
-                confidence: 0.95,
-                citations: [],
-                metadata: metadata
-            )
+            let yieldJSON = """
+            {
+                "step": "yield",
+                "content": "Here's my synthesized response to: \(input)",
+                "confidence": 0.95,
+                "reasoning": "Drawing from the analyzed patterns",
+                "citations": [
+                    {
+                        "prior_id": "id1",
+                        "content": "relevant prior content",
+                        "context": "how this informed the response"
+                    }
+                ]
+            }
+            """.data(using: .utf8)!
+
+            yieldResponse = try decoder.decode(YieldResponse.self, from: yieldJSON)
             responses[.yield] = yieldResponse?.content
             responsesContinuation?.yield(responses)
 

@@ -46,11 +46,11 @@ class RESTChorusCoordinator: ChorusCoordinator, ObservableObject {
         self.api = ChorusAPIClient()
     }
 
-    convenience init(api: ChorusAPIClient) {
-        self.init()
-    }
-
     func process(_ input: String) async throws {
+        // Clear state at start
+        responses.removeAll()
+        responsesContinuation?.yield(responses)
+
         isProcessing = true
         processingContinuation?.yield(true)
 
@@ -63,12 +63,11 @@ class RESTChorusCoordinator: ChorusCoordinator, ObservableObject {
             // Action phase
             currentPhase = .action
             phaseContinuation?.yield(.action)
-            let actionBody = ActionRequestBody(content: input)
-            let actionResult: APIResponse<ActionResponse> = try await api.post(
-                endpoint: "action",
-                body: actionBody
+            let actionBody = ActionRequestBody(
+                content: input,
+                threadID: nil
             )
-            actionResponse = actionResult.data
+            actionResponse = try await api.post(endpoint: "action", body: actionBody)
             responses[.action] = actionResponse?.content
             responsesContinuation?.yield(responses)
 
@@ -79,14 +78,10 @@ class RESTChorusCoordinator: ChorusCoordinator, ObservableObject {
             phaseContinuation?.yield(.experience)
             let experienceBody = ExperienceRequestBody(
                 content: input,
-                action_response: actionResponse?.content ?? "",
-                thread_id: actionResponse?.metadata.next_action
+                actionResponse: actionResponse?.content ?? "",
+                threadID: nil
             )
-            let experienceResult: APIResponse<ExperienceResponse> = try await api.post(
-                endpoint: "experience",
-                body: experienceBody
-            )
-            experienceResponse = experienceResult.data
+            experienceResponse = try await api.post(endpoint: "experience", body: experienceBody)
             responses[.experience] = experienceResponse?.content
             responsesContinuation?.yield(responses)
 
@@ -97,15 +92,12 @@ class RESTChorusCoordinator: ChorusCoordinator, ObservableObject {
             phaseContinuation?.yield(.intention)
             let intentionBody = IntentionRequestBody(
                 content: input,
-                action_response: actionResponse?.content ?? "",
-                experience_response: experienceResponse?.content ?? "",
-                priors: experienceResponse?.priors
+                actionResponse: actionResponse?.content ?? "",
+                experienceResponse: experienceResponse?.content ?? "",
+                priors: experienceResponse?.priors ?? [:],
+                threadID: nil
             )
-            let intentionResult: APIResponse<IntentionResponse> = try await api.post(
-                endpoint: "intention",
-                body: intentionBody
-            )
-            intentionResponse = intentionResult.data
+            intentionResponse = try await api.post(endpoint: "intention", body: intentionBody) as IntentionResponse
             responses[.intention] = intentionResponse?.content
             responsesContinuation?.yield(responses)
 
@@ -116,18 +108,14 @@ class RESTChorusCoordinator: ChorusCoordinator, ObservableObject {
             phaseContinuation?.yield(.observation)
             let observationBody = ObservationRequestBody(
                 content: input,
-                action_response: actionResponse?.content ?? "",
-                experience_response: experienceResponse?.content ?? "",
-                intention_response: intentionResponse?.content ?? "",
-                selected_priors: intentionResponse?.selected_priors ?? [],
-                priors: experienceResponse?.priors,
-                thread_id: nil
+                actionResponse: actionResponse?.content ?? "",
+                experienceResponse: experienceResponse?.content ?? "",
+                intentionResponse: intentionResponse?.content ?? "",
+                selectedPriors: intentionResponse?.selectedPriors ?? [],
+                priors: experienceResponse?.priors ?? [:],
+                threadID: nil
             )
-            let observationResult: APIResponse<ObservationResponse> = try await api.post(
-                endpoint: "observation",
-                body: observationBody
-            )
-            observationResponse = observationResult.data
+            observationResponse = try await api.post(endpoint: "observation", body: observationBody)
             responses[.observation] = observationResponse?.content
             responsesContinuation?.yield(responses)
 
@@ -138,26 +126,22 @@ class RESTChorusCoordinator: ChorusCoordinator, ObservableObject {
             phaseContinuation?.yield(.understanding)
             let understandingBody = UnderstandingRequestBody(
                 content: input,
-                action_response: actionResponse?.content ?? "",
-                experience_response: experienceResponse?.content ?? "",
-                intention_response: intentionResponse?.content ?? "",
-                observation_response: observationResponse?.content ?? "",
-                patterns: observationResponse?.patterns ?? [],
-                selected_priors: intentionResponse?.selected_priors ?? [],
-                thread_id: nil
+                actionResponse: actionResponse?.content ?? "",
+                experienceResponse: experienceResponse?.content ?? "",
+                intentionResponse: intentionResponse?.content ?? "",
+                observationResponse: observationResponse?.content ?? "",
+                patterns: [],
+                selectedPriors: intentionResponse?.selectedPriors ?? [],
+                threadID: nil
             )
-            let understandingResult: APIResponse<UnderstandingResponse> = try await api.post(
-                endpoint: "understanding",
-                body: understandingBody
-            )
-            understandingResponse = understandingResult.data
+            understandingResponse = try await api.post(endpoint: "understanding", body: understandingBody)
             responses[.understanding] = understandingResponse?.content
             responsesContinuation?.yield(responses)
 
             // Check if we should loop
             if let understanding = understandingResponse,
-               !understanding.should_yield,
-               let nextPrompt = understanding.metadata.next_prompt {
+               understanding.shouldYield ?? true,
+               let nextPrompt = understanding.nextPrompt {
                 try await process(nextPrompt)
                 return
             }
@@ -169,20 +153,16 @@ class RESTChorusCoordinator: ChorusCoordinator, ObservableObject {
             phaseContinuation?.yield(.yield)
             let yieldBody = YieldRequestBody(
                 content: input,
-                action_response: actionResponse?.content ?? "",
-                experience_response: experienceResponse?.content ?? "",
-                intention_response: intentionResponse?.content ?? "",
-                observation_response: observationResponse?.content ?? "",
-                understanding_response: understandingResponse?.content ?? "",
-                selected_priors: intentionResponse?.selected_priors ?? [],
-                priors: experienceResponse?.priors,
-                thread_id: nil
+                actionResponse: actionResponse?.content ?? "",
+                experienceResponse: experienceResponse?.content ?? "",
+                intentionResponse: intentionResponse?.content ?? "",
+                observationResponse: observationResponse?.content ?? "",
+                understandingResponse: understandingResponse?.content ?? "",
+                selectedPriors: intentionResponse?.selectedPriors ?? [],
+                priors: experienceResponse?.priors ?? [:],
+                threadID: nil
             )
-            let yieldResult: APIResponse<YieldResponse> = try await api.post(
-                endpoint: "yield",
-                body: yieldBody
-            )
-            yieldResponse = yieldResult.data
+            yieldResponse = try await api.post(endpoint: "yield", body: yieldBody)
             responses[.yield] = yieldResponse?.content
             responsesContinuation?.yield(responses)
 

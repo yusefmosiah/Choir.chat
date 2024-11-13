@@ -2,11 +2,24 @@ import logging
 from typing import List, Dict, Any, Optional
 from .config import Config
 from litellm import completion, embedding
+import litellm
 import json
+from .models.api import (
+    ChorusResponse,
+    ActionResponse,
+    ExperienceResponse,
+    IntentionResponse,
+    ObservationResponse,
+    UnderstandingResponse,
+    YieldResponse
+)
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
+
+# Enable verbose logging for litellm
+# litellm.set_verbose = True
 
 async def get_embedding(input_text: str, model: str) -> List[float]:
     try:
@@ -75,37 +88,44 @@ async def structured_chat_completion(
     config: Config,
     response_format: Optional[Any] = None
 ) -> Dict[str, Any]:
-    """
-    Make a structured chat completion call that returns data in a specified format.
-    """
     try:
-        # Debug log the inputs
-        logger.info(f"Messages: {messages}")
-        logger.info(f"Response format: {response_format}")
+        # Get the appropriate response model based on the phase
+        phase = messages[0]["content"].split()[3].lower()  # Extract phase from "This is the X phase..."
+        response_models = {
+            "action": ActionResponse,
+            "experience": ExperienceResponse,
+            "intention": IntentionResponse,
+            "observation": ObservationResponse,
+            "understanding": UnderstandingResponse,
+            "yield": YieldResponse
+        }
+        model = response_models.get(phase, ChorusResponse)
 
-        # If response_format is a Pydantic model, add format instructions to system message
-        if hasattr(response_format, "model_json_schema"):
-            schema = response_format.model_json_schema()
-            format_instructions = f"""
-            Please provide your response in the following JSON format:
-            {json.dumps(schema, indent=2)}
-            """
-            # Add format instructions to system message
-            messages[0]["content"] = messages[0]["content"] + "\n" + format_instructions
+        # Get schema from pydantic model
+        schema = model.model_json_schema()
+        logger.info(f"Using schema for {phase} phase: {json.dumps(schema, indent=2)}")
 
+        # Make the API call with function calling format
         response = completion(
             model=config.CHAT_MODEL,
             messages=messages,
-            max_tokens=config.MAX_TOKENS,
-            temperature=config.TEMPERATURE,
-            response_format={"type": "json_object"}  # Only specify json_object type
+            tools=[{
+                "type": "function",
+                "function": {
+                    "name": "process_response",
+                    "description": f"Process the response for {phase} phase",
+                    "parameters": schema
+                }
+            }],
+            tool_choice={"type": "function", "function": {"name": "process_response"}}
         )
 
         # Debug log the response
-        logger.info(f"Response: {response}")
+        logger.info(f"Raw response: {response}")
 
-        # Parse the JSON string into a dictionary
-        content = json.loads(response.choices[0].message.content)
+        # Extract content from function call
+        content = json.loads(response.choices[0].message.tool_calls[0].function.arguments)
+        logger.info(f"Parsed content: {content}")
 
         return {
             "status": "success",
@@ -113,7 +133,7 @@ async def structured_chat_completion(
         }
 
     except Exception as e:
-        logger.error(f"Error in structured chat completion: {str(e)}")
+        logger.error(f"Error in structured chat completion: {str(e)}", exc_info=True)
         return {
             "status": "error",
             "content": f"An error occurred: {str(e)}"

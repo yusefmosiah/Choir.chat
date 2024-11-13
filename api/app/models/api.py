@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import List, Optional, Dict, Any
 from datetime import datetime
 
@@ -15,11 +15,10 @@ class ChorusRequest(BaseModel):
     previous_responses: Optional[Dict[str, str]] = None
 
 class ChorusResponse(BaseModel):
-    step: str
-    content: str
-    confidence: float
-    priors: Optional[List[Dict[str, Any]]] = None
-    metadata: Optional[Dict[str, Any]] = None
+    step: str = Field(..., description="The current phase name")
+    content: str = Field(..., description="The main response content")
+    confidence: float = Field(..., ge=0, le=1, description="Confidence score between 0 and 1")
+    reasoning: str = Field(..., description="Reasoning behind the response")
 
 # Vector operation models
 class VectorSearchRequest(BaseModel):
@@ -65,55 +64,30 @@ class ActionRequest(BaseModel):
     content: str
     thread_id: Optional[str] = None
 
-class ActionResponse(BaseModel):
-    response: str
-    confidence: float
-    reasoning: str
+class ActionResponse(ChorusResponse):
+    pass
 
 # Experience models
 class ExperienceRequest(BaseModel):
     content: str
     thread_id: Optional[str] = None
-    action_response: str  # Previous action response
+    action_response: str
 
-class ExperienceResponse(BaseModel):
-    response: str  # Analysis of how priors relate to query
-    confidence: float
-    synthesis: str  # How these priors connect to the current context
-
-    model_config = {
-        "json_schema_extra": {
-            "examples": [{
-                "response": "Analysis of how priors relate to current query",
-                "confidence": 0.8,
-                "synthesis": "How these priors connect to the current context"
-            }]
-        }
-    }
+class ExperienceResponse(ChorusResponse):
+    pass
 
 class IntentionRequest(BaseModel):
     content: str
     thread_id: Optional[str] = None
     action_response: str
     experience_response: str
-    priors: Dict[str, Dict[str, Any]]  # Priors from experience phase
+    priors: Dict[str, Dict[str, Any]]
 
-class IntentionResponse(BaseModel):
-    reasoning: str  # Why these priors were selected
-    selected_priors: List[str]  # IDs of most relevant priors
-    response: str  # Analysis of intent
-    confidence: float
-
-    model_config = {
-        "json_schema_extra": {
-            "examples": [{
-                "reasoning": "Why these priors were selected",
-                "selected_priors": ["prior_id_1", "prior_id_2"],
-                "response": "Analysis of user's intent and relevant priors",
-                "confidence": 0.8
-            }]
-        }
-    }
+class IntentionResponse(ChorusResponse):
+    selected_priors: List[str] = Field(
+        default_factory=list,
+        description="IDs of selected relevant priors"
+    )
 
 class ObservationRequest(BaseModel):
     content: str
@@ -121,29 +95,11 @@ class ObservationRequest(BaseModel):
     action_response: str
     experience_response: str
     intention_response: str
-    selected_priors: List[str]  # IDs from intention phase
-    priors: Dict[str, Dict[str, Any]]  # Full priors dictionary
+    selected_priors: List[str]
+    priors: Dict[str, Dict[str, Any]]
 
-class ObservationResponse(BaseModel):
-    id: str
-    reasoning: str
-    patterns: List[Dict[str, Any]]
-    response: str
-    confidence: float
-
-    model_config = {
-        "json_schema_extra": {
-            "examples": [{
-                "reasoning": "Analysis of patterns in priors and responses",
-                "patterns": [
-                    {"type": "theme", "description": "Pattern description"},
-                    {"type": "insight", "description": "Insight description"}
-                ],
-                "response": "Synthesis of observations",
-                "confidence": 0.8
-            }]
-        }
-    }
+class ObservationResponse(ChorusResponse):
+    pass
 
 class UnderstandingRequest(BaseModel):
     content: str
@@ -152,33 +108,12 @@ class UnderstandingRequest(BaseModel):
     experience_response: str
     intention_response: str
     observation_response: str
-    patterns: List[Dict[str, Any]]  # Patterns from observation
-    selected_priors: List[str]  # Selected priors from intention
+    patterns: List[Dict[str, str]]
+    selected_priors: List[str]
 
-class UnderstandingResponse(BaseModel):
-    reasoning: str  # Analysis of whether we have sufficient understanding
-    should_yield: bool  # Whether to proceed to yield or loop back
-    confidence: float
-    next_action: Optional[str] = None  # Suggested focus if looping back
-    next_prompt: Optional[str] = None  # The actual prompt to use in next action phase
-
-    model_config = {
-        "json_schema_extra": {
-            "examples": [{
-                "reasoning": "Analysis of understanding completeness",
-                "should_yield": True,
-                "confidence": 0.8,
-                "next_action": None,
-                "next_prompt": None
-            }, {
-                "reasoning": "Need to explore creative aspects",
-                "should_yield": False,
-                "confidence": 0.7,
-                "next_action": "Explore creative storytelling",
-                "next_prompt": "Tell me a story about a choir that incorporates themes of community and artistic expression"
-            }]
-        }
-    }
+class UnderstandingResponse(ChorusResponse):
+    should_yield: bool = Field(..., description="Whether to proceed to yield phase")
+    next_prompt: Optional[str] = Field(None, description="Next prompt if not yielding")
 
 class YieldRequest(BaseModel):
     content: str
@@ -188,28 +123,8 @@ class YieldRequest(BaseModel):
     intention_response: str
     observation_response: str
     understanding_response: str
-    selected_priors: List[str]  # Selected priors from intention
-    priors: Dict[str, Dict[str, Any]]  # Full priors dictionary
+    selected_priors: List[str]
+    priors: Dict[str, Dict[str, Any]]
 
-class YieldResponse(BaseModel):
-    reasoning: str  # How the response incorporates priors and insights
-    citations: List[Dict[str, Any]]  # List of cited priors with context
-    response: str  # Final synthesized response
-    confidence: float
-
-    model_config = {
-        "json_schema_extra": {
-            "examples": [{
-                "reasoning": "How the response incorporates priors and insights",
-                "citations": [
-                    {
-                        "prior_id": "id1",
-                        "content": "cited content",
-                        "context": "how this prior was used"
-                    }
-                ],
-                "response": "Final synthesized response with inline citations",
-                "confidence": 0.9
-            }]
-        }
-    }
+class YieldResponse(ChorusResponse):
+    pass

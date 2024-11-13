@@ -64,11 +64,8 @@ struct Message: Identifiable, Equatable {
 
 struct MessageChorusResult: Equatable {
     let phases: [Phase: String]
-    let citations: [Citation]?
 
-    // Equatable conformance
     static func == (lhs: MessageChorusResult, rhs: MessageChorusResult) -> Bool {
-        lhs.phases == rhs.phases &&
-        lhs.citations?.map { $0.prior_id } == rhs.citations?.map { $0.prior_id }
+        lhs.phases == rhs.phases
     }
 }

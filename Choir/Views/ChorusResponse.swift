@@ -6,13 +6,13 @@ struct ChorusResponse: View {
 
     init() {
         // Create a mock coordinator for preview/testing
-        #if DEBUG
-        _viewModel = StateObject(wrappedValue: ChorusViewModel(coordinator: MockChorusCoordinator()))
-        #else
+        // #if DEBUG
+        // _viewModel = StateObject(wrappedValue: ChorusViewModel(coordinator: MockChorusCoordinator()))
+        // #else
         // Create REST coordinator for production
         let coordinator = RESTChorusCoordinator()
         _viewModel = StateObject(wrappedValue: ChorusViewModel(coordinator: coordinator))
-        #endif
+        // #endif
     }
 
     var body: some View {

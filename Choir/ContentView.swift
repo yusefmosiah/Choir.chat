@@ -13,11 +13,11 @@ struct ContentView: View {
     @State private var selectedThread: Thread?
 
     init() {
-        #if DEBUG
-        _viewModel = StateObject(wrappedValue: ChorusViewModel(coordinator: MockChorusCoordinator()))
-        #else
+        // #if DEBUG
+        // _viewModel = StateObject(wrappedValue: ChorusViewModel(coordinator: MockChorusCoordinator()))
+        // #else
         _viewModel = StateObject(wrappedValue: ChorusViewModel(coordinator: RESTChorusCoordinator()))
-        #endif
+        // #endif
     }
 
     var body: some View {
