@@ -472,8 +472,8 @@ tree.md
 ==
 
 
-# Choir-Collective Directory Structure
-## Output of $ tree -I 'venv|node_modules|target|archive' | pbcopy
+# Choir Directory Structure
+## Output of $ tree -I 'venv|archive|__pycache__' | pbcopy
 
 .
 ├── Choir
@@ -533,32 +533,15 @@ tree.md
 ├── api
 │   ├── Dockerfile
 │   ├── __init__.py
-│   ├── __pycache__
-│   │   └── main.cpython-311.pyc
 │   ├── app
 │   │   ├── __init__.py
-│   │   ├── __pycache__
-│   │   │   ├── __init__.cpython-311.pyc
-│   │   │   ├── config.cpython-311.pyc
-│   │   │   ├── database.cpython-311.pyc
-│   │   │   ├── models.cpython-311.pyc
-│   │   │   └── utils.cpython-311.pyc
 │   │   ├── chorus_cycle.py
 │   │   ├── config.py
 │   │   ├── database.py
 │   │   ├── models
 │   │   │   ├── __init__.py
-│   │   │   ├── __pycache__
-│   │   │   │   ├── __init__.cpython-311.pyc
-│   │   │   │   └── api.cpython-311.pyc
 │   │   │   └── api.py
 │   │   ├── routers
-│   │   │   ├── __pycache__
-│   │   │   │   ├── chorus.cpython-311.pyc
-│   │   │   │   ├── embeddings.cpython-311.pyc
-│   │   │   │   ├── threads.cpython-311.pyc
-│   │   │   │   ├── users.cpython-311.pyc
-│   │   │   │   └── vectors.cpython-311.pyc
 │   │   │   ├── chorus.py
 │   │   │   ├── embeddings.py
 │   │   │   ├── threads.py
@@ -566,9 +549,6 @@ tree.md
 │   │   │   └── vectors.py
 │   │   ├── services
 │   │   │   ├── __init__.py
-│   │   │   ├── __pycache__
-│   │   │   │   ├── __init__.cpython-311.pyc
-│   │   │   │   └── chorus.cpython-311.pyc
 │   │   │   └── chorus.py
 │   │   └── utils.py
 │   ├── main.py
@@ -661,7 +641,7 @@ tree.md
     ├── theory_theory.md
     └── tree.md
 
-41 directories, 144 files
+36 directories, 129 files
 
 === File: docs/CHANGELOG.md ===
 
