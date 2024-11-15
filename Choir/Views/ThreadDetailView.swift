@@ -60,6 +60,9 @@ struct ThreadDetailView: View {
 
     private func sendMessage(_ content: String) async {
         do {
+            // Set the current thread in the coordinator before processing
+            (viewModel.coordinator as? RESTChorusCoordinator)?.currentThread = thread
+
             try await viewModel.process(content)
 
             if let yieldResponse = viewModel.yieldResponse,

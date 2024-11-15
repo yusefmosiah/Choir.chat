@@ -16,6 +16,7 @@ class Thread: ObservableObject, Identifiable, Hashable {
     init(id: UUID = UUID(), title: String? = nil) {
         self.id = id
         self.title = title ?? "Thread \(DateFormatter.localizedString(from: Date(), dateStyle: .short, timeStyle: .short))"
+        print("Created new thread: \(self.title)")
     }
 
     func addMessage(_ content: String, isUser: Bool = true, chorusResult: MessageChorusResult? = nil) {
@@ -25,6 +26,8 @@ class Thread: ObservableObject, Identifiable, Hashable {
             chorusResult: chorusResult
         )
         messages.append(message)
+        print("Added message to thread: \(content.prefix(50))...")
+        print("Thread now contains \(messages.count) messages")
     }
 
     // Hashable conformance

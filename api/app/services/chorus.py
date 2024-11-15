@@ -1,8 +1,8 @@
 from app.config import Config
 from app.utils import structured_chat_completion, get_embedding
-from app.models.api import ActionResponse, ExperienceResponse, IntentionResponse, ObservationResponse, UnderstandingResponse, YieldResponse
+from app.models.api import ActionResponse, ExperienceResponse, IntentionResponse, ObservationResponse, UnderstandingResponse, YieldResponse, MessageContext
 from app.database import DatabaseClient
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 import logging
 import json
 
@@ -13,18 +13,25 @@ class ChorusService:
         self.config = config
         self.db = DatabaseClient(config)
 
-    async def process_action(self, content: str) -> ActionResponse:
-        """Process the action phase - pure response without context."""
+    async def process_action(self, content: str, context: Optional[List[MessageContext]] = None) -> ActionResponse:
+        """Process the action phase with proper chat context."""
         try:
-            action_prompt = """
-            This is the Action phase of the Chorus Cycle. Provide an immediate, direct response
-            to the user's input with "beginner's mind" - without overthinking or gathering context.
-            """
-
+            # Start with system message
             messages = [
-                {"role": "system", "content": action_prompt},
-                {"role": "user", "content": content}
+                {"role": "system", "content": "This is the Action phase of the Chorus Cycle. Provide a direct response to the user's input."}
             ]
+
+            # Add context messages in chronological order
+            if context:
+                for msg in context:
+                    if msg.content != "...":  # Skip placeholder messages
+                        role = "user" if msg.is_user else "assistant"
+                        messages.append({"role": role, "content": msg.content})
+
+            # Add current user message
+            messages.append({"role": "user", "content": content})
+
+            print(f"AAAAction messages with context: {messages}")
 
             result = await structured_chat_completion(
                 messages=messages,
@@ -34,7 +41,6 @@ class ChorusService:
             if result["status"] == "error":
                 raise Exception(result["content"])
 
-            # Convert dict to Pydantic model
             return ActionResponse.model_validate(result["content"])
 
         except Exception as e:

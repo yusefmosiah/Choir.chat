@@ -59,10 +59,18 @@ class UserResponse(BaseModel):
     created_at: datetime
     thread_ids: List[str]
 
+# Move MessageContext definition before it's used
+class MessageContext(BaseModel):
+    content: str
+    is_user: bool
+    timestamp: str
+    chorus_result: Optional[Dict[str, str]] = None
+
 # Action models
 class ActionRequest(BaseModel):
     content: str
     thread_id: Optional[str] = None
+    context: Optional[List[MessageContext]] = None
 
 class ActionResponse(ChorusResponse):
     pass
@@ -72,6 +80,7 @@ class ExperienceRequest(BaseModel):
     content: str
     thread_id: Optional[str] = None
     action_response: str
+    context: Optional[List[MessageContext]] = None
 
 class ExperienceResponse(ChorusResponse):
     pass

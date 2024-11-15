@@ -11,10 +11,12 @@ struct APIResponse<T: Codable>: Codable {
 struct ActionRequestBody: Codable {
     let content: String
     let threadID: String?
+    let context: [MessageContext]?
 
     enum CodingKeys: String, CodingKey {
         case content
         case threadID = "thread_id"
+        case context
     }
 }
 
@@ -22,11 +24,13 @@ struct ExperienceRequestBody: Codable {
     let content: String
     let actionResponse: String
     let threadID: String?
+    let context: [MessageContext]?
 
     enum CodingKeys: String, CodingKey {
         case content
         case actionResponse = "action_response"
         case threadID = "thread_id"
+        case context
     }
 }
 
@@ -36,6 +40,7 @@ struct IntentionRequestBody: Codable {
     let experienceResponse: String
     let priors: [String: Prior]
     let threadID: String?
+    let context: [MessageContext]?
 
     enum CodingKeys: String, CodingKey {
         case content
@@ -43,6 +48,7 @@ struct IntentionRequestBody: Codable {
         case experienceResponse = "experience_response"
         case priors
         case threadID = "thread_id"
+        case context
     }
 }
 
@@ -54,6 +60,7 @@ struct ObservationRequestBody: Codable {
     let selectedPriors: [String]
     let priors: [String: Prior]
     let threadID: String?
+    let context: [MessageContext]?
 
     enum CodingKeys: String, CodingKey {
         case content
@@ -63,6 +70,7 @@ struct ObservationRequestBody: Codable {
         case selectedPriors = "selected_priors"
         case priors
         case threadID = "thread_id"
+        case context
     }
 }
 
@@ -75,6 +83,7 @@ struct UnderstandingRequestBody: Codable {
     let patterns: [Pattern]
     let selectedPriors: [String]
     let threadID: String?
+    let context: [MessageContext]?
 
     enum CodingKeys: String, CodingKey {
         case content
@@ -85,6 +94,7 @@ struct UnderstandingRequestBody: Codable {
         case patterns
         case selectedPriors = "selected_priors"
         case threadID = "thread_id"
+        case context
     }
 }
 
@@ -98,6 +108,7 @@ struct YieldRequestBody: Codable {
     let selectedPriors: [String]
     let priors: [String: Prior]
     let threadID: String?
+    let context: [MessageContext]?
 
     enum CodingKeys: String, CodingKey {
         case content
@@ -109,6 +120,7 @@ struct YieldRequestBody: Codable {
         case selectedPriors = "selected_priors"
         case priors
         case threadID = "thread_id"
+        case context
     }
 }
 
@@ -206,6 +218,30 @@ struct Prior: Codable {
 struct Pattern: Codable {
     let type: String
     let description: String
+}
+
+// Add context model
+struct MessageContext: Codable {
+    let content: String
+    let isUser: Bool
+    let timestamp: String
+    let chorusResult: [String: String]?
+
+    enum CodingKeys: String, CodingKey {
+        case content
+        case isUser = "is_user"
+        case timestamp
+        case chorusResult = "chorus_result"
+    }
+
+    init(from message: Message) {
+        self.content = message.content
+        self.isUser = message.isUser
+        self.timestamp = ISO8601DateFormatter().string(from: message.timestamp)
+        self.chorusResult = message.chorusResult?.phases.reduce(into: [String: String]()) { dict, pair in
+            dict[pair.key.rawValue] = pair.value
+        }
+    }
 }
 
 // Type aliases for clearer API response handling

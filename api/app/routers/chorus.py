@@ -13,10 +13,10 @@ db = DatabaseClient(config)
 @router.post("/action", response_model=APIResponse)
 async def process_action(request: ActionRequest):
     """
-    First step of the Chorus Cycle - pure response with "beginner's mind"
+    First step of the Chorus Cycle - process with proper context
     """
     try:
-        result = await chorus_service.process_action(request.content)
+        result = await chorus_service.process_action(request.content, request.context)
         return APIResponse(
             success=True,
             data=result.model_dump()

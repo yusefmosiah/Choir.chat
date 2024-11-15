@@ -526,7 +526,8 @@ tree.md
 ├── ChoirTests
 │   ├── APIResponseTests.swift
 │   ├── ChoirTests.swift
-│   └── ChorusAPIClientTests.swift
+│   ├── ChorusAPIClientTests.swift
+│   └── ThreadTests.swift
 ├── ChoirUITests
 │   ├── ChoirUITests.swift
 │   └── ChoirUITestsLaunchTests.swift
@@ -643,7 +644,7 @@ tree.md
     ├── theory_theory.md
     └── tree.md
 
-36 directories, 131 files
+36 directories, 132 files
 
 === File: docs/CHANGELOG.md ===
 

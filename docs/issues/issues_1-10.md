@@ -13,8 +13,8 @@
 ### Client (Swift)
 - `/Choir/Models/Thread.swift` - Thread model and context management
 - `/Choir/Models/ChorusModels.swift` - API models
-- `/Choir/API/ChorusAPIClient.swift` - API client implementation
-- `/Choir/Coordinator/RESTChorusCoordinator.swift` - Message coordination
+- `/Choir/Networking/ChorusAPIClient.swift` - API client implementation
+- `/Choir/Coordinators/RESTChorusCoordinator.swift` - Message coordination
 
 ### API (Python)
 - `/api/app/models/api.py` - API model definitions

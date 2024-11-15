@@ -9,7 +9,7 @@ class ChorusViewModel: ObservableObject {
     @Published private(set) var error: Error?
 
     // Coordinator handles the actual processing
-    private let coordinator: any ChorusCoordinator
+    let coordinator: any ChorusCoordinator
     private var bindingTasks: Set<Task<Void, Never>> = []
 
     init(coordinator: any ChorusCoordinator) {

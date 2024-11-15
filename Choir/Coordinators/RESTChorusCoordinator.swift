@@ -42,11 +42,37 @@ class RESTChorusCoordinator: ChorusCoordinator, ObservableObject {
         }
     }
 
+    // Add context handling
+    var currentThread: Thread?
+
     required init() {
         self.api = ChorusAPIClient()
     }
 
     func process(_ input: String) async throws {
+        try await process(input, thread: currentThread)
+    }
+
+    private func process(_ input: String, thread: Thread?) async throws {
+        currentThread = thread
+
+        // Get context at the start
+        let messages = thread?.messages ?? []
+        let contexts = messages.map { MessageContext(from: $0) }
+
+        // Add detailed logging
+        print("Thread ID: \(thread?.id.uuidString ?? "nil")")
+        print("Message count: \(messages.count)")
+        print("Messages:")
+        for (i, msg) in messages.enumerated() {
+            print("[\(i)] \(msg.isUser ? "User" : "AI"): \(msg.content.prefix(50))...")
+        }
+        print("Context count: \(contexts.count)")
+        print("Contexts:")
+        for (i, ctx) in contexts.enumerated() {
+            print("[\(i)] \(ctx.isUser ? "User" : "AI"): \(ctx.content.prefix(50))...")
+        }
+
         // Clear state at start
         responses.removeAll()
         responsesContinuation?.yield(responses)
@@ -65,8 +91,10 @@ class RESTChorusCoordinator: ChorusCoordinator, ObservableObject {
             phaseContinuation?.yield(.action)
             let actionBody = ActionRequestBody(
                 content: input,
-                threadID: nil
+                threadID: thread?.id.uuidString,
+                context: contexts  // Pass full message history
             )
+            print("Action request body: \(String(describing: actionBody))")
             actionResponse = try await api.post(endpoint: "action", body: actionBody)
             responses[.action] = actionResponse?.content
             responsesContinuation?.yield(responses)
@@ -79,7 +107,8 @@ class RESTChorusCoordinator: ChorusCoordinator, ObservableObject {
             let experienceBody = ExperienceRequestBody(
                 content: input,
                 actionResponse: actionResponse?.content ?? "",
-                threadID: nil
+                threadID: thread?.id.uuidString,
+                context: contexts  // Pass full message history
             )
             experienceResponse = try await api.post(endpoint: "experience", body: experienceBody)
             responses[.experience] = experienceResponse?.content
@@ -95,7 +124,8 @@ class RESTChorusCoordinator: ChorusCoordinator, ObservableObject {
                 actionResponse: actionResponse?.content ?? "",
                 experienceResponse: experienceResponse?.content ?? "",
                 priors: experienceResponse?.priors ?? [:],
-                threadID: nil
+                threadID: thread?.id.uuidString,
+                context: contexts  // Pass full message history
             )
             intentionResponse = try await api.post(endpoint: "intention", body: intentionBody) as IntentionResponse
             responses[.intention] = intentionResponse?.content
@@ -113,7 +143,8 @@ class RESTChorusCoordinator: ChorusCoordinator, ObservableObject {
                 intentionResponse: intentionResponse?.content ?? "",
                 selectedPriors: intentionResponse?.selectedPriors ?? [],
                 priors: experienceResponse?.priors ?? [:],
-                threadID: nil
+                threadID: thread?.id.uuidString,
+                context: contexts  // Pass full message history
             )
             observationResponse = try await api.post(endpoint: "observation", body: observationBody)
             responses[.observation] = observationResponse?.content
@@ -132,7 +163,8 @@ class RESTChorusCoordinator: ChorusCoordinator, ObservableObject {
                 observationResponse: observationResponse?.content ?? "",
                 patterns: [],
                 selectedPriors: intentionResponse?.selectedPriors ?? [],
-                threadID: nil
+                threadID: thread?.id.uuidString,
+                context: contexts  // Pass full message history
             )
             understandingResponse = try await api.post(endpoint: "understanding", body: understandingBody)
             responses[.understanding] = understandingResponse?.content
@@ -142,7 +174,7 @@ class RESTChorusCoordinator: ChorusCoordinator, ObservableObject {
             if let understanding = understandingResponse,
                understanding.shouldYield ?? true,
                let nextPrompt = understanding.nextPrompt {
-                try await process(nextPrompt)
+                try await process(nextPrompt, thread: thread)
                 return
             }
 
@@ -160,16 +192,27 @@ class RESTChorusCoordinator: ChorusCoordinator, ObservableObject {
                 understandingResponse: understandingResponse?.content ?? "",
                 selectedPriors: intentionResponse?.selectedPriors ?? [],
                 priors: experienceResponse?.priors ?? [:],
-                threadID: nil
+                threadID: thread?.id.uuidString,
+                context: contexts  // Pass full message history
             )
             yieldResponse = try await api.post(endpoint: "yield", body: yieldBody)
             responses[.yield] = yieldResponse?.content
             responsesContinuation?.yield(responses)
 
+        } catch let error as URLError {
+            print("Network error: \(error.localizedDescription)")
+            responses[currentPhase] = "Network error: Could not connect to server"
+            responsesContinuation?.yield(responses)
+            throw APIError.networkError(error)
         } catch is CancellationError {
             responses[currentPhase] = "Cancelled"
             responsesContinuation?.yield(responses)
             throw APIError.cancelled
+        } catch {
+            print("Error during \(currentPhase): \(error.localizedDescription)")
+            responses[currentPhase] = "Error: \(error.localizedDescription)"
+            responsesContinuation?.yield(responses)
+            throw error
         }
     }
 
