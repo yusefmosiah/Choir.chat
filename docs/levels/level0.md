@@ -17,10 +17,10 @@ issue_-1
 Set up and configure development environment for efficient implementation of core message system.
 
 ## Tasks
-- [ ] Configure test environment
-  - [ ] Set up test database # the database we have is the test database. when ready to launch we will make new database
-  - [ ] Configure test vectors
-  - [ ] Add test users/threads
+- [x] Configure test environment
+  - [x] Set up test database # the database we have is the test database. when ready to launch we will make new database
+  - [x] Configure test vectors
+  - [x] Add test users/threads
 - [ ] Set up monitoring
   - [ ] Logging configuration
   - [ ] Performance metrics
