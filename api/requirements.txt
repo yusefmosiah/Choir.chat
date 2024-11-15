@@ -1,5 +1,5 @@
 fastapi>=0.115.0  # Latest version with significant improvements
-uvicorn>=0.27.1  # Latest stable version
+uvicorn[standard]>=0.27.1  # Latest stable version
 gunicorn
 python-dotenv
 litellm

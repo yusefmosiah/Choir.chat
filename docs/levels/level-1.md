@@ -553,14 +553,15 @@ tree.md
 │   │   └── utils.py
 │   ├── main.py
 │   ├── pyproject.toml
+│   ├── pytest.ini
 │   ├── requirements.txt
+│   ├── run_tests.sh
 │   └── tests
 │       ├── __init__.py
 │       ├── conftest.py
 │       ├── test_chorus_endpoints.py
 │       ├── test_core_endpoints.py
 │       ├── test_main.py
-│       ├── test_model_compatibility.py
 │       ├── test_response_schemas.py
 │       ├── test_structured_outputs.py
 │       └── test_user_thread_endpoints.py
@@ -641,7 +642,7 @@ tree.md
     ├── theory_theory.md
     └── tree.md
 
-36 directories, 129 files
+36 directories, 130 files
 
 === File: docs/CHANGELOG.md ===
 

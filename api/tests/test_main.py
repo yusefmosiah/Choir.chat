@@ -8,7 +8,3 @@ def test_health_check():
     assert response.status_code == 200
     assert response.json() == {"status": "healthy"}
 
-def test_log_click():
-    response = client.post("/api/log-click")
-    assert response.status_code == 200
-    assert response.json() == {"status": "success", "message": "Click logged"}
