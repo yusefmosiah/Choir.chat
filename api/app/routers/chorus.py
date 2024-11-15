@@ -38,19 +38,19 @@ async def process_experience(request: ExperienceRequest):
         embedding = await get_embedding(request.content, config.EMBEDDING_MODEL)
         priors = await db.search_vectors(embedding, limit=config.SEARCH_LIMIT)
 
-        # Get the experience response
+        # Get the experience response with context
         result = await chorus_service.process_experience(
             request.content,
             request.action_response,
-            priors
+            priors,
+            request.context
         )
 
-        # Return both the experience response and the priors
         return APIResponse(
             success=True,
             data={
-                **result.dict(),  # The experience response
-                "priors": {  # Pass through the priors directly
+                **result.dict(),
+                "priors": {
                     prior["id"]: {
                         "content": prior["content"],
                         "similarity": prior["similarity"],
@@ -76,10 +76,10 @@ async def process_intention(request: IntentionRequest):
             content=request.content,
             action_response=request.action_response,
             experience_response=request.experience_response,
-            priors=request.priors
+            priors=request.priors,
+            context=request.context
         )
 
-        # Ensure the response includes selected_priors
         response_data = result.model_dump()
         if "selected_priors" not in response_data:
             response_data["selected_priors"] = []
@@ -90,10 +90,7 @@ async def process_intention(request: IntentionRequest):
         )
     except Exception as e:
         logger.error(f"Error in intention endpoint: {str(e)}")
-        raise HTTPException(
-            status_code=500,
-            detail=f"Error processing intention: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Error processing intention: {str(e)}")
 
 @router.post("/observation", response_model=APIResponse)
 async def process_observation(request: ObservationRequest):
@@ -101,7 +98,6 @@ async def process_observation(request: ObservationRequest):
     Fourth step of the Chorus Cycle - analyze patterns and insights
     """
     try:
-        # Filter priors to only selected ones
         selected_priors = {
             prior_id: request.priors[prior_id]
             for prior_id in request.selected_priors
@@ -113,11 +109,12 @@ async def process_observation(request: ObservationRequest):
             action_response=request.action_response,
             experience_response=request.experience_response,
             intention_response=request.intention_response,
-            selected_priors=selected_priors
+            selected_priors=selected_priors,
+            context=request.context
         )
         return APIResponse(
             success=True,
-            data=result.model_dump()  # Use model_dump() to convert to dict
+            data=result.model_dump()
         )
     except Exception as e:
         logger.error(f"Error in observation endpoint: {str(e)}")
@@ -136,10 +133,10 @@ async def process_understanding(request: UnderstandingRequest):
             intention_response=request.intention_response,
             observation_response=request.observation_response,
             patterns=request.patterns,
-            selected_priors=request.selected_priors
+            selected_priors=request.selected_priors,
+            context=request.context
         )
 
-        # Convert to dict and ensure required fields
         response_data = result.model_dump()
         if "should_yield" not in response_data:
             response_data["should_yield"] = True
@@ -152,10 +149,7 @@ async def process_understanding(request: UnderstandingRequest):
         )
     except Exception as e:
         logger.error(f"Error in understanding endpoint: {str(e)}")
-        raise HTTPException(
-            status_code=500,
-            detail=f"Error processing understanding: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Error processing understanding: {str(e)}")
 
 @router.post("/yield", response_model=APIResponse)
 async def process_yield(request: YieldRequest):
@@ -163,7 +157,6 @@ async def process_yield(request: YieldRequest):
     Final step of the Chorus Cycle - synthesize final response with citations
     """
     try:
-        # Filter priors to only selected ones
         selected_prior_data = {
             prior_id: request.priors[prior_id]
             for prior_id in request.selected_priors
@@ -178,7 +171,8 @@ async def process_yield(request: YieldRequest):
             observation_response=request.observation_response,
             understanding_response=request.understanding_response,
             selected_priors=request.selected_priors,
-            priors=selected_prior_data
+            priors=selected_prior_data,
+            context=request.context
         )
         return APIResponse(
             success=True,
@@ -186,7 +180,4 @@ async def process_yield(request: YieldRequest):
         )
     except Exception as e:
         logger.error(f"Error in yield endpoint: {str(e)}")
-        raise HTTPException(
-            status_code=500,
-            detail=f"Error processing yield: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Error processing yield: {str(e)}")

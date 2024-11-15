@@ -196,35 +196,35 @@ async def test_full_chorus_cycle(client, base_url, test_input):
     assert "content" in action_data
     assert "confidence" in action_data
     assert "reasoning" in action_data
-    
+
     # Experience phase
     experience_data = await get_experience_response(client, base_url, action_data)
     assert "step" in experience_data
     assert "content" in experience_data
     assert "confidence" in experience_data
     assert "reasoning" in experience_data
-    
+
     # Intention phase
     intention_data = await get_intention_response(client, base_url, action_data, experience_data)
     assert "step" in intention_data
     assert "content" in intention_data
     assert "confidence" in intention_data
     assert "reasoning" in intention_data
-    
+
     # Observation phase
     observation_data = await get_observation_response(client, base_url, action_data, experience_data, intention_data)
     assert "step" in observation_data
     assert "content" in observation_data
     assert "confidence" in observation_data
     assert "reasoning" in observation_data
-    
+
     # Understanding phase
     understanding_data = await get_understanding_response(client, base_url, action_data, experience_data, intention_data, observation_data)
     assert "step" in understanding_data
     assert "content" in understanding_data
     assert "confidence" in understanding_data
     assert "reasoning" in understanding_data
-    
+
     # Yield phase
     yield_data = await get_yield_response(client, base_url, action_data, experience_data, intention_data, observation_data, understanding_data)
     assert "step" in yield_data

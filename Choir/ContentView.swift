@@ -9,8 +9,8 @@ import SwiftUI
 
 struct ContentView: View {
     @StateObject private var viewModel: ChorusViewModel
-    @State private var threads: [Thread] = []
-    @State private var selectedThread: Thread?
+    @State private var threads: [ChoirThread] = []
+    @State private var selectedChoirThread: ChoirThread?
 
     init() {
         // #if DEBUG
@@ -22,22 +22,22 @@ struct ContentView: View {
 
     var body: some View {
         NavigationSplitView {
-            // Sidebar - Thread List
-            List(threads, selection: $selectedThread) { thread in
+            // Sidebar - ChoirThread List
+            List(threads, selection: $selectedChoirThread) { thread in
                 NavigationLink(value: thread) {
-                    ThreadRow(thread: thread)
+                    ChoirThreadRow(thread: thread)
                 }
             }
-            .navigationTitle("Threads")
+            .navigationTitle("ChoirThreads")
             .toolbar {
-                Button(action: createNewThread) {
-                    Label("New Thread", systemImage: "plus")
+                Button(action: createNewChoirThread) {
+                    Label("New ChoirThread", systemImage: "plus")
                 }
             }
         } detail: {
-            // Detail - Thread Messages or Chorus Response
-            if let thread = selectedThread {
-                ThreadDetailView(thread: thread, viewModel: viewModel)
+            // Detail - ChoirThread Messages or Chorus Response
+            if let thread = selectedChoirThread {
+                ChoirThreadDetailView(thread: thread, viewModel: viewModel)
             } else {
                 Text("Select a thread")
                     .foregroundStyle(.secondary)
@@ -45,15 +45,15 @@ struct ContentView: View {
         }
     }
 
-    private func createNewThread() {
-        let thread = Thread() // Uses auto-generated title
+    private func createNewChoirThread() {
+        let thread = ChoirThread() // Uses auto-generated title
         threads.append(thread)
-        selectedThread = thread
+        selectedChoirThread = thread
     }
 }
 
-struct ThreadRow: View {
-    @ObservedObject var thread: Thread
+struct ChoirThreadRow: View {
+    @ObservedObject var thread: ChoirThread
 
     var body: some View {
         VStack(alignment: .leading) {

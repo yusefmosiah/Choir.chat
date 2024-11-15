@@ -1,7 +1,7 @@
 import SwiftUI
 
-struct ThreadDetailView: View {
-    let thread: Thread
+struct ChoirThreadDetailView: View {
+    let thread: ChoirThread
     @ObservedObject var viewModel: ChorusViewModel
     @State private var input = ""
     @State private var processingMessage: String = ""
@@ -39,10 +39,18 @@ struct ThreadDetailView: View {
                         processingMessage = "Processing: \(messageContent)"
 
                         // Add user message
-                        thread.addMessage(messageContent)
+                        let userMessage = Message(
+                            content: messageContent,
+                            isUser: true
+                        )
+                        thread.messages.append(userMessage)
 
                         // Add placeholder AI message immediately
-                        thread.addMessage("...", isUser: false)
+                        let placeholderMessage = Message(
+                            content: "...",
+                            isUser: false
+                        )
+                        thread.messages.append(placeholderMessage)
 
                         Task {
                             await sendMessage(messageContent)
@@ -61,16 +69,18 @@ struct ThreadDetailView: View {
     private func sendMessage(_ content: String) async {
         do {
             // Set the current thread in the coordinator before processing
-            (viewModel.coordinator as? RESTChorusCoordinator)?.currentThread = thread
+            (viewModel.coordinator as? RESTChorusCoordinator)?.currentChoirThread = thread
 
             try await viewModel.process(content)
 
             if let yieldResponse = viewModel.yieldResponse,
                var lastMessage = thread.messages.last {
+                // Update the placeholder message with the actual response
                 lastMessage.content = yieldResponse.content
                 lastMessage.chorusResult = MessageChorusResult(
                     phases: viewModel.responses
                 )
+                // Since messages is an array, we need to update the last element
                 thread.messages[thread.messages.count - 1] = lastMessage
             }
         } catch {
@@ -80,8 +90,8 @@ struct ThreadDetailView: View {
 }
 
 #Preview {
-    ThreadDetailView(
-        thread: Thread(title: "Preview Thread"),
+    ChoirThreadDetailView(
+        thread: ChoirThread(title: "Preview Thread"),
         viewModel: ChorusViewModel(coordinator: MockChorusCoordinator())
     )
 }

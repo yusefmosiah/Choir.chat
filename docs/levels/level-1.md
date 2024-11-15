@@ -492,9 +492,9 @@ tree.md
 │   │   └── RESTChorusCoordinator.swift
 │   ├── Info.plist
 │   ├── Models
+│   │   ├── ChoirThread.swift
 │   │   ├── ChorusModels.swift
-│   │   ├── Phase.swift
-│   │   └── Thread.swift
+│   │   └── Phase.swift
 │   ├── Networking
 │   │   └── ChorusAPIClient.swift
 │   ├── Preview Content
@@ -505,10 +505,10 @@ tree.md
 │   ├── ViewModels
 │   │   └── ChorusViewModel.swift
 │   └── Views
+│       ├── ChoirThreadDetailView.swift
 │       ├── ChorusCycleView.swift
 │       ├── ChorusResponse.swift
-│       ├── MessageRow.swift
-│       └── ThreadDetailView.swift
+│       └── MessageRow.swift
 ├── Choir.xcodeproj
 │   ├── project.pbxproj
 │   ├── project.xcworkspace
@@ -526,8 +526,8 @@ tree.md
 ├── ChoirTests
 │   ├── APIResponseTests.swift
 │   ├── ChoirTests.swift
-│   ├── ChorusAPIClientTests.swift
-│   └── ThreadTests.swift
+│   ├── ChoirThreadTests.swift
+│   └── ChorusAPIClientTests.swift
 ├── ChoirUITests
 │   ├── ChoirUITests.swift
 │   └── ChoirUITestsLaunchTests.swift

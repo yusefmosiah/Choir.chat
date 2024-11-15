@@ -17,7 +17,7 @@ final class ChorusAPIClientTests: XCTestCase {
         XCTAssertEqual(data.step, "action")
         XCTAssertFalse(data.content.isEmpty)
         XCTAssertGreaterThan(data.confidence, 0)
-        XCTAssertNotNil(data.metadata.reasoning)
+        XCTAssertNotNil(data.reasoning)
     }
 
     func testTimeout() async throws {

@@ -47,13 +47,28 @@ class ChorusService:
             logger.error(f"Error in process_action: {e}")
             raise
 
-    async def process_experience(self, content: str, action_response: str, priors: List[Dict[str, Any]]) -> ExperienceResponse:
-        """Process the experience phase - analyze provided priors."""
+    async def process_experience(
+        self,
+        content: str,
+        action_response: str,
+        priors: List[Dict[str, Any]],
+        context: Optional[List[MessageContext]] = None
+    ) -> ExperienceResponse:
+        """Process the experience phase with proper chat context."""
         try:
-            experience_prompt = f"""
-            This is the Experience phase of the Chorus Cycle. Review these {len(priors)} priors
-            and explain how they might relate to the current context.
+            # Start with system message
+            messages = [
+                {"role": "system", "content": "This is the Experience phase of the Chorus Cycle. Review these priors and explain how they might relate to the current context."}
+            ]
 
+            # Add context messages
+            if context:
+                for msg in context:
+                    if msg.content != "...":
+                        role = "user" if msg.is_user else "assistant"
+                        messages.append({"role": role, "content": msg.content})
+
+            experience_prompt = f"""
             Current input: {content}
             Previous action response: {action_response}
 
@@ -61,10 +76,7 @@ class ChorusService:
             {json.dumps(priors, indent=2)}
             """
 
-            messages = [
-                {"role": "system", "content": experience_prompt},
-                {"role": "user", "content": "Please analyze these priors."}
-            ]
+            messages.append({"role": "user", "content": experience_prompt})
 
             result = await structured_chat_completion(
                 messages=messages,
@@ -85,10 +97,23 @@ class ChorusService:
         content: str,
         action_response: str,
         experience_response: str,
-        priors: Dict[str, Dict[str, Any]]
+        priors: Dict[str, Dict[str, Any]],
+        context: Optional[List[MessageContext]] = None
     ) -> IntentionResponse:
-        """Process the intention phase - analyze intent and select relevant priors."""
+        """Process the intention phase with proper chat context."""
         try:
+            # Start with system message
+            messages = [
+                {"role": "system", "content": "This is the Intention phase of the Chorus Cycle. Analyze intent and select relevant priors."}
+            ]
+
+            # Add context messages
+            if context:
+                for msg in context:
+                    if msg.content != "...":
+                        role = "user" if msg.is_user else "assistant"
+                        messages.append({"role": role, "content": msg.content})
+
             # Format priors for better prompt readability
             formatted_priors = "\n".join([
                 f"ID: {prior_id}\nContent: {prior_data['content']}\nSimilarity: {prior_data['similarity']}"
@@ -96,23 +121,15 @@ class ChorusService:
             ])
 
             intention_prompt = f"""
-            This is the Intention phase of the Chorus Cycle. Analyze the user's intent and select
-            the most relevant priors that could help inform a response.
-
             Current input: {content}
             Action response: {action_response}
             Experience analysis: {experience_response}
 
             Available priors:
             {formatted_priors}
-
-            Select the most relevant priors by their IDs and explain your reasoning.
             """
 
-            messages = [
-                {"role": "system", "content": intention_prompt},
-                {"role": "user", "content": "Please analyze the intent and select relevant priors."}
-            ]
+            messages.append({"role": "user", "content": intention_prompt})
 
             result = await structured_chat_completion(
                 messages=messages,
@@ -122,16 +139,7 @@ class ChorusService:
             if result["status"] == "error":
                 raise Exception(result["content"])
 
-            # Ensure selected_priors is included in the response
-            response_data = result["content"]
-            if "selected_priors" not in response_data:
-                response_data["selected_priors"] = []
-
-            # Ensure step is set correctly
-            response_data["step"] = "intention"
-
-            # Validate and return the response
-            return IntentionResponse.model_validate(response_data)
+            return IntentionResponse.model_validate(result["content"])
 
         except Exception as e:
             logger.error(f"Error in process_intention: {e}")
@@ -143,10 +151,23 @@ class ChorusService:
         action_response: str,
         experience_response: str,
         intention_response: str,
-        selected_priors: Dict[str, Dict[str, Any]]
+        selected_priors: Dict[str, Dict[str, Any]],
+        context: Optional[List[MessageContext]] = None
     ) -> ObservationResponse:
-        """Process the observation phase - analyze patterns and insights."""
+        """Process the observation phase with proper chat context."""
         try:
+            # Start with system message
+            messages = [
+                {"role": "system", "content": "This is the Observation phase of the Chorus Cycle. Analyze patterns and insights."}
+            ]
+
+            # Add context messages
+            if context:
+                for msg in context:
+                    if msg.content != "...":
+                        role = "user" if msg.is_user else "assistant"
+                        messages.append({"role": role, "content": msg.content})
+
             # Format selected priors for better prompt readability
             formatted_priors = "\n".join([
                 f"ID: {prior_id}\nContent: {prior_data['content']}\nSimilarity: {prior_data['similarity']}"
@@ -154,9 +175,6 @@ class ChorusService:
             ])
 
             observation_prompt = f"""
-            This is the Observation phase of the Chorus Cycle. Analyze patterns and insights
-            from the selected priors and previous responses.
-
             Current input: {content}
             Action response: {action_response}
             Experience analysis: {experience_response}
@@ -168,10 +186,7 @@ class ChorusService:
             Please analyze patterns and provide insights based on these responses and priors.
             """
 
-            messages = [
-                {"role": "system", "content": observation_prompt},
-                {"role": "user", "content": "Please analyze patterns and provide insights."}
-            ]
+            messages.append({"role": "user", "content": observation_prompt})
 
             result = await structured_chat_completion(
                 messages=messages,
@@ -196,14 +211,24 @@ class ChorusService:
         intention_response: str,
         observation_response: str,
         patterns: List[Dict[str, str]],
-        selected_priors: List[str]
+        selected_priors: List[str],
+        context: Optional[List[MessageContext]] = None
     ) -> UnderstandingResponse:
-        """Process the understanding phase - decide whether to yield or loop back."""
+        """Process the understanding phase with proper chat context."""
         try:
-            understanding_prompt = f"""
-            This is the Understanding phase of the Chorus Cycle. Analyze whether we have sufficient
-            understanding to provide a final response, or if we need another iteration.
+            # Start with system message
+            messages = [
+                {"role": "system", "content": "This is the Understanding phase of the Chorus Cycle. Analyze whether we have sufficient understanding to provide a final response."}
+            ]
 
+            # Add context messages
+            if context:
+                for msg in context:
+                    if msg.content != "...":
+                        role = "user" if msg.is_user else "assistant"
+                        messages.append({"role": role, "content": msg.content})
+
+            understanding_prompt = f"""
             Current input: {content}
             Action response: {action_response}
             Experience analysis: {experience_response}
@@ -219,10 +244,7 @@ class ChorusService:
             3. Provide reasoning for the decision
             """
 
-            messages = [
-                {"role": "system", "content": understanding_prompt},
-                {"role": "user", "content": "Please analyze our understanding and decide whether to yield or iterate."}
-            ]
+            messages.append({"role": "user", "content": understanding_prompt})
 
             result = await structured_chat_completion(
                 messages=messages,
@@ -232,14 +254,7 @@ class ChorusService:
             if result["status"] == "error":
                 raise Exception(result["content"])
 
-            # Ensure required fields are present
-            response_data = result["content"]
-            if "should_yield" not in response_data:
-                response_data["should_yield"] = True
-            if not response_data["should_yield"] and "next_prompt" not in response_data:
-                response_data["next_prompt"] = "Please provide more information."
-
-            return UnderstandingResponse.model_validate(response_data)
+            return UnderstandingResponse.model_validate(result["content"])
 
         except Exception as e:
             logger.error(f"Error in process_understanding: {e}")
@@ -254,26 +269,31 @@ class ChorusService:
         observation_response: str,
         understanding_response: str,
         selected_priors: List[str],
-        priors: Dict[str, Dict[str, Any]]
+        priors: Dict[str, Dict[str, Any]],
+        context: Optional[List[MessageContext]] = None
     ) -> YieldResponse:
-        """Process the yield phase - synthesize final response with citations."""
+        """Process the yield phase with proper chat context."""
         try:
-            # Filter and format selected priors
-            selected_prior_data = {
-                prior_id: prior_data
-                for prior_id, prior_data in priors.items()
-                if prior_id in selected_priors
-            }
+            # Start with system message
+            messages = [
+                {"role": "system", "content": "This is the Yield phase of the Chorus Cycle. Synthesize a final response with citations."}
+            ]
 
+            # Add context messages
+            if context:
+                for msg in context:
+                    if msg.content != "...":
+                        role = "user" if msg.is_user else "assistant"
+                        messages.append({"role": role, "content": msg.content})
+
+            # Format selected priors
             formatted_priors = "\n".join([
                 f"ID: {prior_id}\nContent: {prior_data['content']}\nSimilarity: {prior_data['similarity']}"
-                for prior_id, prior_data in selected_prior_data.items()
+                for prior_id, prior_data in priors.items()
+                if prior_id in selected_priors
             ])
 
             yield_prompt = f"""
-            This is the Yield phase of the Chorus Cycle. Synthesize a final response that
-            incorporates insights from all previous phases and selected priors.
-
             Current input: {content}
             Action response: {action_response}
             Experience analysis: {experience_response}
@@ -287,32 +307,11 @@ class ChorusService:
             Please provide a comprehensive final response that:
             1. Synthesizes insights from all phases
             2. Incorporates relevant information from selected priors
-            3. Provides clear reasoning for conclusions
-            4. Maintains high confidence in the accuracy of the response
-
-            IMPORTANT: When citing priors, use markdown links in this format:
-            [cited text](choir://choir.chat/<prior_id>)
-
-            For example, if citing text from prior ID "dfd2bf18-9a54-07c0-540b-1f61c62588a7", write:
-            [This is the cited text](choir://choir.chat/dfd2bf18-9a54-07c0-540b-1f61c62588a7)
-
-            Make sure to:
-            - Include citations for key insights and quotes
-            - Use the exact prior IDs provided
-            - Keep cited text concise and relevant
-            - Integrate citations naturally into the response
-
-            Ensure the response includes:
-            - step: "yield"
-            - content: your synthesized response with citations
-            - confidence: a float between 0 and 1
-            - reasoning: explanation of your synthesis
+            3. Uses markdown citations in format: [cited text](choir://choir.chat/<prior_id>)
+            4. Provides clear reasoning for conclusions
             """
 
-            messages = [
-                {"role": "system", "content": yield_prompt},
-                {"role": "user", "content": "Please synthesize the final response with citations."}
-            ]
+            messages.append({"role": "user", "content": yield_prompt})
 
             result = await structured_chat_completion(
                 messages=messages,
@@ -322,12 +321,7 @@ class ChorusService:
             if result["status"] == "error":
                 raise Exception(result["content"])
 
-            # Ensure the step is correctly set
-            response_data = result["content"]
-            if "step" not in response_data or response_data["step"].lower() != "yield":
-                response_data["step"] = "yield"
-
-            return YieldResponse.model_validate(response_data)
+            return YieldResponse.model_validate(result["content"])
 
         except Exception as e:
             logger.error(f"Error in process_yield: {e}")

@@ -8,30 +8,19 @@
 import Foundation
 import SwiftUI
 
-class Thread: ObservableObject, Identifiable, Hashable {
+class ChoirThread: ObservableObject, Identifiable, Hashable {
     let id: UUID
     let title: String
     @Published var messages: [Message] = []
 
     init(id: UUID = UUID(), title: String? = nil) {
         self.id = id
-        self.title = title ?? "Thread \(DateFormatter.localizedString(from: Date(), dateStyle: .short, timeStyle: .short))"
+        self.title = title ?? "ChoirThread \(DateFormatter.localizedString(from: Date(), dateStyle: .short, timeStyle: .short))"
         print("Created new thread: \(self.title)")
     }
 
-    func addMessage(_ content: String, isUser: Bool = true, chorusResult: MessageChorusResult? = nil) {
-        let message = Message(
-            content: content,
-            isUser: isUser,
-            chorusResult: chorusResult
-        )
-        messages.append(message)
-        print("Added message to thread: \(content.prefix(50))...")
-        print("Thread now contains \(messages.count) messages")
-    }
-
     // Hashable conformance
-    static func == (lhs: Thread, rhs: Thread) -> Bool {
+    static func == (lhs: ChoirThread, rhs: ChoirThread) -> Bool {
         lhs.id == rhs.id
     }
 

@@ -10,9 +10,7 @@ final class APIResponseTests: XCTestCase {
                 "step": "action",
                 "content": "Paris",
                 "confidence": 0.95,
-                "metadata": {
-                    "reasoning": "Paris is the capital of France"
-                }
+                "reasoning": "Paris is the capital of France"
             }
         }
         """
@@ -23,8 +21,9 @@ final class APIResponseTests: XCTestCase {
         XCTAssertTrue(response.success)
         XCTAssertNotNil(response.data)
         let responseData = response.data!
+        XCTAssertEqual(responseData.step, "action")
         XCTAssertEqual(responseData.content, "Paris")
         XCTAssertEqual(responseData.confidence, 0.95)
-        XCTAssertEqual(responseData.metadata.reasoning, "Paris is the capital of France")
+        XCTAssertEqual(responseData.reasoning, "Paris is the capital of France")
     }
 }

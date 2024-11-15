@@ -91,6 +91,7 @@ class IntentionRequest(BaseModel):
     action_response: str
     experience_response: str
     priors: Dict[str, Dict[str, Any]]
+    context: Optional[List[MessageContext]] = None
 
 class IntentionResponse(ChorusResponse):
     selected_priors: List[str] = Field(
@@ -106,6 +107,7 @@ class ObservationRequest(BaseModel):
     intention_response: str
     selected_priors: List[str]
     priors: Dict[str, Dict[str, Any]]
+    context: Optional[List[MessageContext]] = None
 
 class ObservationResponse(ChorusResponse):
     pass
@@ -119,6 +121,7 @@ class UnderstandingRequest(BaseModel):
     observation_response: str
     patterns: List[Dict[str, str]]
     selected_priors: List[str]
+    context: Optional[List[MessageContext]] = None
 
 class UnderstandingResponse(ChorusResponse):
     should_yield: bool = Field(..., description="Whether to proceed to yield phase")
@@ -134,6 +137,7 @@ class YieldRequest(BaseModel):
     understanding_response: str
     selected_priors: List[str]
     priors: Dict[str, Dict[str, Any]]
+    context: Optional[List[MessageContext]] = None
 
 class YieldResponse(ChorusResponse):
     pass

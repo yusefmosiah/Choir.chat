@@ -43,25 +43,25 @@ class RESTChorusCoordinator: ChorusCoordinator, ObservableObject {
     }
 
     // Add context handling
-    var currentThread: Thread?
+    var currentChoirThread: ChoirThread?
 
     required init() {
         self.api = ChorusAPIClient()
     }
 
     func process(_ input: String) async throws {
-        try await process(input, thread: currentThread)
+        try await process(input, thread: currentChoirThread)
     }
 
-    private func process(_ input: String, thread: Thread?) async throws {
-        currentThread = thread
+    private func process(_ input: String, thread: ChoirThread?) async throws {
+        currentChoirThread = thread
 
         // Get context at the start
         let messages = thread?.messages ?? []
         let contexts = messages.map { MessageContext(from: $0) }
 
         // Add detailed logging
-        print("Thread ID: \(thread?.id.uuidString ?? "nil")")
+        print("ChoirThread ID: \(thread?.id.uuidString ?? "nil")")
         print("Message count: \(messages.count)")
         print("Messages:")
         for (i, msg) in messages.enumerated() {
