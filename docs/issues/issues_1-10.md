@@ -1,226 +1,195 @@
 # Implementation Checklist: Issues 1-10
 
-## Required Context Files
+## Phase 1: SwiftData Models & Relationships
+- [ ] 1.1 Core Models
+  ```swift
+  @Model
+  class User {
+      @Attribute(.unique) let id: UUID
+      let publicKey: String
+      let createdAt: Date
 
-### Background Documentation
-- `/docs/levels/level-1.md` - Prompts and Prime Directives
-- `/docs/levels/level0.md` - Implementation details and API Design
-- `/docs/levels/level1.md` - Basic Mechanics (Thread Messaging, Token Mechanics)
-- `/docs/levels/level2.md` - Core Mechanics (Harmonic Model)
-- `/docs/levels/level3.md` - Value Creation and Flow
-- `/docs/levels/level_organization.md` - Documentation Structure
+      // Relationships
+      @Relationship(deleteRule: .cascade) var ownedThreads: [ChoirThread]
+      @Relationship var coAuthoredThreads: [ChoirThread]
+      @Relationship(deleteRule: .cascade) var messages: [Message]
+  }
 
-### Client (Swift)
-- `/Choir/Models/Thread.swift` - Thread model and context management
-- `/Choir/Models/ChorusModels.swift` - API models
-- `/Choir/Networking/ChorusAPIClient.swift` - API client implementation
-- `/Choir/Coordinators/RESTChorusCoordinator.swift` - Message coordination
+  @Model
+  class ChoirThread {
+      @Attribute(.unique) let id: UUID
+      let title: String
+      let createdAt: Date
 
-### API (Python)
-- `/api/app/models/api.py` - API model definitions
-- `/api/app/database.py` - Database operations and thread storage
-- `/api/app/services/chorus.py` - Chorus service implementation
-- `/api/app/routers/chorus.py` - API endpoints
-- `/api/app/config.py` - Configuration and constants
-- `/api/app/utils.py` - Utility functions
-- `/api/app/routers/users.py` - User-related endpoints
-- `/api/app/routers/threads.py` - Thread-related endpoints
+      // Ownership & Permissions
+      @Relationship var owner: User
+      @Relationship var coAuthors: [User]
 
-### Tests
-- `/api/tests/test_chorus_endpoints.py` - Endpoint tests
-- `/api/tests/test_database.py` - Thread storage tests
+      // Content
+      @Relationship(deleteRule: .cascade) var messages: [Message]
 
+      // Thread state
+      var lastMessageAt: Date
+      var messageCount: Int
+  }
 
-## Expected Changes
+  @Model
+  class Message {
+      @Attribute(.unique) let id: UUID
+      let content: String
+      let timestamp: Date
+      let isUser: Bool
 
-### Phase 1: Message Flow & Context
-Input:
-- User messages via Swift client
-- Thread context maintained in memory
-- Existing user-thread association
+      // Relationships
+      @Relationship var author: User
+      @Relationship(inverse: \ChoirThread.messages) var thread: ChoirThread?
 
-Output:
-- Message history in Qdrant
-- Continuous conversation flow
-- Thread context preservation
+      // Citations
+      @Relationship var citesPriors: [Message]
+      @Relationship(inverse: \Message.citesPriors) var citedByMessages: [Message]
 
-Files Changed:
-1. `/api/app/services/chorus.py`: Handle thread context and messages
-2. `/api/app/routers/chorus.py`: Update endpoints for context
-3. `/Choir/Models/ChoirThread.swift`: Add context management
-4. `/Choir/Coordinator/RESTChorusCoordinator.swift`: Update for threads
+      var chorusResult: MessageChorusResult?
+  }
+  ```
 
-Tests:
-1. `/api/tests/test_chorus_endpoints.py`:
-   - Test message flow with context
-   - Test context preservation
-   - Test message retrieval
+- [ ] 1.2 Identity Management
+  - [ ] Implement KeychainManager
+  - [ ] Create IdentityManager
+  - [ ] Add key generation
+  - [ ] Test persistence
 
-2. `/Choir/Tests/ChoirThreadTests.swift`:
-   - Test thread context management
-   - Test message sequence tracking
-   - Test conversation flow
-   - Test coordinator integration
+## Phase 2: ViewModels & Views
+- [ ] 2.1 Thread List
+  ```swift
+  @MainActor
+  class ThreadListViewModel: ObservableObject {
+      @Published private(set) var threads: [ChoirThread] = []
+      private let modelContext: ModelContext
 
-### Phase 2: User Authentication
-Input:
-- Existing user endpoints
-- Public key credentials
-- User-thread associations
+      func loadThreads(for user: User) async throws {
+          let descriptor = FetchDescriptor<ChoirThread>(
+              predicate: #Predicate<ChoirThread> { thread in
+                  thread.owner.id == user.id ||
+                  thread.coAuthors.contains { $0.id == user.id }
+              },
+              sortBy: [SortDescriptor(\.lastMessageAt, order: .reverse)]
+          )
+          threads = try modelContext.fetch(descriptor)
+      }
+  }
+  ```
 
-Output:
-- Secure user sessions
-- Auth token validation
-- Protected thread access
+- [ ] 2.2 Thread Detail
+  ```swift
+  @MainActor
+  class ThreadDetailViewModel: ObservableObject {
+      @Published private(set) var messages: [Message] = []
+      @Published var isProcessing = false
 
-Files Changed:
-1. `/api/app/routers/users.py`: Add auth validation
-2. `/Choir/Models/ChorusModels.swift`: Add auth models
-3. `/Choir/API/ChorusAPIClient.swift`: Add auth handling
+      private let thread: ChoirThread
+      private let modelContext: ModelContext
+      private let coordinator: ChorusCoordinator
 
-Tests:
-1. `/api/tests/test_auth_endpoints.py`:
-   - Test auth validation
-   - Test invalid auth attempts
-   - Test token validation
+      func sendMessage(_ content: String, from user: User) async throws {
+          // Create user message
+          let message = Message(content: content, author: user)
+          message.thread = thread
+          modelContext.insert(message)
 
-2. `/Choir/Tests/AuthTests.swift`:
-   - Test auth model
-   - Test API client auth
-   - Test secure storage
-   - Test auth persistence
+          // Process through chorus cycle
+          try await coordinator.process(content)
 
-### Phase 3: Error Handling
-Input:
-- Various error conditions
-- Invalid requests
-- Network failures
+          // Update with result
+          if let response = coordinator.yieldResponse {
+              message.chorusResult = MessageChorusResult(
+                  phases: coordinator.responses
+              )
+          }
+      }
+  }
+  ```
 
-Output:
-- Graceful error handling
-- User-friendly error messages
-- Proper error recovery
+## Phase 3: Coordinator Integration
+- [ ] 3.1 Update RESTChorusCoordinator
+  - [ ] Add SwiftData context
+  - [ ] Handle message persistence
+  - [ ] Maintain message IDs
+  - [ ] Test flow
 
-Files Changed:
-1. `/api/app/models/errors.py`: Define error types
-2. `/api/app/routers/*.py`: Add error handling
-3. `/Choir/Models/Errors.swift`: Add error models
-4. `/Choir/Coordinator/RESTChorusCoordinator.swift`: Add error handling
+- [ ] 3.2 API Client Updates
+  - [ ] Use client-generated IDs
+  - [ ] Add user context
+  - [ ] Update endpoints
+  - [ ] Test integration
 
-Tests:
-1. `/api/tests/test_error_handling.py`:
-   - Test each error type
-   - Test error responses
-   - Test recovery flows
+## Phase 4: Testing Infrastructure
+- [ ] 4.1 Model Tests
+  ```swift
+  class ModelTests: XCTestCase {
+      var container: ModelContainer!
 
-2. `/Choir/Tests/ErrorTests.swift`:
-   - Test error parsing
-   - Test error presentation
-   - Test recovery strategies
-   - Test offline handling
+      func testMessageCitations() async throws {
+          let user = User(id: UUID(), publicKey: "test")
+          let thread = ChoirThread(title: "Test", owner: user)
+          let message1 = Message(content: "First", author: user)
+          let message2 = Message(content: "Cites first", author: user)
 
-### Phase 4: Deployment
-Input:
-- Built application
-- Configuration files
-- Environment variables
+          message2.citesPriors = [message1]
+          XCTAssertEqual(message1.citedByMessages.count, 1)
+      }
+  }
+  ```
 
-Output:
-- Deployed API on Render
-- App on TestFlight
-- Monitoring setup
+- [ ] 4.2 ViewModel Tests
+  ```swift
+  class ViewModelTests: XCTestCase {
+      func testThreadLoading() async throws {
+          let vm = ThreadListViewModel(modelContext: context)
+          try await vm.loadThreads(for: testUser)
+          XCTAssertFalse(vm.threads.isEmpty)
+      }
+  }
+  ```
 
-Files Changed:
-1. `/api/render.yaml`: Deployment config
-2. `/api/app/config.py`: Environment setup
-3. `/Choir/Info.plist`: App configuration
-4. `/Choir/Configuration/`: Environment handling
+## Phase 5: Error Handling
+- [ ] 5.1 Define Errors
+  ```swift
+  enum PersistenceError: Error {
+      case modelNotFound
+      case invalidRelationship
+      case saveFailed
+  }
+  ```
 
-Tests:
-1. `/api/tests/test_deployment.py`:
-   - Test configuration loading
-   - Test environment handling
-   - Test health endpoints
+- [ ] 5.2 Recovery
+  - [ ] Handle model errors
+  - [ ] Add retry logic
+  - [ ] Test scenarios
 
-2. `/Choir/Tests/ConfigurationTests.swift`:
-   - Test environment switching
-   - Test API configuration
-   - Test app settings
-
-## Phase 1: Message Flow & Context (with existing user-thread association)
-- [ ] 1.1 Chorus Cycle Service
-  - [ ] Update chorus.py to use thread context
-  - [ ] Store messages with thread ID
-  - [ ] Test message persistence
-
-- [ ] 1.2 Thread Context (Swift)
-  - [ ] Update Thread.swift to maintain conversation flow
-  - [ ] Track message sequence in memory
-  - [ ] Pass thread context to chorus cycle
-
-- [ ] 1.3 Coordinator Updates
-  - [ ] Update coordinator to use thread ID
-  - [ ] Handle message sequence
-  - [ ] Test full conversation flow
-
-## Phase 2: User Authentication (replace dummy user)
-- [ ] 2.1 Auth Endpoints
-  - [ ] Add POST /users/auth endpoint
-  - [ ] Add user verification
-  - [ ] Test auth flow
-
-- [ ] 2.2 Swift Auth
-  - [ ] Replace dummy user with auth system
-  - [ ] Update API client for auth
-  - [ ] Test auth in app
-
-## Phase 3: Error Handling
-- [ ] 3.1 Python Errors
-  - [ ] Add basic error types
-  - [ ] Add error responses to endpoints
-  - [ ] Test error cases
-
-- [ ] 3.2 Swift Errors
-  - [ ] Add error types to ChorusModels
-  - [ ] Add error handling to coordinator
-  - [ ] Test error handling
-
-## Phase 4: Deployment
-- [ ] 4.1 Render Setup
-  - [ ] Create render.yaml
-  - [ ] Configure environment variables
-  - [ ] Test local Docker build
-
-- [ ] 4.2 API Deployment
-  - [ ] Deploy to Render
-  - [ ] Test deployed endpoints
-  - [ ] Monitor for errors
-
-- [ ] 4.3 TestFlight
-  - [ ] Configure App Store Connect
-  - [ ] Prepare app submission
-  - [ ] Submit build
+## Success Criteria
+- [ ] Models properly relate data
+- [ ] ViewModels manage state
+- [ ] Views stay simple
+- [ ] IDs remain consistent
+- [ ] Tests verify behavior
 
 ## Testing Checkpoints
-After each step:
-1. Run relevant unit tests
-2. Test API with Postman/curl
-3. Test in iOS app
-4. Verify error handling
+After each phase:
+1. Run model tests
+2. Test relationships
+3. Verify ViewModels
+4. Check UI flow
 
-## Success Verification
-- [ ] Messages persist in Qdrant
-- [ ] Thread context maintained in Swift
-- [ ] Context flows through chorus cycles
-- [ ] Users can authenticate
-- [ ] Errors are handled gracefully
-- [ ] API is running on Render
-- [ ] App is on TestFlight
+## Notes
+- Keep Views simple, logic in ViewModels
+- Use client-generated UUIDs
+- Maintain clean relationships
+- Plan for citations
+- Test thoroughly
 
 ## Postponed
-- Performance monitoring
-- Advanced state recovery
-- Sophisticated error strategies
-- Rewards system
-- Thread contracts
-- Multimodality support
+- iCloud sync
+- Advanced security
+- Blockchain integration
+- Complex queries
+- Event Driven Architecture
