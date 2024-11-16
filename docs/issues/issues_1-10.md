@@ -47,7 +47,7 @@ Output:
 Files Changed:
 1. `/api/app/services/chorus.py`: Handle thread context and messages
 2. `/api/app/routers/chorus.py`: Update endpoints for context
-3. `/Choir/Models/Thread.swift`: Add context management
+3. `/Choir/Models/ChoirThread.swift`: Add context management
 4. `/Choir/Coordinator/RESTChorusCoordinator.swift`: Update for threads
 
 Tests:
@@ -56,7 +56,7 @@ Tests:
    - Test context preservation
    - Test message retrieval
 
-2. `/Choir/Tests/ThreadTests.swift`:
+2. `/Choir/Tests/ChoirThreadTests.swift`:
    - Test thread context management
    - Test message sequence tracking
    - Test conversation flow
