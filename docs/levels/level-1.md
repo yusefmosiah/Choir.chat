@@ -593,24 +593,17 @@ tree.md
     ├── goal_wed_nov_13_2024.md
     ├── harmonic_intelligence.md
     ├── issues
-    │   ├── issue_-1.md
     │   ├── issue_0.md
     │   ├── issue_1.md
     │   ├── issue_10.md
     │   ├── issue_11.md
     │   ├── issue_12.md
     │   ├── issue_13.md
-    │   ├── issue_14.md
-    │   ├── issue_15.md
     │   ├── issue_2.md
-    │   ├── issue_3.md
-    │   ├── issue_4.md
     │   ├── issue_5.md
-    │   ├── issue_6.md
     │   ├── issue_7.md
     │   ├── issue_8.md
-    │   ├── issue_9.md
-    │   └── issues_1-10.md
+    │   └── issue_9.md
     ├── levels
     │   ├── level-1.md
     │   ├── level0.md
@@ -622,7 +615,6 @@ tree.md
     │   └── level_organization.md
     ├── plan_carousel_ui_pattern.md
     ├── plan_client_architecture.md
-    ├── plan_client_side_processing.md
     ├── plan_id_persistence.md
     ├── plan_post-training.md
     ├── plan_proxy_authentication.md
@@ -651,7 +643,7 @@ tree.md
     ├── theory_theory.md
     └── tree.md
 
-36 directories, 139 files
+36 directories, 131 files
 
 === File: docs/CHANGELOG.md ===
 

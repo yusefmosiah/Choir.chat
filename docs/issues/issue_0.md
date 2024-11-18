@@ -1,80 +1,96 @@
 # Core Client-Side Implementation
 
 ## Overview
+Implement the foundational client-side system with a focus on getting a working version to TestFlight. Initially use Anthropic and OpenAI APIs through a secure proxy, while preparing for future local AI model integration.
 
-Implement the foundational client-side system that enables AI processing via Anthropic and OpenAI APIs, SUI blockchain integration, and the carousel UI for the Chorus Cycle. Focus on creating a functional Minimum Viable Product (MVP) that demonstrates key features while preparing for future integration with Liquid AI's Liquid Foundation Models (LFMs).
+## Current Issues
+1. Issue 1: Local Data Management and Persistence
+2. Issue 2: SUI Blockchain Smart Contracts (basic wallet integration)
+3. Issue 5: Enhanced UI/UX with Carousel
+4. Issue 7: Testing and Quality Assurance
+5. Issue 8: Deploy to TestFlight and Render
+6. Issue 9: Message Rewards Implementation (postponed)
+7. Issue 10: Thread Sheet Implementation
+8. Issue 11: Thread Contract Implementation (postponed)
+9. Issue 12: Citation Visualization and Handling
+10. Issue 13: LanceDB Migration & Multimodal Support
 
-## Sub-Issues
+## Immediate Tasks
 
-1. [Local Data Management and Persistence](issue_1.md)
-2. [SUI Blockchain Smart Contracts](issue_2.md)
-3. [Tokenomics and CHOIR Token Integration](issue_3.md)
-4. [Proxy Security and Backend Services](issue_4.md)
-5. [Enhanced UI/UX with Carousel and Interaction Patterns](issue_5.md)
-6. [Client-Side Intelligence and Personalization](issue_6.md)
-7. [Testing and Quality Assurance](issue_7.md)
-8. [Documentation and Developer Onboarding](issue_8.md)
+### 1. Core Data Layer
+```swift
+// SwiftData models for local persistence
+@Model
+class User {
+    @Attribute(.unique) let id: UUID
+    let publicKey: String
+    let createdAt: Date
 
-## Tasks
+    @Relationship(deleteRule: .cascade) var ownedThreads: [Thread]
+    @Relationship var coAuthoredThreads: [Thread]
+}
 
-### 1. AI Processing via APIs
+@Model
+class Thread {
+    @Attribute(.unique) let id: UUID
+    let title: String
+    let createdAt: Date
 
-- **Integrate Anthropic and OpenAI APIs**
+    @Relationship var owner: User
+    @Relationship var coAuthors: [User]
+    @Relationship(deleteRule: .cascade) var messages: [Message]
+}
+```
 
-  - Set up API clients for Anthropic and OpenAI.
-  - Implement functions to send prompts and receive responses.
-  - Handle API rate limits and errors gracefully.
+### 2. Basic SUI Integration
+```swift
+// Wallet management
+class WalletManager {
+    private let keychain = KeychainService()
 
-- **Prepare for Future LFM Integration**
-  - Design the architecture to allow easy switching from API-based models to local LFMs.
-  - Abstract AI processing logic to accommodate different model sources.
+    func createOrLoadWallet() async throws -> Wallet {
+        if let existingKey = try? keychain.load("sui_private_key") {
+            return try Wallet(privateKey: existingKey)
+        }
+        let wallet = try await SUIKit.createWallet()
+        try keychain.save(wallet.privateKey, forKey: "sui_private_key")
+        return wallet
+    }
+}
+```
 
-### 2. SUI Wallet Integration
-
-- **Integrate SUIKit for Blockchain Interactions**
-  - Implement wallet creation, import, and transaction signing within the app.
-  - Facilitate user authentication via SUI wallet.
-
-### 3. Carousel UI Implementation
-
-- **Develop Carousel UI Pattern**
-  - Create a carousel interface for navigating through Chorus Cycle phases.
-  - Ensure adjacent phase previews are visible for a typographic, newspaper-like design.
-
-### 4. Proxy Authentication Setup
-
-- **Set Up Secure API Proxy**
-  - Deploy a server-side proxy to handle AI API requests securely.
-  - Implement SUI-signed token authentication for proxy access.
-
-### 5. Initial Testing
-
-- **Conduct Initial Integration Tests**
-  - Verify AI API integrations.
-  - Test SUI wallet functionalities.
-  - Ensure carousel UI navigates smoothly between phases.
+### 3. Proxy Server Setup
+```python
+# FastAPI proxy for AI services
+@app.post("/api/proxy/ai")
+async def proxy_ai_request(
+    request: AIRequest,
+    auth: Auth = Depends(verify_sui_signature)
+):
+    # Route to appropriate AI service
+    if request.model.startswith("claude"):
+        return await route_to_anthropic(request)
+    return await route_to_openai(request)
+```
 
 ## Success Criteria
+- App runs smoothly on TestFlight
+- Users can create and join threads
+- Messages process through Chorus Cycle
+- Basic SUI wallet integration works
+- Citations work properly
 
-- **Functional MVP**
+## Postponed Features
+- Token mechanics and rewards
+- Thread contracts
+- Advanced blockchain features
+- Multimodal support
+- LanceDB migration
 
-  - Users can authenticate with their SUI wallet.
-  - Users can input messages and navigate through the Chorus Cycle using the carousel UI.
-  - AI responses are fetched and displayed correctly via Anthropic and OpenAI APIs.
-
-- **Secure Operations**
-
-  - Proxy server securely handles API requests and authentication.
-  - API keys remain protected on the server side.
-
-- **Scalable Architecture**
-  - The system is designed to switch to Liquid AI's LFMs with minimal changes.
-  - Codebase follows best practices for scalability and maintainability.
-
-## Future Considerations
-
-- **Liquid AI LFMs Integration**
-  - Once access is granted, integrate LFMs for on-device AI processing.
-  - Optimize the architecture to transition from API-based to local model-based processing seamlessly.
+## Notes
+- Focus on core functionality first
+- Keep UI simple but polished
+- Test thoroughly before submission
+- Document setup process
 
 ---

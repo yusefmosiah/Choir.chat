@@ -1,96 +1,68 @@
-# Thread Contract Implementation
+# LanceDB Migration & Multimodal Support
 
 ## Parent Issue
-[Core Message System Implementation](issue_0.md)
-
-## Related Issues
-- Depends on: [Thread State Management](issue_5.md)
-- Related to: [Message Rewards Implementation](issue_12.md)
+[Core Client-Side Implementation](issue_0.md)
 
 ## Description
-Implement the thread contract that manages thread state evolution, stake requirements, and co-author relationships using the quantum harmonic oscillator model.
-
-## Current State
-- Have thread state in Qdrant
-- Need stake mechanics
-- Need temperature evolution
-- Need co-author management
+Migrate from Qdrant to LanceDB for vector storage and add support for multimodal embeddings (text, images, audio), preparing for future content types.
 
 ## Tasks
-- [ ] Implement thread state
-  ```swift
-  struct ThreadState {
-      let id: UUID
-      let coAuthors: Set<PublicKey>
-      let tokenBalance: TokenAmount
-      let temperature: Float
-      let frequency: Float
-      let messageHashes: [Hash]
-      let createdAt: Date
 
-      // E(n) = ℏω(n + 1/2)
-      var stakeRequirement: TokenAmount {
-          let n = coAuthors.count
-          let ω = frequency
-          return TokenAmount(ℏ * ω * (Float(n) + 0.5))
-      }
-  }
-  ```
+### 1. LanceDB Setup
+```python
+# Database setup
+import lancedb
 
-- [ ] Add temperature evolution
-  ```swift
-  extension ThreadState {
-      // T = T0/√(1 + t/τ)
-      mutating func evolveTemperature(timeDelta: TimeInterval) {
-          let coolingFactor = sqrt(1000 + timeDelta / 86400)
-          temperature = (temperature * 1000) / coolingFactor
-      }
+db = lancedb.connect("choir.lance")
+messages = db.create_table(
+    "messages",
+    schema={
+        "id": "string",
+        "content": "string",
+        "thread_id": "string",
+        "created_at": "string",
+        "embedding": "vector[1536]",  # OpenAI embedding size
+        "modality": "string",         # text/image/audio
+        "media_url": "string",        # for non-text content
+        "chorus_result": "json"
+    }
+)
+```
 
-      // Update after message approval/denial
-      mutating func processApproval(_ approved: Bool) {
-          if approved {
-              // Distribute energy to co-authors
-              temperature = tokenBalance / Float(coAuthors.count)
-          } else {
-              // Increase thread energy
-              temperature += stakeRequirement.amount
-          }
-      }
-  }
-  ```
+### 2. Migration Pipeline
+```python
+class MigrationPipeline:
+    def __init__(self):
+        self.qdrant = QdrantClient(...)
+        self.lancedb = lancedb.connect("choir.lance")
+        self.rate_limiter = asyncio.Semaphore(50)
 
-- [ ] Implement co-author management
-  ```swift
-  extension ThreadState {
-      mutating func addCoAuthor(_ publicKey: PublicKey) throws {
-          guard tokenBalance >= stakeRequirement else {
-              throw ThreadError.insufficientStake
-          }
-          coAuthors.insert(publicKey)
-      }
+    async def migrate_points(self):
+        async for batch in self.scroll_points():
+            await self.process_batch(batch)
 
-      func validateMessage(_ message: Message) -> Bool {
-          coAuthors.contains(message.authorId)
-      }
-  }
-  ```
+    async def process_batch(self, points):
+        results = []
+        for point in points:
+            try:
+                # Convert point format
+                new_point = self.convert_point(point)
+                results.append(new_point)
+            except Exception as e:
+                self.failed_points.append((point.id, str(e)))
 
-## Testing Requirements
-- Test state evolution
-  - Temperature cooling
-  - Stake requirements
-  - Co-author management
-- Test message validation
-  - Author verification
-  - Stake verification
-  - Temperature effects
-- Test error handling
-  - Invalid stakes
-  - Unauthorized authors
-  - State transitions
+        # Batch insert to LanceDB
+        if results:
+            await self.lancedb.messages.add(results)
+```
+
+### 3. Multimodal Support
+- Add image embedding generation
+- Support audio content processing
+- Implement cross-modal search
 
 ## Success Criteria
-- Clean state management
-- Proper stake mechanics
-- Reliable temperature evolution
-- Type-safe operations
+- Successful data migration
+- Support for multiple content types
+- Maintained search performance
+- Clean error handling

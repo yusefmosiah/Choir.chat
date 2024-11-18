@@ -8,72 +8,195 @@
 
 - Depends on: None
 - Blocks: [SUI Blockchain Smart Contracts](issue_2.md)
-- Related to: [API Client Message Handling](issue_2.md)
+- Related to: [Deploy to TestFlight and Render](issue_8.md)
 
 ## Description
 
-Implement local data storage and synchronization using SwiftData, managing users, threads, and messages effectively. This ensures data persistence and offline access while preparing for future synchronization with the SUI blockchain.
+Implement local data storage using SwiftData to manage users, threads, and messages effectively. Focus on establishing a solid foundation for the client-side architecture while preparing for future blockchain integration.
 
 ## Tasks
 
-### 1. Define SwiftData Models
+### 1. Core Data Models
 
-- **Create Models for `User`, `Thread`, and `Message`**
+```swift
+@Model
+class User {
+    @Attribute(.unique) let id: UUID
+    let publicKey: String
+    let createdAt: Date
 
-  - Ensure appropriate relationships and data integrity.
-  - Support offline access and local data persistence.
+    // Relationships
+    @Relationship(deleteRule: .cascade) var ownedThreads: [Thread]
+    @Relationship var coAuthoredThreads: [Thread]
+    @Relationship(deleteRule: .cascade) var messages: [Message]
 
-- **Implement Data Relationships**
-  - Define one-to-many and many-to-many relationships as needed.
-  - Ensure models align with blockchain ownership data.
+    // Future blockchain fields
+    var onChainAddress: String?
+    var lastSyncTimestamp: Date?
+}
 
-### 2. Implement Data Operations
+@Model
+class Thread {
+    @Attribute(.unique) let id: UUID
+    let title: String
+    let createdAt: Date
 
-- **CRUD Operations for Threads and Messages**
+    // Ownership
+    @Relationship var owner: User
+    @Relationship var coAuthors: [User]
 
-  - Implement create, read, update, and delete functionalities.
-  - Ensure smooth user interactions and data consistency.
+    // Content
+    @Relationship(deleteRule: .cascade) var messages: [Message]
 
-- **Handle Data Consistency and Conflict Resolution**
-  - Develop mechanisms to resolve data conflicts between local and blockchain data.
-  - Implement versioning or timestamps to manage updates.
+    // Thread state
+    var lastMessageAt: Date
+    var messageCount: Int
 
-### 3. Prepare for Future Synchronization
+    // Future blockchain fields
+    var onChainId: String?
+    var lastSyncTimestamp: Date?
+}
 
-- **Design Synchronization Logic**
+@Model
+class Message {
+    @Attribute(.unique) let id: UUID
+    let content: String
+    let timestamp: Date
+    let isUser: Bool
 
-  - Outline how local data will sync with on-chain data.
-  - Plan for data reconciliation and conflict handling.
+    // Relationships
+    @Relationship var author: User
+    @Relationship(inverse: \Thread.messages) var thread: Thread?
 
-- **Implement Initial Sync Mechanism**
-  - Develop basic synchronization between local data and blockchain state.
-  - Test synchronization with sample data.
+    // Citations
+    @Relationship var citesPriors: [Message]
+    @Relationship(inverse: \Message.citesPriors) var citedByMessages: [Message]
+
+    // Chorus result
+    var chorusResult: ChorusResult?
+
+    // Future blockchain fields
+    var onChainHash: String?
+    var lastSyncTimestamp: Date?
+}
+```
+
+### 2. Data Operations
+
+```swift
+actor DataManager {
+    private let modelContainer: ModelContainer
+    private let modelContext: ModelContext
+
+    // CRUD operations
+    func createThread(title: String, owner: User) async throws -> Thread {
+        let thread = Thread(
+            id: UUID(),
+            title: title,
+            createdAt: Date(),
+            owner: owner,
+            lastMessageAt: Date(),
+            messageCount: 0
+        )
+        modelContext.insert(thread)
+        try await modelContext.save()
+        return thread
+    }
+
+    func addMessage(_ content: String, to thread: Thread, by user: User) async throws -> Message {
+        let message = Message(
+            id: UUID(),
+            content: content,
+            timestamp: Date(),
+            isUser: true,
+            author: user,
+            thread: thread
+        )
+        modelContext.insert(message)
+
+        // Update thread
+        thread.lastMessageAt = message.timestamp
+        thread.messageCount += 1
+
+        try await modelContext.save()
+        return message
+    }
+}
+```
+
+### 3. Query Support
+
+```swift
+extension DataManager {
+    func fetchThreads(for user: User) async throws -> [Thread] {
+        let descriptor = FetchDescriptor<Thread>(
+            predicate: #Predicate<Thread> { thread in
+                thread.owner.id == user.id ||
+                thread.coAuthors.contains { $0.id == user.id }
+            },
+            sortBy: [SortDescriptor(\.lastMessageAt, order: .reverse)]
+        )
+        return try modelContext.fetch(descriptor)
+    }
+
+    func searchMessages(containing text: String) async throws -> [Message] {
+        let descriptor = FetchDescriptor<Message>(
+            predicate: #Predicate<Message> { message in
+                message.content.localizedStandardContains(text)
+            }
+        )
+        return try modelContext.fetch(descriptor)
+    }
+}
+```
 
 ## Success Criteria
 
-- **Reliable Local Storage**
+- **Reliable local data persistence**
 
   - Users can create and manage threads and messages locally.
   - Data persists across app launches and device restarts.
 
-- **Efficient Data Handling**
+- **Efficient CRUD operations**
 
   - CRUD operations perform smoothly without lag.
   - Data relationships are maintained accurately.
 
-- **Preparation for Blockchain Synchronization**
+- **Clean relationship management**
+
+  - One-to-many and many-to-many relationships are defined correctly.
+  - Models align with blockchain ownership data.
+
+- **Ready for blockchain integration**
+
   - Architecture supports future data synchronization.
   - Initial sync tests are successful, laying the groundwork for full integration.
 
+- **Comprehensive test coverage**
+
+  - All CRUD operations are tested thoroughly.
+  - Relationship management is thoroughly tested.
+
 ## Future Considerations
 
-- **SUI Blockchain Synchronization**
+- **Blockchain state synchronization**
 
   - Implement full data synchronization with the SUI blockchain.
   - Ensure real-time updates and consistency between local and on-chain data.
 
-- **Advanced Conflict Resolution**
-  - Develop sophisticated methods to handle complex data conflicts.
+- **Multi-device data sync**
+
+  - Develop mechanisms to synchronize data across multiple devices.
+  - Ensure data consistency and conflict resolution across devices.
+
+- **Advanced search capabilities**
+
+  - Develop sophisticated search capabilities to search for messages and threads.
   - Implement user prompts or automated resolutions where appropriate.
+
+- **Performance optimization for large datasets**
+
+  - Optimize data handling and query performance for large datasets.
+  - Ensure smooth user interactions and data consistency.
 
 ---

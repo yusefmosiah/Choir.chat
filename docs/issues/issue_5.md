@@ -1,51 +1,82 @@
-# Thread State Management
+# Enhanced UI/UX with Carousel and Interaction Patterns
 
 ## Parent Issue
-[Core Message System Implementation](issue_0.md)
+
+[Core Client-Side Implementation](issue_0.md)
 
 ## Related Issues
-- Depends on: [Message Type Reconciliation](issue_1.md), [User Identity Implementation](issue_4.md)
-- Blocks: None
-- Related to: [Coordinator Message Flow](issue_3.md)
+
+- Depends on: [Proxy Security and Backend Services](issue_4.md)
+- Blocks: [Client-Side Intelligence](issue_6.md)
+- Related to: [Testing and Quality Assurance](issue_7.md)
 
 ## Description
-Implement thread state management that maintains local state while synchronizing with Qdrant storage, handling message history and thread metadata.
+
+Implement the carousel-based UI pattern for navigating through Chorus Cycle phases, with a focus on typographic design and fluid interactions. The interface should show previews of adjacent phases while maintaining clarity and usability.
 
 ## Tasks
-- [ ] Implement Thread model with message history
-- [ ] Add thread state synchronization
-- [ ] Handle message addition/removal
-- [ ] Implement thread metadata updates
 
-## Code Examples
-```swift
-class Thread: ObservableObject, Identifiable {
-    let id: UUID
-    let authorId: String  // public key
-    @Published private(set) var messages: [ThreadMessage]
+### 1. Carousel Implementation
 
-    func addMessage(_ content: String) async throws {
-        let message = ThreadMessage(content: content)
-        messages.append(message)
+- **Basic TabView Setup**
 
-        // Sync with Qdrant
-        try await vectorStorage.storeMessage(message)
-    }
+  ```swift
+  struct ChorusCarouselView: View {
+      @State private var currentPhase: Phase = .action
+      @ObservedObject var viewModel: ChorusViewModel
 
-    func loadHistory() async throws {
-        messages = try await api.getThreadMessages(id.uuidString)
-            .map(ThreadMessage.init)
-    }
-}
-```
+      var body: some View {
+          TabView(selection: $currentPhase) {
+              ForEach(Phase.allCases) { phase in
+                  PhaseView(phase: phase, viewModel: viewModel)
+                      .tag(phase)
+              }
+          }
+          .tabViewStyle(.page)
+      }
+  }
+  ```
 
-## Testing Requirements
-- Test thread creation/loading
-- Verify message synchronization
-- Test state management
-- Validate error handling
+### 2. Phase Views
+
+- **Individual Phase Display**
+
+  ```swift
+  struct PhaseView: View {
+      let phase: Phase
+      @ObservedObject var viewModel: ChorusViewModel
+
+      var body: some View {
+          VStack {
+              // Phase content with typographic styling
+              // Adjacent phase previews
+              // Loading states
+          }
+      }
+  }
+  ```
+
+### 3. Animations and Transitions
+
+- Implement smooth phase transitions
+- Add loading state animations
+- Handle gesture-based navigation
+
+### 4. Accessibility
+
+- Support VoiceOver
+- Implement Dynamic Type
+- Add accessibility labels and hints
 
 ## Success Criteria
-- Reliable state management
-- Clean synchronization
-- Proper error handling
+
+- Smooth navigation between phases
+- Clear visibility of current and adjacent phases
+- Responsive animations and transitions
+- Full accessibility support
+
+## Future Considerations
+
+- Advanced gesture controls
+- Custom transition animations
+- Enhanced typographic treatments

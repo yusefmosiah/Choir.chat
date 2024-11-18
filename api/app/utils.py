@@ -106,8 +106,11 @@ async def structured_chat_completion(
         logger.info(f"Using schema for {phase} phase: {json.dumps(schema, indent=2)}")
 
         # Make the API call with function calling format
+        # this is an anthropic flavored way to do json structured output with function calling
+        # it's the first way i could get working
+        # in future, we should support other ai model providers
         response = completion(
-            model=config.CLAUDE_3_5_SONNET_NEW,
+            model=config.CLAUDE_3_5_HAIKU,
             messages=messages,
             tools=[{
                 "type": "function",

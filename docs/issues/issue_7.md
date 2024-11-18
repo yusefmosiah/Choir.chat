@@ -1,46 +1,101 @@
-# Error Handling Strategy
+# Testing and Quality Assurance
 
 ## Parent Issue
-[Core Message System Implementation](issue_0.md)
+
+[Core Client-Side Implementation](issue_0.md)
 
 ## Related Issues
-- Depends on: All implementation issues
+
+- Depends on: [Client-Side Intelligence](issue_6.md)
 - Blocks: None
-- Related to: [Integration Testing Suite](issue_6.md)
+- Related to: [Documentation and Developer Onboarding](issue_8.md)
 
 ## Description
-Implement comprehensive error handling strategy across all layers (API, Coordinator, User, Thread) with proper error propagation and user feedback.
+
+Establish comprehensive testing protocols for the client-side architecture, focusing on SUI blockchain integration, AI API interactions through the proxy, and the carousel UI. Ensure reliability and performance across all components.
 
 ## Tasks
-- [ ] Define error types hierarchy
-- [ ] Implement error propagation
-- [ ] Add error recovery strategies
-- [ ] Create user-facing error messages
 
-## Code Examples
-```swift
-enum ChoirError: Error {
-    // API Errors
-    case networkError(underlying: Error)
-    case decodingError(context: String)
+### 1. Unit Testing
 
-    // Domain Errors
-    case messageNotFound(id: String)
-    case threadAccessDenied(id: String)
-    case userNotAuthenticated
+- **SwiftData Models**
 
-    // State Errors
-    case invalidPhaseTransition(from: Phase, to: Phase)
-    case inconsistentThreadState(details: String)
+  ```swift
+  class ModelTests: XCTestCase {
+      var container: ModelContainer!
 
-    var userMessage: String {
-        switch self {
-        case .networkError:
-            return "Unable to connect. Please check your connection."
-        case .messageNotFound:
-            return "Message not found."
-        // etc...
-        }
-    }
-}
-```
+      override func setUp() {
+          container = try! ModelContainer(
+              for: User.self, Thread.self, Message.self,
+              configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+          )
+      }
+
+      func testThreadCreation() async throws {
+          let user = User(id: UUID(), publicKey: "test_key")
+          let thread = Thread(title: "Test Thread", owner: user)
+          container.mainContext.insert(thread)
+          try container.mainContext.save()
+
+          XCTAssertEqual(thread.owner.id, user.id)
+      }
+  }
+  ```
+
+### 2. Integration Testing
+
+- **SUI Integration Tests**
+
+  ```swift
+  class SUIntegrationTests: XCTestCase {
+      func testWalletCreation() async throws {
+          let wallet = try await SUIWallet.create()
+          XCTAssertNotNil(wallet.publicKey)
+          XCTAssertNotNil(wallet.privateKey)
+      }
+
+      func testMessageSigning() async throws {
+          let message = "Test message"
+          let signature = try await wallet.sign(message)
+          let isValid = try await wallet.verify(signature, for: message)
+          XCTAssertTrue(isValid)
+      }
+  }
+  ```
+
+### 3. UI Testing
+
+- **Carousel Navigation Tests**
+
+  ```swift
+  class CarouselUITests: XCTestCase {
+      func testPhaseNavigation() {
+          let app = XCUIApplication()
+          app.launch()
+
+          // Test swipe gestures
+          let carousel = app.otherElements["phase_carousel"]
+          carousel.swipeLeft()
+          XCTAssertTrue(app.staticTexts["Experience"].exists)
+      }
+  }
+  ```
+
+### 4. Performance Testing
+
+- Measure AI API response times
+- Monitor memory usage
+- Test under different network conditions
+
+## Success Criteria
+
+- High test coverage (>80%)
+- Stable CI/CD pipeline
+- Reliable blockchain interactions
+- Smooth UI performance
+
+## Future Considerations
+
+- Automated UI testing
+- Load testing for proxy server
+- Enhanced blockchain testing

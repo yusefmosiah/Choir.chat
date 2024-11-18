@@ -1,97 +1,67 @@
-# Deploy to Render and TestFlight
+# Thread Sheet Implementation
 
 ## Parent Issue
-[Core Message System Implementation](issue_0.md)
-
-## Related Issues
-- Depends on: All implementation issues
-- Related to: [Development Environment Setup](issue_-1.md)
+[Core Client-Side Implementation](issue_0.md)
 
 ## Description
-Deploy the Python API service to Render and submit the iOS app to TestFlight for testing, ensuring proper configuration and monitoring.
+Design and implement the thread sheet UI with a focus on human experience, incorporating the carousel UI pattern for phase navigation and ensuring smooth interaction flows.
 
 ## Tasks
-1. Render Deployment
-   - [ ] Configure Render service
-     - [ ] Set environment variables
-     - [ ] Configure Qdrant connection
-     - [ ] Set up logging
-   - [ ] Deploy API
-     - [ ] Test endpoints
-     - [ ] Monitor performance
-     - [ ] Check error reporting
 
-2. TestFlight Submission
-   - [ ] App Store Connect setup
-     - [ ] Configure app details
-     - [ ] Add test information
-     - [ ] Set up TestFlight users
-   - [ ] Build preparation
-     - [ ] Update bundle ID
-     - [ ] Configure signing
-     - [ ] Set version/build numbers
-   - [ ] Submit build
-     - [ ] Run archive
-     - [ ] Upload to App Store Connect
-     - [ ] Submit for review
-
-## Code Examples
-```yaml
-# render.yaml
-services:
-  - type: web
-    name: choir-api
-    env: python
-    buildCommand: pip install -r requirements.txt
-    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
-    envVars:
-      - key: QDRANT_URL
-        sync: false
-      - key: QDRANT_API_KEY
-        sync: false
-      - key: OPENAI_API_KEY
-        sync: false
-```
-
+### 1. Core UI Components
 ```swift
-// Configuration.swift
-enum Configuration {
-    #if DEBUG
-    static let apiBaseURL = "http://localhost:8000"
-    #else
-    static let apiBaseURL = "https://choir-api.onrender.com"
-    #endif
+struct ThreadSheet: View {
+    @ObservedObject var thread: ChoirThread
+    @StateObject var viewModel: ThreadViewModel
+
+    var body: some View {
+        VStack {
+            // Header with thread info
+            ThreadHeaderView(thread: thread)
+
+            // Carousel for phase navigation
+            ChorusCarouselView(viewModel: viewModel)
+                .frame(maxHeight: .infinity)
+
+            // Message input
+            MessageInputView(onSend: { message in
+                Task { await viewModel.send(message) }
+            })
+        }
+    }
 }
 ```
 
-## Testing Requirements
-1. API Deployment
-   - Endpoint accessibility
-   - Error handling
-   - Performance metrics
-   - Security headers
+### 2. Phase Navigation
+```swift
+struct PhaseView: View {
+    let phase: Phase
+    @ObservedObject var viewModel: ThreadViewModel
 
-2. TestFlight Build
-   - App functionality
-   - Network connectivity
-   - Error reporting
-   - Analytics integration
+    var body: some View {
+        VStack(spacing: 20) {
+            // Current phase content
+            PhaseContentView(phase: phase, content: viewModel.currentContent)
+
+            // Peek at adjacent phases
+            if let nextContent = viewModel.nextPhasePreview {
+                Text(nextContent)
+                    .font(.caption)
+                    .opacity(0.6)
+            }
+        }
+        .transition(.slide)
+    }
+}
+```
+
+### 3. Loading States
+- Implement progressive loading indicators
+- Show phase transitions smoothly
+- Handle network delays gracefully
 
 ## Success Criteria
-1. API Service
-   - Successfully deployed
-   - All endpoints working
-   - Proper error handling
-   - Good performance
-
-2. iOS App
-   - Approved for TestFlight
-   - Working with deployed API
-   - Clean error handling
-   - Analytics reporting
-
-## Notes
-- Keep development database for now
-- Monitor API performance
-- Track error rates
-- Collect usage metrics
+- Intuitive navigation between phases
+- Clear visibility of process flow
+- Smooth animations and transitions
+- Responsive user feedback

@@ -2,40 +2,6 @@
 
 
 
-=== File: docs/issues/issue_-1.md ===
-
-
-
-==
-issue_-1
-==
-
-
-# Development Environment Setup
-
-## Description
-Set up and configure development environment for efficient implementation of core message system.
-
-## Tasks
-- [x] Configure test environment
-  - [x] Set up test database # the database we have is the test database. when ready to launch we will make new database
-  - [x] Configure test vectors
-  - [x] Add test users/threads
-- [ ] Set up monitoring
-  - [ ] Logging configuration
-  - [ ] Performance metrics
-  - [ ] Error tracking
-- [ ] Development tools
-  - [ ] SwiftFormat configuration
-  - [ ] SwiftLint rules
-  - [ ] Git hooks
-
-## Success Criteria
-- Clean development environment
-- Efficient testing setup
-- Consistent code style
-- Proper monitoring
-
 === File: docs/issues/issue_0.md ===
 
 
@@ -48,81 +14,97 @@ issue_0
 # Core Client-Side Implementation
 
 ## Overview
+Implement the foundational client-side system with a focus on getting a working version to TestFlight. Initially use Anthropic and OpenAI APIs through a secure proxy, while preparing for future local AI model integration.
 
-Implement the foundational client-side system that enables AI processing via Anthropic and OpenAI APIs, SUI blockchain integration, and the carousel UI for the Chorus Cycle. Focus on creating a functional Minimum Viable Product (MVP) that demonstrates key features while preparing for future integration with Liquid AI's Liquid Foundation Models (LFMs).
+## Current Issues
+1. Issue 1: Local Data Management and Persistence
+2. Issue 2: SUI Blockchain Smart Contracts (basic wallet integration)
+3. Issue 5: Enhanced UI/UX with Carousel
+4. Issue 7: Testing and Quality Assurance
+5. Issue 8: Deploy to TestFlight and Render
+6. Issue 9: Message Rewards Implementation (postponed)
+7. Issue 10: Thread Sheet Implementation
+8. Issue 11: Thread Contract Implementation (postponed)
+9. Issue 12: Citation Visualization and Handling
+10. Issue 13: LanceDB Migration & Multimodal Support
 
-## Sub-Issues
+## Immediate Tasks
 
-1. [Local Data Management and Persistence](issue_1.md)
-2. [SUI Blockchain Smart Contracts](issue_2.md)
-3. [Tokenomics and CHOIR Token Integration](issue_3.md)
-4. [Proxy Security and Backend Services](issue_4.md)
-5. [Enhanced UI/UX with Carousel and Interaction Patterns](issue_5.md)
-6. [Client-Side Intelligence and Personalization](issue_6.md)
-7. [Testing and Quality Assurance](issue_7.md)
-8. [Documentation and Developer Onboarding](issue_8.md)
+### 1. Core Data Layer
+```swift
+// SwiftData models for local persistence
+@Model
+class User {
+    @Attribute(.unique) let id: UUID
+    let publicKey: String
+    let createdAt: Date
 
-## Tasks
+    @Relationship(deleteRule: .cascade) var ownedThreads: [Thread]
+    @Relationship var coAuthoredThreads: [Thread]
+}
 
-### 1. AI Processing via APIs
+@Model
+class Thread {
+    @Attribute(.unique) let id: UUID
+    let title: String
+    let createdAt: Date
 
-- **Integrate Anthropic and OpenAI APIs**
+    @Relationship var owner: User
+    @Relationship var coAuthors: [User]
+    @Relationship(deleteRule: .cascade) var messages: [Message]
+}
+```
 
-  - Set up API clients for Anthropic and OpenAI.
-  - Implement functions to send prompts and receive responses.
-  - Handle API rate limits and errors gracefully.
+### 2. Basic SUI Integration
+```swift
+// Wallet management
+class WalletManager {
+    private let keychain = KeychainService()
 
-- **Prepare for Future LFM Integration**
-  - Design the architecture to allow easy switching from API-based models to local LFMs.
-  - Abstract AI processing logic to accommodate different model sources.
+    func createOrLoadWallet() async throws -> Wallet {
+        if let existingKey = try? keychain.load("sui_private_key") {
+            return try Wallet(privateKey: existingKey)
+        }
+        let wallet = try await SUIKit.createWallet()
+        try keychain.save(wallet.privateKey, forKey: "sui_private_key")
+        return wallet
+    }
+}
+```
 
-### 2. SUI Wallet Integration
-
-- **Integrate SUIKit for Blockchain Interactions**
-  - Implement wallet creation, import, and transaction signing within the app.
-  - Facilitate user authentication via SUI wallet.
-
-### 3. Carousel UI Implementation
-
-- **Develop Carousel UI Pattern**
-  - Create a carousel interface for navigating through Chorus Cycle phases.
-  - Ensure adjacent phase previews are visible for a typographic, newspaper-like design.
-
-### 4. Proxy Authentication Setup
-
-- **Set Up Secure API Proxy**
-  - Deploy a server-side proxy to handle AI API requests securely.
-  - Implement SUI-signed token authentication for proxy access.
-
-### 5. Initial Testing
-
-- **Conduct Initial Integration Tests**
-  - Verify AI API integrations.
-  - Test SUI wallet functionalities.
-  - Ensure carousel UI navigates smoothly between phases.
+### 3. Proxy Server Setup
+```python
+# FastAPI proxy for AI services
+@app.post("/api/proxy/ai")
+async def proxy_ai_request(
+    request: AIRequest,
+    auth: Auth = Depends(verify_sui_signature)
+):
+    # Route to appropriate AI service
+    if request.model.startswith("claude"):
+        return await route_to_anthropic(request)
+    return await route_to_openai(request)
+```
 
 ## Success Criteria
+- App runs smoothly on TestFlight
+- Users can create and join threads
+- Messages process through Chorus Cycle
+- Basic SUI wallet integration works
+- Citations work properly
 
-- **Functional MVP**
+## Postponed Features
+- Token mechanics and rewards
+- Thread contracts
+- Advanced blockchain features
+- Multimodal support
+- LanceDB migration
 
-  - Users can authenticate with their SUI wallet.
-  - Users can input messages and navigate through the Chorus Cycle using the carousel UI.
-  - AI responses are fetched and displayed correctly via Anthropic and OpenAI APIs.
-
-- **Secure Operations**
-
-  - Proxy server securely handles API requests and authentication.
-  - API keys remain protected on the server side.
-
-- **Scalable Architecture**
-  - The system is designed to switch to Liquid AI's LFMs with minimal changes.
-  - Codebase follows best practices for scalability and maintainability.
-
-## Future Considerations
-
-- **Liquid AI LFMs Integration**
-  - Once access is granted, integrate LFMs for on-device AI processing.
-  - Optimize the architecture to transition from API-based to local model-based processing seamlessly.
+## Notes
+- Focus on core functionality first
+- Keep UI simple but polished
+- Test thoroughly before submission
+- Document setup process
 
 ---
 
@@ -145,73 +127,196 @@ issue_1
 
 - Depends on: None
 - Blocks: [SUI Blockchain Smart Contracts](issue_2.md)
-- Related to: [API Client Message Handling](issue_2.md)
+- Related to: [Deploy to TestFlight and Render](issue_8.md)
 
 ## Description
 
-Implement local data storage and synchronization using SwiftData, managing users, threads, and messages effectively. This ensures data persistence and offline access while preparing for future synchronization with the SUI blockchain.
+Implement local data storage using SwiftData to manage users, threads, and messages effectively. Focus on establishing a solid foundation for the client-side architecture while preparing for future blockchain integration.
 
 ## Tasks
 
-### 1. Define SwiftData Models
+### 1. Core Data Models
 
-- **Create Models for `User`, `Thread`, and `Message`**
+```swift
+@Model
+class User {
+    @Attribute(.unique) let id: UUID
+    let publicKey: String
+    let createdAt: Date
 
-  - Ensure appropriate relationships and data integrity.
-  - Support offline access and local data persistence.
+    // Relationships
+    @Relationship(deleteRule: .cascade) var ownedThreads: [Thread]
+    @Relationship var coAuthoredThreads: [Thread]
+    @Relationship(deleteRule: .cascade) var messages: [Message]
 
-- **Implement Data Relationships**
-  - Define one-to-many and many-to-many relationships as needed.
-  - Ensure models align with blockchain ownership data.
+    // Future blockchain fields
+    var onChainAddress: String?
+    var lastSyncTimestamp: Date?
+}
 
-### 2. Implement Data Operations
+@Model
+class Thread {
+    @Attribute(.unique) let id: UUID
+    let title: String
+    let createdAt: Date
 
-- **CRUD Operations for Threads and Messages**
+    // Ownership
+    @Relationship var owner: User
+    @Relationship var coAuthors: [User]
 
-  - Implement create, read, update, and delete functionalities.
-  - Ensure smooth user interactions and data consistency.
+    // Content
+    @Relationship(deleteRule: .cascade) var messages: [Message]
 
-- **Handle Data Consistency and Conflict Resolution**
-  - Develop mechanisms to resolve data conflicts between local and blockchain data.
-  - Implement versioning or timestamps to manage updates.
+    // Thread state
+    var lastMessageAt: Date
+    var messageCount: Int
 
-### 3. Prepare for Future Synchronization
+    // Future blockchain fields
+    var onChainId: String?
+    var lastSyncTimestamp: Date?
+}
 
-- **Design Synchronization Logic**
+@Model
+class Message {
+    @Attribute(.unique) let id: UUID
+    let content: String
+    let timestamp: Date
+    let isUser: Bool
 
-  - Outline how local data will sync with on-chain data.
-  - Plan for data reconciliation and conflict handling.
+    // Relationships
+    @Relationship var author: User
+    @Relationship(inverse: \Thread.messages) var thread: Thread?
 
-- **Implement Initial Sync Mechanism**
-  - Develop basic synchronization between local data and blockchain state.
-  - Test synchronization with sample data.
+    // Citations
+    @Relationship var citesPriors: [Message]
+    @Relationship(inverse: \Message.citesPriors) var citedByMessages: [Message]
+
+    // Chorus result
+    var chorusResult: ChorusResult?
+
+    // Future blockchain fields
+    var onChainHash: String?
+    var lastSyncTimestamp: Date?
+}
+```
+
+### 2. Data Operations
+
+```swift
+actor DataManager {
+    private let modelContainer: ModelContainer
+    private let modelContext: ModelContext
+
+    // CRUD operations
+    func createThread(title: String, owner: User) async throws -> Thread {
+        let thread = Thread(
+            id: UUID(),
+            title: title,
+            createdAt: Date(),
+            owner: owner,
+            lastMessageAt: Date(),
+            messageCount: 0
+        )
+        modelContext.insert(thread)
+        try await modelContext.save()
+        return thread
+    }
+
+    func addMessage(_ content: String, to thread: Thread, by user: User) async throws -> Message {
+        let message = Message(
+            id: UUID(),
+            content: content,
+            timestamp: Date(),
+            isUser: true,
+            author: user,
+            thread: thread
+        )
+        modelContext.insert(message)
+
+        // Update thread
+        thread.lastMessageAt = message.timestamp
+        thread.messageCount += 1
+
+        try await modelContext.save()
+        return message
+    }
+}
+```
+
+### 3. Query Support
+
+```swift
+extension DataManager {
+    func fetchThreads(for user: User) async throws -> [Thread] {
+        let descriptor = FetchDescriptor<Thread>(
+            predicate: #Predicate<Thread> { thread in
+                thread.owner.id == user.id ||
+                thread.coAuthors.contains { $0.id == user.id }
+            },
+            sortBy: [SortDescriptor(\.lastMessageAt, order: .reverse)]
+        )
+        return try modelContext.fetch(descriptor)
+    }
+
+    func searchMessages(containing text: String) async throws -> [Message] {
+        let descriptor = FetchDescriptor<Message>(
+            predicate: #Predicate<Message> { message in
+                message.content.localizedStandardContains(text)
+            }
+        )
+        return try modelContext.fetch(descriptor)
+    }
+}
+```
 
 ## Success Criteria
 
-- **Reliable Local Storage**
+- **Reliable local data persistence**
 
   - Users can create and manage threads and messages locally.
   - Data persists across app launches and device restarts.
 
-- **Efficient Data Handling**
+- **Efficient CRUD operations**
 
   - CRUD operations perform smoothly without lag.
   - Data relationships are maintained accurately.
 
-- **Preparation for Blockchain Synchronization**
+- **Clean relationship management**
+
+  - One-to-many and many-to-many relationships are defined correctly.
+  - Models align with blockchain ownership data.
+
+- **Ready for blockchain integration**
+
   - Architecture supports future data synchronization.
   - Initial sync tests are successful, laying the groundwork for full integration.
 
+- **Comprehensive test coverage**
+
+  - All CRUD operations are tested thoroughly.
+  - Relationship management is thoroughly tested.
+
 ## Future Considerations
 
-- **SUI Blockchain Synchronization**
+- **Blockchain state synchronization**
 
   - Implement full data synchronization with the SUI blockchain.
   - Ensure real-time updates and consistency between local and on-chain data.
 
-- **Advanced Conflict Resolution**
-  - Develop sophisticated methods to handle complex data conflicts.
+- **Multi-device data sync**
+
+  - Develop mechanisms to synchronize data across multiple devices.
+  - Ensure data consistency and conflict resolution across devices.
+
+- **Advanced search capabilities**
+
+  - Develop sophisticated search capabilities to search for messages and threads.
   - Implement user prompts or automated resolutions where appropriate.
+
+- **Performance optimization for large datasets**
+
+  - Optimize data handling and query performance for large datasets.
+  - Ensure smooth user interactions and data consistency.
 
 ---
 
@@ -224,103 +329,73 @@ issue_10
 ==
 
 
-# Deploy to Render and TestFlight
+# Thread Sheet Implementation
 
 ## Parent Issue
-[Core Message System Implementation](issue_0.md)
-
-## Related Issues
-- Depends on: All implementation issues
-- Related to: [Development Environment Setup](issue_-1.md)
+[Core Client-Side Implementation](issue_0.md)
 
 ## Description
-Deploy the Python API service to Render and submit the iOS app to TestFlight for testing, ensuring proper configuration and monitoring.
+Design and implement the thread sheet UI with a focus on human experience, incorporating the carousel UI pattern for phase navigation and ensuring smooth interaction flows.
 
 ## Tasks
-1. Render Deployment
-   - [ ] Configure Render service
-     - [ ] Set environment variables
-     - [ ] Configure Qdrant connection
-     - [ ] Set up logging
-   - [ ] Deploy API
-     - [ ] Test endpoints
-     - [ ] Monitor performance
-     - [ ] Check error reporting
 
-2. TestFlight Submission
-   - [ ] App Store Connect setup
-     - [ ] Configure app details
-     - [ ] Add test information
-     - [ ] Set up TestFlight users
-   - [ ] Build preparation
-     - [ ] Update bundle ID
-     - [ ] Configure signing
-     - [ ] Set version/build numbers
-   - [ ] Submit build
-     - [ ] Run archive
-     - [ ] Upload to App Store Connect
-     - [ ] Submit for review
-
-## Code Examples
-```yaml
-# render.yaml
-services:
-  - type: web
-    name: choir-api
-    env: python
-    buildCommand: pip install -r requirements.txt
-    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
-    envVars:
-      - key: QDRANT_URL
-        sync: false
-      - key: QDRANT_API_KEY
-        sync: false
-      - key: OPENAI_API_KEY
-        sync: false
-```
-
+### 1. Core UI Components
 ```swift
-// Configuration.swift
-enum Configuration {
-    #if DEBUG
-    static let apiBaseURL = "http://localhost:8000"
-    #else
-    static let apiBaseURL = "https://choir-api.onrender.com"
-    #endif
+struct ThreadSheet: View {
+    @ObservedObject var thread: ChoirThread
+    @StateObject var viewModel: ThreadViewModel
+
+    var body: some View {
+        VStack {
+            // Header with thread info
+            ThreadHeaderView(thread: thread)
+
+            // Carousel for phase navigation
+            ChorusCarouselView(viewModel: viewModel)
+                .frame(maxHeight: .infinity)
+
+            // Message input
+            MessageInputView(onSend: { message in
+                Task { await viewModel.send(message) }
+            })
+        }
+    }
 }
 ```
 
-## Testing Requirements
-1. API Deployment
-   - Endpoint accessibility
-   - Error handling
-   - Performance metrics
-   - Security headers
+### 2. Phase Navigation
+```swift
+struct PhaseView: View {
+    let phase: Phase
+    @ObservedObject var viewModel: ThreadViewModel
 
-2. TestFlight Build
-   - App functionality
-   - Network connectivity
-   - Error reporting
-   - Analytics integration
+    var body: some View {
+        VStack(spacing: 20) {
+            // Current phase content
+            PhaseContentView(phase: phase, content: viewModel.currentContent)
+
+            // Peek at adjacent phases
+            if let nextContent = viewModel.nextPhasePreview {
+                Text(nextContent)
+                    .font(.caption)
+                    .opacity(0.6)
+            }
+        }
+        .transition(.slide)
+    }
+}
+```
+
+### 3. Loading States
+- Implement progressive loading indicators
+- Show phase transitions smoothly
+- Handle network delays gracefully
 
 ## Success Criteria
-1. API Service
-   - Successfully deployed
-   - All endpoints working
-   - Proper error handling
-   - Good performance
-
-2. iOS App
-   - Approved for TestFlight
-   - Working with deployed API
-   - Clean error handling
-   - Analytics reporting
-
-## Notes
-- Keep development database for now
-- Monitor API performance
-- Track error rates
-- Collect usage metrics
+- Intuitive navigation between phases
+- Clear visibility of process flow
+- Smooth animations and transitions
+- Responsive user feedback
 
 === File: docs/issues/issue_11.md ===
 
@@ -331,80 +406,74 @@ issue_11
 ==
 
 
-# Thread Sheet Implementation
-
-## THIS IS AI SLOP BECAUSE IVE UNDERSPECIFIED IT
+# Thread Contract Implementation
 
 ## Parent Issue
-[Core Message System Implementation](issue_0.md)
-
-## Related Issues
-- Depends on: [Thread State Management](issue_5.md)
-- Related to: [User Identity Implementation](issue_4.md)
+[Core Client-Side Implementation](issue_0.md)
 
 ## Description
-Implement the thread sheet UI component that displays thread messages, handles user input, and shows chorus cycle results.
+Implement the SUI smart contract for thread management, handling ownership, co-authoring, and message verification using the Move programming language.
 
 ## Tasks
-- [ ] Create thread sheet view
-  - [ ] Message list display
-  - [ ] Input handling
-  - [ ] Chorus result visualization
-- [ ] Add state management
-  - [ ] Thread loading
-  - [ ] Message updates
-  - [ ] UI state handling
-- [ ] Implement interactions
-  - [ ] Message submission
-  - [ ] Loading states
-  - [ ] Error handling
 
-## Code Examples
-```swift
-struct ThreadSheet: View {
-    @ObservedObject var thread: Thread
-    @StateObject private var viewModel: ThreadViewModel
-    @State private var inputText = ""
-
-    var body: some View {
-        VStack {
-            MessageList(messages: thread.messages)
-
-            InputField(
-                text: $inputText,
-                onSubmit: {
-                    Task {
-                        try await viewModel.submitMessage(inputText)
-                    }
-                }
-            )
-        }
+### 1. Core Contract Structure
+```move
+module choir::thread {
+    struct Thread has key {
+        id: ID,
+        owner: address,
+        co_authors: vector<address>,
+        message_count: u64,
+        temperature: u64,
+        frequency: u64,
     }
-}
 
-class ThreadViewModel: ObservableObject {
-    @Published private(set) var isProcessing = false
-    private let coordinator: ChorusCoordinator
+    public fun create_thread(ctx: &mut TxContext) {
+        let thread = Thread {
+            id: object::new(ctx),
+            owner: tx_context::sender(ctx),
+            co_authors: vector::empty(),
+            message_count: 0,
+            temperature: INITIAL_TEMP,
+            frequency: INITIAL_FREQ,
+        };
+        transfer::share_object(thread)
+    }
 
-    func submitMessage(_ content: String) async throws {
-        isProcessing = true
-        defer { isProcessing = false }
-        try await coordinator.process(content)
+    public fun add_message(
+        thread: &mut Thread,
+        _ctx: &mut TxContext
+    ) {
+        assert!(is_co_author(thread, tx_context::sender(ctx)), ENotCoAuthor);
+        thread.message_count = thread.message_count + 1;
+        // Update temperature and frequency
     }
 }
 ```
 
-## Testing Requirements
-- UI state management
-- User interactions
-- Error presentation
-- Performance with large threads
+### 2. State Management
+```move
+public fun update_temperature(thread: &mut Thread, delta: u64) {
+    thread.temperature = thread.temperature + delta;
+}
+
+public fun evolve_frequency(thread: &mut Thread) {
+    // Implement quantum harmonic oscillator model
+    let n = vector::length(&thread.co_authors);
+    thread.frequency = calculate_frequency(n, thread.temperature);
+}
+```
+
+### 3. Access Control
+- Implement co-author management
+- Handle permissions and roles
+- Verify message authenticity
 
 ## Success Criteria
-- Smooth user experience
-- Clear state feedback
-- Proper error handling
-- Responsive interface
+- Secure thread ownership
+- Reliable state transitions
+- Efficient gas usage
+- Clean error handling
 
 === File: docs/issues/issue_12.md ===
 
@@ -415,119 +484,82 @@ issue_12
 ==
 
 
-# Message Rewards Implementation
-## THE FORMULAS LOOK DIFFERENT THAN THE ONES IN THE DOCS. THE MATH BETTER BE MATHING.
-
+# Citation Visualization and Handling
 
 ## Parent Issue
-[Core Message System Implementation](issue_0.md)
-
-## Related Issues
-- Depends on: [Message Type Reconciliation](issue_1.md)
-- Related to: [Thread State Management](issue_5.md)
-- Blocks: None
+[Core Client-Side Implementation](issue_0.md)
 
 ## Description
-Implement the message rewards system using the quantum harmonic oscillator model for new messages and prior citations.
-
-## Current State
-- Have formulas defined:
-  ```
-  New Message Rewards:
-  R(t) = R_total × k/(1 + kt)ln(1 + kT)
-
-  Prior Value:
-  V(p) = B_t × Q(p)/∑Q(i)
-  ```
-- Need implementation in Swift
-- Need integration with thread state
+Implement citation visualization and handling in the carousel UI, allowing users to see and interact with prior references while maintaining the quantum harmonic model of knowledge coupling.
 
 ## Tasks
-- [ ] Implement reward calculations
-  - [ ] New message rewards
-  - [ ] Prior citation rewards
-  - [ ] Quality scoring
-- [ ] Add reward distribution
-  - [ ] Treasury management
-  - [ ] User balance updates
-  - [ ] Transaction logging
-- [ ] Integrate with thread state
-  - [ ] Track rewards per message
-  - [ ] Update thread temperature
-  - [ ] Handle stake requirements
 
-## Code Examples
+### 1. Citation Data Model
 ```swift
-struct RewardCalculator {
-    // Constants
-    static let TOTAL_SUPPLY: Double = 2.5e9  // 2.5B total
-    static let DECAY_CONSTANT: Double = 2.04
-    static let TOTAL_PERIOD: TimeInterval = 4 * 365 * 24 * 3600  // 4 years
+struct Citation: Identifiable {
+    let id: UUID
+    let sourceMessageId: String
+    let targetMessageId: String
+    let content: String
+    let similarity: Double
+    let context: String
 
-    // New message rewards
-    func calculateMessageReward(at timestamp: Date) -> Double {
-        let t = timestamp.timeIntervalSince(LAUNCH_DATE)
-        let k = DECAY_CONSTANT
-        let T = TOTAL_PERIOD
-
-        return TOTAL_SUPPLY * (k / (1 + k * t)) * log(1 + k * T)
-    }
-
-    // Prior citation rewards
-    func calculatePriorValue(
-        quality: Double,
-        totalQuality: Double,
-        treasuryBalance: Double
-    ) -> Double {
-        return treasuryBalance * (quality / totalQuality)
+    // Link format: choir://choir.chat/<message_id>
+    var link: URL {
+        URL(string: "choir://choir.chat/\(targetMessageId)")!
     }
 }
 
-actor RewardManager {
-    private let calculator: RewardCalculator
-    private var treasuryBalance: Double
-
-    func processNewMessage(_ message: MessagePoint) async throws -> Double {
-        let reward = calculator.calculateMessageReward(at: message.createdAt)
-        try await distributeReward(reward, to: message.authorId)
-        return reward
-    }
-
-    func processPriorCitation(
-        _ prior: Prior,
-        quality: Double,
-        totalQuality: Double
-    ) async throws -> Double {
-        let value = calculator.calculatePriorValue(
-            quality: quality,
-            totalQuality: totalQuality,
-            treasuryBalance: treasuryBalance
-        )
-        try await distributePriorReward(value, to: prior.authorId)
-        return value
+extension ThreadMessage {
+    var citations: [Citation] {
+        // Parse markdown links from content
+        // Format: [cited text](choir://choir.chat/<message_id>)
+        // Return array of Citations
     }
 }
 ```
 
-## Testing Requirements
-- Test reward calculations
-  - Verify formula implementation
-  - Test edge cases
-  - Check decay over time
-- Test distribution
-  - Treasury management
-  - Balance updates
-  - Transaction integrity
-- Test integration
-  - Thread state updates
-  - User balance changes
-  - System coherence
+### 2. Citation UI Components
+```swift
+struct CitationView: View {
+    let citation: Citation
+    @State private var isExpanded = false
+
+    var body: some View {
+        VStack(alignment: .leading) {
+            // Citation preview with similarity score
+            HStack {
+                Text(citation.content)
+                    .lineLimit(isExpanded ? nil : 2)
+                Spacer()
+                Text("\(Int(citation.similarity * 100))%")
+                    .foregroundColor(.secondary)
+            }
+
+            // Expanded context
+            if isExpanded {
+                Text(citation.context)
+                    .padding(.top, 4)
+                    .foregroundColor(.secondary)
+            }
+        }
+        .onTapGesture {
+            withAnimation { isExpanded.toggle() }
+        }
+    }
+}
+```
+
+### 3. Citation Navigation
+- Implement deep linking to cited messages
+- Handle citation preview in carousel
+- Support citation search and filtering
 
 ## Success Criteria
-- Accurate calculations
-- Reliable distribution
-- Clean integration
-- Type-safe implementation
+- Clear citation visualization
+- Smooth navigation between citations
+- Accurate similarity scores
+- Efficient context display
 
 === File: docs/issues/issue_13.md ===
 
@@ -538,444 +570,74 @@ issue_13
 ==
 
 
-# Thread Contract Implementation
-
-## Parent Issue
-[Core Message System Implementation](issue_0.md)
-
-## Related Issues
-- Depends on: [Thread State Management](issue_5.md)
-- Related to: [Message Rewards Implementation](issue_12.md)
-
-## Description
-Implement the thread contract that manages thread state evolution, stake requirements, and co-author relationships using the quantum harmonic oscillator model.
-
-## Current State
-- Have thread state in Qdrant
-- Need stake mechanics
-- Need temperature evolution
-- Need co-author management
-
-## Tasks
-- [ ] Implement thread state
-  ```swift
-  struct ThreadState {
-      let id: UUID
-      let coAuthors: Set<PublicKey>
-      let tokenBalance: TokenAmount
-      let temperature: Float
-      let frequency: Float
-      let messageHashes: [Hash]
-      let createdAt: Date
-
-      // E(n) = ℏω(n + 1/2)
-      var stakeRequirement: TokenAmount {
-          let n = coAuthors.count
-          let ω = frequency
-          return TokenAmount(ℏ * ω * (Float(n) + 0.5))
-      }
-  }
-  ```
-
-- [ ] Add temperature evolution
-  ```swift
-  extension ThreadState {
-      // T = T0/√(1 + t/τ)
-      mutating func evolveTemperature(timeDelta: TimeInterval) {
-          let coolingFactor = sqrt(1000 + timeDelta / 86400)
-          temperature = (temperature * 1000) / coolingFactor
-      }
-
-      // Update after message approval/denial
-      mutating func processApproval(_ approved: Bool) {
-          if approved {
-              // Distribute energy to co-authors
-              temperature = tokenBalance / Float(coAuthors.count)
-          } else {
-              // Increase thread energy
-              temperature += stakeRequirement.amount
-          }
-      }
-  }
-  ```
-
-- [ ] Implement co-author management
-  ```swift
-  extension ThreadState {
-      mutating func addCoAuthor(_ publicKey: PublicKey) throws {
-          guard tokenBalance >= stakeRequirement else {
-              throw ThreadError.insufficientStake
-          }
-          coAuthors.insert(publicKey)
-      }
-
-      func validateMessage(_ message: Message) -> Bool {
-          coAuthors.contains(message.authorId)
-      }
-  }
-  ```
-
-## Testing Requirements
-- Test state evolution
-  - Temperature cooling
-  - Stake requirements
-  - Co-author management
-- Test message validation
-  - Author verification
-  - Stake verification
-  - Temperature effects
-- Test error handling
-  - Invalid stakes
-  - Unauthorized authors
-  - State transitions
-
-## Success Criteria
-- Clean state management
-- Proper stake mechanics
-- Reliable temperature evolution
-- Type-safe operations
-
-=== File: docs/issues/issue_14.md ===
-
-
-
-==
-issue_14
-==
-
-
 # LanceDB Migration & Multimodal Support
 
-
 ## Parent Issue
-[Core Message System Implementation](issue_0.md)
-
-## Related Issues
-- Depends on: [Message Type Reconciliation](issue_1.md)
-- Related to: [Thread State Management](issue_5.md)
+[Core Client-Side Implementation](issue_0.md)
 
 ## Description
-Migrate from Qdrant to LanceDB for vector storage and add support for multimodal embeddings (text, images, audio).
-
-## Current State
-- Have ~20k message points in Qdrant
-- Text-only embeddings
-- Need multimodal support
-- Need migration strategy
+Migrate from Qdrant to LanceDB for vector storage and add support for multimodal embeddings (text, images, audio), preparing for future content types.
 
 ## Tasks
-1. LanceDB Setup
-   ```python
-   # Database setup
-   import lancedb
 
-   db = lancedb.connect("choir.lance")
-   messages = db.create_table(
-       "messages",
-       schema={
-           "id": "string",
-           "content": "string",
-           "thread_id": "string",
-           "created_at": "string",
-           "embedding": "vector[1536]",  # OpenAI embedding size
-           "modality": "string",         # text/image/audio
-           "media_url": "string",        # for non-text content
-           "chorus_result": "json"
-       }
-   )
-   ```
+### 1. LanceDB Setup
+```python
+# Database setup
+import lancedb
 
-2. Re-Embedding Pipeline
-   ```python
-   from typing import AsyncIterator
-   import asyncio
-   from tenacity import retry, stop_after_attempt, wait_exponential
+db = lancedb.connect("choir.lance")
+messages = db.create_table(
+    "messages",
+    schema={
+        "id": "string",
+        "content": "string",
+        "thread_id": "string",
+        "created_at": "string",
+        "embedding": "vector[1536]",  # OpenAI embedding size
+        "modality": "string",         # text/image/audio
+        "media_url": "string",        # for non-text content
+        "chorus_result": "json"
+    }
+)
+```
 
-   class MigrationPipeline:
-       def __init__(self):
-           self.qdrant = QdrantClient(...)
-           self.lancedb = lancedb.connect("choir.lance")
-           self.openai = OpenAI()
-           self.rate_limiter = asyncio.Semaphore(50)  # Control concurrent requests
+### 2. Migration Pipeline
+```python
+class MigrationPipeline:
+    def __init__(self):
+        self.qdrant = QdrantClient(...)
+        self.lancedb = lancedb.connect("choir.lance")
+        self.rate_limiter = asyncio.Semaphore(50)
 
-       async def scroll_points(self, batch_size=100) -> AsyncIterator[List[Point]]:
-           """Scroll through Qdrant points with batching."""
-           offset = None
-           while True:
-               points, offset = await self.qdrant.scroll(
-                   collection_name="messages",
-                   limit=batch_size,
-                   offset=offset,
-                   with_payload=True,
-                   with_vectors=True
-               )
-               if not points:
-                   break
-               yield points
+    async def migrate_points(self):
+        async for batch in self.scroll_points():
+            await self.process_batch(batch)
 
-       @retry(stop=stop_after_attempt(3), wait=wait_exponential(min=1, max=60))
-       async def get_embedding(self, content: str) -> List[float]:
-           """Rate-limited embedding generation."""
-           async with self.rate_limiter:
-               response = await self.openai.embeddings.create(
-                   model="text-embedding-3-large",
-                   input=content
-               )
-               return response.data[0].embedding
+    async def process_batch(self, points):
+        results = []
+        for point in points:
+            try:
+                # Convert point format
+                new_point = self.convert_point(point)
+                results.append(new_point)
+            except Exception as e:
+                self.failed_points.append((point.id, str(e)))
 
-       async def process_batch(self, points: List[Point]):
-           """Process a batch of points with error handling."""
-           results = []
-           for point in points:
-               try:
-                   # Generate new embedding
-                   new_embedding = await self.get_embedding(point.payload["content"])
+        # Batch insert to LanceDB
+        if results:
+            await self.lancedb.messages.add(results)
+```
 
-                   # Compare with original
-                   similarity = cosine_similarity(new_embedding, point.vector)
-                   if similarity < 0.98:  # Significant difference
-                       logger.warning(f"Embedding divergence for {point.id}: {similarity}")
-
-                   results.append({
-                       "id": str(point.id),
-                       "content": point.payload["content"],
-                       "thread_id": point.payload["thread_id"],
-                       "created_at": point.payload["created_at"],
-                       "embedding": new_embedding,
-                       "modality": "text",
-                       "original_similarity": similarity,
-                       "chorus_result": point.payload.get("chorus_result")
-                   })
-               except Exception as e:
-                   logger.error(f"Error processing point {point.id}: {e}")
-                   # Store error for retry
-                   self.failed_points.append((point.id, str(e)))
-
-           # Batch insert to LanceDB
-           if results:
-               await self.lancedb.messages.add(results)
-
-       async def run_migration(self):
-           """Run the full migration with progress tracking."""
-           total_points = await self.qdrant.count("messages")
-           processed = 0
-
-           async for batch in self.scroll_points():
-               await self.process_batch(batch)
-               processed += len(batch)
-
-               # Progress update
-               logger.info(f"Processed {processed}/{total_points} points")
-
-           # Handle failed points
-           if self.failed_points:
-               logger.warning(f"Failed points: {len(self.failed_points)}")
-               # Write failures to file for manual review
-               with open("failed_migrations.json", "w") as f:
-                   json.dump(self.failed_points, f)
-   ```
-
-3. Migration Monitoring
-   ```python
-   class MigrationMonitor:
-       async def check_embedding_quality(self):
-           """Compare embeddings between systems."""
-           divergent = []
-           async for point in self.pipeline.scroll_points():
-               lance_point = self.lancedb.messages.get(point.id)
-               similarity = cosine_similarity(
-                   point.vector,
-                   lance_point["embedding"]
-               )
-               if similarity < 0.98:
-                   divergent.append((point.id, similarity))
-           return divergent
-
-       async def verify_data_integrity(self):
-           """Verify all data migrated correctly."""
-           qdrant_count = await self.qdrant.count("messages")
-           lance_count = len(self.lancedb.messages)
-
-           assert lance_count >= qdrant_count, "Missing points in LanceDB"
-
-           # Check random samples for payload equality
-           for _ in range(100):
-               point_id = random.choice(await self.get_all_ids())
-               qdrant_point = await self.qdrant.retrieve(point_id)
-               lance_point = self.lancedb.messages.get(point_id)
-
-               assert self.payloads_equal(
-                   qdrant_point.payload,
-                   lance_point
-               ), f"Payload mismatch for {point_id}"
-   ```
-
-## Testing Requirements
-- Migration validation
-  - Data integrity
-  - Embedding preservation
-  - Performance comparison
-- Multimodal support
-  - Text embeddings
-  - Image embeddings
-  - Audio embeddings
-- Search functionality
-  - Cross-modal search
-  - Relevance scoring
-  - Performance metrics
+### 3. Multimodal Support
+- Add image embedding generation
+- Support audio content processing
+- Implement cross-modal search
 
 ## Success Criteria
-- Clean migration
-- Multimodal support
-- Improved performance
-- Type-safe operations
-
-=== File: docs/issues/issue_15.md ===
-
-
-
-==
-issue_15
-==
-
-
-# Citation Visualization and Handling
-
-## Parent Issue
-[Core Message System Implementation](issue_0.md)
-
-## Related Issues
-- Depends on: [Thread Sheet Implementation](issue_11.md)
-- Related to: [Message Type Reconciliation](issue_1.md)
-
-## Description
-Implement citation visualization and handling in the UI, allowing users to see and interact with prior references while maintaining the quantum harmonic model of knowledge coupling.
-
-## Current State
-- Have Prior type in ChorusModels
-- Citations stored in Qdrant
-- Need UI representation
-- Need interaction model
-
-## Tasks
-1. Citation Data Model
-   ```swift
-   struct Citation: Identifiable {
-       let id: UUID
-       let sourceMessageId: String
-       let targetMessageId: String
-       let content: String
-       let similarity: Double
-       let context: String
-
-       // Link format: choir://choir.chat/<message_id>
-       var link: URL {
-           URL(string: "choir://choir.chat/\(targetMessageId)")!
-       }
-   }
-
-   extension ThreadMessage {
-       var citations: [Citation] {
-           // Parse markdown links from content
-           // Format: [cited text](choir://choir.chat/<message_id>)
-           // Return array of Citations
-       }
-   }
-   ```
-
-2. Citation View Components
-   ```swift
-   struct CitationView: View {
-       let citation: Citation
-       @State private var isExpanded = false
-
-       var body: some View {
-           VStack(alignment: .leading) {
-               // Citation preview
-               HStack {
-                   Text(citation.content)
-                       .lineLimit(isExpanded ? nil : 2)
-                   Spacer()
-                   Text(String(format: "%.0f%%", citation.similarity * 100))
-                       .foregroundColor(.secondary)
-               }
-
-               // Expanded context
-               if isExpanded {
-                   Text(citation.context)
-                       .padding(.top, 4)
-                       .foregroundColor(.secondary)
-               }
-           }
-           .onTapGesture {
-               withAnimation {
-                   isExpanded.toggle()
-               }
-           }
-       }
-   }
-
-   struct MessageCitationsView: View {
-       let message: ThreadMessage
-
-       var body: some View {
-           if !message.citations.isEmpty {
-               VStack(alignment: .leading, spacing: 8) {
-                   Text("Citations")
-                       .font(.headline)
-
-                   ForEach(message.citations) { citation in
-                       CitationView(citation: citation)
-                           .padding(.vertical, 4)
-                   }
-               }
-               .padding()
-               .background(Color(.systemBackground))
-               .cornerRadius(8)
-           }
-       }
-   }
-   ```
-
-3. Citation Interaction
-   ```swift
-   class CitationManager: ObservableObject {
-       @Published private(set) var activeCitations: [Citation] = []
-       private let api: ChorusAPIClient
-
-       func loadCitation(_ link: URL) async throws {
-           guard let messageId = link.lastPathComponent else { return }
-           let message = try await api.getMessage(messageId)
-           // Create and add citation
-       }
-
-       func navigateToCitation(_ citation: Citation) {
-           // Handle navigation to cited message
-       }
-   }
-   ```
-
-## Testing Requirements
-1. Citation Parsing
-   - Markdown link extraction
-   - URL validation
-   - Content parsing
-
-2. UI Components
-   - Layout rendering
-   - Expansion behavior
-   - Navigation handling
-
-3. Interaction Flow
-   - Citation loading
-   - Navigation
-   - Error handling
-
-## Success Criteria
-- Clean citation visualization
-- Smooth interaction flow
-- Clear relationship display
-- Performance with many citations
+- Successful data migration
+- Support for multiple content types
+- Maintained search performance
+- Clean error handling
 
 === File: docs/issues/issue_2.md ===
 
@@ -986,124 +648,7 @@ issue_2
 ==
 
 
-# API Client Message Handling
-
-## Parent Issue
-[Core Message System Implementation](issue_0.md)
-
-## Related Issues
-- Depends on: [Message Type Reconciliation](issue_1.md)
-- Blocks: [Coordinator Message Flow](issue_3.md)
-- Related to: [Thread State Management](issue_5.md)
-
-## Description
-Update ChorusAPIClient to handle the new unified message types while maintaining compatibility with existing endpoints and response structures.
-
-## Current State
-- Have working API client with phase-specific endpoints
-- Using existing response types from ChorusModels.swift
-- Need to add message point handling
-- Need to integrate with Qdrant collections
-
-## Tasks
-- [ ] Add message point endpoints
-  - [ ] getMessage by ID
-  - [ ] storeMessage with vector
-  - [ ] getThreadMessages with pagination
-- [ ] Update phase endpoints
-  - [ ] Modify request/response types
-  - [ ] Add message context
-  - [ ] Handle errors gracefully
-- [ ] Add thread operations
-  - [ ] Create/get thread
-  - [ ] Update thread state
-  - [ ] Handle message lists
-- [ ] Implement error handling
-  - [ ] Type-specific errors
-  - [ ] Retry logic
-  - [ ] Error reporting
-
-## Code Examples
-```swift
-extension ChorusAPIClient {
-    // Message operations
-    func getMessage(_ id: String) async throws -> MessagePoint {
-        return try await post(endpoint: "messages/\(id)", body: EmptyBody())
-    }
-
-    func storeMessage(_ message: MessagePoint) async throws {
-        try await post(endpoint: "messages", body: message)
-    }
-
-    func getThreadMessages(
-        _ threadId: String,
-        limit: Int = 50,
-        before: String? = nil
-    ) async throws -> [MessagePoint] {
-        return try await post(
-            endpoint: "threads/\(threadId)/messages",
-            body: GetMessagesRequest(
-                limit: limit,
-                before: before
-            )
-        )
-    }
-
-    // Phase operations with message context
-    func processAction(_ input: String, context: [MessagePoint]) async throws -> ActionResponse {
-        return try await post(
-            endpoint: "chorus/action",
-            body: ActionRequestBody(
-                content: input,
-                threadID: currentThreadId,
-                context: context
-            )
-        )
-    }
-}
-
-// Error handling
-enum APIError: Error {
-    case messageNotFound(String)
-    case invalidMessageData(String)
-    case threadOperationFailed(String)
-    case networkError(Error)
-    case decodingError(Error)
-}
-```
-
-## Testing Requirements
-- Test message operations
-  - Get/store messages
-  - Thread message retrieval
-  - Pagination handling
-- Verify phase operations
-  - Context handling
-  - Response processing
-  - Error cases
-- Test error handling
-  - Network errors
-  - Invalid data
-  - Missing resources
-
-## Success Criteria
-- Reliable message operations
-- Clean error handling
-- Type-safe API interface
-- Proper context handling
-
-=== File: docs/issues/issue_3.md ===
-
-
-
-==
-issue_3
-==
-
-
-# docs/issues/issue_3.md
-
-# Tokenomics and CHOIR Token Integration
+# SUI Blockchain Smart Contracts
 
 ## Parent Issue
 
@@ -1111,239 +656,70 @@ issue_3
 
 ## Related Issues
 
-- Depends on: [SUI Blockchain Smart Contracts](issue_2.md)
-- Blocks: [Proxy Security and Backend Services](issue_4.md)
-- Related to: [Client-Side Intelligence and Personalization](issue_6.md)
+- Depends on: [Local Data Management and Persistence](issue_1.md)
+- Blocks: [Tokenomics and CHOIR Token Integration](issue_3.md)
+- Related to: [Proxy Security and Backend Services](issue_4.md)
 
 ## Description
 
-Integrate the CHOIR token within the app, enabling staking, rewards distribution, and token transactions in line with the economic model. This involves setting up the token mechanics through smart contracts and ensuring seamless user interactions with tokens.
+Implement SUI blockchain integration using SUIKit for secure user authentication, thread ownership, and message verification. Focus on establishing the foundational blockchain interactions while maintaining secure key management.
 
 ## Tasks
 
-### 1. Token Mechanics Implementation
+### 1. SUIKit Integration
 
-- **Display Token Balances**
+- **Add SUIKit Package**
+  ```swift
+  // Package.swift
+  dependencies: [
+      .package(url: "https://github.com/OpenDive/SuiKit.git", .upToNextMajor(from: "1.2.2"))
+  ]
+  ```
+- Configure providers for testnet/mainnet
+- Implement basic wallet operations
 
-  - Show users their CHOIR token balances within the app.
-  - Include both wallet balance and staked amounts.
+### 2. Key Management
 
-- **Implement Staking Functionality**
+- **Implement Secure Key Storage**
 
-  - Allow users to stake tokens when participating in threads.
-  - Enable staking amounts to vary based on thread temperature or frequency.
+  ```swift
+  class KeyManager {
+      private let keychain = KeychainService()
 
-- **Reward Distribution**
-  - Distribute rewards based on user contributions and participation.
-  - Implement automated reward calculations tied to the quantum harmonic oscillator model.
+      func storeKeys(_ wallet: Wallet) throws {
+          try keychain.save(wallet.privateKey, forKey: "sui_private_key")
+          try keychain.save(wallet.publicKey, forKey: "sui_public_key")
+      }
+  }
+  ```
 
-### 2. User Interface Enhancements
+- Use Keychain for private key storage
+- Handle key import/export securely
 
-- **Rewards Dashboard**
+### 3. User Authentication
 
-  - Create a dashboard displaying earned rewards.
-  - Visualize performance and progress in token accumulation.
+- Implement wallet-based authentication
+- Create user profiles linked to SUI addresses
+- Handle session management
 
-- **Staking Actions**
+### 4. Thread Ownership
 
-  - Include UI elements for staking and unstaking tokens.
-  - Guide users through the staking process with clear instructions.
-
-- **Transaction History**
-  - Provide a ledger of token transactions.
-  - Enhance transparency and user trust.
-
-### 3. Education and Compliance
-
-- **In-App Explanations**
-
-  - Include explanations of token mechanics within the app.
-  - Educate users on staking, rewards, and token usage.
-
-- **Regulatory Compliance**
-  - Ensure the tokenomics align with relevant financial and data protection regulations.
-  - Implement necessary measures for compliance.
+- Design thread ownership smart contract
+- Implement thread creation/transfer
+- Handle co-author permissions
 
 ## Success Criteria
 
-- **Seamless Token Integration**
-
-  - Users can view, stake, and manage their CHOIR tokens effortlessly.
-  - Token transactions are processed correctly and securely via the blockchain.
-
-- **Aligned Economic Model**
-
-  - Tokenomics reflect the documented economic principles of the platform.
-  - Rewards distribution is fair and incentivizes desired user behaviors.
-
-- **User Education**
-  - Users understand how the token system works through in-app resources.
-  - Compliance with regulations is maintained to avoid legal issues.
+- Secure key management
+- Reliable blockchain interactions
+- Clean integration with SwiftData
+- Comprehensive test coverage
 
 ## Future Considerations
 
-- **Advanced Token Features**
-
-  - Explore decentralized governance models using CHOIR tokens.
-  - Implement additional token utilities as the platform evolves.
-
-- **Dynamic Reward Systems**
-  - Adapt reward mechanisms based on user feedback and platform needs.
-  - Introduce tiered rewards or bonuses for high contributors.
-
----
-
-=== File: docs/issues/issue_4.md ===
-
-
-
-==
-issue_4
-==
-
-
-# User Identity Implementation
-
-## Parent Issue
-[Core Message System Implementation](issue_0.md)
-
-## Related Issues
-- Depends on: [Message Type Reconciliation](issue_1.md)
-- Blocks: [Thread State Management](issue_5.md)
-- Related to: [API Client Message Handling](issue_2.md)
-
-## Description
-Implement basic user identity management using public/private key pairs stored in UserDefaults, integrating with the existing users collection in Qdrant.
-
-## Current State
-- Have users collection in Qdrant
-- Need local key management
-- Need user creation/retrieval
-- Need API integration
-
-## Tasks
-- [ ] Implement key management
-  - [ ] Generate key pairs
-  - [ ] Store in UserDefaults
-  - [ ] Handle key retrieval
-  - [ ] Add basic validation
-- [ ] Create User type
-  - [ ] Match Qdrant schema
-  - [ ] Add local state
-  - [ ] Handle serialization
-- [ ] Add API integration
-  - [ ] User creation
-  - [ ] User retrieval
-  - [ ] Error handling
-- [ ] Implement UserManager
-  - [ ] Key lifecycle
-  - [ ] User state
-  - [ ] API coordination
-
-## Code Examples
-```swift
-// User types
-struct User: Codable, Identifiable {
-    let id: String          // UUID
-    let publicKey: String   // Base64 encoded public key
-    let createdAt: String   // ISO8601 date
-    let threadIds: [String] // Associated thread IDs
-
-    enum CodingKeys: String, CodingKey {
-        case id
-        case publicKey = "public_key"
-        case createdAt = "created_at"
-        case threadIds = "thread_ids"
-    }
-}
-
-struct UserCreate: Codable {
-    let publicKey: String
-
-    enum CodingKeys: String, CodingKey {
-        case publicKey = "public_key"
-    }
-}
-
-// User management
-actor UserManager {
-    private let userDefaults = UserDefaults.standard
-    private let api: ChorusAPIClient
-
-    // Key constants
-    private let privateKeyKey = "com.choir.privateKey"
-    private let publicKeyKey = "com.choir.publicKey"
-
-    // Key management
-    private func generateKeyPair() throws -> (privateKey: SecKey, publicKey: SecKey) {
-        let attributes: [String: Any] = [
-            kSecAttrKeyType as String: kSecAttrKeyTypeECSECPrimeRandom,
-            kSecAttrKeySizeInBits as String: 256
-        ]
-
-        var error: Unmanaged<CFError>?
-        guard let privateKey = SecKeyCreateRandomKey(attributes as CFDictionary, &error),
-              let publicKey = SecKeyCopyPublicKey(privateKey) else {
-            throw error?.takeRetainedValue() ?? KeyError.generationFailed
-        }
-
-        return (privateKey, publicKey)
-    }
-
-    // User operations
-    func getCurrentUser() async throws -> User {
-        if let publicKey = userDefaults.string(forKey: publicKeyKey),
-           let user = try await api.getUser(publicKey) {
-            return user
-        }
-
-        // Create new user if none exists
-        return try await createUser()
-    }
-
-    private func createUser() async throws -> User {
-        // Generate new keys
-        let (privateKey, publicKey) = try generateKeyPair()
-
-        // Store keys
-        userDefaults.set(privateKey.base64String, forKey: privateKeyKey)
-        userDefaults.set(publicKey.base64String, forKey: publicKeyKey)
-
-        // Create user in Qdrant
-        return try await api.createUser(UserCreate(
-            publicKey: publicKey.base64String
-        ))
-    }
-}
-
-// Error types
-enum KeyError: Error {
-    case generationFailed
-    case invalidKey
-    case storageError
-    case notFound
-}
-```
-
-## Testing Requirements
-- Test key management
-  - Key generation
-  - Storage/retrieval
-  - Validation
-- Test user operations
-  - User creation
-  - User retrieval
-  - Error cases
-- Test API integration
-  - Network operations
-  - Error handling
-  - State management
-
-## Success Criteria
-- Reliable key management
-- Clean user operations
-- Proper error handling
-- Type-safe implementation
+- Advanced smart contract features
+- Multi-device key sync
+- Enhanced permission models
 
 === File: docs/issues/issue_5.md ===
 
@@ -1354,119 +730,88 @@ issue_5
 ==
 
 
-# Thread State Management
+# Enhanced UI/UX with Carousel and Interaction Patterns
 
 ## Parent Issue
-[Core Message System Implementation](issue_0.md)
+
+[Core Client-Side Implementation](issue_0.md)
 
 ## Related Issues
-- Depends on: [Message Type Reconciliation](issue_1.md), [User Identity Implementation](issue_4.md)
-- Blocks: None
-- Related to: [Coordinator Message Flow](issue_3.md)
+
+- Depends on: [Proxy Security and Backend Services](issue_4.md)
+- Blocks: [Client-Side Intelligence](issue_6.md)
+- Related to: [Testing and Quality Assurance](issue_7.md)
 
 ## Description
-Implement thread state management that maintains local state while synchronizing with Qdrant storage, handling message history and thread metadata.
+
+Implement the carousel-based UI pattern for navigating through Chorus Cycle phases, with a focus on typographic design and fluid interactions. The interface should show previews of adjacent phases while maintaining clarity and usability.
 
 ## Tasks
-- [ ] Implement Thread model with message history
-- [ ] Add thread state synchronization
-- [ ] Handle message addition/removal
-- [ ] Implement thread metadata updates
 
-## Code Examples
-```swift
-class Thread: ObservableObject, Identifiable {
-    let id: UUID
-    let authorId: String  // public key
-    @Published private(set) var messages: [ThreadMessage]
+### 1. Carousel Implementation
 
-    func addMessage(_ content: String) async throws {
-        let message = ThreadMessage(content: content)
-        messages.append(message)
+- **Basic TabView Setup**
 
-        // Sync with Qdrant
-        try await vectorStorage.storeMessage(message)
-    }
+  ```swift
+  struct ChorusCarouselView: View {
+      @State private var currentPhase: Phase = .action
+      @ObservedObject var viewModel: ChorusViewModel
 
-    func loadHistory() async throws {
-        messages = try await api.getThreadMessages(id.uuidString)
-            .map(ThreadMessage.init)
-    }
-}
-```
+      var body: some View {
+          TabView(selection: $currentPhase) {
+              ForEach(Phase.allCases) { phase in
+                  PhaseView(phase: phase, viewModel: viewModel)
+                      .tag(phase)
+              }
+          }
+          .tabViewStyle(.page)
+      }
+  }
+  ```
 
-## Testing Requirements
-- Test thread creation/loading
-- Verify message synchronization
-- Test state management
-- Validate error handling
+### 2. Phase Views
 
-## Success Criteria
-- Reliable state management
-- Clean synchronization
-- Proper error handling
+- **Individual Phase Display**
 
-=== File: docs/issues/issue_6.md ===
+  ```swift
+  struct PhaseView: View {
+      let phase: Phase
+      @ObservedObject var viewModel: ChorusViewModel
 
+      var body: some View {
+          VStack {
+              // Phase content with typographic styling
+              // Adjacent phase previews
+              // Loading states
+          }
+      }
+  }
+  ```
 
+### 3. Animations and Transitions
 
-==
-issue_6
-==
+- Implement smooth phase transitions
+- Add loading state animations
+- Handle gesture-based navigation
 
+### 4. Accessibility
 
-# Integration Testing Suite
-
-## Parent Issue
-[Core Message System Implementation](issue_0.md)
-
-## Related Issues
-- Depends on: All previous issues
-- Blocks: None
-- Related to: All implementation issues
-
-## Description
-Create comprehensive integration tests that verify the entire message flow, from user creation through thread management and message processing.
-
-## Tasks
-- [ ] Set up test environment
-- [ ] Create end-to-end flow tests
-- [ ] Add performance tests
-- [ ] Implement error scenario tests
-
-## Code Examples
-```swift
-class IntegrationTests: XCTestCase {
-    func testCompleteMessageFlow() async throws {
-        // Create user
-        let user = try await userManager.createUser()
-
-        // Create thread
-        let thread = try await threadManager.createThread("Test Thread")
-
-        // Add message
-        let message = try await thread.addMessage("Test message")
-
-        // Verify storage
-        let stored = try await api.getMessage(message.id)
-        XCTAssertEqual(stored.content, "Test message")
-
-        // Verify thread state
-        XCTAssertEqual(thread.messages.count, 1)
-    }
-}
-```
-
-## Testing Requirements
-- Full flow coverage
-- Error scenario testing
-- Performance benchmarks
-- State verification
+- Support VoiceOver
+- Implement Dynamic Type
+- Add accessibility labels and hints
 
 ## Success Criteria
-- Complete test coverage
-- Reliable test suite
-- Clear failure reporting
+
+- Smooth navigation between phases
+- Clear visibility of current and adjacent phases
+- Responsive animations and transitions
+- Full accessibility support
+
+## Future Considerations
+
+- Advanced gesture controls
+- Custom transition animations
+- Enhanced typographic treatments
 
 === File: docs/issues/issue_7.md ===
 
@@ -1477,52 +822,107 @@ issue_7
 ==
 
 
-# Error Handling Strategy
+# Testing and Quality Assurance
 
 ## Parent Issue
-[Core Message System Implementation](issue_0.md)
+
+[Core Client-Side Implementation](issue_0.md)
 
 ## Related Issues
-- Depends on: All implementation issues
+
+- Depends on: [Client-Side Intelligence](issue_6.md)
 - Blocks: None
-- Related to: [Integration Testing Suite](issue_6.md)
+- Related to: [Documentation and Developer Onboarding](issue_8.md)
 
 ## Description
-Implement comprehensive error handling strategy across all layers (API, Coordinator, User, Thread) with proper error propagation and user feedback.
+
+Establish comprehensive testing protocols for the client-side architecture, focusing on SUI blockchain integration, AI API interactions through the proxy, and the carousel UI. Ensure reliability and performance across all components.
 
 ## Tasks
-- [ ] Define error types hierarchy
-- [ ] Implement error propagation
-- [ ] Add error recovery strategies
-- [ ] Create user-facing error messages
 
-## Code Examples
-```swift
-enum ChoirError: Error {
-    // API Errors
-    case networkError(underlying: Error)
-    case decodingError(context: String)
+### 1. Unit Testing
 
-    // Domain Errors
-    case messageNotFound(id: String)
-    case threadAccessDenied(id: String)
-    case userNotAuthenticated
+- **SwiftData Models**
 
-    // State Errors
-    case invalidPhaseTransition(from: Phase, to: Phase)
-    case inconsistentThreadState(details: String)
+  ```swift
+  class ModelTests: XCTestCase {
+      var container: ModelContainer!
 
-    var userMessage: String {
-        switch self {
-        case .networkError:
-            return "Unable to connect. Please check your connection."
-        case .messageNotFound:
-            return "Message not found."
-        // etc...
-        }
-    }
-}
-```
+      override func setUp() {
+          container = try! ModelContainer(
+              for: User.self, Thread.self, Message.self,
+              configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+          )
+      }
+
+      func testThreadCreation() async throws {
+          let user = User(id: UUID(), publicKey: "test_key")
+          let thread = Thread(title: "Test Thread", owner: user)
+          container.mainContext.insert(thread)
+          try container.mainContext.save()
+
+          XCTAssertEqual(thread.owner.id, user.id)
+      }
+  }
+  ```
+
+### 2. Integration Testing
+
+- **SUI Integration Tests**
+
+  ```swift
+  class SUIntegrationTests: XCTestCase {
+      func testWalletCreation() async throws {
+          let wallet = try await SUIWallet.create()
+          XCTAssertNotNil(wallet.publicKey)
+          XCTAssertNotNil(wallet.privateKey)
+      }
+
+      func testMessageSigning() async throws {
+          let message = "Test message"
+          let signature = try await wallet.sign(message)
+          let isValid = try await wallet.verify(signature, for: message)
+          XCTAssertTrue(isValid)
+      }
+  }
+  ```
+
+### 3. UI Testing
+
+- **Carousel Navigation Tests**
+
+  ```swift
+  class CarouselUITests: XCTestCase {
+      func testPhaseNavigation() {
+          let app = XCUIApplication()
+          app.launch()
+
+          // Test swipe gestures
+          let carousel = app.otherElements["phase_carousel"]
+          carousel.swipeLeft()
+          XCTAssertTrue(app.staticTexts["Experience"].exists)
+      }
+  }
+  ```
+
+### 4. Performance Testing
+
+- Measure AI API response times
+- Monitor memory usage
+- Test under different network conditions
+
+## Success Criteria
+
+- High test coverage (>80%)
+- Stable CI/CD pipeline
+- Reliable blockchain interactions
+- Smooth UI performance
+
+## Future Considerations
+
+- Automated UI testing
+- Load testing for proxy server
+- Enhanced blockchain testing
 
 === File: docs/issues/issue_8.md ===
 
@@ -1533,147 +933,54 @@ issue_8
 ==
 
 
-# docs/issues/issue_8.md
-
-# Documentation and Developer Onboarding
+# Deploy to TestFlight and Render
 
 ## Parent Issue
-
 [Core Client-Side Implementation](issue_0.md)
 
-## Related Issues
-
-- Depends on: All previous issues (0-7)
-- Blocks: None
-- Related to: None
-
 ## Description
-
-Update and expand documentation to facilitate team growth and knowledge sharing. Ensure that new team members can onboard quickly and contribute effectively by providing clear guides, coding standards, and comprehensive documentation of all components.
+Deploy the iOS app to TestFlight and the proxy server to Render, ensuring secure configuration and proper monitoring.
 
 ## Tasks
 
-### 1. Update Technical Documentation
+### 1. Proxy Server Deployment
+```python
+# app/config.py
+class Settings:
+    ANTHROPIC_API_KEY: str
+    OPENAI_API_KEY: str
+    QDRANT_URL: str
+    QDRANT_API_KEY: str
 
-- **Document New Components**
+    class Config:
+        env_file = ".env"
+```
 
-  - Ensure that all newly implemented features (e.g., proxy authentication, SUI integration, carousel UI) are thoroughly documented.
-  - Include architecture diagrams, flowcharts, and code examples where applicable.
+- [ ] Configure Render service
+  - [ ] Set environment variables
+  - [ ] Configure logging
+  - [ ] Set up monitoring
+  - [ ] Deploy API
 
-- **API Usage Guides**
-
-  - Provide detailed guides on how to use the integrated Anthropic and OpenAI APIs.
-  - Document the abstraction layer facilitating future LFM integration.
-
-- **Smart Contract Documentation**
-  - Detail the functionalities of each smart contract deployed on the SUI blockchain.
-  - Explain how thread ownership, token mechanics, and permissions are managed on-chain.
-
-### 2. Create Onboarding Guides
-
-- **Development Environment Setup**
-
-  - Update `Development Environment Setup` to reflect the current client-side architecture and dependencies.
-  - Include steps for setting up SwiftData, SUI wallets, and proxy server connections.
-
-- **Coding Standards and Best Practices**
-
-  - Define and document coding standards for Swift, ensuring consistency across the codebase.
-  - Outline best practices for using SwiftUI, asynchronous programming, and secure coding.
-
-- **Contribution Guidelines**
-  - Provide guidelines on how to contribute to the project, including branching strategies, commit message conventions, and code review processes.
-
-### 3. Knowledge Base Creation
-
-- **Use Wikis or Documentation Sites**
-
-  - Set up a centralized knowledge base using tools like GitHub Wikis, Notion, or ReadTheDocs.
-  - Organize information for easy access, categorizing by components, features, and processes.
-
-- **Encourage Team Contributions**
-  - Allow team members to add and update documentation.
-  - Implement a review process to ensure documentation quality and accuracy.
-
-### 4. Continuous Documentation Updates
-
-- **Maintain Up-to-Date Docs**
-
-  - Regularly update documentation to reflect ongoing development and changes.
-  - Assign ownership for different documentation sections to responsible team members.
-
-- **Integrate Documentation into CI/CD**
-  - Automate the generation and validation of documentation during the CI/CD pipeline.
-  - Ensure that documentation is built and available with each release.
+### 2. TestFlight Submission
+- [ ] App Store Connect setup
+  - [ ] Configure app details
+  - [ ] Add test information
+  - [ ] Set up TestFlight users
+- [ ] Build preparation
+  - [ ] Update bundle ID
+  - [ ] Configure signing
+  - [ ] Set version/build numbers
+- [ ] Submit build
+  - [ ] Run archive
+  - [ ] Upload to App Store Connect
+  - [ ] Submit for review
 
 ## Success Criteria
-
-- **Comprehensive Documentation**
-
-  - All aspects of the platform are well-documented, including architecture, features, and usage.
-  - Documentation is clear, concise, and accessible to all team members.
-
-- **Efficient Onboarding**
-
-  - New developers can set up their development environment and start contributing quickly.
-  - Onboarding guides cover all necessary steps and common issues.
-
-- **Active Knowledge Sharing**
-  - Team members regularly contribute to and update the knowledge base.
-  - Documentation evolves with the project, maintaining relevance and accuracy.
-
-## Future Considerations
-
-- **Advanced Documentation Features**
-
-  - Implement search functionality for the knowledge base to enhance accessibility.
-  - Incorporate interactive tutorials or walkthroughs for complex features.
-
-- **Localization and Internationalization**
-
-  - Translate documentation into multiple languages to support a diverse development team.
-  - Ensure that technical terms are consistently translated and understood.
-
-- **Feedback Mechanisms**
-  - Enable team members to provide feedback or suggest improvements to documentation.
-  - Regularly review and incorporate feedback to enhance documentation quality.
-
-## Action Plan
-
-1. **Audit Existing Documentation**
-
-   - Review current documentation for completeness and accuracy.
-   - Identify gaps and prioritize areas needing updates.
-
-2. **Assign Documentation Owners**
-
-   - Assign team members to be responsible for different sections of the documentation.
-   - Ensure accountability and regular updates.
-
-3. **Implement Onboarding Guides**
-
-   - Develop step-by-step guides for setting up the development environment.
-   - Include troubleshooting sections for common setup issues.
-
-4. **Establish Contribution Processes**
-
-   - Define how team members can contribute to and update documentation.
-   - Implement review processes to maintain documentation quality.
-
-5. **Integrate into Development Workflow**
-
-   - Make documentation updates a part of the development process.
-   - Ensure that new features come with corresponding documentation.
-
-6. **Regularly Update and Expand Docs**
-   - Schedule periodic reviews of documentation to keep it up-to-date.
-   - Expand documentation as the project grows and new features are added.
-
-## Conclusion
-
-Effective documentation and streamlined onboarding are crucial for the project's success, especially as the team expands. By maintaining comprehensive, accessible, and up-to-date documentation, we ensure that all team members can collaborate efficiently, contribute effectively, and uphold the platform's quality standards.
-
----
+- Proxy server running reliably on Render
+- App approved on TestFlight
+- Monitoring in place
+- Error tracking functional
 
 === File: docs/issues/issue_9.md ===
 
@@ -1684,277 +991,50 @@ issue_9
 ==
 
 
-# State Recovery & Persistence
+# Message Rewards Implementation
 
 ## Parent Issue
-[Core Message System Implementation](issue_0.md)
-
-## Related Issues
-- Depends on: [Thread State Management](issue_5.md)
-- Related to: [Coordinator Message Flow](issue_3.md)
-- Critical for: Chorus Cycle coherence
+[Core Client-Side Implementation](issue_0.md)
 
 ## Description
-Implement state recovery and persistence to maintain Chorus cycle coherence across app lifecycle events (termination, suspension, memory pressure). This isn't just about convenience - it's about preserving the integrity of the cycle's context and phase state.
-
-## Core Requirements
-1. Phase State Preservation
-   - Save current phase (AEIOU-Y)
-   - Preserve phase-specific context
-   - Enable clean phase resumption
-   - Maintain cycle coherence
-
-2. Thread Context Continuity
-   - Save full conversation context
-   - Preserve message relationships
-   - Maintain semantic connections
-   - Enable coherent continuation
-
-3. Cycle Integrity
-   - Handle interruptions gracefully
-   - Preserve cycle momentum
-   - Maintain context relevance
-   - Enable natural resumption
-
-## Context Management & Summarization
-
-1. Progressive Summarization
-```swift
-actor ContextManager {
-    // Maintain sliding window of full context
-    private var recentMessages: [MessagePoint]
-    // Keep compressed summaries of older context
-    private var historicalSummaries: [ContextSummary]
-
-    struct ContextSummary: Codable {
-        let timespan: DateInterval
-        let keyPoints: [String]
-        let semanticMarkers: [String: Float]
-        let threadState: ThreadStateSnapshot
-
-        // Link to full context if needed
-        let archiveReference: String
-    }
-
-    func updateContext(_ newMessage: MessagePoint) async throws {
-        // Add to recent messages
-        recentMessages.append(newMessage)
-
-        // Check if we need to summarize older messages
-        if recentMessages.count > Constants.maxRecentMessages {
-            try await compressOlderContext()
-        }
-    }
-
-    private func compressOlderContext() async throws {
-        let toCompress = recentMessages.prefix(Constants.compressionBatchSize)
-
-        // Generate summary using AI
-        let summary = try await generateContextSummary(toCompress)
-
-        // Archive full messages for potential recovery
-        try await archiveMessages(toCompress)
-
-        // Update state
-        historicalSummaries.append(summary)
-        recentMessages.removeFirst(Constants.compressionBatchSize)
-    }
-}
-```
-
-2. Context Recovery
-```swift
-extension ContextManager {
-    func recoverContext() async throws -> ThreadContext {
-        // Start with recent messages
-        var context = ThreadContext(messages: recentMessages)
-
-        // Add relevant summaries
-        for summary in historicalSummaries.reversed() {
-            if await isRelevantToCurrentPhase(summary) {
-                context.addSummary(summary)
-            }
-
-            // Stop if we have enough context
-            if await context.isSufficient {
-                break
-            }
-        }
-
-        // If needed, fetch archived messages
-        if !context.isSufficient {
-            try await expandContext(context)
-        }
-
-        return context
-    }
-
-    private func expandContext(_ context: ThreadContext) async throws {
-        // Identify gaps that need expansion
-        let gaps = await context.findContextGaps()
-
-        // Fetch archived messages for important gaps
-        for gap in gaps {
-            if await isGapCritical(gap) {
-                let archived = try await fetchArchivedMessages(for: gap)
-                context.fillGap(gap, with: archived)
-            }
-        }
-    }
-}
-```
-
-3. Semantic Continuity
-```swift
-struct SemanticMarker: Codable {
-    let concept: String
-    let strength: Float
-    let firstMention: Date
-    let recentMentions: [Date]
-
-    var isActive: Bool {
-        // Check if concept is still relevant
-        Date().timeIntervalSince(recentMentions.last ?? firstMention) < Constants.conceptTimeout
-    }
-}
-
-extension ContextManager {
-    func maintainSemanticContinuity() async throws {
-        // Track key concepts through summarization
-        var activeMarkers = [SemanticMarker]()
-
-        for message in recentMessages {
-            let concepts = try await extractConcepts(from: message)
-            try await updateMarkers(activeMarkers, with: concepts)
-        }
-
-        // Ensure summaries preserve important markers
-        for marker in activeMarkers where marker.isActive {
-            try await ensureMarkerPreserved(marker)
-        }
-    }
-}
-```
+Implement the quantum harmonic oscillator model for message rewards and prior citations, ensuring proper token distribution and stake requirements.
 
 ## Tasks
-- [ ] Implement phase state persistence
-  ```swift
-  struct PhaseState: Codable {
-      let phase: Phase
-      let context: [MessagePoint]
-      let intermediateResults: [String: Any]
-      let timestamp: Date
 
-      // Recovery metadata
-      let cycleId: UUID
-      let continuityMarkers: [String: String]
-  }
-  ```
-
-- [ ] Add thread state recovery
-  ```swift
-  actor ThreadRecovery {
-      func saveState(_ thread: Thread) async throws {
-          let state = ThreadState(
-              messages: thread.messages,
-              currentPhase: thread.currentPhase,
-              phaseState: thread.phaseState,
-              contextualLinks: thread.contextualLinks
-          )
-          try await persistState(state)
-      }
-
-      func recoverThread(_ id: ThreadID) async throws -> Thread {
-          guard let state = try await loadState(id) else {
-              throw RecoveryError.stateNotFound
-          }
-          return try await rebuildThread(from: state)
-      }
-  }
-  ```
-
-- [ ] Implement cycle recovery logic
-  ```swift
-  extension ChorusCoordinator {
-      func recoverCycle() async throws {
-          let state = try await loadPhaseState()
-
-          // Validate cycle integrity
-          guard await validateCycleCoherence(state) else {
-              throw CycleError.coherenceLost
-          }
-
-          // Restore phase context
-          currentPhase = state.phase
-          phaseContext = state.context
-
-          // Resume cycle
-          try await resumeCycle(from: state)
-      }
-  }
-  ```
-
-## Testing Requirements
-1. Cycle Coherence
-   - Test interruption at each phase
-   - Verify context preservation
-   - Check semantic continuity
-   - Validate cycle resumption
-
-2. State Recovery
-   - Test app termination scenarios
-   - Verify memory pressure handling
-   - Check background task completion
-   - Validate state reconstruction
-
-3. User Experience
-   - Verify seamless resumption
-   - Test context continuity
-   - Check interaction flow
-   - Validate recovery UX
-
-4. Context Management
-   - Test progressive summarization
-   - Verify semantic preservation
-   - Check marker continuity
-   - Validate context recovery
-   - Test gap identification and filling
-
-5. Summary Quality
-   - Verify information preservation
-   - Test semantic marker tracking
-   - Check summary relevance
-   - Validate compression ratios
-   - Test recovery from summaries
-
-## Success Criteria
-- Maintains cycle coherence across interruptions
-- Preserves semantic context
-- Enables natural conversation flow
-- Handles lifecycle events gracefully
-- Provides seamless user experience
-- Maintains semantic continuity through summarization
-- Efficiently manages context depth vs. breadth
-- Preserves critical information in summaries
-- Enables smart context recovery
-- Handles context gaps gracefully
-
-## Code Examples
+### 1. Message Rewards
 ```swift
-actor StateManager {
-    func saveState() async throws {
-        let state = AppState(
-            currentThread: currentThread,
-            currentMessage: currentMessage,
-            phaseResults: phaseResults
-        )
-        try await persistState(state)
+struct RewardCalculator {
+    // E(n) = ℏω(n + 1/2)
+    func calculateStakeRequirement(thread: Thread) -> TokenAmount {
+        let n = thread.coAuthors.count
+        let ω = thread.frequency
+        return TokenAmount(ℏ * ω * (Float(n) + 0.5))
     }
 
-    func recoverState() async throws {
-        guard let state = try await loadPersistedState() else {
-            return
-        }
-        // Restore state...
+    // R(t) = R_total × k/(1 + kt)ln(1 + kT)
+    func calculateMessageReward(timestamp: Date) -> TokenAmount {
+        let t = timestamp.timeIntervalSince(LAUNCH_DATE)
+        let k = DECAY_CONSTANT
+        let T = TOTAL_PERIOD
+        return TokenAmount(TOTAL_SUPPLY * (k / (1 + k * t)) * log(1 + k * T))
     }
 }
+```
+
+### 2. Prior Citations
+```swift
+func calculatePriorValue(
+    quality: Float,
+    totalQuality: Float,
+    treasuryBalance: TokenAmount
+) -> TokenAmount {
+    // V(p) = B_t × Q(p)/∑Q(i)
+    return TokenAmount(treasuryBalance.value * (quality / totalQuality))
+}
+```
+
+## Success Criteria
+- Rewards calculated correctly
+- Prior citations valued properly
+- Token distribution working
+- State transitions verified

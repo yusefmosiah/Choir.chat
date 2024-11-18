@@ -1,105 +1,72 @@
-# API Client Message Handling
+# SUI Blockchain Smart Contracts
 
 ## Parent Issue
-[Core Message System Implementation](issue_0.md)
+
+[Core Client-Side Implementation](issue_0.md)
 
 ## Related Issues
-- Depends on: [Message Type Reconciliation](issue_1.md)
-- Blocks: [Coordinator Message Flow](issue_3.md)
-- Related to: [Thread State Management](issue_5.md)
+
+- Depends on: [Local Data Management and Persistence](issue_1.md)
+- Blocks: [Tokenomics and CHOIR Token Integration](issue_3.md)
+- Related to: [Proxy Security and Backend Services](issue_4.md)
 
 ## Description
-Update ChorusAPIClient to handle the new unified message types while maintaining compatibility with existing endpoints and response structures.
 
-## Current State
-- Have working API client with phase-specific endpoints
-- Using existing response types from ChorusModels.swift
-- Need to add message point handling
-- Need to integrate with Qdrant collections
+Implement SUI blockchain integration using SUIKit for secure user authentication, thread ownership, and message verification. Focus on establishing the foundational blockchain interactions while maintaining secure key management.
 
 ## Tasks
-- [ ] Add message point endpoints
-  - [ ] getMessage by ID
-  - [ ] storeMessage with vector
-  - [ ] getThreadMessages with pagination
-- [ ] Update phase endpoints
-  - [ ] Modify request/response types
-  - [ ] Add message context
-  - [ ] Handle errors gracefully
-- [ ] Add thread operations
-  - [ ] Create/get thread
-  - [ ] Update thread state
-  - [ ] Handle message lists
-- [ ] Implement error handling
-  - [ ] Type-specific errors
-  - [ ] Retry logic
-  - [ ] Error reporting
 
-## Code Examples
-```swift
-extension ChorusAPIClient {
-    // Message operations
-    func getMessage(_ id: String) async throws -> MessagePoint {
-        return try await post(endpoint: "messages/\(id)", body: EmptyBody())
-    }
+### 1. SUIKit Integration
 
-    func storeMessage(_ message: MessagePoint) async throws {
-        try await post(endpoint: "messages", body: message)
-    }
+- **Add SUIKit Package**
+  ```swift
+  // Package.swift
+  dependencies: [
+      .package(url: "https://github.com/OpenDive/SuiKit.git", .upToNextMajor(from: "1.2.2"))
+  ]
+  ```
+- Configure providers for testnet/mainnet
+- Implement basic wallet operations
 
-    func getThreadMessages(
-        _ threadId: String,
-        limit: Int = 50,
-        before: String? = nil
-    ) async throws -> [MessagePoint] {
-        return try await post(
-            endpoint: "threads/\(threadId)/messages",
-            body: GetMessagesRequest(
-                limit: limit,
-                before: before
-            )
-        )
-    }
+### 2. Key Management
 
-    // Phase operations with message context
-    func processAction(_ input: String, context: [MessagePoint]) async throws -> ActionResponse {
-        return try await post(
-            endpoint: "chorus/action",
-            body: ActionRequestBody(
-                content: input,
-                threadID: currentThreadId,
-                context: context
-            )
-        )
-    }
-}
+- **Implement Secure Key Storage**
 
-// Error handling
-enum APIError: Error {
-    case messageNotFound(String)
-    case invalidMessageData(String)
-    case threadOperationFailed(String)
-    case networkError(Error)
-    case decodingError(Error)
-}
-```
+  ```swift
+  class KeyManager {
+      private let keychain = KeychainService()
 
-## Testing Requirements
-- Test message operations
-  - Get/store messages
-  - Thread message retrieval
-  - Pagination handling
-- Verify phase operations
-  - Context handling
-  - Response processing
-  - Error cases
-- Test error handling
-  - Network errors
-  - Invalid data
-  - Missing resources
+      func storeKeys(_ wallet: Wallet) throws {
+          try keychain.save(wallet.privateKey, forKey: "sui_private_key")
+          try keychain.save(wallet.publicKey, forKey: "sui_public_key")
+      }
+  }
+  ```
+
+- Use Keychain for private key storage
+- Handle key import/export securely
+
+### 3. User Authentication
+
+- Implement wallet-based authentication
+- Create user profiles linked to SUI addresses
+- Handle session management
+
+### 4. Thread Ownership
+
+- Design thread ownership smart contract
+- Implement thread creation/transfer
+- Handle co-author permissions
 
 ## Success Criteria
-- Reliable message operations
-- Clean error handling
-- Type-safe API interface
-- Proper context handling
+
+- Secure key management
+- Reliable blockchain interactions
+- Clean integration with SwiftData
+- Comprehensive test coverage
+
+## Future Considerations
+
+- Advanced smart contract features
+- Multi-device key sync
+- Enhanced permission models
