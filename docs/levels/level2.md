@@ -1931,6 +1931,684 @@ Remember: Today's work creates the space for tomorrow's creativity.
 
 Remember: Today's goal is a working foundation that we can build upon, not a complete feature set.
 
+=== File: docs/plan_carousel_ui_pattern.md ===
+
+
+
+==
+plan_carousel_ui_pattern
+==
+
+
+# Carousel UI Pattern
+
+VERSION carousel_ui:
+invariants: {
+"User-friendly navigation",
+"Clear phase distinction",
+"Responsive design"
+}
+assumptions: {
+"Using SwiftUI",
+"Phases are sequential",
+"Support for gestures"
+}
+docs_version: "0.1.0"
+
+## Introduction
+
+The Carousel UI Pattern provides an intuitive way for users to navigate through the different phases of the Chorus Cycle by swiping between views, creating a seamless and engaging experience.
+
+## Design Principles
+
+- **Intuitive Navigation**
+
+  - Users can swipe left or right to move between phases.
+  - Supports natural gesture interactions familiar to iOS users.
+
+- **Visual Feedback**
+
+  - Each phase is distinctly represented, enhancing user understanding.
+  - Progress indicators guide users on their journey.
+
+- **Responsive Animations**
+
+  - Smooth transitions improve perceived performance.
+  - Visual cues indicate loading states and interactive elements.
+
+- **Accessibility**
+  - Design accommodates various screen sizes and orientations.
+  - Supports VoiceOver and other accessibility features.
+
+## Implementation Details
+
+### 1. SwiftUI `TabView` with `PageTabViewStyle`
+
+- **Creating the Carousel**
+
+  ````swift
+  import SwiftUI
+
+  struct ChorusCarouselView: View {
+      @State private var selectedPhase = 0
+      let phases = ["Action", "Experience", "Intention", "Observation", "Understanding", "Yield"]
+
+      var body: some View {
+          TabView(selection: $selectedPhase) {
+              ForEach(0..<phases.count) { index in
+                  PhaseView(phaseName: phases[index])
+                      .tag(index)
+              }
+          }
+          .tabViewStyle(PageTabViewStyle(indexDisplayMode: .automatic))
+          .indexViewStyle(PageIndexViewStyle(backgroundDisplayMode: .interactive))
+      }
+  }  ```
+
+  ````
+
+- **Phase View**
+
+  ````swift
+  struct PhaseView: View {
+      let phaseName: String
+
+      var body: some View {
+          VStack {
+              Text(phaseName)
+                  .font(.largeTitle)
+                  .bold()
+              // Content specific to the phase
+          }
+          .padding()
+      }
+  }  ```
+  ````
+
+### 2. Gesture Support
+
+- **Custom Gestures**
+
+  While `TabView` with `PageTabViewStyle` handles basic swipe gestures, you may want to add custom gestures for additional controls.
+
+  ````swift
+  .gesture(
+      DragGesture()
+          .onEnded { value in
+              // Handle drag gestures
+          }
+  )  ```
+  ````
+
+### 3. Loading Indicators
+
+- **Phase-Specific Loading**
+
+  ````swift
+  struct PhaseView: View {
+      let phaseName: String
+      @State private var isLoading = false
+
+      var body: some View {
+          VStack {
+              if isLoading {
+                  ProgressView("Loading \(phaseName)...")
+              } else {
+                  // Display content
+              }
+          }
+          .onAppear {
+              // Start loading content
+              isLoading = true
+              loadContent()
+          }
+      }
+
+      func loadContent() {
+          // Simulate loading
+          DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+              isLoading = false
+          }
+      }
+  }  ```
+  ````
+
+### 4. Accessibility Features
+
+- **VoiceOver Support**
+
+  ````swift
+  .accessibilityElement(children: .contain)
+  .accessibility(label: Text("Phase \(phaseName)"))  ```
+
+  ````
+
+- **Dynamic Type**
+
+  Use relative font sizes to support dynamic type settings.
+
+  ````swift
+  .font(.title)  ```
+  ````
+
+### 5. Customization
+
+- **Page Indicators**
+
+  Customize the page indicators to match the app's theme.
+
+  ````swift
+  .indexViewStyle(PageIndexViewStyle(backgroundDisplayMode: .always))  ```
+
+  ````
+
+- **Animations**
+
+  Apply animations to transitions or loading states.
+
+  ````swift
+  .animation(.easeInOut(duration: 0.3))  ```
+  ````
+
+## User Experience Considerations
+
+- **Progress Awareness**
+
+  - Indicate which phase the user is on and how many are left.
+  - Use labels or progress bars.
+
+- **State Preservation**
+
+  - Retain user inputs or interactions when navigating between phases.
+  - Use `@State` or data models to store state.
+
+- **Error Handling**
+  - Inform the user of any issues loading content.
+  - Provide options to retry or seek help.
+
+## Advantages
+
+- **Engagement**
+
+  - Interactive elements keep users engaged.
+  - Swiping is more engaging than tapping buttons to proceed.
+
+- **Clarity**
+
+  - Clearly separates content associated with each phase.
+  - Reduces cognitive load by focusing on one phase at a time.
+
+- **Aesthetics**
+  - Modern and sleek design aligns with current UI trends.
+  - Enhances the perceived quality of the app.
+
+## Potential Challenges
+
+- **Content Overload**
+
+  - Ensure each phase view is not overcrowded.
+  - Break down information into digestible chunks.
+
+- **Performance**
+
+  - Optimize content loading to prevent lag during swiping.
+  - Load heavy content asynchronously.
+
+- **Usability on Different Devices**
+  - Test on various iPhone and iPad models.
+  - Ensure UI scales appropriately.
+
+---
+
+By adopting the Carousel UI Pattern, we enhance the user experience, making the navigation through the Chorus Cycle intuitive, engaging, and visually appealing.
+
+=== File: docs/plan_client_architecture.md ===
+
+
+
+==
+plan_client_architecture
+==
+
+
+# Client Architecture Principles
+
+VERSION client_architecture:
+invariants: {
+"Local-first processing",
+"Proxy-based security",
+"Natural UI flow"
+}
+assumptions: {
+"SUI blockchain integration",
+"Client-side AI processing",
+"Carousel-based UI"
+}
+docs_version: "0.1.0"
+
+## Core Architecture
+
+The system operates as a client-first platform:
+
+### 1. Local Processing
+
+- **On-Device AI**
+
+  - AI processing happens on the user's device.
+  - Reduces latency and improves responsiveness.
+  - Enhances privacy by keeping data local.
+
+- **Local Vector Operations**
+
+  - Embedding generation and vector searches run locally.
+  - Utilizes device capabilities for efficient computation.
+  - Enables offline functionality for certain features.
+
+- **State Management with SwiftData**
+
+  - Persistent storage of user data using SwiftData.
+  - Seamless data handling and synchronization.
+  - Robust model management with automatic updates.
+
+- **Secure Network Calls**
+  - All network requests are proxied securely.
+  - Sensitive data is protected during transmission.
+  - API keys and secrets are managed server-side.
+
+### 2. SUI Integration
+
+- **User Accounts via SUI Wallet**
+
+  - Users authenticate using their SUI blockchain wallet.
+  - Ensures secure and decentralized identity management.
+  - Facilitates seamless onboarding and account recovery.
+
+- **Thread Ownership on Chain**
+
+  - Thread creation and ownership are recorded on the SUI blockchain.
+  - Provides immutable proof of authorship and contribution.
+  - Enables decentralized management of content and permissions.
+
+- **Token Mechanics through Smart Contracts**
+
+  - CHOIR tokens are managed via SUI smart contracts.
+  - Supports token staking, rewards, and transfers.
+  - Aligns economic incentives with platform participation.
+
+- **Natural Blockchain Integration**
+  - SUI blockchain integration is transparent to users.
+  - Blockchain interactions are abstracted within the app.
+  - Users benefit from blockchain security without added complexity.
+
+### 3. UI Patterns
+
+- **Carousel-Based Phase Display**
+
+  - The Chorus Cycle phases are presented as a carousel.
+  - Users can swipe to navigate through different phases.
+  - Provides an intuitive and engaging experience.
+
+- **Natural Swipe Navigation**
+
+  - Gesture-based interactions enhance usability.
+  - Allows users to seamlessly explore content.
+  - Supports both linear and non-linear navigation.
+
+- **Progressive Loading States**
+
+  - Content and results load incrementally.
+  - Users receive immediate feedback during processing.
+  - Enhances perception of performance.
+
+- **Fluid Animations**
+  - Smooth transitions between UI elements.
+  - Animations convey state changes effectively.
+  - Contributes to a polished and modern interface.
+
+## Security Model
+
+Security is maintained through a proxy architecture and blockchain authentication:
+
+### 1. API Proxy
+
+- **Client Authentication with Proxy**
+
+  - The app authenticates with a server-side proxy.
+  - Authenticates requests without exposing API keys on the client.
+  - Ensures secure communication between the app and backend services.
+
+- **Managed API Keys**
+
+  - API keys for third-party services are stored securely on the server.
+  - The proxy handles requests to APIs like OpenAI or Anthropic.
+  - Simplifies API management and key rotation.
+
+- **Rate Limiting and Monitoring**
+
+  - The proxy implements rate limiting to prevent abuse.
+  - Monitors usage patterns to detect anomalies.
+  - Provides logging for auditing and analysis.
+
+- **Usage Tracking**
+  - Tracks API usage per user for billing or quota purposes.
+  - Enables fair usage policies and resource allocation.
+  - Supports analytics and reporting.
+
+### 2. SUI Authentication
+
+- **Wallet-Based Authentication**
+
+  - Users sign authentication requests using their SUI wallet.
+  - Eliminates the need for traditional passwords.
+  - Leverages blockchain security for identity verification.
+
+- **Message Signing for Auth**
+
+  - Challenges are signed with the user's private key.
+  - Verifiable signatures ensure the authenticity of requests.
+  - Prevents unauthorized access and impersonation.
+
+- **Chain-Based Permissions**
+
+  - Access rights and permissions are stored on-chain.
+  - Smart contracts enforce rules for content and token interactions.
+  - Provides a transparent and tamper-proof permission system.
+
+- **Natural Security Model**
+  - Users control their own keys and assets.
+  - Reduces reliance on centralized authentication systems.
+  - Enhances trust through decentralization.
+
+## Implementation Flow
+
+A natural development progression guides the implementation:
+
+### 1. Foundation
+
+- **Local AI Processing**
+
+  - Integrate on-device AI capabilities.
+  - Set up models for natural language processing and embeddings.
+  - Ensure models run efficiently on target devices.
+
+- **SwiftData Persistence**
+
+  - Utilize SwiftData for local data storage.
+  - Define data models for users, threads, messages, and tokens.
+  - Implement data synchronization strategies.
+
+- **Basic UI Patterns**
+
+  - Develop the core user interface with SwiftUI.
+  - Implement the carousel pattern for the Chorus Cycle.
+  - Focus on usability and accessibility.
+
+- **Proxy Authentication**
+  - Set up the API proxy server.
+  - Implement client-side authentication flows.
+  - Ensure secure communication between the app and proxy.
+
+### 2. Enhancement
+
+- **SUI Wallet Integration**
+
+  - Integrate SUIKit for blockchain interactions.
+  - Implement wallet creation, import, and transaction signing.
+  - Provide user guidance for managing wallets.
+
+- **Chain-Based Ownership**
+
+  - Develop smart contracts for thread and message ownership.
+  - Implement on-chain logic for co-author management.
+  - Ensure seamless synchronization between on-chain data and the app.
+
+- **Enhanced UI Animations**
+
+  - Refine animations and transitions.
+  - Use SwiftUI animations to enhance the user experience.
+  - Optimize performance for smooth interactions.
+
+- **Advanced Features**
+  - Add support for offline mode with local caching.
+  - Implement advanced analytics and user feedback mechanisms.
+  - Explore opportunities for AI personalization.
+
+## Benefits
+
+This architecture enables:
+
+1. **Client-Side Intelligence**
+
+   - Reduces dependency on external servers for AI processing.
+   - Offers faster responses and greater control over data.
+
+2. **Natural Security**
+
+   - Enhances security through blockchain authentication.
+   - Protects user data and assets with robust cryptography.
+
+3. **Fluid Interaction**
+
+   - Provides an engaging and intuitive user interface.
+   - Encourages user interaction through natural gestures.
+
+4. **Blockchain Integration**
+
+   - Leverages the strengths of SUI blockchain.
+   - Ensures transparency and trust in data management.
+
+5. **System Evolution**
+   - Facilitates future enhancements and scalability.
+   - Adapts to emerging technologies and user needs.
+
+## Assurance
+
+The system ensures:
+
+- **Local Processing**
+
+  - Data remains on the user's device unless explicitly shared.
+  - Users have control over their data and privacy.
+
+- **Secure Operations**
+
+  - Implements best practices for encryption and authentication.
+  - Regular security audits and updates.
+
+- **Natural UI Flow**
+
+  - Prioritizes user experience.
+  - Continuously refined based on user feedback.
+
+- **Chain Integration**
+
+  - Aligns with decentralized principles.
+  - Promotes user empowerment and autonomy.
+
+- **Sustainable Growth**
+  - Designed for scalability and maintainability.
+  - Embraces modular architecture for easy updates.
+
+---
+
+By establishing these core principles and structures, we create a robust foundation for the Choir platform's evolution towards a client-centric architecture with strong security, intuitive design, and seamless blockchain integration.
+
+=== File: docs/plan_client_side_processing.md ===
+
+
+
+==
+plan_client_side_processing
+==
+
+
+# Client-Side Processing
+
+VERSION client_processing:
+invariants: {
+"Local data handling",
+"Responsive interactions",
+"Privacy preservation"
+}
+assumptions: {
+"Device capabilities are sufficient",
+"Models are optimized for mobile",
+"Users prefer privacy"
+}
+docs_version: "0.1.0"
+
+## Introduction
+
+Moving processing tasks to the client-side leverages device capabilities to improve performance, reduce latency, and enhance user privacy by keeping data on the device.
+
+## Key Components
+
+### 1. On-Device AI Models
+
+- **Language Models**
+
+  - Utilize models like GPT-2 or smaller, optimized for on-device use.
+  - Handle natural language understanding and generation tasks.
+
+- **Embeddings**
+
+  - Generate vector embeddings for text using models like MobileBERT.
+  - Enable efficient similarity searches and semantic analysis.
+
+- **Model Optimization**
+  - Use techniques like quantization and pruning to reduce model size.
+  - Employ libraries like Core ML and TensorFlow Lite for performance.
+
+### 2. Local Data Storage
+
+- **SwiftData for Persistence**
+
+  - Manage user data, messages, and thread information locally.
+  - Ensure data consistency and integrity with robust models.
+
+- **Data Security**
+  - Encrypt sensitive data at rest.
+  - Use Keychain services for storing credentials and keys.
+
+### 3. Processing Workflows
+
+- **Chorus Cycle Phases**
+
+  - Implement each phase of the Chorus Cycle to run locally.
+  - Design workflows that connect outputs and inputs seamlessly.
+
+- **Thread and Message Handling**
+
+  - Process message approvals and thread updates on-device.
+  - Synchronize with the blockchain or server when needed.
+
+- **Error Handling**
+  - Detect and handle processing errors gracefully.
+  - Provide feedback to users and options to retry.
+
+## Implementation Steps
+
+### 1. Model Integration
+
+- **Select Appropriate Models**
+
+  - Choose models balancing performance and size.
+  - Test models on target devices to ensure acceptable performance.
+
+- **Convert Models for On-Device Use**
+
+  - Use Core ML Tools to convert models into Core ML format.
+  - Optimize models during conversion.
+
+- **Implement Model Interfaces**
+  - Create classes or structs to encapsulate model usage.
+  - Provide methods for inference and data preprocessing.
+
+### 2. Workflow Development
+
+- **Define Phase Logic**
+
+  - Translate each Chorus Cycle phase into functions or methods.
+  - Ensure inputs and outputs align for smooth transitions.
+
+- **State Management**
+  - Use `@StateObject` and `@EnvironmentObject` for data flow.
+  - Keep track of the current phase and intermediate results.
+
+### 3. Performance Optimization
+
+- **Asynchronous Processing**
+
+  - Execute heavy tasks on background threads using `DispatchQueue` or `async/await`.
+  - Update the UI on the main thread after processing.
+
+- **Caching**
+
+  - Cache model outputs where appropriate to avoid redundant computations.
+  - Manage cache size to prevent excessive memory usage.
+
+- **Battery Considerations**
+  - Monitor and optimize for battery consumption.
+  - Provide settings for users to adjust performance preferences.
+
+### 4. User Privacy and Security
+
+- **Data Handling**
+
+  - Clearly communicate to users what data is processed locally.
+  - Obtain consent if any data needs to be sent externally.
+
+- **Compliance**
+  - Ensure compliance with privacy laws and guidelines (e.g., GDPR, CCPA).
+  - Provide options for users to delete their data.
+
+## Benefits
+
+- **Improved Performance**
+
+  - Reduced latency leads to a smoother user experience.
+  - Eliminates network delays for processing tasks.
+
+- **Enhanced Privacy**
+
+  - Keeping data on-device minimizes exposure risks.
+  - Builds user trust through transparent data practices.
+
+- **Offline Capabilities**
+  - Basic functionalities remain available without internet connectivity.
+  - Improves accessibility for users with limited connectivity.
+
+## Challenges
+
+- **Device Limitations**
+
+  - Older devices may struggle with processing demands.
+  - Need to balance features with performance on lower-end hardware.
+
+- **Model Size**
+
+  - Larger models may not fit or perform well on mobile devices.
+  - Continual optimization is required.
+
+- **Resource Management**
+  - Ensure that processing does not interfere with other app functions.
+  - Manage memory and CPU usage to prevent app crashes or slowdowns.
+
+## Future Enhancements
+
+- **Model Updates**
+
+  - Implement mechanisms to update models as improvements are made.
+  - Consider on-device training or fine-tuning with user consent.
+
+- **Edge Computing Integration**
+  - Explore leveraging nearby devices or local networks for distributed processing.
+  - Potentially offload tasks while maintaining privacy.
+
+---
+
+By embracing client-side processing, we empower users with a responsive and private experience, harnessing the power of their devices to deliver advanced functionalities seamlessly.
+
 === File: docs/plan_id_persistence.md ===
 
 
@@ -2260,6 +2938,407 @@ This architecture enables:
 - System coherence
 - Natural evolution
 
+=== File: docs/plan_proxy_authentication.md ===
+
+
+
+==
+plan_proxy_authentication
+==
+
+
+# Proxy Authentication
+
+VERSION proxy_authentication:
+invariants: {
+"Secure API access",
+"User privacy",
+"Efficient communication"
+}
+assumptions: {
+"Proxy server is trusted",
+"Clients have SUI-based authentication",
+"APIs require secret keys"
+}
+docs_version: "0.1.0"
+
+## Introduction
+
+The proxy authentication system enables secure communication between the client app and third-party APIs without exposing sensitive API keys on the client side. It leverages a server-side proxy that authenticates clients using SUI-signed tokens.
+
+## Key Components
+
+### 1. Proxy Server
+
+- **API Gateway**
+
+  - Acts as a gateway between the client and external APIs (e.g., AI services).
+  - Routes requests and adds necessary authentication headers.
+
+- **Authentication Handler**
+
+  - Verifies client authentication tokens.
+  - Ensures only authorized requests are processed.
+
+- **Rate Limiting**
+
+  - Implements per-user rate limits to prevent abuse.
+  - Protects both the proxy server and external APIs from overload.
+
+- **Usage Monitoring**
+  - Logs requests for auditing and analytics.
+  - Tracks usage per user for potential billing or quotas.
+
+### 2. Client Authentication
+
+- **SUI-Signed Tokens**
+
+  - Clients sign a nonce or challenge with their private key.
+  - The signature is sent alongside requests to the proxy.
+
+- **Session Management**
+
+  - The proxy may issue short-lived session tokens after verification.
+  - Reduces the need to sign every request, improving performance.
+
+- **Request Signing**
+  - Critical requests may require additional signing for security.
+  - Ensures integrity and authenticity of sensitive operations.
+
+### 3. Secure Communication
+
+- **HTTPS**
+
+  - All communication between the client and proxy uses HTTPS.
+  - Encrypts data in transit to prevent interception.
+
+- **No API Keys on Client**
+  - API keys for third-party services remain securely on the proxy.
+  - Eliminates risk of keys being extracted from the app.
+
+## Implementation Steps
+
+### 1. Set Up the Proxy Server
+
+- **Choose a Hosting Environment**
+
+  - Deploy the proxy on a secure and scalable platform (e.g., AWS, Heroku).
+
+- **Implement API Routing**
+
+  - Configure routes that map client requests to external API endpoints.
+  - Include logic to add necessary authentication headers.
+
+- **Integrate SUI Verification**
+  - Implement signature verification using SUI libraries.
+  - Validate that the signature matches the expected public key.
+
+### 2. Develop Authentication Flow
+
+- **Nonce Generation**
+
+  - The proxy provides a unique nonce or challenge for the client to sign.
+  - Prevents replay attacks by ensuring each signature is unique.
+
+- **Signature Verification**
+
+  - Upon receiving a signed nonce, the proxy verifies it using the client's public key.
+  - Establishes trust in the client's identity.
+
+- **Session Tokens (Optional)**
+  - Issue JWT or similar tokens after successful authentication.
+  - Tokens include expiration to enhance security.
+
+### 3. Update the Client App
+
+- **Authentication Requests**
+
+  - Implement logic to request a nonce from the proxy.
+  - Sign the nonce using the SUI wallet and send back to the proxy.
+
+- **Request Headers**
+
+  - Attach authentication tokens or signatures to subsequent requests.
+  - Ensure headers are properly formatted.
+
+- **Error Handling**
+  - Handle authentication failures gracefully.
+  - Provide feedback to the user and options to retry.
+
+### 4. Secure the Proxy
+
+- **Rate Limiting**
+
+  - Prevent excessive requests from a single client.
+  - Protects against denial-of-service attacks.
+
+- **Logging and Monitoring**
+
+  - Keep detailed logs of requests and responses.
+  - Monitor for suspicious activity.
+
+- **API Key Management**
+  - Store external API keys securely on the server.
+  - Implement key rotation policies.
+
+## Security Considerations
+
+- **Prevent Replay Attacks**
+
+  - Use nonces and short-lived tokens.
+  - Validate timestamps and sequence numbers when applicable.
+
+- **Protect Against Man-in-the-Middle**
+
+  - Enforce HTTPS for all communications.
+  - Use HSTS and other headers to enhance security.
+
+- **Secure Storage**
+  - Protect sensitive data on the proxy server.
+  - Use encrypted storage and environment variables.
+
+## Benefits
+
+- **Enhanced Security**
+
+  - Keeps API keys off the client, reducing risk exposure.
+  - Utilizes blockchain-based authentication for robust security.
+
+- **Simplified Client App**
+
+  - The client does not need to manage multiple API keys.
+  - Reduces complexity and potential for errors.
+
+- **Scalable Management**
+  - Centralizes API key management and usage monitoring.
+  - Eases updates and maintenance.
+
+## Potential Challenges
+
+- **Latency**
+
+  - Adds an extra hop between the client and external APIs.
+  - Mitigate with efficient server and network choices.
+
+- **Single Point of Failure**
+
+  - The proxy becomes critical infrastructure.
+  - Ensure high availability and redundancy.
+
+- **Authentication Overhead**
+  - Initial authentication may require extra steps.
+  - Balance security with user experience.
+
+---
+
+By implementing proxy authentication, we secure communication with external services, protect sensitive API keys, and provide a robust and scalable framework for client-server interactions.
+
+=== File: docs/plan_proxy_security_model.md ===
+
+
+
+==
+plan_proxy_security_model
+==
+
+
+# Proxy Security Model
+
+VERSION proxy_security:
+invariants: {
+"Data integrity",
+"Authentication fidelity",
+"Resilience to attacks"
+}
+assumptions: {
+"Proxy server is maintained securely",
+"Clients authenticate properly",
+"Threat vectors are considered"
+}
+docs_version: "0.1.0"
+
+## Introduction
+
+The proxy security model is designed to protect the integrity and confidentiality of data as it passes between clients and external services, while preventing unauthorized access and mitigating potential attacks.
+
+## Security Objectives
+
+1. **Authentication**
+
+   - Ensure that only authorized clients can access the proxy services.
+   - Use robust mechanisms that leverage blockchain verification.
+
+2. **Authorization**
+
+   - Enforce permissions so clients can only perform allowed actions.
+   - Prevent privilege escalation and unauthorized access to resources.
+
+3. **Data Protection**
+
+   - Secure data in transit and at rest.
+   - Protect sensitive information from interception and tampering.
+
+4. **Attack Mitigation**
+   - Detect and prevent common web attacks (e.g., SQL injection, XSS).
+   - Implement rate limiting and anomaly detection.
+
+## Core Components
+
+### 1. Authentication Mechanisms
+
+- **SUI-Based Signature Verification**
+
+  - Clients sign requests or tokens using their private keys.
+  - The proxy verifies these signatures against known public keys.
+
+- **Challenge-Response Protocol**
+  - Prevents replay attacks by using nonces or timestamps.
+  - Ensures freshness of authentication attempts.
+
+### 2. Secure Communication
+
+- **TLS Encryption**
+
+  - All communications use TLS to encrypt data.
+  - Certificates are managed securely, and protocols are kept up-to-date.
+
+- **HTTP Headers Security**
+  - Implement HSTS, X-Content-Type-Options, and other security headers.
+  - Protects against certain types of web-based attacks.
+
+### 3. Input Validation
+
+- **Sanitization**
+
+  - All incoming data is validated and sanitized.
+  - Prevents injection attacks and malformed data processing.
+
+- **Schema Validation**
+  - Use strict schemas for expected data formats.
+  - Reject requests that do not conform.
+
+### 4. Rate Limiting and Throttling
+
+- **Per-User Limits**
+
+  - Rate limits are applied per authenticated user.
+  - Protects against abuse and denial-of-service attacks.
+
+- **Global Limits**
+  - Overall rate limits to safeguard the proxy and backend services.
+  - Provides a safety net against unexpected traffic spikes.
+
+### 5. Monitoring and Logging
+
+- **Comprehensive Logging**
+
+  - All requests and responses are logged with appropriate masking of sensitive data.
+  - Logs include timestamps, source IPs, and user identifiers.
+
+- **Intrusion Detection**
+  - Monitor for patterns indicating potential attacks.
+  - Alert administrators to suspicious activity.
+
+### 6. Error Handling
+
+- **Safe Error Messages**
+
+  - Errors do not reveal sensitive server information.
+  - Provide generic messages to clients while logging detailed errors internally.
+
+- **Graceful Degradation**
+  - In case of issues, the proxy fails safely.
+  - Ensures that failures do not compromise security.
+
+## Implementation Guidelines
+
+### 1. Secure Coding Practices
+
+- **Use Trusted Libraries**
+
+  - Rely on well-maintained, security-focused libraries for cryptography and networking.
+
+- **Regular Updates**
+
+  - Keep all dependencies and platforms updated with security patches.
+
+- **Code Reviews**
+  - Implement peer reviews and possibly third-party audits of the codebase.
+
+### 2. Access Control
+
+- **Role-Based Access Control (RBAC)**
+
+  - Define roles and permissions within the proxy.
+  - Enforce least privilege principles.
+
+- **API Key Management**
+  - Securely store API keys for backend services.
+  - Rotate keys regularly and upon suspected compromise.
+
+### 3. Infrastructure Security
+
+- **Server Hardening**
+
+  - Configure servers with minimal necessary services.
+  - Use firewalls and network segmentation where appropriate.
+
+- **Disaster Recovery**
+  - Implement backups and recovery plans.
+  - Ensure system can be restored in case of catastrophic failure.
+
+### 4. Compliance and Legal Considerations
+
+- **Data Protection Regulations**
+
+  - Comply with GDPR, CCPA, and other relevant data protection laws.
+  - Provide mechanisms for data access and deletion upon user request.
+
+- **Privacy Policies**
+  - Maintain clear and transparent privacy policies.
+  - Inform users about data usage and protection measures.
+
+## Threat Model Overview
+
+- **External Attackers**
+
+  - Attempt to gain unauthorized access or disrupt services.
+  - Mitigated through authentication, rate limiting, and monitoring.
+
+- **Malicious Clients**
+
+  - Authenticated clients misusing their access.
+  - Mitigated through per-user rate limits and RBAC.
+
+- **Man-in-the-Middle Attacks**
+
+  - Interception of data between clients and proxy.
+  - Mitigated through TLS encryption and certificate validation.
+
+- **Insider Threats**
+  - Unauthorized access by proxy administrators.
+  - Mitigated through operational security practices and access controls.
+
+## Testing and Validation
+
+- **Security Testing**
+
+  - Perform regular penetration testing.
+  - Utilize tools like OWASP ZAP for automated scans.
+
+- **Vulnerability Management**
+
+  - Keep abreast of new vulnerabilities affecting components.
+  - Patch promptly and validate fixes.
+
+- **Incident Response**
+  - Have a defined process for handling security incidents.
+  - Include communication plans and recovery steps.
+
+---
+
+By adhering to this security model, we can ensure that the proxy server operates securely, maintaining the trust of users and the integrity of the system as a whole.
+
 === File: docs/plan_save_users_and_threads.md ===
 
 
@@ -2401,6 +3480,197 @@ plan_save_users_and_threads
 - Keychain Services
 - CoreData/Realm (Local Storage)
 - Combine (Async Operations)
+
+=== File: docs/plan_sui_blockchain_integration.md ===
+
+
+
+==
+plan_sui_blockchain_integration
+==
+
+
+# SUI Blockchain Integration
+
+VERSION sui_integration:
+invariants: {
+"Decentralized ownership",
+"Secure transactions",
+"Immutable records"
+}
+assumptions: {
+"Users have SUI wallets",
+"Smart contracts deployed",
+"SUIKit available for Swift"
+}
+docs_version: "0.1.0"
+
+## Introduction
+
+Integrating the SUI blockchain into the Choir platform enhances security, ownership, and transparency. It allows for decentralized management of threads and tokens, ensuring users have full control over their content and assets.
+
+## Key Components
+
+### 1. SUI Wallet Integration
+
+- **Wallet Creation and Management**
+
+  - Users can create new wallets or import existing ones.
+  - Wallets are used for authentication and transaction signing.
+
+- **SUIKit Integration**
+
+  - Utilize the SUIKit library for Swift to interact with the blockchain.
+  - Provides APIs for account management, signing, and transactions.
+
+- **User Authentication**
+  - Replace traditional login systems with wallet-based auth.
+  - Users sign messages to prove ownership of their public keys.
+
+### 2. Smart Contracts
+
+- **Thread Ownership Contract**
+
+  - Manages creation, ownership, and co-authoring of threads.
+  - Records thread metadata and ownership status on-chain.
+
+- **Token Contract**
+
+  - Implements the CHOIR token logic.
+  - Handles staking, rewards, and token transfers.
+
+- **Permission Management**
+  - Smart contracts enforce access control for threads and messages.
+  - Permissions are transparently verifiable on-chain.
+
+### 3. Transactions
+
+- **Thread Creation**
+
+  - Users initiate a transaction to create a new thread.
+  - The transaction includes thread metadata and initial co-authors.
+
+- **Message Posting**
+
+  - Adding messages to a thread may involve on-chain interactions.
+  - Ensures messages are linked to the correct thread and ownership is recorded.
+
+- **Token Transactions**
+  - Users can stake tokens, receive rewards, and transfer tokens.
+  - All token movements are secured by the blockchain.
+
+### 4. Synchronization
+
+- **On-Chain and Off-Chain Data**
+
+  - Combine on-chain records with off-chain data stored in SwiftData.
+  - Maintain consistency between local state and blockchain state.
+
+- **Event Listening**
+  - Implement listeners for blockchain events to update the app in real-time.
+  - Use SUIKit's subscription features to receive updates.
+
+## Implementation Steps
+
+### 1. Setup SUIKit
+
+- **Add SUIKit to Project**
+
+  - Include the SUIKit package via Swift Package Manager.
+  - Ensure compatibility with the project's Swift version.
+
+- **Initialize Providers**
+  - Configure SUI providers for network interactions.
+  - Support testnet, devnet, and mainnet environments.
+
+### 2. Develop Smart Contracts
+
+- **Write Contracts in Move**
+
+  - Use the Move language to develop smart contracts.
+  - Define the logic for threads and token management.
+
+- **Deploy Contracts**
+  - Deploy contracts to the SUI blockchain.
+  - Keep track of contract addresses for app reference.
+
+### 3. Implement Wallet Features
+
+- **Create Wallet Interface**
+
+  - Design UI for wallet creation, import, and management.
+  - Educate users on securing their private keys.
+
+- **Sign Transactions**
+  - Use SUIKit to sign transactions with the user's private key.
+  - Ensure transactions are properly formatted and submitted.
+
+### 4. Integrate Blockchain Actions
+
+- **Thread Actions**
+
+  - Map thread creation and updates to blockchain transactions.
+  - Reflect on-chain changes in the app's UI.
+
+- **Token Actions**
+  - Implement token staking and reward mechanisms.
+  - Display token balances and transaction history.
+
+### 5. Handle Errors and Edge Cases
+
+- **Network Issues**
+
+  - Gracefully handle connectivity problems.
+  - Provide informative error messages to users.
+
+- **Transaction Failures**
+
+  - Detect and communicate transaction failures.
+  - Offer retry mechanisms and guidance.
+
+- **Security Considerations**
+  - Validate all input data before submission.
+  - Protect against common vulnerabilities (e.g., replay attacks).
+
+## Benefits
+
+- **Decentralized Ownership**
+
+  - Users have verifiable ownership of their threads and content.
+  - Reduces reliance on centralized servers.
+
+- **Enhanced Security**
+
+  - Leveraging blockchain security for transactions and authentication.
+  - Immutable records prevent tampering.
+
+- **Transparency**
+
+  - All transactions are publicly recorded.
+  - Increases trust among users.
+
+- **Interoperability**
+  - Potential for integration with other SUI-based platforms and services.
+
+## Considerations
+
+- **User Experience**
+
+  - Ensure the addition of blockchain features does not complicate the UX.
+  - Provide clear explanations and support for non-technical users.
+
+- **Performance**
+
+  - Minimize the impact of blockchain interactions on app responsiveness.
+  - Use asynchronous operations and caching where appropriate.
+
+- **Regulatory Compliance**
+  - Be aware of regulations related to blockchain and tokens.
+  - Implement necessary measures for compliance.
+
+---
+
+By integrating the SUI blockchain, we empower users with control over their data and assets, enhance the security of transactions, and lay a foundation for future decentralized features.
 
 === File: docs/plan_swiftui_chorus_integration.md ===
 

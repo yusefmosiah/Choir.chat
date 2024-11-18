@@ -107,7 +107,7 @@ async def structured_chat_completion(
 
         # Make the API call with function calling format
         response = completion(
-            model=config.CHAT_MODEL,
+            model=config.CLAUDE_3_5_SONNET_NEW,
             messages=messages,
             tools=[{
                 "type": "function",

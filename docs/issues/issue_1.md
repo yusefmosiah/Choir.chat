@@ -1,85 +1,79 @@
-# Message Type Reconciliation
+# Local Data Management and Persistence
 
 ## Parent Issue
-[Core Message System Implementation](issue_0.md)
+
+[Core Client-Side Implementation](issue_0.md)
 
 ## Related Issues
+
 - Depends on: None
-- Blocks: [API Client Message Handling](issue_2.md)
-- Related to: [Coordinator Message Flow](issue_3.md)
+- Blocks: [SUI Blockchain Smart Contracts](issue_2.md)
+- Related to: [API Client Message Handling](issue_2.md)
 
 ## Description
-Reconcile existing `ChorusModels.swift` response types with Qdrant schema, ensuring backward compatibility with ~20k existing message points while enabling future features.
 
-## Current State
-- Have `ChorusModels.swift` with:
-  - Base response types
-  - Phase-specific responses
-  - Supporting types (Prior, Pattern)
-- ~20k points in Qdrant
-- Need unified message type system
+Implement local data storage and synchronization using SwiftData, managing users, threads, and messages effectively. This ensures data persistence and offline access while preparing for future synchronization with the SUI blockchain.
 
 ## Tasks
-- [ ] Create `MessagePoint` struct matching Qdrant schema
-  - [ ] Support all required fields
-  - [ ] Handle optional fields
-  - [ ] Add chorus result support
-- [ ] Implement `ThreadMessage` for UI state
-  - [ ] Convert from MessagePoint
-  - [ ] Handle UI-specific state
-- [ ] Add graceful decoding for legacy points
-  - [ ] Default values for missing fields
-  - [ ] Validation logic
-- [ ] Add conversion tests
-  - [ ] Legacy point handling
-  - [ ] Full message conversion
-  - [ ] Error cases
 
-## Code Examples
-```swift
-// Message point matching Qdrant schema
-struct MessagePoint: Codable {
-    let id: String
-    let content: String
-    let threadId: String
-    let createdAt: String
-    let role: String?
-    let step: String?
-    let chorusResult: ChorusCycleResult?
+### 1. Define SwiftData Models
 
-    // Graceful decoding
-    init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
+- **Create Models for `User`, `Thread`, and `Message`**
 
-        // Required fields
-        id = try container.decode(String.self, forKey: .id)
-        content = try container.decode(String.self, forKey: .content)
-        threadId = try container.decode(String.self, forKey: .threadId)
-        createdAt = try container.decode(String.self, forKey: .createdAt)
+  - Ensure appropriate relationships and data integrity.
+  - Support offline access and local data persistence.
 
-        // Optional fields with empty defaults
-        role = try container.decodeIfPresent(String.self, forKey: .role) ?? ""
-        step = try container.decodeIfPresent(String.self, forKey: .step) ?? ""
-        chorusResult = try container.decodeIfPresent(ChorusCycleResult.self, forKey: .chorusResult)
-    }
-}
-```
+- **Implement Data Relationships**
+  - Define one-to-many and many-to-many relationships as needed.
+  - Ensure models align with blockchain ownership data.
 
-## Testing Requirements
-- Test decoding of legacy points
-  - Missing optional fields
-  - Different date formats
-  - Invalid data
-- Verify conversion to ThreadMessage
-  - All fields mapped correctly
-  - UI state initialized properly
-- Validate chorus result handling
-  - All phase responses
-  - Missing phases
-  - Invalid data
+### 2. Implement Data Operations
+
+- **CRUD Operations for Threads and Messages**
+
+  - Implement create, read, update, and delete functionalities.
+  - Ensure smooth user interactions and data consistency.
+
+- **Handle Data Consistency and Conflict Resolution**
+  - Develop mechanisms to resolve data conflicts between local and blockchain data.
+  - Implement versioning or timestamps to manage updates.
+
+### 3. Prepare for Future Synchronization
+
+- **Design Synchronization Logic**
+
+  - Outline how local data will sync with on-chain data.
+  - Plan for data reconciliation and conflict handling.
+
+- **Implement Initial Sync Mechanism**
+  - Develop basic synchronization between local data and blockchain state.
+  - Test synchronization with sample data.
 
 ## Success Criteria
-- Clean type conversion
-- Backward compatibility
-- Comprehensive test coverage
-- Clear error handling
+
+- **Reliable Local Storage**
+
+  - Users can create and manage threads and messages locally.
+  - Data persists across app launches and device restarts.
+
+- **Efficient Data Handling**
+
+  - CRUD operations perform smoothly without lag.
+  - Data relationships are maintained accurately.
+
+- **Preparation for Blockchain Synchronization**
+  - Architecture supports future data synchronization.
+  - Initial sync tests are successful, laying the groundwork for full integration.
+
+## Future Considerations
+
+- **SUI Blockchain Synchronization**
+
+  - Implement full data synchronization with the SUI blockchain.
+  - Ensure real-time updates and consistency between local and on-chain data.
+
+- **Advanced Conflict Resolution**
+  - Develop sophisticated methods to handle complex data conflicts.
+  - Implement user prompts or automated resolutions where appropriate.
+
+---

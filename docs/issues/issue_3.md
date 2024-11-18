@@ -1,128 +1,91 @@
-# Coordinator Message Flow
+# docs/issues/issue_3.md
+
+# Tokenomics and CHOIR Token Integration
 
 ## Parent Issue
-[Core Message System Implementation](issue_0.md)
+
+[Core Client-Side Implementation](issue_0.md)
 
 ## Related Issues
-- Depends on: [API Client Message Handling](issue_2.md)
-- Blocks: [Thread State Management](issue_5.md)
-- Related to: [Message Type Reconciliation](issue_1.md)
+
+- Depends on: [SUI Blockchain Smart Contracts](issue_2.md)
+- Blocks: [Proxy Security and Backend Services](issue_4.md)
+- Related to: [Client-Side Intelligence and Personalization](issue_6.md)
 
 ## Description
-Update RESTChorusCoordinator to handle the complete message lifecycle using the new unified type system while maintaining compatibility with the existing chorus cycle phases.
 
-## Current State
-- Have working RESTChorusCoordinator
-- Using phase-specific response types
-- Need to integrate MessagePoint/ThreadMessage
-- Need to maintain phase results
+Integrate the CHOIR token within the app, enabling staking, rewards distribution, and token transactions in line with the economic model. This involves setting up the token mechanics through smart contracts and ensuring seamless user interactions with tokens.
 
 ## Tasks
-- [ ] Update coordinator state
-  - [ ] Add MessagePoint handling
-  - [ ] Manage ThreadMessage state
-  - [ ] Track phase results
-- [ ] Implement message lifecycle
-  - [ ] Initial message creation
-  - [ ] Phase processing
-  - [ ] Result accumulation
-  - [ ] Final state updates
-- [ ] Add thread integration
-  - [ ] Thread state updates
-  - [ ] Message synchronization
-  - [ ] History management
-- [ ] Handle errors and cancellation
-  - [ ] Phase-specific errors
-  - [ ] State cleanup
-  - [ ] Graceful cancellation
 
-## Code Examples
-```swift
-@MainActor
-class RESTChorusCoordinator: ChorusCoordinator {
-    // State management
-    private(set) var currentMessage: ThreadMessage?
-    private(set) var currentPhase: Phase = .action
-    private(set) var phaseResults: [Phase: BaseResponse] = [:]
+### 1. Token Mechanics Implementation
 
-    // Process message through phases
-    func process(_ input: String) async throws {
-        // Create initial message
-        let messagePoint = MessagePoint(
-            id: UUID().uuidString,
-            content: input,
-            threadId: threadId,
-            createdAt: ISO8601DateFormatter().string(from: Date()),
-            role: "user",
-            step: Phase.action.rawValue
-        )
+- **Display Token Balances**
 
-        // Process through phases
-        currentMessage = ThreadMessage(from: messagePoint)
+  - Show users their CHOIR token balances within the app.
+  - Include both wallet balance and staked amounts.
 
-        do {
-            // Action phase
-            currentPhase = .action
-            let actionResponse = try await processAction(input)
-            phaseResults[.action] = actionResponse
+- **Implement Staking Functionality**
 
-            // Experience phase with context
-            currentPhase = .experience
-            let experienceResponse = try await processExperience(
-                input,
-                context: currentMessage
-            )
-            phaseResults[.experience] = experienceResponse
+  - Allow users to stake tokens when participating in threads.
+  - Enable staking amounts to vary based on thread temperature or frequency.
 
-            // Continue through phases...
+- **Reward Distribution**
+  - Distribute rewards based on user contributions and participation.
+  - Implement automated reward calculations tied to the quantum harmonic oscillator model.
 
-            // Update final state
-            currentMessage?.chorusResult = ChorusCycleResult(
-                action: phaseResults[.action] as? ActionResponse,
-                experience: phaseResults[.experience] as? ExperienceResponseData,
-                // ... other phases
-            )
+### 2. User Interface Enhancements
 
-            // Store final message
-            try await api.storeMessage(messagePoint)
+- **Rewards Dashboard**
 
-        } catch {
-            // Handle errors while maintaining state consistency
-            phaseResults[currentPhase] = BaseResponse(
-                step: currentPhase.rawValue,
-                content: "Error: \(error.localizedDescription)",
-                confidence: 0.0,
-                reasoning: "Phase failed"
-            )
-            throw error
-        }
-    }
+  - Create a dashboard displaying earned rewards.
+  - Visualize performance and progress in token accumulation.
 
-    // Support cancellation
-    func cancel() {
-        // Cleanup state
-        currentPhase = .action
-        phaseResults.removeAll()
-    }
-}
-```
+- **Staking Actions**
 
-## Testing Requirements
-- Test phase progression
-  - State transitions
-  - Result accumulation
-  - Error handling
-- Verify message lifecycle
-  - Creation
-  - Processing
-  - Storage
-- Test cancellation
-  - State cleanup
-  - Resource release
-  - Error propagation
+  - Include UI elements for staking and unstaking tokens.
+  - Guide users through the staking process with clear instructions.
+
+- **Transaction History**
+  - Provide a ledger of token transactions.
+  - Enhance transparency and user trust.
+
+### 3. Education and Compliance
+
+- **In-App Explanations**
+
+  - Include explanations of token mechanics within the app.
+  - Educate users on staking, rewards, and token usage.
+
+- **Regulatory Compliance**
+  - Ensure the tokenomics align with relevant financial and data protection regulations.
+  - Implement necessary measures for compliance.
 
 ## Success Criteria
-- Clean state transitions
-- Proper error handling
-- Type-safe operations
-- Reliable cancellation
+
+- **Seamless Token Integration**
+
+  - Users can view, stake, and manage their CHOIR tokens effortlessly.
+  - Token transactions are processed correctly and securely via the blockchain.
+
+- **Aligned Economic Model**
+
+  - Tokenomics reflect the documented economic principles of the platform.
+  - Rewards distribution is fair and incentivizes desired user behaviors.
+
+- **User Education**
+  - Users understand how the token system works through in-app resources.
+  - Compliance with regulations is maintained to avoid legal issues.
+
+## Future Considerations
+
+- **Advanced Token Features**
+
+  - Explore decentralized governance models using CHOIR tokens.
+  - Implement additional token utilities as the platform evolves.
+
+- **Dynamic Reward Systems**
+  - Adapt reward mechanisms based on user feedback and platform needs.
+  - Introduce tiered rewards or bonuses for high contributors.
+
+---

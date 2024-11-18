@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Define level prefixes as simple arrays
-level0_prefixes=("")
+level0_prefixes=("client_architecture" "sui_blockchain_integration" "proxy_authentication" "carousel_ui_pattern" "client_side_processing" "proxy_security_model" "sui_token_integration" "distributed_processing" "client_side_intelligence")
 level1_prefixes=("doables" "Entry" "Dev" "Plan" "Tech" "Level" "Current" "core" "CHANGELOG")
 level2_prefixes=("plan" "State" "Summary" "Pivot" "goal" "e" "data" "Error" "reward" "Impl")
 level3_prefixes=("docs" "theory" "V10" "V12")

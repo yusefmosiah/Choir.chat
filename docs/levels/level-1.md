@@ -620,9 +620,15 @@ tree.md
     │   ├── level4.md
     │   ├── level5.md
     │   └── level_organization.md
+    ├── plan_carousel_ui_pattern.md
+    ├── plan_client_architecture.md
+    ├── plan_client_side_processing.md
     ├── plan_id_persistence.md
     ├── plan_post-training.md
+    ├── plan_proxy_authentication.md
+    ├── plan_proxy_security_model.md
     ├── plan_save_users_and_threads.md
+    ├── plan_sui_blockchain_integration.md
     ├── plan_swiftui_chorus_integration.md
     ├── plan_thoughtspace.md
     ├── plan_tokenomics.md
@@ -645,7 +651,7 @@ tree.md
     ├── theory_theory.md
     └── tree.md
 
-36 directories, 133 files
+36 directories, 139 files
 
 === File: docs/CHANGELOG.md ===
 

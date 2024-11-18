@@ -45,61 +45,86 @@ issue_0
 ==
 
 
-# Core Message System Implementation
+# Core Client-Side Implementation
 
 ## Overview
-Implement the foundational message system that reconciles our Swift types with Qdrant storage, enables user identity, and manages thread state. Focus on clean type system that supports existing ~20k message points while enabling future features.
+
+Implement the foundational client-side system that enables AI processing via Anthropic and OpenAI APIs, SUI blockchain integration, and the carousel UI for the Chorus Cycle. Focus on creating a functional Minimum Viable Product (MVP) that demonstrates key features while preparing for future integration with Liquid AI's Liquid Foundation Models (LFMs).
 
 ## Sub-Issues
-1. [Message Type Reconciliation](issue_1.md) - Reconcile ChorusModels with Qdrant
-2. [API Client Message Handling](issue_2.md) - Update client for new types
-3. [Coordinator Message Flow](issue_3.md) - Handle message lifecycle
-4. [User Identity Implementation](issue_4.md) - Basic key management
-5. [Thread State Management](issue_5.md) - Local state with sync
-6. [Integration Testing Suite](issue_6.md) - End-to-end validation
 
-## Dependencies
-- Existing Qdrant setup (~20k message points)
-- Current `ChorusModels.swift` with response types
-- Python API endpoints
-- Working collections (messages, users, threads)
+1. [Local Data Management and Persistence](issue_1.md)
+2. [SUI Blockchain Smart Contracts](issue_2.md)
+3. [Tokenomics and CHOIR Token Integration](issue_3.md)
+4. [Proxy Security and Backend Services](issue_4.md)
+5. [Enhanced UI/UX with Carousel and Interaction Patterns](issue_5.md)
+6. [Client-Side Intelligence and Personalization](issue_6.md)
+7. [Testing and Quality Assurance](issue_7.md)
+8. [Documentation and Developer Onboarding](issue_8.md)
 
-## Architecture Decisions
-1. Message Storage
-   - Points stored in Qdrant with vectors
-   - Full message history in payload
-   - Support for legacy points
+## Tasks
 
-2. State Management
-   - Local thread state in Swift
-   - Sync with Qdrant as source of truth
-   - Clean type conversion
+### 1. AI Processing via APIs
 
-3. Identity System
-   - Public keys as user IDs
-   - UserDefaults for development
-   - Simple key management
+- **Integrate Anthropic and OpenAI APIs**
 
-4. API Design
-   - Stateless endpoints
-   - Type-safe requests/responses
-   - Graceful error handling
+  - Set up API clients for Anthropic and OpenAI.
+  - Implement functions to send prompts and receive responses.
+  - Handle API rate limits and errors gracefully.
 
-## Success Metrics
-1. Type System
-   - Clean conversion between Swift/Qdrant
-   - Support for legacy points
-   - Type-safe operations
+- **Prepare for Future LFM Integration**
+  - Design the architecture to allow easy switching from API-based models to local LFMs.
+  - Abstract AI processing logic to accommodate different model sources.
 
-2. Message Flow
-   - Reliable message handling
-   - Proper state management
-   - Error resilience
+### 2. SUI Wallet Integration
 
-3. Testing
-   - Comprehensive test suite
-   - Performance validation
-   - Error scenario coverage
+- **Integrate SUIKit for Blockchain Interactions**
+  - Implement wallet creation, import, and transaction signing within the app.
+  - Facilitate user authentication via SUI wallet.
+
+### 3. Carousel UI Implementation
+
+- **Develop Carousel UI Pattern**
+  - Create a carousel interface for navigating through Chorus Cycle phases.
+  - Ensure adjacent phase previews are visible for a typographic, newspaper-like design.
+
+### 4. Proxy Authentication Setup
+
+- **Set Up Secure API Proxy**
+  - Deploy a server-side proxy to handle AI API requests securely.
+  - Implement SUI-signed token authentication for proxy access.
+
+### 5. Initial Testing
+
+- **Conduct Initial Integration Tests**
+  - Verify AI API integrations.
+  - Test SUI wallet functionalities.
+  - Ensure carousel UI navigates smoothly between phases.
+
+## Success Criteria
+
+- **Functional MVP**
+
+  - Users can authenticate with their SUI wallet.
+  - Users can input messages and navigate through the Chorus Cycle using the carousel UI.
+  - AI responses are fetched and displayed correctly via Anthropic and OpenAI APIs.
+
+- **Secure Operations**
+
+  - Proxy server securely handles API requests and authentication.
+  - API keys remain protected on the server side.
+
+- **Scalable Architecture**
+  - The system is designed to switch to Liquid AI's LFMs with minimal changes.
+  - Codebase follows best practices for scalability and maintainability.
+
+## Future Considerations
+
+- **Liquid AI LFMs Integration**
+  - Once access is granted, integrate LFMs for on-device AI processing.
+  - Optimize the architecture to transition from API-based to local model-based processing seamlessly.
+
+---
 
 === File: docs/issues/issue_1.md ===
 
@@ -110,91 +135,85 @@ issue_1
 ==
 
 
-# Message Type Reconciliation
+# Local Data Management and Persistence
 
 ## Parent Issue
-[Core Message System Implementation](issue_0.md)
+
+[Core Client-Side Implementation](issue_0.md)
 
 ## Related Issues
+
 - Depends on: None
-- Blocks: [API Client Message Handling](issue_2.md)
-- Related to: [Coordinator Message Flow](issue_3.md)
+- Blocks: [SUI Blockchain Smart Contracts](issue_2.md)
+- Related to: [API Client Message Handling](issue_2.md)
 
 ## Description
-Reconcile existing `ChorusModels.swift` response types with Qdrant schema, ensuring backward compatibility with ~20k existing message points while enabling future features.
 
-## Current State
-- Have `ChorusModels.swift` with:
-  - Base response types
-  - Phase-specific responses
-  - Supporting types (Prior, Pattern)
-- ~20k points in Qdrant
-- Need unified message type system
+Implement local data storage and synchronization using SwiftData, managing users, threads, and messages effectively. This ensures data persistence and offline access while preparing for future synchronization with the SUI blockchain.
 
 ## Tasks
-- [ ] Create `MessagePoint` struct matching Qdrant schema
-  - [ ] Support all required fields
-  - [ ] Handle optional fields
-  - [ ] Add chorus result support
-- [ ] Implement `ThreadMessage` for UI state
-  - [ ] Convert from MessagePoint
-  - [ ] Handle UI-specific state
-- [ ] Add graceful decoding for legacy points
-  - [ ] Default values for missing fields
-  - [ ] Validation logic
-- [ ] Add conversion tests
-  - [ ] Legacy point handling
-  - [ ] Full message conversion
-  - [ ] Error cases
 
-## Code Examples
-```swift
-// Message point matching Qdrant schema
-struct MessagePoint: Codable {
-    let id: String
-    let content: String
-    let threadId: String
-    let createdAt: String
-    let role: String?
-    let step: String?
-    let chorusResult: ChorusCycleResult?
+### 1. Define SwiftData Models
 
-    // Graceful decoding
-    init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
+- **Create Models for `User`, `Thread`, and `Message`**
 
-        // Required fields
-        id = try container.decode(String.self, forKey: .id)
-        content = try container.decode(String.self, forKey: .content)
-        threadId = try container.decode(String.self, forKey: .threadId)
-        createdAt = try container.decode(String.self, forKey: .createdAt)
+  - Ensure appropriate relationships and data integrity.
+  - Support offline access and local data persistence.
 
-        // Optional fields with empty defaults
-        role = try container.decodeIfPresent(String.self, forKey: .role) ?? ""
-        step = try container.decodeIfPresent(String.self, forKey: .step) ?? ""
-        chorusResult = try container.decodeIfPresent(ChorusCycleResult.self, forKey: .chorusResult)
-    }
-}
-```
+- **Implement Data Relationships**
+  - Define one-to-many and many-to-many relationships as needed.
+  - Ensure models align with blockchain ownership data.
 
-## Testing Requirements
-- Test decoding of legacy points
-  - Missing optional fields
-  - Different date formats
-  - Invalid data
-- Verify conversion to ThreadMessage
-  - All fields mapped correctly
-  - UI state initialized properly
-- Validate chorus result handling
-  - All phase responses
-  - Missing phases
-  - Invalid data
+### 2. Implement Data Operations
+
+- **CRUD Operations for Threads and Messages**
+
+  - Implement create, read, update, and delete functionalities.
+  - Ensure smooth user interactions and data consistency.
+
+- **Handle Data Consistency and Conflict Resolution**
+  - Develop mechanisms to resolve data conflicts between local and blockchain data.
+  - Implement versioning or timestamps to manage updates.
+
+### 3. Prepare for Future Synchronization
+
+- **Design Synchronization Logic**
+
+  - Outline how local data will sync with on-chain data.
+  - Plan for data reconciliation and conflict handling.
+
+- **Implement Initial Sync Mechanism**
+  - Develop basic synchronization between local data and blockchain state.
+  - Test synchronization with sample data.
 
 ## Success Criteria
-- Clean type conversion
-- Backward compatibility
-- Comprehensive test coverage
-- Clear error handling
+
+- **Reliable Local Storage**
+
+  - Users can create and manage threads and messages locally.
+  - Data persists across app launches and device restarts.
+
+- **Efficient Data Handling**
+
+  - CRUD operations perform smoothly without lag.
+  - Data relationships are maintained accurately.
+
+- **Preparation for Blockchain Synchronization**
+  - Architecture supports future data synchronization.
+  - Initial sync tests are successful, laying the groundwork for full integration.
+
+## Future Considerations
+
+- **SUI Blockchain Synchronization**
+
+  - Implement full data synchronization with the SUI blockchain.
+  - Ensure real-time updates and consistency between local and on-chain data.
+
+- **Advanced Conflict Resolution**
+  - Develop sophisticated methods to handle complex data conflicts.
+  - Implement user prompts or automated resolutions where appropriate.
+
+---
 
 === File: docs/issues/issue_10.md ===
 
@@ -1082,134 +1101,97 @@ issue_3
 ==
 
 
-# Coordinator Message Flow
+# docs/issues/issue_3.md
+
+# Tokenomics and CHOIR Token Integration
 
 ## Parent Issue
-[Core Message System Implementation](issue_0.md)
+
+[Core Client-Side Implementation](issue_0.md)
 
 ## Related Issues
-- Depends on: [API Client Message Handling](issue_2.md)
-- Blocks: [Thread State Management](issue_5.md)
-- Related to: [Message Type Reconciliation](issue_1.md)
+
+- Depends on: [SUI Blockchain Smart Contracts](issue_2.md)
+- Blocks: [Proxy Security and Backend Services](issue_4.md)
+- Related to: [Client-Side Intelligence and Personalization](issue_6.md)
 
 ## Description
-Update RESTChorusCoordinator to handle the complete message lifecycle using the new unified type system while maintaining compatibility with the existing chorus cycle phases.
 
-## Current State
-- Have working RESTChorusCoordinator
-- Using phase-specific response types
-- Need to integrate MessagePoint/ThreadMessage
-- Need to maintain phase results
+Integrate the CHOIR token within the app, enabling staking, rewards distribution, and token transactions in line with the economic model. This involves setting up the token mechanics through smart contracts and ensuring seamless user interactions with tokens.
 
 ## Tasks
-- [ ] Update coordinator state
-  - [ ] Add MessagePoint handling
-  - [ ] Manage ThreadMessage state
-  - [ ] Track phase results
-- [ ] Implement message lifecycle
-  - [ ] Initial message creation
-  - [ ] Phase processing
-  - [ ] Result accumulation
-  - [ ] Final state updates
-- [ ] Add thread integration
-  - [ ] Thread state updates
-  - [ ] Message synchronization
-  - [ ] History management
-- [ ] Handle errors and cancellation
-  - [ ] Phase-specific errors
-  - [ ] State cleanup
-  - [ ] Graceful cancellation
 
-## Code Examples
-```swift
-@MainActor
-class RESTChorusCoordinator: ChorusCoordinator {
-    // State management
-    private(set) var currentMessage: ThreadMessage?
-    private(set) var currentPhase: Phase = .action
-    private(set) var phaseResults: [Phase: BaseResponse] = [:]
+### 1. Token Mechanics Implementation
 
-    // Process message through phases
-    func process(_ input: String) async throws {
-        // Create initial message
-        let messagePoint = MessagePoint(
-            id: UUID().uuidString,
-            content: input,
-            threadId: threadId,
-            createdAt: ISO8601DateFormatter().string(from: Date()),
-            role: "user",
-            step: Phase.action.rawValue
-        )
+- **Display Token Balances**
 
-        // Process through phases
-        currentMessage = ThreadMessage(from: messagePoint)
+  - Show users their CHOIR token balances within the app.
+  - Include both wallet balance and staked amounts.
 
-        do {
-            // Action phase
-            currentPhase = .action
-            let actionResponse = try await processAction(input)
-            phaseResults[.action] = actionResponse
+- **Implement Staking Functionality**
 
-            // Experience phase with context
-            currentPhase = .experience
-            let experienceResponse = try await processExperience(
-                input,
-                context: currentMessage
-            )
-            phaseResults[.experience] = experienceResponse
+  - Allow users to stake tokens when participating in threads.
+  - Enable staking amounts to vary based on thread temperature or frequency.
 
-            // Continue through phases...
+- **Reward Distribution**
+  - Distribute rewards based on user contributions and participation.
+  - Implement automated reward calculations tied to the quantum harmonic oscillator model.
 
-            // Update final state
-            currentMessage?.chorusResult = ChorusCycleResult(
-                action: phaseResults[.action] as? ActionResponse,
-                experience: phaseResults[.experience] as? ExperienceResponseData,
-                // ... other phases
-            )
+### 2. User Interface Enhancements
 
-            // Store final message
-            try await api.storeMessage(messagePoint)
+- **Rewards Dashboard**
 
-        } catch {
-            // Handle errors while maintaining state consistency
-            phaseResults[currentPhase] = BaseResponse(
-                step: currentPhase.rawValue,
-                content: "Error: \(error.localizedDescription)",
-                confidence: 0.0,
-                reasoning: "Phase failed"
-            )
-            throw error
-        }
-    }
+  - Create a dashboard displaying earned rewards.
+  - Visualize performance and progress in token accumulation.
 
-    // Support cancellation
-    func cancel() {
-        // Cleanup state
-        currentPhase = .action
-        phaseResults.removeAll()
-    }
-}
-```
+- **Staking Actions**
 
-## Testing Requirements
-- Test phase progression
-  - State transitions
-  - Result accumulation
-  - Error handling
-- Verify message lifecycle
-  - Creation
-  - Processing
-  - Storage
-- Test cancellation
-  - State cleanup
-  - Resource release
-  - Error propagation
+  - Include UI elements for staking and unstaking tokens.
+  - Guide users through the staking process with clear instructions.
+
+- **Transaction History**
+  - Provide a ledger of token transactions.
+  - Enhance transparency and user trust.
+
+### 3. Education and Compliance
+
+- **In-App Explanations**
+
+  - Include explanations of token mechanics within the app.
+  - Educate users on staking, rewards, and token usage.
+
+- **Regulatory Compliance**
+  - Ensure the tokenomics align with relevant financial and data protection regulations.
+  - Implement necessary measures for compliance.
 
 ## Success Criteria
-- Clean state transitions
-- Proper error handling
-- Type-safe operations
-- Reliable cancellation
+
+- **Seamless Token Integration**
+
+  - Users can view, stake, and manage their CHOIR tokens effortlessly.
+  - Token transactions are processed correctly and securely via the blockchain.
+
+- **Aligned Economic Model**
+
+  - Tokenomics reflect the documented economic principles of the platform.
+  - Rewards distribution is fair and incentivizes desired user behaviors.
+
+- **User Education**
+  - Users understand how the token system works through in-app resources.
+  - Compliance with regulations is maintained to avoid legal issues.
+
+## Future Considerations
+
+- **Advanced Token Features**
+
+  - Explore decentralized governance models using CHOIR tokens.
+  - Implement additional token utilities as the platform evolves.
+
+- **Dynamic Reward Systems**
+  - Adapt reward mechanisms based on user feedback and platform needs.
+  - Introduce tiered rewards or bonuses for high contributors.
+
+---
 
 === File: docs/issues/issue_4.md ===
 
@@ -1551,38 +1533,147 @@ issue_8
 ==
 
 
-# Performance Monitoring
+# docs/issues/issue_8.md
+
+# Documentation and Developer Onboarding
 
 ## Parent Issue
-[Core Message System Implementation](issue_0.md)
+
+[Core Client-Side Implementation](issue_0.md)
 
 ## Related Issues
-- Depends on: Basic implementation issues
-- Related to: [Integration Testing Suite](issue_6.md)
+
+- Depends on: All previous issues (0-7)
+- Blocks: None
+- Related to: None
 
 ## Description
-Add performance monitoring and metrics collection to track system behavior with real usage.
+
+Update and expand documentation to facilitate team growth and knowledge sharing. Ensure that new team members can onboard quickly and contribute effectively by providing clear guides, coding standards, and comprehensive documentation of all components.
 
 ## Tasks
-- [ ] Add timing metrics
-- [ ] Track memory usage
-- [ ] Monitor API latency
-- [ ] Implement performance tests
 
-## Code Examples
-```swift
-actor PerformanceMonitor {
-    private var metrics: [String: TimeInterval] = [:]
+### 1. Update Technical Documentation
 
-    func track<T>(_ operation: String, _ block: () async throws -> T) async rethrows -> T {
-        let start = CFAbsoluteTimeGetCurrent()
-        let result = try await block()
-        let duration = CFAbsoluteTimeGetCurrent() - start
+- **Document New Components**
 
-        await update(operation, duration)
-        return result
-    }
-}
+  - Ensure that all newly implemented features (e.g., proxy authentication, SUI integration, carousel UI) are thoroughly documented.
+  - Include architecture diagrams, flowcharts, and code examples where applicable.
+
+- **API Usage Guides**
+
+  - Provide detailed guides on how to use the integrated Anthropic and OpenAI APIs.
+  - Document the abstraction layer facilitating future LFM integration.
+
+- **Smart Contract Documentation**
+  - Detail the functionalities of each smart contract deployed on the SUI blockchain.
+  - Explain how thread ownership, token mechanics, and permissions are managed on-chain.
+
+### 2. Create Onboarding Guides
+
+- **Development Environment Setup**
+
+  - Update `Development Environment Setup` to reflect the current client-side architecture and dependencies.
+  - Include steps for setting up SwiftData, SUI wallets, and proxy server connections.
+
+- **Coding Standards and Best Practices**
+
+  - Define and document coding standards for Swift, ensuring consistency across the codebase.
+  - Outline best practices for using SwiftUI, asynchronous programming, and secure coding.
+
+- **Contribution Guidelines**
+  - Provide guidelines on how to contribute to the project, including branching strategies, commit message conventions, and code review processes.
+
+### 3. Knowledge Base Creation
+
+- **Use Wikis or Documentation Sites**
+
+  - Set up a centralized knowledge base using tools like GitHub Wikis, Notion, or ReadTheDocs.
+  - Organize information for easy access, categorizing by components, features, and processes.
+
+- **Encourage Team Contributions**
+  - Allow team members to add and update documentation.
+  - Implement a review process to ensure documentation quality and accuracy.
+
+### 4. Continuous Documentation Updates
+
+- **Maintain Up-to-Date Docs**
+
+  - Regularly update documentation to reflect ongoing development and changes.
+  - Assign ownership for different documentation sections to responsible team members.
+
+- **Integrate Documentation into CI/CD**
+  - Automate the generation and validation of documentation during the CI/CD pipeline.
+  - Ensure that documentation is built and available with each release.
+
+## Success Criteria
+
+- **Comprehensive Documentation**
+
+  - All aspects of the platform are well-documented, including architecture, features, and usage.
+  - Documentation is clear, concise, and accessible to all team members.
+
+- **Efficient Onboarding**
+
+  - New developers can set up their development environment and start contributing quickly.
+  - Onboarding guides cover all necessary steps and common issues.
+
+- **Active Knowledge Sharing**
+  - Team members regularly contribute to and update the knowledge base.
+  - Documentation evolves with the project, maintaining relevance and accuracy.
+
+## Future Considerations
+
+- **Advanced Documentation Features**
+
+  - Implement search functionality for the knowledge base to enhance accessibility.
+  - Incorporate interactive tutorials or walkthroughs for complex features.
+
+- **Localization and Internationalization**
+
+  - Translate documentation into multiple languages to support a diverse development team.
+  - Ensure that technical terms are consistently translated and understood.
+
+- **Feedback Mechanisms**
+  - Enable team members to provide feedback or suggest improvements to documentation.
+  - Regularly review and incorporate feedback to enhance documentation quality.
+
+## Action Plan
+
+1. **Audit Existing Documentation**
+
+   - Review current documentation for completeness and accuracy.
+   - Identify gaps and prioritize areas needing updates.
+
+2. **Assign Documentation Owners**
+
+   - Assign team members to be responsible for different sections of the documentation.
+   - Ensure accountability and regular updates.
+
+3. **Implement Onboarding Guides**
+
+   - Develop step-by-step guides for setting up the development environment.
+   - Include troubleshooting sections for common setup issues.
+
+4. **Establish Contribution Processes**
+
+   - Define how team members can contribute to and update documentation.
+   - Implement review processes to maintain documentation quality.
+
+5. **Integrate into Development Workflow**
+
+   - Make documentation updates a part of the development process.
+   - Ensure that new features come with corresponding documentation.
+
+6. **Regularly Update and Expand Docs**
+   - Schedule periodic reviews of documentation to keep it up-to-date.
+   - Expand documentation as the project grows and new features are added.
+
+## Conclusion
+
+Effective documentation and streamlined onboarding are crucial for the project's success, especially as the team expands. By maintaining comprehensive, accessible, and up-to-date documentation, we ensure that all team members can collaborate efficiently, contribute effectively, and uphold the platform's quality standards.
+
+---
 
 === File: docs/issues/issue_9.md ===
 
