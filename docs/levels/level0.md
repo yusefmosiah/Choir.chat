@@ -657,8 +657,7 @@ issue_2
 ## Related Issues
 
 - Depends on: [Local Data Management and Persistence](issue_1.md)
-- Blocks: [Tokenomics and CHOIR Token Integration](issue_3.md)
-- Related to: [Proxy Security and Backend Services](issue_4.md)
+
 
 ## Description
 
@@ -738,8 +737,6 @@ issue_5
 
 ## Related Issues
 
-- Depends on: [Proxy Security and Backend Services](issue_4.md)
-- Blocks: [Client-Side Intelligence](issue_6.md)
 - Related to: [Testing and Quality Assurance](issue_7.md)
 
 ## Description
@@ -830,8 +827,6 @@ issue_7
 
 ## Related Issues
 
-- Depends on: [Client-Side Intelligence](issue_6.md)
-- Blocks: None
 - Related to: [Documentation and Developer Onboarding](issue_8.md)
 
 ## Description

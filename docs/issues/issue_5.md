@@ -6,8 +6,6 @@
 
 ## Related Issues
 
-- Depends on: [Proxy Security and Backend Services](issue_4.md)
-- Blocks: [Client-Side Intelligence](issue_6.md)
 - Related to: [Testing and Quality Assurance](issue_7.md)
 
 ## Description

@@ -7,8 +7,7 @@
 ## Related Issues
 
 - Depends on: [Local Data Management and Persistence](issue_1.md)
-- Blocks: [Tokenomics and CHOIR Token Integration](issue_3.md)
-- Related to: [Proxy Security and Backend Services](issue_4.md)
+
 
 ## Description
 

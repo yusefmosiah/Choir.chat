@@ -6,8 +6,6 @@
 
 ## Related Issues
 
-- Depends on: [Client-Side Intelligence](issue_6.md)
-- Blocks: None
 - Related to: [Documentation and Developer Onboarding](issue_8.md)
 
 ## Description
