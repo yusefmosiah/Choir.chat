@@ -95,8 +95,9 @@ class RESTChorusCoordinator: ChorusCoordinator, ObservableObject {
                 context: contexts  // Pass full message history
             )
             print("Action request body: \(String(describing: actionBody))")
-            actionResponse = try await api.post(endpoint: "action", body: actionBody)
-            responses[.action] = actionResponse?.content
+            let actionResponse: APIResponse<ActionResponse> = try await api.post(endpoint: "action", body: actionBody)
+            self.actionResponse = actionResponse.data
+            responses[.action] = actionResponse.data?.content
             responsesContinuation?.yield(responses)
 
             try Task.checkCancellation()
@@ -106,12 +107,13 @@ class RESTChorusCoordinator: ChorusCoordinator, ObservableObject {
             phaseContinuation?.yield(.experience)
             let experienceBody = ExperienceRequestBody(
                 content: input,
-                actionResponse: actionResponse?.content ?? "",
+                actionResponse: actionResponse.data?.content ?? "",
                 threadID: thread?.id.uuidString,
                 context: contexts  // Pass full message history
             )
-            experienceResponse = try await api.post(endpoint: "experience", body: experienceBody)
-            responses[.experience] = experienceResponse?.content
+            let experienceResponse: APIResponse<ExperienceResponse> = try await api.post(endpoint: "experience", body: experienceBody)
+            self.experienceResponse = experienceResponse.data
+            responses[.experience] = experienceResponse.data?.content
             responsesContinuation?.yield(responses)
 
             try Task.checkCancellation()
@@ -121,14 +123,15 @@ class RESTChorusCoordinator: ChorusCoordinator, ObservableObject {
             phaseContinuation?.yield(.intention)
             let intentionBody = IntentionRequestBody(
                 content: input,
-                actionResponse: actionResponse?.content ?? "",
-                experienceResponse: experienceResponse?.content ?? "",
-                priors: experienceResponse?.priors ?? [:],
+                actionResponse: actionResponse.data?.content ?? "",
+                experienceResponse: experienceResponse.data?.content ?? "",
+                priors: experienceResponse.data?.priors ?? [:],
                 threadID: thread?.id.uuidString,
                 context: contexts  // Pass full message history
             )
-            intentionResponse = try await api.post(endpoint: "intention", body: intentionBody) as IntentionResponse
-            responses[.intention] = intentionResponse?.content
+            let intentionResponse: APIResponse<IntentionResponse> = try await api.post(endpoint: "intention", body: intentionBody)
+            self.intentionResponse = intentionResponse.data
+            responses[.intention] = intentionResponse.data?.content
             responsesContinuation?.yield(responses)
 
             try Task.checkCancellation()
@@ -138,16 +141,17 @@ class RESTChorusCoordinator: ChorusCoordinator, ObservableObject {
             phaseContinuation?.yield(.observation)
             let observationBody = ObservationRequestBody(
                 content: input,
-                actionResponse: actionResponse?.content ?? "",
-                experienceResponse: experienceResponse?.content ?? "",
-                intentionResponse: intentionResponse?.content ?? "",
-                selectedPriors: intentionResponse?.selectedPriors ?? [],
-                priors: experienceResponse?.priors ?? [:],
+                actionResponse: actionResponse.data?.content ?? "",
+                experienceResponse: experienceResponse.data?.content ?? "",
+                intentionResponse: intentionResponse.data?.content ?? "",
+                selectedPriors: intentionResponse.data?.selectedPriors ?? [],
+                priors: experienceResponse.data?.priors ?? [:],
                 threadID: thread?.id.uuidString,
-                context: contexts  // Pass full message history
+                context: contexts
             )
-            observationResponse = try await api.post(endpoint: "observation", body: observationBody)
-            responses[.observation] = observationResponse?.content
+            let observationResponse: APIResponse<ObservationResponse> = try await api.post(endpoint: "observation", body: observationBody)
+            self.observationResponse = observationResponse.data
+            responses[.observation] = observationResponse.data?.content
             responsesContinuation?.yield(responses)
 
             try Task.checkCancellation()
@@ -157,21 +161,22 @@ class RESTChorusCoordinator: ChorusCoordinator, ObservableObject {
             phaseContinuation?.yield(.understanding)
             let understandingBody = UnderstandingRequestBody(
                 content: input,
-                actionResponse: actionResponse?.content ?? "",
-                experienceResponse: experienceResponse?.content ?? "",
-                intentionResponse: intentionResponse?.content ?? "",
-                observationResponse: observationResponse?.content ?? "",
+                actionResponse: actionResponse.data?.content ?? "",
+                experienceResponse: experienceResponse.data?.content ?? "",
+                intentionResponse: intentionResponse.data?.content ?? "",
+                observationResponse: observationResponse.data?.content ?? "",
                 patterns: [],
-                selectedPriors: intentionResponse?.selectedPriors ?? [],
+                selectedPriors: intentionResponse.data?.selectedPriors ?? [],
                 threadID: thread?.id.uuidString,
-                context: contexts  // Pass full message history
+                context: contexts
             )
-            understandingResponse = try await api.post(endpoint: "understanding", body: understandingBody)
-            responses[.understanding] = understandingResponse?.content
+            let understandingResponse: APIResponse<UnderstandingResponse> = try await api.post(endpoint: "understanding", body: understandingBody)
+            self.understandingResponse = understandingResponse.data
+            responses[.understanding] = understandingResponse.data?.content
             responsesContinuation?.yield(responses)
 
             // Check if we should loop
-            if let understanding = understandingResponse,
+            if let understanding = understandingResponse.data,
                understanding.shouldYield ?? true,
                let nextPrompt = understanding.nextPrompt {
                 try await process(nextPrompt, thread: thread)
@@ -185,33 +190,29 @@ class RESTChorusCoordinator: ChorusCoordinator, ObservableObject {
             phaseContinuation?.yield(.yield)
             let yieldBody = YieldRequestBody(
                 content: input,
-                actionResponse: actionResponse?.content ?? "",
-                experienceResponse: experienceResponse?.content ?? "",
-                intentionResponse: intentionResponse?.content ?? "",
-                observationResponse: observationResponse?.content ?? "",
-                understandingResponse: understandingResponse?.content ?? "",
-                selectedPriors: intentionResponse?.selectedPriors ?? [],
-                priors: experienceResponse?.priors ?? [:],
+                actionResponse: actionResponse.data?.content ?? "",
+                experienceResponse: experienceResponse.data?.content ?? "",
+                intentionResponse: intentionResponse.data?.content ?? "",
+                observationResponse: observationResponse.data?.content ?? "",
+                understandingResponse: understandingResponse.data?.content ?? "",
+                selectedPriors: intentionResponse.data?.selectedPriors ?? [],
+                priors: experienceResponse.data?.priors ?? [:],
                 threadID: thread?.id.uuidString,
-                context: contexts  // Pass full message history
+                context: contexts
             )
-            yieldResponse = try await api.post(endpoint: "yield", body: yieldBody)
-            responses[.yield] = yieldResponse?.content
+            let yieldResponse: APIResponse<YieldResponse> = try await api.post(endpoint: "yield", body: yieldBody)
+            self.yieldResponse = yieldResponse.data
+            responses[.yield] = yieldResponse.data?.content
             responsesContinuation?.yield(responses)
 
         } catch let error as URLError {
-            print("Network error: \(error.localizedDescription)")
-            responses[currentPhase] = "Network error: Could not connect to server"
-            responsesContinuation?.yield(responses)
+            await handleError(APIError.networkError(error), phase: currentPhase)
             throw APIError.networkError(error)
         } catch is CancellationError {
-            responses[currentPhase] = "Cancelled"
-            responsesContinuation?.yield(responses)
+            await handleError(APIError.cancelled, phase: currentPhase)
             throw APIError.cancelled
         } catch {
-            print("Error during \(currentPhase): \(error.localizedDescription)")
-            responses[currentPhase] = "Error: \(error.localizedDescription)"
-            responsesContinuation?.yield(responses)
+            await handleError(error, phase: currentPhase)
             throw error
         }
     }
@@ -225,5 +226,25 @@ class RESTChorusCoordinator: ChorusCoordinator, ObservableObject {
         phaseContinuation?.finish()
         responsesContinuation?.finish()
         processingContinuation?.finish()
+    }
+
+    private func handleError(_ error: Error, phase: Phase) async {
+        let errorMessage: String
+
+        switch error {
+        case let apiError as APIError:
+            errorMessage = apiError.localizedDescription
+        case is CancellationError:
+            errorMessage = "Cancelled"
+        default:
+            errorMessage = "Error: \(error.localizedDescription)"
+        }
+
+        // Update responses with error
+        responses[phase] = errorMessage
+        responsesContinuation?.yield(responses)
+
+        // Log error for debugging
+        print("Error during \(phase): \(errorMessage)")
     }
 }

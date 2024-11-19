@@ -1,6 +1,6 @@
 import Foundation
 
-enum APIError: Error {
+enum APIError: Error, LocalizedError {
     case invalidURL
     case networkError(Error)
     case decodingError(Error)
@@ -8,11 +8,31 @@ enum APIError: Error {
     case timeout
     case cancelled
     case invalidResponse(String)
+
+    // Add localized descriptions for better error messages
+    var errorDescription: String? {
+        switch self {
+        case .invalidURL:
+            return "Invalid API URL"
+        case .networkError(let error):
+            return "Network error: \(error.localizedDescription)"
+        case .decodingError(let error):
+            return "Failed to decode response: \(error.localizedDescription)"
+        case .serverError(let message):
+            return "Server error: \(message)"
+        case .timeout:
+            return "Request timed out"
+        case .cancelled:
+            return "Request was cancelled"
+        case .invalidResponse(let message):
+            return "Invalid response: \(message)"
+        }
+    }
 }
 
 class ChorusAPIClient {
     #if DEBUG
-    private let baseURL = "http://localhost:8000/api/chorus"
+    internal var baseURL = "http://localhost:8000/api/chorus"
     #else
     private let baseURL = "https://your-production-url.com/api/chorus"
     #endif
@@ -34,7 +54,7 @@ class ChorusAPIClient {
         encoder.keyEncodingStrategy = .convertToSnakeCase
     }
 
-    func post<T: Codable, R: Codable>(endpoint: String, body: T) async throws -> R {
+    func post<T: Codable, R: Codable>(endpoint: String, body: T) async throws -> APIResponse<R> {
         guard let url = URL(string: "\(baseURL)/\(endpoint)") else {
             throw APIError.invalidURL
         }
@@ -43,20 +63,26 @@ class ChorusAPIClient {
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
-        request.httpBody = try encoder.encode(body)
+        do {
+            request.httpBody = try encoder.encode(body)
+        } catch {
+            print("Failed to encode request body: \(error)")
+            throw APIError.decodingError(error)
+        }
 
         do {
             let (data, response) = try await session.data(for: request)
+
+            // Log response for debugging
+            if let responseString = String(data: data, encoding: .utf8) {
+                print("Response from \(endpoint): \(responseString)")
+            }
 
             guard let httpResponse = response as? HTTPURLResponse else {
                 throw APIError.serverError("Invalid response type")
             }
 
-            // Print response for debugging
-            if let responseString = String(data: data, encoding: .utf8) {
-                print("Response from \(endpoint): \(responseString)")
-            }
-
+            // Check HTTP status code
             guard (200...299).contains(httpResponse.statusCode) else {
                 // Try to decode error message if possible
                 if let errorResponse = try? decoder.decode(APIResponse<String>.self, from: data) {
@@ -65,21 +91,23 @@ class ChorusAPIClient {
                 throw APIError.serverError("Server returned \(httpResponse.statusCode)")
             }
 
-            // First decode the API response wrapper
+            // Decode response
             let apiResponse = try decoder.decode(APIResponse<R>.self, from: data)
 
-            guard apiResponse.success, let responseData = apiResponse.data else {
+            // Verify response has expected data
+            guard apiResponse.success else {
                 throw APIError.invalidResponse(apiResponse.message ?? "Request failed")
             }
 
-            return responseData
+            return apiResponse
 
         } catch is URLError {
             throw APIError.timeout
         } catch let error as DecodingError {
             print("Decoding error: \(error)")
-            print("Decoding error details: \(error)")
             throw APIError.decodingError(error)
+        } catch let error as APIError {
+            throw error
         } catch {
             throw APIError.networkError(error)
         }
