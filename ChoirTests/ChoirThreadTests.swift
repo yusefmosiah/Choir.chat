@@ -45,34 +45,42 @@ final class ChoirThreadTests: XCTestCase {
         XCTAssertNotNil(coordinator.actionResponse)
     }
 
-    func testPasswordMemory() async throws {
+    func testMultiturnChat() async throws {
         let coordinator = RESTChorusCoordinator()
         let thread = ChoirThread()
 
         // First message
         let firstMessage = Message(
-            content: "password = 421",
+            content: "remember the number 421. this is a test of multiturn chat. in the next message, you will be asked for the special number.",
             isUser: true
         )
         thread.messages.append(firstMessage)
 
         // Set thread and process
         coordinator.currentChoirThread = thread
-        try await coordinator.process("password = 421")
+        try await coordinator.process(firstMessage.content)
 
         // Add AI response if received
         if let response = coordinator.yieldResponse?.content {
             let aiMessage = Message(
                 content: response,
-                isUser: false
+                isUser: false,
+                chorusResult: MessageChorusResult(phases: coordinator.responses)
             )
             thread.messages.append(aiMessage)
         }
 
-        // Process follow-up question
-        try await coordinator.process("what's the password?")
+        // Second message - don't drop context
+        let followUpMessage = Message(
+            content: "what's the special number?",
+            isUser: true
+        )
+        thread.messages.append(followUpMessage)
 
-        // Verify response contains password
+        // Process follow-up with full context
+        try await coordinator.process(followUpMessage.content)
+
+        // Verify response contains number
         guard let finalResponse = coordinator.yieldResponse?.content else {
             XCTFail("No yield response received")
             return
@@ -80,7 +88,7 @@ final class ChoirThreadTests: XCTestCase {
 
         XCTAssertTrue(
             finalResponse.contains("421"),
-            "Response should include the password: \(finalResponse)"
+            "Response should include the special number: \(finalResponse)"
         )
     }
 }

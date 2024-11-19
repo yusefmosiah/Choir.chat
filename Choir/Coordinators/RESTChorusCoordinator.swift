@@ -57,7 +57,7 @@ class RESTChorusCoordinator: ChorusCoordinator, ObservableObject {
         currentChoirThread = thread
 
         // Get context at the start
-        let messages = thread?.messages ?? []
+        let messages = thread?.messages.dropLast(2) ?? []
         let contexts = messages.map { MessageContext(from: $0) }
 
         // Add detailed logging
