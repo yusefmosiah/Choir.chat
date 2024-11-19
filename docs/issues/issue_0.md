@@ -9,9 +9,9 @@ Implement the foundational client-side system with a focus on getting a working 
 3. Issue 5: Enhanced UI/UX with Carousel
 4. Issue 7: Testing and Quality Assurance
 5. Issue 8: Deploy to TestFlight and Render
-6. Issue 9: Message Rewards Implementation (postponed)
+6. Issue 9: Message Rewards Implementation
 7. Issue 10: Thread Sheet Implementation
-8. Issue 11: Thread Contract Implementation (postponed)
+8. Issue 11: Thread Contract Implementation 
 9. Issue 12: Citation Visualization and Handling
 10. Issue 13: LanceDB Migration & Multimodal Support
 

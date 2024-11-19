@@ -129,8 +129,7 @@
     │   ├── issue_5.md
     │   ├── issue_7.md
     │   ├── issue_8.md
-    │   ├── issue_9.md
-    │   └── issues_1-13.md
+    │   └── issue_9.md
     ├── levels
     │   ├── level-1.md
     │   ├── level0.md
@@ -170,4 +169,4 @@
     ├── theory_theory.md
     └── tree.md
 
-36 directories, 132 files
+36 directories, 131 files
