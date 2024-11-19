@@ -11,18 +11,14 @@ struct ContentView: View {
     @StateObject private var viewModel: ChorusViewModel
     @State private var threads: [ChoirThread] = []
     @State private var selectedChoirThread: ChoirThread?
+    @State private var showingWallet = false
 
     init() {
-        // #if DEBUG
-        // _viewModel = StateObject(wrappedValue: ChorusViewModel(coordinator: MockChorusCoordinator()))
-        // #else
         _viewModel = StateObject(wrappedValue: ChorusViewModel(coordinator: RESTChorusCoordinator()))
-        // #endif
     }
 
     var body: some View {
         NavigationSplitView {
-            // Sidebar - ChoirThread List
             List(threads, selection: $selectedChoirThread) { thread in
                 NavigationLink(value: thread) {
                     ChoirThreadRow(thread: thread)
@@ -30,18 +26,27 @@ struct ContentView: View {
             }
             .navigationTitle("ChoirThreads")
             .toolbar {
-                Button(action: createNewChoirThread) {
-                    Label("New ChoirThread", systemImage: "plus")
+                ToolbarItem(placement: .primaryAction) {
+                    Button(action: createNewChoirThread) {
+                        Label("New ChoirThread", systemImage: "plus")
+                    }
+                }
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button(action: { showingWallet = true }) {
+                        Label("Wallet", systemImage: "wallet.pass")
+                    }
                 }
             }
         } detail: {
-            // Detail - ChoirThread Messages or Chorus Response
             if let thread = selectedChoirThread {
                 ChoirThreadDetailView(thread: thread, viewModel: viewModel)
             } else {
                 Text("Select a thread")
                     .foregroundStyle(.secondary)
             }
+        }
+        .sheet(isPresented: $showingWallet) {
+            WalletView()
         }
     }
 
