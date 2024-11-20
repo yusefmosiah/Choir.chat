@@ -56,8 +56,6 @@
 - [ ] Remore Message definition
 - [ ] Adjust models if necessary to ensure compatibility with SwiftData models.
 
-### `ChorusResponse.swift` and `ChorusCycleView.swift`
-- [ ] Verify if they interact with `Message` or `ChoirThread` and update references to `CHMessage` or `CHThread` if needed.
 
 ## New Files to Be Created
 
