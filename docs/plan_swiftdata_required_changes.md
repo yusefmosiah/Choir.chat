@@ -53,6 +53,7 @@
 
 ### `ChorusModels.swift`
 - [ ] Review for conflicts with the new `CHMessage` model.
+- [ ] Remore Message definition
 - [ ] Adjust models if necessary to ensure compatibility with SwiftData models.
 
 ### `ChorusResponse.swift` and `ChorusCycleView.swift`
@@ -77,9 +78,6 @@
 
 ### `ChoirThread.swift`
 - [ ] Replace with the new `CHThread` SwiftData model. Update all references to use `CHThread`.
-
-### `Message.swift` (if it exists separately from `ChorusModels.swift`)
-- [ ] Replace with `CHMessage` in the SwiftData model. Update all references to use `CHMessage`.
 
 ### Test Files Related to Old Models
 - [ ] `ChoirThreadTests.swift`: Update or replace with tests for `CHThread`.
