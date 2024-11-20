@@ -3617,88 +3617,200 @@ plan_swiftdata_required_changes
 ==
 
 
-# SwiftData Required Changes Checklist
+# Updated SwiftData Implementation Plan Checklist
 
-## Summary of Required Actions
+## Overview
 
-### Update Existing Code to Use New Models
-- [ ] Replace `ChoirThread` with `CHThread`.
-- [ ] Replace `Message` with `CHMessage`.
-- [ ] Ensure all data relationships align with the new SwiftData models.
+Implement SwiftData integration with proper modeling of `ChorusResult`, ensuring users can view all chorus phases of AI responses in their old messages. The plan is broken into chunks, each resulting in a working code checkpoint.
 
-### Implement New ViewModels
-- [ ] Create `ThreadListViewModel` and integrate it into `ContentView.swift`.
-- [ ] Create `ThreadDetailViewModel` and integrate it into `ThreadDetailView.swift`.
+---
 
-### Adjust `WalletManager.swift`
-- [ ] After wallet creation/loading, create or load a `CHUser` using the wallet address.
-- [ ] Ensure that `CHUser` is accessible throughout the app for authoring messages and threads.
+## **Chunk 1: Introduce SwiftData with Basic Models and Persistence**
 
-### Modify Views and Coordinators
-- [ ] Update views to use new models and view models.
-- [ ] Adjust coordinators to handle new data models and any changes in data flow.
+### Goals
 
-## Code Files Requiring Changes
+- Set up SwiftData in the project.
+- Create basic SwiftData models (`CHUser`, `CHThread`, `CHMessage`).
+- Ensure data persistence between app launches.
+- Integrate wallet management with `CHUser`.
 
-### `WalletManager.swift`
-- [ ] Instantiate or load a `CHUser` object using the wallet's address after wallet creation or loading.
-- [ ] Use the wallet's address as the unique identifier for the `CHUser`.
-- [ ] Adjust methods to reflect the association between `Wallet` and `CHUser`.
+### Checklist
 
-### `ChorusViewModel.swift`
-- [ ] Modify to work with the new `CHMessage` model instead of the old `Message` struct.
-- [ ] Update data fetching or state management to align with `CHThread` and `CHMessage`.
+- **Set Up SwiftData**
+  - [ ] Configure the SwiftData stack (`ModelContainer`, `ModelContext`).
+  - [ ] Ensure SwiftData is ready to use with the new models.
 
-### `ContentView.swift`
-- [ ] Replace `threads: [ChoirThread]` with a `ThreadListViewModel` instance.
-- [ ] Update thread creation to use `CHThread`, setting the current `CHUser` as the owner.
-- [ ] Adjust navigation links and views to work with `CHThread` and associated view models.
+- **Create Basic SwiftData Models**
 
-### `ChoirThreadDetailView.swift`
-- [ ] Rename to `ThreadDetailView.swift` for consistency.
-- [ ] Replace `ChoirThread` with `CHThread`.
-- [ ] Use `ThreadDetailViewModel` to manage state and interactions.
-- [ ] Update message display to use `CHMessage`.
+  - **`CHUser` Model**
+    - [ ] Properties:
+      - [ ] `walletAddress` (String): Unique identifier from `wallet.accounts[0].address()`.
+      - [ ] `createdAt` (Date).
+    - [ ] Relationships:
+      - [ ] `ownedThreads` (to-many `CHThread`).
+      - [ ] `messages` (to-many `CHMessage`).
 
-### `MessageRow.swift`
-- [ ] Update to accept `CHMessage` instead of `Message`.
-- [ ] Adjust bindings and property references to match the new model's properties.
-- [ ] Display author information using `CHMessage.author`.
+  - **`CHThread` Model**
+    - [ ] Properties:
+      - [ ] `id` (UUID): Unique identifier.
+      - [ ] `title` (String).
+      - [ ] `createdAt` (Date).
+    - [ ] Relationships:
+      - [ ] `owner` (to-one `CHUser`).
+      - [ ] `messages` (to-many `CHMessage`).
 
-### `ChorusCoordinator.swift` and `RESTChorusCoordinator.swift`
-- [ ] Modify references to `ChoirThread` and `Message` to use `CHThread` and `CHMessage`.
-- [ ] Ensure thread and message IDs align with the new models.
-- [ ] Update functions that pass thread or message data to the API.
+  - **`CHMessage` Model**
+    - [ ] Properties:
+      - [ ] `id` (UUID): Unique identifier.
+      - [ ] `content` (String).
+      - [ ] `timestamp` (Date).
+      - [ ] `isUser` (Bool).
+    - [ ] Relationships:
+      - [ ] `author` (to-one `CHUser`).
+      - [ ] `thread` (to-one `CHThread`).
 
-### `ChorusModels.swift`
-- [ ] Review for conflicts with the new `CHMessage` model.
-- [ ] Remore Message definition
-- [ ] Adjust models if necessary to ensure compatibility with SwiftData models.
+- **Integrate `WalletManager` with `CHUser`**
+  - [ ] After wallet creation/loading, create or load a `CHUser` using the wallet address.
+  - [ ] Store the `CHUser` instance for access throughout the app.
 
+- **Implement Data Persistence**
+  - [ ] Ensure data for `CHUser`, `CHThread`, and `CHMessage` is persisted using SwiftData.
+  - [ ] Test data persistence between app launches.
 
-## New Files to Be Created
+---
 
-### Models/Core/
-- [ ] `CHUser.swift`: SwiftData model for `CHUser`, using wallet address as the unique identifier.
-- [ ] `CHThread.swift`: SwiftData model for `CHThread`, representing threads owned and co-authored by users.
-- [ ] `CHMessage.swift`: SwiftData model for `CHMessage`, including content, timestamp, author, and thread relationships.
+## **Chunk 2: Model `ChorusResult` and Integrate with Messages**
 
-### ViewModels/
-- [ ] `ThreadListViewModel.swift`: Manages the list of threads for the current user. Handles loading, creating, and selecting threads.
-- [ ] `ThreadDetailViewModel.swift`: Manages the state and interactions within a thread. Handles loading messages, sending messages, and AI processing.
+### Goals
 
-### Views/
-- [ ] `ThreadDetailView.swift` (if renamed from `ChoirThreadDetailView.swift`): Updated view to work with `ThreadDetailViewModel` and the new models.
-- [ ] Any additional view files needed to support the new models and view models.
+- Create a `ChorusResult` model to store all phases of AI responses.
+- Update `CHMessage` to include a relationship to `ChorusResult`.
+- Ensure AI responses with all chorus phases are properly stored and retrievable.
 
-## Files to Be Deleted or Deprecated
+### Checklist
 
-### `ChoirThread.swift`
-- [ ] Replace with the new `CHThread` SwiftData model. Update all references to use `CHThread`.
+- **Create `ChorusResult` Model**
+  - [ ] Properties:
+    - [ ] `id` (UUID): Unique identifier.
+    - [ ] `phases` (Dictionary or appropriate data structure to store phase content).
 
-### Test Files Related to Old Models
-- [ ] `ChoirThreadTests.swift`: Update or replace with tests for `CHThread`.
-- [ ] `APIResponseTests.swift` and `ChorusAPIClientTests.swift`: Review and update if they rely on the old models.
+- **Update `CHMessage` Model**
+  - [ ] Add relationship to `ChorusResult` (`chorusResult`).
+
+- **Modify `ChorusViewModel`**
+  - [ ] Update to work with `CHMessage` and `ChorusResult`.
+  - [ ] Store the full `ChorusResult` with all phases when processing a message.
+
+- **Update Storage Logic**
+  - [ ] Ensure `ChorusResult` is saved with the AI's `CHMessage`.
+
+- **Adjust UI to Display Chorus Phases**
+  - [ ] Modify views to display all chorus phases associated with a message.
+  - [ ] Ensure users can view old messages with all their chorus phases.
+
+---
+
+## **Chunk 3: Replace Old Models and Update UI**
+
+### Goals
+
+- Replace `ChoirThread` and `Message` models with `CHThread` and `CHMessage`.
+- Update views to use new models.
+- Implement `ThreadListViewModel` and `ThreadDetailViewModel`.
+
+### Checklist
+
+- **Implement `ThreadListViewModel`**
+  - [ ] Manage fetching and displaying the list of threads.
+  - [ ] Handle creating new threads.
+
+- **Implement `ThreadDetailViewModel`**
+  - [ ] Manage message fetching and sending within a thread.
+  - [ ] Handle AI processing and storing `ChorusResult`.
+
+- **Update `ContentView.swift`**
+  - [ ] Replace `threads: [ChoirThread]` with data from SwiftData.
+  - [ ] Use `ThreadListViewModel`.
+  - [ ] Adjust navigation to pass selected `CHThread` to detail view.
+
+- **Rename and Update `ChoirThreadDetailView.swift` to `ThreadDetailView.swift`**
+  - [ ] Replace `ChoirThread` with `CHThread`.
+  - [ ] Use `ThreadDetailViewModel`.
+  - [ ] Update message display to use `CHMessage`.
+
+- **Update Other Views**
+  - **`MessageRow.swift`**
+    - [ ] Update to accept `CHMessage`.
+    - [ ] Adjust bindings to match `CHMessage` properties.
+    - [ ] Display author information and chorus phases.
+
+- **Remove Old Models**
+  - [ ] Delete `ChoirThread.swift` and related old models.
+  - [ ] Update all references to use `CHThread`.
+
+---
+
+## **Chunk 4: Implement Prior Support and Navigation**
+
+### Goals
+
+- Enhance `CHMessage` to include prior references.
+- Implement navigation to source threads and messages from priors.
+- Ensure the Experience phase displays priors and allows navigation.
+
+### Checklist
+
+- **Update `CHMessage` Model**
+  - [ ] Add a relationship for prior references (`priors`).
+
+- **Modify AI Processing to Store Priors**
+  - [ ] Save priors returned from the Experience phase.
+  - [ ] Link priors to the AI's `CHMessage`.
+
+- **Update UI to Display Priors**
+  - [ ] Display priors in the Experience phase view.
+
+- **Implement Navigation to Priors**
+  - [ ] Allow users to navigate to prior messages and threads.
+
+---
+
+## **Chunk 5: Finalize and Refine**
+
+### Goals
+
+- Test the entire application thoroughly.
+- Refine the UI and user experience.
+- Fix any bugs or issues.
+
+### Checklist
+
+- **Comprehensive Testing**
+  - [ ] Test all features end-to-end.
+  - [ ] Ensure data integrity and persistence.
+
+- **Optimize Performance**
+  - [ ] Review and optimize data fetches and UI updates.
+  - [ ] Ensure smooth performance.
+
+- **Polish UI**
+  - [ ] Refine UI elements for better user experience.
+  - [ ] Ensure consistent styling and responsiveness.
+
+- **Documentation and Code Cleanup**
+  - [ ] Comment code where necessary.
+  - [ ] Remove unused code or resources.
+  - [ ] Update documentation to reflect changes.
+
+---
+
+# Notes
+
+- **Working Checkpoints**: After each chunk, ensure the app is functional.
+- **Testing**: Continuously test at each stage.
+- **User Experience**: Prioritize intuitive usage.
+- **Modeling `ChorusResult`**: Enhances value by allowing access to all chorus phases.
+- **Incremental Development**: Breaking into chunks allows manageable progress.
 
 === File: docs/plan_swiftui_chorus_integration.md ===
 
