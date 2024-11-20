@@ -3762,6 +3762,7 @@ Implement SwiftData integration with proper modeling of `ChorusResult`, ensuring
 
 - **Update `CHMessage` Model**
   - [ ] Add a relationship for prior references (`priors`).
+  - [ ] Add inverse relationship for messages that cite message as prior
 
 - **Modify AI Processing to Store Priors**
   - [ ] Save priors returned from the Experience phase.
