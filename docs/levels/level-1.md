@@ -523,6 +523,7 @@ tree.md
 │   │   │       └── configuration
 │   │   └── xcuserdata
 │   │       └── wiz.xcuserdatad
+│   │           ├── IDEFindNavigatorScopes.plist
 │   │           └── UserInterfaceState.xcuserstate
 │   └── xcuserdata
 │       └── wiz.xcuserdatad
@@ -649,7 +650,7 @@ tree.md
     ├── theory_theory.md
     └── tree.md
 
-37 directories, 136 files
+37 directories, 137 files
 
 === File: docs/CHANGELOG.md ===
 

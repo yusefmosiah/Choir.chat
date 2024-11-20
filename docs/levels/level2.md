@@ -2174,12 +2174,12 @@ plan_chuser_chthread_chmessage
 # SwiftData and Choir Models Implementation Plan
 
 ## Overview
-Implement SwiftData persistence with CH-prefixed models, maintaining clean separation between Choir's core functionality and blockchain integration.
+Implement SwiftData persistence with CH-prefixed models, using SUI wallet as the core identity system.
 
 ## 1. Core Models
 - [ ] Create CHUser model
-  - [ ] UUID for local identification
-  - [ ] Optional wallet address (keeps blockchain optional)
+  - [ ] Wallet address as primary identifier (from wallet.accounts[0].address())
+  - [ ] Creation timestamp
   - [ ] Owned threads relationship
   - [ ] Co-authored threads relationship
   - [ ] Created messages relationship
@@ -2190,7 +2190,8 @@ Implement SwiftData persistence with CH-prefixed models, maintaining clean separ
   - [ ] Owner relationship (CHUser)
   - [ ] Co-authors relationship (Set<CHUser>)
   - [ ] Messages relationship
-  - [ ] Optional blockchain fields (onChainId, etc.)
+  - [ ] Message count tracking
+  - [ ] Last message timestamp
 
 - [ ] Create CHMessage model
   - [ ] UUID matching Qdrant ID
@@ -2201,35 +2202,35 @@ Implement SwiftData persistence with CH-prefixed models, maintaining clean separ
   - [ ] isUser flag
 
 ## 2. Identity Integration
-- [ ] Update WalletManager to work with CHUser
-  - [ ] Keep wallet management separate from user identity
-  - [ ] Link wallet address to CHUser when available
-  - [ ] Support users without wallets
-  - [ ] Handle wallet linking/unlinking
+- [ ] Update WalletManager to create/load CHUser
+  - [ ] Create CHUser on first wallet creation
+  - [ ] Load CHUser when loading existing wallet
+  - [ ] Use wallet address as stable identifier
+  - [ ] Handle wallet address changes
 
 ## 3. ViewModels
 - [ ] Create ThreadListViewModel
-  - [ ] Load user's threads (owned + co-authored)
-  - [ ] Create new threads
+  - [ ] Load current user's threads (owned + co-authored)
+  - [ ] Create new threads with current user as owner
   - [ ] Handle thread selection
   - [ ] Manage thread lifecycle
 
 - [ ] Create ThreadDetailViewModel
   - [ ] Load thread messages
-  - [ ] Handle message creation
+  - [ ] Handle message creation with proper authorship
   - [ ] Process AI responses
   - [ ] Manage co-authors
 
 ## 4. Update Existing Views
 - [ ] Modify ContentView
   - [ ] Use ThreadListViewModel
-  - [ ] Update thread creation
-  - [ ] Keep wallet integration optional
+  - [ ] Update thread creation with wallet identity
+  - [ ] Integrate WalletView
   - [ ] Handle navigation
 
 - [ ] Update ChoirThreadDetailView
   - [ ] Use ThreadDetailViewModel
-  - [ ] Show author information
+  - [ ] Show wallet-based author information
   - [ ] Display message history
   - [ ] Handle AI processing
 
@@ -2242,8 +2243,8 @@ Implement SwiftData persistence with CH-prefixed models, maintaining clean separ
 
 ## 6. Testing
 - [ ] Model relationship tests
-  - [ ] User-thread ownership
-  - [ ] Thread co-authorship
+  - [ ] Wallet-user mapping
+  - [ ] Thread ownership
   - [ ] Message attribution
   - [ ] Prior references
 
@@ -2255,22 +2256,23 @@ Implement SwiftData persistence with CH-prefixed models, maintaining clean separ
 
 ## Success Criteria
 - [ ] Data persists between app launches
-- [ ] Optional wallet integration works smoothly
+- [ ] Wallet identity works reliably
 - [ ] Messages maintain Qdrant sync
 - [ ] UI updates reflect persistence
 - [ ] Prior references preserved
 
-## Future Considerations
-- Blockchain integration remains optional
-- Multi-device sync
-- Prior navigation
-- Citation visualization
+## Implementation Order
+1. Core models with wallet integration
+2. Basic persistence without priors
+3. View updates
+4. Prior support
+5. Testing
 
 ## Notes
-- Keep models blockchain-agnostic
-- Focus on core Choir functionality first
+- Wallet is required for all operations
+- Use wallet address as stable identifier
 - Maintain ID consistency with Qdrant
-- Keep wallet integration optional
+- Keep relationships clean and well-defined
 
 === File: docs/plan_client_architecture.md ===
 
