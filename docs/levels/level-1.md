@@ -628,6 +628,7 @@ tree.md
     ├── plan_proxy_security_model.md
     ├── plan_save_users_and_threads.md
     ├── plan_sui_blockchain_integration.md
+    ├── plan_swiftdata_required_changes.md
     ├── plan_swiftui_chorus_integration.md
     ├── plan_thoughtspace.md
     ├── plan_tokenomics.md
@@ -650,7 +651,7 @@ tree.md
     ├── theory_theory.md
     └── tree.md
 
-37 directories, 137 files
+37 directories, 138 files
 
 === File: docs/CHANGELOG.md ===
 
