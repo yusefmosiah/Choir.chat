@@ -1,7 +1,7 @@
 services:
   - type: web
     name: choir-api
-    env: docker
+    runtime: docker
     dockerfilePath: api/Dockerfile
     dockerContext: api
     rootDir: api
