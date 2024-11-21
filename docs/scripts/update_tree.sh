@@ -1,12 +1,12 @@
 #!/bin/bash
 
 # Get the tree output, excluding venv and node_modules
-tree_output=$(tree -I 'venv|archive|__pycache__|iOS_Example')
+tree_output=$(tree -I 'venv|archive|__pycache__|iOS_Example|dependencies')
 
 # Create a temporary file with the new content
 cat > docs/tree.md.tmp << EOL
 # Choir Directory Structure
-## Output of $ tree -I 'venv|archive|__pycache__|iOS_Example' | pbcopy
+## Output of $ tree -I 'venv|archive|__pycache__|iOS_Example|dependencies' | pbcopy
 
 $tree_output
 EOL
