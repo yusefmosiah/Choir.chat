@@ -3,8 +3,7 @@ services:
     name: choir-api
     runtime: docker
     dockerfilePath: Dockerfile
-    dockerContext: .
-    rootDir: api
+    dockerContext: api
     envVars:
       - key: SUI_PRIVATE_KEY
         sync: false
