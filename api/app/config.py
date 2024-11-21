@@ -22,6 +22,10 @@ class Config:
         "https://choir-collective.onrender.com"
     ]
 
+
+    # SUI configuration
+    SUI_PRIVATE_KEY: str = os.getenv("SUI_PRIVATE_KEY", "")
+
     # AI API configuration
     OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
     ANTHROPIC_API_KEY: str = os.getenv("ANTHROPIC_API_KEY", "")

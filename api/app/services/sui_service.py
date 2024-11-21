@@ -1,4 +1,5 @@
 import logging
+from app.config import Config
 from pysui import SuiConfig
 from pysui.sui.sui_clients.sync_client import SuiClient
 from pysui.sui.sui_types.address import SuiAddress
@@ -11,6 +12,8 @@ import os
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+config = Config.from_env()
+
 class SuiService:
     def __init__(self):
         # Initialize with devnet config
@@ -21,8 +24,8 @@ class SuiService:
         self.package_id = "0x50c65cb11acb624b3a53be22ae511d0828007af3f28903ba1a1d87b64597c830"
         self.treasury_cap_id = "0x2f56680643480b738d3b9b1f8a176a7edea9993d2b85b862175983298103483b"
 
-        # Load deployer keypair from env
-        deployer_key = os.getenv("SUI_PRIVATE_KEY")
+        # Load deployer keypair 
+        deployer_key = config.SUI_PRIVATE_KEY
         if not deployer_key:
             raise ValueError("SUI_PRIVATE_KEY environment variable not set")
 

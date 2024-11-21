@@ -230,22 +230,22 @@ This updated checklist helps you separate the Python backend from the codebase a
 ## Convert WebSocket API to REST Endpoints
 
 1. **Core Chorus Cycle Endpoints**
-   - [ ] `POST /api/chorus/action`
+   - [x] `POST /api/chorus/action`
      - Input: User message content
      - Output: Initial response
-   - [ ] `POST /api/chorus/experience`
+   - [x] `POST /api/chorus/experience`
      - Input: User message + action response
      - Output: Prior-enriched response
-   - [ ] `POST /api/chorus/intention`
+   - [x] `POST /api/chorus/intention`
      - Input: Previous responses
      - Output: Intent analysis
-   - [ ] `POST /api/chorus/observation`
+   - [x] `POST /api/chorus/observation`
      - Input: Previous responses
      - Output: Pattern observations
-   - [ ] `POST /api/chorus/understanding`
+   - [x] `POST /api/chorus/understanding`
      - Input: Previous responses
      - Output: Loop decision
-   - [ ] `POST /api/chorus/yield`
+   - [x] `POST /api/chorus/yield`
      - Input: All previous responses
      - Output: Final synthesis
 
@@ -272,57 +272,52 @@ This updated checklist helps you separate the Python backend from the codebase a
    - [x] `GET /api/threads/{id}/messages`
      - Get thread messages
 
-5. **Message Management**
-   - [ ] `POST /api/messages`
-     - Store new message
-   - [ ] `GET /api/messages/{id}`
-     - Get message details
 
 ## API Implementation Tasks
 
 1. **Update FastAPI Routes**
-   - [ ] Remove WebSocket handler
-   - [ ] Create new router files for each domain
-   - [ ] Implement endpoint handlers
-   - [ ] Add request/response models
+   - [x] Remove WebSocket handler
+   - [x] Create new router files for each domain
+   - [x] Implement endpoint handlers
+   - [x] Add request/response models
 
 2. **Update Database Layer**
    - [ ] Simplify database client
-   - [ ] Remove WebSocket-specific code
-   - [ ] Add direct CRUD operations
+   - [x] Remove WebSocket-specific code
+   - [x] Add direct CRUD operations
    - [ ] Optimize query patterns
 
 3. **Update Chorus Cycle**
-   - [ ] Convert to stateless operation
-   - [ ] Remove state management
-   - [ ] Accept full context in requests
-   - [ ] Return complete responses
+   - [x] Convert to stateless operation
+   - [x] Remove state management
+   - [x] Accept full context in requests
+   - [x] Return complete responses
 
 4. **Update Configuration**
-   - [ ] Remove WebSocket configs
-   - [ ] Add REST-specific settings
-   - [ ] Update CORS configuration
+   - [x] Remove WebSocket configs
+   - [x] Add REST-specific settings
+   - [x] Update CORS configuration
    - [ ] Configure rate limiting
 
 5. **Update Dependencies**
-   - [ ] Remove WebSocket dependencies
-   - [ ] Add REST-specific packages
-   - [ ] Update requirements.txt
-   - [ ] Update Docker configuration
+   - [x] Remove WebSocket dependencies
+   - [x] Add REST-specific packages
+   - [x] Update requirements.txt
+   - [x] Update Docker configuration
 
 ## Testing Updates
 
 1. **Unit Tests**
-   - [ ] Add endpoint tests
-   - [ ] Add request validation tests
-   - [ ] Add response validation tests
-   - [ ] Add error handling tests
+   - [x] Add endpoint tests
+   - [x] Add request validation tests
+   - [x] Add response validation tests
+   - [x] Add error handling tests
 
 2. **Integration Tests**
-   - [ ] Add API flow tests
-   - [ ] Add database operation tests
-   - [ ] Add embedding tests
-   - [ ] Add end-to-end tests
+   - [x] Add API flow tests
+   - [x] Add database operation tests
+   - [x] Add embedding tests
+   - [x] Add end-to-end tests
 
 ## Documentation Updates
 
@@ -339,13 +334,14 @@ This updated checklist helps you separate the Python backend from the codebase a
    - [ ] Update scaling recommendations
 
 ## Frontend Updates
-
+## SWIFT!
 1. **Update API Client**
-   - [ ] Remove WebSocket client
-   - [ ] Add REST client
-   - [ ] Update response handling
-   - [ ] Add error handling
+   - [x] Remove WebSocket client
+   - [x] Add REST client
+   - [x] Update response handling
+   - [x] Add error handling
 
+UI and state management require work. up next, once we get this deployed!
 2. **Update UI Components**
    - [ ] Update loading states
    - [ ] Add progress indicators
@@ -355,7 +351,7 @@ This updated checklist helps you separate the Python backend from the codebase a
 ## Deployment Steps
 
 1. **Prepare New API**
-   - [ ] Test locally
+   - [x] Test locally
    - [ ] Update environment variables
    - [ ] Test with production database
    - [ ] Verify all endpoints
