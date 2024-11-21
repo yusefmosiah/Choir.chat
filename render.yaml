@@ -4,7 +4,6 @@ services:
     runtime: docker
     dockerfilePath: Dockerfile
     dockerContext: api
-    rootDir: .
     envVars:
       - key: SUI_PRIVATE_KEY
         sync: false
