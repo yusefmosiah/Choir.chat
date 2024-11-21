@@ -4,44 +4,121 @@
 [Core Client-Side Implementation](issue_0.md)
 
 ## Description
-Implement the quantum harmonic oscillator model for message rewards and prior citations, ensuring proper token distribution and stake requirements.
+Implement message rewards using vector similarity for uniqueness calculation and prior citation value, distributed through a Python-controlled SUI wallet. This provides a foundation for testing token economics before implementing smart contracts.
 
 ## Tasks
 
-### 1. Message Rewards
-```swift
-struct RewardCalculator {
-    // E(n) = ℏω(n + 1/2)
-    func calculateStakeRequirement(thread: Thread) -> TokenAmount {
-        let n = thread.coAuthors.count
-        let ω = thread.frequency
-        return TokenAmount(ℏ * ω * (Float(n) + 0.5))
-    }
+### 1. SUI Wallet Controller
+```python
+class ChoirWallet:
+    def __init__(self, network: str = "devnet"):
+        self.client = SuiClient(network=network)
+        self.base_reward = 100  # Base SUI reward amount
+        self.base_prior_reward = 50  # Base citation reward
 
-    // R(t) = R_total × k/(1 + kt)ln(1 + kT)
-    func calculateMessageReward(timestamp: Date) -> TokenAmount {
-        let t = timestamp.timeIntervalSince(LAUNCH_DATE)
-        let k = DECAY_CONSTANT
-        let T = TOTAL_PERIOD
-        return TokenAmount(TOTAL_SUPPLY * (k / (1 + k * t)) * log(1 + k * T))
-    }
-}
+    async def calculate_uniqueness_reward(
+        self,
+        content: str,
+        vector_db: QdrantClient
+    ) -> float:
+        # Get embedding
+        embedding = await get_embedding(content)
+
+        # Search for similar content
+        similar = await vector_db.search(
+            collection_name="messages",
+            query_vector=embedding,
+            limit=10
+        )
+
+        # 1.0 = unique, 0.0 = duplicate
+        max_similarity = max(r.score for r in similar) if similar else 0.0
+        uniqueness = 1.0 - max_similarity
+
+        return self.base_reward * uniqueness
+
+    async def distribute_rewards(
+        self,
+        message_content: str,
+        author_address: str,
+        cited_priors: List[Prior],
+        vector_db: QdrantClient
+    ):
+        # Calculate and send new message reward
+        reward = await self.calculate_uniqueness_reward(
+            message_content,
+            vector_db
+        )
+        await self.send_sui(author_address, reward)
+
+        # Handle prior citation rewards
+        for prior in cited_priors:
+            if prior.quality_score > QUALITY_THRESHOLD:
+                citation_reward = self.base_prior_reward * prior.quality_score
+                await self.send_sui(prior.author_address, citation_reward)
 ```
 
-### 2. Prior Citations
-```swift
-func calculatePriorValue(
-    quality: Float,
-    totalQuality: Float,
-    treasuryBalance: TokenAmount
-) -> TokenAmount {
-    // V(p) = B_t × Q(p)/∑Q(i)
-    return TokenAmount(treasuryBalance.value * (quality / totalQuality))
-}
+### 2. Yield Phase Integration
+```python
+@router.post("/yield")
+async def yield_phase(
+    request: YieldRequest,
+    choir_wallet: ChoirWallet = Depends(get_choir_wallet),
+    vector_db: QdrantClient = Depends(get_vector_db)
+):
+    # Process yield response
+    response = await process_yield(request)
+
+    # Only distribute rewards if message is approved
+    if response.approved:
+        await choir_wallet.distribute_rewards(
+            message_content=request.content,
+            author_address=request.author_address,
+            cited_priors=response.citations,
+            vector_db=vector_db
+        )
+
+    return response
+```
+
+### 3. Monitoring & Analytics
+```python
+class RewardMetrics:
+    async def log_distribution(
+        self,
+        message_id: str,
+        author_reward: float,
+        prior_rewards: Dict[str, float],
+        uniqueness_score: float
+    ):
+        # Log reward distribution for analysis
+        # This data will inform smart contract design
+        pass
+
+    async def analyze_distribution_patterns(self):
+        # Analyze reward patterns to tune parameters
+        # Track semantic clustering effects
+        # Monitor economic effects
+        pass
 ```
 
 ## Success Criteria
-- Rewards calculated correctly
-- Prior citations valued properly
-- Token distribution working
-- State transitions verified
+- Rewards scale properly with semantic uniqueness
+- Prior citations receive appropriate value
+- Distribution transactions complete reliably
+- System maintains economic stability
+- Clear metrics for tuning parameters
+
+## Future Evolution
+- Migration path to smart contracts
+- Enhanced economic models
+- Community governance of parameters
+- Integration with thread contracts
+- Advanced citation value calculations
+
+## Notes
+- Start with conservative base reward values
+- Monitor distribution patterns closely
+- Gather data for smart contract design
+- Focus on semantic value creation
+- Build community through fair distribution

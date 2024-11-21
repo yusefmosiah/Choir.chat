@@ -549,14 +549,18 @@ tree.md
 │   │   │   ├── __init__.py
 │   │   │   └── api.py
 │   │   ├── routers
+│   │   │   ├── balance.py
 │   │   │   ├── chorus.py
 │   │   │   ├── embeddings.py
 │   │   │   ├── threads.py
 │   │   │   ├── users.py
-│   │   │   └── vectors.py
+│   │   │   ├── vectors.py
+│   │   │   └── wallet.py
 │   │   ├── services
 │   │   │   ├── __init__.py
-│   │   │   └── chorus.py
+│   │   │   ├── chorus.py
+│   │   │   ├── sui_service.py
+│   │   │   └── wallet_manager.py
 │   │   └── utils.py
 │   ├── main.py
 │   ├── pyproject.toml
@@ -571,6 +575,7 @@ tree.md
 │       ├── test_main.py
 │       ├── test_response_schemas.py
 │       ├── test_structured_outputs.py
+│       ├── test_sui_service.py
 │       └── test_user_thread_endpoints.py
 └── docs
     ├── CHANGELOG.md
@@ -651,7 +656,7 @@ tree.md
     ├── theory_theory.md
     └── tree.md
 
-37 directories, 138 files
+37 directories, 143 files
 
 === File: docs/CHANGELOG.md ===
 
