@@ -1,0 +1,16 @@
+[package]
+name = "choir"
+version = "0.0.1"
+edition = "2024.beta"
+authors = ["Yusef Mosiah Nathanson"]
+license = "MIT"
+
+[dependencies]
+Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "framework/testnet" }
+
+[addresses]
+choir = "0x0"
+sui = "0x2"
+
+[dev-addresses]
+choir = "0x0"

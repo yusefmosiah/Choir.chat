@@ -989,14 +989,17 @@ issue_9
 # Message Rewards Implementation
 
 ## Parent Issue
+
 [Core Client-Side Implementation](issue_0.md)
 
 ## Description
+
 Implement message rewards using vector similarity for uniqueness calculation and prior citation value, distributed through a Python-controlled SUI wallet. This provides a foundation for testing token economics before implementing smart contracts.
 
 ## Tasks
 
 ### 1. SUI Wallet Controller
+
 ```python
 class ChoirWallet:
     def __init__(self, network: str = "devnet"):
@@ -1047,6 +1050,7 @@ class ChoirWallet:
 ```
 
 ### 2. Yield Phase Integration
+
 ```python
 @router.post("/yield")
 async def yield_phase(
@@ -1070,6 +1074,7 @@ async def yield_phase(
 ```
 
 ### 3. Monitoring & Analytics
+
 ```python
 class RewardMetrics:
     async def log_distribution(
@@ -1091,6 +1096,7 @@ class RewardMetrics:
 ```
 
 ## Success Criteria
+
 - Rewards scale properly with semantic uniqueness
 - Prior citations receive appropriate value
 - Distribution transactions complete reliably
@@ -1098,6 +1104,7 @@ class RewardMetrics:
 - Clear metrics for tuning parameters
 
 ## Future Evolution
+
 - Migration path to smart contracts
 - Enhanced economic models
 - Community governance of parameters
@@ -1105,6 +1112,7 @@ class RewardMetrics:
 - Advanced citation value calculations
 
 ## Notes
+
 - Start with conservative base reward values
 - Monitor distribution patterns closely
 - Gather data for smart contract design

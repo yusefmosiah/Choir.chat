@@ -1,6 +1,19 @@
-from pysui.sui.sui_crypto import SUIKeyPair
+from pysui import SuiConfig
+from pysui.sui.sui_crypto import SuiKeyPair
+from pysui.sui.sui_types.address import SuiAddress
 
 class WalletManager:
+    def __init__(self):
+        self.config = SuiConfig.default_config()
+
+    def validate_address(self, address: str) -> bool:
+        """Validate a SUI address format"""
+        try:
+            SuiAddress(address)
+            return True
+        except:
+            return False
+
     def create_wallet(self):
         # Generate a new keypair
         keypair = SUIKeyPair.create_new()
