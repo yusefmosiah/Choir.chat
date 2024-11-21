@@ -1931,6 +1931,237 @@ Remember: Today's work creates the space for tomorrow's creativity.
 
 Remember: Today's goal is a working foundation that we can build upon, not a complete feature set.
 
+=== File: docs/guide_pysui.md ===
+
+
+
+==
+guide_pysui
+==
+
+
+# PySUI Integration Guide
+
+## Overview
+This guide documents our learnings from implementing PySUI v0.72.0 to interact with Sui smart contracts. It focuses on the patterns that worked, helping future developers avoid common pitfalls.
+
+## Key Components
+
+### Client Setup
+- Use `SuiConfig.default_config()` for network configuration
+- Initialize `SuiClient` with the config
+- Load and validate signer keypair from environment variables
+
+### Transaction Building
+- Create transaction with `SuiTransaction(client=self.client)`
+- Use `move_call()` to specify contract interactions
+- Properly wrap arguments with scalar types:
+  - `ObjectID` for object references (e.g., treasury cap)
+  - `SuiU64` for u64 numbers
+  - `SuiAddress` for addresses
+
+### Error Handling
+- Check `result.is_ok()` for transaction success
+- Inspect `effects.status.status` for detailed transaction status
+- Log transaction results for debugging
+- Return structured responses with success/error info
+
+### Common Pitfalls
+1. **Object References**: Must use `ObjectID` for contract objects
+2. **Address Formatting**: Always use `SuiAddress` for address parameters
+3. **Transaction Status**: Check both RPC success and transaction effects
+
+### Response Format
+Success:
+json
+{
+"success": true,
+"digest": "tx_digest_here",
+"amount": "1.0 CHOIR",
+"recipient": "0x..."
+}
+Error:
+json
+{
+"success": false,
+"error": "error_message_here",
+"digest": "tx_digest_here" // if available
+}
+
+## FastAPI Integration
+- Create service class to encapsulate PySUI logic
+- Handle errors with FastAPI's HTTPException
+- Return structured JSON responses
+- Log all operations for debugging
+
+## Environment Setup
+Required environment variables:
+- `SUI_PRIVATE_KEY`: Deployer's private key
+
+## Version Notes
+This guide is specific to PySUI v0.72.0. The API may change in future versions.
+
+## References
+- PySUI Documentation: https://github.com/FrankC01/pysui/tree/main/docs
+- Sui Documentation: https://docs.sui.io/
+
+=== File: docs/guide_render_checklist_updated.md ===
+
+
+
+==
+guide_render_checklist_updated
+==
+
+
+# Choir API Deployment Checklist (Docker + Render)
+
+## Overview
+- Backend: FastAPI + PySUI + Docker
+- Frontend: Swift iOS app
+- Database: Qdrant Cloud
+- Blockchain: Sui Devnet
+
+## Prerequisites
+- [x] Working Docker setup locally
+- [x] GitHub repository connected to Render
+- [x] Qdrant Cloud instance running
+- [x] CHOIR coin deployed on Sui devnet
+
+## Environment Variables Required
+```env
+# Sui Configuration
+SUI_PRIVATE_KEY=your_deployer_private_key
+
+# CORS Settings (iOS app)
+ALLOWED_ORIGINS=*  # Configure appropriately for production
+
+# Qdrant Configuration
+QDRANT_HOST=your-qdrant-instance.cloud.qdrant.io
+QDRANT_API_KEY=your_qdrant_api_key
+```
+
+## Local Testing Checklist
+- [x] Docker build succeeds
+```bash
+docker build -t choir-api .
+```
+- [x] Docker Compose runs
+```bash
+docker-compose up
+```
+- [x] API endpoints accessible
+- [x] CHOIR minting works
+- [x] Qdrant connection works
+
+## Render Deployment Steps
+
+1. **Create Web Service**
+   - Select "Docker" as environment
+   - Connect GitHub repository
+   - Select branch (e.g., `main`)
+
+2. **Configure Environment**
+   - Add all environment variables from `.env`
+   - Set `PORT=8000`
+   - Mark sensitive variables as secret:
+     - `SUI_PRIVATE_KEY`
+     - `QDRANT_API_KEY`
+
+3. **Build Settings**
+   - Root Directory: `./api`
+   - Docker Command: (leave empty, uses Dockerfile)
+   - Instance Type: Starter (upgrade as needed)
+
+4. **Health Check**
+   - Path: `/health`
+   - Already configured in Dockerfile
+
+## Post-Deployment Verification
+
+1. **API Health**
+   - [ ] Check `/health` endpoint
+   - [ ] Verify logs in Render dashboard
+
+2. **Core Functionality**
+   - [ ] Test CHOIR minting
+   - [ ] Verify Qdrant connections
+   - [ ] Check CORS with iOS app
+
+3. **iOS App Integration**
+   - [ ] Update API URL in iOS app
+   - [ ] Test all endpoints from iOS
+   - [ ] Verify error handling
+
+## Monitoring Setup
+
+1. **Render Monitoring**
+   - [ ] Set up usage alerts
+   - [ ] Configure error notifications
+   - [ ] Enable log streaming
+
+2. **Custom Metrics**
+   - [ ] CHOIR minting success rate
+   - [ ] API response times
+   - [ ] Error rates
+
+## Rollback Plan
+1. Keep previous deployment URL
+2. Test new deployment thoroughly
+3. Switch iOS app to new URL only after verification
+
+## Security Checklist
+- [ ] No sensitive data in Docker image
+- [ ] Environment variables properly secured
+- [ ] CORS properly configured for iOS
+- [ ] Rate limiting configured
+- [ ] TLS/SSL enabled (automatic with Render)
+
+## Documentation Updates
+- [ ] Update API documentation
+- [ ] Document deployment process
+- [ ] Update environment variable guide
+- [ ] Add troubleshooting guide
+
+## Cost Considerations
+- Render Starter instance: Free
+- Additional instances: Based on usage
+- Qdrant Cloud: Based on usage
+- Monitor usage and scale as needed
+
+## Future Improvements
+- [ ] Set up CI/CD with GitHub Actions
+- [ ] Implement automated testing
+- [ ] Add staging environment
+- [ ] Configure auto-scaling rules
+- [ ] Set up backup strategy
+
+## Useful Commands
+```bash
+# Local Development
+docker-compose up
+docker-compose down
+
+# Logs
+docker-compose logs -f
+
+# Render CLI (if needed)
+render whoami
+render list
+```
+
+## Important URLs
+- Render Dashboard: https://dashboard.render.com
+- API Documentation: https://your-api.onrender.com/docs
+- Health Check: https://your-api.onrender.com/health
+
+## Support Contacts
+- Render Support: https://render.com/docs
+- Qdrant Support: https://qdrant.tech/support
+- Sui Support: https://docs.sui.io/support
+
+Remember to keep this checklist updated as the deployment process evolves.
+
 === File: docs/plan_carousel_ui_pattern.md ===
 
 

@@ -1269,6 +1269,7 @@ tree.md
     ├── goal_implementation.md
     ├── goal_wed_nov_13_2024.md
     ├── guide_pysui.md
+    ├── guide_render_checklist_updated.md
     ├── harmonic_intelligence.md
     ├── issues
     │   ├── issue_0.md
@@ -1323,7 +1324,7 @@ tree.md
     ├── theory_theory.md
     └── tree.md
 
-55 directories, 792 files
+55 directories, 793 files
 
 === File: docs/CHANGELOG.md ===
 
