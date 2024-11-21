@@ -80,13 +80,11 @@
 │   │   │   ├── embeddings.py
 │   │   │   ├── threads.py
 │   │   │   ├── users.py
-│   │   │   ├── vectors.py
-│   │   │   └── wallet.py
+│   │   │   └── vectors.py
 │   │   ├── services
 │   │   │   ├── __init__.py
 │   │   │   ├── chorus.py
-│   │   │   ├── sui_service.py
-│   │   │   └── wallet_manager.py
+│   │   │   └── sui_service.py
 │   │   └── utils.py
 │   ├── main.py
 │   ├── pyproject.toml
@@ -770,6 +768,7 @@
 │       │   └── choir_coin.move
 │       └── tests
 │           └── choir_coin_tests.move
+├── docker-compose.yml
 └── docs
     ├── CHANGELOG.md
     ├── Impl_Security.md
@@ -850,4 +849,4 @@
     ├── theory_theory.md
     └── tree.md
 
-55 directories, 793 files
+55 directories, 792 files

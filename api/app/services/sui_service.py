@@ -16,23 +16,27 @@ config = Config.from_env()
 
 class SuiService:
     def __init__(self):
-        # Initialize with devnet config
-        self.config = SuiConfig.default_config()
-        self.client = SuiClient(config=self.config)
-
-        # Store deployed CHOIR contract info
-        self.package_id = "0x50c65cb11acb624b3a53be22ae511d0828007af3f28903ba1a1d87b64597c830"
-        self.treasury_cap_id = "0x2f56680643480b738d3b9b1f8a176a7edea9993d2b85b862175983298103483b"
-
-        # Load deployer keypair 
-        deployer_key = config.SUI_PRIVATE_KEY
+        # Get deployer key from environment
+        deployer_key = os.getenv("SUI_PRIVATE_KEY")
         if not deployer_key:
             raise ValueError("SUI_PRIVATE_KEY environment variable not set")
 
         try:
+            # Initialize config with devnet RPC and private key
+            self.config = SuiConfig.user_config(
+                rpc_url="https://fullnode.devnet.sui.io:443",
+                prv_keys=[deployer_key]
+            )
+            self.client = SuiClient(config=self.config)
             self.signer = keypair_from_keystring(deployer_key)
+
+            # Store deployed CHOIR contract info
+            self.package_id = "0x50c65cb11acb624b3a53be22ae511d0828007af3f28903ba1a1d87b64597c830"
+            self.treasury_cap_id = "0x2f56680643480b738d3b9b1f8a176a7edea9993d2b85b862175983298103483b"
+
+            logger.info("SuiService initialized successfully")
         except Exception as e:
-            raise ValueError(f"Invalid private key: {e}")
+            raise ValueError(f"Failed to initialize SuiService: {e}")
 
     async def mint_choir(self, recipient_address: str, amount: int = 1_000_000_000):
         """Mint CHOIR tokens to recipient (default 1 CHOIR)"""

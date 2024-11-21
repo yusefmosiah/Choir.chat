@@ -1,10 +1,8 @@
 from fastapi import APIRouter, HTTPException
 from app.services.sui_service import SuiService
-from app.services.wallet_manager import WalletManager
 
 router = APIRouter()
 sui_service = SuiService()
-wallet_manager = WalletManager()
 
 @router.get("/balance/{address}")
 async def get_balance(address: str):
