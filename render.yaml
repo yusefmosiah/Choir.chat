@@ -2,8 +2,9 @@ services:
   - type: web
     name: choir-api
     runtime: docker
-    dockerfilePath: api/Dockerfile
-    dockerContext: .
+    dockerfilePath: Dockerfile
+    dockerContext: api
+    rootDir: .
     envVars:
       - key: SUI_PRIVATE_KEY
         sync: false
