@@ -70,4 +70,14 @@ module choir::choir {
     public fun total_minted(treasury: &TreasuryCapability): u64 {
         treasury.total_minted
     }
+
+    // ======= Test-only functions =======
+    // not deployed to the devnet
+
+    #[test_only]
+    /// Test-only initialization function that creates a new instance of the currency
+    /// This is needed because the real init() can only be called once during publishing
+    public fun test_init(ctx: &mut TxContext) {
+        init(CHOIR {}, ctx)
+    }
 }
