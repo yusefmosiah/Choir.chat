@@ -6,6 +6,7 @@ from pysui.sui.sui_types.address import SuiAddress
 from pysui.sui.sui_crypto import keypair_from_keystring
 from pysui.sui.sui_txn.sync_transaction import SuiTransaction
 from pysui.sui.sui_types.scalars import ObjectID, SuiU64
+from pysui.sui.sui_builders.get_builders import GetAllCoinBalances
 import os
 
 # Configure logging
@@ -104,12 +105,17 @@ class SuiService:
     def get_balance(self, address: str):
         """Get SUI balance for address"""
         try:
-            result = self.client.get_balance(
+            # Create a builder for getting all coin balances
+            builder = GetAllCoinBalances(
                 owner=SuiAddress(address)
             )
+            # Execute the builder through the client
+            result = self.client.execute(builder)
+
             if result.is_ok():
-                logger.info(f"Balance retrieved for {address}: {result.result_data}")
-                return result.result_data
+                balances = result.result_data
+                logger.info(f"Balance retrieved for {address}: {balances}")
+                return balances
             else:
                 logger.error(f"Failed to get balance: {result.result_string}")
                 return None
