@@ -1,64 +1,98 @@
 # PySUI Integration Guide
 
 ## Overview
-This guide documents our learnings from implementing PySUI v0.72.0 to interact with Sui smart contracts. It focuses on the patterns that worked, helping future developers avoid common pitfalls.
+
+This guide documents our implementation of PySUI for interacting with Sui smart contracts, specifically for the CHOIR token. Based on our deployment experience, we'll focus on working patterns and known issues.
 
 ## Key Components
 
 ### Client Setup
-- Use `SuiConfig.default_config()` for network configuration
-- Initialize `SuiClient` with the config
-- Load and validate signer keypair from environment variables
 
-### Transaction Building
-- Create transaction with `SuiTransaction(client=self.client)`
-- Use `move_call()` to specify contract interactions
-- Properly wrap arguments with scalar types:
-  - `ObjectID` for object references (e.g., treasury cap)
-  - `SuiU64` for u64 numbers
-  - `SuiAddress` for addresses
+```python
+# Initialize with devnet RPC
+self.config = SuiConfig.user_config(
+    rpc_url="https://fullnode.devnet.sui.io:443",
+    prv_keys=[deployer_key]
+)
+self.client = SuiClient(config=self.config)
+self.signer = keypair_from_keystring(deployer_key)
+```
 
-### Error Handling
-- Check `result.is_ok()` for transaction success
-- Inspect `effects.status.status` for detailed transaction status
-- Log transaction results for debugging
-- Return structured responses with success/error info
+### Transaction Building (CHOIR Minting)
+
+```python
+# Create transaction
+txn = SuiTransaction(client=self.client)
+
+# Add move call with proper argument types
+txn.move_call(
+    target=f"{package_id}::choir::mint",
+    arguments=[
+        ObjectID(treasury_cap_id),
+        SuiU64(amount),
+        SuiAddress(recipient_address)
+    ],
+    type_arguments=[]
+)
+
+# Execute and check result
+result = txn.execute()
+```
+
+### Balance Checking
+
+```python
+# Using GetAllCoinBalances builder
+builder = GetAllCoinBalances(
+    owner=SuiAddress(address)
+)
+result = self.client.execute(builder)
+```
+
+### Error Handling Pattern
+
+```python
+if result.is_ok():
+    # Check transaction effects
+    effects = result.result_data.effects
+    if effects and hasattr(effects, 'status'):
+        if effects.status.status != 'success':
+            # Handle failure
+    else:
+        # Handle success
+else:
+    # Handle RPC error
+```
 
 ### Common Pitfalls
-1. **Object References**: Must use `ObjectID` for contract objects
-2. **Address Formatting**: Always use `SuiAddress` for address parameters
-3. **Transaction Status**: Check both RPC success and transaction effects
 
-### Response Format
-Success:
-json
-{
-"success": true,
-"digest": "tx_digest_here",
-"amount": "1.0 CHOIR",
-"recipient": "0x..."
-}
-Error:
-json
-{
-"success": false,
-"error": "error_message_here",
-"digest": "tx_digest_here" // if available
-}
+1. **Builder Pattern Required**: Use builders like `GetAllCoinBalances` for queries
+2. **Transaction Effects**: Always check both `is_ok()` and effects status
+3. **Type Wrapping**: Must wrap arguments with proper types (`ObjectID`, `SuiU64`, `SuiAddress`)
+4. **Environment Setup**: Ensure Rust toolchain is available for `pysui` installation
 
-## FastAPI Integration
-- Create service class to encapsulate PySUI logic
-- Handle errors with FastAPI's HTTPException
-- Return structured JSON responses
-- Log all operations for debugging
+## Docker Deployment Notes
 
-## Environment Setup
-Required environment variables:
+- Requires Rust toolchain for building `pysui`
+- Consider splitting pip install steps for better caching
+- Virtual environment recommended for isolation
+
+## Environment Variables
+
+Required:
+
 - `SUI_PRIVATE_KEY`: Deployer's private key
+- Contract IDs (can be hardcoded or env vars):
+  - `package_id`
+  - `treasury_cap_id`
 
-## Version Notes
-This guide is specific to PySUI v0.72.0. The API may change in future versions.
+## Current Limitations
+
+- Balance checking API may change between versions
+- Long build times due to Rust compilation
+- Limited error details from transaction effects
 
 ## References
-- PySUI Documentation: https://github.com/FrankC01/pysui/tree/main/docs
-- Sui Documentation: https://docs.sui.io/
+
+- [PySUI Documentation](https://github.com/FrankC01/pysui)
+- [Sui JSON-RPC API](https://docs.sui.io/sui-jsonrpc)

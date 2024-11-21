@@ -1943,67 +1943,101 @@ guide_pysui
 # PySUI Integration Guide
 
 ## Overview
-This guide documents our learnings from implementing PySUI v0.72.0 to interact with Sui smart contracts. It focuses on the patterns that worked, helping future developers avoid common pitfalls.
+
+This guide documents our implementation of PySUI for interacting with Sui smart contracts, specifically for the CHOIR token. Based on our deployment experience, we'll focus on working patterns and known issues.
 
 ## Key Components
 
 ### Client Setup
-- Use `SuiConfig.default_config()` for network configuration
-- Initialize `SuiClient` with the config
-- Load and validate signer keypair from environment variables
 
-### Transaction Building
-- Create transaction with `SuiTransaction(client=self.client)`
-- Use `move_call()` to specify contract interactions
-- Properly wrap arguments with scalar types:
-  - `ObjectID` for object references (e.g., treasury cap)
-  - `SuiU64` for u64 numbers
-  - `SuiAddress` for addresses
+```python
+# Initialize with devnet RPC
+self.config = SuiConfig.user_config(
+    rpc_url="https://fullnode.devnet.sui.io:443",
+    prv_keys=[deployer_key]
+)
+self.client = SuiClient(config=self.config)
+self.signer = keypair_from_keystring(deployer_key)
+```
 
-### Error Handling
-- Check `result.is_ok()` for transaction success
-- Inspect `effects.status.status` for detailed transaction status
-- Log transaction results for debugging
-- Return structured responses with success/error info
+### Transaction Building (CHOIR Minting)
+
+```python
+# Create transaction
+txn = SuiTransaction(client=self.client)
+
+# Add move call with proper argument types
+txn.move_call(
+    target=f"{package_id}::choir::mint",
+    arguments=[
+        ObjectID(treasury_cap_id),
+        SuiU64(amount),
+        SuiAddress(recipient_address)
+    ],
+    type_arguments=[]
+)
+
+# Execute and check result
+result = txn.execute()
+```
+
+### Balance Checking
+
+```python
+# Using GetAllCoinBalances builder
+builder = GetAllCoinBalances(
+    owner=SuiAddress(address)
+)
+result = self.client.execute(builder)
+```
+
+### Error Handling Pattern
+
+```python
+if result.is_ok():
+    # Check transaction effects
+    effects = result.result_data.effects
+    if effects and hasattr(effects, 'status'):
+        if effects.status.status != 'success':
+            # Handle failure
+    else:
+        # Handle success
+else:
+    # Handle RPC error
+```
 
 ### Common Pitfalls
-1. **Object References**: Must use `ObjectID` for contract objects
-2. **Address Formatting**: Always use `SuiAddress` for address parameters
-3. **Transaction Status**: Check both RPC success and transaction effects
 
-### Response Format
-Success:
-json
-{
-"success": true,
-"digest": "tx_digest_here",
-"amount": "1.0 CHOIR",
-"recipient": "0x..."
-}
-Error:
-json
-{
-"success": false,
-"error": "error_message_here",
-"digest": "tx_digest_here" // if available
-}
+1. **Builder Pattern Required**: Use builders like `GetAllCoinBalances` for queries
+2. **Transaction Effects**: Always check both `is_ok()` and effects status
+3. **Type Wrapping**: Must wrap arguments with proper types (`ObjectID`, `SuiU64`, `SuiAddress`)
+4. **Environment Setup**: Ensure Rust toolchain is available for `pysui` installation
 
-## FastAPI Integration
-- Create service class to encapsulate PySUI logic
-- Handle errors with FastAPI's HTTPException
-- Return structured JSON responses
-- Log all operations for debugging
+## Docker Deployment Notes
 
-## Environment Setup
-Required environment variables:
+- Requires Rust toolchain for building `pysui`
+- Consider splitting pip install steps for better caching
+- Virtual environment recommended for isolation
+
+## Environment Variables
+
+Required:
+
 - `SUI_PRIVATE_KEY`: Deployer's private key
+- Contract IDs (can be hardcoded or env vars):
+  - `package_id`
+  - `treasury_cap_id`
 
-## Version Notes
-This guide is specific to PySUI v0.72.0. The API may change in future versions.
+## Current Limitations
+
+- Balance checking API may change between versions
+- Long build times due to Rust compilation
+- Limited error details from transaction effects
 
 ## References
-- PySUI Documentation: https://github.com/FrankC01/pysui/tree/main/docs
-- Sui Documentation: https://docs.sui.io/
+
+- [PySUI Documentation](https://github.com/FrankC01/pysui)
+- [Sui JSON-RPC API](https://docs.sui.io/sui-jsonrpc)
 
 === File: docs/guide_render_checklist_updated.md ===
 
@@ -2014,153 +2048,131 @@ guide_render_checklist_updated
 ==
 
 
-# Choir API Deployment Checklist (Docker + Render)
+# Choir API Deployment Guide (Docker + Render)
 
-## Overview
-- Backend: FastAPI + PySUI + Docker
-- Frontend: Swift iOS app
-- Database: Qdrant Cloud
-- Blockchain: Sui Devnet
+## Current Status
 
-## Prerequisites
-- [x] Working Docker setup locally
-- [x] GitHub repository connected to Render
-- [x] Qdrant Cloud instance running
-- [x] CHOIR coin deployed on Sui devnet
+- [x] Basic Docker deployment working
+- [x] PySUI integration functional
+- [x] CHOIR minting operational
+- [x] Balance checking implemented
+- [ ] Comprehensive error handling
+- [ ] Production-ready monitoring
+
+## Docker Configuration
+
+```dockerfile
+# Key components
+FROM python:3.12-slim
+# Rust toolchain required for pysui
+RUN curl https://sh.rustup.rs -sSf | bash -s -- -y
+# Virtual environment for isolation
+ENV VIRTUAL_ENV=/app/venv
+# Split pip installs for better caching
+RUN pip install --no-cache-dir pysui
+RUN pip install --no-cache-dir -r requirements.txt
+```
+
+## Render Configuration
+
+```yaml
+services:
+  - type: web
+    name: choir-api
+    runtime: docker
+    dockerfilePath: Dockerfile
+    dockerContext: api
+    envVars:
+      - key: SUI_PRIVATE_KEY
+        sync: false
+      # Other env vars...
+```
 
 ## Environment Variables Required
+
 ```env
-# Sui Configuration
+# Critical Variables
 SUI_PRIVATE_KEY=your_deployer_private_key
+ALLOWED_ORIGINS=*  # Configure for production
 
-# CORS Settings (iOS app)
-ALLOWED_ORIGINS=*  # Configure appropriately for production
-
-# Qdrant Configuration
-QDRANT_HOST=your-qdrant-instance.cloud.qdrant.io
-QDRANT_API_KEY=your_qdrant_api_key
+# Optional Services
+QDRANT_URL=your_qdrant_url
+QDRANT_API_KEY=your_qdrant_key
+OPENAI_API_KEY=your_openai_key
 ```
 
-## Local Testing Checklist
-- [x] Docker build succeeds
-```bash
-docker build -t choir-api .
-```
-- [x] Docker Compose runs
-```bash
-docker-compose up
-```
-- [x] API endpoints accessible
-- [x] CHOIR minting works
-- [x] Qdrant connection works
+## Known Issues & Solutions
 
-## Render Deployment Steps
+1. **Long Build Times**
 
-1. **Create Web Service**
-   - Select "Docker" as environment
-   - Connect GitHub repository
-   - Select branch (e.g., `main`)
+   - First build takes ~5 minutes due to Rust compilation
+   - Subsequent builds faster with proper caching
 
-2. **Configure Environment**
-   - Add all environment variables from `.env`
-   - Set `PORT=8000`
-   - Mark sensitive variables as secret:
-     - `SUI_PRIVATE_KEY`
-     - `QDRANT_API_KEY`
+2. **PySUI Integration**
 
-3. **Build Settings**
-   - Root Directory: `./api`
-   - Docker Command: (leave empty, uses Dockerfile)
-   - Instance Type: Starter (upgrade as needed)
+   - Balance checking requires builder pattern
+   - Transaction effects need careful validation
 
-4. **Health Check**
-   - Path: `/health`
-   - Already configured in Dockerfile
+3. **Environment Setup**
+   - All env vars must be set in Render dashboard
+   - Some vars optional depending on features needed
 
-## Post-Deployment Verification
+## Deployment Checklist
 
-1. **API Health**
-   - [ ] Check `/health` endpoint
-   - [ ] Verify logs in Render dashboard
+### Pre-Deploy
 
-2. **Core Functionality**
-   - [ ] Test CHOIR minting
-   - [ ] Verify Qdrant connections
-   - [ ] Check CORS with iOS app
+- [ ] Test Docker build locally
+- [ ] Verify all required env vars
+- [ ] Check CORS settings
+- [ ] Test PySUI functionality
 
-3. **iOS App Integration**
-   - [ ] Update API URL in iOS app
-   - [ ] Test all endpoints from iOS
-   - [ ] Verify error handling
+### Deploy
+
+- [ ] Push to GitHub
+- [ ] Create Render web service
+- [ ] Set environment variables
+- [ ] Monitor build progress
+
+### Post-Deploy
+
+- [ ] Verify `/health` endpoint
+- [ ] Test CHOIR minting
+- [ ] Check balance queries
+- [ ] Monitor error logs
 
 ## Monitoring Setup
 
-1. **Render Monitoring**
-   - [ ] Set up usage alerts
-   - [ ] Configure error notifications
-   - [ ] Enable log streaming
-
-2. **Custom Metrics**
-   - [ ] CHOIR minting success rate
-   - [ ] API response times
-   - [ ] Error rates
-
-## Rollback Plan
-1. Keep previous deployment URL
-2. Test new deployment thoroughly
-3. Switch iOS app to new URL only after verification
-
-## Security Checklist
-- [ ] No sensitive data in Docker image
-- [ ] Environment variables properly secured
-- [ ] CORS properly configured for iOS
-- [ ] Rate limiting configured
-- [ ] TLS/SSL enabled (automatic with Render)
-
-## Documentation Updates
-- [ ] Update API documentation
-- [ ] Document deployment process
-- [ ] Update environment variable guide
-- [ ] Add troubleshooting guide
-
-## Cost Considerations
-- Render Starter instance: Free
-- Additional instances: Based on usage
-- Qdrant Cloud: Based on usage
-- Monitor usage and scale as needed
+- [ ] Set up Render logging
+- [ ] Configure error alerts
+- [ ] Monitor build times
+- [ ] Track API response times
 
 ## Future Improvements
-- [ ] Set up CI/CD with GitHub Actions
-- [ ] Implement automated testing
+
+- [ ] Optimize Docker build time
+- [ ] Add comprehensive testing
+- [ ] Improve error handling
+- [ ] Set up CI/CD pipeline
 - [ ] Add staging environment
-- [ ] Configure auto-scaling rules
-- [ ] Set up backup strategy
 
 ## Useful Commands
+
 ```bash
-# Local Development
-docker-compose up
-docker-compose down
+# Local Testing
+docker build -t choir-api -f api/Dockerfile .
+docker run -p 8000:8000 choir-api
 
 # Logs
-docker-compose logs -f
-
-# Render CLI (if needed)
-render whoami
-render list
+docker logs choir-api
 ```
 
-## Important URLs
-- Render Dashboard: https://dashboard.render.com
-- API Documentation: https://your-api.onrender.com/docs
-- Health Check: https://your-api.onrender.com/health
+## Support Resources
 
-## Support Contacts
-- Render Support: https://render.com/docs
-- Qdrant Support: https://qdrant.tech/support
-- Sui Support: https://docs.sui.io/support
+- [Render Dashboard](https://dashboard.render.com)
+- [PySUI Issues](https://github.com/FrankC01/pysui/issues)
+- [Sui Discord](https://discord.gg/sui)
 
-Remember to keep this checklist updated as the deployment process evolves.
+Remember to update these guides as the deployment process evolves.
 
 === File: docs/plan_carousel_ui_pattern.md ===
 
@@ -3848,201 +3860,133 @@ plan_swiftdata_required_changes
 ==
 
 
-# Updated SwiftData Implementation Plan Checklist
+# SwiftData Implementation Plan for Choir
 
-## Overview
+## Current State
+- Working REST API integration
+- Functional wallet management
+- In-memory message handling
+- Chorus cycle visualization
 
-Implement SwiftData integration with proper modeling of `ChorusResult`, ensuring users can view all chorus phases of AI responses in their old messages. The plan is broken into chunks, each resulting in a working code checkpoint.
+## Chunk 1: Core Models & Migration Setup
 
----
+### Models
+```swift
+@Model
+class CHUser {
+    var id: UUID
+    var walletAddress: String
+    var threads: [CHThread]
+    var createdAt: Date
 
-## **Chunk 1: Introduce SwiftData with Basic Models and Persistence**
+    // Wallet integration
+    var lastKnownBalance: Double?
+    var lastBalanceUpdate: Date?
+}
 
-### Goals
+@Model
+class CHThread {
+    var id: UUID
+    var title: String
+    var messages: [CHMessage]
+    var owner: CHUser?
+    var createdAt: Date
+    var lastActivity: Date
+}
 
-- Set up SwiftData in the project.
-- Create basic SwiftData models (`CHUser`, `CHThread`, `CHMessage`).
-- Ensure data persistence between app launches.
-- Integrate wallet management with `CHUser`.
+@Model
+class CHMessage {
+    var id: UUID
+    var content: String
+    var isUser: Bool
+    var timestamp: Date
+    var thread: CHThread?
+    var chorusResult: CHChorusResult?
+}
 
-### Checklist
+@Model
+class CHChorusResult {
+    var id: UUID
+    var message: CHMessage?
+    var phases: [String: String] // Store as JSON or structured data
+    var confidence: Double
+    var timestamp: Date
+}
+```
 
-- **Set Up SwiftData**
-  - [ ] Configure the SwiftData stack (`ModelContainer`, `ModelContext`).
-  - [ ] Ensure SwiftData is ready to use with the new models.
+### Migration Strategy
+1. Create temporary storage for current messages
+2. Initialize SwiftData container
+3. Migrate existing data
+4. Validate persistence
 
-- **Create Basic SwiftData Models**
+## Chunk 2: ViewModel Updates
 
-  - **`CHUser` Model**
-    - [ ] Properties:
-      - [ ] `walletAddress` (String): Unique identifier from `wallet.accounts[0].address()`.
-      - [ ] `createdAt` (Date).
-    - [ ] Relationships:
-      - [ ] `ownedThreads` (to-many `CHThread`).
-      - [ ] `messages` (to-many `CHMessage`).
+### ThreadListViewModel
+```swift
+@MainActor
+class ThreadListViewModel: ObservableObject {
+    @Query private var threads: [CHThread]
+    private let modelContext: ModelContext
 
-  - **`CHThread` Model**
-    - [ ] Properties:
-      - [ ] `id` (UUID): Unique identifier.
-      - [ ] `title` (String).
-      - [ ] `createdAt` (Date).
-    - [ ] Relationships:
-      - [ ] `owner` (to-one `CHUser`).
-      - [ ] `messages` (to-many `CHMessage`).
+    // CRUD operations
+    func createThread() -> CHThread
+    func deleteThread(_ thread: CHThread)
+    func loadThreads() async
+}
+```
 
-  - **`CHMessage` Model**
-    - [ ] Properties:
-      - [ ] `id` (UUID): Unique identifier.
-      - [ ] `content` (String).
-      - [ ] `timestamp` (Date).
-      - [ ] `isUser` (Bool).
-    - [ ] Relationships:
-      - [ ] `author` (to-one `CHUser`).
-      - [ ] `thread` (to-one `CHThread`).
+### ThreadDetailViewModel
+```swift
+@MainActor
+class ThreadDetailViewModel: ObservableObject {
+    private let thread: CHThread
+    private let modelContext: ModelContext
+    private let chorusCoordinator: ChorusCoordinator
 
-- **Integrate `WalletManager` with `CHUser`**
-  - [ ] After wallet creation/loading, create or load a `CHUser` using the wallet address.
-  - [ ] Store the `CHUser` instance for access throughout the app.
+    // Message handling
+    func sendMessage(_ content: String) async
+    func processAIResponse(_ response: ChorusResponse)
+}
+```
 
-- **Implement Data Persistence**
-  - [ ] Ensure data for `CHUser`, `CHThread`, and `CHMessage` is persisted using SwiftData.
-  - [ ] Test data persistence between app launches.
+## Chunk 3: View Updates
 
----
+1. Update ContentView
+   - Replace @State threads with @Query
+   - Inject ThreadListViewModel
 
-## **Chunk 2: Model `ChorusResult` and Integrate with Messages**
+2. Update ThreadDetailView
+   - Use ThreadDetailViewModel
+   - Maintain Chorus cycle visualization
+   - Add persistence for message states
 
-### Goals
+3. Update MessageRow
+   - Support CHMessage model
+   - Keep existing UI components
 
-- Create a `ChorusResult` model to store all phases of AI responses.
-- Update `CHMessage` to include a relationship to `ChorusResult`.
-- Ensure AI responses with all chorus phases are properly stored and retrievable.
+## Chunk 4: Wallet Integration
 
-### Checklist
+1. Link WalletManager with CHUser
+2. Persist wallet state
+3. Update balance tracking
+4. Add transaction history
 
-- **Create `ChorusResult` Model**
-  - [ ] Properties:
-    - [ ] `id` (UUID): Unique identifier.
-    - [ ] `phases` (Dictionary or appropriate data structure to store phase content).
+## Chunk 5: Testing & Refinement
 
-- **Update `CHMessage` Model**
-  - [ ] Add relationship to `ChorusResult` (`chorusResult`).
+1. Migration Testing
+   - Test data preservation
+   - Verify relationships
 
-- **Modify `ChorusViewModel`**
-  - [ ] Update to work with `CHMessage` and `ChorusResult`.
-  - [ ] Store the full `ChorusResult` with all phases when processing a message.
+2. Performance Testing
+   - Message loading
+   - Thread switching
+   - Memory usage
 
-- **Update Storage Logic**
-  - [ ] Ensure `ChorusResult` is saved with the AI's `CHMessage`.
-
-- **Adjust UI to Display Chorus Phases**
-  - [ ] Modify views to display all chorus phases associated with a message.
-  - [ ] Ensure users can view old messages with all their chorus phases.
-
----
-
-## **Chunk 3: Replace Old Models and Update UI**
-
-### Goals
-
-- Replace `ChoirThread` and `Message` models with `CHThread` and `CHMessage`.
-- Update views to use new models.
-- Implement `ThreadListViewModel` and `ThreadDetailViewModel`.
-
-### Checklist
-
-- **Implement `ThreadListViewModel`**
-  - [ ] Manage fetching and displaying the list of threads.
-  - [ ] Handle creating new threads.
-
-- **Implement `ThreadDetailViewModel`**
-  - [ ] Manage message fetching and sending within a thread.
-  - [ ] Handle AI processing and storing `ChorusResult`.
-
-- **Update `ContentView.swift`**
-  - [ ] Replace `threads: [ChoirThread]` with data from SwiftData.
-  - [ ] Use `ThreadListViewModel`.
-  - [ ] Adjust navigation to pass selected `CHThread` to detail view.
-
-- **Rename and Update `ChoirThreadDetailView.swift` to `ThreadDetailView.swift`**
-  - [ ] Replace `ChoirThread` with `CHThread`.
-  - [ ] Use `ThreadDetailViewModel`.
-  - [ ] Update message display to use `CHMessage`.
-
-- **Update Other Views**
-  - **`MessageRow.swift`**
-    - [ ] Update to accept `CHMessage`.
-    - [ ] Adjust bindings to match `CHMessage` properties.
-    - [ ] Display author information and chorus phases.
-
-- **Remove Old Models**
-  - [ ] Delete `ChoirThread.swift` and related old models.
-  - [ ] Update all references to use `CHThread`.
-
----
-
-## **Chunk 4: Implement Prior Support and Navigation**
-
-### Goals
-
-- Enhance `CHMessage` to include prior references.
-- Implement navigation to source threads and messages from priors.
-- Ensure the Experience phase displays priors and allows navigation.
-
-### Checklist
-
-- **Update `CHMessage` Model**
-  - [ ] Add a relationship for prior references (`priors`).
-  - [ ] Add inverse relationship for messages that cite message as prior
-
-- **Modify AI Processing to Store Priors**
-  - [ ] Save priors returned from the Experience phase.
-  - [ ] Link priors to the AI's `CHMessage`.
-
-- **Update UI to Display Priors**
-  - [ ] Display priors in the Experience phase view.
-
-- **Implement Navigation to Priors**
-  - [ ] Allow users to navigate to prior messages and threads.
-
----
-
-## **Chunk 5: Finalize and Refine**
-
-### Goals
-
-- Test the entire application thoroughly.
-- Refine the UI and user experience.
-- Fix any bugs or issues.
-
-### Checklist
-
-- **Comprehensive Testing**
-  - [ ] Test all features end-to-end.
-  - [ ] Ensure data integrity and persistence.
-
-- **Optimize Performance**
-  - [ ] Review and optimize data fetches and UI updates.
-  - [ ] Ensure smooth performance.
-
-- **Polish UI**
-  - [ ] Refine UI elements for better user experience.
-  - [ ] Ensure consistent styling and responsiveness.
-
-- **Documentation and Code Cleanup**
-  - [ ] Comment code where necessary.
-  - [ ] Remove unused code or resources.
-  - [ ] Update documentation to reflect changes.
-
----
-
-# Notes
-
-- **Working Checkpoints**: After each chunk, ensure the app is functional.
-- **Testing**: Continuously test at each stage.
-- **User Experience**: Prioritize intuitive usage.
-- **Modeling `ChorusResult`**: Enhances value by allowing access to all chorus phases.
-- **Incremental Development**: Breaking into chunks allows manageable progress.
+3. Error Handling
+   - Data consistency
+   - Network failures
+   - Wallet operations
 
 === File: docs/plan_swiftui_chorus_integration.md ===
 
