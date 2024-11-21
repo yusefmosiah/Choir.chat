@@ -613,6 +613,7 @@ tree.md
 │   ├── core_state.md
 │   ├── core_state_transitions.md
 │   ├── data_engine_model.md
+│   ├── deploy_render_checklist_updated.md
 │   ├── docs_dev_principles.md
 │   ├── docs_operators.md
 │   ├── e_business.md
@@ -680,7 +681,7 @@ tree.md
 │   └── tree.md
 └── render.yaml
 
-46 directories, 158 files
+46 directories, 159 files
 
 === File: docs/CHANGELOG.md ===
 

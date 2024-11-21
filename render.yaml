@@ -23,5 +23,3 @@ services:
       - key: ANTHROPIC_API_KEY
         sync: false
     healthCheckPath: /health
-    buildCommand: docker build -t choir-api .
-    startCommand: docker run -p $PORT:8000 choir-api
