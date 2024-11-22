@@ -647,6 +647,7 @@ tree.md
 │   │   ├── level4.md
 │   │   ├── level5.md
 │   │   └── level_organization.md
+│   ├── memo_swiftdata.md
 │   ├── plan_carousel_ui_pattern.md
 │   ├── plan_chuser_chthread_chmessage.md
 │   ├── plan_client_architecture.md
@@ -656,6 +657,7 @@ tree.md
 │   ├── plan_proxy_security_model.md
 │   ├── plan_save_users_and_threads.md
 │   ├── plan_sui_blockchain_integration.md
+│   ├── plan_swiftdata_checklist.md
 │   ├── plan_swiftdata_required_changes.md
 │   ├── plan_swiftui_chorus_integration.md
 │   ├── plan_thoughtspace.md
@@ -680,7 +682,7 @@ tree.md
 │   └── tree.md
 └── render.yaml
 
-46 directories, 158 files
+46 directories, 160 files
 
 === File: docs/CHANGELOG.md ===
 
