@@ -12,9 +12,10 @@ enum APIError: Error {
 
 class ChorusAPIClient {
     #if DEBUG
-    private let baseURL = "http://localhost:8000/api/chorus"
+    // private let baseURL = "http://localhost:8000/api/chorus"
+    private let baseURL = "https://choir-chat.onrender.com/api/chorus"
     #else
-    private let baseURL = "https://your-production-url.com/api/chorus"
+    private let baseURL = "https://choir-chat.onrender.com/api/chorus"
     #endif
 
     private let session: URLSession
