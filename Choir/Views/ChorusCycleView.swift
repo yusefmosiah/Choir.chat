@@ -6,29 +6,55 @@ struct ChorusCycleView: View {
     @State private var selectedPhase: Phase = .action
     @State private var showingMetadata: Bool = false
     @State private var longPressPhase: Phase?
+    @State private var offset: CGFloat = 0
+    @GestureState private var dragOffset: CGFloat = 0
 
-    private let tabWidth: CGFloat = 44
+    private let phaseWidth: CGFloat = 60
+    private let spacing: CGFloat = 20
 
     var body: some View {
         VStack(spacing: 0) {
-            // Phase tabs
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 1) {
+            // Phase carousel
+            GeometryReader { geometry in
+                let totalWidth = geometry.size.width
+                let centerX = totalWidth / 2
+
+                HStack(spacing: spacing) {
                     ForEach(Phase.allCases) { phase in
                         PhaseTabButton(
                             phase: phase,
                             isSelected: phase == selectedPhase,
                             isEnabled: phases[phase] != nil,
-                            width: tabWidth
-                        ) {
-                            if phases[phase] != nil {
-                                selectedPhase = phase
-                            }
-                        }
+                            width: phaseWidth
+                        )
+                        .id(phase)
                     }
                 }
+                .offset(x: centerX - phaseWidth/2 + calculateOffset())
+                .gesture(
+                    DragGesture()
+                        .updating($dragOffset) { value, state, _ in
+                            state = value.translation.width
+                        }
+                        .onEnded { value in
+                            let predictedEndOffset = value.predictedEndTranslation.width
+                            let phaseStep = phaseWidth + spacing
+
+                            // Calculate the number of phases to move
+                            let stepCount = (predictedEndOffset / phaseStep).rounded()
+                            let currentIndex = Phase.allCases.firstIndex(of: selectedPhase) ?? 0
+                            let targetIndex = max(0, min(Phase.allCases.count - 1, currentIndex - Int(stepCount)))
+
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                                if let newPhase = Phase.allCases[safe: targetIndex], phases[newPhase] != nil {
+                                    selectedPhase = newPhase
+                                }
+                                offset = 0
+                            }
+                        }
+                )
             }
-            .padding(.vertical, 4)
+            .frame(height: 60)
 
             Divider()
 
@@ -47,9 +73,17 @@ struct ChorusCycleView: View {
         }
         .onChange(of: phases) { _, newPhases in
             if newPhases[.yield] != nil {
-                selectedPhase = .yield
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                    selectedPhase = .yield
+                }
             }
         }
+    }
+
+    private func calculateOffset() -> CGFloat {
+        let phaseStep = phaseWidth + spacing
+        let currentIndex = Phase.allCases.firstIndex(of: selectedPhase) ?? 0
+        return -CGFloat(currentIndex) * phaseStep + dragOffset
     }
 }
 
@@ -58,19 +92,21 @@ struct PhaseTabButton: View {
     let isSelected: Bool
     let isEnabled: Bool
     let width: CGFloat
-    let action: () -> Void
 
     var body: some View {
-        Button(action: action) {
-            Image(systemName: phase.symbol)
-                .imageScale(.small)
-                .frame(width: width, height: 32)
-        }
-        .foregroundColor(isEnabled ? (isSelected ? .accentColor : .primary) : .gray.opacity(0.5))
-        .background(isSelected ? Color.accentColor.opacity(0.1) : Color.clear)
-        .clipShape(Circle())
-        .disabled(!isEnabled)
-        .opacity(isEnabled ? 1 : 0.5)
+        Image(systemName: phase.symbol)
+            .imageScale(.small)
+            .frame(width: width, height: 32)
+            .foregroundColor(isEnabled ? (isSelected ? .accentColor : .primary) : .gray.opacity(0.5))
+            .background(isSelected ? Color.accentColor.opacity(0.1) : Color.clear)
+            .clipShape(Circle())
+            .opacity(isEnabled ? 1 : 0.5)
+    }
+}
+
+extension Array {
+    subscript(safe index: Int) -> Element? {
+        indices.contains(index) ? self[index] : nil
     }
 }
 
