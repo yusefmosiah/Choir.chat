@@ -511,6 +511,10 @@ tree.md
 │       ├── ChoirThreadDetailView.swift
 │       ├── ChorusCycleView.swift
 │       ├── MessageRow.swift
+│       ├── Thread
+│       │   └── Components
+│       │       ├── ThreadInputBar.swift
+│       │       └── ThreadMessageList.swift
 │       └── WalletView.swift
 ├── Choir.xcodeproj
 │   ├── project.pbxproj
@@ -682,7 +686,7 @@ tree.md
 │   └── tree.md
 └── render.yaml
 
-46 directories, 160 files
+48 directories, 162 files
 
 === File: docs/CHANGELOG.md ===
 
