@@ -2996,6 +2996,166 @@ class ThreadDetailViewModel: ObservableObject {
 3. Create ViewModels
 4. Add comprehensive tests
 
+=== File: docs/plan_modularity_refactor.md ===
+
+
+
+==
+plan_modularity_refactor
+==
+
+
+# Choir Modularity Refactor Plan
+
+## Goals
+- Break monolithic architecture into clear modules
+- Simplify state management
+- Maintain existing functionality
+- Create foundation for future enhancements
+
+## Phase 1: Core Domain Models
+- [ ] Create MessageStore module
+  - [ ] Define MessageStore protocol
+  - [ ] Create basic in-memory implementation
+  - [ ] Add message CRUD operations
+  - [ ] Add thread management
+  - [ ] Add observation/subscription capabilities
+
+- [ ] Create ChorusService module
+  - [ ] Define ChorusService protocol
+  - [ ] Extract chorus cycle logic from RESTChorusCoordinator
+  - [ ] Create clean async API for phase processing
+  - [ ] Add proper error handling
+  - [ ] Add logging/debugging support
+
+## Phase 2: Network Layer
+- [ ] Refactor APIClient
+  - [ ] Create APIClient protocol
+  - [ ] Simplify request/response handling
+  - [ ] Add proper error types
+  - [ ] Add request/response logging
+  - [ ] Add retry logic
+  - [ ] Add request cancellation
+
+- [ ] Create NetworkModels
+  - [ ] Separate API models from domain models
+  - [ ] Create clear mapping layer
+  - [ ] Add validation
+  - [ ] Add proper Codable implementations
+
+## Phase 3: State Management
+- [ ] Create AppState module
+  - [ ] Define core state container
+  - [ ] Add thread state management
+  - [ ] Add message state management
+  - [ ] Add UI state management
+  - [ ] Add proper state observation
+
+- [ ] Create StateContainer
+  - [ ] Implement observable state pattern
+  - [ ] Add state update middleware
+  - [ ] Add state persistence hooks
+  - [ ] Add state restoration
+
+## Phase 4: ViewModels
+- [ ] Create ThreadViewModel
+  - [ ] Move thread logic from ChorusViewModel
+  - [ ] Add thread state management
+  - [ ] Add message handling
+  - [ ] Add UI state
+
+- [ ] Create MessageViewModel
+  - [ ] Move message logic from ChorusViewModel
+  - [ ] Add message state management
+  - [ ] Add phase handling
+  - [ ] Add UI state
+
+- [ ] Create ChorusViewModel
+  - [ ] Simplify to pure UI state
+  - [ ] Remove coordinator dependency
+  - [ ] Add proper state binding
+  - [ ] Add error handling
+
+## Phase 5: Views
+- [ ] Refactor MessageRow
+  - [ ] Remove direct state management
+  - [ ] Use view model exclusively
+  - [ ] Simplify UI updates
+  - [ ] Add proper animations
+
+- [ ] Refactor ChorusCycleView
+  - [ ] Remove direct state management
+  - [ ] Use view model exclusively
+  - [ ] Improve phase transitions
+  - [ ] Add proper animations
+
+- [ ] Refactor ThreadDetailView
+  - [ ] Remove direct state management
+  - [ ] Use view model exclusively
+  - [ ] Improve message handling
+  - [ ] Add proper scroll behavior
+
+## Phase 6: Testing
+- [ ] Add MessageStore tests
+  - [ ] Test CRUD operations
+  - [ ] Test thread management
+  - [ ] Test state updates
+  - [ ] Test error cases
+
+- [ ] Add ChorusService tests
+  - [ ] Test phase processing
+  - [ ] Test error handling
+  - [ ] Test cancellation
+  - [ ] Test edge cases
+
+- [ ] Add ViewModel tests
+  - [ ] Test state management
+  - [ ] Test user interactions
+  - [ ] Test error handling
+  - [ ] Test edge cases
+
+## Phase 7: Integration
+- [ ] Create DependencyContainer
+  - [ ] Add service registration
+  - [ ] Add proper initialization
+  - [ ] Add state restoration
+  - [ ] Add proper cleanup
+
+- [ ] Update App initialization
+  - [ ] Use dependency injection
+  - [ ] Add proper state setup
+  - [ ] Add error handling
+  - [ ] Add logging
+
+## Phase 8: Cleanup
+- [ ] Remove old coordinator pattern
+  - [ ] Migrate remaining functionality
+  - [ ] Update dependencies
+  - [ ] Remove unused code
+  - [ ] Update documentation
+
+- [ ] Final testing
+  - [ ] End-to-end testing
+  - [ ] Performance testing
+  - [ ] UI testing
+  - [ ] Documentation review
+
+## Success Criteria
+1. Clear module boundaries
+2. Simplified state management
+3. Improved testability
+4. Maintained functionality
+5. Better error handling
+6. Improved performance
+7. Clear upgrade path
+
+## Notes
+- Each phase should be completed and tested before moving to next
+- Keep existing functionality working throughout refactor
+- Add proper logging/debugging support
+- Document architectural decisions
+- Create migration guides for each phase
+
 === File: docs/plan_post-training.md ===
 
 
@@ -3517,6 +3677,187 @@ The proxy security model is designed to protect the integrity and confidentialit
 ---
 
 By adhering to this security model, we can ensure that the proxy server operates securely, maintaining the trust of users and the integrity of the system as a whole.
+
+=== File: docs/plan_refactoring_chorus_cycle.md ===
+
+
+
+==
+plan_refactoring_chorus_cycle
+==
+
+
+# Chorus Cycle Refactoring Plan
+
+## Overview
+This document outlines the plan to refactor the Chorus Cycle implementation to improve its concurrency model, state management, and error handling. The refactoring will be done in phases to maintain stability.
+
+## Phase 1: Actor Model Implementation
+### Goals
+- Convert `RESTChorusCoordinator` from a class to an actor
+- Implement proper actor isolation
+- Remove `@Published` properties in favor of actor state
+
+### Changes Required
+1. `ChorusCoordinator.swift`:
+```swift
+protocol ChorusCoordinator: Actor {
+    // Async properties
+    var currentPhase: Phase { get async }
+    var responses: [Phase: String] { get async }
+    var isProcessing: Bool { get async }
+
+    // Async sequences for live updates
+    var currentPhaseSequence: AsyncStream<Phase> { get }
+    var responsesSequence: AsyncStream<[Phase: String]> { get }
+    var isProcessingSequence: AsyncStream<Bool> { get }
+
+    // Core processing
+    func process(_ input: String) async throws
+    func cancel()
+}
+```
+
+2. `RESTChorusCoordinator.swift`:
+```swift
+actor RESTChorusCoordinator: ChorusCoordinator {
+    private let api: ChorusAPIClient
+    private var state: ChorusState
+
+    // Stream management
+    private let phaseStream: AsyncStream<Phase>
+    private let responsesStream: AsyncStream<[Phase: String]>
+    private let processingStream: AsyncStream<Bool>
+
+    // Stream continuations
+    private var phaseContinuation: AsyncStream<Phase>.Continuation?
+    private var responsesContinuation: AsyncStream<[Phase: String]>.Continuation?
+    private var processingContinuation: AsyncStream<Bool>.Continuation?
+}
+```
+
+## Phase 2: State Management
+### Goals
+- Extract state management into a dedicated type
+- Implement proper state transitions
+- Add state validation
+
+### Changes Required
+1. Create `ChorusState.swift`:
+```swift
+actor ChorusState {
+    private(set) var currentPhase: Phase
+    private(set) var responses: [Phase: String]
+    private(set) var isProcessing: Bool
+    private(set) var phaseResponses: PhaseResponses
+
+    struct PhaseResponses {
+        var action: ActionResponse?
+        var experience: ExperienceResponse?
+        var intention: IntentionResponse?
+        var observation: ObservationResponse?
+        var understanding: UnderstandingResponse?
+        var yield: YieldResponse?
+    }
+
+    func transition(to phase: Phase) async
+    func updateResponse(_ response: String, for phase: Phase) async
+    func setProcessing(_ isProcessing: Bool) async
+}
+```
+
+## Phase 3: API Client Refactoring
+### Goals
+- Convert `ChorusAPIClient` to an actor
+- Implement proper error handling
+- Add request/response logging
+- Add retry logic for transient failures
+
+### Changes Required
+1. Update `ChorusAPIClient.swift`:
+```swift
+actor ChorusAPIClient {
+    private let session: URLSession
+    private let decoder: JSONDecoder
+    private let encoder: JSONEncoder
+    private let retryPolicy: RetryPolicy
+
+    func post<T: Codable, R: Codable>(
+        endpoint: String,
+        body: T,
+        retries: Int = 3
+    ) async throws -> R
+}
+```
+
+## Phase 4: Error Handling
+### Goals
+- Implement structured error types
+- Add error recovery mechanisms
+- Improve error reporting
+
+### Changes Required
+1. Create `ChorusError.swift`:
+```swift
+enum ChorusError: Error {
+    case networkError(URLError)
+    case cancelled
+    case phaseError(Phase, Error)
+    case invalidState(String)
+    case apiError(APIError)
+
+    var isRetryable: Bool
+    var shouldResetState: Bool
+}
+```
+
+## Phase 5: Testing Infrastructure
+### Goals
+- Add unit tests for actor behavior
+- Add integration tests for state transitions
+- Add stress tests for concurrency
+
+### Changes Required
+1. Create new test files:
+- `ChorusCoordinatorTests.swift`
+- `ChorusStateTests.swift`
+- `ChorusAPIClientTests.swift`
+- `ConcurrencyStressTests.swift`
+
+## Implementation Order
+1. Phase 1: Actor Model Implementation
+   - This is the foundation for all other changes
+   - Requires careful migration to maintain existing functionality
+
+2. Phase 2: State Management
+   - Build on actor model to implement proper state handling
+   - Can be done incrementally while maintaining backward compatibility
+
+3. Phase 3: API Client Refactoring
+   - Improve network layer reliability
+   - Can be done in parallel with state management
+
+4. Phase 4: Error Handling
+   - Implement once new architecture is stable
+   - Add recovery mechanisms for each type of failure
+
+5. Phase 5: Testing Infrastructure
+   - Add tests as each component is refactored
+   - Final comprehensive test suite
+
+## Migration Strategy
+1. Create new actor-based implementations alongside existing code
+2. Gradually migrate functionality, one phase at a time
+3. Use feature flags to control rollout
+4. Maintain backward compatibility until migration is complete
+5. Remove old implementation once new system is proven stable
+
+## Validation Criteria
+- All existing functionality must work as before
+- Performance metrics must be maintained or improved
+- Error handling must be more robust
+- Test coverage must be comprehensive
+- Documentation must be updated to reflect new architecture
 
 === File: docs/plan_save_users_and_threads.md ===
 

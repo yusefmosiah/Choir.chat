@@ -36,7 +36,6 @@
 │   └── Views
 │       ├── ChoirThreadDetailView.swift
 │       ├── ChorusCycleView.swift
-│       ├── ChorusResponse.swift
 │       ├── MessageRow.swift
 │       └── WalletView.swift
 ├── Choir.xcodeproj
@@ -178,9 +177,11 @@
 │   ├── plan_chuser_chthread_chmessage.md
 │   ├── plan_client_architecture.md
 │   ├── plan_id_persistence.md
+│   ├── plan_modularity_refactor.md
 │   ├── plan_post-training.md
 │   ├── plan_proxy_authentication.md
 │   ├── plan_proxy_security_model.md
+│   ├── plan_refactoring_chorus_cycle.md
 │   ├── plan_save_users_and_threads.md
 │   ├── plan_sui_blockchain_integration.md
 │   ├── plan_swiftdata_checklist.md
@@ -208,4 +209,4 @@
 │   └── tree.md
 └── render.yaml
 
-46 directories, 160 files
+46 directories, 161 files
