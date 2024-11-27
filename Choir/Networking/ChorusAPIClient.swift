@@ -43,7 +43,6 @@ class ChorusAPIClient {
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-
         request.httpBody = try encoder.encode(body)
 
         do {
@@ -53,33 +52,32 @@ class ChorusAPIClient {
                 throw APIError.serverError("Invalid response type")
             }
 
-            // Print response for debugging
+            #if DEBUG
             if let responseString = String(data: data, encoding: .utf8) {
                 print("Response from \(endpoint): \(responseString)")
             }
+            #endif
 
             guard (200...299).contains(httpResponse.statusCode) else {
-                // Try to decode error message if possible
-                if let errorResponse = try? decoder.decode(APIResponse<String>.self, from: data) {
-                    throw APIError.serverError(errorResponse.message ?? "Server error \(httpResponse.statusCode)")
-                }
                 throw APIError.serverError("Server returned \(httpResponse.statusCode)")
             }
 
-            // First decode the API response wrapper
-            let apiResponse = try decoder.decode(APIResponse<R>.self, from: data)
-
-            guard apiResponse.success, let responseData = apiResponse.data else {
-                throw APIError.invalidResponse(apiResponse.message ?? "Request failed")
+            // Try to decode directly first
+            do {
+                return try decoder.decode(R.self, from: data)
+            } catch {
+                // If direct decoding fails, try wrapped response
+                let apiResponse = try decoder.decode(APIResponse<R>.self, from: data)
+                guard let responseData = apiResponse.data else {
+                    throw APIError.invalidResponse("No data in response")
+                }
+                return responseData
             }
-
-            return responseData
 
         } catch is URLError {
             throw APIError.timeout
         } catch let error as DecodingError {
             print("Decoding error: \(error)")
-            print("Decoding error details: \(error)")
             throw APIError.decodingError(error)
         } catch {
             throw APIError.networkError(error)
