@@ -1,6 +1,5 @@
 import Foundation
 import SwiftUI
-import Combine
 
 @MainActor
 class MockChorusCoordinator: ChorusCoordinator, ObservableObject {
@@ -17,53 +16,22 @@ class MockChorusCoordinator: ChorusCoordinator, ObservableObject {
     private(set) var yieldResponse: YieldResponse?
 
     private var mockDelay: TimeInterval = 1.0
-
-    // Continuations to manage the streams
-    private var phaseContinuation: AsyncStream<Phase>.Continuation?
-    private var responsesContinuation: AsyncStream<[Phase: String]>.Continuation?
-    private var processingContinuation: AsyncStream<Bool>.Continuation?
-
-    // Async sequences
-    var currentPhaseSequence: AsyncStream<Phase> {
-        AsyncStream { continuation in
-            phaseContinuation = continuation
-            continuation.yield(currentPhase)
-        }
-    }
-
-    var responsesSequence: AsyncStream<[Phase: String]> {
-        AsyncStream { continuation in
-            responsesContinuation = continuation
-            continuation.yield(responses)
-        }
-    }
-
-    var isProcessingSequence: AsyncStream<Bool> {
-        AsyncStream { continuation in
-            processingContinuation = continuation
-            continuation.yield(isProcessing)
-        }
-    }
+    weak var viewModel: ChorusViewModel?
 
     required init() {}
 
     func process(_ input: String) async throws {
         // Clear state at start
-        responses.removeAll()
-        responsesContinuation?.yield(responses)
-
+        responses = [:]
         isProcessing = true
-        processingContinuation?.yield(true)
 
         defer {
             isProcessing = false
-            processingContinuation?.yield(false)
         }
 
         do {
             // Action phase
             currentPhase = .action
-            phaseContinuation?.yield(.action)
             try await Task.sleep(nanoseconds: UInt64(mockDelay * 1_000_000_000))
             try Task.checkCancellation()
 
@@ -79,11 +47,10 @@ class MockChorusCoordinator: ChorusCoordinator, ObservableObject {
 
             actionResponse = try decoder.decode(ActionResponse.self, from: actionJSON)
             responses[.action] = actionResponse?.content
-            responsesContinuation?.yield(responses)
+            viewModel?.updateState()
 
             // Experience phase
             currentPhase = .experience
-            phaseContinuation?.yield(.experience)
             try await Task.sleep(nanoseconds: UInt64(mockDelay * 1_000_000_000))
             try Task.checkCancellation()
 
@@ -99,11 +66,10 @@ class MockChorusCoordinator: ChorusCoordinator, ObservableObject {
 
             experienceResponse = try decoder.decode(ExperienceResponse.self, from: experienceJSON)
             responses[.experience] = experienceResponse?.content
-            responsesContinuation?.yield(responses)
+            viewModel?.updateState()
 
             // Intention phase
             currentPhase = .intention
-            phaseContinuation?.yield(.intention)
             try await Task.sleep(nanoseconds: UInt64(mockDelay * 1_000_000_000))
             try Task.checkCancellation()
 
@@ -119,11 +85,10 @@ class MockChorusCoordinator: ChorusCoordinator, ObservableObject {
 
             intentionResponse = try decoder.decode(IntentionResponse.self, from: intentionJSON)
             responses[.intention] = intentionResponse?.content
-            responsesContinuation?.yield(responses)
+            viewModel?.updateState()
 
             // Observation phase
             currentPhase = .observation
-            phaseContinuation?.yield(.observation)
             try await Task.sleep(nanoseconds: UInt64(mockDelay * 1_000_000_000))
             try Task.checkCancellation()
 
@@ -142,11 +107,10 @@ class MockChorusCoordinator: ChorusCoordinator, ObservableObject {
 
             observationResponse = try decoder.decode(ObservationResponse.self, from: observationJSON)
             responses[.observation] = observationResponse?.content
-            responsesContinuation?.yield(responses)
+            viewModel?.updateState()
 
             // Understanding phase
             currentPhase = .understanding
-            phaseContinuation?.yield(.understanding)
             try await Task.sleep(nanoseconds: UInt64(mockDelay * 1_000_000_000))
             try Task.checkCancellation()
 
@@ -163,11 +127,10 @@ class MockChorusCoordinator: ChorusCoordinator, ObservableObject {
 
             understandingResponse = try decoder.decode(UnderstandingResponse.self, from: understandingJSON)
             responses[.understanding] = understandingResponse?.content
-            responsesContinuation?.yield(responses)
+            viewModel?.updateState()
 
             // Yield phase
             currentPhase = .yield
-            phaseContinuation?.yield(.yield)
             try await Task.sleep(nanoseconds: UInt64(mockDelay * 1_000_000_000))
             try Task.checkCancellation()
 
@@ -189,23 +152,15 @@ class MockChorusCoordinator: ChorusCoordinator, ObservableObject {
 
             yieldResponse = try decoder.decode(YieldResponse.self, from: yieldJSON)
             responses[.yield] = yieldResponse?.content
-            responsesContinuation?.yield(responses)
+            viewModel?.updateState()
 
         } catch is CancellationError {
             responses[currentPhase] = "Cancelled"
-            responsesContinuation?.yield(responses)
             throw APIError.cancelled
         }
     }
 
     func cancel() {
         isProcessing = false
-        processingContinuation?.yield(false)
-    }
-
-    deinit {
-        phaseContinuation?.finish()
-        responsesContinuation?.finish()
-        processingContinuation?.finish()
     }
 }

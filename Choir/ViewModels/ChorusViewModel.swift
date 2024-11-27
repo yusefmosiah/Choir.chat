@@ -2,67 +2,54 @@ import SwiftUI
 
 @MainActor
 class ChorusViewModel: ObservableObject {
-    // Published state
-    @Published private(set) var currentPhase: Phase = .action
-    @Published private(set) var responses: [Phase: String] = [:]
-    @Published private(set) var isProcessing = false
+    @Published private(set) var currentPhase: Phase
+    @Published private(set) var responses: [Phase: String]
+    @Published private(set) var isProcessing: Bool
     @Published private(set) var error: Error?
 
-    // Coordinator handles the actual processing
     let coordinator: any ChorusCoordinator
-    private var bindingTasks: Set<Task<Void, Never>> = []
 
     init(coordinator: any ChorusCoordinator) {
         self.coordinator = coordinator
-        setupBindings()
-    }
+        self.currentPhase = coordinator.currentPhase
+        self.responses = coordinator.responses
+        self.isProcessing = coordinator.isProcessing
 
-    private func setupBindings() {
-        let phaseTask = Task {
-            for await phase in coordinator.currentPhaseSequence {
-                self.currentPhase = phase
-            }
+        if let restCoordinator = coordinator as? RESTChorusCoordinator {
+            restCoordinator.viewModel = self
         }
-
-        let responsesTask = Task {
-            for await responses in coordinator.responsesSequence {
-                if self.isProcessing {
-                    self.responses = responses
-                }
-            }
-        }
-
-        let processingTask = Task {
-            for await isProcessing in coordinator.isProcessingSequence {
-                self.isProcessing = isProcessing
-                if !isProcessing {
-                    self.responses.removeAll()
-                }
-            }
-        }
-
-        bindingTasks = [phaseTask, responsesTask, processingTask]
-    }
-
-    deinit {
-        bindingTasks.forEach { $0.cancel() }
     }
 
     func process(_ input: String) async throws {
-        // Clear previous state
-        responses.removeAll()
         error = nil
+
+        // Clear state before starting new process
+        currentPhase = .action
+        responses = [:]
+        isProcessing = true
 
         do {
             try await coordinator.process(input)
         } catch {
             self.error = error
+            isProcessing = false
             throw error
+        }
+    }
+
+    // Update state from coordinator
+    func updateState() {
+        withAnimation {
+            currentPhase = coordinator.currentPhase
+            responses = coordinator.responses
+            isProcessing = coordinator.isProcessing
         }
     }
 
     func cancel() {
         coordinator.cancel()
+        isProcessing = false
+        responses = [:]
     }
 
     // Convenience accessors for responses

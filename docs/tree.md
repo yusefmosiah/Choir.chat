@@ -177,7 +177,6 @@
 │   ├── plan_chuser_chthread_chmessage.md
 │   ├── plan_client_architecture.md
 │   ├── plan_id_persistence.md
-│   ├── plan_modularity_refactor.md
 │   ├── plan_post-training.md
 │   ├── plan_proxy_authentication.md
 │   ├── plan_proxy_security_model.md
@@ -209,4 +208,4 @@
 │   └── tree.md
 └── render.yaml
 
-46 directories, 161 files
+46 directories, 160 files
