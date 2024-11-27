@@ -5,21 +5,9 @@ class RESTChorusCoordinator: ChorusCoordinator, ObservableObject {
     private let api: ChorusAPIClient
 
     // Use @Published to ensure SwiftUI updates
-    @Published private(set) var currentPhase: Phase = .action {
-        didSet {
-            objectWillChange.send()
-        }
-    }
-    @Published private(set) var responses: [Phase: String] = [:] {
-        didSet {
-            objectWillChange.send()
-        }
-    }
-    @Published private(set) var isProcessing = false {
-        didSet {
-            objectWillChange.send()
-        }
-    }
+    @Published private(set) var currentPhase: Phase = .action
+    @Published private(set) var responses: [Phase: String] = [:]
+    @Published private(set) var isProcessing = false
 
     // Response state
     private(set) var actionResponse: ActionResponse?

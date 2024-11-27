@@ -52,11 +52,13 @@ class ChorusViewModel: ObservableObject {
         responses = [:]
     }
 
-    // Convenience accessors for responses
-    var actionResponse: ActionResponse? { coordinator.actionResponse }
-    var experienceResponse: ExperienceResponse? { coordinator.experienceResponse }
-    var intentionResponse: IntentionResponse? { coordinator.intentionResponse }
-    var observationResponse: ObservationResponse? { coordinator.observationResponse }
-    var understandingResponse: UnderstandingResponse? { coordinator.understandingResponse }
-    var yieldResponse: YieldResponse? { coordinator.yieldResponse }
+    // Helper method to update message with final response
+    func updateMessage(_ message: Message) -> Message {
+        var updatedMessage = message
+        if let yieldResponse = coordinator.yieldResponse {
+            updatedMessage.content = yieldResponse.content
+            updatedMessage.chorusResult = MessageChorusResult(phases: responses)
+        }
+        return updatedMessage
+    }
 }

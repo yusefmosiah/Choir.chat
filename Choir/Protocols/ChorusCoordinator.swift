@@ -2,8 +2,8 @@ import Foundation
 
 
 @MainActor
-protocol ChorusCoordinator: ObservableObject {
-    // Published state
+protocol ChorusCoordinator {
+    // State
     var currentPhase: Phase { get }
     var responses: [Phase: String] { get }
     var isProcessing: Bool { get }
@@ -12,7 +12,7 @@ protocol ChorusCoordinator: ObservableObject {
     func process(_ input: String) async throws
     func cancel()
 
-    // Optional phase-specific responses
+    // Response state
     var actionResponse: ActionResponse? { get }
     var experienceResponse: ExperienceResponse? { get }
     var intentionResponse: IntentionResponse? { get }
@@ -20,6 +20,5 @@ protocol ChorusCoordinator: ObservableObject {
     var understandingResponse: UnderstandingResponse? { get }
     var yieldResponse: YieldResponse? { get }
 
-    // Required initializer
     init()
 }

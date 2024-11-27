@@ -36,27 +36,11 @@ struct ChoirThreadDetailView: View {
                    Button("Send") {
                        guard !input.isEmpty else { return }
                        let messageContent = input
-                       processingMessage = "Processing: \(messageContent)"
-
-                       // Add user message
-                       let userMessage = Message(
-                           content: messageContent,
-                           isUser: true
-                       )
-                       thread.messages.append(userMessage)
-
-                       // Add placeholder AI message immediately
-                       let placeholderMessage = Message(
-                           content: "...",
-                           isUser: false
-                       )
-                       thread.messages.append(placeholderMessage)
+                       input = "" // Clear input immediately
 
                        Task {
                            await sendMessage(messageContent)
-                           processingMessage = ""
                        }
-                       input = ""
                    }
                    .buttonStyle(.borderedProminent)
                }
@@ -68,20 +52,30 @@ struct ChoirThreadDetailView: View {
 
    private func sendMessage(_ content: String) async {
        do {
-           // Set the current thread in the coordinator before processing
-           (viewModel.coordinator as? RESTChorusCoordinator)?.currentChoirThread = thread
+           // Set the current thread in the coordinator
+           if let restCoordinator = viewModel.coordinator as? RESTChorusCoordinator {
+               restCoordinator.currentChoirThread = thread
+           }
+
+           // Add user message
+           let userMessage = Message(
+               content: content,
+               isUser: true
+           )
+           thread.messages.append(userMessage)
+
+           // Add placeholder AI message
+           var placeholderMessage = Message(
+               content: "...",
+               isUser: false
+           )
+           thread.messages.append(placeholderMessage)
 
            try await viewModel.process(content)
 
-           if let yieldResponse = viewModel.yieldResponse,
-              var lastMessage = thread.messages.last {
-               // Update the placeholder message with the actual response
-               lastMessage.content = yieldResponse.content
-               lastMessage.chorusResult = MessageChorusResult(
-                   phases: viewModel.responses
-               )
-               // Since messages is an array, we need to update the last element
-               thread.messages[thread.messages.count - 1] = lastMessage
+           // Update the placeholder message with the final response
+           if let lastIndex = thread.messages.indices.last {
+               thread.messages[lastIndex] = viewModel.updateMessage(thread.messages[lastIndex])
            }
        } catch {
            print("Error processing message: \(error)")
