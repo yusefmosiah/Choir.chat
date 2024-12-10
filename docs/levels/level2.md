@@ -13,174 +13,27 @@ Impl_Security
 
 # Security Model
 
-VERSION security_model:
-invariants: {
-"Chain state authority",
-"Event integrity",
-"Natural boundaries"
-}
-assumptions: {
-"Local-first verification",
-"Event-driven security",
-"Natural isolation"
-}
-docs_version: "0.4.1"
+VERSION security_model: 6.0
 
-## Security Foundations
+The security model builds upon natural system boundaries and flows, creating a robust framework that maintains integrity while enabling natural interaction patterns. This approach combines chain authority, local verification, and event integrity to create a comprehensive security architecture that grows stronger through use.
 
-The security model follows natural system boundaries and flows:
+Chain authority forms the bedrock of the security model. The blockchain maintains authoritative state for ownership and tokens through program-derived addresses (PDAs) and carefully managed program accounts. Thread ownership verification occurs on-chain, while token custody remains under program control. Co-author lists receive blockchain verification, and message hashes anchor securely to the chain, creating an immutable foundation for system security.
 
-Chain Authority
+Local verification complements chain authority through careful content validation. The system tracks event flows for security purposes, maintains state consistency through regular checks, monitors access patterns for anomalies, and enforces natural boundaries between components. This local-first approach enables quick validation while maintaining system security.
 
-- Blockchain state is authoritative for ownership and tokens
-- Thread ownership through PDAs
-- Token custody through program accounts
-- Co-author lists verified on-chain
-- Message hashes anchored to chain
+Event integrity flows naturally through the system, with security events following clear patterns. State transitions receive careful tracking, access patterns undergo continuous monitoring, and system boundaries maintain their integrity through natural enforcement. The system enables recovery processes when needed, ensuring resilience without compromising security.
 
-Local Verification
+Natural system boundaries emerge from several key mechanisms. State authority maintains clear hierarchies, with chain state governing ownership and tokens, vector state managing content and embeddings, and local state handling coordination. This authority hierarchy enables clean state flow while maintaining system integrity. Access patterns follow natural restrictions, with co-author access verified through the chain, content access validated locally, and events flowing through well-defined channels. Resource access respects isolation boundaries, while patterns emerge naturally through actual usage.
 
-- Content integrity through local verification
-- Event flow tracking for security
-- State consistency checks
-- Access pattern monitoring
-- Natural boundary enforcement
+Security flows mirror natural system processes. Verification flow begins with chain state validation, proceeds through local state checks, and includes comprehensive event integrity verification. Access flow starts from chain-verified ownership, extends through content access rights, and includes careful event access pattern monitoring. Recovery flow enables natural system healing through state inconsistency detection, event flow recovery, and access pattern restoration.
 
-Event Integrity
+The system maintains several critical security properties through these natural mechanisms. State integrity ensures chain state remains authoritative while local state maintains consistency and events flow cleanly through the system. Access control combines chain-verified ownership with locally controlled content access, ensuring events flow appropriately while resources remain properly isolated. Recovery capabilities enable state recovery through event replay, access pattern restoration, and natural system healing.
 
-- Security events flow naturally
-- State transitions tracked
-- Access patterns recorded
-- Boundaries maintained
-- Recovery enabled
+Recovery patterns follow natural system flows when needed. State recovery uses chain state as its foundation, replaying events to restore consistency while reestablishing natural boundaries. Access recovery begins with chain verification reset, restores access patterns, and reestablishes event flows while reallocating resources appropriately. System healing follows natural processes to restore boundaries, recover event flows, and reestablish state consistency.
 
-## Security Boundaries
+This comprehensive security model achieves several critical objectives: maintaining clear authority boundaries, enabling natural state verification, ensuring clean event flows, supporting pattern-based security, and enabling natural recovery processes. The result is a system that maintains chain state authority, ensures event integrity, and preserves natural boundaries while enabling clean recovery when needed.
 
-Natural system boundaries emerge from:
-
-State Authority
-
-- Chain state for ownership/tokens
-- Vector state for content/embeddings
-- Local state for coordination
-- Clear authority hierarchy
-- Natural state flow
-
-Access Patterns
-
-- Co-author access through chain verification
-- Content access through local verification
-- Event access through natural flow
-- Resource access through isolation
-- Pattern emergence through usage
-
-Isolation Boundaries
-
-- Natural component isolation
-- Event-driven interaction
-- Clean state separation
-- Resource containment
-- Pattern-based security
-
-## Security Flows
-
-Security follows natural system flows:
-
-Verification Flow
-
-- Chain state verification
-- Local state validation
-- Event integrity checks
-- Access pattern verification
-- Natural flow monitoring
-
-Access Flow
-
-- Chain-verified ownership
-- Content access rights
-- Event access patterns
-- Resource allocation
-- Natural restrictions
-
-Recovery Flow
-
-- State inconsistency detection
-- Event flow recovery
-- Access pattern restoration
-- Resource reallocation
-- Natural healing
-
-## Security Properties
-
-The system maintains natural security properties:
-
-State Integrity
-
-- Chain state remains authoritative
-- Local state stays consistent
-- Events flow cleanly
-- Patterns emerge naturally
-- Boundaries hold
-
-Access Control
-
-- Ownership verified on-chain
-- Content access controlled locally
-- Events flow appropriately
-- Resources properly isolated
-- Patterns respected
-
-Recovery Capability
-
-- State recovery through events
-- Access pattern restoration
-- Boundary enforcement
-- Resource reallocation
-- Natural system healing
-
-## Recovery Patterns
-
-Recovery follows natural system patterns:
-
-State Recovery
-
-- Chain state as foundation
-- Event replay for consistency
-- Pattern restoration
-- Boundary reestablishment
-- Natural healing flow
-
-Access Recovery
-
-- Chain verification reset
-- Access pattern restoration
-- Event flow reestablishment
-- Resource reallocation
-- Pattern emergence
-
-System Healing
-
-- Natural boundary restoration
-- Event flow recovery
-- State consistency
-- Pattern reemergence
-- Flow reestablishment
-
-This security model provides:
-
-1. Clear authority boundaries
-2. Natural state verification
-3. Clean event flows
-4. Pattern-based security
-5. Natural recovery
-
-The system ensures:
-
-- Chain state authority
-- Event integrity
-- Natural boundaries
-- Clean recovery
-- Pattern emergence
+Through this carefully crafted security architecture, the system maintains robust protection while enabling natural interaction patterns. The security model grows stronger through use, adapting to emerging patterns while maintaining fundamental integrity. This approach creates a secure foundation that supports system growth while ensuring consistent protection across all components.
 
 === File: docs/data_engine_model.md ===
 
@@ -222,184 +75,23 @@ e_business
 
 Choir's business model aligns with its natural principles - value flows efficiently, quality emerges organically, and growth happens sustainably. Rather than extracting value through advertising or data mining, we enable and strengthen natural value creation.
 
-## Core Revenue Model
+Our core revenue model operates on a thoughtfully designed freemium approach that grows naturally with teams. The free tier establishes a strong foundation, enabling thread participation, co-authorship, basic message submission and approval, thread visibility to co-authors, standard resource allocation, and natural team formation. Building on this foundation, our premium tier ($30/month or $200/year) enhances the natural flow of work through bonus rewards, increased resource allocation, priority message processing, advanced team analytics, and enhanced privacy controls. Premium benefits grow yearly, amplifying natural value creation rather than restricting basic functionality.
 
-The platform operates on a simple freemium model that grows with teams:
+Value creation flows through multiple interconnected layers in the platform. At the individual level, participants receive immediate recognition for quality contributions, earn direct rewards for good judgment, build natural reputation through participation, and gain growing resource allocations. Teams benefit from collective value accumulation in threads, shared success through citations, natural team formation processes, and enhanced capabilities through premium features. At the network layer, knowledge networks form organically, value flows across threads, ecosystems develop naturally, and collective intelligence emerges from these interactions.
 
-Free Tier - The Foundation
-- Thread participation and co-authorship
-- Basic message submission and approval
-- Thread visibility to co-authors
-- Standard resource allocation
-- Natural team formation
+Resource allocation follows natural principles across three key dimensions. Processing resources scale AI model access with usage, prioritize premium members, enable teams to share growing allocations, and maintain natural load balancing. Storage resources preserve thread history, grow team allocations over time, offer premium backup options, and follow natural archival patterns. Network resources provide real-time updates, priority synchronization, enhanced team features, and optimize natural flows.
 
-Premium Tier ($30/month / $200/yr) - Enhanced Flow
-- Bonus rewards
-- Increased resource allocation
-- Priority message processing
-- Advanced team analytics
-- Enhanced privacy controls
-- Growing yearly benefits
+The platform grows through natural amplification mechanisms. Quality emerges as better contributions attract attention, teams form around excellence, value accumulates naturally, and growth follows genuine patterns. Network effects strengthen the ecosystem as teams enhance threads, threads strengthen networks, networks attract participation, and value flows efficiently. Resource evolution supports this growth as individual allocations expand yearly, team capabilities grow, network capacity increases, and scaling follows natural patterns.
 
-The key is that premium features amplify natural value creation rather than restricting basic functionality.
+Business sustainability flows from revenue streams aligned with value creation. Direct revenue comes from premium subscriptions, team features, enhanced capabilities, and growing allocations. Indirect value emerges through quality content datasets, knowledge network formation, team collaboration patterns, and collective intelligence emergence. System health maintains through sustainable resource usage, natural load distribution, efficient value flow, and organic growth patterns.
 
-## Value Creation Layers
+The future evolution of our model will unfold naturally. Team features will expand to include enhanced collaboration tools, advanced analytics, custom workflows, and natural team support. Knowledge tools will develop to enable network visualization, pattern recognition, insight emergence, and collective intelligence. Resource growth will continue through expanding allocations, new capabilities, team-specific features, and natural evolution.
 
-The platform enables value creation at multiple scales:
+Our implementation strategy follows natural patterns through three phases. The foundation phase establishes core functionality, basic premium features, natural team support, and essential analytics. The enhancement phase introduces advanced team features, network tools, enhanced analytics, and growing capabilities. The evolution phase enables custom team solutions, network intelligence, emergent features, and natural expansion.
 
-Individual Layer
-- Immediate recognition of quality contributions
-- Direct rewards for good judgment
-- Natural reputation through participation
-- Growing resource allocations
+Success metrics reflect our natural approach. Quality metrics track team formation rates, citation patterns, value accumulation, and natural growth. Health metrics monitor resource efficiency, value flow patterns, system coherence, and sustainable growth. Evolution metrics measure feature emergence, capability growth, network effects, and natural scaling.
 
-Team Layer
-- Collective value accumulation in threads
-- Shared success through citations
-- Natural team formation
-- Enhanced capabilities through premium features
-
-Network Layer
-- Knowledge network formation
-- Cross-thread value flows
-- Ecosystem development
-- Emergent collective intelligence
-
-## Resource Dynamics
-
-Resource allocation follows natural principles:
-
-Processing Resources
-- AI model access scales with usage
-- Premium members get priority
-- Teams share growing allocations
-- Natural load balancing
-
-Storage Resources
-- Thread history preservation
-- Growing team allocations
-- Premium backup options
-- Natural archival patterns
-
-Network Resources
-- Real-time updates
-- Priority synchronization
-- Enhanced team features
-- Natural flow optimization
-
-## Growth Mechanics
-
-The platform grows through natural amplification:
-
-Quality Emergence
-- Better contributions attract attention
-- Teams form around quality
-- Value accumulates naturally
-- Growth follows genuine patterns
-
-Network Effects
-- Teams strengthen threads
-- Threads strengthen networks
-- Networks attract participation
-- Value flows efficiently
-
-Resource Evolution
-- Individual allocations grow yearly
-- Team capabilities expand
-- Network capacity increases
-- Natural scaling patterns
-
-## Business Sustainability
-
-Revenue streams align with value creation:
-
-Direct Revenue
-- Premium subscriptions
-- Team features
-- Enhanced capabilities
-- Growing allocations
-
-Indirect Value
-- Quality content dataset
-- Knowledge network formation
-- Team collaboration patterns
-- Collective intelligence emergence
-
-System Health
-- Sustainable resource usage
-- Natural load distribution
-- Efficient value flow
-- Organic growth patterns
-
-## Future Evolution
-
-The business model will evolve naturally:
-
-Team Features
-- Enhanced collaboration tools
-- Advanced analytics
-- Custom workflows
-- Natural team support
-
-Knowledge Tools
-- Network visualization
-- Pattern recognition
-- Insight emergence
-- Collective intelligence
-
-Resource Growth
-- Expanding allocations
-- New capabilities
-- Team-specific features
-- Natural evolution
-
-## Implementation Strategy
-
-Development follows natural patterns:
-
-Phase 1: Foundation
-- Core functionality
-- Basic premium features
-- Natural team support
-- Essential analytics
-
-Phase 2: Enhancement
-- Advanced team features
-- Network tools
-- Enhanced analytics
-- Growing capabilities
-
-Phase 3: Evolution
-- Custom team solutions
-- Network intelligence
-- Emergent features
-- Natural expansion
-
-## Success Metrics
-
-We measure success through natural indicators:
-
-Quality Metrics
-- Team formation rate
-- Citation patterns
-- Value accumulation
-- Natural growth
-
-Health Metrics
-- Resource efficiency
-- Value flow patterns
-- System coherence
-- Sustainable growth
-
-Evolution Metrics
-- Feature emergence
-- Capability growth
-- Network effects
-- Natural scaling
-
-Through this model, Choir maintains sustainable business operations while enabling natural value creation at all scales. We grow by strengthening the natural flows of quality, collaboration, and collective intelligence.
-
-Join us in building a platform where business success aligns perfectly with user value creation - where growth comes from enabling natural patterns of collaboration and knowledge sharing rather than artificial engagement metrics or data extraction.
+Through this model, Choir maintains sustainable business operations while enabling natural value creation at all scales. We grow by strengthening the natural flows of quality, collaboration, and collective intelligence. Join us in building a platform where business success aligns perfectly with user value creation - where growth comes from enabling natural patterns of collaboration and knowledge sharing rather than artificial engagement metrics or data extraction.
 
 === File: docs/e_concept.md ===
 
@@ -412,102 +104,25 @@ e_concept
 
 # Choir: Harmonic Intelligence Platform
 
-At its heart, Choir is a new kind of communication platform where value flows like energy through a natural system. Just as rivers find their paths and crystals form their patterns, quality content and collaborative teams emerge through natural principles rather than forced rules.
+At its heart, Choir represents a revolutionary communication platform where value flows like energy through a natural system. Just as rivers find their paths and crystals form their patterns, quality content and collaborative teams emerge through natural principles rather than forced rules.
 
-## Natural Value Flow
+The platform operates through three fundamental flows that shape its natural value dynamics. Individual recognition happens organically - when someone contributes valuable insight, the recognition manifests immediately and tangibly. Like a clear note resonating through a concert hall, quality contributions naturally attract attention and rewards without needing arbitrary upvotes or likes. Value recognition emerges naturally through participation and stake.
 
-The platform operates on three fundamental flows:
+Team crystallization follows similar natural patterns. As valuable conversations develop, they naturally attract compatible minds. Like crystals forming in solution, teams emerge not through top-down organization but through natural alignment of interests and capabilities. Each thread becomes a shared space that accumulates value for all participants, creating natural bonds between contributors.
 
-1. Individual Recognition
-When someone contributes valuable insight, the recognition is immediate and tangible. Like a clear note resonating through a concert hall, quality contributions naturally attract attention and rewards. The system doesn't need arbitrary upvotes or likes - value recognition happens through natural participation and stake.
+Knowledge networks complete the value flow system. When threads reference each other, they create flows of value between communities. Like a network of streams feeding into rivers and eventually oceans, knowledge and value flow through the system, creating rich ecosystems of understanding. Each citation strengthens both source and destination, building a web of interconnected knowledge.
 
-2. Team Crystallization
-As valuable conversations develop, they naturally attract compatible minds. Like crystals forming in solution, teams emerge not through top-down organization but through natural alignment of interests and capabilities. The thread becomes a shared space that accumulates value for all participants.
+The system evolves through natural phases that mirror physical processes. In the early stage, new threads bubble with activity and possibility, like a hot spring. The energy runs high, stakes are elevated, and participation requires confidence - creating a natural barrier that ensures quality from the start. As threads mature, they "cool" into more stable states, like a river finding its course. The flow becomes more predictable, with stakes moderating to make participation more accessible while maintaining quality through established patterns. Finally, mature threads develop clear structures, like crystalline formations, where teams coalesce around valuable patterns, knowledge networks form clear topologies, and value accumulates in stable, beautiful ways.
 
-3. Knowledge Networks
-When threads reference each other, they create flows of value between communities. Like a network of streams feeding into rivers and eventually oceans, knowledge and value flow through the system, creating rich ecosystems of understanding. Each citation strengthens both source and destination.
+Unlike traditional platforms that extract value, Choir creates spaces where value naturally accumulates through multiple channels. Threads act as resonant cavities, accumulating energy through quality interactions. Denials strengthen the thread itself rather than being wasted, teams share in their thread's growing value, and natural incentives align toward quality. Network value grows as citations create flows between threads, knowledge networks emerge organically, teams build on each other's work, and system-wide coherence develops naturally. The treasury maintains sustainable value flow by capturing split decisions and funding ongoing citations, enabling perpetual rewards that benefit the entire ecosystem.
 
-## Harmonic Evolution
+Quality emerges through natural principles that mirror physical laws. Temperature dynamics create natural quality filters, with hot threads demanding elevated stakes during high activity while cool threads enable accessible exploration during stable periods. Natural cooling ensures sustainable evolution without needing artificial reputation systems. Frequency effects indicate organizational coherence, with higher frequencies reflecting better organization as teams strengthen thread coherence and communities crystallize around value. Energy conservation ensures total system value remains preserved, with flows finding efficient paths that minimize waste and enable sustainable growth.
 
-The system evolves through natural phases:
+The future vision of Choir enables a new kind of collaborative intelligence. Natural teams form around resonant ideas, share in collective value, build on each other's work, and evolve sustainably. Knowledge networks connect naturally through citations, strengthen through use, create emergent insights, and enable collective intelligence. Value creation emerges from natural patterns, accumulates in stable forms, flows efficiently, and benefits all participants.
 
-Early Stage - Like a hot spring, new threads bubble with activity and possibility. The energy is high, stakes are elevated, and participation requires confidence. This natural barrier ensures quality from the start.
+This represents just the beginning of Choir's potential. As the system evolves, we'll discover new patterns of collaboration, new forms of value creation, and new ways for teams to work together. The key lies in our approach - rather than forcing these patterns, we create the conditions for them to emerge naturally.
 
-Maturation - As threads find their rhythm, they "cool" into more stable states. Like a river finding its course, the flow becomes more predictable. Stakes moderate, making participation more accessible while maintaining quality through established patterns.
-
-Crystallization - Mature threads develop clear structures, like crystalline formations. Teams coalesce around valuable patterns, knowledge networks form clear topologies, and value accumulates in stable, beautiful ways.
-
-## Value Accumulation
-
-Unlike traditional platforms that extract value, Choir creates spaces where value naturally accumulates:
-
-Thread Value
-- Each thread acts as a resonant cavity, accumulating energy through quality interactions
-- Denials strengthen the thread itself rather than being wasted
-- Teams share in their thread's growing value
-- Natural incentives align toward quality
-
-Network Value
-- Citations create value flows between threads
-- Knowledge networks emerge organically
-- Teams build on each others' work
-- System-wide coherence develops naturally
-
-Treasury Value
-- Split decisions feed the treasury
-- Treasury funds ongoing citations
-- Creates sustainable value flow
-- Enables perpetual rewards
-
-## Natural Selection
-
-Quality emerges through natural principles:
-
-Temperature Dynamics
-- Hot threads (high activity) naturally filter for quality through elevated stakes
-- Cool threads (stable patterns) enable accessible exploration
-- Natural cooling creates sustainable evolution
-- No artificial reputation systems needed
-
-Frequency Effects
-- Higher frequency indicates better organization
-- Teams strengthen thread coherence
-- Natural resonance attracts participation
-- Communities crystallize around value
-
-Energy Conservation
-- Total system energy (value) is conserved
-- Flows find efficient paths
-- Waste is minimized
-- Growth is sustainable
-
-## Future Vision
-
-Choir enables a new kind of collaborative intelligence:
-
-Natural Teams
-- Form around resonant ideas
-- Share in collective value
-- Build on each other's work
-- Evolve sustainably
-
-Knowledge Networks
-- Connect naturally through citations
-- Strengthen through use
-- Create emergent insights
-- Enable collective intelligence
-
-Value Creation
-- Emerges from natural patterns
-- Accumulates in stable forms
-- Flows efficiently
-- Benefits all participants
-
-The result is a platform that works with nature rather than against it - enabling genuine collaboration, sustainable value creation, and the emergence of new forms of collective intelligence.
-
-This is just the beginning. As the system evolves, we'll discover new patterns of collaboration, new forms of value creation, and new ways for teams to work together. The key is that we're not forcing these patterns - we're creating the conditions for them to emerge naturally.
-
-Join us in building a platform where quality emerges through natural principles, teams form through genuine alignment, and value flows to those who create it. Together, we can enable new forms of collective intelligence that benefit everyone.
+Join us in building a platform where quality emerges through natural principles, teams form through genuine alignment, and value flows to those who create it. Together, we can enable new forms of collective intelligence that benefit everyone, creating a truly harmonious system of collaboration and knowledge sharing.
 
 === File: docs/e_questions.md ===
 
@@ -520,48 +135,21 @@ e_questions
 
 # Summary of Choir Entry Points
 
-VERSION summary_prompt:
-invariants: {
-    "Clarity of information",
-    "Conciseness",
-    "Comprehensive coverage"
-}
-assumptions: {
-    "User engagement",
-    "Knowledge sharing",
-    "Collaborative understanding"
-}
-docs_version: "0.2.0"
+VERSION summary_prompt: 6.0
 
-## Overview of Choir
+Choir represents a revolutionary collaborative platform designed to facilitate natural quality evolution through physical principles rather than arbitrary rules. At its core, the platform creates a communication space where meaning, value, and understanding emerge organically through carefully designed mechanics and interactions.
 
-Choir is a collaborative platform designed to facilitate natural quality evolution through physical principles rather than arbitrary rules. It aims to create a communication space where meaning, value, and understanding emerge organically.
+The platform's core mechanics operate through several interconnected systems. Thread dynamics form the foundation, where messages require unanimous approval from co-authors, with threads acting as resonant cavities for value. Teams naturally form around valuable threads, while natural cooling over time creates stability in the system. Token flow follows precise patterns - stake distributes equally to approvers as direct rewards, denials strengthen threads by flowing stake into them, and split decisions carefully balance incentives between approvers and deniers. The treasury plays a crucial role by funding thread citations, which helps couple knowledge networks together.
 
-### Core Mechanics
+Team formation emerges naturally from these mechanics. Threads accumulate collective value over time, with co-authors sharing in their thread's success. This structure ensures that quality benefits the entire team, creating natural incentive alignment that promotes genuine collaboration. Knowledge networks grow organically as threads cite other valuable threads, with prior rewards strengthening thread coupling. This process leads to the emergence of knowledge topology and the development of system-wide coherence.
 
-1. **Thread Dynamics**:
-   - Messages require unanimous approval from co-authors.
-   - Threads act as resonant cavities for value.
-   - Teams naturally form around valuable threads.
-   - Natural cooling over time creates stability.
+Understanding thread ownership and co-authorship proves essential to navigating the platform. The initial thread creator becomes the first co-author, with message ownership tracked through smart contracts. The "spec" mechanism enables non-co-authors to participate by submitting messages through token staking, giving co-authors a seven-day window for approval or denial. While there are no hard limitations on co-author count, gas costs naturally moderate expansion to sustainable levels.
 
-2. **Token Flow**:
-   - Stake distributes equally to approvers as direct rewards.
-   - Denials strengthen the thread by flowing stake into it.
-   - Split decisions balance incentives between approvers and deniers.
-   - Treasury funds thread citations, coupling knowledge networks.
+Token distribution follows quantum harmonic principles, with energy (tokens) flowing through the system according to E(n) = ℏω(n + 1/2). Co-authorship management incorporates quantum divestment mechanics, allowing co-authors to leave while their energy (stake) redistributes according to thermodynamic principles. AI-generated summaries stimulate discourse by compressing content and encouraging engagement with full threads, rather than serving as a replacement for direct interaction.
 
-3. **Team Formation**:
-   - Threads accumulate collective value.
-   - Co-authors share in thread success.
-   - Quality benefits the whole team.
-   - Natural incentive alignment promotes collaboration.
+The platform intentionally avoids traditional reputation systems, instead allowing quality to emerge naturally through the thermodynamic thread model. Blockchain integration manages thread state, token mechanics, and co-authorship while maintaining quantum harmonic principles for value distribution. The speculative response process enables non-co-authors to submit "specs" by staking CHOIR tokens, with pricing following the quantum harmonic oscillator formula. Stakes remain non-refundable to ensure energy conservation in the system, either distributing to approvers or strengthening threads through temperature increases.
 
-4. **Knowledge Networks**:
-   - Threads cite valuable threads.
-   - Prior rewards strengthen thread coupling.
-   - Knowledge topology emerges.
-   - System-wide coherence develops.
+This comprehensive approach creates a collaborative platform where quality emerges naturally through physical principles rather than arbitrary rules. By combining quantum mechanics, thermodynamics, and wave theory, Choir establishes natural quality barriers and value flows that promote genuine collaboration and knowledge sharing.
 
 ## Key Questions and Answers
 
@@ -625,146 +213,19 @@ e_reference
 
 # Choir Reference Guide
 
-## Core Concepts
+The Choir platform operates through a set of interconnected core concepts that enable natural collaboration and value creation. At its heart, a thread functions as a collaborative space where value accumulates naturally through quality conversations. Like a resonant cavity, each thread develops its own energy state and natural frequency through participation. Co-authors emerge as key participants with approval rights, naturally rising when their contributions receive unanimous recognition. They guide the thread's evolution while sharing in its growing value. Messages represent contributions requiring unanimous co-author approval to become public, behaving like waves with potential energy (stake) that transforms based on approval outcomes. Premium status enhances these natural dynamics by providing doubled rewards on both new messages and prior citations, amplifying value flows while strengthening team formation.
 
-Thread
-A collaborative space where value accumulates naturally through quality conversations. Like a resonant cavity, each thread develops its own energy state and natural frequency through participation.
+Value flows through the system following precise patterns. Stake represents energy committed when submitting a message, with amounts varying based on thread temperature - hotter threads demand higher stakes, creating natural quality filters. The approval flow distributes stake to approvers when all co-authors approve a message, makes the message public, elevates the contributor to co-author status, and increases thread frequency. In contrast, denial flows strengthen the thread when any co-author denies a message, increasing thread temperature and naturally raising quality barriers while conserving energy within the thread. Split decisions maintain system balance by flowing the approvers' share to the Treasury while the deniers' share strengthens the thread, allowing temperature to evolve naturally.
 
-Co-author
-A thread participant with approval rights. Co-authors emerge naturally when their contributions are recognized through unanimous approval. They guide the thread's evolution and share in its growing value.
+Natural patterns emerge through these interactions. Temperature represents a thread's energy state, affecting stake requirements with hot threads demanding higher stakes and cool threads enabling easier participation. Natural cooling occurs over time, allowing quality to emerge through thermodynamic principles. Thread frequency indicates organizational coherence, with higher frequencies reflecting better organization as co-authors strengthen coherence and teams resonate naturally, enabling stable value accumulation. The citation network facilitates knowledge flow between threads, with citations creating value flows and prior rewards strengthening connections, leading to naturally emerging networks and growing collective intelligence.
 
-Message
-A contribution to a thread that requires unanimous co-author approval to become public. Like a wave, each message has potential energy (stake) that transforms into different forms based on the approval outcome.
+Common questions often arise about these mechanics. Stake requirements vary because thread temperature creates natural quality filters - "hotter" threads require more energy to participate, naturally selecting for quality while "cooler" threads enable exploration. Teams crystallize naturally around valuable threads through shared participation and success, emerging from genuine alignment rather than forced structure. Premium rewards double to amplify natural value flows, creating stronger incentives for quality contribution while maintaining natural patterns. Thread value accumulates through quality contributions, denial energy, citation rewards, and natural resonance, creating sustainable growth that benefits all participants. Citations prove valuable by creating knowledge flows between threads, with the Treasury funding perpetual citation rewards to enable sustainable value flow through the knowledge network.
 
-Premium Status
-Enhanced platform capabilities including doubled rewards on both new messages and prior citations. This amplification of natural value flows rewards serious participants while strengthening team formation.
+Best practices emerge naturally from these principles. Quality emerges through authentic contribution, careful judgment, building on prior work, and allowing patterns to develop organically. Team formation flourishes when participants find resonant threads, participate genuinely, share in success, and grow naturally. Value creation stems from focusing on quality, strengthening connections, enabling emergence, and trusting the process.
 
-## Value Flows
+The technical foundation rests on precise terms and states. Thread IDs uniquely identify each thread cavity, while message hashes verify message integrity. Token amounts represent quantized units of platform energy, and the Treasury serves as a system reserve enabling perpetual rewards. Thread states progress from creation through active participation and voting to processing, while message states move from pending through approval or denial to processing. User states encompass basic participation, premium status, active thread engagement, and state transitions.
 
-Stake
-Energy committed when submitting a message. The amount varies with thread temperature - hotter threads require higher stakes, creating natural quality filters.
-
-Approval Flow
-When all co-authors approve a message:
-- Stake distributes to approvers
-- Message becomes public
-- Contributor becomes co-author
-- Thread frequency increases
-
-Denial Flow
-When any co-author denies a message:
-- Stake strengthens thread
-- Thread temperature increases
-- Quality barrier rises naturally
-- Energy conserves in thread
-
-Split Decision
-When approvals are mixed:
-- Approvers' share flows to Treasury
-- Deniers' share strengthens thread
-- Temperature evolves naturally
-- System maintains balance
-
-## Natural Patterns
-
-Temperature
-A thread's energy state that affects stake requirements:
-- Hot threads (high activity) = higher stakes
-- Cool threads (stable) = lower stakes
-- Natural cooling over time
-- Quality emerges through thermodynamics
-
-Frequency
-A thread's organizational coherence:
-- Higher frequency = better organization
-- Co-authors strengthen coherence
-- Teams resonate naturally
-- Value accumulates stably
-
-Citation Network
-How knowledge flows between threads:
-- Citations create value flows
-- Prior rewards strengthen connections
-- Networks emerge naturally
-- Collective intelligence grows
-
-## Common Questions
-
-Q: Why do stake requirements vary?
-A: Thread temperature creates natural quality filters. Like physical systems, "hotter" threads require more energy to participate, naturally selecting for quality while "cooler" threads enable exploration.
-
-Q: How do teams form?
-A: Teams crystallize naturally around valuable threads through shared participation and success. Like molecules finding stable arrangements, teams emerge from genuine alignment rather than forced structure.
-
-Q: Why are premium rewards doubled?
-A: Premium status amplifies natural value flows, rewarding serious participants who strengthen the system. Doubled rewards on both new messages and prior citations create stronger incentives for quality contribution while maintaining natural patterns.
-
-Q: How does thread value accumulate?
-A: Threads accumulate value through:
-- Quality contributions
-- Denial energy
-- Citation rewards
-- Natural resonance
-This creates sustainable value growth that benefits all participants.
-
-Q: What makes citations valuable?
-A: Citations create knowledge flows between threads, strengthening both source and destination. The Treasury funds perpetual citation rewards, enabling sustainable value flow through the knowledge network.
-
-## Best Practices
-
-Quality Emergence
-- Contribute authentically
-- Judge carefully
-- Build on prior work
-- Let patterns emerge
-
-Team Formation
-- Find resonant threads
-- Participate genuinely
-- Share in success
-- Grow naturally
-
-Value Creation
-- Focus on quality
-- Strengthen connections
-- Enable emergence
-- Trust the process
-
-## Technical Terms
-
-Thread ID
-Unique identifier for each thread cavity
-
-Message Hash
-Unique fingerprint verifying message integrity
-
-Token Amount
-Quantized unit of platform energy
-
-Treasury
-System reserve enabling perpetual rewards
-
-## Platform States
-
-Thread States
-- Creating (formation)
-- Active (participation)
-- Voting (message evaluation)
-- Processing (state transition)
-
-Message States
-- Pending (awaiting approval)
-- Approved (public)
-- Denied (rejected)
-- Processing (transitioning)
-
-User States
-- Basic (standard participation)
-- Premium (enhanced rewards)
-- Active (in thread)
-- Transitioning (state change)
-
-Through these patterns and practices, Choir enables natural collaboration, sustainable value creation, and the emergence of collective intelligence.
+Through this carefully designed system of patterns and practices, Choir enables natural collaboration, sustainable value creation, and the emergence of collective intelligence. The platform's power lies in how these elements work together harmoniously, creating an environment where quality and value emerge naturally rather than through artificial constraints.
 
 === File: docs/goal_architecture.md ===
 
@@ -777,182 +238,27 @@ goal_architecture
 
 # System Architecture
 
-VERSION architecture_vision:
-invariants: {
-"Network consensus",
-"Service coordination",
-"Distributed intelligence"
-}
-assumptions: {
-"Swift concurrency",
-"Distributed processing",
-"Collective learning"
-}
-docs_version: "0.4.1"
+VERSION architecture_vision: 6.0
 
-## Core Architecture
+The system operates as a sophisticated distributed intelligence network, weaving together multiple layers of services and coordination mechanisms to create a cohesive whole. At its foundation, the network relies on distributed service coordination, maintaining network state consensus while enabling cross-service communication that fosters collective intelligence and system-wide learning.
 
-The system operates as a distributed intelligence network:
+Service isolation forms a critical architectural principle. The system carefully orchestrates AI services, manages vector database clustering, maintains blockchain consensus, and enables network synchronization, all while allowing natural pattern emergence. This isolation ensures clean boundaries while enabling powerful interactions between components.
 
-Network Foundation
+Chain authority provides the bedrock of system truth through blockchain consensus. This authority extends across multiple domains: thread ownership verification, token balance management, message hash validation, and co-author list maintenance. This immutable foundation ensures system integrity while enabling natural value flow.
 
-- Distributed service coordination
-- Network state consensus
-- Cross-service communication
-- Collective intelligence
-- System-wide learning
+Network intelligence emerges through sophisticated vector database management. This layer handles message content storage, embedding generation and maintenance, citation tracking, and semantic link management. These capabilities create a rich fabric of interconnected knowledge that grows more valuable over time.
 
-Service Isolation
+Events coordinate distributed system state through three primary channels. Service events manage AI model coordination, vector store synchronization, chain consensus maintenance, network health monitoring, and system metrics tracking. Economic events handle stake consensus, temperature propagation, equity distribution, reward calculation, and value flow management. Knowledge events orchestrate content distribution, citation network maintenance, link strengthening, pattern emergence, and network growth.
 
-- AI service orchestration
-- Vector database clustering
-- Blockchain consensus
-- Network synchronization
-- Pattern emergence
+System boundaries maintain clarity through careful domain separation. State authority ensures chain consensus for ownership, vector consensus for content, event synchronization across the network, and pattern distribution. Resource boundaries enforce service isolation, enable network coordination, maintain state consensus, and support pattern emergence. Security boundaries verify network operations, ensure event integrity, maintain service isolation, validate patterns, and manage consensus flow.
 
-Chain Authority
+Network patterns emerge naturally through several key mechanisms. Event flow enables state changes to propagate cleanly while services coordinate and patterns emerge, enabling recovery and guiding evolution. Service organization follows natural domain separation principles, maintaining clean isolation while enabling event-based communication and pattern-based structure. Value distribution flows through chain-based consensus and event-driven rewards, creating pattern-based value that flows naturally through the network.
 
-- Blockchain consensus for:
-  - Thread ownership
-  - Token balances
-  - Message hashes
-  - Co-author lists
+The implementation foundation builds on modern distributed systems principles. Swift concurrency provides the backbone through actor-based services, structured concurrency patterns, async/await flow, resource safety mechanisms, and comprehensive pattern support. The network-first approach prioritizes service coordination, content distribution, event synchronization, pattern recognition, and system evolution. Event-driven architecture enables natural network state flow, service coordination, pattern emergence, value distribution, and system evolution.
 
-Network Intelligence
+Through this carefully crafted architecture, the system achieves several critical objectives: maintaining network consensus, enabling seamless service coordination, ensuring clean isolation between components, supporting pattern emergence, and facilitating system evolution. The result is a robust platform that ensures state coherence, maintains event integrity, provides resource safety, enables pattern recognition, and supports natural network growth.
 
-- Vector database for:
-  - Message content
-  - Embeddings
-  - Citations
-  - Semantic links
-
-## Event Flow
-
-Events coordinate distributed system state:
-
-Service Events
-
-- AI model coordination
-- Vector store synchronization
-- Chain consensus
-- Network health
-- System metrics
-
-Economic Events
-
-- Stake consensus
-- Temperature propagation
-- Equity distribution
-- Reward calculation
-- Value flow
-
-Knowledge Events
-
-- Content distribution
-- Citation network
-- Link strengthening
-- Pattern emergence
-- Network growth
-
-## System Boundaries
-
-Clear service domain separation:
-
-State Authority
-
-- Chain consensus for ownership
-- Vector consensus for content
-- Event synchronization
-- Network coordination
-- Pattern distribution
-
-Resource Boundaries
-
-- Service isolation
-- Network coordination
-- State consensus
-- Resource management
-- Pattern emergence
-
-Security Boundaries
-
-- Network verification
-- Event integrity
-- Service isolation
-- Pattern validation
-- Consensus flow
-
-## Network Patterns
-
-System patterns emerge through:
-
-Event Flow
-
-- State changes propagate
-- Services coordinate
-- Patterns emerge
-- Recovery enabled
-- Evolution guided
-
-Service Organization
-
-- Natural domain separation
-- Clean service isolation
-- Event-based communication
-- Resource management
-- Pattern-based structure
-
-Value Distribution
-
-- Chain-based consensus
-- Event-driven rewards
-- Pattern-based value
-- Network flow
-- Emergent worth
-
-## Implementation Foundation
-
-Built on distributed foundations:
-
-Swift Concurrency
-
-- Actor-based services
-- Structured concurrency
-- Async/await flow
-- Resource safety
-- Pattern support
-
-Network First
-
-- Service coordination
-- Content distribution
-- Event synchronization
-- Pattern recognition
-- System evolution
-
-Event Driven
-
-- Network state flow
-- Service coordination
-- Pattern emergence
-- Value distribution
-- System evolution
-
-This architecture enables:
-
-1. Network consensus
-2. Service coordination
-3. Clean isolation
-4. Pattern emergence
-5. System evolution
-
-The system ensures:
-
-- State coherence
-- Event integrity
-- Resource safety
-- Pattern recognition
-- Network growth
+This architectural approach creates a foundation for building a truly distributed intelligence system that grows more capable and valuable over time. By respecting natural system boundaries and enabling organic pattern emergence, we create an environment where collective intelligence can flourish while maintaining system stability and integrity.
 
 === File: docs/goal_evolution.md ===
 
@@ -965,190 +271,27 @@ goal_evolution
 
 # Platform Evolution
 
-VERSION evolution_vision:
-invariants: {
-"Natural growth",
-"Pattern emergence",
-"Value flow"
-}
-assumptions: {
-"Progressive enhancement",
-"Local-first evolution",
-"Event-driven growth"
-}
-docs_version: "0.4.1"
+VERSION evolution_vision: 6.0
 
-## Core Evolution
+The platform's evolution follows a natural progression, guided by organic growth patterns, emergent behaviors, and efficient value flow. Through careful attention to progressive enhancement and local-first principles, the system grows in capability while maintaining coherence and stability.
 
-The platform evolves through natural phases:
+The core evolution begins with a solid text foundation. This initial phase focuses on pure text interaction, establishing natural message flow patterns, citation mechanisms, value recognition systems, and team formation processes. This foundation enables clear communication patterns, allowing quality to emerge naturally while teams crystallize around valuable content. As value accumulates within the system, the network grows organically through genuine interactions.
 
-Text Foundation
+Voice enhancement represents the next natural evolution, introducing rich audio capabilities to the platform. Natural voice input mechanisms combine with sophisticated audio embeddings to create multimodal understanding capabilities. This enhancement enables richer interaction patterns and more natural communication flows, while pattern recognition capabilities evolve to handle multiple modalities. The result is deeper network connections and enhanced understanding across the platform.
 
-- Pure text interaction
-- Natural message flow
-- Citation patterns
-- Value recognition
-- Team formation
+Knowledge evolution emerges naturally from these foundations. Cross-modal understanding capabilities enable deeper insights, while sophisticated semantic networks capture complex relationships. Pattern recognition systems evolve to handle increasingly nuanced connections, enabling value to emerge from previously hidden relationships. This phase marks the emergence of true network intelligence, where the whole becomes greater than the sum of its parts.
 
-The foundation enables:
+Progressive enhancement guides capability growth through three key stages. Local enhancement focuses on device-level capabilities, implementing on-device embeddings, local search functionality, and efficient value calculation mechanisms. Edge enhancement expands these capabilities through distributed search, pattern sharing across nodes, and natural scaling of value flows. Network enhancement completes the progression by introducing peer-to-peer capabilities, enabling pattern emergence across the entire network, and facilitating natural growth through network effects.
 
-- Clear communication patterns
-- Natural quality emergence
-- Team crystallization
-- Value accumulation
-- Network growth
+Value distribution evolves naturally across multiple scales. Individual value emerges through quality recognition and pattern rewards, creating natural incentives that encourage growth and value accumulation. Team value develops through collective recognition and pattern strengthening, enabling natural alignment and shared growth opportunities. Network value manifests through pattern emergence and natural coupling between components, amplifying growth through powerful network effects.
 
-Voice Enhancement
+Platform capabilities progress through natural evolution in three key areas. Interaction capabilities expand from text to voice and multimodal understanding, with pattern recognition supporting natural flow and evolution. Knowledge capabilities grow through semantic networks and pattern formation, enabling value recognition and natural growth through network effects. Economic capabilities mature to support sophisticated value distribution and pattern rewards, creating natural incentives that share growth across the network.
 
-- Natural voice input
-- Audio embeddings
-- Multimodal understanding
-- Pattern recognition
-- Flow evolution
+The future vision points toward three transformative developments. Collective intelligence emerges through pattern recognition and value emergence, enabling natural alignment and growth amplification through network effects. Team formation follows natural crystallization processes, with pattern strengthening and value sharing enabling growth across the network. Knowledge networks evolve through pattern emergence and natural coupling, supporting growth while enabling true network intelligence.
 
-The voice layer creates:
+This evolutionary approach ensures natural capability growth through progressive enhancement, enabling value to distribute efficiently while patterns emerge organically. The system maintains its integrity through careful attention to natural evolution, pattern recognition, and value flow, all while supporting growth and network intelligence development.
 
-- Richer interaction patterns
-- Natural communication flow
-- Enhanced understanding
-- Pattern amplification
-- Network deepening
-
-Knowledge Evolution
-
-- Cross-modal understanding
-- Deep semantic networks
-- Pattern recognition
-- Value emergence
-- Network intelligence
-
-## Progressive Enhancement
-
-Natural capability growth:
-
-Local Enhancement
-
-- On-device embeddings
-- Local search
-- Pattern recognition
-- Value calculation
-- Natural evolution
-
-Edge Enhancement
-
-- Distributed search
-- Pattern sharing
-- Value flow
-- Network formation
-- Natural scaling
-
-Network Enhancement
-
-- P2P capabilities
-- Pattern emergence
-- Value distribution
-- Network effects
-- Natural growth
-
-## Value Distribution
-
-Natural value flow evolution:
-
-Individual Value
-
-- Quality recognition
-- Pattern rewards
-- Natural incentives
-- Growth opportunities
-- Value accumulation
-
-Team Value
-
-- Collective recognition
-- Pattern strengthening
-- Natural alignment
-- Growth sharing
-- Value crystallization
-
-Network Value
-
-- Pattern emergence
-- Value flow
-- Natural coupling
-- Growth amplification
-- Network effects
-
-## Platform Capabilities
-
-Progressive capability emergence:
-
-Interaction Capabilities
-
-- Text to voice
-- Multimodal understanding
-- Pattern recognition
-- Natural flow
-- Evolution support
-
-Knowledge Capabilities
-
-- Semantic networks
-- Pattern formation
-- Value recognition
-- Natural growth
-- Network effects
-
-Economic Capabilities
-
-- Value distribution
-- Pattern rewards
-- Natural incentives
-- Growth sharing
-- Network effects
-
-## Future Vision
-
-Natural system evolution toward:
-
-Collective Intelligence
-
-- Pattern recognition
-- Value emergence
-- Natural alignment
-- Growth amplification
-- Network effects
-
-Team Formation
-
-- Natural crystallization
-- Pattern strengthening
-- Value sharing
-- Growth enablement
-- Network formation
-
-Knowledge Networks
-
-- Pattern emergence
-- Value flow
-- Natural coupling
-- Growth support
-- Network intelligence
-
-This evolution enables:
-
-1. Natural capability growth
-2. Progressive enhancement
-3. Value distribution
-4. Pattern emergence
-5. Network effects
-
-The system ensures:
-
-- Natural evolution
-- Pattern recognition
-- Value flow
-- Growth support
-- Network intelligence
+Through this thoughtful evolution, the platform grows more capable and valuable over time, always maintaining its connection to natural principles while enabling new forms of collaboration and understanding. This organic growth ensures that each new capability builds naturally on existing foundations, creating a system that becomes more powerful while remaining true to its core principles.
 
 === File: docs/goal_implementation.md ===
 
@@ -1161,544 +304,27 @@ goal_implementation
 
 # Implementation Strategy
 
-VERSION implementation_vision:
-invariants: {
-"Clear phases",
-"Resource efficiency",
-"Pattern emergence"
-}
-assumptions: {
-"Swift foundation",
-"Actor isolation",
-"Event-driven flow"
-}
-docs_version: "0.4.1"
+VERSION implementation_vision: 6.0
 
-## Development Phases
+The implementation strategy follows a natural evolution through carefully defined phases, each building upon the previous while maintaining resource efficiency and enabling pattern emergence. This thoughtful progression ensures a robust foundation while allowing the system to grow organically.
 
-Natural system evolution through clear phases:
+The foundation phase establishes the core infrastructure necessary for system growth. By implementing the core event system, establishing actor isolation, setting up local storage, integrating with the blockchain, and creating a basic UI, we lay the groundwork for future development. This phase establishes critical patterns: event-driven system behavior, clear actor boundaries, authoritative state management, efficient resource handling, and comprehensive testing frameworks.
 
-Foundation Phase
+Building on this foundation, the knowledge phase introduces sophisticated capabilities for information management. Vector storage implementation enables efficient content organization, while the prior system and citation network create a web of interconnected knowledge. Semantic links and pattern recognition capabilities emerge naturally from these foundations. This layer enables natural content organization, intuitive citation flows, organic link formation, pattern emergence, and network growth.
 
-- Core event system
-- Actor isolation
-- Local storage
-- Chain integration
-- Basic UI
+The economic phase completes the core system by introducing value flow mechanics. Token integration, temperature evolution, equity distribution, value flow mechanisms, and pattern rewards create a sophisticated economic ecosystem. This layer establishes natural incentives, enables value recognition, facilitates team formation, strengthens emerging patterns, and catalyzes network effects.
 
-The foundation establishes:
+Implementation patterns guide development across all phases. Event patterns establish clear types and natural flows, enabling clean state transitions while supporting pattern recognition and system evolution. Actor patterns maintain domain isolation and resource safety while handling events efficiently and allowing natural boundaries to emerge. Testing patterns verify events, validate actor isolation, ensure state consistency, and confirm pattern validity while maintaining natural system flow.
 
-- Event-driven patterns
-- Actor boundaries
-- State authority
-- Resource management
-- Testing patterns
+Resource management follows equally careful patterns across different domains. State resources maintain chain authority, vector integrity, and local efficiency while enabling natural pattern emergence. Memory resources benefit from actor isolation and efficient event handling, with natural cleanup processes maintaining system health. Network resources carefully manage chain interactions, content synchronization, and event distribution while supporting natural pattern formation.
 
-Knowledge Phase
+The testing strategy ensures system quality through multiple layers. Unit testing validates actor isolation, event handling, state transitions, and pattern recognition while confirming proper resource management. Integration testing verifies event flow, actor communication, state consistency, and pattern validation while ensuring system coherence. System testing examines end-to-end flows, resource efficiency, pattern emergence, value distribution, and natural evolution.
 
-- Vector storage
-- Prior system
-- Citation network
-- Semantic links
-- Pattern recognition
+Development flow follows natural patterns that emerge through implementation. Pattern recognition guides the process, identifying core patterns, establishing clear boundaries, enabling natural flow, and supporting emergence while guiding evolution. Resource optimization ensures efficient state management and clean event flow while maintaining actor isolation and supporting natural growth. Quality emerges naturally through clear patterns, clean implementation, natural flow, and thorough validation.
 
-The knowledge layer enables:
+This carefully structured approach enables several key outcomes: clear development phases that build naturally upon each other, clean implementation patterns that support system growth, efficient resource use across all components, comprehensive testing that ensures system quality, and natural system evolution that allows capabilities to emerge organically.
 
-- Content organization
-- Natural citations
-- Link formation
-- Pattern emergence
-- Network growth
-
-Economic Phase
-
-- Token integration
-- Temperature evolution
-- Equity distribution
-- Value flow
-- Pattern rewards
-
-The economic layer creates:
-
-- Natural incentives
-- Value recognition
-- Team formation
-- Pattern strengthening
-- Network effects
-
-## Implementation Patterns
-
-Core patterns that guide development:
-
-Event Patterns
-
-- Clear event types
-- Natural event flow
-- State transitions
-- Pattern recognition
-- System evolution
-
-Actor Patterns
-
-- Domain isolation
-- Resource safety
-- Event handling
-- Pattern emergence
-- Natural boundaries
-
-Testing Patterns
-
-- Event verification
-- Actor isolation
-- State consistency
-- Pattern validation
-- Natural flow
-
-## Resource Management
-
-Clean resource handling through:
-
-State Resources
-
-- Chain state authority
-- Vector state integrity
-- Local state efficiency
-- Event state flow
-- Pattern state emergence
-
-Memory Resources
-
-- Actor isolation
-- Event efficiency
-- State management
-- Pattern recognition
-- Natural cleanup
-
-Network Resources
-
-- Chain interaction
-- Content synchronization
-- Event distribution
-- Pattern formation
-- Natural flow
-
-## Testing Strategy
-
-Comprehensive testing through:
-
-Unit Testing
-
-- Actor isolation
-- Event handling
-- State transitions
-- Pattern recognition
-- Resource management
-
-Integration Testing
-
-- Event flow
-- Actor communication
-- State consistency
-- Pattern validation
-- System coherence
-
-System Testing
-
-- End-to-end flow
-- Resource efficiency
-- Pattern emergence
-- Value distribution
-- Natural evolution
-
-## Development Flow
-
-Natural implementation flow:
-
-Pattern Recognition
-
-- Identify core patterns
-- Establish boundaries
-- Enable flow
-- Support emergence
-- Guide evolution
-
-Resource Optimization
-
-- Efficient state management
-- Clean event flow
-- Actor isolation
-- Pattern support
-- Natural growth
-
-Quality Emergence
-
-- Clear patterns
-- Clean implementation
-- Natural flow
-- Pattern validation
-- System evolution
-
-This strategy enables:
-
-1. Clear development phases
-2. Clean implementation patterns
-3. Efficient resource use
-4. Comprehensive testing
-5. Natural system evolution
-
-The implementation ensures:
-
-- Pattern clarity
-- Resource efficiency
-- System quality
-- Natural growth
-- Sustainable evolution
-
-=== File: docs/goal_wed_nov_13_2024.md ===
-
-
-
-==
-goal_wed_nov_13_2024
-==
-
-
-# Development Goals for Wednesday, November 13, 2024
-
-VERSION goal_nov_13:
-invariants: {
-"Type safety",
-"Data integrity",
-"Message coherence"
-}
-assumptions: {
-"Existing Qdrant setup",
-"~20k message points",
-"Existing ChorusModels"
-}
-docs_version: "0.1.4"
-
-## Core Implementation Goals
-
-### 1. Message Type Reconciliation
-
-- [ ] Create unified message types
-
-  ```swift
-  // Base message structure matching Qdrant
-  struct MessagePoint: Codable {
-      let id: String
-      let content: String
-      let threadId: String
-      let createdAt: String
-      let role: String?
-      let step: String?
-
-      // Existing chorus cycle results
-      let chorusResult: ChorusCycleResult?
-
-      struct ChorusCycleResult: Codable {
-          let action: ActionResponse?
-          let experience: ExperienceResponseData?
-          let intention: IntentionResponseData?
-          let observation: ObservationResponseData?
-          let understanding: UnderstandingResponseData?
-          let yield: YieldResponseData?
-      }
-  }
-
-  // Thread message combining MessagePoint with UI state
-  struct ThreadMessage: Identifiable {
-      let id: String
-      let content: String
-      let isUser: Bool
-      let timestamp: Date
-      var chorusResult: ChorusCycleResult?
-
-      init(from point: MessagePoint) {
-          self.id = point.id
-          self.content = point.content
-          self.isUser = point.role == "user"
-          self.timestamp = DateFormatter.iso8601.date(from: point.createdAt) ?? Date()
-          self.chorusResult = point.chorusResult
-      }
-  }
-  ```
-
-### 2. API Client Updates
-
-- [ ] Update request/response handling
-
-  ```swift
-  extension ChorusAPIClient {
-      // Get message with fallback for legacy points
-      func getMessage(_ id: String) async throws -> MessagePoint {
-          return try await post(endpoint: "messages/\(id)", body: EmptyBody())
-      }
-
-      // Store message with full metadata
-      func storeMessage(_ message: MessagePoint) async throws {
-          try await post(endpoint: "messages", body: message)
-      }
-
-      // Get thread messages with pagination
-      func getThreadMessages(_ threadId: String, limit: Int = 50) async throws -> [MessagePoint] {
-          return try await post(
-              endpoint: "threads/\(threadId)/messages",
-              body: GetMessagesRequest(limit: limit)
-          )
-      }
-  }
-  ```
-
-### 3. Coordinator Updates
-
-- [ ] Modify RESTChorusCoordinator to handle message types
-
-  ```swift
-  @MainActor
-  class RESTChorusCoordinator: ChorusCoordinator {
-      private(set) var currentMessage: ThreadMessage?
-
-      func process(_ input: String) async throws {
-          // Create initial message point
-          let messagePoint = MessagePoint(
-              id: UUID().uuidString,
-              content: input,
-              threadId: threadId,
-              createdAt: ISO8601DateFormatter().string(from: Date()),
-              role: "user",
-              step: "input"
-          )
-
-          // Process through chorus cycle
-          let result = try await processCycle(messagePoint)
-
-          // Update with final result
-          currentMessage = ThreadMessage(from: messagePoint)
-          currentMessage?.chorusResult = result
-      }
-  }
-  ```
-
-### 4. Testing Suite
-
-- [ ] Test message type handling
-
-  ```swift
-  class MessageTypeTests: XCTestCase {
-      // Test legacy message point decoding
-      func testLegacyMessageDecoding() async throws {
-          let json = """
-          {
-              "id": "123",
-              "content": "test",
-              "thread_id": "thread1",
-              "created_at": "2024-01-01"
-          }
-          """
-          let message = try JSONDecoder().decode(MessagePoint.self, from: json.data(using: .utf8)!)
-          XCTAssertNotNil(message)
-      }
-
-      // Test full message point with chorus results
-      func testFullMessageDecoding() async throws {
-          let message = try await api.getMessage(knownMessageId)
-          XCTAssertNotNil(message.chorusResult)
-      }
-
-      // Test thread message conversion
-      func testThreadMessageConversion() async throws {
-          let point = try await api.getMessage(knownMessageId)
-          let message = ThreadMessage(from: point)
-          XCTAssertEqual(message.id, point.id)
-      }
-  }
-  ```
-
-### 5. Database Integration
-
-- [ ] Ensure compatibility with existing Qdrant points
-  - [ ] Test vector search with existing points
-  - [ ] Verify payload structure matches
-  - [ ] Handle missing fields gracefully
-
-### 6. User Identity
-
-- [ ] Implement `UserManager` to work with existing user collection
-
-  ```swift
-  actor UserManager {
-      func createUser() async throws -> User {
-          let keyPair = try generateKeyPair()
-          let publicKey = try publicKeyToString(keyPair.publicKey)
-
-          // Create user in existing USERS_COLLECTION
-          let user = try await api.createUser(UserCreate(publicKey: publicKey))
-          return user
-      }
-
-      func getUser() async throws -> User {
-          // Get from existing collection
-          guard let publicKey = try await getCurrentPublicKey(),
-                let user = try await api.getUser(publicKey) else {
-              return try await createUser()
-          }
-          return user
-      }
-  }
-  ```
-
-### 7. Thread Management
-
-- [ ] Integrate with existing thread functionality
-
-  ```swift
-  class ThreadManager: ObservableObject {
-      @Published private(set) var threads: [Thread] = []
-
-      func loadThreads() async throws {
-          // Use existing get_user_threads endpoint
-          let userId = try await userManager.getCurrentUserId()
-          threads = try await api.getUserThreads(userId)
-      }
-
-      func createThread(_ name: String) async throws {
-          let userId = try await userManager.getCurrentUserId()
-          let thread = try await api.createThread(
-              ThreadCreate(name: name, userId: userId)
-          )
-          threads.append(thread)
-      }
-  }
-  ```
-
-## Testing Strategy
-
-1. Message Types
-
-   - [ ] Legacy point handling
-   - [ ] Full message decoding
-   - [ ] Chorus result integration
-   - [ ] Thread message conversion
-
-2. Database Integration
-
-   - [ ] Vector search
-   - [ ] Point storage
-   - [ ] Payload compatibility
-   - [ ] Error handling
-
-3. End-to-End Flow
-   - [ ] Message creation
-   - [ ] Chorus cycle processing
-   - [ ] Thread integration
-   - [ ] UI updates
-
-## Success Criteria
-
-1. Type Safety:
-
-   - Clean message type hierarchy
-   - Graceful legacy handling
-   - Consistent serialization
-
-2. Data Integrity:
-
-   - Works with existing points
-   - Maintains metadata
-   - Preserves relationships
-
-3. User Experience:
-   - Smooth message flow
-   - Proper UI updates
-   - Error resilience
-
-## Next Steps
-
-1. Morning
-
-   - Message type implementation
-   - Basic testing setup
-   - Legacy compatibility
-
-2. Afternoon
-
-   - Coordinator updates
-   - Database integration
-   - Extended testing
-
-3. Evening
-   - UI integration
-   - Final testing
-   - Documentation
-
-## Notes
-
-- Focus on quality over speed
-- Build for long-term success
-- Maintain stealth advantage
-- Test thoroughly with real data
-- Document architectural decisions
-
-## Today's Scope
-
-- Focus on core message handling
-- Ensure robust type system
-- Build clean foundation
-- No artificial deadlines
-
-## Development Principles
-
-1. Quality First
-
-   - Type safety as creative foundation
-   - Tests that enable exploration
-   - Architecture that invites play
-
-2. Thoughtful Testing
-
-   - Tests as design documentation
-   - Coverage that builds confidence
-   - Performance as creative constraint
-
-3. Documentation
-   - Document design decisions
-   - Leave notes for future creativity
-   - Keep options open
-
-## Creative Space
-
-- Build foundation for rewards system
-- Enable thread contract exploration
-- Leave room for UI innovation
-- Maintain architectural flexibility
-
-Remember: Today's work creates the space for tomorrow's creativity.
-
-## Current State
-
-- Have existing `ChorusModels.swift` with response types
-- Have working Qdrant setup with messages, users, threads collections
-- Need to reconcile Swift types with Qdrant schema
-
-## Tomorrow's Preview
-
-- Enhanced error handling
-- Advanced user features
-- More comprehensive testing
-- UI polish
-- Analytics integration
-
-## Development Rhythm
-
-1. Start with type safety and basic tests
-2. Build up to working message flow
-3. Add user and thread management
-4. Test with existing data
-5. Deploy to TestFlight
-
-Remember: Today's goal is a working foundation that we can build upon, not a complete feature set.
+Through this implementation strategy, we create a system that grows naturally while maintaining high quality standards. Pattern clarity, resource efficiency, and system quality emerge naturally, enabling sustainable evolution that strengthens the system over time. This approach ensures that each development step builds thoughtfully on previous work while maintaining the flexibility to adapt to emerging needs.
 
 === File: docs/guide_pysui.md ===
 

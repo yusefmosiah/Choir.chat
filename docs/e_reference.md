@@ -1,142 +1,15 @@
 # Choir Reference Guide
 
-## Core Concepts
+The Choir platform operates through a set of interconnected core concepts that enable natural collaboration and value creation. At its heart, a thread functions as a collaborative space where value accumulates naturally through quality conversations. Like a resonant cavity, each thread develops its own energy state and natural frequency through participation. Co-authors emerge as key participants with approval rights, naturally rising when their contributions receive unanimous recognition. They guide the thread's evolution while sharing in its growing value. Messages represent contributions requiring unanimous co-author approval to become public, behaving like waves with potential energy (stake) that transforms based on approval outcomes. Premium status enhances these natural dynamics by providing doubled rewards on both new messages and prior citations, amplifying value flows while strengthening team formation.
 
-Thread
-A collaborative space where value accumulates naturally through quality conversations. Like a resonant cavity, each thread develops its own energy state and natural frequency through participation.
+Value flows through the system following precise patterns. Stake represents energy committed when submitting a message, with amounts varying based on thread temperature - hotter threads demand higher stakes, creating natural quality filters. The approval flow distributes stake to approvers when all co-authors approve a message, makes the message public, elevates the contributor to co-author status, and increases thread frequency. In contrast, denial flows strengthen the thread when any co-author denies a message, increasing thread temperature and naturally raising quality barriers while conserving energy within the thread. Split decisions maintain system balance by flowing the approvers' share to the Treasury while the deniers' share strengthens the thread, allowing temperature to evolve naturally.
 
-Co-author
-A thread participant with approval rights. Co-authors emerge naturally when their contributions are recognized through unanimous approval. They guide the thread's evolution and share in its growing value.
+Natural patterns emerge through these interactions. Temperature represents a thread's energy state, affecting stake requirements with hot threads demanding higher stakes and cool threads enabling easier participation. Natural cooling occurs over time, allowing quality to emerge through thermodynamic principles. Thread frequency indicates organizational coherence, with higher frequencies reflecting better organization as co-authors strengthen coherence and teams resonate naturally, enabling stable value accumulation. The citation network facilitates knowledge flow between threads, with citations creating value flows and prior rewards strengthening connections, leading to naturally emerging networks and growing collective intelligence.
 
-Message
-A contribution to a thread that requires unanimous co-author approval to become public. Like a wave, each message has potential energy (stake) that transforms into different forms based on the approval outcome.
+Common questions often arise about these mechanics. Stake requirements vary because thread temperature creates natural quality filters - "hotter" threads require more energy to participate, naturally selecting for quality while "cooler" threads enable exploration. Teams crystallize naturally around valuable threads through shared participation and success, emerging from genuine alignment rather than forced structure. Premium rewards double to amplify natural value flows, creating stronger incentives for quality contribution while maintaining natural patterns. Thread value accumulates through quality contributions, denial energy, citation rewards, and natural resonance, creating sustainable growth that benefits all participants. Citations prove valuable by creating knowledge flows between threads, with the Treasury funding perpetual citation rewards to enable sustainable value flow through the knowledge network.
 
-Premium Status
-Enhanced platform capabilities including doubled rewards on both new messages and prior citations. This amplification of natural value flows rewards serious participants while strengthening team formation.
+Best practices emerge naturally from these principles. Quality emerges through authentic contribution, careful judgment, building on prior work, and allowing patterns to develop organically. Team formation flourishes when participants find resonant threads, participate genuinely, share in success, and grow naturally. Value creation stems from focusing on quality, strengthening connections, enabling emergence, and trusting the process.
 
-## Value Flows
+The technical foundation rests on precise terms and states. Thread IDs uniquely identify each thread cavity, while message hashes verify message integrity. Token amounts represent quantized units of platform energy, and the Treasury serves as a system reserve enabling perpetual rewards. Thread states progress from creation through active participation and voting to processing, while message states move from pending through approval or denial to processing. User states encompass basic participation, premium status, active thread engagement, and state transitions.
 
-Stake
-Energy committed when submitting a message. The amount varies with thread temperature - hotter threads require higher stakes, creating natural quality filters.
-
-Approval Flow
-When all co-authors approve a message:
-- Stake distributes to approvers
-- Message becomes public
-- Contributor becomes co-author
-- Thread frequency increases
-
-Denial Flow
-When any co-author denies a message:
-- Stake strengthens thread
-- Thread temperature increases
-- Quality barrier rises naturally
-- Energy conserves in thread
-
-Split Decision
-When approvals are mixed:
-- Approvers' share flows to Treasury
-- Deniers' share strengthens thread
-- Temperature evolves naturally
-- System maintains balance
-
-## Natural Patterns
-
-Temperature
-A thread's energy state that affects stake requirements:
-- Hot threads (high activity) = higher stakes
-- Cool threads (stable) = lower stakes
-- Natural cooling over time
-- Quality emerges through thermodynamics
-
-Frequency
-A thread's organizational coherence:
-- Higher frequency = better organization
-- Co-authors strengthen coherence
-- Teams resonate naturally
-- Value accumulates stably
-
-Citation Network
-How knowledge flows between threads:
-- Citations create value flows
-- Prior rewards strengthen connections
-- Networks emerge naturally
-- Collective intelligence grows
-
-## Common Questions
-
-Q: Why do stake requirements vary?
-A: Thread temperature creates natural quality filters. Like physical systems, "hotter" threads require more energy to participate, naturally selecting for quality while "cooler" threads enable exploration.
-
-Q: How do teams form?
-A: Teams crystallize naturally around valuable threads through shared participation and success. Like molecules finding stable arrangements, teams emerge from genuine alignment rather than forced structure.
-
-Q: Why are premium rewards doubled?
-A: Premium status amplifies natural value flows, rewarding serious participants who strengthen the system. Doubled rewards on both new messages and prior citations create stronger incentives for quality contribution while maintaining natural patterns.
-
-Q: How does thread value accumulate?
-A: Threads accumulate value through:
-- Quality contributions
-- Denial energy
-- Citation rewards
-- Natural resonance
-This creates sustainable value growth that benefits all participants.
-
-Q: What makes citations valuable?
-A: Citations create knowledge flows between threads, strengthening both source and destination. The Treasury funds perpetual citation rewards, enabling sustainable value flow through the knowledge network.
-
-## Best Practices
-
-Quality Emergence
-- Contribute authentically
-- Judge carefully
-- Build on prior work
-- Let patterns emerge
-
-Team Formation
-- Find resonant threads
-- Participate genuinely
-- Share in success
-- Grow naturally
-
-Value Creation
-- Focus on quality
-- Strengthen connections
-- Enable emergence
-- Trust the process
-
-## Technical Terms
-
-Thread ID
-Unique identifier for each thread cavity
-
-Message Hash
-Unique fingerprint verifying message integrity
-
-Token Amount
-Quantized unit of platform energy
-
-Treasury
-System reserve enabling perpetual rewards
-
-## Platform States
-
-Thread States
-- Creating (formation)
-- Active (participation)
-- Voting (message evaluation)
-- Processing (state transition)
-
-Message States
-- Pending (awaiting approval)
-- Approved (public)
-- Denied (rejected)
-- Processing (transitioning)
-
-User States
-- Basic (standard participation)
-- Premium (enhanced rewards)
-- Active (in thread)
-- Transitioning (state change)
-
-Through these patterns and practices, Choir enables natural collaboration, sustainable value creation, and the emergence of collective intelligence.
+Through this carefully designed system of patterns and practices, Choir enables natural collaboration, sustainable value creation, and the emergence of collective intelligence. The platform's power lies in how these elements work together harmoniously, creating an environment where quality and value emerge naturally rather than through artificial constraints.

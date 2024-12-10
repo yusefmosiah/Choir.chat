@@ -1,47 +1,20 @@
 # Summary of Choir Entry Points
 
-VERSION summary_prompt:
-invariants: {
-    "Clarity of information",
-    "Conciseness",
-    "Comprehensive coverage"
-}
-assumptions: {
-    "User engagement",
-    "Knowledge sharing",
-    "Collaborative understanding"
-}
-docs_version: "0.2.0"
+VERSION summary_prompt: 6.0
 
-## Overview of Choir
+Choir represents a revolutionary collaborative platform designed to facilitate natural quality evolution through physical principles rather than arbitrary rules. At its core, the platform creates a communication space where meaning, value, and understanding emerge organically through carefully designed mechanics and interactions.
 
-Choir is a collaborative platform designed to facilitate natural quality evolution through physical principles rather than arbitrary rules. It aims to create a communication space where meaning, value, and understanding emerge organically.
+The platform's core mechanics operate through several interconnected systems. Thread dynamics form the foundation, where messages require unanimous approval from co-authors, with threads acting as resonant cavities for value. Teams naturally form around valuable threads, while natural cooling over time creates stability in the system. Token flow follows precise patterns - stake distributes equally to approvers as direct rewards, denials strengthen threads by flowing stake into them, and split decisions carefully balance incentives between approvers and deniers. The treasury plays a crucial role by funding thread citations, which helps couple knowledge networks together.
 
-### Core Mechanics
+Team formation emerges naturally from these mechanics. Threads accumulate collective value over time, with co-authors sharing in their thread's success. This structure ensures that quality benefits the entire team, creating natural incentive alignment that promotes genuine collaboration. Knowledge networks grow organically as threads cite other valuable threads, with prior rewards strengthening thread coupling. This process leads to the emergence of knowledge topology and the development of system-wide coherence.
 
-1. **Thread Dynamics**:
-   - Messages require unanimous approval from co-authors.
-   - Threads act as resonant cavities for value.
-   - Teams naturally form around valuable threads.
-   - Natural cooling over time creates stability.
+Understanding thread ownership and co-authorship proves essential to navigating the platform. The initial thread creator becomes the first co-author, with message ownership tracked through smart contracts. The "spec" mechanism enables non-co-authors to participate by submitting messages through token staking, giving co-authors a seven-day window for approval or denial. While there are no hard limitations on co-author count, gas costs naturally moderate expansion to sustainable levels.
 
-2. **Token Flow**:
-   - Stake distributes equally to approvers as direct rewards.
-   - Denials strengthen the thread by flowing stake into it.
-   - Split decisions balance incentives between approvers and deniers.
-   - Treasury funds thread citations, coupling knowledge networks.
+Token distribution follows quantum harmonic principles, with energy (tokens) flowing through the system according to E(n) = ℏω(n + 1/2). Co-authorship management incorporates quantum divestment mechanics, allowing co-authors to leave while their energy (stake) redistributes according to thermodynamic principles. AI-generated summaries stimulate discourse by compressing content and encouraging engagement with full threads, rather than serving as a replacement for direct interaction.
 
-3. **Team Formation**:
-   - Threads accumulate collective value.
-   - Co-authors share in thread success.
-   - Quality benefits the whole team.
-   - Natural incentive alignment promotes collaboration.
+The platform intentionally avoids traditional reputation systems, instead allowing quality to emerge naturally through the thermodynamic thread model. Blockchain integration manages thread state, token mechanics, and co-authorship while maintaining quantum harmonic principles for value distribution. The speculative response process enables non-co-authors to submit "specs" by staking CHOIR tokens, with pricing following the quantum harmonic oscillator formula. Stakes remain non-refundable to ensure energy conservation in the system, either distributing to approvers or strengthening threads through temperature increases.
 
-4. **Knowledge Networks**:
-   - Threads cite valuable threads.
-   - Prior rewards strengthen thread coupling.
-   - Knowledge topology emerges.
-   - System-wide coherence develops.
+This comprehensive approach creates a collaborative platform where quality emerges naturally through physical principles rather than arbitrary rules. By combining quantum mechanics, thermodynamics, and wave theory, Choir establishes natural quality barriers and value flows that promote genuine collaboration and knowledge sharing.
 
 ## Key Questions and Answers
 

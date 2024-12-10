@@ -2,181 +2,20 @@
 
 Choir's business model aligns with its natural principles - value flows efficiently, quality emerges organically, and growth happens sustainably. Rather than extracting value through advertising or data mining, we enable and strengthen natural value creation.
 
-## Core Revenue Model
+Our core revenue model operates on a thoughtfully designed freemium approach that grows naturally with teams. The free tier establishes a strong foundation, enabling thread participation, co-authorship, basic message submission and approval, thread visibility to co-authors, standard resource allocation, and natural team formation. Building on this foundation, our premium tier ($30/month or $200/year) enhances the natural flow of work through bonus rewards, increased resource allocation, priority message processing, advanced team analytics, and enhanced privacy controls. Premium benefits grow yearly, amplifying natural value creation rather than restricting basic functionality.
 
-The platform operates on a simple freemium model that grows with teams:
+Value creation flows through multiple interconnected layers in the platform. At the individual level, participants receive immediate recognition for quality contributions, earn direct rewards for good judgment, build natural reputation through participation, and gain growing resource allocations. Teams benefit from collective value accumulation in threads, shared success through citations, natural team formation processes, and enhanced capabilities through premium features. At the network layer, knowledge networks form organically, value flows across threads, ecosystems develop naturally, and collective intelligence emerges from these interactions.
 
-Free Tier - The Foundation
-- Thread participation and co-authorship
-- Basic message submission and approval
-- Thread visibility to co-authors
-- Standard resource allocation
-- Natural team formation
+Resource allocation follows natural principles across three key dimensions. Processing resources scale AI model access with usage, prioritize premium members, enable teams to share growing allocations, and maintain natural load balancing. Storage resources preserve thread history, grow team allocations over time, offer premium backup options, and follow natural archival patterns. Network resources provide real-time updates, priority synchronization, enhanced team features, and optimize natural flows.
 
-Premium Tier ($30/month / $200/yr) - Enhanced Flow
-- Bonus rewards
-- Increased resource allocation
-- Priority message processing
-- Advanced team analytics
-- Enhanced privacy controls
-- Growing yearly benefits
+The platform grows through natural amplification mechanisms. Quality emerges as better contributions attract attention, teams form around excellence, value accumulates naturally, and growth follows genuine patterns. Network effects strengthen the ecosystem as teams enhance threads, threads strengthen networks, networks attract participation, and value flows efficiently. Resource evolution supports this growth as individual allocations expand yearly, team capabilities grow, network capacity increases, and scaling follows natural patterns.
 
-The key is that premium features amplify natural value creation rather than restricting basic functionality.
+Business sustainability flows from revenue streams aligned with value creation. Direct revenue comes from premium subscriptions, team features, enhanced capabilities, and growing allocations. Indirect value emerges through quality content datasets, knowledge network formation, team collaboration patterns, and collective intelligence emergence. System health maintains through sustainable resource usage, natural load distribution, efficient value flow, and organic growth patterns.
 
-## Value Creation Layers
+The future evolution of our model will unfold naturally. Team features will expand to include enhanced collaboration tools, advanced analytics, custom workflows, and natural team support. Knowledge tools will develop to enable network visualization, pattern recognition, insight emergence, and collective intelligence. Resource growth will continue through expanding allocations, new capabilities, team-specific features, and natural evolution.
 
-The platform enables value creation at multiple scales:
+Our implementation strategy follows natural patterns through three phases. The foundation phase establishes core functionality, basic premium features, natural team support, and essential analytics. The enhancement phase introduces advanced team features, network tools, enhanced analytics, and growing capabilities. The evolution phase enables custom team solutions, network intelligence, emergent features, and natural expansion.
 
-Individual Layer
-- Immediate recognition of quality contributions
-- Direct rewards for good judgment
-- Natural reputation through participation
-- Growing resource allocations
+Success metrics reflect our natural approach. Quality metrics track team formation rates, citation patterns, value accumulation, and natural growth. Health metrics monitor resource efficiency, value flow patterns, system coherence, and sustainable growth. Evolution metrics measure feature emergence, capability growth, network effects, and natural scaling.
 
-Team Layer
-- Collective value accumulation in threads
-- Shared success through citations
-- Natural team formation
-- Enhanced capabilities through premium features
-
-Network Layer
-- Knowledge network formation
-- Cross-thread value flows
-- Ecosystem development
-- Emergent collective intelligence
-
-## Resource Dynamics
-
-Resource allocation follows natural principles:
-
-Processing Resources
-- AI model access scales with usage
-- Premium members get priority
-- Teams share growing allocations
-- Natural load balancing
-
-Storage Resources
-- Thread history preservation
-- Growing team allocations
-- Premium backup options
-- Natural archival patterns
-
-Network Resources
-- Real-time updates
-- Priority synchronization
-- Enhanced team features
-- Natural flow optimization
-
-## Growth Mechanics
-
-The platform grows through natural amplification:
-
-Quality Emergence
-- Better contributions attract attention
-- Teams form around quality
-- Value accumulates naturally
-- Growth follows genuine patterns
-
-Network Effects
-- Teams strengthen threads
-- Threads strengthen networks
-- Networks attract participation
-- Value flows efficiently
-
-Resource Evolution
-- Individual allocations grow yearly
-- Team capabilities expand
-- Network capacity increases
-- Natural scaling patterns
-
-## Business Sustainability
-
-Revenue streams align with value creation:
-
-Direct Revenue
-- Premium subscriptions
-- Team features
-- Enhanced capabilities
-- Growing allocations
-
-Indirect Value
-- Quality content dataset
-- Knowledge network formation
-- Team collaboration patterns
-- Collective intelligence emergence
-
-System Health
-- Sustainable resource usage
-- Natural load distribution
-- Efficient value flow
-- Organic growth patterns
-
-## Future Evolution
-
-The business model will evolve naturally:
-
-Team Features
-- Enhanced collaboration tools
-- Advanced analytics
-- Custom workflows
-- Natural team support
-
-Knowledge Tools
-- Network visualization
-- Pattern recognition
-- Insight emergence
-- Collective intelligence
-
-Resource Growth
-- Expanding allocations
-- New capabilities
-- Team-specific features
-- Natural evolution
-
-## Implementation Strategy
-
-Development follows natural patterns:
-
-Phase 1: Foundation
-- Core functionality
-- Basic premium features
-- Natural team support
-- Essential analytics
-
-Phase 2: Enhancement
-- Advanced team features
-- Network tools
-- Enhanced analytics
-- Growing capabilities
-
-Phase 3: Evolution
-- Custom team solutions
-- Network intelligence
-- Emergent features
-- Natural expansion
-
-## Success Metrics
-
-We measure success through natural indicators:
-
-Quality Metrics
-- Team formation rate
-- Citation patterns
-- Value accumulation
-- Natural growth
-
-Health Metrics
-- Resource efficiency
-- Value flow patterns
-- System coherence
-- Sustainable growth
-
-Evolution Metrics
-- Feature emergence
-- Capability growth
-- Network effects
-- Natural scaling
-
-Through this model, Choir maintains sustainable business operations while enabling natural value creation at all scales. We grow by strengthening the natural flows of quality, collaboration, and collective intelligence.
-
-Join us in building a platform where business success aligns perfectly with user value creation - where growth comes from enabling natural patterns of collaboration and knowledge sharing rather than artificial engagement metrics or data extraction.
+Through this model, Choir maintains sustainable business operations while enabling natural value creation at all scales. We grow by strengthening the natural flows of quality, collaboration, and collective intelligence. Join us in building a platform where business success aligns perfectly with user value creation - where growth comes from enabling natural patterns of collaboration and knowledge sharing rather than artificial engagement metrics or data extraction.

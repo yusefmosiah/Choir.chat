@@ -619,7 +619,6 @@ tree.md
 │   ├── core_state_transitions.md
 │   ├── data_engine_model.md
 │   ├── docs_dev_principles.md
-│   ├── docs_operators.md
 │   ├── e_business.md
 │   ├── e_concept.md
 │   ├── e_questions.md
@@ -627,7 +626,6 @@ tree.md
 │   ├── goal_architecture.md
 │   ├── goal_evolution.md
 │   ├── goal_implementation.md
-│   ├── goal_wed_nov_13_2024.md
 │   ├── guide_pysui.md
 │   ├── guide_render_checklist_updated.md
 │   ├── harmonic_intelligence.md
@@ -691,7 +689,7 @@ tree.md
 │   └── tree.md
 └── render.yaml
 
-49 directories, 166 files
+49 directories, 164 files
 
 === File: docs/CHANGELOG.md ===
 

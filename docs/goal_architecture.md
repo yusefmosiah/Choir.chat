@@ -1,178 +1,23 @@
 # System Architecture
 
-VERSION architecture_vision:
-invariants: {
-"Network consensus",
-"Service coordination",
-"Distributed intelligence"
-}
-assumptions: {
-"Swift concurrency",
-"Distributed processing",
-"Collective learning"
-}
-docs_version: "0.4.1"
+VERSION architecture_vision: 6.0
 
-## Core Architecture
+The system operates as a sophisticated distributed intelligence network, weaving together multiple layers of services and coordination mechanisms to create a cohesive whole. At its foundation, the network relies on distributed service coordination, maintaining network state consensus while enabling cross-service communication that fosters collective intelligence and system-wide learning.
 
-The system operates as a distributed intelligence network:
+Service isolation forms a critical architectural principle. The system carefully orchestrates AI services, manages vector database clustering, maintains blockchain consensus, and enables network synchronization, all while allowing natural pattern emergence. This isolation ensures clean boundaries while enabling powerful interactions between components.
 
-Network Foundation
+Chain authority provides the bedrock of system truth through blockchain consensus. This authority extends across multiple domains: thread ownership verification, token balance management, message hash validation, and co-author list maintenance. This immutable foundation ensures system integrity while enabling natural value flow.
 
-- Distributed service coordination
-- Network state consensus
-- Cross-service communication
-- Collective intelligence
-- System-wide learning
+Network intelligence emerges through sophisticated vector database management. This layer handles message content storage, embedding generation and maintenance, citation tracking, and semantic link management. These capabilities create a rich fabric of interconnected knowledge that grows more valuable over time.
 
-Service Isolation
+Events coordinate distributed system state through three primary channels. Service events manage AI model coordination, vector store synchronization, chain consensus maintenance, network health monitoring, and system metrics tracking. Economic events handle stake consensus, temperature propagation, equity distribution, reward calculation, and value flow management. Knowledge events orchestrate content distribution, citation network maintenance, link strengthening, pattern emergence, and network growth.
 
-- AI service orchestration
-- Vector database clustering
-- Blockchain consensus
-- Network synchronization
-- Pattern emergence
+System boundaries maintain clarity through careful domain separation. State authority ensures chain consensus for ownership, vector consensus for content, event synchronization across the network, and pattern distribution. Resource boundaries enforce service isolation, enable network coordination, maintain state consensus, and support pattern emergence. Security boundaries verify network operations, ensure event integrity, maintain service isolation, validate patterns, and manage consensus flow.
 
-Chain Authority
+Network patterns emerge naturally through several key mechanisms. Event flow enables state changes to propagate cleanly while services coordinate and patterns emerge, enabling recovery and guiding evolution. Service organization follows natural domain separation principles, maintaining clean isolation while enabling event-based communication and pattern-based structure. Value distribution flows through chain-based consensus and event-driven rewards, creating pattern-based value that flows naturally through the network.
 
-- Blockchain consensus for:
-  - Thread ownership
-  - Token balances
-  - Message hashes
-  - Co-author lists
+The implementation foundation builds on modern distributed systems principles. Swift concurrency provides the backbone through actor-based services, structured concurrency patterns, async/await flow, resource safety mechanisms, and comprehensive pattern support. The network-first approach prioritizes service coordination, content distribution, event synchronization, pattern recognition, and system evolution. Event-driven architecture enables natural network state flow, service coordination, pattern emergence, value distribution, and system evolution.
 
-Network Intelligence
+Through this carefully crafted architecture, the system achieves several critical objectives: maintaining network consensus, enabling seamless service coordination, ensuring clean isolation between components, supporting pattern emergence, and facilitating system evolution. The result is a robust platform that ensures state coherence, maintains event integrity, provides resource safety, enables pattern recognition, and supports natural network growth.
 
-- Vector database for:
-  - Message content
-  - Embeddings
-  - Citations
-  - Semantic links
-
-## Event Flow
-
-Events coordinate distributed system state:
-
-Service Events
-
-- AI model coordination
-- Vector store synchronization
-- Chain consensus
-- Network health
-- System metrics
-
-Economic Events
-
-- Stake consensus
-- Temperature propagation
-- Equity distribution
-- Reward calculation
-- Value flow
-
-Knowledge Events
-
-- Content distribution
-- Citation network
-- Link strengthening
-- Pattern emergence
-- Network growth
-
-## System Boundaries
-
-Clear service domain separation:
-
-State Authority
-
-- Chain consensus for ownership
-- Vector consensus for content
-- Event synchronization
-- Network coordination
-- Pattern distribution
-
-Resource Boundaries
-
-- Service isolation
-- Network coordination
-- State consensus
-- Resource management
-- Pattern emergence
-
-Security Boundaries
-
-- Network verification
-- Event integrity
-- Service isolation
-- Pattern validation
-- Consensus flow
-
-## Network Patterns
-
-System patterns emerge through:
-
-Event Flow
-
-- State changes propagate
-- Services coordinate
-- Patterns emerge
-- Recovery enabled
-- Evolution guided
-
-Service Organization
-
-- Natural domain separation
-- Clean service isolation
-- Event-based communication
-- Resource management
-- Pattern-based structure
-
-Value Distribution
-
-- Chain-based consensus
-- Event-driven rewards
-- Pattern-based value
-- Network flow
-- Emergent worth
-
-## Implementation Foundation
-
-Built on distributed foundations:
-
-Swift Concurrency
-
-- Actor-based services
-- Structured concurrency
-- Async/await flow
-- Resource safety
-- Pattern support
-
-Network First
-
-- Service coordination
-- Content distribution
-- Event synchronization
-- Pattern recognition
-- System evolution
-
-Event Driven
-
-- Network state flow
-- Service coordination
-- Pattern emergence
-- Value distribution
-- System evolution
-
-This architecture enables:
-
-1. Network consensus
-2. Service coordination
-3. Clean isolation
-4. Pattern emergence
-5. System evolution
-
-The system ensures:
-
-- State coherence
-- Event integrity
-- Resource safety
-- Pattern recognition
-- Network growth
+This architectural approach creates a foundation for building a truly distributed intelligence system that grows more capable and valuable over time. By respecting natural system boundaries and enabling organic pattern emergence, we create an environment where collective intelligence can flourish while maintaining system stability and integrity.
