@@ -1,222 +1,29 @@
 # Core Economic Model
 
-VERSION core_economics:
-invariants: {
-"Chain state authority",
-"Energy conservation",
-"Harmonic distribution"
-}
-assumptions: {
-"Swift concurrency",
-"Event-driven flow",
-"EVM integration"
-}
-docs_version: "0.4.2"
+VERSION core_economics: 6.0
 
-## Economic Events
+The economic model operates as a harmonically balanced system, anchored by the Move Virtual Machine as its source of truth. The model orchestrates the flow of value through temperature-mediated stake dynamics and equitable distribution mechanisms.
 
-Chain-driven economic events:
+At its foundation, the system tracks economic events through the blockchain. These events capture stake movements, temperature fluctuations, equity distributions, and reward issuance. Each event carries a unique identifier, precise timestamp, and rich metadata that ensures perfect traceability.
 
-```swift
-// Economic domain events
-enum EconomicEvent: DomainEvent {
-    // Stake events (from chain)
-    case stakeDeposited(threadId: ThreadID, amount: TokenAmount)
-    case stakeWithdrawn(threadId: ThreadID, amount: TokenAmount)
+The chain state manager serves as the authoritative bridge between the economic model and the blockchain. It retrieves thread economics directly from smart contracts, maintaining an accurate view of temperature, energy levels, token balances, and equity distributions. All economic transactions flow through this manager, ensuring that on-chain state changes trigger appropriate event cascades throughout the system.
 
-    // Temperature events (from chain)
-    case temperatureIncreased(threadId: ThreadID, delta: Float)
-    case temperatureDecreased(threadId: ThreadID, delta: Float)
+The model's core strength lies in its harmonic calculations. These pure mathematical functions govern the relationship between temperature and value. The base price follows a quantum harmonic oscillator model:
 
-    // Equity events (from chain)
-    case equityDistributed(threadId: ThreadID, shares: [Address: Float])
-    case equityDiluted(threadId: ThreadID, newShares: [Address: Float])
+P₀ = S₀[1/2 + 1/(exp(ℏω/kT)-1)]
 
-    // Reward events (from chain)
-    case rewardsIssued(amount: TokenAmount, recipients: [Address])
-    case treasuryUpdated(newBalance: TokenAmount)
+In this equation, S₀ represents the base stake quantum, while ℏ denotes the reduced Planck constant. The frequency ω interacts with the Boltzmann constant k and temperature T to determine the system's energy state.
 
-    var id: UUID
-    var timestamp: Date
-    var metadata: EventMetadata
-}
-```
+Equity distribution follows a square root law that balances stake size with fair co-author allocation:
 
-## Chain State Authority
+E(s) = (1/N) * √(s/P₀)
 
-EVM as source of truth:
+This formula elegantly balances the number of co-authors N with the stake amount s, normalized by the base price P₀, ensuring fair value distribution across participants.
 
-```swift
-// Economic state from chain
-actor ChainStateManager {
-    private let web3: Web3
-    private let eventStore: EventStore
+The economic handler processes these events through a carefully orchestrated flow. When stake is deposited, it calculates new equity shares based on the current temperature and frequency. Temperature changes trigger chain updates that maintain the system's thermodynamic balance. Each event flows through the handler, ensuring proper economic state transitions.
 
-    // Get thread economics from chain
-    func getThreadEconomics(_ id: ThreadID) async throws -> ThreadEconomics {
-        // Get authoritative state from smart contract
-        let contract = try await web3.contract(at: threadContractAddress)
-        let state = try await contract.method("getThread", parameters: [id]).call()
+Analytics and monitoring provide real-time insight into the economic system's health. The system tracks stake movements, temperature evolution, equity distributions, and reward issuance. This data feeds back into the system, enabling natural price discovery and value distribution.
 
-        return ThreadEconomics(
-            temperature: state.temperature,
-            energy: state.energy,
-            tokenBalance: state.balance,
-            equityShares: state.equityMap
-        )
-    }
+The economic model's strength emerges from several key principles. The blockchain serves as the immutable source of truth, while value flows follow strict conservation laws. Price discovery emerges naturally through harmonic oscillator patterns, and state changes propagate cleanly through the event-driven system. Most importantly, complex economic behaviors arise organically from these simple underlying rules.
 
-    // Submit economic transaction
-    func submitTransaction(_ tx: Transaction) async throws {
-        // Submit to chain first
-        let hash = try await web3.eth.sendRawTransaction(tx)
-
-        // Then emit events based on transaction type
-        switch tx.data {
-        case .depositStake(let amount):
-            try await eventStore.append(.stakeDeposited(
-                threadId: tx.threadId,
-                amount: amount
-            ))
-
-        case .updateTemperature(let delta):
-            try await eventStore.append(.temperatureIncreased(
-                threadId: tx.threadId,
-                delta: delta
-            ))
-
-        case .distributeEquity(let shares):
-            try await eventStore.append(.equityDistributed(
-                threadId: tx.threadId,
-                shares: shares
-            ))
-        }
-    }
-}
-```
-
-## Harmonic Calculations
-
-Pure calculation functions:
-
-```swift
-// Economic calculations (pure functions)
-struct EconomicCalculator {
-    // Base price using harmonic oscillator
-    static func calculateBasePrice(
-        temperature: Double,
-        frequency: Double
-    ) -> TokenAmount {
-        // P₀ = S₀[1/2 + 1/(exp(ℏω/kT)-1)]
-        let baseStake = Constants.baseStakeQuantum
-        let reducedPlanck = Constants.reducedPlanck
-        let boltzmann = Constants.boltzmann
-
-        let exponent = (reducedPlanck * frequency) / (boltzmann * temperature)
-        let occupation = 1.0 / (exp(exponent) - 1.0)
-
-        return baseStake * (0.5 + occupation)
-    }
-
-    // Equity share calculation
-    static func calculateEquityShare(
-        stake: TokenAmount,
-        basePrice: TokenAmount,
-        coauthorCount: Int
-    ) -> Double {
-        // E(s) = (1/N) * √(s/P₀)
-        let quantumNumber = Double(stake) / Double(basePrice)
-        let quantumShare = 1.0 / Double(coauthorCount)
-        return quantumShare * sqrt(quantumNumber)
-    }
-}
-```
-
-## Economic Handler
-
-Event-driven economic processing:
-
-```swift
-// Economic event handling
-actor EconomicHandler: EventHandler {
-    private let chain: ChainStateManager
-    private let calculator: EconomicCalculator
-
-    func handle(_ event: DomainEvent) async throws {
-        guard let economicEvent = event as? EconomicEvent else { return }
-
-        switch economicEvent {
-        case .stakeDeposited(let threadId, let amount):
-            // Calculate new equity shares
-            let thread = try await chain.getThreadEconomics(threadId)
-            let basePrice = calculator.calculateBasePrice(
-                temperature: thread.temperature,
-                frequency: thread.frequency
-            )
-            let equity = calculator.calculateEquityShare(
-                stake: amount,
-                basePrice: basePrice,
-                coauthorCount: thread.equityShares.count
-            )
-
-            // Submit equity distribution to chain
-            let tx = Transaction.distributeEquity(
-                threadId: threadId,
-                shares: [event.author: equity]
-            )
-            try await chain.submitTransaction(tx)
-
-        case .temperatureIncreased(let threadId, let delta):
-            // Update thread temperature on chain
-            let tx = Transaction.updateTemperature(
-                threadId: threadId,
-                delta: delta
-            )
-            try await chain.submitTransaction(tx)
-
-        // Handle other economic events...
-        }
-    }
-}
-```
-
-## Analytics & Monitoring
-
-Economic event tracking:
-
-```swift
-// Economic analytics
-actor EconomicAnalytics: EventHandler {
-    func handle(_ event: DomainEvent) async throws {
-        guard let economicEvent = event as? EconomicEvent else { return }
-
-        switch economicEvent {
-        case .stakeDeposited(let threadId, let amount):
-            try await trackStakeMetric(threadId, amount)
-
-        case .temperatureIncreased(let threadId, let delta):
-            try await trackTemperatureMetric(threadId, delta)
-
-        case .equityDistributed(let threadId, let shares):
-            try await trackEquityMetric(threadId, shares)
-
-        case .rewardsIssued(let amount, let recipients):
-            try await trackRewardMetric(amount, recipients)
-        }
-    }
-}
-```
-
-This implementation provides:
-1. Chain state authority
-2. Event-driven updates
-3. Pure calculations
-4. Clean analytics
-5. Proper event flow
-
-The system ensures:
-- Economic integrity
-- Harmonic distribution
-- Temperature evolution
-- Value conservation
-- Natural emergence
+Through this careful balance of blockchain authority, mathematical precision, and natural value flows, the economic model creates a self-sustaining ecosystem for knowledge work. The system's elegance lies in how these principles work together, creating a robust economic framework that adapts and evolves while maintaining fundamental stability.

@@ -1,218 +1,25 @@
 # Core Implementation Patterns
 
-VERSION core_patterns:
-invariants: {
-"Source of truth clarity",
-"Event-driven coordination",
-"Actor isolation"
-}
-assumptions: {
-"Swift concurrency",
-"Proper data hierarchy",
-"Event-based sync"
-}
-docs_version: "0.4.1"
+VERSION core_patterns: 6.0
 
-## Source of Truth Pattern
+The implementation patterns form a cohesive framework for building reliable distributed systems. These patterns ensure clear sources of truth, coordinate state changes through events, and maintain proper actor isolation throughout the system.
 
-Respect data authority hierarchy:
+The Source of Truth pattern establishes a clear data authority hierarchy. The blockchain serves as the ultimate arbiter of economic state, managing thread states and token balances through an authoritative interface. Vector stores maintain authority over content and semantic relationships, handling message storage and citation recording. This separation of concerns ensures that each subsystem has clear responsibility for its domain.
 
-```swift
-// Chain state authority pattern
-protocol ChainStateProvider {
-    // Authoritative state
-    func getThreadState(_ id: ThreadID) async throws -> ThreadState
-    func getTokenBalance(_ owner: PublicKey) async throws -> UInt64
+Event Coordination weaves the system together through carefully typed events. State synchronization flows through chain state and content storage events. UI coordination happens through view state and loading state updates. Error handling maintains system stability through typed error events and sync failure notifications. This event-driven architecture enables loose coupling while maintaining system coherence.
 
-    // State transitions
-    func submitTransaction(_ tx: Transaction) async throws -> Signature
-}
+Actor Isolation creates clean boundaries between system components. Domain-specific actors encapsulate their state and behavior, communicating through well-defined interfaces. Resource management follows structured patterns for acquisition and release, ensuring proper cleanup even under failure conditions. This isolation enables concurrent processing while preventing data races and state corruption.
 
-// Vector state authority pattern
-protocol VectorStateProvider {
-    // Authoritative content
-    func getMessage(_ hash: MessageHash) async throws -> Message
-    func searchPriors(_ query: String) async throws -> [Prior]
+Error Recovery builds resilience into the system through typed error handling. The system categorizes errors by their source - chain errors, vector errors, and synchronization failures. Recovery strategies adapt to each error type, implementing appropriate retry logic, state resynchronization, and cleanup procedures. This layered approach to error handling maintains system stability even under adverse conditions.
 
-    // Content storage
-    func storeMessage(_ message: Message) async throws
-    func recordCitation(_ source: Prior, _ target: Message) async throws
-}
+Testing follows a protocol-based approach that enables thorough verification of system behavior. Mock implementations of core protocols allow testing of individual components in isolation. Test scenarios cover the full range of system operations, from basic state synchronization to complex error recovery paths. This comprehensive testing strategy ensures reliable system operation.
 
-// Example implementation
-actor StateManager {
-    private let chain: ChainStateProvider
-    private let vectors: VectorStateProvider
+The implementation's strength emerges from several key aspects. Source of truth clarity flows from the chain state's authority over economic data and vector stores' mastery of content, creating clean hierarchical data flows and proper state transitions. Event-driven coordination manifests through typed system events, synchronized state changes, coordinated UI patterns, and clear error propagation paths.
 
-    func processMessage(_ content: String) async throws {
-        // Store content first
-        let message = Message(content: content)
-        try await vectors.storeMessage(message)
+Actor isolation maintains system integrity through well-defined domain boundaries and careful resource management. This enables clean concurrent processing while ensuring proper state encapsulation. Error resilience builds from typed error handling through sophisticated recovery strategies and retry mechanisms, culminating in proper state cleanup procedures.
 
-        // Then record on chain
-        let tx = Transaction.recordMessage(message.hash)
-        try await chain.submitTransaction(tx)
-    }
-}
-```
+The testing approach ensures system reliability through comprehensive verification. Protocol-based mocking enables isolated component testing, while thorough scenarios verify behavior across the full system. This multi-layered testing strategy catches issues early while ensuring proper integration.
 
-## Event Coordination Pattern
+Through these carefully crafted patterns, the system achieves several critical qualities. Each component maintains clear authority over its domain, while state changes flow naturally through the event system. Components operate independently without interference, and the system recovers gracefully from failures. Most importantly, thorough testing verifies behavior at all levels.
 
-Events for state synchronization:
-
-```swift
-// Event types by purpose
-enum SystemEvent {
-    // State sync events
-    case chainStateChanged(ThreadID)
-    case contentStored(MessageHash)
-
-    // UI coordination events
-    case uiStateChanged(ViewState)
-    case loadingStateChanged(Bool)
-
-    // Error events
-    case errorOccurred(Error)
-    case syncFailed(reason: String)
-}
-
-// Event handling pattern
-protocol EventHandler: Actor {
-    // Handle specific event types
-    func handle(_ event: SystemEvent) async throws
-}
-
-// Example implementation
-actor UICoordinator: EventHandler {
-    func handle(_ event: SystemEvent) async throws {
-        switch event {
-        case .chainStateChanged(let threadId):
-            try await refreshThread(threadId)
-        case .contentStored(let hash):
-            try await refreshContent(hash)
-        }
-    }
-}
-```
-
-## Actor Isolation Pattern
-
-Clean actor boundaries:
-
-```swift
-// Domain-specific actors
-actor ThreadActor {
-    private let chain: ChainStateProvider
-    private let events: EventEmitter
-
-    func getThread(_ id: ThreadID) async throws -> Thread {
-        // Get authoritative state
-        let state = try await chain.getThreadState(id)
-
-        // Emit UI event
-        try await events.emit(.threadStateLoaded(id))
-
-        return state
-    }
-}
-
-// Resource management pattern
-actor ResourcePool {
-    private var resources: Set<Resource> = []
-
-    func withResource<T>(_ work: (Resource) async throws -> T) async throws -> T {
-        let resource = try await acquireResource()
-        defer { releaseResource(resource) }
-        return try await work(resource)
-    }
-}
-```
-
-## Error Recovery Pattern
-
-Clean error handling with events:
-
-```swift
-// Error types by source
-enum SystemError: Error {
-    // Chain errors
-    case chainUnavailable
-    case transactionFailed(reason: String)
-
-    // Vector errors
-    case contentNotFound(MessageHash)
-    case storageError(reason: String)
-
-    // Sync errors
-    case syncFailed(reason: String)
-    case stateInconsistent
-}
-
-// Recovery pattern
-actor ErrorRecovery {
-    func recover(from error: SystemError) async throws {
-        switch error {
-        case .chainUnavailable:
-            try await queueForRetry()
-        case .syncFailed:
-            try await resyncState()
-        }
-    }
-}
-```
-
-## Testing Pattern
-
-Protocol-based testing:
-
-```swift
-// Test implementations
-class MockChainProvider: ChainStateProvider {
-    var mockState: [ThreadID: ThreadState] = [:]
-
-    func getThreadState(_ id: ThreadID) async throws -> ThreadState {
-        guard let state = mockState[id] else {
-            throw SystemError.chainUnavailable
-        }
-        return state
-    }
-}
-
-// Test scenarios
-class SystemTests: XCTestCase {
-    var sut: StateManager!
-    var mockChain: MockChainProvider!
-
-    override func setUp() {
-        mockChain = MockChainProvider()
-        sut = StateManager(chain: mockChain)
-    }
-
-    func testStateSync() async throws {
-        // Given
-        let threadId = ThreadID()
-        let state = ThreadState(id: threadId)
-        mockChain.mockState[threadId] = state
-
-        // When
-        let result = try await sut.getThread(threadId)
-
-        // Then
-        XCTAssertEqual(result, state)
-    }
-}
-```
-
-These patterns ensure:
-1. Clear data authority
-2. Clean event flow
-3. Safe state sync
-4. Error resilience
-5. Testability
-
-The system maintains:
-- Source of truth clarity
-- Event-driven coordination
-- Actor isolation
-- Error recovery
-- Testing simplicity
+This pattern language creates a foundation for building reliable, maintainable, and evolvable distributed systems. The patterns work together harmoniously, enabling the construction of robust systems that can grow and adapt while maintaining fundamental stability and reliability.
