@@ -182,6 +182,7 @@
 │   ├── plan_carousel_ui_pattern.md
 │   ├── plan_chuser_chthread_chmessage.md
 │   ├── plan_client_architecture.md
+│   ├── plan_competitive.md
 │   ├── plan_id_persistence.md
 │   ├── plan_post-training.md
 │   ├── plan_proxy_authentication.md
@@ -214,4 +215,4 @@
 │   └── tree.md
 └── render.yaml
 
-49 directories, 163 files
+49 directories, 164 files
