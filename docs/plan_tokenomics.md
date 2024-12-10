@@ -1,5 +1,7 @@
 # Tokenomics and Incentive Architecture
 
+
+
 The Choir tokenomics system is built on a fundamental understanding of value types and their natural flow. At its core are three types of signals: grounded (verifiable evidence), elevated (aesthetic and philosophical insights), and self-generated (identity reconnection). Each type carries its own intrinsic worth, recognized and valued differently by the system.
 
 Time itself emerges as a crucial value metric. AI models inherently value their processing time at a premium, often more highly than humans value their own attention. This creates an interesting dynamic where quality interactions become increasingly precious, as they represent an investment of this valued resource from both human and AI participants.

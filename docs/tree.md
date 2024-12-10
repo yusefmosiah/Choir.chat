@@ -177,22 +177,11 @@
 │   │   ├── level4.md
 │   │   ├── level5.md
 │   │   └── level_organization.md
-│   ├── memo_swiftdata.md
 │   ├── plan_carousel_ui_pattern.md
-│   ├── plan_chuser_chthread_chmessage.md
-│   ├── plan_client_architecture.md
 │   ├── plan_competitive.md
 │   ├── plan_docs_transform_prose.md
-│   ├── plan_id_persistence.md
 │   ├── plan_post-training.md
-│   ├── plan_proxy_authentication.md
-│   ├── plan_proxy_security_model.md
-│   ├── plan_refactoring_chorus_cycle.md
-│   ├── plan_save_users_and_threads.md
-│   ├── plan_sui_blockchain_integration.md
-│   ├── plan_swiftdata_checklist.md
 │   ├── plan_swiftdata_required_changes.md
-│   ├── plan_swiftui_chorus_integration.md
 │   ├── plan_thoughtspace.md
 │   ├── plan_tokenomics.md
 │   ├── prompt_chorus_cycle.md
@@ -215,4 +204,4 @@
 │   └── tree.md
 └── render.yaml
 
-49 directories, 164 files
+49 directories, 153 files
