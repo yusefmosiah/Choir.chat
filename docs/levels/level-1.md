@@ -340,7 +340,6 @@ tree.md
 │   ├── scripts
 │   │   ├── combiner.sh
 │   │   └── update_tree.sh
-│   ├── self_creation_process.md
 │   ├── theory_choir_harmonics.md
 │   ├── theory_dynamics.md
 │   ├── theory_economics.md
@@ -351,7 +350,7 @@ tree.md
 │   └── tree.md
 └── render.yaml
 
-49 directories, 153 files
+49 directories, 152 files
 
 === File: docs/CHANGELOG.md ===
 
