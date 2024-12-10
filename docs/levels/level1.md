@@ -15,23 +15,25 @@ core_architecture
 
 VERSION core_architecture: 6.0
 
-The system operates through pure event flows. Events ripple through interconnected services, creating waves of state change that propagate across the network. Each service maintains its own event log, creating a resilient distributed architecture where state emerges through consensus rather than central authority.
+Note: This document describes the core system architecture, with initial focus on TestFlight functionality. More sophisticated event-driven mechanisms described here will be implemented post-funding.
+
+The system operates through coordinated state management and clear authority hierarchies. State changes flow through interconnected services while maintaining system consistency. Each service manages its own state, creating a resilient distributed architecture where consistency emerges through clear authority rather than central control.
 
 At the foundation lies a clear hierarchy of truth. The blockchain serves as the authoritative source for all ownership and economic state - thread ownership, token balances, message hashes, and co-author lists. This ensures that the economic model, with its equity distribution and thread evolution, has an immutable and verifiable foundation.
 
 Alongside the chain, our vector database acts as the authoritative source for all content and semantic relationships. It stores the actual message content, embeddings, and the growing network of citations and semantic links. This separation of concerns allows the system to maintain both economic integrity through the blockchain and rich semantic relationships through the vector database.
 
-Events serve as the coordination mechanism between these components. When a user submits input, it triggers a cascade of events that flow through the system. The chorus cycle generates events as it processes the input. These events coordinate UI updates, track system state, and maintain synchronization between components. However, events are not the source of truth - they are merely the means by which the system coordinates updates and maintains consistency.
+State updates coordinate between these components. When a user submits input, the system manages necessary updates across services. The chorus cycle processes input while maintaining state consistency. These updates ensure proper synchronization while preserving data integrity across components.
 
 The economic model uses precise mathematical principles to govern thread evolution and value distribution. Thread temperature rises with rejections and moderates with approvals, creating natural quality barriers. The energy formula E(n) = ℏω(n + 1/2) determines stake requirements, ensuring that participation costs align with thread organization levels. Value flows follow conservation laws, with total system energy remaining constant while redistributing through various state transitions.
 
 State management follows this natural hierarchy of truth. The chain state is authoritative for ownership and economics. The vector state is authoritative for content and semantics. Local state serves only to coordinate UI updates and handle temporary synchronization needs. This clear hierarchy ensures system consistency while enabling responsive user interaction.
 
-All of this manifests through Swift's modern concurrency system. Actors provide thread-safe state isolation. Async/await enables clean asynchronous code. Structured concurrency through task groups ensures proper resource management. The event-driven architecture allows for loose coupling between components while maintaining system coherence.
+All of this manifests through Swift's modern concurrency system. Actors provide thread-safe state isolation. Async/await enables clean asynchronous code. Structured concurrency through task groups ensures proper resource management. The architecture maintains loose coupling between components while ensuring system coherence.
 
-The result is a system that combines economic incentives, semantic knowledge, and natural interaction patterns into a coherent whole. The blockchain provides economic integrity. The vector database enables semantic richness. Events coordinate the pieces. And Swift's concurrency model keeps it all running smoothly and safely.
+The result is a system that combines economic incentives, semantic knowledge, and natural interaction patterns into a coherent whole. The blockchain provides economic integrity. The vector database enables semantic richness. Swift's concurrency model keeps it all running smoothly and safely.
 
-This architecture enables the system to evolve naturally. New event types can be added to handle new features. The semantic network grows organically through usage. The economic model creates emergent quality barriers. And the whole system maintains consistency through its clear hierarchy of truth and well-defined patterns of event flow.
+This architecture enables the system to evolve naturally. The semantic network grows organically through usage. The economic model creates emergent quality barriers. And the whole system maintains consistency through its clear hierarchy of truth and well-defined state management patterns.
 
 === File: docs/core_chorus.md ===
 
@@ -46,25 +48,27 @@ core_chorus
 
 VERSION core_chorus: 6.0
 
-The chorus cycle operates as a distributed event sequence, coordinating state changes across the network through well-defined transitions. Each phase of the cycle generates specific events that ripple through the system, creating waves of coordinated state change.
+Note: This document describes the core chorus cycle functionality, with initial focus on TestFlight implementation. More sophisticated distributed coordination mechanisms described here will be implemented post-funding.
 
-The cycle begins with Action - pure response generation without context. Events mark the start of processing, capture the generated response, and record confidence levels. This creates a clean foundation for the rest of the cycle.
+The chorus cycle processes user input through a series of well-defined phases, maintaining state consistency through careful coordination. Each phase of the cycle contributes to the system's collective intelligence through structured state transitions.
 
-Experience follows, enriching the response with prior knowledge. The system searches for relevant priors, measuring semantic relevance across the network. This phase connects current insight with accumulated knowledge, strengthening the semantic fabric of the system.
+The cycle begins with Action - pure response generation without context. This phase focuses on immediate response processing, establishing a clean foundation for subsequent steps. The system captures the generated response and confidence levels as a baseline.
 
-Intention aligns the evolving response with user goals. Through careful analysis of both explicit and implicit signals, this phase ensures that the response serves its purpose. Events track this alignment process, enabling the system to learn from each interaction.
+Experience follows, enriching the response with prior knowledge. The system searches for relevant priors, measuring semantic relevance across stored knowledge. This phase connects current insight with accumulated knowledge, strengthening the semantic fabric of the system.
 
-Observation records the emerging semantic connections. As links form between current insights and prior knowledge, events capture these relationships. The network of understanding grows stronger with each new connection, each citation, each recognized pattern.
+Intention aligns the evolving response with user goals. Through careful analysis of both explicit and implicit signals, this phase ensures that the response serves its purpose. The system learns from each interaction by tracking these alignments.
 
-Understanding evaluates the system state, deciding whether to continue cycling or move to completion. This critical phase prevents premature convergence while ensuring efficient processing. Events track these decisions, maintaining the integrity of the cycle.
+Observation records the emerging semantic connections. As links form between current insights and prior knowledge, the system captures these relationships. The network of understanding grows stronger with each new connection, citation, and recognized pattern.
 
-Yield produces the final response, but only when the cycle has truly completed its work. Citations are generated, effects are distributed across the network, and the system prepares for the next interaction. The cycle maintains its integrity through careful event logging and state tracking.
+Understanding evaluates the system state, deciding whether to continue cycling or move to completion. This critical phase prevents premature convergence while ensuring efficient processing. The system maintains cycle integrity through careful state tracking.
 
-Each phase operates through distributed coordination. Foundation models process language. Vector stores manage semantic relationships. Embedding services capture meaning. Chain actors maintain state consensus. All of these services work together through clean event flows and careful state management.
+Yield produces the final response, but only when the cycle has truly completed its work. Citations are generated, semantic effects are recorded, and the system prepares for the next interaction. The cycle maintains consistency through proper state management.
 
-The cycle's power lies in its distributed nature. No single service controls the process. Instead, collective intelligence emerges through coordinated event flows and careful state transitions. The system maintains coherence while enabling natural evolution.
+Each phase operates through coordinated services. Foundation models process language. Vector stores manage semantic relationships. Embedding services capture meaning. Chain actors maintain state consensus. All of these services work together through clean interfaces and careful state coordination.
 
-This is how the chorus cycle enables collective intelligence - not through central control but through carefully coordinated event flows. Each cycle strengthens the network's understanding, builds semantic relationships, and enables natural knowledge growth.
+The cycle's power lies in its structured approach. No single service controls the process. Instead, collective intelligence emerges through coordinated state transitions and careful phase management. The system maintains coherence while enabling natural evolution.
+
+This is how the chorus cycle enables collective intelligence - not through central control but through carefully structured phases. Each cycle strengthens the system's understanding, builds semantic relationships, and enables natural knowledge growth.
 
 === File: docs/core_core.md ===
 
@@ -79,13 +83,15 @@ core_core
 
 VERSION core_system: 6.0
 
-The Choir system is built around a clear hierarchy of truth and a natural flow of events. At its foundation, the blockchain serves as the authoritative source for all ownership and economic state - thread ownership, token balances, message hashes, and co-author lists. This ensures that the economic model, with its harmonic equity distribution and thermodynamic thread evolution, has an immutable and verifiable foundation.
+Note: This document describes the core system architecture, with initial focus on TestFlight functionality. More sophisticated event-driven mechanisms described here will be implemented post-funding.
+
+The Choir system is built around a clear hierarchy of truth and state management. At its foundation, the blockchain serves as the authoritative source for all ownership and economic state - thread ownership, token balances, message hashes, and co-author lists. This ensures that the economic model, with its harmonic equity distribution and thermodynamic thread evolution, has an immutable and verifiable foundation.
 
 Alongside the blockchain, Qdrant acts as the authoritative source for all content and semantic relationships. It stores the actual message content, embeddings, and the growing network of citations and semantic links. This separation of concerns allows the system to maintain both economic integrity through the blockchain and rich semantic relationships through the vector database.
 
-The AEIOU-Y chorus cycle sits at the heart of the interaction model, processing user input through a series of well-defined steps. Each step generates events that flow through the system, coordinating state updates and UI feedback. The cycle begins with pure response in the Action step, enriches it with prior knowledge in the Experience step, aligns with user intent in the Intention step, records semantic connections in the Observation step, decides on continuation in the Update step, and produces the final response in the Yield step.
+The AEIOU-Y chorus cycle sits at the heart of the interaction model, processing user input through a series of well-defined steps. The cycle begins with pure response in the Action step, enriches it with prior knowledge in the Experience step, aligns with user intent in the Intention step, records semantic connections in the Observation step, decides on continuation in the Update step, and produces the final response in the Yield step.
 
-Events serve as the coordination mechanism between these components. When a user submits input, it triggers a cascade of events that flow through the system. The chorus cycle generates events as it processes the input. These events are used to coordinate UI updates, track system state, and maintain synchronization between components. However, these events are not the source of truth - they are merely the means by which the system coordinates updates and maintains consistency.
+State updates flow naturally between these components. When a user submits input, the system coordinates necessary updates across the UI, blockchain, and vector store. The chorus cycle processes the input while maintaining system state consistency. These state changes are carefully managed to maintain data integrity and system coherence.
 
 The economic model uses harmonic principles to govern thread evolution and value distribution. Thread temperature rises with rejections and moderates with approvals, creating natural quality barriers. Equity is distributed according to harmonic formulas, ensuring fair value attribution while maintaining mathematical elegance.
 
@@ -93,11 +99,11 @@ The knowledge system builds a growing semantic network through citations and pri
 
 State management follows the natural hierarchy of truth. The chain state is authoritative for ownership and economics. The vector state is authoritative for content and semantics. Local state serves only to coordinate UI updates and handle temporary synchronization needs. This clear hierarchy ensures system consistency while enabling responsive user interaction.
 
-All of this is implemented using Swift's modern concurrency system. Actors provide thread-safe state isolation. Async/await enables clean asynchronous code. Structured concurrency through task groups ensures proper resource management. The event-driven architecture allows for loose coupling between components while maintaining system coherence.
+All of this is implemented using Swift's modern concurrency system. Actors provide thread-safe state isolation. Async/await enables clean asynchronous code. Structured concurrency through task groups ensures proper resource management. The architecture maintains loose coupling between components while ensuring system coherence.
 
-The result is a system that combines economic incentives, semantic knowledge, and natural interaction patterns into a coherent whole. The blockchain provides economic integrity. The vector database enables semantic richness. The chorus cycle creates natural interaction. Events coordinate the pieces. And Swift's concurrency model keeps it all running smoothly and safely.
+The result is a system that combines economic incentives, semantic knowledge, and natural interaction patterns into a coherent whole. The blockchain provides economic integrity. The vector database enables semantic richness. The chorus cycle creates natural interaction. And Swift's concurrency model keeps it all running smoothly and safely.
 
-This architecture enables the system to evolve naturally. New event types can be added to handle new features. The semantic network grows organically through usage. The economic model creates emergent quality barriers. And the whole system maintains consistency through its clear hierarchy of truth and well-defined patterns of event flow.
+This architecture enables the system to evolve naturally. The semantic network grows organically through usage. The economic model creates emergent quality barriers. And the whole system maintains consistency through its clear hierarchy of truth and well-defined state management patterns.
 
 === File: docs/core_economics.md ===
 
@@ -219,23 +225,25 @@ core_state
 
 VERSION core_state: 6.0
 
-The state management system establishes clear authority hierarchies and coordination patterns across the distributed network. At its core, the system maintains two authoritative sources of truth - the blockchain for economic state and vector stores for content state - while enabling efficient local coordination through event-driven patterns.
+Note: This document describes the core state management system, with initial focus on TestFlight functionality. More sophisticated distributed coordination mechanisms described here will be implemented post-funding.
 
-The Chain State serves as the ultimate arbiter of economic truth. Through a dedicated actor, it maintains authoritative thread states including co-author lists, token balances, temperature values, frequency measurements, and message hash collections. All state changes must flow through the blockchain first, with local events emitted only after on-chain confirmation. This ensures perfect consistency between the network's economic state and local views.
+The state management system establishes clear authority hierarchies and coordination patterns across the system. At its core, the system maintains two authoritative sources of truth - the blockchain for economic state and vector stores for content state - while enabling efficient local coordination through careful state synchronization.
 
-The Vector State maintains authoritative control over content and semantic relationships. Built on Qdrant, this system provides the source of truth for messages and their embeddings. Content operations follow a strict pattern - store in the vector database first, then emit local events for UI coordination. This maintains semantic coherence while enabling responsive user interfaces.
+The Chain State serves as the ultimate arbiter of economic truth. Through a dedicated actor, it maintains authoritative thread states including co-author lists, token balances, temperature values, frequency measurements, and message hash collections. All state changes must flow through the blockchain first, ensuring perfect consistency between the network's economic state and local views.
 
-Local Events enable efficient coordination without claiming authority. The system serves two key purposes in this regard. First, it manages UI updates by notifying interfaces about content loads and chain state changes. Second, it handles synchronization status by tracking progress and managing the offline queue. The event store maintains a clean separation between authoritative state and local coordination, with events flowing to subscribers for UI updates while maintaining proper cleanup of historical events.
+The Vector State maintains authoritative control over content and semantic relationships. Built on Qdrant, this system provides the source of truth for messages and their embeddings. Content operations follow a strict pattern - store in the vector database first, then update local state for UI coordination. This maintains semantic coherence while enabling responsive user interfaces.
 
-UI State Management reacts to authoritative changes through a carefully coordinated view model pattern. The process begins by loading authoritative thread state from the blockchain, then retrieves associated messages from the vector store. The view models subscribe to local events for efficient updates while maintaining clean separation between source data and presentation layers.
+Local State Management enables efficient coordination without claiming authority. The system serves two key purposes in this regard. First, it manages UI updates by reflecting content loads and chain state changes. Second, it handles synchronization status by tracking progress and managing the offline queue. The system maintains a clean separation between authoritative state and local coordination while ensuring proper cleanup of historical data.
+
+UI State Management reacts to authoritative changes through a carefully coordinated view model pattern. The process begins by loading authoritative thread state from the blockchain, then retrieves associated messages from the vector store. The view models maintain clean separation between source data and presentation layers while enabling efficient updates.
 
 The system implements thorough state verification through dedicated verification actors. Chain state integrity verification ensures positive temperature values, valid frequency measurements, proper energy conservation across threads, and consistent token balances. Vector state integrity checks maintain message availability, embedding consistency, citation validity, and content coherence. Cross-state alignment verifies message hash consistency, thread state alignment, citation graph validity, and system-wide coherence.
 
-The state management system's strength emerges from several key aspects. Authority clarity flows from the blockchain's economic authority and vector stores' content mastery, creating clean coordination patterns and clear state ownership. State transitions manifest through atomic chain updates and vector store consistency, enabling local event propagation and seamless UI synchronization.
+The state management system's strength emerges from several key aspects. Authority clarity flows from the blockchain's economic authority and vector stores' content mastery, creating clean coordination patterns and clear state ownership. State transitions manifest through atomic chain updates and vector store consistency, enabling seamless UI synchronization.
 
-System coordination maintains stability through careful actor isolation and event-driven updates. This enables efficient local synchronization while ensuring clean error handling throughout the system. The verification patterns provide comprehensive oversight through state consistency checks, cross-system validation, integrity verification, and sophisticated error detection.
+System coordination maintains stability through careful actor isolation and structured state updates. This enables efficient local synchronization while ensuring clean error handling throughout the system. The verification patterns provide comprehensive oversight through state consistency checks, cross-system validation, integrity verification, and sophisticated error detection.
 
-Through this careful orchestration of state management patterns, the system maintains perfect consistency while enabling responsive local interactions. The interplay of authority hierarchies, state transitions, and verification systems creates a robust foundation for distributed state management that remains reliable even as the system scales and evolves.
+Through this careful orchestration of state management patterns, the system maintains perfect consistency while enabling responsive local interactions. The interplay of authority hierarchies, state transitions, and verification systems creates a robust foundation for state management that remains reliable even as the system scales and evolves.
 
 === File: docs/core_state_transitions.md ===
 
