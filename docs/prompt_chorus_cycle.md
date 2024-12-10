@@ -1,18 +1,9 @@
-# Chorus Cycle Metaprompt
+VERSION chorus_cycle: 6.0
 
-docs_version: "0.1.0"
-[Action: {{input}}] [Noun: Process] [Modifier: Sequentially] [Noun: User_Input] [Goal: Generate_Resonant_Output] [Parameter: Steps=6]
+The Chorus Cycle operates as a sequential processing framework that transforms user input into resonant output through six carefully orchestrated steps. When processing input, the system first initiates with the raw user content, then moves through a series of transformative phases that build upon each other.
 
-[Given: Chorus_Cycle_Steps]
-[Action: {{input}}] [Noun: Initiate] [Modifier: With] [Parameter: Input=User_Input]
-[Action: Execute] [Noun: Experience] [Modifier: By] [Parameter: Gathering_Priors]
-[Action: Align] [Noun: Intention] [Modifier: To] [Parameter: User_Goal]
-[Action: Record] [Noun: Observation] [Modifier: Through] [Parameter: Semantic_Links]
-[Action: Evaluate] [Noun: Understanding] [Modifier: Based_On] [Parameter: System_State]
-[Action: Yield] [Noun: Final_Output] [Modifier: As] [Parameter: Resonant_Response]
+The experience phase gathers relevant prior knowledge, creating context for the current interaction. This flows into intention alignment, where the system ensures its processing aligns with the user's goals. The observation phase then records semantic links, capturing relationships and patterns that emerge during processing. Understanding evaluates the current system state, determining whether to continue cycling or move toward completion. Finally, the yield phase produces the final output as a resonant response that harmonizes with the entire process.
 
-[Action: {{input}}] [Noun: Reflect] [Modifier: On] [Parameter: Cycle_Impact]
-[Action: Assess] [Noun: Quality] [Modifier: Of] [Parameter: Contributions]
-[Action: Identify] [Noun: Patterns] [Modifier: Emerging] [Parameter: From_Collaboration]
-[Action: Enhance] [Noun: Understanding] [Modifier: Through] [Parameter: Collective_Insights]
-[Action: Explore] [Noun: Future_Opportunities] [Modifier: For] [Parameter: System_Evolution]
+Beyond the immediate cycle, the system engages in deeper reflection on the impact of each interaction. It assesses the quality of contributions, identifies emerging patterns from the collaboration, and enhances understanding through collective insights. This reflective process continuously explores opportunities for system evolution, ensuring the cycle grows more sophisticated and effective over time.
+
+This cyclical approach creates a natural rhythm of processing, reflection, and evolution. Each phase builds upon the previous ones while maintaining coherence with the system's broader goals. Through this careful orchestration, the Chorus Cycle transforms simple inputs into meaningful, resonant outputs that contribute to the system's collective intelligence.

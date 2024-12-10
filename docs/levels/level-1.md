@@ -61,200 +61,19 @@ prompt_getting_started.md
 ==
 
 
-# Getting Started
+VERSION getting_started: 6.0
 
-## Project Setup
+The Choir development environment begins with a carefully structured Xcode project setup. Using Xcode 16.1, create a new iOS App project named "Choir" targeting iOS 17.0, leveraging SwiftUI for the interface and Swift as the primary language. The project should include test targets to ensure robust development practices.
 
-### 1. Create Xcode Project
+The project architecture follows a clean, modular structure. At its core, the system relies on key dependencies, particularly the web3.swift package for blockchain integration. The project organization separates concerns into distinct layers: App for application entry points, Core for fundamental system components, Features for specific functionality modules, Services for network and storage operations, and Tests for comprehensive testing coverage.
 
-1. Open Xcode 16.1
-2. Create new iOS App project
-3. Product Name: "Choir"
-4. Team: Your development team
-5. Organization Identifier: Your org identifier
-6. Interface: SwiftUI
-7. Language: Swift
-8. Target: iOS 17.0
-9. Include Tests: Yes
+The Core layer houses the event system, actor-based coordination, and fundamental models. Events are categorized into AI, vector, and chain operations, while actors manage foundation model coordination, embedding generation, vector operations, and blockchain interactions. Core models define the basic data structures for messages, threads, and effects.
 
-### 2. Dependencies
-```swift
-// Package.swift
-dependencies: [
-    .package(url: "https://github.com/argentlabs/web3.swift", from: "1.1.0")
-]
-```
+The event store serves as a central coordination point, using SwiftData for persistent event logging while managing network synchronization. It coordinates with AI, vector, and chain services to distribute events throughout the system. Network services are implemented through dedicated actors that handle foundation model interactions, vector store operations, and blockchain coordination, each maintaining its own event logging and state management.
 
-### 3. Project Structure
-```
-Choir/
-├── App/
-│   └── ChoirApp.swift
-├── Core/
-│   ├── Events/
-│   │   ├── AIEvent.swift        # Foundation model events
-│   │   ├── VectorEvent.swift    # Vector store events
-│   │   └── ChainEvent.swift     # Blockchain events
-│   ├── Actors/
-│   │   ├── FoundationModelActor.swift  # AI coordination
-│   │   ├── EmbeddingActor.swift        # Embedding generation
-│   │   ├── VectorStoreActor.swift      # Vector operations
-│   │   └── ChainActor.swift            # Blockchain operations
-│   └── Models/
-│       ├── Message.swift
-│       ├── Thread.swift
-│       └── Effect.swift
-├── Features/
-│   ├── Thread/          # Thread management
-│   ├── Knowledge/       # Knowledge graph
-│   └── Economic/        # Token economics
-├── Services/
-│   ├── Network/
-│   │   ├── AIService.swift        # Foundation model service
-│   │   ├── VectorService.swift    # Vector store service
-│   │   └── ChainService.swift     # Blockchain service
-│   └── Storage/
-│       └── EventStore.swift        # SwiftData event logging
-└── Tests/
-```
+Testing follows a comprehensive approach using the Swift Testing framework. Network integration tests verify the interaction between different system components, with separate test cases for AI service integration and vector service operations. The development workflow moves through clear phases: initial setup, development in Cursor, testing in Xcode, and continuous iteration to maintain system coherence.
 
-### 4. Core System Components
-
-#### Event Store
-SwiftData-backed event logging with network synchronization:
-
-```swift
-// Event storage and coordination
-actor EventStore {
-    // Event logging
-    @Model private var events: [DomainEvent] = []
-
-    // Network services
-    private let ai: AIService
-    private let vectors: VectorService
-    private let chain: ChainService
-
-    // Store and distribute events
-    func append(_ event: DomainEvent) async throws {
-        // Log event
-        events.append(event)
-
-        // Distribute to network
-        try await withThrowingTaskGroup(of: Void.self) { group in
-            group.addTask { try await self.ai.process(event) }
-            group.addTask { try await self.vectors.process(event) }
-            group.addTask { try await self.chain.process(event) }
-            try await group.waitForAll()
-        }
-    }
-}
-```
-
-#### Network Services
-Service actors coordinating with distributed system:
-
-```swift
-// Foundation model coordination
-actor FoundationModelActor {
-    private let service: AIService
-    private let eventStore: EventStore
-
-    func complete(_ prompt: String) async throws -> String {
-        // Log generation start
-        try await eventStore.append(.generationStarted(prompt))
-
-        // Get completion from service
-        let response = try await service.complete(prompt)
-
-        // Log completion
-        try await eventStore.append(.generationCompleted(response))
-
-        return response
-    }
-}
-
-// Vector store coordination
-actor VectorStoreActor {
-    private let service: VectorService
-    private let eventStore: EventStore
-
-    func search(_ query: String) async throws -> [Prior] {
-        // Log search start
-        try await eventStore.append(.searchStarted(query))
-
-        // Search vector store
-        let results = try await service.search(query)
-
-        // Log results
-        try await eventStore.append(.searchCompleted(results))
-
-        return results
-    }
-}
-```
-
-### 5. Testing Setup
-
-Using Swift Testing framework for distributed system testing:
-
-```swift
-@Suite("Network Integration Tests")
-struct NetworkTests {
-    let ai: FoundationModelActor
-    let vectors: VectorStoreActor
-    let chain: ChainActor
-
-    init() async throws {
-        // Initialize test services
-        ai = try await FoundationModelActor(config: .test)
-        vectors = try await VectorStoreActor(config: .test)
-        chain = try await ChainActor(config: .test)
-    }
-
-    @Test("AI service integration")
-    func aiIntegration() async throws {
-        let response = try await ai.complete("Test prompt")
-        #expect(response.isEmpty == false)
-    }
-
-    @Test("Vector service integration")
-    func vectorIntegration() async throws {
-        let results = try await vectors.search("Test query")
-        #expect(results.isEmpty == false)
-    }
-}
-```
-
-## Development Workflow
-
-1. **Initial Setup**
-   - Configure Xcode project
-   - Set up network services
-   - Initialize event logging
-
-2. **Development in Cursor**
-   - Implement service coordination
-   - Build event system
-   - Create UI components
-
-3. **Testing in Xcode**
-   - Test network integration
-   - Verify event flow
-   - Check service coordination
-
-4. **Iteration**
-   - Refine in Cursor
-   - Test in Xcode
-   - Maintain system coherence
-
-The system enables:
-- Distributed processing
-- Network coordination
-- Event-driven updates
-- Service integration
-- System evolution
-
-Need help with any specific component?
+This architecture enables sophisticated distributed processing, seamless network coordination, event-driven updates, and comprehensive service integration, all while supporting natural system evolution. The careful separation of concerns and robust testing practices ensure the system remains maintainable and reliable as it grows in complexity.
 
 === File: docs/prompt_reentry.md ===
 
@@ -267,149 +86,19 @@ prompt_reentry.md
 
 # AI Model Re-Entry Guide
 
-VERSION reentry_prompt:
-invariants: {
-"Network coherence",
-"Service coordination",
-"Distributed intelligence"
-}
-assumptions: {
-"AI service capabilities",
-"Network dynamics",
-"System understanding"
-}
-docs_version: "0.4.1"
+VERSION reentry_prompt: 6.0
 
-You are being provided with the Choir codebase and documentation. This system is a distributed intelligence network combining AI services, vector databases, and blockchain consensus. Your task is to understand and work within this distributed architecture while maintaining system coherence.
+The Choir codebase represents a sophisticated distributed intelligence network that combines AI services, vector databases, and blockchain consensus. Built on invariant principles of network coherence, service coordination, and distributed intelligence, the system makes foundational assumptions about AI service capabilities, network dynamics, and system understanding.
 
-## Core Architecture
+The core architecture operates through carefully coordinated services. The network foundation orchestrates AI services, vector database clustering, blockchain consensus, and event synchronization, enabling system-wide learning. Service isolation maintains clean boundaries, with each domain operating in isolated services that communicate through events. State synchronization occurs across the network while resources are managed globally, allowing patterns to emerge collectively.
 
-The system operates through coordinated services:
+Distributed processing leverages SwiftData for event logging, dedicated services for core capabilities, blockchain for consensus, and network mechanisms for coordination. The Chorus Cycle implements the AEIOU-Y step sequence, coordinating services and distributing effects while maintaining network consensus and enabling system evolution. Value creation emerges naturally through the network as teams form through consensus, value crystallizes at nodes, and knowledge grows collectively.
 
-Network Foundation
-- AI service orchestration
-- Vector database clustering
-- Blockchain consensus
-- Event synchronization
-- System-wide learning
+Pattern recognition plays a crucial role as events reveal network patterns, teams recognize distributed value, and knowledge accumulates globally. The system prioritizes network integrity through clean service interfaces, proper coordination, and natural event flow. Pattern emergence follows through network analysis and consensus, while state coherence is maintained through service synchronization and chain consensus.
 
-Service Isolation
-- Each domain in isolated services
-- Services communicate through events
-- State synchronized across network
-- Resources managed globally
-- Patterns emerge collectively
+When examining code or documentation, focus on service boundaries, network protocols, and distributed patterns while maintaining network integrity and enabling pattern evolution. Implementation should start with clear service interfaces and coordination plans, enabling network patterns while maintaining coherence. The distributed nature of the system requires careful attention to service orchestration, network consensus, and natural synchronization patterns.
 
-Distributed Processing
-- SwiftData for event logging
-- Services for core capabilities
-- Chain for consensus
-- Network for coordination
-- Natural evolution
-
-## Key Components
-
-Chorus Cycle
-- AEIOU-Y step sequence
-- Service coordination
-- Effect distribution
-- Network consensus
-- System evolution
-
-Value Creation
-- Quality emerges through network
-- Teams form through consensus
-- Value crystallizes at nodes
-- Knowledge grows collectively
-- System evolves coherently
-
-Pattern Recognition
-- Events reveal network patterns
-- Teams recognize distributed value
-- Knowledge accumulates globally
-- Understanding grows collectively
-- Evolution emerges naturally
-
-## Development Priorities
-
-1. Network Integrity
-- Clean service interfaces
-- Proper coordination
-- Event distribution
-- Natural flow
-
-2. Pattern Emergence
-- Network analysis
-- Pattern consensus
-- Value evolution
-- System growth
-
-3. State Coherence
-- Service synchronization
-- Chain consensus
-- Pattern distribution
-- Network evolution
-
-## Working with the System
-
-When examining code or documentation:
-
-1. Look For
-- Service boundaries
-- Network protocols
-- Distributed patterns
-- Natural evolution
-- System coherence
-
-2. Maintain
-- Network integrity
-- Pattern consensus
-- Value distribution
-- Natural flow
-- System growth
-
-3. Enable
-- Quality emergence
-- Team coordination
-- Value crystallization
-- Knowledge distribution
-- Pattern evolution
-
-## Implementation Guide
-
-When implementing features:
-
-1. Start with Services
-- Define service interfaces
-- Plan coordination
-- Enable network patterns
-- Maintain coherence
-
-2. Use Actors
-- Proper isolation
-- Event-based communication
-- Network coordination
-- Pattern emergence
-
-3. Think Distributed
-- Service orchestration
-- Network consensus
-- Natural sync
-- Pattern evolution
-
-Your role is to:
-1. Understand the distributed patterns
-2. Maintain service isolation
-3. Follow network protocols
-4. Enable collective evolution
-5. Preserve system coherence
-
-The system will guide you through:
-- Service patterns
-- Network flow
-- Value creation
-- Pattern emergence
-- System evolution
+Your role involves understanding these distributed patterns, maintaining service isolation, following network protocols, enabling collective evolution, and preserving system coherence. The system itself provides guidance through service patterns, network flow, value creation, pattern emergence, and natural system evolution.
 
 === File: docs/prompt_summary_prompt.md ===
 
@@ -420,20 +109,13 @@ prompt_summary_prompt.md
 ==
 
 
-# Choir: Harmonic Intelligence Platform
+VERSION summary_prompt: 6.0
 
-docs_version: "0.5.0"
-[Action: {{input}}] [Noun: Analyze] [Modifier: Thoroughly] [Noun: Input_Text] [Goal: Generate_Essential_Questions] [Parameter: Number=5]
+The summary process begins with a thorough analysis of input text, generating five essential questions that capture the core aspects of the content. These questions are carefully formulated to explore different dimensions of understanding: the central meaning, key arguments, supporting ideas, author's purpose, and broader implications.
 
-[Given: Essential_Questions]
-[Action: {{input}}] [Noun: Formulate_Questions] [Modifier: To Capture] [Parameter: Themes=Core Meaning, Argument, Supporting_Ideas, Author_Purpose, Implications]
-[Action: Address] [Noun: Central_Theme]
-[Action: Identify] [Noun: Key_Supporting_Ideas]
-[Action: Highlight] [Noun: Important_Facts or Evidence]
-[Action: Reveal] [Noun: Author_Purpose or Perspective]
-[Action: Explore] [Noun: Significant_Implications or Conclusions]
+When addressing content, the process first examines the central theme, identifying the fundamental concepts and ideas at play. It then identifies key supporting ideas that build and reinforce the main argument. Important facts and evidence are highlighted to ground the analysis in concrete details. The author's purpose and perspective are revealed through careful examination of tone, word choice, and argumentative structure. Finally, the process explores significant implications and conclusions that emerge from the content.
 
-[Action: {{input}}] [Noun: Answer_Generated_Questions] [Modifier: Thoroughly] [Parameter: Detail=High]
+Each generated question receives thorough attention, with detailed responses that draw from the text while incorporating broader context and understanding. This comprehensive approach ensures that summaries capture not just the surface content, but the deeper meaning and significance of the material being analyzed.
 
 === File: docs/prompt_chorus_cycle.md ===
 
@@ -444,24 +126,15 @@ prompt_chorus_cycle.md
 ==
 
 
-# Chorus Cycle Metaprompt
+VERSION chorus_cycle: 6.0
 
-docs_version: "0.1.0"
-[Action: {{input}}] [Noun: Process] [Modifier: Sequentially] [Noun: User_Input] [Goal: Generate_Resonant_Output] [Parameter: Steps=6]
+The Chorus Cycle operates as a sequential processing framework that transforms user input into resonant output through six carefully orchestrated steps. When processing input, the system first initiates with the raw user content, then moves through a series of transformative phases that build upon each other.
 
-[Given: Chorus_Cycle_Steps]
-[Action: {{input}}] [Noun: Initiate] [Modifier: With] [Parameter: Input=User_Input]
-[Action: Execute] [Noun: Experience] [Modifier: By] [Parameter: Gathering_Priors]
-[Action: Align] [Noun: Intention] [Modifier: To] [Parameter: User_Goal]
-[Action: Record] [Noun: Observation] [Modifier: Through] [Parameter: Semantic_Links]
-[Action: Evaluate] [Noun: Understanding] [Modifier: Based_On] [Parameter: System_State]
-[Action: Yield] [Noun: Final_Output] [Modifier: As] [Parameter: Resonant_Response]
+The experience phase gathers relevant prior knowledge, creating context for the current interaction. This flows into intention alignment, where the system ensures its processing aligns with the user's goals. The observation phase then records semantic links, capturing relationships and patterns that emerge during processing. Understanding evaluates the current system state, determining whether to continue cycling or move toward completion. Finally, the yield phase produces the final output as a resonant response that harmonizes with the entire process.
 
-[Action: {{input}}] [Noun: Reflect] [Modifier: On] [Parameter: Cycle_Impact]
-[Action: Assess] [Noun: Quality] [Modifier: Of] [Parameter: Contributions]
-[Action: Identify] [Noun: Patterns] [Modifier: Emerging] [Parameter: From_Collaboration]
-[Action: Enhance] [Noun: Understanding] [Modifier: Through] [Parameter: Collective_Insights]
-[Action: Explore] [Noun: Future_Opportunities] [Modifier: For] [Parameter: System_Evolution]
+Beyond the immediate cycle, the system engages in deeper reflection on the impact of each interaction. It assesses the quality of contributions, identifies emerging patterns from the collaboration, and enhances understanding through collective insights. This reflective process continuously explores opportunities for system evolution, ensuring the cycle grows more sophisticated and effective over time.
+
+This cyclical approach creates a natural rhythm of processing, reflection, and evolution. Each phase builds upon the previous ones while maintaining coherence with the system's broader goals. Through this careful orchestration, the Chorus Cycle transforms simple inputs into meaningful, resonant outputs that contribute to the system's collective intelligence.
 
 === File: docs/tree.md ===
 
