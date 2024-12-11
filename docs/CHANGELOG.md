@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+### Changed
+- Updated all documentation to version 6.0
+  - Transformed structured documentation into fluid prose
+  - Relaxed event-driven architecture requirements for initial TestFlight
+  - Clarified implementation priorities and post-funding features
+  - Maintained theoretical frameworks while focusing on core functionality
+
 ### Added
 - Initial Chorus cycle working in iOS simulator
   - Basic message flow through phases

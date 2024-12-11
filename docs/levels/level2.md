@@ -147,49 +147,59 @@ Understanding thread ownership and co-authorship proves essential to navigating 
 
 Token distribution follows quantum harmonic principles, with energy (tokens) flowing through the system according to E(n) = ℏω(n + 1/2). Co-authorship management incorporates quantum divestment mechanics, allowing co-authors to leave while their energy (stake) redistributes according to thermodynamic principles. AI-generated summaries stimulate discourse by compressing content and encouraging engagement with full threads, rather than serving as a replacement for direct interaction.
 
-The platform intentionally avoids traditional reputation systems, instead allowing quality to emerge naturally through the thermodynamic thread model. Blockchain integration manages thread state, token mechanics, and co-authorship while maintaining quantum harmonic principles for value distribution. The speculative response process enables non-co-authors to submit "specs" by staking CHOIR tokens, with pricing following the quantum harmonic oscillator formula. Stakes remain non-refundable to ensure energy conservation in the system, either distributing to approvers or strengthening threads through temperature increases.
+The platform intentionally avoids traditional reputation systems, instead allowing quality to emerge naturally through the thermodynamic thread model. Blockchain integration manages thread state, token mechanics, and co-authorship while maintaining quantum harmonic principles for value distribution. The speculative response process enables non-co-authors to submit "specs" by staking CHIP tokens, with pricing following the quantum harmonic oscillator formula. Stakes remain non-refundable to ensure energy conservation in the system, either distributing to approvers or strengthening threads through temperature increases.
 
 This comprehensive approach creates a collaborative platform where quality emerges naturally through physical principles rather than arbitrary rules. By combining quantum mechanics, thermodynamics, and wave theory, Choir establishes natural quality barriers and value flows that promote genuine collaboration and knowledge sharing.
 
 ## Key Questions and Answers
 
 ### 1. Thread Ownership and Co-authorship
+
 - **Q**: How does the concept of "co-authors" align with the initial thread creator?
 - **A**: The initial thread creator is the first co-author, and every message is owned by its creator. Thread ownership is tracked through smart contracts.
 
 ### 2. Message Approval Process
+
 - **Q**: How does the "spec" mechanism work in relation to the existing approval process?
 - **A**: The "spec" mechanism allows non-co-authors to submit messages by staking tokens, with co-authors having a 7-day window to approve or deny.
 
 ### 3. Co-author Limitations
+
 - **Q**: Are there any limitations on the number of co-authors a thread can have?
 - **A**: There are no hard limitations on co-author count, allowing organic growth while gas costs naturally moderate expansion.
 
 ### 4. Token Distribution
+
 - **Q**: How are token rewards distributed when a new message is approved or when their thread is cited?
 - **A**: Token distribution follows quantum harmonic principles, with energy (tokens) flowing through the system according to E(n) = ℏω(n + 1/2).
 
 ### 5. Co-authorship Management
+
 - **Q**: Is there a mechanism for removing co-authorship or transferring ownership of threads?
 - **A**: Co-authors can leave through quantum divestment mechanics, with their energy (stake) redistributing according to thermodynamic principles.
 
 ### 6. AI-Generated Summaries
+
 - **Q**: How does the AI-generated summary feature ensure privacy and accuracy?
 - **A**: AI-generated summaries stimulate discourse by compressing content, encouraging engagement with the full thread.
 
 ### 7. Reputation System
+
 - **Q**: Are there any plans to implement a reputation system based on user contributions and co-authorship?
 - **A**: Currently, there are no plans for a reputation system; quality emerges naturally through the thermodynamic thread model.
 
 ### 8. Blockchain Integration
+
 - **Q**: How is the blockchain integrated into the Choir platform?
 - **A**: Smart contracts manage thread state, token mechanics, and co-authorship, while maintaining quantum harmonic principles for value distribution.
 
 ### 9. Speculative Response ("Spec") Process
+
 - **Q**: Can you elaborate on the speculative response process?
-- **A**: Non-co-authors can submit a "spec" by staking CHOIR tokens, with co-authors having a 7-day window to approve or deny. Stakes follow the quantum harmonic oscillator formula for pricing.
+- **A**: Non-co-authors can submit a "spec" by staking CHIP tokens, with co-authors having a 7-day window to approve or deny. Stakes follow the quantum harmonic oscillator formula for pricing.
 
 ### 10. Non-Refundable Stakes
+
 - **Q**: Why are thread participation stakes non-refundable?
 - **A**: Non-refundable stakes ensure energy conservation in the system, with stakes either distributing to approvers or strengthening the thread through temperature increases.
 
@@ -339,7 +349,7 @@ guide_pysui
 
 ## Overview
 
-This guide documents our implementation of PySUI for interacting with Sui smart contracts, specifically for the CHOIR token. Based on our deployment experience, we'll focus on working patterns and known issues.
+This guide documents our implementation of PySUI for interacting with Sui smart contracts, specifically for the CHIP token. Based on our deployment experience, we'll focus on working patterns and known issues.
 
 ## Key Components
 
@@ -594,6 +604,277 @@ The pattern addresses several key challenges through careful optimization. Conte
 
 Through this thoughtful implementation, the Carousel UI Pattern enhances the Chorus Cycle experience by providing an intuitive, engaging, and visually appealing navigation system that aligns with modern iOS design principles while maintaining robust accessibility and performance characteristics.
 
+=== File: docs/plan_client_architecture.md ===
+
+
+
+==
+plan_client_architecture
+==
+
+
+# Client Architecture Principles
+
+VERSION client_architecture:
+invariants: {
+"Local-first processing",
+"Proxy-based security",
+"Natural UI flow"
+}
+assumptions: {
+"SUI blockchain integration",
+"Client-side AI processing",
+"Carousel-based UI"
+}
+docs_version: "0.1.0"
+
+## Core Architecture
+
+The system operates as a client-first platform:
+
+### 1. Local Processing
+
+- **On-Device AI**
+
+  - AI processing happens on the user's device.
+  - Reduces latency and improves responsiveness.
+  - Enhances privacy by keeping data local.
+
+- **Local Vector Operations**
+
+  - Embedding generation and vector searches run locally.
+  - Utilizes device capabilities for efficient computation.
+  - Enables offline functionality for certain features.
+
+- **State Management with SwiftData**
+
+  - Persistent storage of user data using SwiftData.
+  - Seamless data handling and synchronization.
+  - Robust model management with automatic updates.
+
+- **Secure Network Calls**
+  - All network requests are proxied securely.
+  - Sensitive data is protected during transmission.
+  - API keys and secrets are managed server-side.
+
+### 2. SUI Integration
+
+- **User Accounts via SUI Wallet**
+
+  - Users authenticate using their SUI blockchain wallet.
+  - Ensures secure and decentralized identity management.
+  - Facilitates seamless onboarding and account recovery.
+
+- **Thread Ownership on Chain**
+
+  - Thread creation and ownership are recorded on the SUI blockchain.
+  - Provides immutable proof of authorship and contribution.
+  - Enables decentralized management of content and permissions.
+
+- **Token Mechanics through Smart Contracts**
+
+  - CHIP tokens are managed via SUI smart contracts.
+  - Supports token staking, rewards, and transfers.
+  - Aligns economic incentives with platform participation.
+
+- **Natural Blockchain Integration**
+  - SUI blockchain integration is transparent to users.
+  - Blockchain interactions are abstracted within the app.
+  - Users benefit from blockchain security without added complexity.
+
+### 3. UI Patterns
+
+- **Carousel-Based Phase Display**
+
+  - The Chorus Cycle phases are presented as a carousel.
+  - Users can swipe to navigate through different phases.
+  - Provides an intuitive and engaging experience.
+
+- **Natural Swipe Navigation**
+
+  - Gesture-based interactions enhance usability.
+  - Allows users to seamlessly explore content.
+  - Supports both linear and non-linear navigation.
+
+- **Progressive Loading States**
+
+  - Content and results load incrementally.
+  - Users receive immediate feedback during processing.
+  - Enhances perception of performance.
+
+- **Fluid Animations**
+  - Smooth transitions between UI elements.
+  - Animations convey state changes effectively.
+  - Contributes to a polished and modern interface.
+
+## Security Model
+
+Security is maintained through a proxy architecture and blockchain authentication:
+
+### 1. API Proxy
+
+- **Client Authentication with Proxy**
+
+  - The app authenticates with a server-side proxy.
+  - Authenticates requests without exposing API keys on the client.
+  - Ensures secure communication between the app and backend services.
+
+- **Managed API Keys**
+
+  - API keys for third-party services are stored securely on the server.
+  - The proxy handles requests to APIs like OpenAI or Anthropic.
+  - Simplifies API management and key rotation.
+
+- **Rate Limiting and Monitoring**
+
+  - The proxy implements rate limiting to prevent abuse.
+  - Monitors usage patterns to detect anomalies.
+  - Provides logging for auditing and analysis.
+
+- **Usage Tracking**
+  - Tracks API usage per user for billing or quota purposes.
+  - Enables fair usage policies and resource allocation.
+  - Supports analytics and reporting.
+
+### 2. SUI Authentication
+
+- **Wallet-Based Authentication**
+
+  - Users sign authentication requests using their SUI wallet.
+  - Eliminates the need for traditional passwords.
+  - Leverages blockchain security for identity verification.
+
+- **Message Signing for Auth**
+
+  - Challenges are signed with the user's private key.
+  - Verifiable signatures ensure the authenticity of requests.
+  - Prevents unauthorized access and impersonation.
+
+- **Chain-Based Permissions**
+
+  - Access rights and permissions are stored on-chain.
+  - Smart contracts enforce rules for content and token interactions.
+  - Provides a transparent and tamper-proof permission system.
+
+- **Natural Security Model**
+  - Users control their own keys and assets.
+  - Reduces reliance on centralized authentication systems.
+  - Enhances trust through decentralization.
+
+## Implementation Flow
+
+A natural development progression guides the implementation:
+
+### 1. Foundation
+
+- **Local AI Processing**
+
+  - Integrate on-device AI capabilities.
+  - Set up models for natural language processing and embeddings.
+  - Ensure models run efficiently on target devices.
+
+- **SwiftData Persistence**
+
+  - Utilize SwiftData for local data storage.
+  - Define data models for users, threads, messages, and tokens.
+  - Implement data synchronization strategies.
+
+- **Basic UI Patterns**
+
+  - Develop the core user interface with SwiftUI.
+  - Implement the carousel pattern for the Chorus Cycle.
+  - Focus on usability and accessibility.
+
+- **Proxy Authentication**
+  - Set up the API proxy server.
+  - Implement client-side authentication flows.
+  - Ensure secure communication between the app and proxy.
+
+### 2. Enhancement
+
+- **SUI Wallet Integration**
+
+  - Integrate SUIKit for blockchain interactions.
+  - Implement wallet creation, import, and transaction signing.
+  - Provide user guidance for managing wallets.
+
+- **Chain-Based Ownership**
+
+  - Develop smart contracts for thread and message ownership.
+  - Implement on-chain logic for co-author management.
+  - Ensure seamless synchronization between on-chain data and the app.
+
+- **Enhanced UI Animations**
+
+  - Refine animations and transitions.
+  - Use SwiftUI animations to enhance the user experience.
+  - Optimize performance for smooth interactions.
+
+- **Advanced Features**
+  - Add support for offline mode with local caching.
+  - Implement advanced analytics and user feedback mechanisms.
+  - Explore opportunities for AI personalization.
+
+## Benefits
+
+This architecture enables:
+
+1. **Client-Side Intelligence**
+
+   - Reduces dependency on external servers for AI processing.
+   - Offers faster responses and greater control over data.
+
+2. **Natural Security**
+
+   - Enhances security through blockchain authentication.
+   - Protects user data and assets with robust cryptography.
+
+3. **Fluid Interaction**
+
+   - Provides an engaging and intuitive user interface.
+   - Encourages user interaction through natural gestures.
+
+4. **Blockchain Integration**
+
+   - Leverages the strengths of SUI blockchain.
+   - Ensures transparency and trust in data management.
+
+5. **System Evolution**
+   - Facilitates future enhancements and scalability.
+   - Adapts to emerging technologies and user needs.
+
+## Assurance
+
+The system ensures:
+
+- **Local Processing**
+
+  - Data remains on the user's device unless explicitly shared.
+  - Users have control over their data and privacy.
+
+- **Secure Operations**
+
+  - Implements best practices for encryption and authentication.
+  - Regular security audits and updates.
+
+- **Natural UI Flow**
+
+  - Prioritizes user experience.
+  - Continuously refined based on user feedback.
+
+- **Chain Integration**
+
+  - Aligns with decentralized principles.
+  - Promotes user empowerment and autonomy.
+
+- **Sustainable Growth**
+  - Designed for scalability and maintainability.
+  - Embraces modular architecture for easy updates.
+
+---
+
+By establishing these core principles and structures, we create a robust foundation for the Choir platform's evolution towards a client-centric architecture with strong security, intuitive design, and seamless blockchain integration.
+
 === File: docs/plan_competitive.md ===
 
 
@@ -674,6 +955,197 @@ Time valuation plays a crucial role, with AI models placing high value on qualit
 The integration architecture seamlessly incorporates the Data Engine Model's emphasis on pattern recognition and value creation, while ensuring natural evolution through system development and reality formation. This architecture fits naturally within the Chorus Cycle, enabling value generation and pattern building through natural progression and system development.
 
 Through this comprehensive approach, the system achieves specialized excellence while maintaining value recognition, pattern integrity, and system coherence, all evolving naturally within the broader framework of collective intelligence.
+
+=== File: docs/plan_sui_blockchain_integration.md ===
+
+
+
+==
+plan_sui_blockchain_integration
+==
+
+
+# SUI Blockchain Integration
+
+VERSION sui_integration:
+invariants: {
+"Decentralized ownership",
+"Secure transactions",
+"Immutable records"
+}
+assumptions: {
+"Users have SUI wallets",
+"Smart contracts deployed",
+"SUIKit available for Swift"
+}
+docs_version: "0.1.0"
+
+## Introduction
+
+Integrating the SUI blockchain into the Choir platform enhances security, ownership, and transparency. It allows for decentralized management of threads and tokens, ensuring users have full control over their content and assets.
+
+## Key Components
+
+### 1. SUI Wallet Integration
+
+- **Wallet Creation and Management**
+
+  - Users can create new wallets or import existing ones.
+  - Wallets are used for authentication and transaction signing.
+
+- **SUIKit Integration**
+
+  - Utilize the SUIKit library for Swift to interact with the blockchain.
+  - Provides APIs for account management, signing, and transactions.
+
+- **User Authentication**
+  - Replace traditional login systems with wallet-based auth.
+  - Users sign messages to prove ownership of their public keys.
+
+### 2. Smart Contracts
+
+- **Thread Ownership Contract**
+
+  - Manages creation, ownership, and co-authoring of threads.
+  - Records thread metadata and ownership status on-chain.
+
+- **Token Contract**
+
+  - Implements the CHIP token logic.
+  - Handles staking, rewards, and token transfers.
+
+- **Permission Management**
+  - Smart contracts enforce access control for threads and messages.
+  - Permissions are transparently verifiable on-chain.
+
+### 3. Transactions
+
+- **Thread Creation**
+
+  - Users initiate a transaction to create a new thread.
+  - The transaction includes thread metadata and initial co-authors.
+
+- **Message Posting**
+
+  - Adding messages to a thread may involve on-chain interactions.
+  - Ensures messages are linked to the correct thread and ownership is recorded.
+
+- **Token Transactions**
+  - Users can stake tokens, receive rewards, and transfer tokens.
+  - All token movements are secured by the blockchain.
+
+### 4. Synchronization
+
+- **On-Chain and Off-Chain Data**
+
+  - Combine on-chain records with off-chain data stored in SwiftData.
+  - Maintain consistency between local state and blockchain state.
+
+- **Event Listening**
+  - Implement listeners for blockchain events to update the app in real-time.
+  - Use SUIKit's subscription features to receive updates.
+
+## Implementation Steps
+
+### 1. Setup SUIKit
+
+- **Add SUIKit to Project**
+
+  - Include the SUIKit package via Swift Package Manager.
+  - Ensure compatibility with the project's Swift version.
+
+- **Initialize Providers**
+  - Configure SUI providers for network interactions.
+  - Support testnet, devnet, and mainnet environments.
+
+### 2. Develop Smart Contracts
+
+- **Write Contracts in Move**
+
+  - Use the Move language to develop smart contracts.
+  - Define the logic for threads and token management.
+
+- **Deploy Contracts**
+  - Deploy contracts to the SUI blockchain.
+  - Keep track of contract addresses for app reference.
+
+### 3. Implement Wallet Features
+
+- **Create Wallet Interface**
+
+  - Design UI for wallet creation, import, and management.
+  - Educate users on securing their private keys.
+
+- **Sign Transactions**
+  - Use SUIKit to sign transactions with the user's private key.
+  - Ensure transactions are properly formatted and submitted.
+
+### 4. Integrate Blockchain Actions
+
+- **Thread Actions**
+
+  - Map thread creation and updates to blockchain transactions.
+  - Reflect on-chain changes in the app's UI.
+
+- **Token Actions**
+  - Implement token staking and reward mechanisms.
+  - Display token balances and transaction history.
+
+### 5. Handle Errors and Edge Cases
+
+- **Network Issues**
+
+  - Gracefully handle connectivity problems.
+  - Provide informative error messages to users.
+
+- **Transaction Failures**
+
+  - Detect and communicate transaction failures.
+  - Offer retry mechanisms and guidance.
+
+- **Security Considerations**
+  - Validate all input data before submission.
+  - Protect against common vulnerabilities (e.g., replay attacks).
+
+## Benefits
+
+- **Decentralized Ownership**
+
+  - Users have verifiable ownership of their threads and content.
+  - Reduces reliance on centralized servers.
+
+- **Enhanced Security**
+
+  - Leveraging blockchain security for transactions and authentication.
+  - Immutable records prevent tampering.
+
+- **Transparency**
+
+  - All transactions are publicly recorded.
+  - Increases trust among users.
+
+- **Interoperability**
+  - Potential for integration with other SUI-based platforms and services.
+
+## Considerations
+
+- **User Experience**
+
+  - Ensure the addition of blockchain features does not complicate the UX.
+  - Provide clear explanations and support for non-technical users.
+
+- **Performance**
+
+  - Minimize the impact of blockchain interactions on app responsiveness.
+  - Use asynchronous operations and caching where appropriate.
+
+- **Regulatory Compliance**
+  - Be aware of regulations related to blockchain and tokens.
+  - Implement necessary measures for compliance.
+
+---
+
+By integrating the SUI blockchain, we empower users with control over their data and assets, enhance the security of transactions, and lay a foundation for future decentralized features.
 
 === File: docs/plan_swiftdata_required_changes.md ===
 

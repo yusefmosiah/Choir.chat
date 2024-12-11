@@ -315,6 +315,7 @@ tree.md
 │   │   ├── issue_8.md
 │   │   └── issue_9.md
 │   ├── levels
+│   │   ├── all.md
 │   │   ├── level-1.md
 │   │   ├── level0.md
 │   │   ├── level1.md
@@ -349,7 +350,7 @@ tree.md
 │   └── tree.md
 └── render.yaml
 
-49 directories, 151 files
+49 directories, 152 files
 
 === File: docs/CHANGELOG.md ===
 
@@ -1652,23 +1653,25 @@ core_architecture
 
 VERSION core_architecture: 6.0
 
-The system operates through pure event flows. Events ripple through interconnected services, creating waves of state change that propagate across the network. Each service maintains its own event log, creating a resilient distributed architecture where state emerges through consensus rather than central authority.
+Note: This document describes the core system architecture, with initial focus on TestFlight functionality. More sophisticated event-driven mechanisms described here will be implemented post-funding.
+
+The system operates through coordinated state management and clear authority hierarchies. State changes flow through interconnected services while maintaining system consistency. Each service manages its own state, creating a resilient distributed architecture where consistency emerges through clear authority rather than central control.
 
 At the foundation lies a clear hierarchy of truth. The blockchain serves as the authoritative source for all ownership and economic state - thread ownership, token balances, message hashes, and co-author lists. This ensures that the economic model, with its equity distribution and thread evolution, has an immutable and verifiable foundation.
 
 Alongside the chain, our vector database acts as the authoritative source for all content and semantic relationships. It stores the actual message content, embeddings, and the growing network of citations and semantic links. This separation of concerns allows the system to maintain both economic integrity through the blockchain and rich semantic relationships through the vector database.
 
-Events serve as the coordination mechanism between these components. When a user submits input, it triggers a cascade of events that flow through the system. The chorus cycle generates events as it processes the input. These events coordinate UI updates, track system state, and maintain synchronization between components. However, events are not the source of truth - they are merely the means by which the system coordinates updates and maintains consistency.
+State updates coordinate between these components. When a user submits input, the system manages necessary updates across services. The chorus cycle processes input while maintaining state consistency. These updates ensure proper synchronization while preserving data integrity across components.
 
 The economic model uses precise mathematical principles to govern thread evolution and value distribution. Thread temperature rises with rejections and moderates with approvals, creating natural quality barriers. The energy formula E(n) = ℏω(n + 1/2) determines stake requirements, ensuring that participation costs align with thread organization levels. Value flows follow conservation laws, with total system energy remaining constant while redistributing through various state transitions.
 
 State management follows this natural hierarchy of truth. The chain state is authoritative for ownership and economics. The vector state is authoritative for content and semantics. Local state serves only to coordinate UI updates and handle temporary synchronization needs. This clear hierarchy ensures system consistency while enabling responsive user interaction.
 
-All of this manifests through Swift's modern concurrency system. Actors provide thread-safe state isolation. Async/await enables clean asynchronous code. Structured concurrency through task groups ensures proper resource management. The event-driven architecture allows for loose coupling between components while maintaining system coherence.
+All of this manifests through Swift's modern concurrency system. Actors provide thread-safe state isolation. Async/await enables clean asynchronous code. Structured concurrency through task groups ensures proper resource management. The architecture maintains loose coupling between components while ensuring system coherence.
 
-The result is a system that combines economic incentives, semantic knowledge, and natural interaction patterns into a coherent whole. The blockchain provides economic integrity. The vector database enables semantic richness. Events coordinate the pieces. And Swift's concurrency model keeps it all running smoothly and safely.
+The result is a system that combines economic incentives, semantic knowledge, and natural interaction patterns into a coherent whole. The blockchain provides economic integrity. The vector database enables semantic richness. Swift's concurrency model keeps it all running smoothly and safely.
 
-This architecture enables the system to evolve naturally. New event types can be added to handle new features. The semantic network grows organically through usage. The economic model creates emergent quality barriers. And the whole system maintains consistency through its clear hierarchy of truth and well-defined patterns of event flow.
+This architecture enables the system to evolve naturally. The semantic network grows organically through usage. The economic model creates emergent quality barriers. And the whole system maintains consistency through its clear hierarchy of truth and well-defined state management patterns.
 
 === File: docs/core_chorus.md ===
 
@@ -1683,25 +1686,27 @@ core_chorus
 
 VERSION core_chorus: 6.0
 
-The chorus cycle operates as a distributed event sequence, coordinating state changes across the network through well-defined transitions. Each phase of the cycle generates specific events that ripple through the system, creating waves of coordinated state change.
+Note: This document describes the core chorus cycle functionality, with initial focus on TestFlight implementation. More sophisticated distributed coordination mechanisms described here will be implemented post-funding.
 
-The cycle begins with Action - pure response generation without context. Events mark the start of processing, capture the generated response, and record confidence levels. This creates a clean foundation for the rest of the cycle.
+The chorus cycle processes user input through a series of well-defined phases, maintaining state consistency through careful coordination. Each phase of the cycle contributes to the system's collective intelligence through structured state transitions.
 
-Experience follows, enriching the response with prior knowledge. The system searches for relevant priors, measuring semantic relevance across the network. This phase connects current insight with accumulated knowledge, strengthening the semantic fabric of the system.
+The cycle begins with Action - pure response generation without context. This phase focuses on immediate response processing, establishing a clean foundation for subsequent steps. The system captures the generated response and confidence levels as a baseline.
 
-Intention aligns the evolving response with user goals. Through careful analysis of both explicit and implicit signals, this phase ensures that the response serves its purpose. Events track this alignment process, enabling the system to learn from each interaction.
+Experience follows, enriching the response with prior knowledge. The system searches for relevant priors, measuring semantic relevance across stored knowledge. This phase connects current insight with accumulated knowledge, strengthening the semantic fabric of the system.
 
-Observation records the emerging semantic connections. As links form between current insights and prior knowledge, events capture these relationships. The network of understanding grows stronger with each new connection, each citation, each recognized pattern.
+Intention aligns the evolving response with user goals. Through careful analysis of both explicit and implicit signals, this phase ensures that the response serves its purpose. The system learns from each interaction by tracking these alignments.
 
-Understanding evaluates the system state, deciding whether to continue cycling or move to completion. This critical phase prevents premature convergence while ensuring efficient processing. Events track these decisions, maintaining the integrity of the cycle.
+Observation records the emerging semantic connections. As links form between current insights and prior knowledge, the system captures these relationships. The network of understanding grows stronger with each new connection, citation, and recognized pattern.
 
-Yield produces the final response, but only when the cycle has truly completed its work. Citations are generated, effects are distributed across the network, and the system prepares for the next interaction. The cycle maintains its integrity through careful event logging and state tracking.
+Understanding evaluates the system state, deciding whether to continue cycling or move to completion. This critical phase prevents premature convergence while ensuring efficient processing. The system maintains cycle integrity through careful state tracking.
 
-Each phase operates through distributed coordination. Foundation models process language. Vector stores manage semantic relationships. Embedding services capture meaning. Chain actors maintain state consensus. All of these services work together through clean event flows and careful state management.
+Yield produces the final response, but only when the cycle has truly completed its work. Citations are generated, semantic effects are recorded, and the system prepares for the next interaction. The cycle maintains consistency through proper state management.
 
-The cycle's power lies in its distributed nature. No single service controls the process. Instead, collective intelligence emerges through coordinated event flows and careful state transitions. The system maintains coherence while enabling natural evolution.
+Each phase operates through coordinated services. Foundation models process language. Vector stores manage semantic relationships. Embedding services capture meaning. Chain actors maintain state consensus. All of these services work together through clean interfaces and careful state coordination.
 
-This is how the chorus cycle enables collective intelligence - not through central control but through carefully coordinated event flows. Each cycle strengthens the network's understanding, builds semantic relationships, and enables natural knowledge growth.
+The cycle's power lies in its structured approach. No single service controls the process. Instead, collective intelligence emerges through coordinated state transitions and careful phase management. The system maintains coherence while enabling natural evolution.
+
+This is how the chorus cycle enables collective intelligence - not through central control but through carefully structured phases. Each cycle strengthens the system's understanding, builds semantic relationships, and enables natural knowledge growth.
 
 === File: docs/core_core.md ===
 
@@ -1716,13 +1721,15 @@ core_core
 
 VERSION core_system: 6.0
 
-The Choir system is built around a clear hierarchy of truth and a natural flow of events. At its foundation, the blockchain serves as the authoritative source for all ownership and economic state - thread ownership, token balances, message hashes, and co-author lists. This ensures that the economic model, with its harmonic equity distribution and thermodynamic thread evolution, has an immutable and verifiable foundation.
+Note: This document describes the core system architecture, with initial focus on TestFlight functionality. More sophisticated event-driven mechanisms described here will be implemented post-funding.
+
+The Choir system is built around a clear hierarchy of truth and state management. At its foundation, the blockchain serves as the authoritative source for all ownership and economic state - thread ownership, token balances, message hashes, and co-author lists. This ensures that the economic model, with its harmonic equity distribution and thermodynamic thread evolution, has an immutable and verifiable foundation.
 
 Alongside the blockchain, Qdrant acts as the authoritative source for all content and semantic relationships. It stores the actual message content, embeddings, and the growing network of citations and semantic links. This separation of concerns allows the system to maintain both economic integrity through the blockchain and rich semantic relationships through the vector database.
 
-The AEIOU-Y chorus cycle sits at the heart of the interaction model, processing user input through a series of well-defined steps. Each step generates events that flow through the system, coordinating state updates and UI feedback. The cycle begins with pure response in the Action step, enriches it with prior knowledge in the Experience step, aligns with user intent in the Intention step, records semantic connections in the Observation step, decides on continuation in the Update step, and produces the final response in the Yield step.
+The AEIOU-Y chorus cycle sits at the heart of the interaction model, processing user input through a series of well-defined steps. The cycle begins with pure response in the Action step, enriches it with prior knowledge in the Experience step, aligns with user intent in the Intention step, records semantic connections in the Observation step, decides on continuation in the Update step, and produces the final response in the Yield step.
 
-Events serve as the coordination mechanism between these components. When a user submits input, it triggers a cascade of events that flow through the system. The chorus cycle generates events as it processes the input. These events are used to coordinate UI updates, track system state, and maintain synchronization between components. However, these events are not the source of truth - they are merely the means by which the system coordinates updates and maintains consistency.
+State updates flow naturally between these components. When a user submits input, the system coordinates necessary updates across the UI, blockchain, and vector store. The chorus cycle processes the input while maintaining system state consistency. These state changes are carefully managed to maintain data integrity and system coherence.
 
 The economic model uses harmonic principles to govern thread evolution and value distribution. Thread temperature rises with rejections and moderates with approvals, creating natural quality barriers. Equity is distributed according to harmonic formulas, ensuring fair value attribution while maintaining mathematical elegance.
 
@@ -1730,11 +1737,11 @@ The knowledge system builds a growing semantic network through citations and pri
 
 State management follows the natural hierarchy of truth. The chain state is authoritative for ownership and economics. The vector state is authoritative for content and semantics. Local state serves only to coordinate UI updates and handle temporary synchronization needs. This clear hierarchy ensures system consistency while enabling responsive user interaction.
 
-All of this is implemented using Swift's modern concurrency system. Actors provide thread-safe state isolation. Async/await enables clean asynchronous code. Structured concurrency through task groups ensures proper resource management. The event-driven architecture allows for loose coupling between components while maintaining system coherence.
+All of this is implemented using Swift's modern concurrency system. Actors provide thread-safe state isolation. Async/await enables clean asynchronous code. Structured concurrency through task groups ensures proper resource management. The architecture maintains loose coupling between components while ensuring system coherence.
 
-The result is a system that combines economic incentives, semantic knowledge, and natural interaction patterns into a coherent whole. The blockchain provides economic integrity. The vector database enables semantic richness. The chorus cycle creates natural interaction. Events coordinate the pieces. And Swift's concurrency model keeps it all running smoothly and safely.
+The result is a system that combines economic incentives, semantic knowledge, and natural interaction patterns into a coherent whole. The blockchain provides economic integrity. The vector database enables semantic richness. The chorus cycle creates natural interaction. And Swift's concurrency model keeps it all running smoothly and safely.
 
-This architecture enables the system to evolve naturally. New event types can be added to handle new features. The semantic network grows organically through usage. The economic model creates emergent quality barriers. And the whole system maintains consistency through its clear hierarchy of truth and well-defined patterns of event flow.
+This architecture enables the system to evolve naturally. The semantic network grows organically through usage. The economic model creates emergent quality barriers. And the whole system maintains consistency through its clear hierarchy of truth and well-defined state management patterns.
 
 === File: docs/core_economics.md ===
 
@@ -1856,23 +1863,25 @@ core_state
 
 VERSION core_state: 6.0
 
-The state management system establishes clear authority hierarchies and coordination patterns across the distributed network. At its core, the system maintains two authoritative sources of truth - the blockchain for economic state and vector stores for content state - while enabling efficient local coordination through event-driven patterns.
+Note: This document describes the core state management system, with initial focus on TestFlight functionality. More sophisticated distributed coordination mechanisms described here will be implemented post-funding.
 
-The Chain State serves as the ultimate arbiter of economic truth. Through a dedicated actor, it maintains authoritative thread states including co-author lists, token balances, temperature values, frequency measurements, and message hash collections. All state changes must flow through the blockchain first, with local events emitted only after on-chain confirmation. This ensures perfect consistency between the network's economic state and local views.
+The state management system establishes clear authority hierarchies and coordination patterns across the system. At its core, the system maintains two authoritative sources of truth - the blockchain for economic state and vector stores for content state - while enabling efficient local coordination through careful state synchronization.
 
-The Vector State maintains authoritative control over content and semantic relationships. Built on Qdrant, this system provides the source of truth for messages and their embeddings. Content operations follow a strict pattern - store in the vector database first, then emit local events for UI coordination. This maintains semantic coherence while enabling responsive user interfaces.
+The Chain State serves as the ultimate arbiter of economic truth. Through a dedicated actor, it maintains authoritative thread states including co-author lists, token balances, temperature values, frequency measurements, and message hash collections. All state changes must flow through the blockchain first, ensuring perfect consistency between the network's economic state and local views.
 
-Local Events enable efficient coordination without claiming authority. The system serves two key purposes in this regard. First, it manages UI updates by notifying interfaces about content loads and chain state changes. Second, it handles synchronization status by tracking progress and managing the offline queue. The event store maintains a clean separation between authoritative state and local coordination, with events flowing to subscribers for UI updates while maintaining proper cleanup of historical events.
+The Vector State maintains authoritative control over content and semantic relationships. Built on Qdrant, this system provides the source of truth for messages and their embeddings. Content operations follow a strict pattern - store in the vector database first, then update local state for UI coordination. This maintains semantic coherence while enabling responsive user interfaces.
 
-UI State Management reacts to authoritative changes through a carefully coordinated view model pattern. The process begins by loading authoritative thread state from the blockchain, then retrieves associated messages from the vector store. The view models subscribe to local events for efficient updates while maintaining clean separation between source data and presentation layers.
+Local State Management enables efficient coordination without claiming authority. The system serves two key purposes in this regard. First, it manages UI updates by reflecting content loads and chain state changes. Second, it handles synchronization status by tracking progress and managing the offline queue. The system maintains a clean separation between authoritative state and local coordination while ensuring proper cleanup of historical data.
+
+UI State Management reacts to authoritative changes through a carefully coordinated view model pattern. The process begins by loading authoritative thread state from the blockchain, then retrieves associated messages from the vector store. The view models maintain clean separation between source data and presentation layers while enabling efficient updates.
 
 The system implements thorough state verification through dedicated verification actors. Chain state integrity verification ensures positive temperature values, valid frequency measurements, proper energy conservation across threads, and consistent token balances. Vector state integrity checks maintain message availability, embedding consistency, citation validity, and content coherence. Cross-state alignment verifies message hash consistency, thread state alignment, citation graph validity, and system-wide coherence.
 
-The state management system's strength emerges from several key aspects. Authority clarity flows from the blockchain's economic authority and vector stores' content mastery, creating clean coordination patterns and clear state ownership. State transitions manifest through atomic chain updates and vector store consistency, enabling local event propagation and seamless UI synchronization.
+The state management system's strength emerges from several key aspects. Authority clarity flows from the blockchain's economic authority and vector stores' content mastery, creating clean coordination patterns and clear state ownership. State transitions manifest through atomic chain updates and vector store consistency, enabling seamless UI synchronization.
 
-System coordination maintains stability through careful actor isolation and event-driven updates. This enables efficient local synchronization while ensuring clean error handling throughout the system. The verification patterns provide comprehensive oversight through state consistency checks, cross-system validation, integrity verification, and sophisticated error detection.
+System coordination maintains stability through careful actor isolation and structured state updates. This enables efficient local synchronization while ensuring clean error handling throughout the system. The verification patterns provide comprehensive oversight through state consistency checks, cross-system validation, integrity verification, and sophisticated error detection.
 
-Through this careful orchestration of state management patterns, the system maintains perfect consistency while enabling responsive local interactions. The interplay of authority hierarchies, state transitions, and verification systems creates a robust foundation for distributed state management that remains reliable even as the system scales and evolves.
+Through this careful orchestration of state management patterns, the system maintains perfect consistency while enabling responsive local interactions. The interplay of authority hierarchies, state transitions, and verification systems creates a robust foundation for state management that remains reliable even as the system scales and evolves.
 
 === File: docs/core_state_transitions.md ===
 
@@ -2782,19 +2791,19 @@ theory_dynamics
 
 VERSION theory_dynamics: 6.0
 
-The system dynamics evolve through coordinated services and network consensus, built upon invariant principles of event coherence, network consensus, and distributed learning, while making foundational assumptions about service coordination, network dynamics, and collective intelligence. This dynamic framework implements specific event types and pattern formation mechanisms that enable the system's evolution.
+Note: This document describes the complete theoretical framework for system dynamics. The initial TestFlight implementation will focus on core functionality, with the event-driven architecture and sophisticated pattern recognition described here planned for future development phases.
 
-At the implementation level, the system processes action events through a structured enum that tracks event progression from initiation through completion, including started events with input strings, processed events with response strings, and completed events with confidence measures. Similarly, experience events track the flow of knowledge processing, from search initiation through prior discovery and synthesis completion. These event structures maintain state hashes for chain verification and enable comprehensive event logging.
+The system dynamics evolve through coordinated services and network consensus, built upon invariant principles of coherence, consensus, and distributed learning, while making foundational assumptions about service coordination, network dynamics, and collective intelligence. This framework provides a roadmap for how the system will grow to support increasingly sophisticated interactions and pattern formation.
 
-Pattern formation emerges through network consensus, modeled by the pattern field equation ∂P/∂t = D∇²P + f(P,E), where P represents pattern strength, E denotes the event field, D indicates the diffusion coefficient, and f describes nonlinear coupling. This mathematical framework helps conceptualize pattern formation and strengthening across the network, potentially informing future analytics for measuring pattern evolution. Event coupling follows the model E(x,t) = ∑ᵢ Aᵢexp(ikᵢx - iωᵢt), where Aᵢ represents event amplitudes, kᵢ denotes pattern wavenumbers, and ωᵢ indicates event frequencies, providing insight into event interactions across the network.
+For the initial implementation, we focus on essential state management and basic service coordination to deliver a working app. The theoretical framework described here - including pattern formation, event processing, and sophisticated actor coordination - represents the system's planned evolution rather than immediate requirements.
 
-The system implements specific dynamics through precise formulas. Thread stake pricing follows the quantum harmonic oscillator equation E(n) = ℏω(n + 1/2), where n represents the stake level (quantum number), ω indicates the thread's organization level (frequency), and ℏ represents the reduced Planck constant. New message rewards implement a temporal decay model R(t) = R_total × k/(1 + kt)ln(1 + kT), distributing 2.5B tokens over four years with a decay constant of approximately 2.04. Prior value calculations use V(p) = B_t × Q(p)/∑Q(i), where treasury balance and quality scores determine value distribution.
+Pattern formation emerges through network consensus, modeled by the pattern field equation ∂P/∂t = D∇²P + f(P,E), where P represents pattern strength, E denotes the field state, D indicates the diffusion coefficient, and f describes nonlinear coupling. This mathematical framework helps conceptualize how patterns will form and strengthen across the network as it matures.
 
-Event processing occurs through sophisticated actor-based coordination. The EventProcessor actor manages network state, event logging, and service coordination, processing events through distributed networks, maintaining logs, obtaining network consensus, and updating patterns. Working in parallel, the PatternDetector actor analyzes network events to identify resonant patterns, maintaining pattern state and network synchronization.
+The system will eventually implement specific dynamics through precise formulas. Thread stake pricing follows the quantum harmonic oscillator equation E(n) = ℏω(n + 1/2), where n represents the stake level (quantum number), ω indicates the thread's organization level (frequency), and ℏ represents the reduced Planck constant. New message rewards implement a temporal decay model R(t) = R_total × k/(1 + kt)ln(1 + kT), distributing 2.5B tokens over four years with a decay constant of approximately 2.04. Prior value calculations use V(p) = B_t × Q(p)/∑Q(i), where treasury balance and quality scores determine value distribution.
 
-Implementation details focus on robust event storage and pattern evolution mechanisms. The EventStore model maintains comprehensive records of events, patterns, timestamps, and network state, with sophisticated synchronization across network layers. The PatternManager actor handles pattern evolution, updating patterns based on events, obtaining network consensus, and recording evolution patterns.
+Future implementation details will focus on robust state management and pattern evolution mechanisms. The system will maintain comprehensive records of patterns, timestamps, and network state, with sophisticated synchronization across network layers. Pattern management will handle evolution based on network consensus and state updates.
 
-This carefully orchestrated system ensures event coherence while maintaining network consensus and service coordination. The model preserves event integrity and enables pattern emergence while ensuring state consistency, knowledge growth, and value flow. Through this comprehensive approach, the dynamics create a self-organizing system that evolves through natural pattern formation and network consensus.
+This carefully orchestrated system ensures coherence while maintaining network consensus and service coordination. The model preserves state integrity and enables pattern emergence while ensuring consistency, knowledge growth, and value flow. Through this comprehensive approach, the dynamics create a self-organizing system that evolves through natural pattern formation and network consensus, building from an initial focused implementation to the full theoretical vision over time.
 
 === File: docs/theory_economics.md ===
 
@@ -2809,7 +2818,9 @@ theory_economics
 
 VERSION theory_economics: 6.0
 
-The economic model's foundation rests upon invariant principles of energy conservation, value coherence, and pattern stability, while making foundational assumptions about event-driven flow, network dynamics, and chain authority. At its core, the system implements quantum harmonic principles where value behaves like energy in a quantum system, exhibiting discrete levels and natural resonances.
+Note: This document describes the complete theoretical framework for the economic system. The initial TestFlight implementation will focus on core economic functionality, with the sophisticated event-driven mechanisms described here planned for post-funding development.
+
+The economic model's foundation rests upon invariant principles of energy conservation, value coherence, and pattern stability, while making foundational assumptions about natural value flow, network dynamics, and chain authority. At its core, the system implements quantum harmonic principles where value behaves like energy in a quantum system, exhibiting discrete levels and natural resonances.
 
 The quantum mechanical foundation is expressed through the energy level formula E(n) = ℏω(n + 1/2), where E(n) represents the energy of quantum level n, n denotes the quantum number, ω indicates natural frequency, and ℏ represents the reduced Planck constant. Just as electrons in atoms occupy specific energy levels, this principle finds direct implementation in thread stake pricing, where stake levels are quantized. Higher frequency threads, representing more organized and valuable content, require greater energy for participation, creating natural quality barriers.
 
@@ -2817,7 +2828,7 @@ The system's efficiency aligns with the concept of Carnot efficiency from thermo
 
 From a free energy minimization perspective, the system optimizes by transforming the environment to minimize aggregate uncertainty. This manifests through maximized incentives, unified value flow through the CHOIR token, reduced friction in high-stakes decisions, and focused collective growth. The model mirrors Carnot efficiency by optimizing value creation with minimal waste, similar to optimal energy conversion in thermodynamic systems.
 
-Thread temperature evolution follows thermodynamic principles through the formula T(E,N) = E/N, where temperature represents activity level and quality barriers. Energy flow follows dE/dt = ∑ᵢ δ(t - tᵢ)eᵢ - γE, with events adding energy while natural cooling creates dynamic equilibrium. Value transitions occur through structured events tracking stake flow and temperature changes, maintaining system-wide value conservation.
+Thread temperature evolution follows thermodynamic principles through the formula T(E,N) = E/N, where temperature represents activity level and quality barriers. Energy flow follows dE/dt = ∑ᵢ δ(t - tᵢ)eᵢ - γE, creating dynamic equilibrium through natural cooling processes. Value transitions maintain system-wide value conservation through careful state management.
 
 The system upholds strict value conservation through the equation V_total = V_chain + V_threads + V_treasury, where value, like energy in physical systems, transforms but neither creates nor destroys. Flow conservation ensures dV_total/dt = 0, maintaining economic integrity across all operations. Value crystallizes in metastable states following quantum principles, with energy barriers described by ΔE = kT * ln(ω_high / ω_low) and state transitions governed by P(transition) = A * exp(-ΔE / kT).
 
@@ -2834,7 +2845,9 @@ theory_foundation
 
 VERSION theory_foundation: 6.0
 
-The harmonic system foundation operates as a quantum field where events create waves of state change, built upon invariant principles of wave coherence, network consensus, and pattern emergence. The system makes foundational assumptions about service coordination, network dynamics, and collective intelligence, implementing these through precise mathematical models and practical formulas.
+Note: While this document describes the complete theoretical framework, the initial implementation focuses on delivering a working TestFlight app with core functionality. The event-driven architecture described here represents the system's eventual evolution but is not a requirement for the initial release.
+
+The harmonic system foundation operates as a quantum field where state changes propagate like waves, built upon invariant principles of wave coherence, network consensus, and pattern emergence. The system makes foundational assumptions about service coordination, network dynamics, and collective intelligence, implementing these through precise mathematical models and practical formulas.
 
 At the heart of the system lies the quantum harmonic oscillator, described by the fundamental formula E(n) = ℏω(n + 1/2). This equation from quantum mechanics, where E(n) represents the energy of quantum level n, n denotes the quantum number, ω indicates the natural frequency, and ℏ represents the reduced Planck constant, finds direct implementation in our thread stake pricing mechanism. The system extends this foundation through wave functions modeled as Ψ(x,t) = A cos(kx - ωt + φ), where amplitude A represents value/meaning strength, k indicates spatial frequency, ω describes temporal evolution, and φ captures context alignment.
 
@@ -2844,7 +2857,7 @@ State evolution follows quantum principles, with the state transition model |Ψ(
 
 The mathematical properties of the system encompass energy conservation, described by ∂E/∂t + ∇·j = 0, guiding our understanding of value conservation in the network. Phase coherence, expressed through ⟨Ψ₁|Ψ₂⟩ = ∫ Ψ₁*(x)Ψ₂(x)dx, provides a model for team alignment and consensus. Pattern evolution follows ∂P/∂t = D∇²P + f(P), offering insights into how patterns strengthen across the network.
 
-This theoretical foundation combines precise economic calculations with rich conceptual models, creating a system that bridges practical implementation with elegant theory. Built on quantum mechanics for pricing, wave mechanics for events, field theory for patterns, and network dynamics for evolution, the system achieves both practical effectiveness and theoretical sophistication. The true innovation lies in this seamless integration of precise implementations with powerful conceptual models, enabling a system that operates effectively while maintaining theoretical rigor.
+This theoretical foundation combines precise economic calculations with rich conceptual models, creating a system that bridges practical implementation with elegant theory. Built on quantum mechanics for pricing, wave mechanics for state changes, field theory for patterns, and network dynamics for evolution, the system achieves both practical effectiveness and theoretical sophistication. The initial implementation will focus on core functionality while laying the groundwork for this more sophisticated architecture to evolve naturally over time. The true innovation lies in this seamless integration of precise implementations with powerful conceptual models, enabling a system that operates effectively while maintaining theoretical rigor.
 
 === File: docs/theory_harmonic_intelligence.md ===
 
@@ -2859,6 +2872,8 @@ theory_harmonic_intelligence
 
 VERSION theory_harmonics: 6.0
 
+Note: This document describes the complete theoretical framework for distributed intelligence. The initial TestFlight implementation will focus on core functionality, with the sophisticated network mechanisms described here planned for post-funding development.
+
 At the core of Choir lies a profound realization: the principles governing physical phenomena—quantum mechanics, thermodynamics, and wave theory—serve as foundational models directly applicable to distributed intelligence and human collaboration. Built upon invariant principles of wave resonance, energy conservation, and pattern emergence, while making assumptions about quantum harmonic principles, Carnot efficiency optimization, and collective intelligence, the system achieves efficiency and resonance mirroring thermodynamic ideals.
 
 The quantum harmonic oscillator (QHO) formula E(n) = ℏω(n + 1/2) serves as the system's heartbeat, where E(n) represents the energy of the nth quantum level, n denotes the quantum number, ℏ indicates the reduced Planck constant, and ω represents the natural angular frequency. This formula finds direct implementation in thread stake pricing, where n represents quantized participation levels, ω corresponds to thread frequency (organization level), and ℏ ensures discrete engagement, creating natural quality barriers that encourage meaningful contributions.
@@ -2867,9 +2882,9 @@ The system's efficiency mirrors Carnot efficiency, representing the maximum poss
 
 Threads function analogously to enhanced automated market makers, avoiding token fracturing while driving value through co-authorship and content creation. This creates superior user experience by abstracting complex financial mechanisms into natural high-stakes decisions. From a free energy minimization perspective, the system optimizes by transforming the environment to reduce uncertainty, acting as an optimal data engine that enables value-maximizing content creation and fosters collaborative intelligence.
 
-Value and meaning flow through wave mechanics and resonance, where events create network ripples that propagate meaning like waves. When these waves align, they interfere constructively, strengthening patterns and leading to emergent value. Threads exist in metastable states, with quantized stakes creating energy barriers that prevent random fluctuations while enabling purposeful transitions. Thread temperature evolves through denials increasing energy and raising participation barriers, while approvals distribute energy among co-authors, enabling new metastable states.
+Value and meaning flow through wave mechanics and resonance, propagating through the network like waves in a medium. When these waves align, they interfere constructively, strengthening patterns and leading to emergent value. Threads exist in metastable states, with quantized stakes creating energy barriers that prevent random fluctuations while enabling purposeful transitions. Thread temperature evolves through natural processes, with denials increasing energy and raising participation barriers, while approvals distribute energy among co-authors.
 
-The system maintains strict value conservation, mimicking physical systems where value transforms rather than creates or destroys. Through this harmonious integration of principles, Choir emerges as a living network where collective consciousness arises through participant interaction resonance, quality content naturally resonates more strongly, and the network evolves organically through pattern, team, and knowledge structure formation.
+The system maintains strict value conservation, mimicking physical systems where value transforms rather than creates or destroys. Through this harmonious integration of principles, Choir emerges as a living network where collective consciousness arises through participant interactions, quality content naturally resonates more strongly, and the network evolves organically through pattern and knowledge structure formation.
 
 By grounding Choir in physics and thermodynamics principles, we achieve Carnot-like efficiency in value creation and distribution. This alignment with natural laws enhances platform effectiveness while fostering collaborative intelligence. We're not merely applying metaphors but implementing foundational principles, creating resonance between human collaboration and universal mechanics. This unlocks a new paradigm of social interaction and value creation, harmonious and aligned with reality's fundamental nature.
 

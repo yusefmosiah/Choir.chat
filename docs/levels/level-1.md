@@ -325,9 +325,11 @@ tree.md
 │   │   ├── level5.md
 │   │   └── level_organization.md
 │   ├── plan_carousel_ui_pattern.md
+│   ├── plan_client_architecture.md
 │   ├── plan_competitive.md
 │   ├── plan_docs_transform_prose.md
 │   ├── plan_post-training.md
+│   ├── plan_sui_blockchain_integration.md
 │   ├── plan_swiftdata_required_changes.md
 │   ├── plan_thoughtspace.md
 │   ├── plan_tokenomics.md
@@ -350,7 +352,7 @@ tree.md
 │   └── tree.md
 └── render.yaml
 
-49 directories, 152 files
+49 directories, 154 files
 
 === File: docs/CHANGELOG.md ===
 
@@ -364,6 +366,13 @@ CHANGELOG.md
 # Changelog
 
 ## [Unreleased]
+
+### Changed
+- Updated all documentation to version 6.0
+  - Transformed structured documentation into fluid prose
+  - Relaxed event-driven architecture requirements for initial TestFlight
+  - Clarified implementation priorities and post-funding features
+  - Maintained theoretical frameworks while focusing on core functionality
 
 ### Added
 - Initial Chorus cycle working in iOS simulator

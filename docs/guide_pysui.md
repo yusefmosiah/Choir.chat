@@ -2,7 +2,7 @@
 
 ## Overview
 
-This guide documents our implementation of PySUI for interacting with Sui smart contracts, specifically for the CHOIR token. Based on our deployment experience, we'll focus on working patterns and known issues.
+This guide documents our implementation of PySUI for interacting with Sui smart contracts, specifically for the CHIP token. Based on our deployment experience, we'll focus on working patterns and known issues.
 
 ## Key Components
 
