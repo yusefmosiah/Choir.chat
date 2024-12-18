@@ -315,7 +315,6 @@ tree.md
 │   │   ├── issue_8.md
 │   │   └── issue_9.md
 │   ├── levels
-│   │   ├── all.md
 │   │   ├── level-1.md
 │   │   ├── level0.md
 │   │   ├── level1.md
@@ -352,7 +351,7 @@ tree.md
 │   └── tree.md
 └── render.yaml
 
-49 directories, 154 files
+49 directories, 153 files
 
 === File: docs/CHANGELOG.md ===
 
