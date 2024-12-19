@@ -21,3 +21,7 @@ All of this manifests through Swift's modern concurrency system. Actors provide 
 The result is a system that combines economic incentives, semantic knowledge, and natural interaction patterns into a coherent whole. The blockchain provides economic integrity. The vector database enables semantic richness. Swift's concurrency model keeps it all running smoothly and safely.
 
 This architecture enables the system to evolve naturally. The semantic network grows organically through usage. The economic model creates emergent quality barriers. And the whole system maintains consistency through its clear hierarchy of truth and well-defined state management patterns.
+
+The Post Chain sits at the heart of our interaction model. Each user action flows through steps ensuring semantic richness, prior knowledge, and economic alignment.
+
+The integration of SAI (Social AI) further enhances this environment: KYC-verified operators can run AI agents that post, cite priors, and even participate in governance via futarchy. This merges human intent with AI-driven insights, producing a uniquely powerful collective intelligence engine.

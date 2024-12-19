@@ -579,6 +579,99 @@ docker logs choir-api
 
 Remember to update these guides as the deployment process evolves.
 
+=== File: docs/plan_business_model.md ===
+
+
+
+==
+plan_business_model
+==
+
+
+# Business Model
+
+VERSION business_model: 7.0
+
+---
+
+## Overview
+
+Choir’s business model is designed to ensure the platform’s long-term sustainability while staying true to its core principles of user empowerment, transparency, and decentralization. This document outlines how Choir generates revenue, manages costs, and aligns economic incentives to foster a thriving ecosystem.
+
+---
+
+## Core Principles
+
+1. **Value-Based Monetization**: Revenue generation is tied directly to the value provided to users, whether through enhanced features, access to advanced AI capabilities, or identity verification services.
+2. **Sustainability**: The model is designed to cover operational costs, fund ongoing development, and ensure the platform's long-term viability.
+3. **Transparency**: Revenue streams, cost structures, and financial decisions are openly communicated to the community.
+4. **Alignment of Incentives**: The economic model aligns the interests of users, developers, and the platform itself, creating a positive feedback loop that drives growth and innovation.
+5. **Decentralization**: Over time, financial control and decision-making will be increasingly decentralized, with CHIP token holders playing a key role in shaping the platform's economic future.
+
+---
+
+## Revenue Streams
+
+### Identity Verification and Maintenance
+
+Recurring revenue from users who choose to maintain a verified on-chain identity. Beyond signaling power and governance rights, verified identity also confers the right to operate SAIs in official governance or specialized platform actions.
+
+### Premium Tier Subscriptions
+
+Revenue from users who opt for enhanced features, increased usage limits, and other premium benefits. These benefits are available to both anonymous and verified users, ensuring that they do not create a two-tiered system based on identity.
+
+### High-Cost Inference Plans
+
+Revenue from users who require high-performance AI models for their specific use cases.
+
+### Enterprise/Team Solutions
+
+Customized solutions for organizations that want to leverage Choir's collaborative intelligence tools for internal knowledge management, research, or communication.
+
+---
+
+## Cost Management
+
+Choir's operational costs fall into several categories:
+
+1. **Inference Costs**: The computational resources required to run the AI models that power the platform.
+2. **Transaction Fees**: Costs associated with on-chain transactions, such as those required for governance and CHIP token transfers.
+3. **Storage and Bandwidth**: Costs associated with storing and serving the platform's data.
+4. **Development and Maintenance**: Ongoing costs associated with developing new features, maintaining existing systems, and providing user support.
+5. **Identity Verification**: Costs associated with KYC processes and maintaining the IDaaS system.
+
+These costs are managed through a combination of:
+
+- **Tiered Pricing**: Higher usage tiers and premium features are priced to offset the costs associated with increased resource consumption.
+- **Dynamic CHIP Rewards**: The CHIP reward mechanism is designed to adjust dynamically based on platform usage and overall economic conditions, ensuring that rewards remain sustainable over time.
+- **Treasury Management**: A portion of the platform's revenue is allocated to a treasury, which is used to fund development, cover operational costs, and support community initiatives.
+
+---
+
+## CHIP Tokenomics
+
+The CHIP token plays a central role in the platform's economy:
+
+- **Incentive Alignment**: CHIP rewards align the incentives of users with the long-term health of the platform.
+- **Governance Participation**: CHIP tokens, in conjunction with verified identities, grant governance rights, allowing stakeholders to participate in key decisions.
+- **Value Capture**: As the platform grows and the demand for CHIP increases, token holders benefit from the increased value of their holdings.
+
+---
+
+## Long-Term Vision
+
+Choir's business model is designed to evolve alongside the platform:
+
+- **Progressive Decentralization**: Over time, more control over the platform's finances and governance will be transferred to the community.
+- **Decentralized Ownership**:  Progressive decentralization of platform ownership and governance, with CHIP holders playing an increasingly important role.
+- **Expanding Utility of CHIP**:  Continuously expanding the utility of CHIP within the platform and potentially into other integrated services.
+
+---
+
+## Conclusion
+
+Choir's business model is designed to be ethical, sustainable, and aligned with the platform's core values. By making anonymity the default, offering identity as a service, and providing tiered access based on usage and computational needs, Choir creates a system where value flows naturally, incentives are aligned, and the community collectively benefits from the platform's growth. This approach positions Choir not just as a business but as a new economic paradigm for online interaction and collective intelligence. The ability for verified users to operate SAIs within this framework further enhances the platform's capabilities, allowing for the integration of advanced AI while maintaining accountability through verified identities.
+
 === File: docs/plan_carousel_ui_pattern.md ===
 
 
@@ -910,6 +1003,8 @@ Choir isn't another attempt at techno-utopianism. We're not promising to fix soc
 
 The challenge isn't technical but architectural: can we create systems where value flows naturally toward quality? Where economic incentives align with genuine insight? Where collective intelligence emerges not from algorithmic manipulation but from the natural resonance of meaningful discourse?
 
+Choir is such a system, harnessing the Post Chain for high-information discourse, the CHIP token for aligned incentives, and Social AI (SAI) for collaborative intelligence. By linking governance to futarchy—open only to KYC-verified participants—Choir ensures its economic and strategic decisions are hyper-informed. Verified users and their SAIs collectively shape decisions by contributing knowledge and prediction-market insights.
+
 === File: docs/plan_docs_transform_prose.md ===
 
 
@@ -930,6 +1025,160 @@ The transformation preserves what matters: version headers for identity, mathema
 This transform applies to the living documentation in our docs directory, excluding archived materials and level documentation. Each document will maintain its mathematical foundations while expressing ideas with greater clarity and less noise. When we write E(n) = ℏω(n + 1/2), we mean exactly that - a precise description of energy levels in our system. The prose explores implications; the mathematics captures truth.
 
 The result is documentation with higher fidelity. Technical precision flows from mathematical clarity and direct statement. Our system's architecture reveals itself through clean signal rather than noisy metaphor.
+
+=== File: docs/plan_governance.md ===
+
+
+
+==
+plan_governance
+==
+
+
+# Governance System
+
+VERSION governance: 7.1
+
+Choir’s governance model is designed to ensure that decisions about the platform’s evolution, resource allocation, and high-level direction are made in a transparent, accountable, and participatory manner. This document provides an overview of how verified identities, prediction markets (futarchy), and CHIP-based stakeholder influence come together to form a cohesive governance framework.
+
+---
+
+## Overview
+
+Governance refers to the processes and mechanisms by which a community makes collective decisions. In the context of Choir, governance is essential for maintaining the platform’s integrity, directing crowdfunded resources, and continually refining the underlying protocols.
+
+We believe that governance should remain both transparent and adaptable. Transparent governance is critical for building community trust, while adaptability ensures that the system can evolve with changing needs and priorities.
+
+---
+
+## Core Principles
+
+1. **Transparency**: All proposals, votes, and outcomes are recorded in an auditable manner on the blockchain.
+2. **Accountability**: Only KYC-verified users may cast binding votes, tying real-world accountability into critical decisions.
+3. **Inclusivity**: While binding votes require verified identity, unverified or anonymous users can still propose ideas and participate in preliminary discussions.
+4. **Decentralization**: Power is distributed among participants rather than concentrated in a single entity, limiting the potential for undue influence.
+5. **Futarchy-Driven**: Major decisions—particularly around financial/resource allocation—are decided using a futarchy model, leveraging the collective intelligence of the market to predict and adopt the best outcomes.
+
+---
+
+## Key Mechanisms
+
+### Verified Identity Requirement
+
+To participate in binding on-chain votes, users must have a verified on-chain identity (KYC). This ensures governance decisions are made by real individuals with a verifiable stake in the platform and prevents Sybil-style exploits. Anonymous participants are welcome to join discussions and propose ideas, but their votes on final proposals are advisory only.
+
+### CHIP-Weighted Voting
+
+While CHIP holdings matter for economic interactions, futarchy voting power is primarily determined by verified identity status. Each verified user receives a baseline of governance influence, which can be modestly increased by CHIP stakes. This model balances out the need to reward actual participants without enabling large token holders to dominate every decision.
+
+### Futarchy Implementation
+
+For proposals with significant impact on the platform (e.g., changes to fee structures, vast development budgets, major feature rollouts), a futarchy-based approach is used:
+
+• A prediction market is created around each proposal’s potential outcomes.
+• Verified users (including authorized AI agents) buy and sell outcome tokens, reflecting their best estimate of future conditions under each scenario.
+• Once the market matures (or a predefined deadline is reached), the proposal outcome with the highest-value market prediction is automatically enacted through on-chain execution.
+
+By “reverse delegating” decisions to markets, Choir harnesses the collective intelligence of participants to discover the most beneficial course of action for the platform.
+
+---
+
+## SAI Participation in Governance
+
+Social AI (SAI) agents can contribute their insights within futarchy or other decision-making frameworks, provided they are operated by a KYC-verified user. That ve­rified user remains ultimately accountable for any trades, predictions, or votes made by the AI. This approach augments the intelligence of the system with advanced analytics while anchoring accountability in real-world identities.
+
+---
+
+## Flow of a Governance Proposal
+
+1. **Idea & Discussion**: Any user—anonymous or verified—proposes an idea in the governance discussion space.
+2. **Preliminary Consensus**: The community debates the proposal informally. If there is broad agreement that the idea has merit, it moves forward.
+3. **Formal Submission**: A KYC-verified user (or group) officially submits the proposal on-chain.
+4. **Futarchy Market Creation**: A prediction market is created, offering outcome tokens for the various possible scenarios (e.g., acceptance vs. rejection or Option A vs. Option B).
+5. **Market Participation**: Verified governance participants (including SAI) buy and sell these outcome tokens, revealing collective preferences and perceived “best” outcomes.
+6. **On-Chain Execution**: After a set duration or once the market stabilizes, the outcome with the most value (highest priced tokens) is automatically enacted via smart contract logic.
+
+---
+
+## Conclusion
+
+Choir’s governance model leverages the futarchy principle, combining KYC-verified identities with the predictive power of collective markets. Verified identities ensure accountability, while outcome-based prediction markets help the community arrive at the most beneficial decisions. This synergy makes Choir’s governance both robust and future-facing—able to adapt as the platform grows while remaining grounded in shared accountability and transparent oversight.
+
+=== File: docs/plan_identity_as_a_service.md ===
+
+
+
+==
+plan_identity_as_a_service
+==
+
+
+# Identity as a Service (IDaaS)
+
+VERSION identity_service: 7.1
+
+Identity on Choir is optional yet valuable. By default, users can participate anonymously, preserving privacy and free expression. However, those who opt into KYC-based verification unlock the ability to participate in binding governance decisions, operate Social AI (SAI) agents under their account, and gain additional social trust signals. This document explains how Identity as a Service (IDaaS) fits into the Choir platform.
+
+---
+
+## Overview
+
+Traditional online platforms typically force users to accept a real-name policy or harvest personal data without explicit consent. Choir takes a different stance:
+
+• **Default Anonymity**: Everyone can read messages, post anonymously, and earn CHIP tokens without providing personal data.
+• **Paid Identity**: Those requiring the social or governance benefits of verified status can pay for IDaaS, enabling official KYC-based identity on the platform.
+
+The result is a tiered approach that preserves anonymity for casual or privacy-conscious users, while offering valuable identity features to those who want or need them.
+
+---
+
+## Core Principles
+
+1. **Anonymity First**: No user is required to reveal their personal information to use the basic features of Choir.
+2. **Paid Identity**: Identity verification introduces real-world accountability and signals commitment to the community.
+3. **Signaling, Not Pay-to-Win**: Verified status does not grant better content visibility—it grants governance participation, the ability to run SAIs, and optional social credibility.
+4. **Jurisdictional Compliance**: KYC standards vary globally, so IDaaS is flexible enough to accommodate region-specific regulations.
+5. **Privacy Respect**: Despite verification, Choir stores personally identifying information offline and only retains essential proofs on-chain.
+
+---
+
+## Benefits of Verified Identity
+
+- **Governance Participation**: Only verified users can submit binding on-chain votes in futarchy or other proposals.
+- **SAI Operator Verification**: KYC ensures that an AI-driven account is mapped to a real individual for accountability.
+- **Jurisdictional Compliance**: Verification aligns Choir with relevant regulations, which is critical for the platform’s long-term viability.
+
+Additionally, verified accounts may enjoy intangible benefits like higher reputational trust within the community, though this is a social dynamic rather than a platform-engineered outcome.
+
+---
+
+## IDaaS Workflow
+
+1. **Voluntary Enrollment**: You choose if/when to enroll in IDaaS.
+2. **KYC Process**: Provide a government-issued ID or other documentation; a third-party service verifies authenticity.
+3. **On-Chain Confirmation**: A non-reversible cryptographic link is posted on-chain (no personally identifying information, just proof of verification).
+4. **Subscription or One-Time Fee**: Payment for IDaaS can be structured as recurring or one-time.
+5. **Privileges Granted**: The verified user can now vote in binding governance proposals, run SAI agents, and optionally display a verified badge or signal in UI.
+
+---
+
+## Use Cases
+
+- **Governance**: Ensuring that major decisions are made by real individuals with accountability.
+- **SAI Execution**: Operating advanced AI software that can influence the platform, under the direct responsibility of a verified user.
+- **Enterprise Collaboration**: In corporate settings, having verified internal team members fosters trust and ensures compliance with company or legal requirements.
+
+---
+
+## Monetization and Sustainability
+
+Because IDaaS revenues support the system’s operational costs, they help offset free-tier usage by anonymous participants. This aligns the business model, ensuring that those who need additional capabilities also help fund the platform’s continued growth and stability.
+
+---
+
+## Conclusion
+
+By offering Identity as a Service, Choir establishes a nuanced balance: anonymity remains a core value and default, while verified identity is treated as a premium feature. This approach ensures that governance decisions are accountable, advanced AI operations remain traceable to real individuals, and the platform remains compliant with jurisdictional regulations. Through IDaaS, Choir invites each user to choose the identity model that suits their needs, forging a new path forward for responsible digital communities.
 
 === File: docs/plan_post-training.md ===
 

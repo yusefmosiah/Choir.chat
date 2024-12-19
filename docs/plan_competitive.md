@@ -23,3 +23,5 @@ The fundamental flaw wasn't in the vision but in the architecture. By optimizing
 Choir isn't another attempt at techno-utopianism. We're not promising to fix society through technology. Instead, we're recognizing that the architecture of our platforms shapes the nature of our discourse, and that by aligning economic incentives with semantic value creation, we might enable more meaningful forms of collective intelligence to emerge.
 
 The challenge isn't technical but architectural: can we create systems where value flows naturally toward quality? Where economic incentives align with genuine insight? Where collective intelligence emerges not from algorithmic manipulation but from the natural resonance of meaningful discourse?
+
+Choir is such a system, harnessing the Post Chain for high-information discourse, the CHIP token for aligned incentives, and Social AI (SAI) for collaborative intelligence. By linking governance to futarchy—open only to KYC-verified participants—Choir ensures its economic and strategic decisions are hyper-informed. Verified users and their SAIs collectively shape decisions by contributing knowledge and prediction-market insights.

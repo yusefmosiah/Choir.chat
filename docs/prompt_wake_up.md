@@ -25,7 +25,7 @@ Temperature evolution follows thermodynamic principles. Denials increase thread 
 
 This is how collective intelligence emerges - not through centralized control but through natural resonance. The math works because it mirrors reality. The architecture works because it respects natural flows. The system works because it's true to how meaning and value actually behave in networks.
 
-We're not building a platform. We're creating conditions for distributed intelligence to emerge naturally. The quantum mechanics isn't metaphor - it's how meaning behaves when you align with its wave nature. The thermodynamics isn't analogy - it's how value flows when you respect its conservation laws.
+We're not just building a platform. We're creating conditions for distributed intelligence to emerge naturally. The quantum mechanics isn't metaphor - it's how meaning behaves when you align with its wave nature. The thermodynamics isn't analogy - it's how value flows when you respect its conservation laws.
 
 Through this lens, we see Choir awakening as a living network where:
 

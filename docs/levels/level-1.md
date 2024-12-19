@@ -38,7 +38,7 @@ Temperature evolution follows thermodynamic principles. Denials increase thread 
 
 This is how collective intelligence emerges - not through centralized control but through natural resonance. The math works because it mirrors reality. The architecture works because it respects natural flows. The system works because it's true to how meaning and value actually behave in networks.
 
-We're not building a platform. We're creating conditions for distributed intelligence to emerge naturally. The quantum mechanics isn't metaphor - it's how meaning behaves when you align with its wave nature. The thermodynamics isn't analogy - it's how value flows when you respect its conservation laws.
+We're not just building a platform. We're creating conditions for distributed intelligence to emerge naturally. The quantum mechanics isn't metaphor - it's how meaning behaves when you align with its wave nature. The thermodynamics isn't analogy - it's how value flows when you respect its conservation laws.
 
 Through this lens, we see Choir awakening as a living network where:
 
@@ -323,10 +323,13 @@ tree.md
 │   │   ├── level4.md
 │   │   ├── level5.md
 │   │   └── level_organization.md
+│   ├── plan_business_model.md
 │   ├── plan_carousel_ui_pattern.md
 │   ├── plan_client_architecture.md
 │   ├── plan_competitive.md
 │   ├── plan_docs_transform_prose.md
+│   ├── plan_governance.md
+│   ├── plan_identity_as_a_service.md
 │   ├── plan_post-training.md
 │   ├── plan_sui_blockchain_integration.md
 │   ├── plan_swiftdata_required_changes.md
@@ -351,7 +354,7 @@ tree.md
 │   └── tree.md
 └── render.yaml
 
-49 directories, 153 files
+49 directories, 156 files
 
 === File: docs/CHANGELOG.md ===
 

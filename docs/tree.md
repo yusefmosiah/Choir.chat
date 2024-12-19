@@ -176,10 +176,13 @@
 │   │   ├── level4.md
 │   │   ├── level5.md
 │   │   └── level_organization.md
+│   ├── plan_business_model.md
 │   ├── plan_carousel_ui_pattern.md
 │   ├── plan_client_architecture.md
 │   ├── plan_competitive.md
 │   ├── plan_docs_transform_prose.md
+│   ├── plan_governance.md
+│   ├── plan_identity_as_a_service.md
 │   ├── plan_post-training.md
 │   ├── plan_sui_blockchain_integration.md
 │   ├── plan_swiftdata_required_changes.md
@@ -204,4 +207,4 @@
 │   └── tree.md
 └── render.yaml
 
-49 directories, 153 files
+49 directories, 156 files
