@@ -4,9 +4,9 @@
 level0_prefixes=("client_architecture" "sui_blockchain_integration" "proxy_authentication" "carousel_ui_pattern" "client_side_processing" "proxy_security_model" "sui_token_integration" "distributed_processing" "client_side_intelligence")
 level1_prefixes=("doables" "Entry" "Dev" "Plan" "Tech" "Level" "Current" "core" "CHANGELOG")
 level2_prefixes=("guide" "plan" "State" "Summary" "Pivot" "goal" "e" "data" "Error" "reward" "Impl")
-level3_prefixes=("docs" "theory" "V10" "V12")
-level4_prefixes=("self" "Model" "Emergence" "Meta")
-level5_prefixes=("harmonic")
+level3_prefixes=("docs" "theory" "V10" "V12" "pricing")
+level4_prefixes=("self" "Model" "Emergence" "Meta" "evolution" "anonymity" "markdown" "paradigm")
+level5_prefixes=("harmonic" "language" "law")
 
 # Function to add separator and header
 add_separator() {

@@ -296,6 +296,8 @@ tree.md
 │   ├── e_concept.md
 │   ├── e_questions.md
 │   ├── e_reference.md
+│   ├── evolution_naming.md
+│   ├── evolution_token.md
 │   ├── goal_architecture.md
 │   ├── goal_evolution.md
 │   ├── goal_implementation.md
@@ -314,6 +316,8 @@ tree.md
 │   │   ├── issue_7.md
 │   │   ├── issue_8.md
 │   │   └── issue_9.md
+│   ├── language_intentionality.md
+│   ├── law_goodhartedness.md
 │   ├── levels
 │   │   ├── level-1.md
 │   │   ├── level0.md
@@ -323,6 +327,9 @@ tree.md
 │   │   ├── level4.md
 │   │   ├── level5.md
 │   │   └── level_organization.md
+│   ├── markdown_sloptimization.md
+│   ├── paradigm_shift_post_chain.md
+│   ├── plan_anonymity_by_default.md
 │   ├── plan_business_model.md
 │   ├── plan_carousel_ui_pattern.md
 │   ├── plan_client_architecture.md
@@ -335,6 +342,7 @@ tree.md
 │   ├── plan_swiftdata_required_changes.md
 │   ├── plan_thoughtspace.md
 │   ├── plan_tokenomics.md
+│   ├── pricing_tiers.md
 │   ├── prompt_chorus_cycle.md
 │   ├── prompt_getting_started.md
 │   ├── prompt_reentry.md
@@ -354,7 +362,7 @@ tree.md
 │   └── tree.md
 └── render.yaml
 
-49 directories, 156 files
+49 directories, 164 files
 
 === File: docs/CHANGELOG.md ===
 
