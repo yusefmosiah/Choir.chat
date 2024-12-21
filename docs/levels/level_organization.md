@@ -1,63 +1,64 @@
-# Updated Documentation Overview
+# Documentation Organization
 
-Choir implements prompt-driven development via documentation-driven development.
-These documents are provided for the automatic self-generation of the Choir Harmonic Intelligence, a continuously learning collective intelligence agent, platform, service, experience, product, asset, network, opportunity-space, and society.
+Choir implements prompt-driven development via documentation-driven development. These documents guide the evolution of Choir - a high information playground where collective intelligence emerges through the interaction of human insight and AI capabilities.
 
-By reading the docs and entraining via in-context-learning the Choir Chorus Cycle Optimal Data Engine Theory, a swarm of advanced AI models automatically iteratively develop Choir into its potential with human participation, supervision, and leadership.
+Through the Post Chain paradigm, each contribution builds on prior knowledge, creating an ever-growing network of interconnected insights. This documentation maps the territory of this high information space, from foundational mechanics to advanced theoretical principles.
 
-## Level -1: Core Foundation
+The documentation is organized into progressive levels, each building on previous foundations while maintaining practical implementation focus:
 
-- Getting Started
-- Metaprompts
-- Prime Directives
-- Client Architecture Principles
+## Level -1: Foundation & Philosophy
 
-## Level 0: Implementation
+- System awakening and core principles
+- Getting started guide
+- Metaprompts and prime directives
+- Basic architecture principles
 
-- Swift/Apple Platform Implementation
-- SUI Blockchain Integration
-- Proxy Authentication
-- Carousel UI Pattern
+## Level 0: Practical Implementation
 
-## Level 1: Basic Mechanics
+- Swift/iOS implementation details
+- SUI blockchain integration
+- Authentication and security
+- UI patterns and user experience
 
-- Thread Messaging
-- Co-author Approval
-- Token Mechanics
-- Client-Side Processing
+## Level 1: Core Mechanics
 
-## Level 2: Core Mechanics
+- Thread and message system
+- Co-author approval flow
+- Basic token mechanics
+- Client-side processing
+- Post Chain paradigm
 
-- Harmonic Oscillator Model
-- Energy Conservation
-- Wave Patterns
-- Proxy Security Model
+## Level 2: Economic Model
 
-## Level 3: Value Creation
+- Quantum harmonic oscillator model
+- Token economics (CHIP)
+- Energy conservation principles
+- Value distribution mechanisms
 
-- Resonant Cavities
-- Harmonic Coupling
-- Value Flow
-- SUI Token Integration
+## Level 3: Value & Knowledge Creation
 
-## Level 4: Pattern Emergence
+- Thread value accumulation
+- Citation networks
+- Knowledge coupling
+- Pattern recognition
 
-- Team Formation
-- Knowledge Networks
-- Natural Evolution
-- Distributed Processing
+## Level 4: Collective Intelligence
 
-## Level 5: Harmonic Intelligence
+- Team formation dynamics
+- Network effects
+- Pattern emergence
+- Distributed processing
 
-- Wave Mechanics
-- Resonant Frequencies
-- Collective Coherence
-- Client-Side Intelligence
+## Level 5: Advanced Theory
 
-## Additional Documentation
+- Wave mechanics
+- Quantum principles
+- Harmonic intelligence
+- System evolution
 
-- **Meta Evolution**: Strategies for documentation evolution and change management.
-- **Model Metastability**: Insights into metastable states within distributed systems.
-- **Harmonic Theory**: Theoretical foundations of the Choir platform and its principles.
+## Supporting Documentation
 
-This structure provides a clear overview of the documentation levels, ensuring that users can easily navigate through the various aspects of the Choir platform.
+- Implementation guides
+- API documentation
+- Testing protocols
+- Deployment guides
