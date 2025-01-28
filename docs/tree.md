@@ -131,32 +131,14 @@
 ├── docker-compose.yml
 ├── docs
 │   ├── CHANGELOG.md
-│   ├── Impl_Security.md
-│   ├── Meta_Evolution.md
-│   ├── Model_Foundation_Evolution.md
-│   ├── Model_Metastability.md
-│   ├── core_architecture.md
-│   ├── core_chorus.md
 │   ├── core_core.md
 │   ├── core_economics.md
-│   ├── core_knowledge.md
-│   ├── core_patterns.md
-│   ├── core_state.md
 │   ├── core_state_transitions.md
 │   ├── data_engine_model.md
-│   ├── docs_dev_principles.md
 │   ├── e_business.md
 │   ├── e_concept.md
-│   ├── e_questions.md
-│   ├── e_reference.md
 │   ├── evolution_naming.md
 │   ├── evolution_token.md
-│   ├── goal_architecture.md
-│   ├── goal_evolution.md
-│   ├── goal_implementation.md
-│   ├── guide_pysui.md
-│   ├── guide_render_checklist_updated.md
-│   ├── harmonic_intelligence.md
 │   ├── issues
 │   │   ├── issue_0.md
 │   │   ├── issue_1.md
@@ -169,8 +151,6 @@
 │   │   ├── issue_7.md
 │   │   ├── issue_8.md
 │   │   └── issue_9.md
-│   ├── language_intentionality.md
-│   ├── law_goodhartedness.md
 │   ├── levels
 │   │   ├── level-1.md
 │   │   ├── level0.md
@@ -180,39 +160,12 @@
 │   │   ├── level4.md
 │   │   ├── level5.md
 │   │   └── level_organization.md
-│   ├── markdown_sloptimization.md
-│   ├── paradigm_shift_post_chain.md
 │   ├── plan_anonymity_by_default.md
-│   ├── plan_business_model.md
-│   ├── plan_carousel_ui_pattern.md
-│   ├── plan_client_architecture.md
-│   ├── plan_competitive.md
-│   ├── plan_docs_transform_prose.md
-│   ├── plan_governance.md
 │   ├── plan_identity_as_a_service.md
-│   ├── plan_post-training.md
-│   ├── plan_sui_blockchain_integration.md
-│   ├── plan_swiftdata_required_changes.md
-│   ├── plan_thoughtspace.md
-│   ├── plan_tokenomics.md
-│   ├── pricing_tiers.md
-│   ├── prompt_chorus_cycle.md
-│   ├── prompt_getting_started.md
-│   ├── prompt_reentry.md
-│   ├── prompt_summary_prompt.md
-│   ├── prompt_wake_up.md
-│   ├── reward_model.md
 │   ├── scripts
 │   │   ├── combiner.sh
 │   │   └── update_tree.sh
-│   ├── theory_choir_harmonics.md
-│   ├── theory_dynamics.md
-│   ├── theory_economics.md
-│   ├── theory_foundation.md
-│   ├── theory_harmonic_intelligence.md
-│   ├── theory_oscillator_cooling.md
-│   ├── theory_theory.md
 │   └── tree.md
 └── render.yaml
 
-49 directories, 164 files
+49 directories, 117 files
