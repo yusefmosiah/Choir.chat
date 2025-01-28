@@ -139,26 +139,7 @@
 │   ├── e_concept.md
 │   ├── evolution_naming.md
 │   ├── evolution_token.md
-│   ├── issues
-│   │   ├── issue_0.md
-│   │   ├── issue_1.md
-│   │   ├── issue_10.md
-│   │   ├── issue_11.md
-│   │   ├── issue_12.md
-│   │   ├── issue_13.md
-│   │   ├── issue_2.md
-│   │   ├── issue_5.md
-│   │   ├── issue_7.md
-│   │   ├── issue_8.md
-│   │   └── issue_9.md
 │   ├── levels
-│   │   ├── level-1.md
-│   │   ├── level0.md
-│   │   ├── level1.md
-│   │   ├── level2.md
-│   │   ├── level3.md
-│   │   ├── level4.md
-│   │   ├── level5.md
 │   │   └── level_organization.md
 │   ├── plan_anonymity_by_default.md
 │   ├── plan_identity_as_a_service.md
@@ -168,4 +149,4 @@
 │   └── tree.md
 └── render.yaml
 
-49 directories, 117 files
+48 directories, 99 files
