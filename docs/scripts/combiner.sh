@@ -2,10 +2,10 @@
 
 # Define level prefixes as simple arrays
 level0_prefixes=("client_architecture" "sui_blockchain_integration" "proxy_authentication" "carousel_ui_pattern" "client_side_processing" "proxy_security_model" "sui_token_integration" "distributed_processing" "client_side_intelligence")
-level1_prefixes=("doables" "Entry" "Dev" "Plan" "Tech" "Level" "Current" "core" "CHANGELOG")
-level2_prefixes=("guide" "plan" "State" "Summary" "Pivot" "goal" "e" "data" "Error" "reward" "Impl")
+level1_prefixes=("doables" "Entry" "Dev" "Plan" "Tech" "Level" "Current" "core")
+level2_prefixes=("guide" "plan" "State" "Summary" "Pivot" "goal" "e" "Error" "reward" "Impl" "evolution")
 level3_prefixes=("docs" "theory" "V10" "V12" "pricing")
-level4_prefixes=("self" "Model" "Emergence" "Meta" "evolution" "anonymity" "markdown" "paradigm")
+level4_prefixes=("self" "Model" "Emergence" "Meta" "anonymity" "markdown" "paradigm" "data")
 level5_prefixes=("harmonic" "language" "law")
 
 # Function to add separator and header

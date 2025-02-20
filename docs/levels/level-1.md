@@ -153,13 +153,6 @@ tree.md
 │   ├── evolution_naming.md
 │   ├── evolution_token.md
 │   ├── levels
-│   │   ├── level-1.md
-│   │   ├── level0.md
-│   │   ├── level1.md
-│   │   ├── level2.md
-│   │   ├── level3.md
-│   │   ├── level4.md
-│   │   ├── level5.md
 │   │   └── level_organization.md
 │   ├── plan_anonymity_by_default.md
 │   ├── plan_identity_as_a_service.md
@@ -169,7 +162,7 @@ tree.md
 │   └── tree.md
 └── render.yaml
 
-48 directories, 106 files
+48 directories, 99 files
 
 === File: docs/CHANGELOG.md ===
 
