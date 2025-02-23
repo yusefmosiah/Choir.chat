@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# Define level prefixes as simple arrays
-level0_prefixes=("client_architecture" "sui_blockchain_integration" "proxy_authentication" "carousel_ui_pattern" "client_side_processing" "proxy_security_model" "sui_token_integration" "distributed_processing" "client_side_intelligence")
-level1_prefixes=("doables" "Entry" "Dev" "Plan" "Tech" "Level" "Current" "core")
-level2_prefixes=("guide" "plan" "State" "Summary" "Pivot" "goal" "e" "Error" "reward" "Impl" "evolution")
-level3_prefixes=("docs" "theory" "V10" "V12" "pricing")
-level4_prefixes=("self" "Model" "Emergence" "Meta" "anonymity" "markdown" "paradigm" "data")
-level5_prefixes=("harmonic" "language" "law")
+# Revised prefix arrays
+level0_prefixes=("client" "sui" "proxy" "carousel" "distributed")  # Basic technical integration
+level1_prefixes=("core" "Tech" "Dev" "Service" "Coordinator")  # Core system components
+level2_prefixes=("e" "reward" "Error" "Impl")           # Business/concept/implementation
+level3_prefixes=("plan" "state" "economic" "vector" "chain")               # State/economic models
+level4_prefixes=("evolution" "theory" "Model" "Emergence" "anonymity")     # Theoretical frameworks
+level5_prefixes=("data" "harmonic" "language" "law" "quantum")             # Foundational principles
 
 # Function to add separator and header
 add_separator() {

@@ -147,8 +147,7 @@
 │   │   ├── level2.md
 │   │   ├── level3.md
 │   │   ├── level4.md
-│   │   ├── level5.md
-│   │   └── level_organization.md
+│   │   └── level5.md
 │   ├── plan_anonymity_by_default.md
 │   ├── plan_identity_as_a_service.md
 │   ├── scripts
@@ -157,4 +156,4 @@
 │   └── tree.md
 └── render.yaml
 
-48 directories, 107 files
+48 directories, 106 files
