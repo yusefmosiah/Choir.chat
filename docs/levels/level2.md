@@ -33,6 +33,8 @@ Success metrics reflect our natural approach. Quality metrics track team formati
 
 Through this model, Choir maintains sustainable business operations while enabling natural value creation at all scales. We grow by strengthening the natural flows of quality, collaboration, and collective intelligence. Join us in building a platform where business success aligns perfectly with user value creation - where growth comes from enabling natural patterns of collaboration and knowledge sharing rather than artificial engagement metrics or data extraction.
 
+Thread stake prices rise in response to rejections and fall with approvals—following a quantum anharmonic oscillator model. In this scheme, the effective anharmonic coefficient (K₀) is increased when refusals accumulate, resulting in higher stake requirements, and conversely, strong approval lowers the cost barrier. This dynamic pricing creates natural quality barriers.
+
 === File: docs/e_concept.md ===
 
 
@@ -56,7 +58,7 @@ The system evolves through natural phases that mirror physical processes. In the
 
 Unlike traditional platforms that extract value, Choir creates spaces where value naturally accumulates through multiple channels. Threads act as resonant cavities, accumulating energy through quality interactions. Denials strengthen the thread itself rather than being wasted, teams share in their thread's growing value, and natural incentives align toward quality. Network value grows as citations create flows between threads, knowledge networks emerge organically, teams build on each other's work, and system-wide coherence develops naturally. The treasury maintains sustainable value flow by capturing split decisions and funding ongoing citations, enabling perpetual rewards that benefit the entire ecosystem.
 
-Quality emerges through natural principles that mirror physical laws. Temperature dynamics create natural quality filters, with hot threads demanding elevated stakes during high activity while cool threads enable accessible exploration during stable periods. Natural cooling ensures sustainable evolution without needing artificial reputation systems. Frequency effects indicate organizational coherence, with higher frequencies reflecting better organization as teams strengthen thread coherence and communities crystallize around value. Energy conservation ensures total system value remains preserved, with flows finding efficient paths that minimize waste and enable sustainable growth.
+Dynamic stake evolution creates natural quality filters. Threads that accumulate many refusals (thereby increasing the effective anharmonic coefficient) demand elevated stakes, while those with strong approval enable lower-cost participation. This mechanism—rooted in quantum anharmonic oscillator principles—ensures that value is distributed in proportion to the quality of contributions.
 
 The future vision of Choir enables a new kind of collaborative intelligence. Natural teams form around resonant ideas, share in collective value, build on each other's work, and evolve sustainably. Knowledge networks connect naturally through citations, strengthen through use, create emergent insights, and enable collective intelligence. Value creation emerges from natural patterns, accumulates in stable forms, flows efficiently, and benefits all participants.
 

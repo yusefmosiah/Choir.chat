@@ -4,7 +4,7 @@ VERSION core_system: 6.0
 
 Note: This document describes the core system architecture, with initial focus on TestFlight functionality. More sophisticated event-driven mechanisms described here will be implemented post-funding.
 
-The Choir system is built around a clear hierarchy of truth and state management. At its foundation, the blockchain serves as the authoritative source for all ownership and economic state - thread ownership, token balances, message hashes, and co-author lists. This ensures that the economic model, with its harmonic equity distribution and thermodynamic thread evolution, has an immutable and verifiable foundation.
+The Choir system is built around a clear hierarchy of truth and state management. At its foundation, the blockchain serves as the authoritative source for all ownership and economic state – thread ownership, token balances, message hashes, and co-author lists. This ensures that the economic model, with its harmonic equity distribution and quantum anharmonic thread evolution (where dynamic stake pricing is driven by approval/refusal feedback), has an immutable and verifiable foundation.
 
 Alongside the blockchain, Qdrant acts as the authoritative source for all content and semantic relationships. It stores the actual message content, embeddings, and the growing network of citations and semantic links. This separation of concerns allows the system to maintain both economic integrity through the blockchain and rich semantic relationships through the vector database.
 
@@ -12,7 +12,7 @@ The AEIOU-Y chorus cycle sits at the heart of the interaction model, processing 
 
 State updates flow naturally between these components. When a user submits input, the system coordinates necessary updates across the UI, blockchain, and vector store. The chorus cycle processes the input while maintaining system state consistency. These state changes are carefully managed to maintain data integrity and system coherence.
 
-The economic model uses harmonic principles to govern thread evolution and value distribution. Thread temperature rises with rejections and moderates with approvals, creating natural quality barriers. Equity is distributed according to harmonic formulas, ensuring fair value attribution while maintaining mathematical elegance.
+The economic model employs QAHO-based dynamics: the base stake price increases when a thread receives many refusals (via an uptick in an effective anharmonic coefficient, K₀) and decreases with strong approval—thus naturally filtering quality. Equity is distributed according to harmonic formulas, ensuring fair value attribution while maintaining mathematical elegance.
 
 The knowledge system builds a growing semantic network through citations and prior references. Each message can reference previous messages as priors, creating a web of semantic relationships. These relationships are stored in Qdrant and help inform future responses through the Experience step of the chorus cycle.
 

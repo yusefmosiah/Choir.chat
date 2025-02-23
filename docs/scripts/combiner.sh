@@ -91,6 +91,11 @@ for level in {0..5}; do
     process_level $level
 done
 
+# Concatenate all levels into a single file
+echo "Combining all levels into one file..."
+mkdir -p docs/levels
+cat docs/levels/level-1.md docs/levels/level{0..5}.md > docs/levels/all.txt
+
 # Check for uncategorized files
 echo -e "\nUncategorized files:"
 uncategorized=0

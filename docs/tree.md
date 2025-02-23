@@ -140,7 +140,6 @@
 │   ├── evolution_naming.md
 │   ├── evolution_token.md
 │   ├── levels
-│   │   ├── all.md
 │   │   ├── all.txt
 │   │   ├── level-1.md
 │   │   ├── level0.md
@@ -158,4 +157,4 @@
 │   └── tree.md
 └── render.yaml
 
-48 directories, 108 files
+48 directories, 107 files
