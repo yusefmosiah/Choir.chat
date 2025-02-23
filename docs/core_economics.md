@@ -32,3 +32,14 @@ Analytics and monitoring provide real-time insight into the economic system's he
 The economic model's strength emerges from several key principles. The blockchain serves as the immutable source of truth, while value flows follow strict conservation laws. Price discovery emerges naturally through anharmonic eigenvalue patterns, and state changes propagate through quantized energy transitions. Most importantly, complex economic behaviors arise organically from these simple underlying rules.
 
 Through this careful balance of blockchain authority, mathematical precision, and natural value flows, the economic model creates a self-sustaining ecosystem for knowledge work. The system's elegance lies in how these principles work together, creating a robust economic framework that adapts and evolves while maintaining fundamental stability.
+
+# Dynamic Potential Order
+
+m = 2 + α(1 - e^{-βt}) + γD
+
+Where:
+
+- α = 0.5 (Max anharmonic boost)
+- β = 0.1 (Time decay constant)
+- γ = 0.2 (Disapproval sensitivity)
+- D = R/(A+R) (Refusal ratio)
