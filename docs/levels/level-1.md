@@ -182,6 +182,15 @@ CHANGELOG.md
 
 # Changelog
 
+## [2025-03-15] - 2025-03-15
+
+### Changed
+
+- Implemented fractional quantum anharmonic oscillator model for dynamic stake pricing
+- Added fractional parameter α to capture memory effects and non-local interactions
+- Revised parameter modulation formulas for K₀, α, and m to reflect interdependencies
+- Created simulation framework for parameter optimization
+
 ## [2025-02-23] - 2025-02-23
 
 ### Changed
