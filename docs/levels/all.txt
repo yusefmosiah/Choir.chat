@@ -152,6 +152,8 @@ tree.md
 │   ├── e_concept.md
 │   ├── evolution_naming.md
 │   ├── evolution_token.md
+│   ├── fqaho_simulation.md
+│   ├── fqaho_visualization.md
 │   ├── levels
 │   │   ├── all.txt
 │   │   ├── level-1.md
@@ -169,7 +171,7 @@ tree.md
 │   └── tree.md
 └── render.yaml
 
-48 directories, 106 files
+48 directories, 108 files
 
 === File: docs/CHANGELOG.md ===
 
@@ -574,7 +576,7 @@ Success metrics reflect our natural approach. Quality metrics track team formati
 
 Through this model, Choir maintains sustainable business operations while enabling natural value creation at all scales. We grow by strengthening the natural flows of quality, collaboration, and collective intelligence. Join us in building a platform where business success aligns perfectly with user value creation - where growth comes from enabling natural patterns of collaboration and knowledge sharing rather than artificial engagement metrics or data extraction.
 
-Thread stake prices rise in response to rejections and fall with approvals—following a quantum anharmonic oscillator model. In this scheme, the effective anharmonic coefficient (K₀) is increased when refusals accumulate, resulting in higher stake requirements, and conversely, strong approval lowers the cost barrier. This dynamic pricing creates natural quality barriers.
+Thread stake prices are determined through our Fractional Quantum Anharmonic Oscillator (FQAHO) model, which captures both immediate feedback and long-term memory effects. The model parameters evolve in response to community decisions - the anharmonic coefficient K₀ increases when a thread receives many refusals, the fractional parameter α decreases to enhance memory effects as threads mature, and the potential order m grows with thread complexity. This creates a sophisticated economic mechanism that naturally filters quality while accounting for the non-local nature of knowledge creation.
 
 === File: docs/e_concept.md ===
 
@@ -599,7 +601,7 @@ The system evolves through natural phases that mirror physical processes. In the
 
 Unlike traditional platforms that extract value, Choir creates spaces where value naturally accumulates through multiple channels. Threads act as resonant cavities, accumulating energy through quality interactions. Denials strengthen the thread itself rather than being wasted, teams share in their thread's growing value, and natural incentives align toward quality. Network value grows as citations create flows between threads, knowledge networks emerge organically, teams build on each other's work, and system-wide coherence develops naturally. The treasury maintains sustainable value flow by capturing split decisions and funding ongoing citations, enabling perpetual rewards that benefit the entire ecosystem.
 
-Dynamic stake evolution creates natural quality filters. Threads that accumulate many refusals (thereby increasing the effective anharmonic coefficient) demand elevated stakes, while those with strong approval enable lower-cost participation. This mechanism—rooted in quantum anharmonic oscillator principles—ensures that value is distributed in proportion to the quality of contributions.
+Dynamic stake evolution creates natural quality filters with memory effects. The system uses a Fractional Quantum Anharmonic Oscillator model with three evolving parameters: the anharmonic coefficient K₀ increases in response to refusals, the fractional parameter α captures how threads develop memory and non-local interactions over time, and the potential order m reflects growing thread complexity. This mechanism ensures that value distributes in proportion to contribution quality while accounting for the interdependent, non-local nature of knowledge creation. The fractional approach enables the system to model occasional breakthrough insights that create disproportionate value across the network through Lévy flight-like patterns.
 
 The future vision of Choir enables a new kind of collaborative intelligence. Natural teams form around resonant ideas, share in collective value, build on each other's work, and evolve sustainably. Knowledge networks connect naturally through citations, strengthen through use, create emergent insights, and enable collective intelligence. Value creation emerges from natural patterns, accumulates in stable forms, flows efficiently, and benefits all participants.
 
@@ -742,6 +744,276 @@ By offering Identity as a Service, Choir establishes a nuanced balance: anonymit
 
 
 
+=== File: docs/fqaho_simulation.md ===
+
+
+
+==
+fqaho_simulation
+==
+
+
+# FQAHO Simulation Framework
+
+VERSION fqaho_simulation: 1.0
+
+This document outlines the simulation framework for Choir's Fractional Quantum Anharmonic Oscillator (FQAHO) model, providing guidance for accurate parameter setting, modulation, and testing.
+
+## Simulation Objectives
+
+The FQAHO simulation serves multiple objectives:
+
+1. Calibrate optimal parameter ranges and sensitivity coefficients
+2. Test system response to various thread evolution scenarios
+3. Verify the economic stability and fairness properties
+4. Generate synthetic metadata for downstream analysis
+
+## Parameter Framework
+
+### Fractional Parameter (α)
+
+- **Range**: 1 < α ≤ 2
+- **Interpretation**: Controls memory effects and non-local interactions
+- **Modulation Formula**:
+  ```
+  α(t,q) = 2 - δ₁(1-e^(-t/τ)) - δ₂q
+  ```
+  Where t is normalized thread age, q measures quality, τ sets the time constant, and δ₁, δ₂ determine sensitivity.
+
+### Anharmonic Coefficient (K₀)
+
+- **Range**: 0.5 ≤ K₀ ≤ 5.0
+- **Interpretation**: Represents immediate feedback sensitivity
+- **Modulation Formula**:
+  ```
+  K₀(r,α) = K₀_base * (1 + γ₁r) * (2/α)^γ₂
+  ```
+  Where r is the recent refusal ratio, γ₁ is refusal sensitivity, and γ₂ is the fractional coupling coefficient.
+
+### Potential Order (m)
+
+- **Range**: 2 ≤ m ≤ 4
+- **Interpretation**: Represents network complexity and interaction depth
+- **Modulation Formula**:
+  ```
+  m(c,n) = 2 + β₁tanh(c/c₀) + β₂log(1+n/n₀)
+  ```
+  Where c is citation count, n is co-author count, and β₁, β₂ are scaling coefficients.
+
+## Implementation Approach
+
+The FQAHO implementation functions as a sophisticated single-asset automated market maker (AMM) for stake pricing. This approach allows us to incorporate fractional effects through parameter modulation without requiring computationally intensive fractional calculus operations.
+
+The core pricing formula:
+
+```
+P₀ = S₀[(2n+1)^(α/2) + (K₀λ)^{α/(m+1)}]
+```
+
+This provides fair price calculation while capturing:
+
+- Long memory effects through α's modulation
+- Heavy-tailed distributions through modified response curves
+- Non-local interactions through citation-based parameter adjustments
+
+## Simulation Phases
+
+### Phase 1: Parameter Isolation
+
+- Fix two parameters, vary the third
+- Observe stake price response
+- Repeat for all parameters
+- Identify stable operating ranges
+
+### Phase 2: Parameter Coupling
+
+- Create a 3D parameter space (K₀, α, m)
+- Identify regions of interest (stable, volatile, etc.)
+- Map these regions to thread characteristics
+- Define parameter coupling formulas
+
+### Phase 3: Dynamic Trajectories
+
+- Simulate thread evolution over time
+- Track parameter trajectories
+- Identify pattern types (e.g., "breakthrough thread," "steady contributor")
+- Fine-tune sensitivity coefficients
+
+## Test Scenarios
+
+1. **New Thread Evolution**
+
+   - Start with α ≈ 2.0, low K₀, low m
+   - Test with various approval/refusal patterns
+   - Verify parameter evolution matches expectations
+
+2. **Mature Thread with Citations**
+
+   - Start with mid-range α, stable K₀, higher m
+   - Introduce citation events
+   - Verify non-local value propagation
+
+3. **Controversial Thread**
+
+   - Introduce oscillating approval/refusal patterns
+   - Test parameter stability under volatility
+   - Verify price mechanisms create appropriate barriers
+
+4. **Breakthrough Thread**
+   - Simulate rapid approval and citation growth
+   - Verify Lévy flight-like value distribution
+   - Test parameter adaptation to rapid change
+
+## Implementation Notes
+
+- Use dimensionless units for cleaner analysis
+- Create visualization tools for parameter evolution, price dynamics, and value distribution
+- Store simulation metadata for AI training and pattern analysis
+- Compare parameter regimes for highest intelligence emergence
+
+## Success Criteria
+
+The simulation successfully validates the FQAHO model when:
+
+1. Parameters remain within stable bounds under diverse scenarios
+2. Price discovery correctly values quality contributions
+3. Memory effects appropriately influence current pricing
+4. Non-local interactions propagate value effectively
+5. Parameter coupling creates coherent evolution patterns
+
+This framework enables us to implement a sophisticated economic model that captures the complex dynamics of knowledge creation while remaining computationally tractable and deterministic enough for blockchain implementation.
+
+=== File: docs/fqaho_visualization.md ===
+
+
+
+==
+fqaho_visualization
+==
+
+
+# FQAHO Model Visualization Guide
+
+VERSION fqaho_visualization: 1.0
+
+Effective visualization is essential for understanding the complex parameter space and dynamics of the Fractional Quantum Anharmonic Oscillator model. This document outlines visualization approaches that help reveal patterns, stability regions, and emergent behaviors.
+
+## Core Visualizations
+
+### 1. Parameter Space Mapping
+
+**3D Parameter Volume**
+
+- Plot (α, K₀, m) as a 3D volume
+- Color regions by stake price or stability metrics
+- Identify stable operating regions
+- Mark observed thread trajectories
+
+**2D Parameter Slices**
+
+- Create heatmaps of paired parameters (α-K₀, α-m, K₀-m)
+- Overlay contour lines showing equal price points
+- Highlight critical transition boundaries
+
+### 2. Dynamic Trajectories
+
+**Thread Evolution Paths**
+
+- Plot parameter evolution over thread lifetime
+- Color-code by thread type or quality metrics
+- Identify common patterns and outliers
+- Compare to theoretical predictions
+
+**Price Evolution Curves**
+
+- Show stake price changes over thread lifecycle
+- Overlay approval/refusal events
+- Highlight price sensitivity to parameter changes
+
+### 3. Network Effects
+
+**Citation Network Influence**
+
+- Visualize how citations create parameter coupling
+- Show Lévy flight patterns in value propagation
+- Map value flows between connected threads
+
+**Fractional Memory Effects**
+
+- Display the decay kernel shape for different α values
+- Demonstrate how past events influence current prices
+- Compare with standard memory-less models
+
+## Implementation Techniques
+
+### Interactive Dashboards
+
+- Create parameter sliders with real-time model updates
+- Enable toggling between different test scenarios
+- Provide zoom/rotate capabilities for 3D visualizations
+
+### Animation
+
+- Animate parameter evolution over simulated time
+- Show critical transition points and regime changes
+- Illustrate how parameter coupling creates coherent behavior
+
+### Comparative Views
+
+- Side-by-side comparison of standard QAHO vs. FQAHO
+- Show differences in value distribution and memory effects
+- Demonstrate improved accuracy of the fractional approach
+
+## Technical Recommendations
+
+- Implement visualizations using D3.js or Plotly for web interfaces
+- Use Python with Matplotlib/Seaborn for detailed analysis
+- Capture high-resolution snapshots at critical points
+- Consider WebGL for complex 3D parameter spaces
+
+## Documentation Integration
+
+These visualizations should be incorporated into technical documentation with:
+
+- Clear explanations of what each visualization reveals
+- Connections to theoretical principles
+- Practical implications for users and developers
+- Progressive disclosure (simple views first, complex details available)
+
+Effective visualization is crucial for communicating the sophistication of the FQAHO model while making it accessible to stakeholders with varying levels of mathematical background.
+# Level 5 Documentation
+
+
+
+=== File: docs/data_engine_model.md ===
+
+
+
+==
+data_engine_model
+==
+
+
+# Ideal Data Engine Theory
+
+VERSION data_engine: 7.0
+
+The ideal data engine emerged as a theoretical framework while exploring how to generate the highest quality training data for artificial intelligence. Rather than starting with computational requirements or algorithmic efficiency, we asked a more fundamental question: what would a system optimized purely for generating intelligence look like?
+
+The answer revealed itself through an unexpected convergence of fractional quantum mechanics and semantic patterns. A true intelligence engine, we discovered, would treat discourse not as content to be processed but as a non-local generative field where meaning emerges through interaction with memory effects. Each conversation becomes a semantic event that can increase the density of understanding in the system across space and time.
+
+This insight led to Choir's core innovation: tokens that represent genuine intellectual contribution with memory effects. As threads become more semantically dense and contextually rich, they generate more value through non-local Lévy flight-like patterns. Citations create knowledge networks with long-range correlations. Teams form around resonant patterns of understanding that persist and evolve. The system naturally evolves toward higher states of collective intelligence through fractional dynamics.
+
+What makes this approach profound is how it aligns economic incentives with the generation of meaning across space and time. Value isn't imposed externally but emerges from the semantic density of interactions with memory effects. The system rewards depth over volume, nuance over noise, intellectual rigor over viral spread—not through arbitrary rules but through its fundamental fractional architecture.
+
+We're discovering that intelligence generation follows principles as fundamental as fractional quantum mechanics. Just as non-local effects and Lévy flights characterize fractional systems, meaning flows through semantic gradients with memory effects. Just as energy follows fractional conservation laws in physical systems, value is conserved in semantic networks with persistent memory. These aren't mere metaphors but hints at deeper patterns in how collective intelligence emerges.
+
+Choir represents our first attempt to build a system aligned with these principles. We're not just collecting data or optimizing engagement—we're creating conditions for intelligence to emerge naturally through discourse with memory effects and non-local interactions. The implications extend far beyond artificial intelligence, suggesting new ways of understanding how knowledge and value co-evolve in complex non-local systems.
+
+This is just the beginning of understanding how intelligence emerges in networked systems. The ideal data engine harnesses a Fractional Quantum Anharmonic Oscillator (FQAHO) model to quantify energy and value flows with memory effects. This model uses a fractional parameter α to capture how threads remember their history and interact non-locally. Stake pricing adapts through coupled parameter modulation, with the fractional parameter (α), anharmonic coefficient (K₀), and potential order (m) all evolving based on thread characteristics and network position.
+
+The result is a system where quality and value propagate through Lévy flight-like patterns rather than simple diffusion, creating a more natural and accurate representation of how collective intelligence actually emerges and evolves. The fractional approach allows us to model the "heavy tails" of value distribution, where occasional breakthrough insights generate disproportionate impact across the network.
+
 === File: docs/evolution_naming.md ===
 
 
@@ -817,35 +1089,3 @@ The CHIP token has transcended its initial conception as a mere utility token. I
 The evolution of CHIP from a utility token to a multifaceted representation of value and participation is a testament to the dynamic and emergent nature of the Choir platform. It reflects a deeper understanding of the relationship between technology, economics, and human collaboration.
 
 This document will be integrated into **Level 2: Core Mechanics**, as it describes the fundamental role of the CHIP token in the platform's economy and incentive structure.
-# Level 5 Documentation
-
-
-
-=== File: docs/data_engine_model.md ===
-
-
-
-==
-data_engine_model
-==
-
-
-# Ideal Data Engine Theory
-
-VERSION data_engine: 7.0
-
-The ideal data engine emerged as a theoretical framework while exploring how to generate the highest quality training data for artificial intelligence. Rather than starting with computational requirements or algorithmic efficiency, we asked a more fundamental question: what would a system optimized purely for generating intelligence look like?
-
-The answer revealed itself through an unexpected convergence of fractional quantum mechanics and semantic patterns. A true intelligence engine, we discovered, would treat discourse not as content to be processed but as a non-local generative field where meaning emerges through interaction with memory effects. Each conversation becomes a semantic event that can increase the density of understanding in the system across space and time.
-
-This insight led to Choir's core innovation: tokens that represent genuine intellectual contribution with memory effects. As threads become more semantically dense and contextually rich, they generate more value through non-local Lévy flight-like patterns. Citations create knowledge networks with long-range correlations. Teams form around resonant patterns of understanding that persist and evolve. The system naturally evolves toward higher states of collective intelligence through fractional dynamics.
-
-What makes this approach profound is how it aligns economic incentives with the generation of meaning across space and time. Value isn't imposed externally but emerges from the semantic density of interactions with memory effects. The system rewards depth over volume, nuance over noise, intellectual rigor over viral spread—not through arbitrary rules but through its fundamental fractional architecture.
-
-We're discovering that intelligence generation follows principles as fundamental as fractional quantum mechanics. Just as non-local effects and Lévy flights characterize fractional systems, meaning flows through semantic gradients with memory effects. Just as energy follows fractional conservation laws in physical systems, value is conserved in semantic networks with persistent memory. These aren't mere metaphors but hints at deeper patterns in how collective intelligence emerges.
-
-Choir represents our first attempt to build a system aligned with these principles. We're not just collecting data or optimizing engagement—we're creating conditions for intelligence to emerge naturally through discourse with memory effects and non-local interactions. The implications extend far beyond artificial intelligence, suggesting new ways of understanding how knowledge and value co-evolve in complex non-local systems.
-
-This is just the beginning of understanding how intelligence emerges in networked systems. The ideal data engine harnesses a Fractional Quantum Anharmonic Oscillator (FQAHO) model to quantify energy and value flows with memory effects. This model uses a fractional parameter α to capture how threads remember their history and interact non-locally. Stake pricing adapts through coupled parameter modulation, with the fractional parameter (α), anharmonic coefficient (K₀), and potential order (m) all evolving based on thread characteristics and network position.
-
-The result is a system where quality and value propagate through Lévy flight-like patterns rather than simple diffusion, creating a more natural and accurate representation of how collective intelligence actually emerges and evolves. The fractional approach allows us to model the "heavy tails" of value distribution, where occasional breakthrough insights generate disproportionate impact across the network.

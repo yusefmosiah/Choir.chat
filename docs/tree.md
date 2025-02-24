@@ -139,6 +139,8 @@
 │   ├── e_concept.md
 │   ├── evolution_naming.md
 │   ├── evolution_token.md
+│   ├── fqaho_simulation.md
+│   ├── fqaho_visualization.md
 │   ├── levels
 │   │   ├── all.txt
 │   │   ├── level-1.md
@@ -156,4 +158,4 @@
 │   └── tree.md
 └── render.yaml
 
-48 directories, 106 files
+48 directories, 108 files

@@ -5,8 +5,8 @@ level0_prefixes=("client" "sui" "proxy" "carousel" "distributed")  # Basic techn
 level1_prefixes=("core" "Tech" "Dev" "Service" "Coordinator")  # Core system components
 level2_prefixes=("e" "reward" "Error" "Impl")           # Business/concept/implementation
 level3_prefixes=("plan" "state" "economic" "vector" "chain")               # State/economic models
-level4_prefixes=("evolution" "theory" "Model" "Emergence" "anonymity")     # Theoretical frameworks
-level5_prefixes=("data" "harmonic" "language" "law" "quantum")             # Foundational principles
+level4_prefixes=("fqaho" "theory" "Model" "Emergence" "anonymity")     # Simulations
+level5_prefixes=("evolution" "data" "harmonic" "language" "law" "quantum")             # Foundational principles
 
 # Function to add separator and header
 add_separator() {
