@@ -2,6 +2,7 @@
 ## Output of $ tree -I 'venv|archive|__pycache__|iOS_Example|dependencies' | pbcopy
 
 .
+├── CLAUDE.md
 ├── Choir
 │   ├── App
 │   │   └── ChoirApp.swift
@@ -156,6 +157,8 @@
 │   │   ├── combiner.sh
 │   │   └── update_tree.sh
 │   └── tree.md
+├── notebooks
+│   └── fqaho_simulation.ipynb
 └── render.yaml
 
-48 directories, 108 files
+49 directories, 110 files
