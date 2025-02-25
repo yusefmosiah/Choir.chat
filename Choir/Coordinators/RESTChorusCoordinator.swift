@@ -9,6 +9,9 @@ class RESTChorusCoordinator: ChorusCoordinator, ObservableObject {
     @Published private(set) var responses: [Phase: String] = [:]
     @Published private(set) var isProcessing = false
 
+    // Track phase processing status
+    @Published private(set) var processingPhases: Set<Phase> = []
+
     // Response state
     private(set) var actionResponse: ActionResponse?
     private(set) var experienceResponse: ExperienceResponse?
@@ -37,6 +40,7 @@ class RESTChorusCoordinator: ChorusCoordinator, ObservableObject {
         responses = [:]
         isProcessing = true
         currentPhase = .action
+        processingPhases = []
 
         // Reset all responses
         actionResponse = nil
@@ -51,6 +55,7 @@ class RESTChorusCoordinator: ChorusCoordinator, ObservableObject {
 
         defer {
             isProcessing = false
+            processingPhases = []
             viewModel?.updateState()
         }
 
@@ -60,20 +65,19 @@ class RESTChorusCoordinator: ChorusCoordinator, ObservableObject {
 
         do {
             // Action phase
-            currentPhase = .action
+            await startProcessingPhase(.action)
             let actionBody = ActionRequestBody(
                 content: input,
                 threadID: thread?.id.uuidString,
                 context: contexts
             )
             actionResponse = try await api.post(endpoint: "action", body: actionBody)
-            responses[.action] = actionResponse?.content
-            viewModel?.updateState()
+            await completePhase(.action, content: actionResponse?.content)
 
             try Task.checkCancellation()
 
             // Experience phase
-            currentPhase = .experience
+            await startProcessingPhase(.experience)
             let experienceBody = ExperienceRequestBody(
                 content: input,
                 actionResponse: actionResponse?.content ?? "",
@@ -81,13 +85,12 @@ class RESTChorusCoordinator: ChorusCoordinator, ObservableObject {
                 context: contexts
             )
             experienceResponse = try await api.post(endpoint: "experience", body: experienceBody)
-            responses[.experience] = experienceResponse?.content
-            viewModel?.updateState()
+            await completePhase(.experience, content: experienceResponse?.content)
 
             try Task.checkCancellation()
 
             // Intention phase
-            currentPhase = .intention
+            await startProcessingPhase(.intention)
             let intentionBody = IntentionRequestBody(
                 content: input,
                 actionResponse: actionResponse?.content ?? "",
@@ -97,13 +100,12 @@ class RESTChorusCoordinator: ChorusCoordinator, ObservableObject {
                 context: contexts
             )
             intentionResponse = try await api.post(endpoint: "intention", body: intentionBody) as IntentionResponse
-            responses[.intention] = intentionResponse?.content
-            viewModel?.updateState()
+            await completePhase(.intention, content: intentionResponse?.content)
 
             try Task.checkCancellation()
 
             // Observation phase
-            currentPhase = .observation
+            await startProcessingPhase(.observation)
             let observationBody = ObservationRequestBody(
                 content: input,
                 actionResponse: actionResponse?.content ?? "",
@@ -115,13 +117,12 @@ class RESTChorusCoordinator: ChorusCoordinator, ObservableObject {
                 context: contexts
             )
             observationResponse = try await api.post(endpoint: "observation", body: observationBody)
-            responses[.observation] = observationResponse?.content
-            viewModel?.updateState()
+            await completePhase(.observation, content: observationResponse?.content)
 
             try Task.checkCancellation()
 
             // Understanding phase
-            currentPhase = .understanding
+            await startProcessingPhase(.understanding)
             let understandingBody = UnderstandingRequestBody(
                 content: input,
                 actionResponse: actionResponse?.content ?? "",
@@ -134,8 +135,7 @@ class RESTChorusCoordinator: ChorusCoordinator, ObservableObject {
                 context: contexts
             )
             understandingResponse = try await api.post(endpoint: "understanding", body: understandingBody)
-            responses[.understanding] = understandingResponse?.content
-            viewModel?.updateState()
+            await completePhase(.understanding, content: understandingResponse?.content)
 
             // Check if we should loop
             if let understanding = understandingResponse,
@@ -148,7 +148,7 @@ class RESTChorusCoordinator: ChorusCoordinator, ObservableObject {
             try Task.checkCancellation()
 
             // Yield phase
-            currentPhase = .yield
+            await startProcessingPhase(.yield)
             let yieldBody = YieldRequestBody(
                 content: input,
                 actionResponse: actionResponse?.content ?? "",
@@ -162,24 +162,55 @@ class RESTChorusCoordinator: ChorusCoordinator, ObservableObject {
                 context: contexts
             )
             yieldResponse = try await api.post(endpoint: "yield", body: yieldBody)
-            responses[.yield] = yieldResponse?.content
-            viewModel?.updateState()
+            await completePhase(.yield, content: yieldResponse?.content)
 
         } catch let error as URLError {
             print("Network error: \(error.localizedDescription)")
             responses[currentPhase] = "Network error: Could not connect to server"
+            processingPhases.remove(currentPhase)
+            viewModel?.updateState()
             throw APIError.networkError(error)
         } catch is CancellationError {
             responses[currentPhase] = "Cancelled"
+            processingPhases.remove(currentPhase)
+            viewModel?.updateState()
             throw APIError.cancelled
         } catch {
             print("Error during \(currentPhase): \(error.localizedDescription)")
             responses[currentPhase] = "Error: \(error.localizedDescription)"
+            processingPhases.remove(currentPhase)
+            viewModel?.updateState()
             throw error
         }
     }
 
+    private func startProcessingPhase(_ phase: Phase) async {
+        currentPhase = phase
+        processingPhases.insert(phase)
+        viewModel?.updateState()
+
+        // Add a small delay to allow UI to update
+        try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
+    }
+
+    private func completePhase(_ phase: Phase, content: String?) async {
+        if let content = content {
+            responses[phase] = content
+        }
+        processingPhases.remove(phase)
+        viewModel?.updateState()
+
+        // Add a small delay to allow UI to update
+        try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
+    }
+
     func cancel() {
         isProcessing = false
+        processingPhases = []
+    }
+
+    // Helper to check if a specific phase is currently processing
+    func isProcessingPhase(_ phase: Phase) -> Bool {
+        return processingPhases.contains(phase)
     }
 }

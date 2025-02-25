@@ -7,6 +7,9 @@ class ChorusViewModel: ObservableObject {
     @Published private(set) var isProcessing: Bool
     @Published private(set) var error: Error?
 
+    // Track the latest phase that has been processed
+    @Published private(set) var latestProcessedPhase: Phase?
+
     let coordinator: any ChorusCoordinator
 
     init(coordinator: any ChorusCoordinator) {
@@ -14,6 +17,7 @@ class ChorusViewModel: ObservableObject {
         self.currentPhase = coordinator.currentPhase
         self.responses = coordinator.responses
         self.isProcessing = coordinator.isProcessing
+        self.latestProcessedPhase = nil
 
         if let restCoordinator = coordinator as? RESTChorusCoordinator {
             restCoordinator.viewModel = self
@@ -27,6 +31,7 @@ class ChorusViewModel: ObservableObject {
         currentPhase = .action
         responses = [:]
         isProcessing = true
+        latestProcessedPhase = nil
 
         do {
             try await coordinator.process(input)
@@ -41,8 +46,25 @@ class ChorusViewModel: ObservableObject {
     func updateState() {
         withAnimation {
             currentPhase = coordinator.currentPhase
-            responses = coordinator.responses
+
+            // Create a new responses dictionary to trigger UI updates
+            var newResponses = [Phase: String]()
+
+            // Add responses in phase order to ensure proper UI updates
+            for phase in Phase.allCases {
+                if let response = coordinator.responses[phase] {
+                    newResponses[phase] = response
+                    latestProcessedPhase = phase
+                }
+            }
+
+            self.responses = newResponses
             isProcessing = coordinator.isProcessing
+
+            // If processing is complete, ensure yield is the latest phase
+            if !isProcessing && coordinator.responses[.yield] != nil {
+                latestProcessedPhase = .yield
+            }
         }
     }
 
@@ -50,6 +72,7 @@ class ChorusViewModel: ObservableObject {
         coordinator.cancel()
         isProcessing = false
         responses = [:]
+        latestProcessedPhase = nil
     }
 
     // Helper method to update message with final response
@@ -60,5 +83,19 @@ class ChorusViewModel: ObservableObject {
             updatedMessage.chorusResult = MessageChorusResult(phases: responses)
         }
         return updatedMessage
+    }
+
+    // Helper to get the next phase that should be processed
+    var nextPhaseToProcess: Phase? {
+        if let latest = latestProcessedPhase {
+            let allPhases = Phase.allCases
+            if let currentIndex = allPhases.firstIndex(of: latest),
+               currentIndex + 1 < allPhases.count {
+                return allPhases[currentIndex + 1]
+            }
+            return nil
+        } else {
+            return .action
+        }
     }
 }

@@ -4,109 +4,271 @@ struct ChorusCycleView: View {
     let phases: [Phase: String]
     let isProcessing: Bool
     @State private var selectedPhase: Phase = .action
-    @State private var showingMetadata: Bool = false
-    @State private var longPressPhase: Phase?
-    @State private var offset: CGFloat = 0
-    @GestureState private var dragOffset: CGFloat = 0
+    @State private var dragOffset: CGFloat = 0
 
-    private let phaseWidth: CGFloat = 60
-    private let spacing: CGFloat = 20
+    // Optional coordinator to check processing status
+    var coordinator: RESTChorusCoordinator?
+
+    // Computed property to get available phases in order
+    private var availablePhases: [Phase] {
+        Phase.allCases.filter { phases[$0] != nil }
+    }
 
     var body: some View {
-        VStack(spacing: 0) {
-            // Phase carousel
-            GeometryReader { geometry in
-                let totalWidth = geometry.size.width
-                let centerX = totalWidth / 2
+        GeometryReader { geometry in
+            let cardWidth = geometry.size.width * 0.9
+            let sideCardWidth = geometry.size.width * 0.1
+            let totalWidth = geometry.size.width
 
-                HStack(spacing: spacing) {
+            VStack(spacing: 0) {
+                // Final response display when cycle is complete
+                if let yieldContent = phases[.yield] {
+                    Text("Final Response")
+                        .font(.headline)
+                        .padding(.top)
+
+                    Text(yieldContent)
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .background(Color.accentColor.opacity(0.1))
+                        .cornerRadius(8)
+                        .padding(.horizontal)
+                }
+
+                // Phase carousel
+                ZStack {
                     ForEach(Phase.allCases) { phase in
-                        PhaseTabButton(
-                            phase: phase,
-                            isSelected: phase == selectedPhase,
-                            isEnabled: phases[phase] != nil,
-                            width: phaseWidth
-                        )
-                        .id(phase)
+                        if let content = phases[phase] {
+                            // Phase has content
+                            PhaseCard(
+                                phase: phase,
+                                content: content,
+                                isSelected: phase == selectedPhase,
+                                isLoading: false
+                            )
+                            .frame(width: cardWidth)
+                            .offset(x: calculateOffset(for: phase, cardWidth: cardWidth, totalWidth: totalWidth))
+                            .zIndex(phase == selectedPhase ? 1 : 0)
+                            .opacity(calculateOpacity(for: phase))
+                        } else if isProcessing {
+                            // Check if this is the next phase being processed
+                            let isCurrentlyProcessing = coordinator?.isProcessingPhase(phase) ?? false
+                            let isNextPhase = isNextPhaseToProcess(phase)
+
+                            if isCurrentlyProcessing || isNextPhase {
+                                PhaseCard(
+                                    phase: phase,
+                                    content: nil,
+                                    isSelected: false,
+                                    isLoading: true
+                                )
+                                .frame(width: cardWidth)
+                                .offset(x: calculateOffset(for: phase, cardWidth: cardWidth, totalWidth: totalWidth))
+                                .zIndex(0)
+                                .opacity(0.7)
+                            }
+                        }
                     }
                 }
-                .offset(x: centerX - phaseWidth/2 + calculateOffset())
+                .frame(height: geometry.size.height * 0.8)
                 .gesture(
                     DragGesture()
-                        .updating($dragOffset) { value, state, _ in
-                            state = value.translation.width
+                        .onChanged { value in
+                            dragOffset = value.translation.width
                         }
                         .onEnded { value in
                             let predictedEndOffset = value.predictedEndTranslation.width
-                            let phaseStep = phaseWidth + spacing
+                            let threshold = cardWidth / 3
 
-                            // Calculate the number of phases to move
-                            let stepCount = (predictedEndOffset / phaseStep).rounded()
-                            let currentIndex = Phase.allCases.firstIndex(of: selectedPhase) ?? 0
-                            let targetIndex = max(0, min(Phase.allCases.count - 1, currentIndex - Int(stepCount)))
+                            if abs(predictedEndOffset) > threshold {
+                                let direction = predictedEndOffset > 0 ? -1 : 1
+                                let currentIndex = availablePhases.firstIndex(of: selectedPhase) ?? 0
+                                let targetIndex = currentIndex + direction
 
-                            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                                if let newPhase = Phase.allCases[safe: targetIndex], phases[newPhase] != nil {
-                                    selectedPhase = newPhase
+                                if targetIndex >= 0 && targetIndex < availablePhases.count {
+                                    withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                                        selectedPhase = availablePhases[targetIndex]
+                                        dragOffset = 0
+                                    }
+                                } else {
+                                    withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                                        dragOffset = 0
+                                    }
                                 }
-                                offset = 0
+                            } else {
+                                withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                                    dragOffset = 0
+                                }
                             }
                         }
                 )
-            }
-            .frame(height: 60)
 
-            Divider()
-
-            // Content area
-            if let content = phases[selectedPhase] {
-                Text(content)
-                    .padding()
-                    .frame(maxWidth: .infinity, alignment: .leading)
-            } else if isProcessing {
-                HStack {
-                    ProgressView()
-                    Text("Processing...")
+                // Phase indicator
+                HStack(spacing: 8) {
+                    ForEach(Phase.allCases) { phase in
+                        Circle()
+                            .fill(phase == selectedPhase ? Color.accentColor : Color.gray.opacity(0.3))
+                            .frame(width: 8, height: 8)
+                            .opacity(phases[phase] != nil ? 1 : 0.3)
+                    }
                 }
-                .padding()
+                .padding(.top, 16)
             }
         }
         .onChange(of: phases) { _, newPhases in
-            if newPhases[.yield] != nil {
+            // Auto-select the latest phase when new content arrives
+            if let latestPhase = availablePhases.last, latestPhase != selectedPhase {
                 withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                    selectedPhase = .yield
+                    selectedPhase = latestPhase
                 }
             }
         }
     }
 
-    private func calculateOffset() -> CGFloat {
-        let phaseStep = phaseWidth + spacing
-        let currentIndex = Phase.allCases.firstIndex(of: selectedPhase) ?? 0
-        return -CGFloat(currentIndex) * phaseStep + dragOffset
+    private func calculateOffset(for phase: Phase, cardWidth: CGFloat, totalWidth: CGFloat) -> CGFloat {
+        guard let currentIndex = availablePhases.firstIndex(of: selectedPhase) else {
+            // If no phase is selected yet, use the first available phase
+            if let firstPhase = availablePhases.first,
+               let firstIndex = availablePhases.firstIndex(of: firstPhase),
+               let phaseIndex = availablePhases.firstIndex(of: phase) {
+                let indexDifference = phaseIndex - firstIndex
+                return CGFloat(indexDifference) * cardWidth + dragOffset
+            }
+            return totalWidth // Off-screen if not available
+        }
+
+        // If the phase is not in available phases but is being processed
+        if !availablePhases.contains(phase) && isProcessing {
+            if let lastPhase = availablePhases.last,
+               let lastIndex = availablePhases.firstIndex(of: lastPhase) {
+                // Position it after the last available phase
+                let phaseIndex = Phase.allCases.firstIndex(of: phase) ?? 0
+                let lastPhaseIndex = Phase.allCases.firstIndex(of: lastPhase) ?? 0
+
+                if phaseIndex > lastPhaseIndex {
+                    let indexDifference = (currentIndex - lastIndex) + (phaseIndex - lastPhaseIndex)
+                    return CGFloat(indexDifference) * cardWidth + dragOffset
+                }
+            }
+            return totalWidth // Off-screen if not available
+        }
+
+        // Normal case - phase is in available phases
+        if let phaseIndex = availablePhases.firstIndex(of: phase) {
+            let indexDifference = phaseIndex - currentIndex
+            return CGFloat(indexDifference) * cardWidth + dragOffset
+        }
+
+        return totalWidth // Off-screen if not available
+    }
+
+    private func calculateOpacity(for phase: Phase) -> Double {
+        guard let currentIndex = availablePhases.firstIndex(of: selectedPhase),
+              let phaseIndex = availablePhases.firstIndex(of: phase) else {
+            // If phase is being processed but not yet available
+            if isProcessing && isNextPhaseToProcess(phase) {
+                return 0.5
+            }
+            return 0
+        }
+
+        let indexDifference = abs(phaseIndex - currentIndex)
+
+        if indexDifference == 0 {
+            return 1
+        } else if indexDifference == 1 {
+            return 0.7
+        } else {
+            return 0.3
+        }
+    }
+
+    private func isNextPhaseToProcess(_ phase: Phase) -> Bool {
+        // If coordinator is available, use it to check
+        if let coordinator = coordinator {
+            return coordinator.isProcessingPhase(phase)
+        }
+
+        // Otherwise, guess based on available phases
+        if let lastPhase = availablePhases.last,
+           let lastIndex = Phase.allCases.firstIndex(of: lastPhase),
+           let phaseIndex = Phase.allCases.firstIndex(of: phase) {
+            return phaseIndex == lastIndex + 1
+        }
+
+        return false
     }
 }
 
-struct PhaseTabButton: View {
+struct PhaseCard: View {
     let phase: Phase
+    let content: String?
     let isSelected: Bool
-    let isEnabled: Bool
-    let width: CGFloat
+    var isLoading: Bool = false
 
     var body: some View {
-        Image(systemName: phase.symbol)
-            .imageScale(.small)
-            .frame(width: width, height: 32)
-            .foregroundColor(isEnabled ? (isSelected ? .accentColor : .primary) : .gray.opacity(0.5))
-            .background(isSelected ? Color.accentColor.opacity(0.1) : Color.clear)
-            .clipShape(Circle())
-            .opacity(isEnabled ? 1 : 0.5)
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Image(systemName: phase.symbol)
+                    .imageScale(.medium)
+                    .foregroundColor(.accentColor)
+
+                Text(phase.description)
+                    .font(.headline)
+
+                Spacer()
+
+                if isLoading {
+                    ProgressView()
+                        .scaleEffect(0.7)
+                }
+            }
+            .padding(.bottom, 4)
+
+            if let content = content {
+                ScrollView {
+                    Text(content)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+            } else if isLoading {
+                VStack(spacing: 16) {
+                    Spacer()
+                    HStack {
+                        Spacer()
+                        ProgressView()
+                        Text("Processing \(phase.description)...")
+                            .foregroundColor(.secondary)
+                        Spacer()
+                    }
+                    Spacer()
+                }
+                .padding(.vertical, 40)
+            } else {
+                Spacer()
+            }
+        }
+        .padding()
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color(UIColor.systemBackground))
+                .shadow(color: Color.black.opacity(isSelected ? 0.2 : 0.1), radius: isSelected ? 8 : 4)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(isSelected ? Color.accentColor : Color.gray.opacity(0.2), lineWidth: isSelected ? 2 : 1)
+        )
+        .padding(.horizontal, 8)
     }
 }
 
-extension Array {
-    subscript(safe index: Int) -> Element? {
-        indices.contains(index) ? self[index] : nil
+extension Phase {
+    var next: Phase? {
+        guard let currentIndex = Phase.allCases.firstIndex(of: self),
+              currentIndex + 1 < Phase.allCases.count else {
+            return nil
+        }
+        return Phase.allCases[currentIndex + 1]
     }
 }
 
@@ -115,8 +277,11 @@ extension Array {
         phases: [
             .action: "I understand you said...",
             .experience: "Based on my experience...",
+            .intention: "Your intention seems to be...",
             .yield: "Here's my response..."
         ],
-        isProcessing: false
+        isProcessing: true
     )
+    .frame(height: 500)
+    .padding()
 }
