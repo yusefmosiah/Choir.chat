@@ -4,7 +4,6 @@ struct MessageRow: View {
     let message: Message
     let isProcessing: Bool
     @ObservedObject var viewModel: ChorusViewModel
-    @State private var showChorusCycle: Bool = false
 
     init(message: Message, isProcessing: Bool = false, viewModel: ChorusViewModel) {
         self.message = message
@@ -13,80 +12,60 @@ struct MessageRow: View {
     }
 
     var body: some View {
-        VStack(alignment: message.isUser ? .trailing : .leading, spacing: 4) {
-            VStack(alignment: .leading, spacing: 0) {
-                // Message content with status indicator
+        VStack(alignment: message.isUser ? .trailing : .leading, spacing: 8) {
+            // User messages
+            if message.isUser {
                 HStack(alignment: .top, spacing: 8) {
-                    if !message.isUser {
-                        Image(systemName: "person.circle.fill")
-                            .foregroundColor(.accentColor)
-                            .opacity(0.8)
-                    }
-
                     Text(LocalizedStringKey(message.content))
-                        .multilineTextAlignment(message.isUser ? .trailing : .leading)
+                        .multilineTextAlignment(.trailing)
                         .fixedSize(horizontal: false, vertical: true)
 
-                    if !message.isUser {
-                        if isProcessing {
-                            ProgressView()
-                                .scaleEffect(0.7)
-                        } else if message.chorusResult != nil {
-                            Image(systemName: "checkmark.circle.fill")
-                                .foregroundColor(.accentColor)
-                        }
-                    }
-
-                    if message.isUser {
-                        Image(systemName: "person.circle.fill")
-                            .foregroundColor(.white)
-                            .opacity(0.8)
-                    }
+                    Image(systemName: "person.circle.fill")
+                        .foregroundColor(.white)
+                        .opacity(0.8)
                 }
                 .padding()
-                .frame(maxWidth: .infinity, alignment: message.isUser ? .trailing : .leading)
-                .background(message.isUser ? Color.accentColor : Color(.systemGray6))
-                .foregroundColor(message.isUser ? .white : .primary)
+                .frame(maxWidth: .infinity, alignment: .trailing)
+                .background(Color.accentColor)
+                .foregroundColor(.white)
                 .cornerRadius(16)
-
-                // Toggle button for Chorus cycle (only for AI responses)
-                if !message.isUser && (isProcessing || message.chorusResult != nil) {
-                    Button(action: {
-                        withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                            showChorusCycle.toggle()
-                        }
-                    }) {
-                        HStack {
-                            Text(showChorusCycle ? "Hide Chorus Cycle" : "Show Chorus Cycle")
-                                .font(.caption)
-                                .foregroundColor(.accentColor)
-
-                            Image(systemName: showChorusCycle ? "chevron.up" : "chevron.down")
-                                .font(.caption)
-                                .foregroundColor(.accentColor)
-                        }
-                        .padding(.vertical, 6)
-                        .padding(.horizontal, 12)
-                    }
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .background(Color(.systemGray6).opacity(0.5))
-                    .cornerRadius(8)
-                    .padding(.top, 4)
-                }
-
-                // Chorus cycle for AI responses
-                if !message.isUser && showChorusCycle {
-                    ChorusCycleView(
-                        phases: isProcessing ? viewModel.responses : (message.chorusResult?.phases ?? [:]),
-                        isProcessing: isProcessing,
-                        coordinator: viewModel.coordinator as? RESTChorusCoordinator
-                    )
-                    .frame(height: 400)
-                    .padding(.top, 8)
-                    .transition(.move(edge: .top).combined(with: .opacity))
-                }
+                .padding(.leading, 40) // Add some padding to make it look more like a chat
             }
-            .frame(maxWidth: .infinity, alignment: message.isUser ? .trailing : .leading)
+            // AI messages - directly show the chorus cycle
+            else {
+                // Header with AI icon
+                HStack {
+                    Image(systemName: "person.circle.fill")
+                        .foregroundColor(.accentColor)
+                        .opacity(0.8)
+
+                    Text("AI Assistant")
+                        .font(.headline)
+                        .foregroundColor(.primary)
+
+                    Spacer()
+
+                    if isProcessing {
+                        ProgressView()
+                            .scaleEffect(0.7)
+                    } else if message.chorusResult != nil {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundColor(.accentColor)
+                    }
+                }
+                .padding(.horizontal)
+
+                // Chorus cycle view
+                ChorusCycleView(
+                    phases: isProcessing ? viewModel.responses : (message.chorusResult?.phases ?? [:]),
+                    isProcessing: isProcessing,
+                    coordinator: viewModel.coordinator as? RESTChorusCoordinator
+                )
+                .frame(height: 400)
+                .padding(.top, 4)
+                .padding(.bottom, 8)
+                .padding(.trailing, 40) // Add some padding to make it look more like a chat
+            }
 
             Text(message.timestamp, style: .time)
                 .font(.caption2)
@@ -94,22 +73,7 @@ struct MessageRow: View {
                 .padding(.horizontal, 4)
         }
         .padding(.horizontal, 8)
-        .onChange(of: isProcessing) { _, newValue in
-            // When processing starts, show the chorus cycle
-            if newValue {
-                withAnimation {
-                    showChorusCycle = true
-                }
-            }
-        }
-        .onChange(of: viewModel.responses) { _, _ in
-            // When new responses come in, ensure chorus cycle is visible
-            if isProcessing && !showChorusCycle {
-                withAnimation {
-                    showChorusCycle = true
-                }
-            }
-        }
+        .padding(.vertical, 4)
     }
 }
 

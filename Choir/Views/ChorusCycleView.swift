@@ -21,20 +21,6 @@ struct ChorusCycleView: View {
             let totalWidth = geometry.size.width
 
             VStack(spacing: 0) {
-                // Final response display when cycle is complete
-                if let yieldContent = phases[.yield] {
-                    Text("Final Response")
-                        .font(.headline)
-                        .padding(.top)
-
-                    Text(yieldContent)
-                        .padding()
-                        .frame(maxWidth: .infinity)
-                        .background(Color.accentColor.opacity(0.1))
-                        .cornerRadius(8)
-                        .padding(.horizontal)
-                }
-
                 // Phase carousel
                 ZStack {
                     ForEach(Phase.allCases) { phase in
@@ -211,10 +197,11 @@ struct PhaseCard: View {
             HStack {
                 Image(systemName: phase.symbol)
                     .imageScale(.medium)
-                    .foregroundColor(.accentColor)
+                    .foregroundColor(phase == .yield ? .white : .accentColor)
 
                 Text(phase.description)
                     .font(.headline)
+                    .foregroundColor(phase == .yield ? .white : .primary)
 
                 Spacer()
 
@@ -229,6 +216,7 @@ struct PhaseCard: View {
                 ScrollView {
                     Text(content)
                         .frame(maxWidth: .infinity, alignment: .leading)
+                        .foregroundColor(phase == .yield ? .white : .primary)
                 }
             } else if isLoading {
                 VStack(spacing: 16) {
@@ -237,7 +225,7 @@ struct PhaseCard: View {
                         Spacer()
                         ProgressView()
                         Text("Processing \(phase.description)...")
-                            .foregroundColor(.secondary)
+                            .foregroundColor(phase == .yield ? .white.opacity(0.8) : .secondary)
                         Spacer()
                     }
                     Spacer()
@@ -251,12 +239,17 @@ struct PhaseCard: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(
             RoundedRectangle(cornerRadius: 16)
-                .fill(Color(UIColor.systemBackground))
+                .fill(phase == .yield
+                      ? Color.accentColor
+                      : Color(UIColor.systemBackground))
                 .shadow(color: Color.black.opacity(isSelected ? 0.2 : 0.1), radius: isSelected ? 8 : 4)
         )
         .overlay(
             RoundedRectangle(cornerRadius: 16)
-                .stroke(isSelected ? Color.accentColor : Color.gray.opacity(0.2), lineWidth: isSelected ? 2 : 1)
+                .stroke(isSelected
+                        ? (phase == .yield ? Color.white : Color.accentColor)
+                        : Color.gray.opacity(0.2),
+                        lineWidth: isSelected ? 2 : 1)
         )
         .padding(.horizontal, 8)
     }

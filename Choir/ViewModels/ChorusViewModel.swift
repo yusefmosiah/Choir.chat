@@ -60,11 +60,6 @@ class ChorusViewModel: ObservableObject {
 
             self.responses = newResponses
             isProcessing = coordinator.isProcessing
-
-            // If processing is complete, ensure yield is the latest phase
-            if !isProcessing && coordinator.responses[.yield] != nil {
-                latestProcessedPhase = .yield
-            }
         }
     }
 
@@ -79,7 +74,10 @@ class ChorusViewModel: ObservableObject {
     func updateMessage(_ message: Message) -> Message {
         var updatedMessage = message
         if let yieldResponse = coordinator.yieldResponse {
+            // Store the yield content as the message content for compatibility
             updatedMessage.content = yieldResponse.content
+
+            // Store all phase responses in the chorus result
             updatedMessage.chorusResult = MessageChorusResult(phases: responses)
         }
         return updatedMessage
