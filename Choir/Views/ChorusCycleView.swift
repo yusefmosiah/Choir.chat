@@ -30,7 +30,8 @@ struct ChorusCycleView: View {
                                 phase: phase,
                                 content: content,
                                 isSelected: phase == selectedPhase,
-                                isLoading: false
+                                isLoading: false,
+                                priors: phase == .experience ? coordinator?.experienceResponse?.priors : nil
                             )
                             .frame(width: cardWidth)
                             .offset(x: calculateOffset(for: phase, cardWidth: cardWidth, totalWidth: totalWidth))
@@ -191,6 +192,7 @@ struct PhaseCard: View {
     let content: String?
     let isSelected: Bool
     var isLoading: Bool = false
+    var priors: [String: Prior]? = nil
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -217,6 +219,22 @@ struct PhaseCard: View {
                     Text(content)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .foregroundColor(phase == .yield ? .white : .primary)
+
+                    // Display priors if this is the experience phase and we have priors
+                    if phase == .experience, let priors = priors, !priors.isEmpty {
+                        VStack(alignment: .leading, spacing: 10) {
+                            Text("Available Priors:")
+                                .font(.headline)
+                                .padding(.top, 12)
+                                .foregroundColor(phase == .yield ? .white : .primary)
+
+                            ForEach(Array(priors.keys.sorted()), id: \.self) { key in
+                                if let prior = priors[key] {
+                                    PriorCard(prior: prior, priorKey: key)
+                                }
+                            }
+                        }
+                    }
                 }
             } else if isLoading {
                 VStack(spacing: 16) {
@@ -252,6 +270,76 @@ struct PhaseCard: View {
                         lineWidth: isSelected ? 2 : 1)
         )
         .padding(.horizontal, 8)
+    }
+}
+
+struct PriorCard: View {
+    let prior: Prior
+    let priorKey: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Text("Prior ID: \(priorKey)")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+
+                Spacer()
+
+                Text("Similarity: \(Int(prior.similarity * 100))%")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+
+            Text(prior.content)
+                .font(.body)
+                .lineLimit(3)
+
+            HStack {
+                if let threadID = prior.threadID {
+                    Text("Thread: \(threadID)")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+
+                Spacer()
+
+                if let step = prior.step {
+                    Text("Phase: \(step)")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+
+                if let createdAt = prior.createdAt {
+                    Text("Created: \(formattedDate(createdAt))")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+            }
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color(UIColor.secondarySystemBackground))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.gray.opacity(0.2), lineWidth: 1)
+        )
+    }
+
+    private func formattedDate(_ dateString: String) -> String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
+
+        if let date = dateFormatter.date(from: dateString) {
+            let displayFormatter = DateFormatter()
+            displayFormatter.dateStyle = .short
+            displayFormatter.timeStyle = .short
+            return displayFormatter.string(from: date)
+        }
+
+        return dateString
     }
 }
 

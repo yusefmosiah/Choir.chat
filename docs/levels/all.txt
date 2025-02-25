@@ -50,6 +50,7 @@ tree.md
 │   └── Views
 │       ├── ChoirThreadDetailView.swift
 │       ├── ChorusCycleView.swift
+│       ├── Components
 │       ├── MessageRow.swift
 │       ├── Thread
 │       │   └── Components
@@ -174,7 +175,7 @@ tree.md
 │   └── fqaho_simulation.ipynb
 └── render.yaml
 
-49 directories, 110 files
+50 directories, 110 files
 
 === File: docs/CHANGELOG.md ===
 
