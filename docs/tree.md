@@ -158,6 +158,7 @@
 │   │   └── level5.md
 │   ├── plan_anonymity_by_default.md
 │   ├── plan_identity_as_a_service.md
+│   ├── plan_libsql.md
 │   ├── scripts
 │   │   ├── combiner.sh
 │   │   └── update_tree.sh
@@ -166,4 +167,4 @@
 │   └── fqaho_simulation.ipynb
 └── render.yaml
 
-51 directories, 113 files
+51 directories, 114 files
