@@ -6,11 +6,21 @@ This document outlines the implementation plan for integrating libSQL/Turso as t
 
 ## Core Objectives
 
-1. Replace SwiftData with libSQL for local persistence
-2. Implement vector search capabilities to support semantic matching in the Experience phase
-3. Create a synchronization system between local and global databases
-4. Support the FQAHO model parameters (α, K₀, m) in the database schema
-5. Enable offline functionality with seamless online synchronization
+1. Implement libSQL as the primary local persistence solution
+2. Design a flexible schema that can accommodate evolving data models
+3. Implement vector search capabilities to support semantic matching in the Experience phase
+4. Create a synchronization system between local and global databases
+5. Support the FQAHO model parameters (α, K₀, m) in the database schema
+6. Enable offline functionality with seamless online synchronization
+
+## Implementation Philosophy
+
+Our approach to database implementation will be guided by these principles:
+
+1. **Core System First** - Focus on getting the core UX and system operational before fully committing to a database schema
+2. **Flexibility** - Design the database to be adaptable as our data model evolves
+3. **Incremental Implementation** - Add database features in phases, starting with the most essential components
+4. **Performance** - Optimize for mobile device constraints and offline-first operation
 
 ## Technical Implementation
 
@@ -346,69 +356,45 @@ extension DatabaseService {
 }
 ```
 
-## Migration Strategy from SwiftData
+## Phased Implementation Approach
 
-1. Create a migration utility that:
+Given that UX has more pressing issues and the data model is still evolving, we'll adopt a phased approach to database implementation:
 
-   - Reads all existing threads and messages from SwiftData
-   - Converts them to the new libSQL schema format
-   - Generates embeddings for historical messages (if missing)
-   - Inserts them into the libSQL database
+### Phase 1: Core UX Development (Current Focus)
 
-2. Implement a dual-write approach during transition:
+- Continue developing the core UI and interaction flow
+- Prioritize UX improvements over database implementation
+- Use in-memory or mock data for testing
 
-   - Write to both SwiftData and libSQL temporarily
-   - Validate data integrity between both systems
-   - Switch to exclusive libSQL usage once confident
+### Phase 2: Schema Development and Validation
 
-3. Data Cleanup:
-   - After successful migration and verification, provide option to purge SwiftData storage
+- Finalize initial schema design as the core system stabilizes
+- Create prototypes to validate the schema with real usage patterns
+- Ensure the schema can adapt to evolving requirements
 
-```swift
-struct MigrationService {
-    static func migrateFromSwiftData() throws {
-        // 1. Fetch all data from SwiftData
-        let swiftDataThreads = try fetchAllSwiftDataThreads()
-        let swiftDataMessages = try fetchAllSwiftDataMessages()
+### Phase 3: Basic Database Implementation
 
-        // 2. Convert and insert into libSQL
-        for thread in swiftDataThreads {
-            try DatabaseService.shared.createThread(
-                id: thread.id,
-                title: thread.title,
-                k0: thread.k0 ?? 1.0,     // Default if missing
-                alpha: thread.alpha ?? 1.5, // Default if missing
-                m: thread.m ?? 1.0       // Default if missing
-            )
-        }
+- Implement basic CRUD operations for threads and messages
+- Set up the database connection and initialization
+- Create simplified data services for the UI to consume
 
-        // 3. Process messages - may need batching for large datasets
-        for message in swiftDataMessages {
-            // Generate embeddings if missing
-            let embedding = message.embedding ?? generateEmbedding(for: message.content)
+### Phase 4: Vector Search Implementation
 
-            try DatabaseService.shared.createMessage(
-                id: message.id,
-                threadId: message.threadId,
-                userId: message.userId,
-                content: message.content,
-                embedding: embedding,
-                phase: message.phase
-            )
+- Add vector embedding storage and search
+- Connect the Experience phase to vector similarity search
+- Optimize for performance and memory usage
 
-            // Set approval status if it exists
-            if let status = message.approvalStatus {
-                try DatabaseService.shared.updateMessageApprovalStatus(
-                    messageId: message.id,
-                    status: status
-                )
-            }
-        }
-    }
+### Phase 5: FQAHO Parameter Support
 
-    // Helper methods would be implemented here
-}
-```
+- Implement parameter storage and history tracking
+- Add parameter calculation algorithms
+- Connect parameter adjustments to the UI
+
+### Phase 6: Synchronization
+
+- Configure embedded replicas
+- Implement sync management
+- Handle offline/online transitions
 
 ## Integration with Post Chain Phases
 
@@ -420,42 +406,15 @@ The libSQL implementation will support all phases of the Post Chain:
 4. **Web Search** - Store search results with vector embeddings for future reference
 5. **Tool Use** - Record tool usage patterns and outcomes
 
-## Implementation Timeline
+## Flexible Schema Design Principles
 
-1. **Phase 1: Foundation (1-2 weeks)**
+Since the data model is still evolving, the database schema should follow these principles:
 
-   - Set up libSQL Swift package
-   - Implement basic schema
-   - Create core CRUD operations
-
-2. **Phase 2: Vector Search (1-2 weeks)**
-
-   - Implement embedding generation
-   - Set up vector storage
-   - Create similarity search queries
-
-3. **Phase 3: Synchronization (1 week)**
-
-   - Configure embedded replicas
-   - Implement sync management
-   - Handle offline/online transitions
-
-4. **Phase 4: FQAHO Integration (1-2 weeks)**
-
-   - Implement parameter storage
-   - Create parameter adjustment algorithms
-   - Track and visualize parameter history
-
-5. **Phase 5: Migration (1 week)**
-
-   - Develop migration utility
-   - Test with production data
-   - Verify data integrity
-
-6. **Phase 6: Testing and Optimization (1-2 weeks)**
-   - Performance testing
-   - Optimization of queries
-   - Battery usage analysis
+1. **Versioned Schema** - Include version markers in the schema to facilitate future migrations
+2. **Nullable Fields** - Use nullable fields where appropriate to accommodate evolving requirements
+3. **Isolated Tables** - Keep related concepts in separate tables to minimize the impact of changes
+4. **Extensible Records** - Consider using a JSON or blob field for attributes that might change frequently
+5. **Minimal Dependencies** - Limit foreign key constraints to essential relationships
 
 ## Future Considerations
 
