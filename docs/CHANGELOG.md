@@ -1,6 +1,5 @@
 # Changelog
 
-
 ## [2025-02-25] - 2025-02-25
 
 ### Added
@@ -8,6 +7,20 @@
 - Implemented UI carousel to improve user experience
 - Added display of priors in the Experience step
 - Resumed active development after coding hiatus
+
+### Planned
+
+- API streaming implementation to enhance responsiveness
+- Model reconfiguration for improved performance
+- Go multimodel, then multimodal
+- OpenRouter integration
+- Conceptual evolution from "Chorus Cycle" to "Post Chain"
+  - Representing shift from harmonic oscillator (cycle) to anharmonic oscillator (chain)
+  - Aligning interface terminology with underlying FQAHO model
+- Client-side editable system prompts for customization
+- Additional phases in the Post Chain:
+  - Web search phase for real-time information access
+  - Sandboxed arbitrary tool use phase for enhanced capabilities
 
 ## [2025-02-24] - 2025-02-24
 
