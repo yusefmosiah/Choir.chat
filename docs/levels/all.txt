@@ -23,8 +23,12 @@ tree.md
 │   │   ├── AccentColor.colorset
 │   │   │   └── Contents.json
 │   │   ├── AppIcon.appiconset
-│   │   │   └── Contents.json
-│   │   └── Contents.json
+│   │   │   ├── Contents.json
+│   │   │   └── Icon-App-1024x1024@2x.png
+│   │   ├── Contents.json
+│   │   └── Icon-App-1024x1024.imageset
+│   │       ├── Contents.json
+│   │       └── Icon-App-1024x1024@2x.png
 │   ├── Choir.entitlements
 │   ├── ContentView.swift
 │   ├── Coordinators
@@ -175,7 +179,7 @@ tree.md
 │   └── fqaho_simulation.ipynb
 └── render.yaml
 
-50 directories, 110 files
+51 directories, 113 files
 
 === File: docs/CHANGELOG.md ===
 
@@ -188,7 +192,16 @@ CHANGELOG.md
 
 # Changelog
 
-## [2025-03-15] - 2025-03-15
+
+## [2025-02-25] - 2025-02-25
+
+### Added
+
+- Implemented UI carousel to improve user experience
+- Added display of priors in the Experience step
+- Resumed active development after coding hiatus
+
+## [2025-02-24] - 2025-02-24
 
 ### Changed
 

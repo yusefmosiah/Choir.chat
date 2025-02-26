@@ -10,8 +10,12 @@
 │   │   ├── AccentColor.colorset
 │   │   │   └── Contents.json
 │   │   ├── AppIcon.appiconset
-│   │   │   └── Contents.json
-│   │   └── Contents.json
+│   │   │   ├── Contents.json
+│   │   │   └── Icon-App-1024x1024@2x.png
+│   │   ├── Contents.json
+│   │   └── Icon-App-1024x1024.imageset
+│   │       ├── Contents.json
+│   │       └── Icon-App-1024x1024@2x.png
 │   ├── Choir.entitlements
 │   ├── ContentView.swift
 │   ├── Coordinators
@@ -162,4 +166,4 @@
 │   └── fqaho_simulation.ipynb
 └── render.yaml
 
-50 directories, 110 files
+51 directories, 113 files

@@ -1,6 +1,15 @@
 # Changelog
 
-## [2025-03-15] - 2025-03-15
+
+## [2025-02-25] - 2025-02-25
+
+### Added
+
+- Implemented UI carousel to improve user experience
+- Added display of priors in the Experience step
+- Resumed active development after coding hiatus
+
+## [2025-02-24] - 2025-02-24
 
 ### Changed
 
