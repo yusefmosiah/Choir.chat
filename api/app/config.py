@@ -35,12 +35,19 @@ class Config:
     AZURE_API_BASE: str = os.getenv("AZURE_API_BASE", "")
     AZURE_API_VERSION: str = "2024-08-01-preview"
 
+    # OpenRouter configuration
+    OPENROUTER_API_KEY: str = os.getenv("OPENROUTER_API_KEY", "")
+
     # Model configuration
     EMBEDDING_MODEL: str = "text-embedding-ada-002"
     CHAT_MODEL: str = "anthropic/claude-3-5-haiku-20241022"
     SUMMARY_MODEL: str = "anthropic/claude-3-5-sonnet-20241022"
     CLAUDE_3_5_HAIKU: str = "anthropic/claude-3-5-haiku-20241022"
     CLAUDE_3_5_SONNET_NEW: str = "anthropic/claude-3-5-sonnet-20241022"
+
+    OPENROUTER_CLAUDE_3_5_HAIKU: str = "openrouter/anthropic/claude-3-5-haiku-20241022"
+    OPENROUTER_CLAUDE_3_5_SONNET: str = "openrouter/anthropic/claude-3-5-sonnet-20241022"
+
     AZURE_CHAT_MODEL: str = "azure/gpt-4o-2024-08-06"
     MAX_TOKENS: int = 4000
     TEMPERATURE: float = 0.7

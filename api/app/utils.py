@@ -110,7 +110,7 @@ async def structured_chat_completion(
         # it's the first way i could get working
         # in future, we should support other ai model providers
         response = completion(
-            model=config.CLAUDE_3_5_HAIKU,
+            model=config.OPENROUTER_CLAUDE_3_5_HAIKU,
             messages=messages,
             tools=[{
                 "type": "function",
