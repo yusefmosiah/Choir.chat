@@ -29,7 +29,7 @@ struct MessageRow: View {
                 .background(Color.accentColor)
                 .foregroundColor(.white)
                 .cornerRadius(16)
-                .padding(.leading, 40) // Add some padding to make it look more like a chat
+                .padding(.leading, 40)
             }
             // AI messages - directly show the chorus cycle
             else {
@@ -63,8 +63,7 @@ struct MessageRow: View {
                 )
                 .frame(height: 400)
                 .padding(.top, 4)
-                .padding(.bottom, 8)
-                .padding(.trailing, 40) // Add some padding to make it look more like a chat
+                .padding(.trailing, 40)
             }
 
             Text(message.timestamp, style: .time)
@@ -74,6 +73,7 @@ struct MessageRow: View {
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 4)
+        .padding(.bottom, 24)
     }
 }
 

@@ -16,97 +16,87 @@ struct ChorusCycleView: View {
 
     var body: some View {
         GeometryReader { geometry in
-            let cardWidth = geometry.size.width * 0.9
+            let cardWidth = geometry.size.width * 0.98
             let sideCardWidth = geometry.size.width * 0.1
             let totalWidth = geometry.size.width
 
-            VStack(spacing: 0) {
-                // Phase carousel
-                ZStack {
-                    ForEach(Phase.allCases) { phase in
-                        if let content = phases[phase] {
-                            // Phase has content
+            // Simplified to just the carousel without indicators
+            ZStack {
+                ForEach(Phase.allCases) { phase in
+                    if let content = phases[phase] {
+                        // Phase has content
+                        PhaseCard(
+                            phase: phase,
+                            content: content,
+                            isSelected: phase == selectedPhase,
+                            isLoading: false,
+                            priors: phase == .experience ? coordinator?.experienceResponse?.priors : nil
+                        )
+                        .frame(width: cardWidth)
+                        .offset(x: calculateOffset(for: phase, cardWidth: cardWidth, totalWidth: totalWidth))
+                        .zIndex(phase == selectedPhase ? 1 : 0)
+                        .opacity(calculateOpacity(for: phase))
+                    } else if isProcessing {
+                        // Check if this is the next phase being processed
+                        let isCurrentlyProcessing = coordinator?.isProcessingPhase(phase) ?? false
+                        let isNextPhase = isNextPhaseToProcess(phase)
+
+                        if isCurrentlyProcessing || isNextPhase {
                             PhaseCard(
                                 phase: phase,
-                                content: content,
-                                isSelected: phase == selectedPhase,
-                                isLoading: false,
-                                priors: phase == .experience ? coordinator?.experienceResponse?.priors : nil
+                                content: nil,
+                                isSelected: false,
+                                isLoading: true
                             )
                             .frame(width: cardWidth)
                             .offset(x: calculateOffset(for: phase, cardWidth: cardWidth, totalWidth: totalWidth))
-                            .zIndex(phase == selectedPhase ? 1 : 0)
-                            .opacity(calculateOpacity(for: phase))
-                        } else if isProcessing {
-                            // Check if this is the next phase being processed
-                            let isCurrentlyProcessing = coordinator?.isProcessingPhase(phase) ?? false
-                            let isNextPhase = isNextPhaseToProcess(phase)
-
-                            if isCurrentlyProcessing || isNextPhase {
-                                PhaseCard(
-                                    phase: phase,
-                                    content: nil,
-                                    isSelected: false,
-                                    isLoading: true
-                                )
-                                .frame(width: cardWidth)
-                                .offset(x: calculateOffset(for: phase, cardWidth: cardWidth, totalWidth: totalWidth))
-                                .zIndex(0)
-                                .opacity(0.7)
-                            }
+                            .zIndex(0)
+                            .opacity(0.7)
                         }
                     }
                 }
-                .frame(height: geometry.size.height * 0.8)
-                .gesture(
-                    DragGesture()
-                        .onChanged { value in
-                            dragOffset = value.translation.width
-                        }
-                        .onEnded { value in
-                            let predictedEndOffset = value.predictedEndTranslation.width
-                            let threshold = cardWidth / 3
+            }
+            .frame(height: geometry.size.height * 0.99) // Back to using full height
+            .gesture(
+                DragGesture()
+                    .onChanged { value in
+                        dragOffset = value.translation.width
+                    }
+                    .onEnded { value in
+                        let predictedEndOffset = value.predictedEndTranslation.width
+                        let threshold = cardWidth / 3
 
-                            if abs(predictedEndOffset) > threshold {
-                                let direction = predictedEndOffset > 0 ? -1 : 1
-                                let currentIndex = availablePhases.firstIndex(of: selectedPhase) ?? 0
-                                let targetIndex = currentIndex + direction
+                        if abs(predictedEndOffset) > threshold {
+                            let direction = predictedEndOffset > 0 ? -1 : 1
+                            let currentIndex = availablePhases.firstIndex(of: selectedPhase) ?? 0
+                            let targetIndex = currentIndex + direction
 
-                                if targetIndex >= 0 && targetIndex < availablePhases.count {
-                                    withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                                        selectedPhase = availablePhases[targetIndex]
-                                        dragOffset = 0
-                                    }
-                                } else {
-                                    withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                                        dragOffset = 0
-                                    }
+                            if targetIndex >= 0 && targetIndex < availablePhases.count {
+                                withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                                    selectedPhase = availablePhases[targetIndex]
+                                    dragOffset = 0
                                 }
                             } else {
                                 withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
                                     dragOffset = 0
                                 }
                             }
+                        } else {
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                                dragOffset = 0
+                            }
                         }
-                )
-
-                // Phase indicator
-                HStack(spacing: 8) {
-                    ForEach(Phase.allCases) { phase in
-                        Circle()
-                            .fill(phase == selectedPhase ? Color.accentColor : Color.gray.opacity(0.3))
-                            .frame(width: 8, height: 8)
-                            .opacity(phases[phase] != nil ? 1 : 0.3)
                     }
-                }
-                .padding(.top, 16)
-            }
+            )
+            .padding(.bottom, 16) // Add padding at the bottom of the carousel
         }
+        // Remove the onChange handler completely since we want the user to control phase selection
+        // If you want to only auto-select when starting from zero phases, you could modify it like this:
         .onChange(of: phases) { _, newPhases in
-            // Auto-select the latest phase when new content arrives
-            if let latestPhase = availablePhases.last, latestPhase != selectedPhase {
+            // Only auto-select if this is the first phase being added
+            if availablePhases.count == 1 {
                 withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                    selectedPhase = latestPhase
+                    selectedPhase = availablePhases[0]
                 }
             }
         }
@@ -195,14 +185,15 @@ struct PhaseCard: View {
     var priors: [String: Prior]? = nil
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 16) {
             HStack {
                 Image(systemName: phase.symbol)
-                    .imageScale(.medium)
+                    .imageScale(.large)
                     .foregroundColor(phase == .yield ? .white : .accentColor)
 
                 Text(phase.description)
-                    .font(.headline)
+                    .font(.title3)
+                    .fontWeight(.semibold)
                     .foregroundColor(phase == .yield ? .white : .primary)
 
                 Spacer()
@@ -212,13 +203,16 @@ struct PhaseCard: View {
                         .scaleEffect(0.7)
                 }
             }
-            .padding(.bottom, 4)
+            .padding(.bottom, 8)
 
             if let content = content {
                 ScrollView {
                     Text(content)
+                        .font(.body)
+                        .lineSpacing(6)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .foregroundColor(phase == .yield ? .white : .primary)
+                        .padding(.bottom, 4)
 
                     // Display priors if this is the experience phase and we have priors
                     if phase == .experience, let priors = priors, !priors.isEmpty {
@@ -236,6 +230,7 @@ struct PhaseCard: View {
                         }
                     }
                 }
+                .frame(minHeight: 400)
             } else if isLoading {
                 VStack(spacing: 16) {
                     Spacer()
@@ -253,23 +248,27 @@ struct PhaseCard: View {
                 Spacer()
             }
         }
-        .padding()
+        .padding(16)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(
             RoundedRectangle(cornerRadius: 16)
                 .fill(phase == .yield
                       ? Color.accentColor
                       : Color(UIColor.systemBackground))
-                .shadow(color: Color.black.opacity(isSelected ? 0.2 : 0.1), radius: isSelected ? 8 : 4)
+                .shadow(color: Color.black.opacity(isSelected ? 0.25 : 0.1),
+                        radius: isSelected ? 10 : 4,
+                        x: 0,
+                        y: isSelected ? 4 : 2)
         )
         .overlay(
             RoundedRectangle(cornerRadius: 16)
                 .stroke(isSelected
                         ? (phase == .yield ? Color.white : Color.accentColor)
                         : Color.gray.opacity(0.2),
-                        lineWidth: isSelected ? 2 : 1)
+                        lineWidth: isSelected ? 2.5 : 1)
         )
-        .padding(.horizontal, 8)
+        .padding(.horizontal, 4)
+        .padding(.bottom, 0)
     }
 }
 
