@@ -158,13 +158,17 @@
 │   │   └── level5.md
 │   ├── plan_anonymity_by_default.md
 │   ├── plan_identity_as_a_service.md
+│   ├── plan_langgraph.md
 │   ├── plan_libsql.md
 │   ├── scripts
 │   │   ├── combiner.sh
 │   │   └── update_tree.sh
+│   ├── spec_postchain.md
 │   └── tree.md
 ├── notebooks
-│   └── fqaho_simulation.ipynb
+│   ├── fqaho_simulation.ipynb
+│   ├── post_chain0.ipynb
+│   └── vowel_loop3.ipynb
 └── render.yaml
 
-51 directories, 114 files
+51 directories, 118 files
