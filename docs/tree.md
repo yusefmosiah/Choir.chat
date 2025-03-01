@@ -85,10 +85,18 @@
 │   │   ├── models
 │   │   │   ├── __init__.py
 │   │   │   └── api.py
+│   │   ├── postchain
+│   │   │   ├── __init__.py
+│   │   │   ├── provider_info.md
+│   │   │   └── schemas
+│   │   │       ├── __init__.py
+│   │   │       ├── aeiou.py
+│   │   │       └── state.py
 │   │   ├── routers
 │   │   │   ├── balance.py
 │   │   │   ├── chorus.py
 │   │   │   ├── embeddings.py
+│   │   │   ├── postchain.py
 │   │   │   ├── threads.py
 │   │   │   ├── users.py
 │   │   │   └── vectors.py
@@ -105,6 +113,13 @@
 │   └── tests
 │       ├── __init__.py
 │       ├── conftest.py
+│       ├── postchain
+│       │   ├── __init__.py
+│       │   ├── run_all_tests.py
+│       │   ├── test_langgraph_multiturn.py
+│       │   ├── test_multiturn.py
+│       │   ├── test_providers.py
+│       │   └── test_structured_output.py
 │       ├── test_chorus_endpoints.py
 │       ├── test_core_endpoints.py
 │       ├── test_main.py
@@ -159,6 +174,7 @@
 │   ├── plan_anonymity_by_default.md
 │   ├── plan_identity_as_a_service.md
 │   ├── plan_langgraph.md
+│   ├── plan_langgraph_postchain.md
 │   ├── plan_libsql.md
 │   ├── plan_spec_postchain.md
 │   ├── scripts
@@ -169,6 +185,7 @@
 │   ├── fqaho_simulation.ipynb
 │   ├── post_chain0.ipynb
 │   └── vowel_loop3.ipynb
-└── render.yaml
+├── render.yaml
+└── ~
 
-51 directories, 118 files
+55 directories, 131 files
