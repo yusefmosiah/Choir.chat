@@ -48,7 +48,7 @@ class StructuredOutputTester:
         self.results: Dict[str, Dict[str, Any]] = {}
         self.test_prompt = "What is the capital of France?"
         self.system_prompt = """
-        You are a helpful assistant that provides information in a structured format.
+        You are a helpful assistant that provides information in a structured JSON format.
         Please respond to the user's question with your answer, confidence level, and reasoning.
         """
     
@@ -60,20 +60,18 @@ class StructuredOutputTester:
         try:
             logger.info(f"Testing OpenAI structured output with {model_name}...")
             
-            # Special case for o1 and o3-mini models which don't support temperature
             if model_name in [self.config.OPENAI_O1, self.config.OPENAI_O3_MINI]:
-                model = ChatOpenAI(
+                base_model = ChatOpenAI(
                     api_key=self.config.OPENAI_API_KEY,
-                    model=model_name,
-                    response_format={"type": "json_object"}
+                    model=model_name
                 )
             else:
-                model = ChatOpenAI(
+                base_model = ChatOpenAI(
                     api_key=self.config.OPENAI_API_KEY,
                     model=model_name,
-                    temperature=0,
-                    response_format={"type": "json_object"}
+                    temperature=0
                 )
+            model = base_model.with_structured_output(ActionResponse)
             
             messages = [
                 SystemMessage(content=self.system_prompt),
@@ -132,26 +130,15 @@ class StructuredOutputTester:
         try:
             logger.info(f"Testing Anthropic structured output with {model_name}...")
             
-            model = ChatAnthropic(
+            base_model = ChatAnthropic(
                 api_key=self.config.ANTHROPIC_API_KEY,
                 model=model_name,
                 temperature=0
             )
-            
-            # Anthropic requires a different approach for structured output
-            structured_system_prompt = f"""
-            {self.system_prompt}
-            
-            You must respond in the following JSON format:
-            {{
-                "proposed_response": "Your answer to the question",
-                "confidence": 0.9,  // A number between 0 and 1
-                "reasoning": "Brief explanation of your answer"
-            }}
-            """
+            model = base_model.with_structured_output(ActionResponse)
             
             messages = [
-                SystemMessage(content=structured_system_prompt),
+                SystemMessage(content=self.system_prompt),
                 HumanMessage(content=self.test_prompt)
             ]
             
@@ -222,25 +209,15 @@ class StructuredOutputTester:
         try:
             logger.info(f"Testing Google structured output with {model_name}...")
             
-            model = ChatGoogleGenerativeAI(
+            base_model = ChatGoogleGenerativeAI(
                 api_key=self.config.GOOGLE_API_KEY,
                 model=model_name,
                 temperature=0
             )
-            
-            structured_system_prompt = f"""
-            {self.system_prompt}
-            
-            You must respond in the following JSON format:
-            {{
-                "proposed_response": "Your answer to the question",
-                "confidence": 0.9,  // A number between 0 and 1
-                "reasoning": "Brief explanation of your answer"
-            }}
-            """
+            model = base_model.with_structured_output(ActionResponse)
             
             messages = [
-                SystemMessage(content=structured_system_prompt),
+                SystemMessage(content=self.system_prompt),
                 HumanMessage(content=self.test_prompt)
             ]
             
@@ -309,25 +286,15 @@ class StructuredOutputTester:
         try:
             logger.info(f"Testing Mistral structured output with {model_name}...")
             
-            model = ChatMistralAI(
+            base_model = ChatMistralAI(
                 api_key=self.config.MISTRAL_API_KEY,
                 model=model_name,
                 temperature=0
             )
-            
-            structured_system_prompt = f"""
-            {self.system_prompt}
-            
-            You must respond in the following JSON format:
-            {{
-                "proposed_response": "Your answer to the question",
-                "confidence": 0.9,  // A number between 0 and 1
-                "reasoning": "Brief explanation of your answer"
-            }}
-            """
+            model = base_model.with_structured_output(ActionResponse)
             
             messages = [
-                SystemMessage(content=structured_system_prompt),
+                SystemMessage(content=self.system_prompt),
                 HumanMessage(content=self.test_prompt)
             ]
             
@@ -399,25 +366,15 @@ class StructuredOutputTester:
             # Fireworks models need a prefix
             model_id = f"accounts/fireworks/models/{model_name}"
             
-            model = ChatFireworks(
+            base_model = ChatFireworks(
                 api_key=self.config.FIREWORKS_API_KEY,
                 model=model_id,
                 temperature=0
             )
-            
-            structured_system_prompt = f"""
-            {self.system_prompt}
-            
-            You must respond in the following JSON format:
-            {{
-                "proposed_response": "Your answer to the question",
-                "confidence": 0.9,  // A number between 0 and 1
-                "reasoning": "Brief explanation of your answer"
-            }}
-            """
+            model = base_model.with_structured_output(ActionResponse)
             
             messages = [
-                SystemMessage(content=structured_system_prompt),
+                SystemMessage(content=self.system_prompt),
                 HumanMessage(content=self.test_prompt)
             ]
             
@@ -486,25 +443,15 @@ class StructuredOutputTester:
         try:
             logger.info(f"Testing Cohere structured output with {model_name}...")
             
-            model = ChatCohere(
+            base_model = ChatCohere(
                 api_key=self.config.COHERE_API_KEY,
                 model=model_name,
                 temperature=0
             )
-            
-            structured_system_prompt = f"""
-            {self.system_prompt}
-            
-            You must respond in the following JSON format:
-            {{
-                "proposed_response": "Your answer to the question",
-                "confidence": 0.9,  // A number between 0 and 1
-                "reasoning": "Brief explanation of your answer"
-            }}
-            """
+            model = base_model.with_structured_output(ActionResponse)
             
             messages = [
-                SystemMessage(content=structured_system_prompt),
+                SystemMessage(content=self.system_prompt),
                 HumanMessage(content=self.test_prompt)
             ]
             
