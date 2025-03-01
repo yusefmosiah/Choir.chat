@@ -34,7 +34,7 @@ async def run_all_tests():
     logger.info("TESTING STRUCTURED OUTPUT")
     logger.info("="*50)
     structured_tester = StructuredOutputTester(config)
-    await structured_tester.run_all_tests()
+    structured_results = await structured_tester.run_all_tests()
     structured_tester.print_results()
     
     # Test multi-turn conversations
@@ -42,7 +42,7 @@ async def run_all_tests():
     logger.info("TESTING MULTI-TURN CONVERSATIONS")
     logger.info("="*50)
     multiturn_tester = MultiTurnTester(config)
-    await multiturn_tester.run_all_tests()
+    multiturn_results = await multiturn_tester.run_all_tests()
     multiturn_tester.print_results()
     
     # Print overall summary
@@ -54,39 +54,52 @@ async def run_all_tests():
     api_success = sum(1 for r in provider_tester.results.values() if r.get("status") == "success")
     api_total = len(provider_tester.results)
     
-    # Count providers with successful structured output
-    structured_success = sum(1 for r in structured_tester.results.values() if r.get("status") == "success")
-    structured_total = len(structured_tester.results)
+    # Count models with successful structured output
+    structured_success = sum(sum(1 for r in results if r.get("status") == "success") for results in structured_tester.results.values())
+    structured_parse_error = sum(sum(1 for r in results if r.get("status") == "parse_error") for results in structured_tester.results.values())
+    structured_total = sum(len(results) for results in structured_tester.results.values())
     
-    # Count providers with successful multi-turn conversations
-    multiturn_success = sum(1 for r in multiturn_tester.results.values() if r.get("status") == "success")
-    multiturn_context = sum(1 for r in multiturn_tester.results.values() if r.get("status") == "success" and r.get("context_maintained", False))
-    multiturn_total = len(multiturn_tester.results)
+    # Count models with successful multi-turn conversations
+    multiturn_success = sum(sum(1 for r in results if r.get("status") == "success") for results in multiturn_tester.results.values())
+    multiturn_context = sum(sum(1 for r in results if r.get("status") == "success" and r.get("context_maintained", False)) for results in multiturn_tester.results.values())
+    multiturn_total = sum(len(results) for results in multiturn_tester.results.values())
     
     logger.info(f"API Connectivity: {api_success}/{api_total} providers successful")
-    logger.info(f"Structured Output: {structured_success}/{structured_total} providers successful")
-    logger.info(f"Multi-turn Conversations: {multiturn_success}/{multiturn_total} providers successful, {multiturn_context}/{multiturn_total} maintained context")
+    logger.info(f"Structured Output: {structured_success}/{structured_total} models successful, {structured_parse_error}/{structured_total} parse errors")
+    logger.info(f"Multi-turn Conversations: {multiturn_success}/{multiturn_total} models successful, {multiturn_context}/{multiturn_success} maintained context")
     
     # Print provider-specific summary
     logger.info("\nProvider-specific summary:")
     all_providers = set(provider_tester.results.keys()) | set(structured_tester.results.keys()) | set(multiturn_tester.results.keys())
     
     for provider in all_providers:
-        api_status = provider_tester.results.get(provider, {}).get("status", "not tested")
-        structured_status = structured_tester.results.get(provider, {}).get("status", "not tested")
-        multiturn_status = multiturn_tester.results.get(provider, {}).get("status", "not tested")
-        context_maintained = multiturn_tester.results.get(provider, {}).get("context_maintained", False)
+        api_status_provider = provider_tester.results.get(provider, [])
+        structured_status_provider = structured_tester.results.get(provider, [])
+        multiturn_status_provider = multiturn_tester.results.get(provider, [])
         
-        api_icon = "✅" if api_status == "success" else "❌" if api_status == "error" else "⚠️"
-        structured_icon = "✅" if structured_status == "success" else "❌" if structured_status == "error" else "⚠️"
-        multiturn_icon = "✅" if multiturn_status == "success" else "❌" if multiturn_status == "error" else "⚠️"
-        context_icon = "✅" if context_maintained else "❌" if multiturn_status == "success" else "⚠️"
+        api_success_provider = sum(1 for r in api_status_provider if r.get("status") == "success")
+        api_total_provider = len(api_status_provider)
+        structured_success_provider = sum(1 for r in structured_status_provider if r.get("status") == "success")
+        structured_parse_error_provider = sum(1 for r in structured_status_provider if r.get("status") == "parse_error")
+        structured_total_provider = len(structured_status_provider)
+        multiturn_success_provider = sum(1 for r in multiturn_status_provider if r.get("status") == "success")
+        multiturn_context_provider = sum(1 for r in multiturn_status_provider if r.get("status") == "success" and r.get("context_maintained", False))
+        multiturn_total_provider = len(multiturn_status_provider)
+
+        api_status = f"{api_success_provider}/{api_total_provider} models successful" if api_total_provider > 0 else "Not tested"
+        structured_status = f"{structured_success_provider}/{structured_total_provider} models successful, {structured_parse_error_provider}/{structured_total_provider} parse errors" if structured_total_provider > 0 else "Not tested"
+        multiturn_status = f"{multiturn_success_provider}/{multiturn_total_provider} models successful, {multiturn_context_provider}/{multiturn_success_provider} maintained context" if multiturn_total_provider > 0 else "Not tested"
+
+        api_icon = "✅" if api_success_provider == api_total_provider and api_total_provider > 0 else "⚠️" if api_total_provider > 0 else " "
+        structured_icon = "✅" if structured_success_provider == structured_total_provider and structured_total_provider > 0 else "⚠️" if structured_total_provider > 0 else " "
+        multiturn_icon = "✅" if multiturn_success_provider == multiturn_total_provider and multiturn_total_provider > 0 else "⚠️" if multiturn_total_provider > 0 else " "
+        context_icon = "✅" if multiturn_context_provider == multiturn_success_provider and multiturn_success_provider > 0 else "⚠️" if multiturn_success_provider > 0 else " "
         
         logger.info(f"{provider}:")
         logger.info(f"  {api_icon} API Connectivity: {api_status}")
         logger.info(f"  {structured_icon} Structured Output: {structured_status}")
         logger.info(f"  {multiturn_icon} Multi-turn Conversation: {multiturn_status}")
-        logger.info(f"  {context_icon} Context Maintained: {str(context_maintained) if multiturn_status == 'success' else 'N/A'}")
+        logger.info(f"  {context_icon} Context Maintained: {multiturn_status if multiturn_status == 'Not tested' else f'{multiturn_context_provider}/{multiturn_success_provider} maintained context'}")
     
     logger.info("="*50)
 
