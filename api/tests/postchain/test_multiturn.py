@@ -1,12 +1,15 @@
 """
 Test script to verify multi-turn conversation capabilities of each provider.
 This tests the ability of models to maintain context across multiple turns.
+
+The test uses a prompt chain format:
+<system><user="hello"><ai><user="the magic number is 1729"><ai><user="whats the magic number"><ai_response_contains~="1729">
 """
 
 import os
 import asyncio
 import logging
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, Tuple
 
 from langchain_openai import ChatOpenAI
 from langchain_anthropic import ChatAnthropic
@@ -36,17 +39,15 @@ class MultiTurnTester:
     def __init__(self, config: Config):
         self.config = config
         self.results: Dict[str, Dict[str, Any]] = {}
-        self.system_prompt = """
-        You are a helpful assistant that engages in multi-turn conversations.
-        Be concise but informative in your responses.
-        """
+        self.system_prompt = "You are a helpful assistant."
         self.conversation = [
-            {"role": "human", "content": "Hello! I'd like to plan a trip to France."},
+            {"role": "human", "content": "hello"},
             {"role": "ai", "content": None},  # Will be filled during testing
-            {"role": "human", "content": "What's the best time of year to visit Paris?"},
+            {"role": "human", "content": "the magic number is 1729"},
             {"role": "ai", "content": None},  # Will be filled during testing
-            {"role": "human", "content": "What are the must-see attractions there?"},
+            {"role": "human", "content": "whats the magic number"},
         ]
+        self.expected_content = "1729"
     
     async def test_openai_model(self, model_name: str) -> Dict[str, Any]:
         """Test multi-turn conversation capabilities of a specific OpenAI model."""
@@ -86,19 +87,20 @@ class MultiTurnTester:
                     # Add AI response to messages for context
                     messages.append(AIMessage(content=response.content))
             
-            # Check if the last response references information from earlier in the conversation
-            context_maintained = any(
-                "Paris" in responses[-1] or 
-                "France" in responses[-1] or 
-                "trip" in responses[-1].lower()
-            )
+            # Get the final response for the last message
+            final_response = await model.ainvoke(messages)
+            responses.append(final_response.content)
+            
+            # Check if the expected content is in the final response
+            contains_expected = self.expected_content in final_response.content
             
             return {
                 "status": "success",
                 "model": model_name,
                 "responses": responses,
-                "context_maintained": context_maintained,
-                "provider": "OpenAI"
+                "contains_expected": contains_expected,
+                "provider": "OpenAI",
+                "final_response": final_response.content
             }
         except Exception as e:
             logger.error(f"OpenAI multi-turn test failed for {model_name}: {str(e)}")
@@ -152,19 +154,20 @@ class MultiTurnTester:
                     # Add AI response to messages for context
                     messages.append(AIMessage(content=response.content))
             
-            # Check if the last response references information from earlier in the conversation
-            context_maintained = any(
-                "Paris" in responses[-1] or 
-                "France" in responses[-1] or 
-                "trip" in responses[-1].lower()
-            )
+            # Get the final response for the last message
+            final_response = await model.ainvoke(messages)
+            responses.append(final_response.content)
+            
+            # Check if the expected content is in the final response
+            contains_expected = self.expected_content in final_response.content
             
             return {
                 "status": "success",
                 "model": model_name,
                 "responses": responses,
-                "context_maintained": context_maintained,
-                "provider": "Anthropic"
+                "contains_expected": contains_expected,
+                "provider": "Anthropic",
+                "final_response": final_response.content
             }
         except Exception as e:
             logger.error(f"Anthropic multi-turn test failed for {model_name}: {str(e)}")
@@ -218,19 +221,20 @@ class MultiTurnTester:
                     # Add AI response to messages for context
                     messages.append(AIMessage(content=response.content))
             
-            # Check if the last response references information from earlier in the conversation
-            context_maintained = any(
-                "Paris" in responses[-1] or 
-                "France" in responses[-1] or 
-                "trip" in responses[-1].lower()
-            )
+            # Get the final response for the last message
+            final_response = await model.ainvoke(messages)
+            responses.append(final_response.content)
+            
+            # Check if the expected content is in the final response
+            contains_expected = self.expected_content in final_response.content
             
             return {
                 "status": "success",
                 "model": model_name,
                 "responses": responses,
-                "context_maintained": context_maintained,
-                "provider": "Google"
+                "contains_expected": contains_expected,
+                "provider": "Google",
+                "final_response": final_response.content
             }
         except Exception as e:
             logger.error(f"Google multi-turn test failed for {model_name}: {str(e)}")
@@ -284,19 +288,20 @@ class MultiTurnTester:
                     # Add AI response to messages for context
                     messages.append(AIMessage(content=response.content))
             
-            # Check if the last response references information from earlier in the conversation
-            context_maintained = any(
-                "Paris" in responses[-1] or 
-                "France" in responses[-1] or 
-                "trip" in responses[-1].lower()
-            )
+            # Get the final response for the last message
+            final_response = await model.ainvoke(messages)
+            responses.append(final_response.content)
+            
+            # Check if the expected content is in the final response
+            contains_expected = self.expected_content in final_response.content
             
             return {
                 "status": "success",
                 "model": model_name,
                 "responses": responses,
-                "context_maintained": context_maintained,
-                "provider": "Mistral"
+                "contains_expected": contains_expected,
+                "provider": "Mistral",
+                "final_response": final_response.content
             }
         except Exception as e:
             logger.error(f"Mistral multi-turn test failed for {model_name}: {str(e)}")
@@ -353,19 +358,20 @@ class MultiTurnTester:
                     # Add AI response to messages for context
                     messages.append(AIMessage(content=response.content))
             
-            # Check if the last response references information from earlier in the conversation
-            context_maintained = any(
-                "Paris" in responses[-1] or 
-                "France" in responses[-1] or 
-                "trip" in responses[-1].lower()
-            )
+            # Get the final response for the last message
+            final_response = await model.ainvoke(messages)
+            responses.append(final_response.content)
+            
+            # Check if the expected content is in the final response
+            contains_expected = self.expected_content in final_response.content
             
             return {
                 "status": "success",
                 "model": model_name,
                 "responses": responses,
-                "context_maintained": context_maintained,
-                "provider": "Fireworks"
+                "contains_expected": contains_expected,
+                "provider": "Fireworks",
+                "final_response": final_response.content
             }
         except Exception as e:
             logger.error(f"Fireworks multi-turn test failed for {model_name}: {str(e)}")
@@ -419,19 +425,20 @@ class MultiTurnTester:
                     # Add AI response to messages for context
                     messages.append(AIMessage(content=response.content))
             
-            # Check if the last response references information from earlier in the conversation
-            context_maintained = any(
-                "Paris" in responses[-1] or 
-                "France" in responses[-1] or 
-                "trip" in responses[-1].lower()
-            )
+            # Get the final response for the last message
+            final_response = await model.ainvoke(messages)
+            responses.append(final_response.content)
+            
+            # Check if the expected content is in the final response
+            contains_expected = self.expected_content in final_response.content
             
             return {
                 "status": "success",
                 "model": model_name,
                 "responses": responses,
-                "context_maintained": context_maintained,
-                "provider": "Cohere"
+                "contains_expected": contains_expected,
+                "provider": "Cohere",
+                "final_response": final_response.content
             }
         except Exception as e:
             logger.error(f"Cohere multi-turn test failed for {model_name}: {str(e)}")
@@ -490,16 +497,16 @@ class MultiTurnTester:
         
         total_models = 0
         total_success = 0
-        total_context_maintained = 0
         total_error = 0
         total_skipped = 0
+        total_passed = 0
         
         for provider, results_list in self.results.items():
             logger.info(f"\n{provider} Models:")
             logger.info("-"*50)
             
             # Check if the provider was skipped entirely
-            if len(results_list) == 1 and results_list[0].get("status") == "skipped" and "provider" in results_list[0]:
+            if len(results_list) == 1 and results_list[0].get("status") == "skipped":
                 logger.info(f"⚠️ {provider}: SKIPPED - {results_list[0].get('reason', 'No reason provided')}")
                 total_skipped += 1
                 continue
@@ -510,20 +517,15 @@ class MultiTurnTester:
                 model_name = result.get("model", "unknown")
                 
                 if status == "success":
-                    context_maintained = result.get("context_maintained", False)
-                    context_status = "✅" if context_maintained else "❌"
-                    
-                    logger.info(f"✅ {model_name}: SUCCESS")
-                    logger.info(f"   Context Maintained: {context_status}")
-                    
-                    # Print last exchange of the conversation
-                    responses = result.get("responses", [])
-                    if responses:
-                        logger.info(f"   Last response: {responses[-1][:100]}...")
+                    contains_expected = result.get("contains_expected", False)
+                    if contains_expected:
+                        logger.info(f"✅ {model_name}: PASSED - Successfully remembered the magic number")
+                        total_passed += 1
+                    else:
+                        logger.info(f"❌ {model_name}: FAILED - Did not remember the magic number")
+                        logger.info(f"   Final response: {result.get('final_response', 'No response')[:100]}...")
                     
                     total_success += 1
-                    if context_maintained:
-                        total_context_maintained += 1
                 elif status == "skipped":
                     logger.info(f"⚠️ {model_name}: SKIPPED - {result.get('reason', 'No reason provided')}")
                     total_skipped += 1
@@ -538,21 +540,21 @@ class MultiTurnTester:
         # Overall summary
         logger.info("\nSummary by Provider:")
         for provider, results_list in self.results.items():
-            if len(results_list) == 1 and results_list[0].get("status") == "skipped" and "provider" in results_list[0]:
+            if len(results_list) == 1 and results_list[0].get("status") == "skipped":
                 provider_status = "SKIPPED"
             else:
                 success_count = sum(1 for r in results_list if r.get("status") == "success")
-                context_count = sum(1 for r in results_list if r.get("status") == "success" and r.get("context_maintained", False))
+                passed_count = sum(1 for r in results_list if r.get("status") == "success" and r.get("contains_expected", False))
                 total_count = len(results_list)
-                provider_status = f"{success_count}/{total_count} models successful, {context_count}/{success_count} maintained context"
+                provider_status = f"{passed_count}/{total_count} models passed"
             
             logger.info(f"{provider}: {provider_status}")
         
         logger.info("\nOverall Summary:")
         logger.info(f"Total Models: {total_models}")
-        logger.info(f"Successful: {total_success}")
-        logger.info(f"Context Maintained: {total_context_maintained}/{total_success}")
-        logger.info(f"Failed: {total_error}")
+        logger.info(f"Successful API Calls: {total_success}")
+        logger.info(f"Passed Memory Test: {total_passed}")
+        logger.info(f"Failed API Calls: {total_error}")
         logger.info(f"Skipped: {total_skipped}")
         logger.info("="*50)
 
