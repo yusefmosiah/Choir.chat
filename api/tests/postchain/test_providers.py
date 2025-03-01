@@ -28,6 +28,8 @@ def get_openai_models(config: Config) -> List[str]:
         config.OPENAI_GPT_45_PREVIEW,
         config.OPENAI_GPT_4O,
         config.OPENAI_GPT_4O_MINI,
+        # Note: o1 and o3-mini models don't support temperature parameter
+        # They will be handled with special cases in the test_model function
         config.OPENAI_O1,
         config.OPENAI_O3_MINI
     ]
@@ -47,11 +49,13 @@ def get_google_models(config: Config) -> List[str]:
     ]
 
 def get_mistral_models(config: Config) -> List[str]:
+    # Note: Only using free models or models with available credits
+    # Other models commented out due to rate limits or credit issues
     return [
         config.MISTRAL_PIXTRAL_12B,
-        config.MISTRAL_SMALL_LATEST,
-        config.MISTRAL_PIXTRAL_LARGE,
-        config.MISTRAL_LARGE_LATEST,
+        # config.MISTRAL_SMALL_LATEST,  # Requires paid credits
+        # config.MISTRAL_PIXTRAL_LARGE,  # Requires paid credits
+        # config.MISTRAL_LARGE_LATEST,  # Requires paid credits
         config.MISTRAL_CODESTRAL
     ]
 
@@ -62,7 +66,7 @@ def get_cohere_models(config: Config) -> List[str]:
 
 def get_fireworks_models(config: Config) -> List[str]:
     return [
-        config.FIREWORKS_DEEPSEEK_R1,
+        # config.FIREWORKS_DEEPSEEK_R1,  # Currently failing with internal server error
         config.FIREWORKS_DEEPSEEK_V3,
         config.FIREWORKS_QWEN25_CODER
     ]
@@ -78,11 +82,19 @@ class ProviderTester:
         """Test a specific model."""
         try:
             logger.info(f"Testing {provider} model: {model_name}...")
-            model = model_class(
-                api_key=api_key,
-                model=model_name,
-                temperature=0
-            )
+            
+            # Special case for OpenAI o1 and o3-mini models which don't support temperature
+            if provider == "OpenAI" and (model_name == "o1" or model_name == "o3-mini"):
+                model = model_class(
+                    api_key=api_key,
+                    model=model_name
+                )
+            else:
+                model = model_class(
+                    api_key=api_key,
+                    model=model_name,
+                    temperature=0
+                )
             
             response = await model.ainvoke([HumanMessage(content="Say hello!")])
             return {
