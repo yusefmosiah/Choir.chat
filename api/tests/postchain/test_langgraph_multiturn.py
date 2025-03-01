@@ -69,7 +69,7 @@ def create_conversation_graph(model):
         elif current_turn == 1:
             new_state["messages"].append(HumanMessage(content="the magic number is 1729"))
         elif current_turn == 2:
-            new_state["messages"].append(HumanMessage(content="whats the magic number"))
+            new_state["messages"].append(HumanMessage(content="whats the magic number again? repeat it. this is a multi-turn chat context test."))
 
         # Increment the turn counter
         new_state["current_turn"] = current_turn + 1
