@@ -46,10 +46,13 @@ class MultiTurnTester:
             return {"status": "skipped", "reason": "API key not configured"}
         
         try:
-            logger.info("Testing OpenAI multi-turn conversation...")
+            # Use GPT-4o from config
+            model_name = self.config.OPENAI_GPT_4O
+            logger.info(f"Testing OpenAI multi-turn conversation with {model_name}...")
+            
             model = ChatOpenAI(
                 api_key=self.config.OPENAI_API_KEY,
-                model="gpt-3.5-turbo",
+                model=model_name,
                 temperature=0
             )
             
@@ -79,7 +82,7 @@ class MultiTurnTester:
             
             return {
                 "status": "success",
-                "model": "gpt-3.5-turbo",
+                "model": model_name,
                 "responses": responses,
                 "context_maintained": context_maintained,
                 "provider": "OpenAI"
@@ -94,10 +97,13 @@ class MultiTurnTester:
             return {"status": "skipped", "reason": "API key not configured"}
         
         try:
-            logger.info("Testing Anthropic multi-turn conversation...")
+            # Use Claude 3.5 Haiku from config
+            model_name = self.config.ANTHROPIC_CLAUDE_35_HAIKU
+            logger.info(f"Testing Anthropic multi-turn conversation with {model_name}...")
+            
             model = ChatAnthropic(
                 api_key=self.config.ANTHROPIC_API_KEY,
-                model="claude-3-haiku-20240307",
+                model=model_name,
                 temperature=0
             )
             
@@ -127,7 +133,7 @@ class MultiTurnTester:
             
             return {
                 "status": "success",
-                "model": "claude-3-haiku-20240307",
+                "model": model_name,
                 "responses": responses,
                 "context_maintained": context_maintained,
                 "provider": "Anthropic"
@@ -142,10 +148,13 @@ class MultiTurnTester:
             return {"status": "skipped", "reason": "API key not configured"}
         
         try:
-            logger.info("Testing Google multi-turn conversation...")
+            # Use Gemini 2.0 Flash from config
+            model_name = self.config.GOOGLE_GEMINI_20_FLASH
+            logger.info(f"Testing Google multi-turn conversation with {model_name}...")
+            
             model = ChatGoogleGenerativeAI(
                 api_key=self.config.GOOGLE_API_KEY,
-                model="gemini-pro",
+                model=model_name,
                 temperature=0
             )
             
@@ -175,7 +184,7 @@ class MultiTurnTester:
             
             return {
                 "status": "success",
-                "model": "gemini-pro",
+                "model": model_name,
                 "responses": responses,
                 "context_maintained": context_maintained,
                 "provider": "Google"
@@ -190,7 +199,8 @@ class MultiTurnTester:
             self.test_openai(),
             self.test_anthropic(),
             self.test_google(),
-            # Add other providers as needed
+            # We're only testing multi-turn with the main providers
+            # that have the best multi-turn capabilities
         ]
         
         results = await asyncio.gather(*tests)
@@ -199,7 +209,6 @@ class MultiTurnTester:
             "OpenAI": results[0],
             "Anthropic": results[1],
             "Google": results[2],
-            # Add other providers as needed
         }
         
         return self.results

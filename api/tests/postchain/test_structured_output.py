@@ -50,10 +50,13 @@ class StructuredOutputTester:
             return {"status": "skipped", "reason": "API key not configured"}
         
         try:
-            logger.info("Testing OpenAI structured output...")
+            # Use GPT-4o from config for structured output testing
+            model_name = self.config.OPENAI_GPT_4O
+            logger.info(f"Testing OpenAI structured output with {model_name}...")
+            
             model = ChatOpenAI(
                 api_key=self.config.OPENAI_API_KEY,
-                model="gpt-3.5-turbo",
+                model=model_name,
                 temperature=0,
                 response_format={"type": "json_object"}
             )
@@ -72,7 +75,7 @@ class StructuredOutputTester:
                 validated_response = ActionResponse(**parsed_response)
                 return {
                     "status": "success",
-                    "model": "gpt-3.5-turbo",
+                    "model": model_name,
                     "response": validated_response.model_dump(),
                     "provider": "OpenAI",
                     "raw_response": response.content
@@ -95,10 +98,13 @@ class StructuredOutputTester:
             return {"status": "skipped", "reason": "API key not configured"}
         
         try:
-            logger.info("Testing Anthropic structured output...")
+            # Use Claude 3.5 Haiku from config
+            model_name = self.config.ANTHROPIC_CLAUDE_35_HAIKU
+            logger.info(f"Testing Anthropic structured output with {model_name}...")
+            
             model = ChatAnthropic(
                 api_key=self.config.ANTHROPIC_API_KEY,
-                model="claude-3-haiku-20240307",
+                model=model_name,
                 temperature=0
             )
             
@@ -135,7 +141,7 @@ class StructuredOutputTester:
                     validated_response = ActionResponse(**parsed_response)
                     return {
                         "status": "success",
-                        "model": "claude-3-haiku-20240307",
+                        "model": model_name,
                         "response": validated_response.model_dump(),
                         "provider": "Anthropic",
                         "raw_response": content
@@ -159,17 +165,19 @@ class StructuredOutputTester:
             logger.error(f"Anthropic structured output test failed: {str(e)}")
             return {"status": "error", "error": str(e), "provider": "Anthropic"}
     
-    # Similar methods for other providers...
     async def test_google(self) -> Dict[str, Any]:
         """Test Google structured output capabilities."""
         if not self.config.GOOGLE_API_KEY:
             return {"status": "skipped", "reason": "API key not configured"}
         
         try:
-            logger.info("Testing Google structured output...")
+            # Use Gemini 2.0 Flash from config
+            model_name = self.config.GOOGLE_GEMINI_20_FLASH
+            logger.info(f"Testing Google structured output with {model_name}...")
+            
             model = ChatGoogleGenerativeAI(
                 api_key=self.config.GOOGLE_API_KEY,
-                model="gemini-pro",
+                model=model_name,
                 temperature=0
             )
             
@@ -203,7 +211,7 @@ class StructuredOutputTester:
                     validated_response = ActionResponse(**parsed_response)
                     return {
                         "status": "success",
-                        "model": "gemini-pro",
+                        "model": model_name,
                         "response": validated_response.model_dump(),
                         "provider": "Google",
                         "raw_response": content
@@ -233,7 +241,8 @@ class StructuredOutputTester:
             self.test_openai(),
             self.test_anthropic(),
             self.test_google(),
-            # Add other providers as needed
+            # We're only testing structured output with the main providers
+            # that have the best structured output capabilities
         ]
         
         results = await asyncio.gather(*tests)
@@ -242,7 +251,6 @@ class StructuredOutputTester:
             "OpenAI": results[0],
             "Anthropic": results[1],
             "Google": results[2],
-            # Add other providers as needed
         }
         
         return self.results
