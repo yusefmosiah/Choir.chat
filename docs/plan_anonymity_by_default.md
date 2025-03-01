@@ -39,5 +39,3 @@ Anonymity is not just a feature of Choir; it's a fundamental principle, a design
 **Conclusion:**
 
 Anonymity by default is a core design principle of Choir, one that reflects the platform's commitment to privacy, freedom of expression, and the creation of a truly meritocratic space for the exchange of ideas. It's a bold choice in a world where online platforms increasingly demand real-name identification, but it's a choice that has the potential to unlock new levels of creativity, honesty, and collective intelligence. By prioritizing anonymity, Choir is not just building a platform; it's building a new model for online interaction, one that empowers individuals and fosters a more open and equitable exchange of ideas.
-
-This document will be integrated into **Level 1: Basic Mechanics**, as it describes a fundamental aspect of how users interact with the platform and each other. It also connects to **Level 3: Value Creation**, as anonymity is a key value proposition for many users, particularly those concerned about privacy and freedom of expression.

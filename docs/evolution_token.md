@@ -28,4 +28,3 @@ The CHIP token has transcended its initial conception as a mere utility token. I
 
 The evolution of CHIP from a utility token to a multifaceted representation of value and participation is a testament to the dynamic and emergent nature of the Choir platform. It reflects a deeper understanding of the relationship between technology, economics, and human collaboration.
 
-This document will be integrated into **Level 2: Core Mechanics**, as it describes the fundamental role of the CHIP token in the platform's economy and incentive structure.

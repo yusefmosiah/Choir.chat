@@ -64,7 +64,6 @@ The shift from Chorus Cycle to Post Chain also marks a crucial conceptual evolut
 
 This evolution is not merely semantic. It reflects a deeper understanding of the system's core principles, a refinement of its purpose, a recognition of its potential. **Post Chain** is the name that embodies the platform's essence: a simple, powerful, and elegant system for building collective intelligence, one post at a time. It is easy to say, and means what it says. It is direct.
 
-This document will be integrated into **Level 1: Basic Mechanics**, as it describes the evolution of the core interaction model.
 
 === File: docs/evolution_token.md ===
 
@@ -105,4 +104,3 @@ The CHIP token has transcended its initial conception as a mere utility token. I
 
 The evolution of CHIP from a utility token to a multifaceted representation of value and participation is a testament to the dynamic and emergent nature of the Choir platform. It reflects a deeper understanding of the relationship between technology, economics, and human collaboration.
 
-This document will be integrated into **Level 2: Core Mechanics**, as it describes the fundamental role of the CHIP token in the platform's economy and incentive structure.

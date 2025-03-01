@@ -22,4 +22,3 @@ The shift from Chorus Cycle to Post Chain also marks a crucial conceptual evolut
 
 This evolution is not merely semantic. It reflects a deeper understanding of the system's core principles, a refinement of its purpose, a recognition of its potential. **Post Chain** is the name that embodies the platform's essence: a simple, powerful, and elegant system for building collective intelligence, one post at a time. It is easy to say, and means what it says. It is direct.
 
-This document will be integrated into **Level 1: Basic Mechanics**, as it describes the evolution of the core interaction model.
