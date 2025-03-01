@@ -29,6 +29,10 @@ class Config:
     # AI API configuration
     OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
     ANTHROPIC_API_KEY: str = os.getenv("ANTHROPIC_API_KEY", "")
+    GOOGLE_API_KEY: str = os.getenv("GOOGLE_API_KEY", "")
+    MISTRAL_API_KEY: str = os.getenv("MISTRAL_API_KEY", "")
+    FIREWORKS_API_KEY: str = os.getenv("FIREWORKS_API_KEY", "")
+    COHERE_API_KEY: str = os.getenv("COHERE_API_KEY", "")
 
     # Azure configuration
     AZURE_API_KEY: str = os.getenv("AZURE_API_KEY", "")
