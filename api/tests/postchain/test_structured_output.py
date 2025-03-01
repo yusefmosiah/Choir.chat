@@ -80,17 +80,15 @@ class StructuredOutputTester:
             
             response = await model.ainvoke(messages)
             
-            # Try to parse the response as JSON
+            # When using with_structured_output, the response is already an instance of ActionResponse
             try:
-                parsed_response = json.loads(response.content)
-                # Validate against our schema
-                validated_response = ActionResponse(**parsed_response)
+                # The response is already the validated Pydantic model
                 return {
                     "status": "success",
                     "model": model_name,
-                    "response": validated_response.model_dump(),
+                    "response": response.model_dump(),
                     "provider": "OpenAI",
-                    "raw_response": response.content
+                    "raw_response": str(response)
                 }
             except Exception as parse_error:
                 return {
@@ -98,7 +96,7 @@ class StructuredOutputTester:
                     "error": str(parse_error),
                     "provider": "OpenAI",
                     "model": model_name,
-                    "raw_response": response.content
+                    "raw_response": str(response)
                 }
                 
         except Exception as e:
@@ -144,33 +142,16 @@ class StructuredOutputTester:
             
             response = await model.ainvoke(messages)
             
-            # Try to extract and parse JSON from the response
+            # When using with_structured_output, the response is already an instance of ActionResponse
             try:
-                # Look for JSON in the response
-                content = response.content
-                # Find JSON-like content (between curly braces)
-                json_start = content.find('{')
-                json_end = content.rfind('}') + 1
-                
-                if json_start >= 0 and json_end > json_start:
-                    json_str = content[json_start:json_end]
-                    parsed_response = json.loads(json_str)
-                    validated_response = ActionResponse(**parsed_response)
-                    return {
-                        "status": "success",
-                        "model": model_name,
-                        "response": validated_response.model_dump(),
-                        "provider": "Anthropic",
-                        "raw_response": content
-                    }
-                else:
-                    return {
-                        "status": "parse_error",
-                        "error": "Could not find JSON in response",
-                        "provider": "Anthropic",
-                        "model": model_name,
-                        "raw_response": content
-                    }
+                # The response is already the validated Pydantic model
+                return {
+                    "status": "success",
+                    "model": model_name,
+                    "response": response.model_dump(),
+                    "provider": "Anthropic",
+                    "raw_response": str(response)
+                }
             except Exception as parse_error:
                 return {
                     "status": "parse_error",
@@ -223,38 +204,23 @@ class StructuredOutputTester:
             
             response = await model.ainvoke(messages)
             
-            # Try to extract and parse JSON from the response
+            # When using with_structured_output, the response is already an instance of ActionResponse
             try:
-                content = response.content
-                json_start = content.find('{')
-                json_end = content.rfind('}') + 1
-                
-                if json_start >= 0 and json_end > json_start:
-                    json_str = content[json_start:json_end]
-                    parsed_response = json.loads(json_str)
-                    validated_response = ActionResponse(**parsed_response)
-                    return {
-                        "status": "success",
-                        "model": model_name,
-                        "response": validated_response.model_dump(),
-                        "provider": "Google",
-                        "raw_response": content
-                    }
-                else:
-                    return {
-                        "status": "parse_error",
-                        "error": "Could not find JSON in response",
-                        "provider": "Google",
-                        "model": model_name,
-                        "raw_response": content
-                    }
+                # The response is already the validated Pydantic model
+                return {
+                    "status": "success",
+                    "model": model_name,
+                    "response": response.model_dump(),
+                    "provider": "Google",
+                    "raw_response": str(response)
+                }
             except Exception as parse_error:
                 return {
                     "status": "parse_error",
                     "error": str(parse_error),
                     "provider": "Google",
                     "model": model_name,
-                    "raw_response": response.content
+                    "raw_response": str(response)
                 }
                 
         except Exception as e:
@@ -300,38 +266,23 @@ class StructuredOutputTester:
             
             response = await model.ainvoke(messages)
             
-            # Try to extract and parse JSON from the response
+            # When using with_structured_output, the response is already an instance of ActionResponse
             try:
-                content = response.content
-                json_start = content.find('{')
-                json_end = content.rfind('}') + 1
-                
-                if json_start >= 0 and json_end > json_start:
-                    json_str = content[json_start:json_end]
-                    parsed_response = json.loads(json_str)
-                    validated_response = ActionResponse(**parsed_response)
-                    return {
-                        "status": "success",
-                        "model": model_name,
-                        "response": validated_response.model_dump(),
-                        "provider": "Mistral",
-                        "raw_response": content
-                    }
-                else:
-                    return {
-                        "status": "parse_error",
-                        "error": "Could not find JSON in response",
-                        "provider": "Mistral",
-                        "model": model_name,
-                        "raw_response": content
-                    }
+                # The response is already the validated Pydantic model
+                return {
+                    "status": "success",
+                    "model": model_name,
+                    "response": response.model_dump(),
+                    "provider": "Mistral",
+                    "raw_response": str(response)
+                }
             except Exception as parse_error:
                 return {
                     "status": "parse_error",
                     "error": str(parse_error),
                     "provider": "Mistral",
                     "model": model_name,
-                    "raw_response": response.content
+                    "raw_response": str(response)
                 }
                 
         except Exception as e:
@@ -380,38 +331,23 @@ class StructuredOutputTester:
             
             response = await model.ainvoke(messages)
             
-            # Try to extract and parse JSON from the response
+            # When using with_structured_output, the response is already an instance of ActionResponse
             try:
-                content = response.content
-                json_start = content.find('{')
-                json_end = content.rfind('}') + 1
-                
-                if json_start >= 0 and json_end > json_start:
-                    json_str = content[json_start:json_end]
-                    parsed_response = json.loads(json_str)
-                    validated_response = ActionResponse(**parsed_response)
-                    return {
-                        "status": "success",
-                        "model": model_name,
-                        "response": validated_response.model_dump(),
-                        "provider": "Fireworks",
-                        "raw_response": content
-                    }
-                else:
-                    return {
-                        "status": "parse_error",
-                        "error": "Could not find JSON in response",
-                        "provider": "Fireworks",
-                        "model": model_name,
-                        "raw_response": content
-                    }
+                # The response is already the validated Pydantic model
+                return {
+                    "status": "success",
+                    "model": model_name,
+                    "response": response.model_dump(),
+                    "provider": "Fireworks",
+                    "raw_response": str(response)
+                }
             except Exception as parse_error:
                 return {
                     "status": "parse_error",
                     "error": str(parse_error),
                     "provider": "Fireworks",
                     "model": model_name,
-                    "raw_response": response.content
+                    "raw_response": str(response)
                 }
                 
         except Exception as e:
@@ -457,38 +393,23 @@ class StructuredOutputTester:
             
             response = await model.ainvoke(messages)
             
-            # Try to extract and parse JSON from the response
+            # When using with_structured_output, the response is already an instance of ActionResponse
             try:
-                content = response.content
-                json_start = content.find('{')
-                json_end = content.rfind('}') + 1
-                
-                if json_start >= 0 and json_end > json_start:
-                    json_str = content[json_start:json_end]
-                    parsed_response = json.loads(json_str)
-                    validated_response = ActionResponse(**parsed_response)
-                    return {
-                        "status": "success",
-                        "model": model_name,
-                        "response": validated_response.model_dump(),
-                        "provider": "Cohere",
-                        "raw_response": content
-                    }
-                else:
-                    return {
-                        "status": "parse_error",
-                        "error": "Could not find JSON in response",
-                        "provider": "Cohere",
-                        "model": model_name,
-                        "raw_response": content
-                    }
+                # The response is already the validated Pydantic model
+                return {
+                    "status": "success",
+                    "model": model_name,
+                    "response": response.model_dump(),
+                    "provider": "Cohere",
+                    "raw_response": str(response)
+                }
             except Exception as parse_error:
                 return {
                     "status": "parse_error",
                     "error": str(parse_error),
                     "provider": "Cohere",
                     "model": model_name,
-                    "raw_response": response.content
+                    "raw_response": str(response)
                 }
                 
         except Exception as e:
