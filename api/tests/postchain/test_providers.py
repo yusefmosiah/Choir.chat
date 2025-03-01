@@ -6,7 +6,7 @@ Run this script to check if all API keys are properly configured.
 import os
 import asyncio
 import logging
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, Tuple
 
 from langchain_openai import ChatOpenAI
 from langchain_anthropic import ChatAnthropic
@@ -22,6 +22,51 @@ from app.config import Config
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
+# Get models to test from config
+def get_openai_models(config: Config) -> List[str]:
+    return [
+        config.OPENAI_GPT_45_PREVIEW,
+        config.OPENAI_GPT_4O,
+        config.OPENAI_GPT_4O_MINI,
+        config.OPENAI_O1,
+        config.OPENAI_O3_MINI
+    ]
+
+def get_anthropic_models(config: Config) -> List[str]:
+    return [
+        config.ANTHROPIC_CLAUDE_37_SONNET,
+        config.ANTHROPIC_CLAUDE_35_HAIKU
+    ]
+
+def get_google_models(config: Config) -> List[str]:
+    return [
+        config.GOOGLE_GEMINI_20_FLASH,
+        config.GOOGLE_GEMINI_20_FLASH_LITE,
+        config.GOOGLE_GEMINI_20_PRO_EXP,
+        config.GOOGLE_GEMINI_20_FLASH_THINKING
+    ]
+
+def get_mistral_models(config: Config) -> List[str]:
+    return [
+        config.MISTRAL_PIXTRAL_12B,
+        config.MISTRAL_SMALL_LATEST,
+        config.MISTRAL_PIXTRAL_LARGE,
+        config.MISTRAL_LARGE_LATEST,
+        config.MISTRAL_CODESTRAL
+    ]
+
+def get_cohere_models(config: Config) -> List[str]:
+    return [
+        config.COHERE_COMMAND_R7B
+    ]
+
+def get_fireworks_models(config: Config) -> List[str]:
+    return [
+        config.FIREWORKS_DEEPSEEK_R1,
+        config.FIREWORKS_DEEPSEEK_V3,
+        config.FIREWORKS_QWEN25_CODER
+    ]
+
 class ProviderTester:
     """Test connectivity with various LLM providers."""
     
@@ -29,170 +74,156 @@ class ProviderTester:
         self.config = config
         self.results: Dict[str, Dict[str, Any]] = {}
     
-    async def test_openai(self) -> Dict[str, Any]:
-        """Test OpenAI API connectivity."""
+    async def test_model(self, provider: str, model_name: str, model_class, api_key: str) -> Dict[str, Any]:
+        """Test a specific model."""
+        try:
+            logger.info(f"Testing {provider} model: {model_name}...")
+            model = model_class(
+                api_key=api_key,
+                model=model_name,
+                temperature=0
+            )
+            
+            response = await model.ainvoke([HumanMessage(content="Say hello!")])
+            return {
+                "status": "success",
+                "model": model_name,
+                "response": response.content,
+                "provider": provider
+            }
+        except Exception as e:
+            logger.error(f"{provider} model {model_name} test failed: {str(e)}")
+            return {
+                "status": "error", 
+                "error": str(e), 
+                "model": model_name,
+                "provider": provider
+            }
+    
+    async def test_openai_models(self) -> List[Dict[str, Any]]:
+        """Test OpenAI models."""
         if not self.config.OPENAI_API_KEY:
-            return {"status": "skipped", "reason": "API key not configured"}
+            return [{"status": "skipped", "reason": "API key not configured", "provider": "OpenAI"}]
         
-        try:
-            logger.info("Testing OpenAI API...")
-            model = ChatOpenAI(
-                api_key=self.config.OPENAI_API_KEY,
-                model="gpt-3.5-turbo",
-                temperature=0
+        results = []
+        for model_name in get_openai_models(self.config):
+            result = await self.test_model(
+                "OpenAI", 
+                model_name, 
+                ChatOpenAI, 
+                self.config.OPENAI_API_KEY
             )
-            
-            response = await model.ainvoke([HumanMessage(content="Say hello!")])
-            return {
-                "status": "success",
-                "model": "gpt-3.5-turbo",
-                "response": response.content,
-                "provider": "OpenAI"
-            }
-        except Exception as e:
-            logger.error(f"OpenAI API test failed: {str(e)}")
-            return {"status": "error", "error": str(e), "provider": "OpenAI"}
+            results.append(result)
+        
+        return results
     
-    async def test_anthropic(self) -> Dict[str, Any]:
-        """Test Anthropic API connectivity."""
+    async def test_anthropic_models(self) -> List[Dict[str, Any]]:
+        """Test Anthropic models."""
         if not self.config.ANTHROPIC_API_KEY:
-            return {"status": "skipped", "reason": "API key not configured"}
+            return [{"status": "skipped", "reason": "API key not configured", "provider": "Anthropic"}]
         
-        try:
-            logger.info("Testing Anthropic API...")
-            model = ChatAnthropic(
-                api_key=self.config.ANTHROPIC_API_KEY,
-                model="claude-3-haiku-20240307",
-                temperature=0
+        results = []
+        for model_name in get_anthropic_models(self.config):
+            result = await self.test_model(
+                "Anthropic", 
+                model_name, 
+                ChatAnthropic, 
+                self.config.ANTHROPIC_API_KEY
             )
-            
-            response = await model.ainvoke([HumanMessage(content="Say hello!")])
-            return {
-                "status": "success",
-                "model": "claude-3-haiku-20240307",
-                "response": response.content,
-                "provider": "Anthropic"
-            }
-        except Exception as e:
-            logger.error(f"Anthropic API test failed: {str(e)}")
-            return {"status": "error", "error": str(e), "provider": "Anthropic"}
+            results.append(result)
+        
+        return results
     
-    async def test_google(self) -> Dict[str, Any]:
-        """Test Google API connectivity."""
+    async def test_google_models(self) -> List[Dict[str, Any]]:
+        """Test Google models."""
         if not self.config.GOOGLE_API_KEY:
-            return {"status": "skipped", "reason": "API key not configured"}
+            return [{"status": "skipped", "reason": "API key not configured", "provider": "Google"}]
         
-        try:
-            logger.info("Testing Google API...")
-            model = ChatGoogleGenerativeAI(
-                api_key=self.config.GOOGLE_API_KEY,
-                model="gemini-pro",
-                temperature=0
+        results = []
+        for model_name in get_google_models(self.config):
+            result = await self.test_model(
+                "Google", 
+                model_name, 
+                ChatGoogleGenerativeAI, 
+                self.config.GOOGLE_API_KEY
             )
-            
-            response = await model.ainvoke([HumanMessage(content="Say hello!")])
-            return {
-                "status": "success",
-                "model": "gemini-pro",
-                "response": response.content,
-                "provider": "Google"
-            }
-        except Exception as e:
-            logger.error(f"Google API test failed: {str(e)}")
-            return {"status": "error", "error": str(e), "provider": "Google"}
+            results.append(result)
+        
+        return results
     
-    async def test_mistral(self) -> Dict[str, Any]:
-        """Test Mistral API connectivity."""
+    async def test_mistral_models(self) -> List[Dict[str, Any]]:
+        """Test Mistral models."""
         if not self.config.MISTRAL_API_KEY:
-            return {"status": "skipped", "reason": "API key not configured"}
+            return [{"status": "skipped", "reason": "API key not configured", "provider": "Mistral"}]
         
-        try:
-            logger.info("Testing Mistral API...")
-            model = ChatMistralAI(
-                api_key=self.config.MISTRAL_API_KEY,
-                model="mistral-medium",
-                temperature=0
+        results = []
+        for model_name in get_mistral_models(self.config):
+            result = await self.test_model(
+                "Mistral", 
+                model_name, 
+                ChatMistralAI, 
+                self.config.MISTRAL_API_KEY
             )
-            
-            response = await model.ainvoke([HumanMessage(content="Say hello!")])
-            return {
-                "status": "success",
-                "model": "mistral-medium",
-                "response": response.content,
-                "provider": "Mistral"
-            }
-        except Exception as e:
-            logger.error(f"Mistral API test failed: {str(e)}")
-            return {"status": "error", "error": str(e), "provider": "Mistral"}
+            results.append(result)
+        
+        return results
     
-    async def test_fireworks(self) -> Dict[str, Any]:
-        """Test Fireworks API connectivity."""
+    async def test_fireworks_models(self) -> List[Dict[str, Any]]:
+        """Test Fireworks models."""
         if not self.config.FIREWORKS_API_KEY:
-            return {"status": "skipped", "reason": "API key not configured"}
+            return [{"status": "skipped", "reason": "API key not configured", "provider": "Fireworks"}]
         
-        try:
-            logger.info("Testing Fireworks API...")
-            model = ChatFireworks(
-                api_key=self.config.FIREWORKS_API_KEY,
-                model="accounts/fireworks/models/deepseek-chat",
-                temperature=0
+        results = []
+        for model_name in get_fireworks_models(self.config):
+            # Fireworks models might need a prefix
+            model_id = f"accounts/fireworks/models/{model_name}"
+            result = await self.test_model(
+                "Fireworks", 
+                model_id, 
+                ChatFireworks, 
+                self.config.FIREWORKS_API_KEY
             )
-            
-            response = await model.ainvoke([HumanMessage(content="Say hello!")])
-            return {
-                "status": "success",
-                "model": "deepseek-chat",
-                "response": response.content,
-                "provider": "Fireworks"
-            }
-        except Exception as e:
-            logger.error(f"Fireworks API test failed: {str(e)}")
-            return {"status": "error", "error": str(e), "provider": "Fireworks"}
+            results.append(result)
+        
+        return results
     
-    async def test_cohere(self) -> Dict[str, Any]:
-        """Test Cohere API connectivity."""
+    async def test_cohere_models(self) -> List[Dict[str, Any]]:
+        """Test Cohere models."""
         if not self.config.COHERE_API_KEY:
-            return {"status": "skipped", "reason": "API key not configured"}
+            return [{"status": "skipped", "reason": "API key not configured", "provider": "Cohere"}]
         
-        try:
-            logger.info("Testing Cohere API...")
-            model = ChatCohere(
-                api_key=self.config.COHERE_API_KEY,
-                model="command",
-                temperature=0
+        results = []
+        for model_name in get_cohere_models(self.config):
+            result = await self.test_model(
+                "Cohere", 
+                model_name, 
+                ChatCohere, 
+                self.config.COHERE_API_KEY
             )
-            
-            response = await model.ainvoke([HumanMessage(content="Say hello!")])
-            return {
-                "status": "success",
-                "model": "command",
-                "response": response.content,
-                "provider": "Cohere"
-            }
-        except Exception as e:
-            logger.error(f"Cohere API test failed: {str(e)}")
-            return {"status": "error", "error": str(e), "provider": "Cohere"}
+            results.append(result)
+        
+        return results
     
-    async def run_all_tests(self) -> Dict[str, Dict[str, Any]]:
+    async def run_all_tests(self) -> Dict[str, List[Dict[str, Any]]]:
         """Run all provider tests."""
-        tests = [
-            self.test_openai(),
-            self.test_anthropic(),
-            self.test_google(),
-            self.test_mistral(),
-            self.test_fireworks(),
-            self.test_cohere()
+        test_tasks = [
+            self.test_openai_models(),
+            self.test_anthropic_models(),
+            self.test_google_models(),
+            self.test_mistral_models(),
+            self.test_fireworks_models(),
+            self.test_cohere_models()
         ]
         
-        results = await asyncio.gather(*tests)
+        all_results = await asyncio.gather(*test_tasks)
         
         self.results = {
-            "OpenAI": results[0],
-            "Anthropic": results[1],
-            "Google": results[2],
-            "Mistral": results[3],
-            "Fireworks": results[4],
-            "Cohere": results[5]
+            "OpenAI": all_results[0],
+            "Anthropic": all_results[1],
+            "Google": all_results[2],
+            "Mistral": all_results[3],
+            "Fireworks": all_results[4],
+            "Cohere": all_results[5]
         }
         
         return self.results
@@ -207,26 +238,58 @@ class ProviderTester:
         logger.info("PROVIDER TEST RESULTS")
         logger.info("="*50)
         
-        for provider, result in self.results.items():
-            status = result.get("status", "unknown")
+        total_models = 0
+        total_success = 0
+        total_error = 0
+        total_skipped = 0
+        
+        for provider, results_list in self.results.items():
+            logger.info(f"\n{provider} Models:")
+            logger.info("-"*50)
             
-            if status == "success":
-                logger.info(f"✅ {provider}: SUCCESS")
-                logger.info(f"   Model: {result.get('model', 'unknown')}")
-                logger.info(f"   Response: {result.get('response', 'No response')}")
-            elif status == "skipped":
-                logger.info(f"⚠️ {provider}: SKIPPED - {result.get('reason', 'No reason provided')}")
-            else:
-                logger.info(f"❌ {provider}: ERROR - {result.get('error', 'Unknown error')}")
+            # Check if the provider was skipped entirely
+            if len(results_list) == 1 and results_list[0].get("status") == "skipped":
+                logger.info(f"⚠️ {provider}: SKIPPED - {results_list[0].get('reason', 'No reason provided')}")
+                total_skipped += 1
+                continue
+            
+            # Process each model result
+            for result in results_list:
+                status = result.get("status", "unknown")
+                model_name = result.get("model", "unknown")
+                
+                if status == "success":
+                    logger.info(f"✅ {model_name}: SUCCESS")
+                    logger.info(f"   Response: {result.get('response', 'No response')[:100]}...")
+                    total_success += 1
+                elif status == "skipped":
+                    logger.info(f"⚠️ {model_name}: SKIPPED - {result.get('reason', 'No reason provided')}")
+                    total_skipped += 1
+                else:
+                    logger.info(f"❌ {model_name}: ERROR - {result.get('error', 'Unknown error')}")
+                    total_error += 1
+                
+                total_models += 1
             
             logger.info("-"*50)
         
-        # Summary
-        success_count = sum(1 for r in self.results.values() if r.get("status") == "success")
-        skipped_count = sum(1 for r in self.results.values() if r.get("status") == "skipped")
-        error_count = sum(1 for r in self.results.values() if r.get("status") == "error")
+        # Overall summary
+        logger.info("\nSummary by Provider:")
+        for provider, results_list in self.results.items():
+            if len(results_list) == 1 and results_list[0].get("status") == "skipped":
+                provider_status = "SKIPPED"
+            else:
+                success_count = sum(1 for r in results_list if r.get("status") == "success")
+                total_count = len(results_list)
+                provider_status = f"{success_count}/{total_count} models successful"
+            
+            logger.info(f"{provider}: {provider_status}")
         
-        logger.info(f"Summary: {success_count} successful, {skipped_count} skipped, {error_count} failed")
+        logger.info("\nOverall Summary:")
+        logger.info(f"Total Models: {total_models}")
+        logger.info(f"Successful: {total_success}")
+        logger.info(f"Failed: {total_error}")
+        logger.info(f"Skipped: {total_skipped}")
         logger.info("="*50)
 
 async def main():
