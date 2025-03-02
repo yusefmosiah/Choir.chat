@@ -134,6 +134,7 @@ tree.md
 │       │   ├── test_langgraph_multiturn_abstracted.py
 │       │   ├── test_providers.py
 │       │   ├── test_providers_abstracted.py
+│       │   ├── test_simple_multimodel.py
 │       │   ├── test_structured_output.py
 │       │   └── test_structured_output_abstracted.py
 │       ├── test_chorus_endpoints.py
@@ -204,7 +205,7 @@ tree.md
 ├── render.yaml
 └── ~
 
-55 directories, 134 files
+55 directories, 135 files
 
 === File: docs/CHANGELOG.md ===
 
