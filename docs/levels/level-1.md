@@ -236,13 +236,14 @@ tree.md
 │   ├── fqaho_simulation.ipynb
 │   ├── post_chain0.ipynb
 │   └── vowel_loop3.ipynb
+├── postchain_tests.log
 ├── render.yaml
 ├── tests
 │   └── postchain
 │       └── test_framework.py
 └── ~
 
-63 directories, 164 files
+63 directories, 165 files
 
 === File: docs/CHANGELOG.md ===
 

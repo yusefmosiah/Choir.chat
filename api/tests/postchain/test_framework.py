@@ -49,7 +49,7 @@ class PostChainTester:
 
     async def run_test(self,
                       prompt: str,
-                      loop_config: Optional[Dict] = None,
+                      loop_probability: float = 0.5,
                       max_loops: int = 3,
                       context: Optional[List] = None,
                       recursion_limit: int = 50) -> Dict:
@@ -62,7 +62,7 @@ class PostChainTester:
         test_config = {
             "prompt": prompt,
             "max_loops": max_loops,
-            "loop_config": loop_config or {},
+            "loop_probability": loop_probability,
             "recursion_limit": recursion_limit,
             "start_time": datetime.now().isoformat()
         }
@@ -77,20 +77,12 @@ class PostChainTester:
             "responses": {},
             "current_phase": None,
             "max_loops": max_loops,
+            "loop_probability": loop_probability,
             "recursion_limit": recursion_limit
         }
 
-        # Add loop configuration if provided
-        if loop_config:
-            # Add as a nested dictionary instead of flattening
-            state["loop_config"] = loop_config
-            # Also extract specific loop parameters to the top level for backward compatibility
-            if "loop_probability" in loop_config:
-                state["loop_probability"] = loop_config["loop_probability"]
-            if "max_loops" in loop_config:
-                state["max_loops"] = loop_config["max_loops"]
-
-            logger.info(f"Added loop_config to state: {loop_config}")
+        # Log the loop probability setting
+        logger.info(f"Setting loop_probability to {loop_probability}")
 
         # Add required LangGraph state keys
         state = {
@@ -98,7 +90,8 @@ class PostChainTester:
             "__root__": {  # LangGraph special key
                 "messages": [HumanMessage(content=prompt)],
                 "current_phase": "action",
-                "responses": {}
+                "responses": {},
+                "loop_probability": loop_probability
             }
         }
 
@@ -121,6 +114,18 @@ class PostChainTester:
 
                 # Process each event
                 async for phase, event_data in chain.astream(state):
+                    # Debug log to understand event structure
+                    logger.debug(f"Received event - Phase: {phase}, Keys: {list(event_data.keys() if isinstance(event_data, dict) else [])}")
+
+                    # Ensure phase is properly extracted and not "unknown"
+                    if phase == "unknown" and isinstance(event_data, dict):
+                        # Try to extract phase from the event data
+                        for key in ["current_phase", "phase"]:
+                            if key in event_data and event_data[key] in ["action", "experience", "intention", "observation", "understanding", "yield"]:
+                                phase = event_data[key]
+                                logger.debug(f"Extracted phase '{phase}' from event data")
+                                break
+
                     # Track the phase
                     phases_executed.append(phase)
                     timestamp = datetime.now().isoformat()

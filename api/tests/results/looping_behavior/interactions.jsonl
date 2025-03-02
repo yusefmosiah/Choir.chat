@@ -1,26 +1,6 @@
-{"timestamp": "2025-03-02T00:32:42.249921", "phase": "unknown", "loop": 1, "cumulative_phases": ["unknown"], "content": "", "data": {"action": null}}
-{"timestamp": "2025-03-02T00:32:42.250338", "phase": "unknown", "loop": 1, "cumulative_phases": ["unknown"], "content": "", "data": {"experience": null}}
-{"timestamp": "2025-03-02T00:32:42.250727", "phase": "unknown", "loop": 1, "cumulative_phases": ["unknown"], "content": "", "data": {"intention": null}}
-{"timestamp": "2025-03-02T00:32:42.251098", "phase": "unknown", "loop": 1, "cumulative_phases": ["unknown"], "content": "", "data": {"observation": null}}
-{"timestamp": "2025-03-02T00:32:42.252417", "phase": "unknown", "loop": 1, "cumulative_phases": ["unknown"], "content": "", "data": {"understanding": null}}
-{"timestamp": "2025-03-02T00:32:42.252854", "phase": "unknown", "loop": 1, "cumulative_phases": ["unknown"], "content": "", "data": {"action": null}}
-{"timestamp": "2025-03-02T00:32:42.253246", "phase": "unknown", "loop": 1, "cumulative_phases": ["unknown"], "content": "", "data": {"experience": null}}
-{"timestamp": "2025-03-02T00:32:42.253678", "phase": "unknown", "loop": 1, "cumulative_phases": ["unknown"], "content": "", "data": {"intention": null}}
-{"timestamp": "2025-03-02T00:32:42.254055", "phase": "unknown", "loop": 1, "cumulative_phases": ["unknown"], "content": "", "data": {"observation": null}}
-{"timestamp": "2025-03-02T00:32:42.255044", "phase": "unknown", "loop": 1, "cumulative_phases": ["unknown"], "content": "", "data": {"understanding": null}}
-{"timestamp": "2025-03-02T00:32:42.255449", "phase": "unknown", "loop": 1, "cumulative_phases": ["unknown"], "content": "", "data": {"action": null}}
-{"timestamp": "2025-03-02T00:32:42.255886", "phase": "unknown", "loop": 1, "cumulative_phases": ["unknown"], "content": "", "data": {"experience": null}}
-{"timestamp": "2025-03-02T00:32:42.256252", "phase": "unknown", "loop": 1, "cumulative_phases": ["unknown"], "content": "", "data": {"intention": null}}
-{"timestamp": "2025-03-02T00:32:42.256622", "phase": "unknown", "loop": 1, "cumulative_phases": ["unknown"], "content": "", "data": {"observation": null}}
-{"timestamp": "2025-03-02T00:32:42.257368", "phase": "unknown", "loop": 1, "cumulative_phases": ["unknown"], "content": "", "data": {"understanding": null}}
-{"timestamp": "2025-03-02T00:32:42.257730", "phase": "unknown", "loop": 1, "cumulative_phases": ["unknown"], "content": "", "data": {"action": null}}
-{"timestamp": "2025-03-02T00:32:42.258095", "phase": "unknown", "loop": 1, "cumulative_phases": ["unknown"], "content": "", "data": {"experience": null}}
-{"timestamp": "2025-03-02T00:32:42.258555", "phase": "unknown", "loop": 1, "cumulative_phases": ["unknown"], "content": "", "data": {"intention": null}}
-{"timestamp": "2025-03-02T00:32:42.258918", "phase": "unknown", "loop": 1, "cumulative_phases": ["unknown"], "content": "", "data": {"observation": null}}
-{"timestamp": "2025-03-02T00:32:42.259715", "phase": "unknown", "loop": 1, "cumulative_phases": ["unknown"], "content": "", "data": {"understanding": null}}
-{"timestamp": "2025-03-02T00:32:42.260111", "phase": "unknown", "loop": 1, "cumulative_phases": ["unknown"], "content": "", "data": {"action": null}}
-{"timestamp": "2025-03-02T00:32:42.260475", "phase": "unknown", "loop": 1, "cumulative_phases": ["unknown"], "content": "", "data": {"experience": null}}
-{"timestamp": "2025-03-02T00:32:42.260953", "phase": "unknown", "loop": 1, "cumulative_phases": ["unknown"], "content": "", "data": {"intention": null}}
-{"timestamp": "2025-03-02T00:32:42.261357", "phase": "unknown", "loop": 1, "cumulative_phases": ["unknown"], "content": "", "data": {"observation": null}}
-{"timestamp": "2025-03-02T00:32:42.262043", "phase": "unknown", "loop": 1, "cumulative_phases": ["unknown"], "content": "", "data": {"understanding": null}}
-{"timestamp": "2025-03-02T00:32:42.263451", "phase": "yield", "loop": 1, "cumulative_phases": ["unknown", "yield"], "content": "Explain quantum computing to me in detail", "data": {"content": "Explain quantum computing to me in detail", "thread_id": "looping_behavior", "context": "[0 items]", "priors": "[0 items]", "responses": {"error": {"content": "Error occurred: Recursion limit of 25 reached without hitting a stop condition. You can increase the limit by setting the `recursion_limit` config key.\nFor troubleshooting, visit: https://python.langchain.com/docs/troubleshooting/errors/GRAPH_RECURSION_LIMIT", "confidence": 0.0, "metadata": {"error": true}}}, "current_phase": "yield", "max_loops": 2, "recursion_limit": 100, "loop_config": {"should_loop": true, "loop_probability": 0.9}, "loop_probability": 0.9, "__root__": {"messages": "[1 items]", "current_phase": "action", "responses": {}, "loop_config": {"should_loop": true, "loop_probability": 0.9}, "loop_count": 0, "max_loops": 2, "loop_probability": 0.9, "recursion_limit": null}, "streaming_enabled": true, "error": "Recursion limit of 25 reached without hitting a stop condition. You can increase the limit by setting the `recursion_limit` config key.\nFor troubleshooting, visit: https://python.langchain.com/docs/troubleshooting/errors/GRAPH_RECURSION_LIMIT"}}
+{"timestamp": "2025-03-02T00:50:09.623489", "phase": "action", "loop": 1, "cumulative_phases": ["action"], "content": "", "data": {"action": null, "current_phase": "action"}}
+{"timestamp": "2025-03-02T00:50:09.623906", "phase": "experience", "loop": 1, "cumulative_phases": ["action", "experience"], "content": "", "data": {"experience": null, "current_phase": "experience"}}
+{"timestamp": "2025-03-02T00:50:09.624306", "phase": "intention", "loop": 1, "cumulative_phases": ["action", "experience", "intention"], "content": "", "data": {"intention": null, "current_phase": "intention"}}
+{"timestamp": "2025-03-02T00:50:09.624689", "phase": "observation", "loop": 1, "cumulative_phases": ["action", "experience", "intention", "observation"], "content": "", "data": {"observation": null, "current_phase": "observation"}}
+{"timestamp": "2025-03-02T00:50:09.625588", "phase": "understanding", "loop": 1, "cumulative_phases": ["action", "experience", "intention", "observation", "understanding"], "content": "", "data": {"understanding": null, "current_phase": "understanding"}}
+{"timestamp": "2025-03-02T00:50:09.626034", "phase": "yield", "loop": 1, "cumulative_phases": ["action", "experience", "intention", "observation", "understanding", "yield"], "content": "", "data": {"yield": null, "current_phase": "yield"}}
