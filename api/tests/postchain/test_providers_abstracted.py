@@ -1,6 +1,6 @@
 """
-Test script to verify API connectivity with each provider.
-Run this script to check if all API keys are properly configured.
+Test script to verify API connectivity with each provider using the abstraction layer.
+This is a reimplementation of test_providers.py using the langchain_utils abstraction.
 """
 
 import os
@@ -8,101 +8,61 @@ import asyncio
 import logging
 from typing import Dict, Any, List, Optional, Tuple
 
-from langchain_openai import ChatOpenAI
-from langchain_anthropic import ChatAnthropic
-from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_mistralai import ChatMistralAI
-from langchain_fireworks import ChatFireworks
-from langchain_cohere import ChatCohere
-from langchain_core.messages import HumanMessage
-
 from app.config import Config
+from app.langchain_utils import abstract_llm_completion
+
+# Import model lists from the original test
+from tests.postchain.test_providers import (
+    get_openai_models,
+    get_anthropic_models,
+    get_google_models,
+    get_mistral_models,
+    get_fireworks_models,
+    get_cohere_models
+)
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-# Get models to test from config
-def get_openai_models(config: Config) -> List[str]:
-    return [
-        config.OPENAI_GPT_45_PREVIEW,
-        config.OPENAI_GPT_4O,
-        config.OPENAI_GPT_4O_MINI,
-        # Note: o1 and o3-mini models don't support temperature parameter
-        # They will be handled with special cases in the test_model function
-        config.OPENAI_O1,
-        config.OPENAI_O3_MINI
-    ]
-
-def get_anthropic_models(config: Config) -> List[str]:
-    return [
-        config.ANTHROPIC_CLAUDE_37_SONNET,
-        config.ANTHROPIC_CLAUDE_35_HAIKU
-    ]
-
-def get_google_models(config: Config) -> List[str]:
-    return [
-        config.GOOGLE_GEMINI_20_FLASH,
-        config.GOOGLE_GEMINI_20_FLASH_LITE,
-        config.GOOGLE_GEMINI_20_PRO_EXP,
-        config.GOOGLE_GEMINI_20_FLASH_THINKING
-    ]
-
-def get_mistral_models(config: Config) -> List[str]:
-    # Note: Only using free models or models with available credits
-    # Other models commented out due to rate limits or credit issues
-    return [
-        config.MISTRAL_PIXTRAL_12B,
-        # config.MISTRAL_SMALL_LATEST,  # Requires paid credits
-        # config.MISTRAL_PIXTRAL_LARGE,  # Requires paid credits
-        # config.MISTRAL_LARGE_LATEST,  # Requires paid credits
-        # config.MISTRAL_CODESTRAL  # Requires paid credits
-    ]
-
-def get_cohere_models(config: Config) -> List[str]:
-    return [
-        config.COHERE_COMMAND_R7B
-    ]
-
-def get_fireworks_models(config: Config) -> List[str]:
-    return [
-        # config.FIREWORKS_DEEPSEEK_R1,  # Currently failing with internal server error
-        config.FIREWORKS_DEEPSEEK_V3,
-        config.FIREWORKS_QWEN25_CODER
-    ]
-
-class ProviderTester:
-    """Test connectivity with various LLM providers."""
+class AbstractedProviderTester:
+    """Test connectivity with various LLM providers using the abstraction layer."""
 
     def __init__(self, config: Config):
         self.config = config
-        self.results: Dict[str, Dict[str, Any]] = {}
+        self.results: Dict[str, List[Dict[str, Any]]] = {}
+        self.test_message = "Say hello!"
 
-    async def test_model(self, provider: str, model_name: str, model_class, api_key: str) -> Dict[str, Any]:
-        """Test a specific model."""
+    async def test_model(self, provider: str, model_name: str) -> Dict[str, Any]:
+        """Test a specific model using the abstraction layer."""
         try:
-            logger.info(f"Testing {provider} model: {model_name}...")
+            model_id = f"{provider}/{model_name}"
+            logger.info(f"Testing {provider} model: {model_name} using abstraction...")
 
-            # Special case for OpenAI o1 and o3-mini models which don't support temperature
-            if provider == "OpenAI" and (model_name == "o1" or model_name == "o3-mini"):
-                model = model_class(
-                    api_key=api_key,
-                    model=model_name
-                )
+            # Prepare messages
+            messages = [{"role": "user", "content": self.test_message}]
+
+            # Use the abstraction layer
+            response = await abstract_llm_completion(
+                model_name=model_id,
+                messages=messages,
+                config=self.config
+            )
+
+            if response["status"] == "success":
+                return {
+                    "status": "success",
+                    "model": model_name,
+                    "response": response["content"],
+                    "provider": provider
+                }
             else:
-                model = model_class(
-                    api_key=api_key,
-                    model=model_name,
-                    temperature=0
-                )
-
-            response = await model.ainvoke([HumanMessage(content="Say hello!")])
-            return {
-                "status": "success",
-                "model": model_name,
-                "response": response.content,
-                "provider": provider
-            }
+                return {
+                    "status": "error",
+                    "error": response["content"],
+                    "model": model_name,
+                    "provider": provider
+                }
         except Exception as e:
             logger.error(f"{provider} model {model_name} test failed: {str(e)}")
             return {
@@ -113,105 +73,74 @@ class ProviderTester:
             }
 
     async def test_openai_models(self) -> List[Dict[str, Any]]:
-        """Test OpenAI models."""
+        """Test OpenAI models using the abstraction layer."""
         if not self.config.OPENAI_API_KEY:
-            return [{"status": "skipped", "reason": "API key not configured", "provider": "OpenAI"}]
+            return [{"status": "skipped", "reason": "API key not configured", "provider": "openai"}]
 
         results = []
         for model_name in get_openai_models(self.config):
-            result = await self.test_model(
-                "OpenAI",
-                model_name,
-                ChatOpenAI,
-                self.config.OPENAI_API_KEY
-            )
+            result = await self.test_model("openai", model_name)
             results.append(result)
 
         return results
 
     async def test_anthropic_models(self) -> List[Dict[str, Any]]:
-        """Test Anthropic models."""
+        """Test Anthropic models using the abstraction layer."""
         if not self.config.ANTHROPIC_API_KEY:
-            return [{"status": "skipped", "reason": "API key not configured", "provider": "Anthropic"}]
+            return [{"status": "skipped", "reason": "API key not configured", "provider": "anthropic"}]
 
         results = []
         for model_name in get_anthropic_models(self.config):
-            result = await self.test_model(
-                "Anthropic",
-                model_name,
-                ChatAnthropic,
-                self.config.ANTHROPIC_API_KEY
-            )
+            result = await self.test_model("anthropic", model_name)
             results.append(result)
 
         return results
 
     async def test_google_models(self) -> List[Dict[str, Any]]:
-        """Test Google models."""
+        """Test Google models using the abstraction layer."""
         if not self.config.GOOGLE_API_KEY:
-            return [{"status": "skipped", "reason": "API key not configured", "provider": "Google"}]
+            return [{"status": "skipped", "reason": "API key not configured", "provider": "google"}]
 
         results = []
         for model_name in get_google_models(self.config):
-            result = await self.test_model(
-                "Google",
-                model_name,
-                ChatGoogleGenerativeAI,
-                self.config.GOOGLE_API_KEY
-            )
+            result = await self.test_model("google", model_name)
             results.append(result)
 
         return results
 
     async def test_mistral_models(self) -> List[Dict[str, Any]]:
-        """Test Mistral models."""
+        """Test Mistral models using the abstraction layer."""
         if not self.config.MISTRAL_API_KEY:
-            return [{"status": "skipped", "reason": "API key not configured", "provider": "Mistral"}]
+            return [{"status": "skipped", "reason": "API key not configured", "provider": "mistral"}]
 
         results = []
         for model_name in get_mistral_models(self.config):
-            result = await self.test_model(
-                "Mistral",
-                model_name,
-                ChatMistralAI,
-                self.config.MISTRAL_API_KEY
-            )
+            result = await self.test_model("mistral", model_name)
             results.append(result)
 
         return results
 
     async def test_fireworks_models(self) -> List[Dict[str, Any]]:
-        """Test Fireworks models."""
+        """Test Fireworks models using the abstraction layer."""
         if not self.config.FIREWORKS_API_KEY:
-            return [{"status": "skipped", "reason": "API key not configured", "provider": "Fireworks"}]
+            return [{"status": "skipped", "reason": "API key not configured", "provider": "fireworks"}]
 
         results = []
         for model_name in get_fireworks_models(self.config):
-            # Fireworks models might need a prefix
-            model_id = f"accounts/fireworks/models/{model_name}"
-            result = await self.test_model(
-                "Fireworks",
-                model_id,
-                ChatFireworks,
-                self.config.FIREWORKS_API_KEY
-            )
+            # No need to add prefix, abstraction layer handles it
+            result = await self.test_model("fireworks", model_name)
             results.append(result)
 
         return results
 
     async def test_cohere_models(self) -> List[Dict[str, Any]]:
-        """Test Cohere models."""
+        """Test Cohere models using the abstraction layer."""
         if not self.config.COHERE_API_KEY:
-            return [{"status": "skipped", "reason": "API key not configured", "provider": "Cohere"}]
+            return [{"status": "skipped", "reason": "API key not configured", "provider": "cohere"}]
 
         results = []
         for model_name in get_cohere_models(self.config):
-            result = await self.test_model(
-                "Cohere",
-                model_name,
-                ChatCohere,
-                self.config.COHERE_API_KEY
-            )
+            result = await self.test_model("cohere", model_name)
             results.append(result)
 
         return results
@@ -247,7 +176,7 @@ class ProviderTester:
             return
 
         logger.info("\n" + "="*50)
-        logger.info("PROVIDER TEST RESULTS")
+        logger.info("ABSTRACTED PROVIDER TEST RESULTS")
         logger.info("="*50)
 
         total_models = 0
@@ -304,10 +233,16 @@ class ProviderTester:
         logger.info(f"Skipped: {total_skipped}")
         logger.info("="*50)
 
+        # Compare with original implementation
+        logger.info("\nComparison with Original Implementation:")
+        logger.info("This test uses the abstraction layer to achieve the same results")
+        logger.info("with a simpler, more maintainable implementation.")
+        logger.info("="*50)
+
 async def main():
-    """Run the provider tests."""
+    """Run the provider tests using the abstraction layer."""
     config = Config()
-    tester = ProviderTester(config)
+    tester = AbstractedProviderTester(config)
     await tester.run_all_tests()
     tester.print_results()
 

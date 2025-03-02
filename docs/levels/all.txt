@@ -95,6 +95,7 @@ tree.md
 │   │   ├── chorus_cycle.py
 │   │   ├── config.py
 │   │   ├── database.py
+│   │   ├── langchain_utils.py
 │   │   ├── models
 │   │   │   ├── __init__.py
 │   │   │   └── api.py
@@ -130,8 +131,11 @@ tree.md
 │       │   ├── __init__.py
 │       │   ├── run_all_tests.py
 │       │   ├── test_langgraph_multiturn.py
+│       │   ├── test_langgraph_multiturn_abstracted.py
 │       │   ├── test_providers.py
-│       │   └── test_structured_output.py
+│       │   ├── test_providers_abstracted.py
+│       │   ├── test_structured_output.py
+│       │   └── test_structured_output_abstracted.py
 │       ├── test_chorus_endpoints.py
 │       ├── test_core_endpoints.py
 │       ├── test_main.py
@@ -200,7 +204,7 @@ tree.md
 ├── render.yaml
 └── ~
 
-55 directories, 130 files
+55 directories, 134 files
 
 === File: docs/CHANGELOG.md ===
 
