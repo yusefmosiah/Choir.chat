@@ -124,6 +124,7 @@
 │       │   ├── test_providers_abstracted.py
 │       │   ├── test_random_multimodel.py
 │       │   ├── test_simple_multimodel.py
+│       │   ├── test_simple_multimodel_stream.py
 │       │   ├── test_structured_output.py
 │       │   └── test_structured_output_abstracted.py
 │       ├── test_chorus_endpoints.py
@@ -194,4 +195,4 @@
 ├── render.yaml
 └── ~
 
-55 directories, 137 files
+55 directories, 138 files
