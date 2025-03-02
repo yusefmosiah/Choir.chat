@@ -2,8 +2,8 @@ fastapi==0.115.4
 uvicorn[standard]==0.27.1
 gunicorn==20.1.0
 python-dotenv==1.0.0
-litellm==1.52.3
-openai==1.65.0
+litellm==1.61.20
+openai==1.65.2
 qdrant-client==1.12.1
 pydantic==2.9.2
 pydantic-settings==2.6.1
@@ -16,19 +16,20 @@ pytest-asyncio==0.23.5
 httpx==0.25.2
 
 # LangGraph dependencies - pinned to compatible versions
-langchain==0.3.0
-langchain-core==0.3.0
-langgraph==0.3.0
-langserve==0.3.0
+langchain==0.3.19
+langchain-core==0.3.40
+langchain-openai==0.3.7
+langchain-anthropic==0.3.8
+langchain-google-genai==2.0.11
+langchain-cohere==0.4.2
+langchain-mistralai==0.2.7
+langchain-fireworks==0.2.7
+langchain-qdrant==0.2.0
+langgraph==0.3.2
+langserve==0.3.1
 
-# Model provider integrations - pinned to compatible versions
-langchain-openai==0.3.0
-langchain-anthropic==0.3.0
-langchain-google-genai==2.0.0
-langchain-mistralai==0.2.0
-langchain-fireworks==0.2.0
-langchain-cohere==0.4.0
+
 
 # Additional tools - pinned to compatible versions
-langchain-community==0.3.0
-duckduckgo-search==7.0.0
+langchain-community==0.3.18
+duckduckgo-search==7.5.0
