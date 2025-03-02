@@ -93,6 +93,7 @@ tree.md
 │   ├── app
 │   │   ├── __init__.py
 │   │   ├── chorus_cycle.py
+│   │   ├── chorus_graph.py
 │   │   ├── config.py
 │   │   ├── database.py
 │   │   ├── langchain_utils.py
@@ -120,6 +121,7 @@ tree.md
 │   │   │   └── sui_service.py
 │   │   └── utils.py
 │   ├── main.py
+│   ├── postchain_tests.log
 │   ├── pyproject.toml
 │   ├── pytest.ini
 │   ├── requirements.txt
@@ -129,8 +131,14 @@ tree.md
 │       ├── conftest.py
 │       ├── postchain
 │       │   ├── __init__.py
+│       │   ├── analysis.py
 │       │   ├── random_gen_prompts.md
 │       │   ├── run_all_tests.py
+│       │   ├── run_tests.py
+│       │   ├── test_cases.json
+│       │   ├── test_cases.py
+│       │   ├── test_fast_looping.py
+│       │   ├── test_framework.py
 │       │   ├── test_langgraph_multiturn.py
 │       │   ├── test_langgraph_multiturn_abstracted.py
 │       │   ├── test_providers.py
@@ -142,6 +150,27 @@ tree.md
 │       │   ├── test_structured_output.py
 │       │   ├── test_structured_output_abstracted.py
 │       │   └── test_utils.py
+│       ├── results
+│       │   ├── basic_flow
+│       │   │   ├── final_state.json
+│       │   │   ├── interactions.jsonl
+│       │   │   └── metadata.json
+│       │   ├── confidence_thresholds
+│       │   │   ├── final_state.json
+│       │   │   ├── interactions.jsonl
+│       │   │   └── metadata.json
+│       │   ├── error_handling
+│       │   │   ├── final_state.json
+│       │   │   ├── interactions.jsonl
+│       │   │   └── metadata.json
+│       │   ├── looping_behavior
+│       │   │   ├── final_state.json
+│       │   │   ├── interactions.jsonl
+│       │   │   └── metadata.json
+│       │   └── tool_integration
+│       │       ├── final_state.json
+│       │       ├── interactions.jsonl
+│       │       └── metadata.json
 │       ├── test_chorus_endpoints.py
 │       ├── test_core_endpoints.py
 │       ├── test_main.py
@@ -198,7 +227,7 @@ tree.md
 │   ├── plan_langgraph.md
 │   ├── plan_langgraph_postchain.md
 │   ├── plan_libsql.md
-│   ├── plan_spec_postchain.md
+│   ├── plan_postchain_checklist.md
 │   ├── scripts
 │   │   ├── combiner.sh
 │   │   └── update_tree.sh
@@ -208,9 +237,12 @@ tree.md
 │   ├── post_chain0.ipynb
 │   └── vowel_loop3.ipynb
 ├── render.yaml
+├── tests
+│   └── postchain
+│       └── test_framework.py
 └── ~
 
-55 directories, 140 files
+63 directories, 164 files
 
 === File: docs/CHANGELOG.md ===
 

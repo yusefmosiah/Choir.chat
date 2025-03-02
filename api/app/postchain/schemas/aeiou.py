@@ -25,7 +25,7 @@ class ObservationOutput(AEIOUPhaseOutput):
     """Output schema for the Observation phase."""
     pass
 
-class UpdateOutput(BaseModel):
+class UnderstandingOutput(BaseModel):
     """Output schema for the Update phase."""
     should_loop: bool = Field(..., description="Whether to loop back to Action or proceed to Yield")
     reasoning: str = Field(..., description="Reasoning for the decision")

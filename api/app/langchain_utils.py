@@ -5,8 +5,10 @@ across multiple model providers.
 """
 
 import logging
+import random
 from typing import Dict, Any, List, Optional, Tuple, AsyncGenerator
 from pydantic import BaseModel
+from dataclasses import dataclass
 
 from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import HumanMessage, SystemMessage, AIMessage, AIMessageChunk, BaseMessage
@@ -24,6 +26,107 @@ from .config import Config
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
+
+@dataclass
+class ModelConfig:
+    """Configuration for a model"""
+    provider: str
+    model_name: str
+
+    def __str__(self) -> str:
+        """Return the full model identifier"""
+        return f"{self.provider}/{self.model_name}"
+
+# Functions to get available models from each provider
+def get_openai_models(config: Config) -> List[str]:
+    """Get available OpenAI models"""
+    return [
+        config.OPENAI_GPT_45_PREVIEW,
+        config.OPENAI_GPT_4O,
+        config.OPENAI_GPT_4O_MINI,
+        config.OPENAI_O1,
+        config.OPENAI_O3_MINI
+    ]
+
+def get_anthropic_models(config: Config) -> List[str]:
+    """Get available Anthropic models"""
+    return [
+        config.ANTHROPIC_CLAUDE_37_SONNET,
+        config.ANTHROPIC_CLAUDE_35_HAIKU
+    ]
+
+def get_google_models(config: Config) -> List[str]:
+    """Get available Google models"""
+    return [
+        config.GOOGLE_GEMINI_20_FLASH,
+        config.GOOGLE_GEMINI_20_FLASH_LITE,
+        config.GOOGLE_GEMINI_20_PRO_EXP,
+        config.GOOGLE_GEMINI_20_FLASH_THINKING
+    ]
+
+def get_mistral_models(config: Config) -> List[str]:
+    """Get available Mistral models"""
+    return [
+        config.MISTRAL_PIXTRAL_12B,
+        config.MISTRAL_SMALL_LATEST,
+        config.MISTRAL_PIXTRAL_LARGE,
+        config.MISTRAL_LARGE_LATEST,
+        config.MISTRAL_CODESTRAL
+    ]
+
+def get_fireworks_models(config: Config) -> List[str]:
+    """Get available Fireworks models"""
+    return [
+        config.FIREWORKS_DEEPSEEK_R1,
+        config.FIREWORKS_DEEPSEEK_V3,
+        config.FIREWORKS_QWEN25_CODER
+    ]
+
+def get_cohere_models(config: Config) -> List[str]:
+    """Get available Cohere models"""
+    return [
+        config.COHERE_COMMAND_R7B
+    ]
+
+def initialize_model_list(config: Config) -> List[ModelConfig]:
+    """Initialize the list of available models from all providers.
+
+    Args:
+        config: Application configuration with API keys
+
+    Returns:
+        List of available models
+    """
+    models = []
+
+    # Add models from each provider if API key is available
+    if config.OPENAI_API_KEY:
+        models.extend([ModelConfig("openai", m) for m in get_openai_models(config)])
+
+    if config.ANTHROPIC_API_KEY:
+        models.extend([ModelConfig("anthropic", m) for m in get_anthropic_models(config)])
+
+    if config.GOOGLE_API_KEY:
+        models.extend([ModelConfig("google", m) for m in get_google_models(config)])
+
+    if config.MISTRAL_API_KEY:
+        models.extend([ModelConfig("mistral", m) for m in get_mistral_models(config)])
+
+    if config.FIREWORKS_API_KEY:
+        models.extend([ModelConfig("fireworks", m) for m in get_fireworks_models(config)])
+
+    if config.COHERE_API_KEY:
+        models.extend([ModelConfig("cohere", m) for m in get_cohere_models(config)])
+
+    logger.info(f"Initialized {len(models)} models for model selection")
+    return models
+
+def get_user_message(messages: List[BaseMessage]) -> str:
+    """Extract the latest user message from a list of messages."""
+    for message in reversed(messages):
+        if isinstance(message, HumanMessage):
+            return message.content
+    return ""
 
 def get_model_provider(model_name: str) -> Tuple[str, str]:
     """
