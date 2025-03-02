@@ -202,7 +202,6 @@
 │   ├── fqaho_visualization.md
 │   ├── levels
 │   │   ├── all.txt
-│   │   ├── level-1.md
 │   │   ├── level0.md
 │   │   ├── level1.md
 │   │   ├── level2.md
@@ -230,4 +229,4 @@
 │       └── test_framework.py
 └── ~
 
-63 directories, 165 files
+63 directories, 164 files
