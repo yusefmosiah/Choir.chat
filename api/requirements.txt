@@ -3,7 +3,7 @@ uvicorn[standard]==0.27.1
 gunicorn==20.1.0
 python-dotenv==1.0.0
 litellm==1.52.3
-openai>=1.54.0
+openai==1.65.0
 qdrant-client==1.12.1
 pydantic==2.9.2
 pydantic-settings==2.6.1
@@ -13,22 +13,22 @@ PyYAML==6.0.1
 pysui==0.72.0
 pytest==8.0.0
 pytest-asyncio==0.23.5
-httpx==0.27.0
+httpx==0.25.2
 
-# LangGraph dependencies
-langchain>=0.1.0
-langchain-core>=0.1.0
-langgraph>=0.0.15
-langserve>=0.0.30
+# LangGraph dependencies - pinned to compatible versions
+langchain==0.3.0
+langchain-core==0.3.0
+langgraph==0.3.0
+langserve==0.3.0
 
-# Model provider integrations
-langchain-openai>=0.0.5
-langchain-anthropic>=0.1.0
-langchain-google-genai>=0.0.5
-langchain-mistralai>=0.0.1
-langchain-fireworks>=0.1.0
-langchain-cohere>=0.0.1
+# Model provider integrations - pinned to compatible versions
+langchain-openai==0.3.0
+langchain-anthropic==0.3.0
+langchain-google-genai==2.0.0
+langchain-mistralai==0.2.0
+langchain-fireworks==0.2.0
+langchain-cohere==0.4.0
 
-# Additional tools
-langchain-community>=0.0.1
-duckduckgo-search>=4.1.0
+# Additional tools - pinned to compatible versions
+langchain-community==0.3.0
+duckduckgo-search==7.0.0
