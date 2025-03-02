@@ -1,12 +1,12 @@
 #!/bin/bash
 
 # Revised prefix arrays
-level0_prefixes=("client" "sui" "proxy" "carousel" "distributed")  # Basic technical integration
-level1_prefixes=("core" "Tech" "Dev" "Service" "Coordinator")  # Core system components
-level2_prefixes=("e" "reward" "Error" "Impl")           # Business/concept/implementation
-level3_prefixes=("plan" "state" "economic" "vector" "chain")               # State/economic models
-level4_prefixes=("fqaho" "theory" "Model" "Emergence" "anonymity")     # Simulations
-level5_prefixes=("evolution" "data" "harmonic" "language" "law" "quantum")             # Foundational principles
+level0_prefixes=("")  # Basic technical integration
+level1_prefixes=("core")  # Core system components
+level2_prefixes=("e")           # Business/concept/implementation
+level3_prefixes=("plan")               # State/economic models
+level4_prefixes=("fqaho")     # Simulations
+level5_prefixes=("evolution" "data")             # Foundational principles
 
 # Function to add separator and header
 add_separator() {
@@ -42,8 +42,9 @@ process_level() {
 
     SPECIAL_FILES=("docs/prompt_wake_up.md" "docs/prompt_getting_started.md" "docs/prompt_reentry.md" "docs/prompt_organization.md" "docs/prompt_summary_prompt.md" "docs/prompt_chorus_cycle.md" "docs/tree.md" "docs/CHANGELOG.md" "docs/scripts/combiner.sh")
 
-    # Special handling for level -1 (system files)
-    if [ "$level" -eq -1 ]; then
+    # Level 0 now includes important system files (previously in level -1)
+    if [ "$level" -eq 0 ]; then
+        # Add system files (previously in level -1)
         for special_file in "${SPECIAL_FILES[@]}"; do
             if [ -f "$special_file" ]; then
                 echo -e "\n=== File: $special_file ===\n" >> "$output_file"
@@ -52,22 +53,7 @@ process_level() {
                 echo "$special_file" >> "/tmp/processed_files.txt"
             fi
         done
-        return
-    fi
 
-    # Special handling for level 0 (include issues)
-    if [ "$level" -eq 0 ]; then
-        # Process issues first
-        if [ -d "docs/issues" ]; then
-            for issue in docs/issues/issue_*.md; do
-                if [ -f "$issue" ]; then
-                    echo -e "\n=== File: $issue ===\n" >> "$output_file"
-                    add_separator "$(basename "$issue" .md)" >> "$output_file"
-                    cat "$issue" >> "$output_file"
-                    echo "$issue" >> "/tmp/processed_files.txt"
-                fi
-            done
-        fi
     fi
 
     # Process all docs to find ones for this level
@@ -84,9 +70,8 @@ process_level() {
 # Create temporary file for tracking
 touch /tmp/processed_files.txt
 
-# Process all levels
+# Process all levels (excluding level -1 as its content is now in level 0)
 echo "Processing documentation..."
-process_level -1
 for level in {0..5}; do
     process_level $level
 done
@@ -94,7 +79,7 @@ done
 # Concatenate all levels into a single file
 echo "Combining all levels into one file..."
 mkdir -p docs/levels
-cat docs/levels/level-1.md docs/levels/level{0..5}.md > docs/levels/all.txt
+cat docs/levels/level{0..5}.md > docs/levels/all.txt
 
 # Check for uncategorized files
 echo -e "\nUncategorized files:"

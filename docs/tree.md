@@ -80,15 +80,25 @@
 │   ├── app
 │   │   ├── __init__.py
 │   │   ├── chorus_cycle.py
+│   │   ├── chorus_graph.py
 │   │   ├── config.py
 │   │   ├── database.py
+│   │   ├── langchain_utils.py
 │   │   ├── models
 │   │   │   ├── __init__.py
 │   │   │   └── api.py
+│   │   ├── postchain
+│   │   │   ├── __init__.py
+│   │   │   ├── provider_info.md
+│   │   │   └── schemas
+│   │   │       ├── __init__.py
+│   │   │       ├── aeiou.py
+│   │   │       └── state.py
 │   │   ├── routers
 │   │   │   ├── balance.py
 │   │   │   ├── chorus.py
 │   │   │   ├── embeddings.py
+│   │   │   ├── postchain.py
 │   │   │   ├── threads.py
 │   │   │   ├── users.py
 │   │   │   └── vectors.py
@@ -98,6 +108,7 @@
 │   │   │   └── sui_service.py
 │   │   └── utils.py
 │   ├── main.py
+│   ├── postchain_tests.log
 │   ├── pyproject.toml
 │   ├── pytest.ini
 │   ├── requirements.txt
@@ -105,6 +116,48 @@
 │   └── tests
 │       ├── __init__.py
 │       ├── conftest.py
+│       ├── postchain
+│       │   ├── __init__.py
+│       │   ├── analysis.py
+│       │   ├── random_gen_prompts.md
+│       │   ├── run_all_tests.py
+│       │   ├── run_tests.py
+│       │   ├── test_cases.json
+│       │   ├── test_cases.py
+│       │   ├── test_fast_looping.py
+│       │   ├── test_framework.py
+│       │   ├── test_langgraph_multiturn.py
+│       │   ├── test_langgraph_multiturn_abstracted.py
+│       │   ├── test_providers.py
+│       │   ├── test_providers_abstracted.py
+│       │   ├── test_random_multimodel.py
+│       │   ├── test_random_multimodel_stream.py
+│       │   ├── test_simple_multimodel.py
+│       │   ├── test_simple_multimodel_stream.py
+│       │   ├── test_structured_output.py
+│       │   ├── test_structured_output_abstracted.py
+│       │   └── test_utils.py
+│       ├── results
+│       │   ├── basic_flow
+│       │   │   ├── final_state.json
+│       │   │   ├── interactions.jsonl
+│       │   │   └── metadata.json
+│       │   ├── confidence_thresholds
+│       │   │   ├── final_state.json
+│       │   │   ├── interactions.jsonl
+│       │   │   └── metadata.json
+│       │   ├── error_handling
+│       │   │   ├── final_state.json
+│       │   │   ├── interactions.jsonl
+│       │   │   └── metadata.json
+│       │   ├── looping_behavior
+│       │   │   ├── final_state.json
+│       │   │   ├── interactions.jsonl
+│       │   │   └── metadata.json
+│       │   └── tool_integration
+│       │       ├── final_state.json
+│       │       ├── interactions.jsonl
+│       │       └── metadata.json
 │       ├── test_chorus_endpoints.py
 │       ├── test_core_endpoints.py
 │       ├── test_main.py
@@ -149,7 +202,6 @@
 │   ├── fqaho_visualization.md
 │   ├── levels
 │   │   ├── all.txt
-│   │   ├── level-1.md
 │   │   ├── level0.md
 │   │   ├── level1.md
 │   │   ├── level2.md
@@ -159,8 +211,9 @@
 │   ├── plan_anonymity_by_default.md
 │   ├── plan_identity_as_a_service.md
 │   ├── plan_langgraph.md
+│   ├── plan_langgraph_postchain.md
 │   ├── plan_libsql.md
-│   ├── plan_spec_postchain.md
+│   ├── plan_postchain_checklist.md
 │   ├── scripts
 │   │   ├── combiner.sh
 │   │   └── update_tree.sh
@@ -169,6 +222,11 @@
 │   ├── fqaho_simulation.ipynb
 │   ├── post_chain0.ipynb
 │   └── vowel_loop3.ipynb
-└── render.yaml
+├── postchain_tests.log
+├── render.yaml
+├── tests
+│   └── postchain
+│       └── test_framework.py
+└── ~
 
-51 directories, 118 files
+63 directories, 164 files

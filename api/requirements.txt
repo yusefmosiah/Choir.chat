@@ -14,3 +14,21 @@ pysui==0.72.0
 pytest==8.0.0
 pytest-asyncio==0.23.5
 httpx==0.27.0
+
+# LangGraph dependencies
+langchain>=0.1.0
+langchain-core>=0.1.0
+langgraph>=0.0.15
+langserve>=0.0.30
+
+# Model provider integrations
+langchain-openai>=0.0.5
+langchain-anthropic>=0.1.0
+langchain-google-genai>=0.0.5
+langchain-mistralai>=0.0.1
+langchain-fireworks>=0.1.0
+langchain-cohere>=0.0.1
+
+# Additional tools
+langchain-community>=0.0.1
+duckduckgo-search>=4.1.0

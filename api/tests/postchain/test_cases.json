@@ -1,0 +1,37 @@
+{
+  "basic_flow": {
+    "prompt": "What is the meaning of life?",
+    "loop_config": {
+      "should_loop": false
+    },
+    "max_loops": 1
+  },
+  "looping_behavior": {
+    "prompt": "Explain quantum computing to me in detail",
+    "loop_config": {
+      "should_loop": true,
+      "loop_probability": 0.9
+    },
+    "max_loops": 2
+  },
+  "complex_query": {
+    "prompt": "Compare and contrast different approaches to climate change mitigation, including their economic, social, and environmental impacts.",
+    "loop_config": {
+      "should_loop": true,
+      "loop_probability": 0.7
+    },
+    "max_loops": 3
+  },
+  "web_search_trigger": {
+    "prompt": "What were the major global news headlines from yesterday?",
+    "loop_config": {
+      "should_loop": true
+    },
+    "max_loops": 2
+  },
+  "error_case": {
+    "prompt": "",
+    "loop_config": {},
+    "max_loops": 1
+  }
+}
