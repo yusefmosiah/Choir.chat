@@ -1,0 +1,64 @@
+---
+description: Choir Rules
+globs: *.py, *.swift, *.md
+alwaysApply: true
+---
+# Choir: CursorRules
+
+## Project Context
+
+Choir is a collaborative platform built around the Post Chain (Chorus Cycle (AEIOU-Y)), which uses multiple AI models in sequence to process user input through specialized phases:
+- **Action**: Initial response to user input
+- **Experience**: Enrichment with prior knowledge
+- **Intention**: Alignment with user intent
+- **Observation**: Recording semantic connections
+- **Understanding**: Decision on continuation
+- **Yield**: Final response production
+
+The platform incorporates a Fractional Quantum Anharmonic Oscillator (FQAHO) model as its economic engine, with vector database storage and blockchain integration.
+
+## Development Principles
+
+### Documentation-Driven Development
+
+1. **Document First, Code Second**: Create or update documentation before implementing changes
+2. **Documentation as Persistent Memory**: Use docs to accumulate context and knowledge
+3. **Tests Alongside Docs**: Create test specifications alongside documentation
+4. **Transparent Record of Change**: Maintain clear records of design decisions and their rationale
+5. **Implementation-Agnostic Design**: Focus on concepts and interfaces before implementation details
+
+### System Limitations
+
+1. **Tool Call Threshold**: While the system supports up to 25 sequential tool calls, quality degrades after 7 consecutive calls
+2. **Minimize Code Generation**: Prefer small, focused code changes over large implementations
+3. **Incremental Development**: Implement features in small, testable increments
+4. **Context Preservation**: Reference existing documentation to maintain understanding
+
+## Documentation Categories
+
+1. **Conceptual Documentation**: Explains core concepts, principles, and architecture
+2. **API Documentation**: Defines interfaces, schemas, and contracts between components
+3. **Implementation Notes**: Records specific implementation decisions and rationales
+4. **Test Documentation**: Outlines test cases and validation strategies
+5. **Progress Tracking**: Maintains current status and prioritized next steps
+
+## Practical Workflow
+
+1. **Document Concept**: Create or update conceptual documentation for the feature
+2. **Define Schema/API**: Document the data structures and interfaces clearly
+3. **Create Test Specification**: Outline how the feature will be tested
+4. **Implement Minimal Solution**: Code the smallest viable implementation
+5. **Document Implementation Notes**: Record rationale and approaches tried
+6. **Update Progress Tracking**: Maintain the development progress document
+
+## for Language: Swift, do not call xcodebuild commands. User will manually build in Xcode.
+
+## Common Questions to Address in Documentation
+
+1. How does this component interact with other parts of the system?
+2. What specific data structures are passed between components?
+3. What are the expected failure modes and how are they handled?
+4. How does this implementation reflect the AEIOU-Y Chorus Cycle Post Chain philosophy?
+5. What model-specific considerations need to be addressed?
+
+By following these principles, we create a development process that builds shared understanding incrementally while producing maintainable, well-understood code.
