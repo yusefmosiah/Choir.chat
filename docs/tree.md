@@ -107,6 +107,11 @@
 │   │   │   ├── __init__.py
 │   │   │   ├── chorus.py
 │   │   │   └── sui_service.py
+│   │   ├── tools
+│   │   │   ├── __init__.py
+│   │   │   ├── base.py
+│   │   │   ├── calculator.py
+│   │   │   └── conversation.py
 │   │   └── utils.py
 │   ├── main.py
 │   ├── postchain_tests.log
@@ -165,7 +170,12 @@
 │       ├── test_response_schemas.py
 │       ├── test_structured_outputs.py
 │       ├── test_sui_service.py
-│       └── test_user_thread_endpoints.py
+│       ├── test_user_thread_endpoints.py
+│       └── tools
+│           ├── __init__.py
+│           ├── run_tool_tests.py
+│           ├── test_calculator.py
+│           └── test_multimodel_with_tools.py
 ├── choir_coin
 │   └── choir_coin
 │       ├── Move.lock
@@ -216,6 +226,7 @@
 │   ├── plan_libsql.md
 │   ├── plan_model_config_checklist.md
 │   ├── plan_postchain_checklist.md
+│   ├── plan_tools_checklist.md
 │   ├── scripts
 │   │   ├── combiner.sh
 │   │   └── update_tree.sh
@@ -231,4 +242,4 @@
 │       └── test_framework.py
 └── ~
 
-63 directories, 166 files
+65 directories, 175 files
