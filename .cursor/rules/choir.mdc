@@ -51,6 +51,14 @@ The platform incorporates a Fractional Quantum Anharmonic Oscillator (FQAHO) mod
 5. **Document Implementation Notes**: Record rationale and approaches tried
 6. **Update Progress Tracking**: Maintain the development progress document
 
+## Testing Practices
+
+1. **Run Tests from API Directory**: Always run tests from the root `/api` directory with the virtual environment activated
+2. **Direct Test Execution**: Run tests directly using `python -m tests.path.to.test_file` rather than through wrapper scripts
+3. **Virtual Environment Required**: Always ensure the project's virtual environment is activated before running tests
+4. **Test Isolation**: Each test should be self-contained and not depend on the state from other tests
+5. **Model Configuration Testing**: When testing models, use the `disabled_providers` parameter to exclude unavailable models (e.g., `disabled_providers={"openai"}`)
+
 ## for Language: Swift, do not call xcodebuild commands. User will manually build in Xcode.
 
 ## Common Questions to Address in Documentation
@@ -62,3 +70,4 @@ The platform incorporates a Fractional Quantum Anharmonic Oscillator (FQAHO) mod
 5. What model-specific considerations need to be addressed?
 
 By following these principles, we create a development process that builds shared understanding incrementally while producing maintainable, well-understood code.
+

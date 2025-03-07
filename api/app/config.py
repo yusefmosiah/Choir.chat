@@ -33,6 +33,7 @@ class Config:
     MISTRAL_API_KEY: str = os.getenv("MISTRAL_API_KEY", "")
     FIREWORKS_API_KEY: str = os.getenv("FIREWORKS_API_KEY", "")
     COHERE_API_KEY: str = os.getenv("COHERE_API_KEY", "")
+    GROQ_API_KEY: str = os.getenv("GROQ_API_KEY", "")
 
     # Azure configuration
     AZURE_API_KEY: str = os.getenv("AZURE_API_KEY", "")
@@ -85,6 +86,16 @@ class Config:
     FIREWORKS_DEEPSEEK_R1: str = "deepseek-r1"
     FIREWORKS_DEEPSEEK_V3: str = "deepseek-v3"
     FIREWORKS_QWEN25_CODER: str = "qwen2p5-coder-32b-instruct"
+    FIREWORKS_QWEN_QWQ_32B: str = "qwen-qwq-32b"
+
+    # Groq models
+    GROQ_LLAMA3_3_70B_VERSATILE: str = "llama-3.3-70b-versatile"
+    GROQ_QWEN_QWQ_32B: str = "qwen-qwq-32b"
+    GROQ_DEEPSEEK_R1_DISTILL_QWEN_32B: str = "deepseek-r1-distill-qwen-32b"
+    GROQ_DEEPSEEK_R1_DISTILL_LLAMA_70B_SPECDEC: str = "deepseek-r1-distill-llama-70b-specdec"
+    GROQ_DEEPSEEK_R1_DISTILL_LLAMA_70B: str = "deepseek-r1-distill-llama-70b"
+
+
     MAX_TOKENS: int = 4000
     TEMPERATURE: float = 0.7
 

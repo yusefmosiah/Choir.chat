@@ -20,6 +20,7 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_mistralai import ChatMistralAI
 from langchain_fireworks import ChatFireworks
 from langchain_cohere import ChatCohere
+from langchain_groq import ChatGroq
 
 from .config import Config
 
@@ -88,35 +89,50 @@ def get_cohere_models(config: Config) -> List[str]:
         config.COHERE_COMMAND_R7B
     ]
 
-def initialize_model_list(config: Config) -> List[ModelConfig]:
+def get_groq_models(config: Config) -> List[str]:
+    """Get available Groq models"""
+    return [
+        config.GROQ_LLAMA3_3_70B_VERSATILE,
+        config.GROQ_QWEN_QWQ_32B,
+        config.GROQ_DEEPSEEK_R1_DISTILL_QWEN_32B,
+        config.GROQ_DEEPSEEK_R1_DISTILL_LLAMA_70B_SPECDEC,
+        config.GROQ_DEEPSEEK_R1_DISTILL_LLAMA_70B
+    ]
+
+def initialize_model_list(config: Config, disabled_providers: set = None) -> List[ModelConfig]:
     """Initialize the list of available models from all providers.
 
     Args:
         config: Application configuration with API keys
+        disabled_providers: Set of provider names to exclude (e.g., {"openai", "anthropic"})
 
     Returns:
         List of available models
     """
     models = []
+    disabled_providers = disabled_providers or set()
 
-    # Add models from each provider if API key is available
-    if config.OPENAI_API_KEY:
+    # Add models from each provider if API key is available and provider not disabled
+    if config.OPENAI_API_KEY and "openai" not in disabled_providers:
         models.extend([ModelConfig("openai", m) for m in get_openai_models(config)])
 
-    if config.ANTHROPIC_API_KEY:
+    if config.ANTHROPIC_API_KEY and "anthropic" not in disabled_providers:
         models.extend([ModelConfig("anthropic", m) for m in get_anthropic_models(config)])
 
-    if config.GOOGLE_API_KEY:
+    if config.GOOGLE_API_KEY and "google" not in disabled_providers:
         models.extend([ModelConfig("google", m) for m in get_google_models(config)])
 
-    if config.MISTRAL_API_KEY:
+    if config.MISTRAL_API_KEY and "mistral" not in disabled_providers:
         models.extend([ModelConfig("mistral", m) for m in get_mistral_models(config)])
 
-    if config.FIREWORKS_API_KEY:
+    if config.FIREWORKS_API_KEY and "fireworks" not in disabled_providers:
         models.extend([ModelConfig("fireworks", m) for m in get_fireworks_models(config)])
 
-    if config.COHERE_API_KEY:
+    if config.COHERE_API_KEY and "cohere" not in disabled_providers:
         models.extend([ModelConfig("cohere", m) for m in get_cohere_models(config)])
+
+    if config.GROQ_API_KEY and "groq" not in disabled_providers:
+        models.extend([ModelConfig("groq", m) for m in get_groq_models(config)])
 
     logger.info(f"Initialized {len(models)} models for model selection")
     return models
@@ -223,6 +239,12 @@ def get_base_model(model_name: str, config: Config) -> BaseChatModel:
             model=clean_name,
             temperature=config.TEMPERATURE
         )
+    elif provider == "groq":
+        return ChatGroq(
+            api_key=config.GROQ_API_KEY,
+            model=clean_name,
+            temperature=config.TEMPERATURE
+        )
     raise ValueError(f"Unsupported provider: {provider}")
 
 def get_streaming_model(model_name: str, config: Config) -> BaseChatModel:
@@ -304,6 +326,13 @@ def get_streaming_model(model_name: str, config: Config) -> BaseChatModel:
         return ChatOpenAI(
             api_key=config.OPENROUTER_API_KEY,
             base_url="https://openrouter.ai/api/v1",
+            model=clean_name,
+            temperature=config.TEMPERATURE,
+            streaming=True
+        )
+    elif provider == "groq":
+        return ChatGroq(
+            api_key=config.GROQ_API_KEY,
             model=clean_name,
             temperature=config.TEMPERATURE,
             streaming=True

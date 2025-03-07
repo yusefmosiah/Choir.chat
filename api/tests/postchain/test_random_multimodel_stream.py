@@ -16,12 +16,10 @@ from typing import Dict, Any, List
 from dataclasses import dataclass, field
 
 from app.config import Config
-from app.langchain_utils import abstract_llm_completion_stream
+from app.langchain_utils import abstract_llm_completion_stream, initialize_model_list, ModelConfig
 
 from tests.postchain.test_utils import (
-    ModelConfig,
     load_prompts,
-    initialize_model_list
 )
 
 # Configure logging with colors and formatting
@@ -170,13 +168,15 @@ class RandomMultiModelStreamTester:
         if not self.prompts:
             self.prompts = load_prompts()
 
-        models = initialize_model_list(self.config)
+        # Disable OpenAI models as they're not available
+        models = initialize_model_list(self.config, disabled_providers={"openai"})
 
         if not models:
             logger.error("No models available for testing")
             return
 
         logger.info(f"Running {num_conversations} random conversations with {turns_per_conversation} turns each")
+        logger.info(f"Using {len(models)} models with OpenAI disabled")
 
         for i in range(num_conversations):
             result = await self.run_random_conversation(models, turns_per_conversation)

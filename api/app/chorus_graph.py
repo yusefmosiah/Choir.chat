@@ -120,7 +120,8 @@ def create_phase_handler(phase: str, config: Config, models_list: Optional[List[
     # Get models for random selection if no specific models are provided
     available_models = []
     if models_list is None:
-        available_models = initialize_model_list(config)
+        # Disable OpenAI models since they're not available
+        available_models = initialize_model_list(config, disabled_providers={"openai"})
         if not available_models:
             raise ValueError(f"No models available for random selection for phase {phase}")
         logger.info(f"Using random model selection for {phase} from {len(available_models)} available models")

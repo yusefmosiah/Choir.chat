@@ -10,6 +10,7 @@ from typing import Dict, Any, List
 from dataclasses import dataclass
 
 from app.config import Config
+from app.langchain_utils import initialize_model_list, ModelConfig
 from tests.postchain.test_providers import (
     get_openai_models,
     get_anthropic_models,
@@ -21,19 +22,12 @@ from tests.postchain.test_providers import (
 
 logger = logging.getLogger(__name__)
 
-@dataclass
-class ModelConfig:
-    provider: str
-    model_name: str
-
-    def __str__(self):
-        return f"{self.provider}/{self.model_name}"
-
 def load_prompts():
-    """Load conversation prompts from the random_gen_prompts.md file.
+    """
+    Load conversation prompts from the file.
 
     Returns:
-        List[str]: A list of prompt strings
+        list: List of prompts for testing
     """
     prompts = []
     try:
@@ -83,31 +77,6 @@ def set_fallback_prompts(reason):
     logger.warning(f"{reason}. Using {len(fallback_prompts)} fallback prompts.")
     return fallback_prompts
 
-def initialize_model_list(config: Config) -> List[ModelConfig]:
-    """Initialize the list of available models to choose from
-
-    Args:
-        config (Config): Application configuration with API keys
-
-    Returns:
-        List[ModelConfig]: List of available models
-    """
-    models = []
-    if config.OPENAI_API_KEY:
-        models.extend([ModelConfig("openai", m) for m in get_openai_models(config)])
-    if config.ANTHROPIC_API_KEY:
-        models.extend([ModelConfig("anthropic", m) for m in get_anthropic_models(config)])
-    if config.GOOGLE_API_KEY:
-        models.extend([ModelConfig("google", m) for m in get_google_models(config)])
-    if config.MISTRAL_API_KEY:
-        models.extend([ModelConfig("mistral", m) for m in get_mistral_models(config)])
-    if config.FIREWORKS_API_KEY:
-        models.extend([ModelConfig("fireworks", m) for m in get_fireworks_models(config)])
-    if config.COHERE_API_KEY:
-        models.extend([ModelConfig("cohere", m) for m in get_cohere_models(config)])
-    logger.info(f"Initialized {len(models)} models for testing")
-    return models
-
 # Add self-test capability
 if __name__ == "__main__":
     # Configure basic logging
@@ -124,7 +93,7 @@ if __name__ == "__main__":
         for i, prompt in enumerate(prompts[:3]):
             print(f"  {i+1}. {prompt[:50]}..." if len(prompt) > 50 else f"  {i+1}. {prompt}")
 
-    # Test model initialization
+    # Test model initialization using the imported function
     print("\nTesting model initialization:")
     config = Config()
     models = initialize_model_list(config)
