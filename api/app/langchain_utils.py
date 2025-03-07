@@ -9,9 +9,10 @@ import random
 from typing import Dict, Any, List, Optional, Tuple, AsyncGenerator
 from pydantic import BaseModel
 from dataclasses import dataclass
+import re
 
 from langchain_core.language_models import BaseChatModel
-from langchain_core.messages import HumanMessage, SystemMessage, AIMessage, AIMessageChunk, BaseMessage
+from langchain_core.messages import HumanMessage, SystemMessage, AIMessage, AIMessageChunk, BaseMessage, ToolMessage
 
 # LangChain model imports
 from langchain_openai import ChatOpenAI
@@ -339,16 +340,19 @@ def get_streaming_model(model_name: str, config: Config) -> BaseChatModel:
         )
     raise ValueError(f"Unsupported provider: {provider}")
 
-def convert_to_langchain_messages(messages: List[Dict[str, str]]) -> List[Any]:
+def convert_to_langchain_messages(messages: List[Dict[str, str]], provider: Optional[str] = None) -> List[Any]:
     """
     Convert dictionary-based messages to LangChain message objects.
 
     Args:
         messages: List of message dictionaries with 'role' and 'content' keys
+        provider: Optional provider name to handle provider-specific formatting
 
     Returns:
         List of LangChain message objects
     """
+    is_anthropic = provider and "anthropic" in provider.lower() if provider else False
+
     lc_messages = []
     for msg in messages:
         if msg["role"] == "system":
@@ -357,6 +361,22 @@ def convert_to_langchain_messages(messages: List[Dict[str, str]]) -> List[Any]:
             lc_messages.append(HumanMessage(content=msg["content"]))
         elif msg["role"] == "assistant":
             lc_messages.append(AIMessage(content=msg["content"]))
+        elif msg["role"] == "tool":
+            # For Anthropic models, don't use ToolMessage as they have their own format
+            if is_anthropic:
+                # Convert tool messages to user messages for Anthropic
+                lc_messages.append(HumanMessage(content=f"Tool results: {msg['content']}"))
+            else:
+                # Handle tool messages - parse tool name from the content if possible
+                tool_name = "unknown_tool"
+                content = msg["content"]
+
+                # Try to extract tool name if in format [tool_name] output: result
+                tool_match = re.match(r"\[([\w_]+)\]\s+output:", content)
+                if tool_match:
+                    tool_name = tool_match.group(1)
+
+                lc_messages.append(ToolMessage(content=content, tool_call_id=tool_name))
         # Ignore other message types
     return lc_messages
 
@@ -391,8 +411,9 @@ async def abstract_llm_completion(
                 temp_config.MAX_TOKENS = max_tokens
             config = temp_config
 
+        provider, _ = get_model_provider(model_name)
         model = get_base_model(model_name, config)
-        lc_messages = convert_to_langchain_messages(messages)
+        lc_messages = convert_to_langchain_messages(messages, provider)
 
         # Invoke the model
         response = await model.ainvoke(lc_messages)
@@ -446,8 +467,9 @@ async def abstract_llm_completion_stream(
             config = temp_config
 
         # Get streaming-enabled model
+        provider, _ = get_model_provider(model_name)
         model = get_streaming_model(model_name, config)
-        lc_messages = convert_to_langchain_messages(messages)
+        lc_messages = convert_to_langchain_messages(messages, provider)
 
         # Stream the tokens
         async for chunk in model.astream(lc_messages):

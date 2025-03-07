@@ -6,6 +6,9 @@ import re
 import random
 import asyncio
 from typing import List, Dict, Any, Optional, Set
+from datetime import datetime
+
+from langchain_core.messages import HumanMessage, AIMessage, SystemMessage, ToolMessage
 
 from app.config import Config
 from app.langchain_utils import (
@@ -25,37 +28,47 @@ class ConversationWithTools:
         models: List[ModelConfig],
         tools: List[BaseTool],
         config: Optional[Config] = None,
-        system_prompt: Optional[str] = None
+        system_prompt: Optional[str] = None,
     ):
-        """Initialize a conversation with tools.
+        """
+        Initialize a conversation with tools.
 
         Args:
             models: List of models to use for the conversation
-            tools: List of tools available in the conversation
-            config: Application configuration
+            tools: List of tools to make available to the models
+            config: Configuration object
             system_prompt: Optional system prompt to use
         """
         self.models = models
         self.tools = tools
         self.config = config or Config()
-        self.messages = []
 
-        # Create system prompt with tool descriptions
-        tool_descriptions = "\n".join([
-            f"- {tool.name}: {tool.description}" for tool in tools
-        ])
+        # Get the current date to include in the system prompt
+        current_date = datetime.now().strftime("%Y-%m-%d")
 
-        default_system_prompt = (
-            "You are a helpful assistant that can use tools to provide better answers. "
-            "You have access to the following tools:\n\n"
-            f"{tool_descriptions}\n\n"
-            "When you need to use a tool, respond with:\n"
-            "I'll use the [tool_name] tool to help answer this.\n"
-            "[tool_name] input: your_input_here\n\n"
-            "Then, continue your answer after receiving the tool's output."
-        )
+        # Create default system prompt with date if not provided
+        if system_prompt is None:
+            # Define the system prompt with date and tool instructions
+            self.system_prompt = f"""Today's date is {current_date}. You are a helpful AI assistant with access to tools.
+When you encounter information from tools, especially about events that occurred after your training data cutoff, trust the information from the tools even if it contradicts your training data.
 
-        self.system_prompt = system_prompt or default_system_prompt
+You will be given access to the following tools: {', '.join([tool.name for tool in tools])}.
+
+Only use these tools when needed, by outputting text in the format:
+[tool name] input: [tool input]
+
+For example:
+[calculator] input: 2 + 2
+[web_search] input: latest news about AI regulations
+
+The output of the tool will be shown to you, and you can continue the conversation afterwards.
+"""
+        else:
+            self.system_prompt = system_prompt + f"\n\nToday's date is {current_date}."
+
+        self.messages = [
+            {"role": "system", "content": self.system_prompt}
+        ]
         self.current_model = None
 
     def _extract_tool_calls(self, content: str) -> List[Dict[str, Any]]:
@@ -123,28 +136,29 @@ class ConversationWithTools:
         return "\n\n".join(results)
 
     async def process_message(self, user_message: str) -> Dict[str, Any]:
-        """Process a user message through the conversation.
+        """
+        Process a user message, potentially using tools to generate a response.
 
         Args:
-            user_message: The user's message
+            user_message: The message from the user
 
         Returns:
-            Response containing the assistant's message
+            The assistant's response, including tool usage
         """
-        # Add user message to conversation
+        # Add user message
         self.messages.append({"role": "user", "content": user_message})
 
-        # Select a random model if not already set
-        if not self.current_model:
-            self.current_model = random.choice(self.models)
+        # If no current model, select the first one
+        if self.current_model is None:
+            self.current_model = self.models[0]
+
+        logger.info(f"Using model: {self.current_model}")
 
         # Create messages array with system prompt
         formatted_messages = [
             {"role": "system", "content": self.system_prompt}
         ]
         formatted_messages.extend(self.messages)
-
-        logger.info(f"Using model: {self.current_model}")
 
         # Generate initial response
         response_content = ""
@@ -173,15 +187,25 @@ class ConversationWithTools:
             self.messages.append({"role": "assistant", "content": response_content})
 
             # Handle models differently based on their provider
-            # For Mistral, we need to use user messages for follow-up and can't have consecutive assistant messages
+            # Some models need special handling for tool results
             is_mistral = "mistral/" in str(self.current_model)
+            is_cohere = "cohere/" in str(self.current_model)
+            is_anthropic = "anthropic/" in str(self.current_model)
 
-            if is_mistral:
-                # For Mistral models, add tool results as a user message
+            # Both Mistral and Cohere need tool results as user messages
+            if is_mistral or is_cohere:
+                # Add tool results as a user message
                 self.messages.append({"role": "user", "content": f"Tool results: {tool_results}"})
+            elif is_anthropic:
+                # For Anthropic models, we need to extract tool use IDs and format the results differently
+                # Instead of sending a tool message, we need to update the last user message with tool results
+                # Since we don't have access to the actual tool_use_id from Anthropic's response,
+                # we'll use a different approach and format tool results as a regular user message
+                self.messages.append({"role": "user", "content": f"The tools returned the following results:\n\n{tool_results}"})
             else:
-                # For other models, we add tool results as an assistant message
-                self.messages.append({"role": "assistant", "content": tool_results})
+                # For other models, add tool results as a tool message
+                # This uses the proper LangChain ToolMessage type for models that support it
+                self.messages.append({"role": "tool", "content": tool_results})
 
             # Select a different model for continuation to test context preservation
             previous_model = self.current_model

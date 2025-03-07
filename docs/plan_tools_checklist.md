@@ -67,33 +67,43 @@ For now, we'll continue with the current approach to make rapid progress, while 
 
 - [x] Select web search API providers (DuckDuckGo, Tavily, Brave Search)
 - [x] Configure API keys and environment variables
-- [ ] Document API limitations and rate limits
-- [ ] Create fallback logic between search providers
+- [x] Document API limitations and rate limits
+- [x] Create fallback logic between search providers
+- [x] Create provider switching logic
 - [ ] Implement caching to reduce API calls
+- [x] Test provider fallback scenarios
 
 #### Primary Search Implementation (Tavily)
 
-- [ ] Create Tavily search tool interface (`app/tools/tavily_search.py`)
-- [ ] Implement structured result formatting
-- [ ] Add image inclusion capabilities
-- [ ] Write standalone unit tests (`tests/tools/test_tavily_search.py`)
-- [ ] Document Tavily search API usage
+- [x] Create Tavily search tool interface (`app/tools/tavily_search.py`)
+- [x] Implement structured result formatting
+- [x] Add image inclusion capabilities
+- [x] Write standalone unit tests (`tests/tools/test_tavily_search.py`)
+- [x] Document Tavily API usage & limitations (`docs/tool_api_docs.md`)
 
 #### Backup Search Implementations
 
-- [ ] Implement DuckDuckGo search (for development/testing)
-- [ ] Implement Brave Search alternative
-- [ ] Create provider switching logic
-- [ ] Test provider fallback scenarios
+- [x] Implement DuckDuckGo search (for development/testing)
+- [x] Implement Brave Search alternative
+- [x] Create provider switching logic
+- [x] Test provider fallback scenarios
 - [ ] Document multi-provider strategy
 
 #### Web Search Integration Tests
 
-- [ ] Create test for web search in multimodel chat thread
-- [ ] Test different query types and result handling
-- [ ] Verify context maintenance with search results
-- [ ] Test search provider fallback
-- [ ] Document integration patterns
+- [x] Create test for web search in multimodel chat thread
+- [x] Test different query types and result handling
+- [x] Verify context maintenance with search results
+- [x] Test search provider fallback
+- [x] Document integration patterns
+
+#### Web Search Improvements
+
+- [x] Add timestamp to system prompt to help models understand current date
+- [x] Add trust instructions to help models accept search results that contradict training data
+- [x] Add usage guidance in search results for events after model training cutoff
+- [x] Test handling of search results about "future" events relative to model training
+- [x] Document best practices for prompting models with recent events
 
 ### 3️⃣ Qdrant Integration
 

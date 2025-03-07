@@ -123,8 +123,12 @@ tree.md
 │   │   ├── tools
 │   │   │   ├── __init__.py
 │   │   │   ├── base.py
+│   │   │   ├── brave_search.py
 │   │   │   ├── calculator.py
-│   │   │   └── conversation.py
+│   │   │   ├── conversation.py
+│   │   │   ├── duckduckgo_search.py
+│   │   │   ├── tavily_search.py
+│   │   │   └── web_search.py
 │   │   └── utils.py
 │   ├── main.py
 │   ├── postchain_tests.log
@@ -186,9 +190,17 @@ tree.md
 │       ├── test_user_thread_endpoints.py
 │       └── tools
 │           ├── __init__.py
+│           ├── direct_search_diagnostic.py
+│           ├── direct_search_test.py
 │           ├── run_tool_tests.py
+│           ├── test_brave_search.py
 │           ├── test_calculator.py
-│           └── test_multimodel_with_tools.py
+│           ├── test_duckduckgo_search.py
+│           ├── test_multimodel_with_tools.py
+│           ├── test_recent_events.py
+│           ├── test_search_tools_report.py
+│           ├── test_tavily_search.py
+│           └── test_updated_search.py
 ├── choir_coin
 │   └── choir_coin
 │       ├── Move.lock
@@ -243,6 +255,7 @@ tree.md
 │   ├── scripts
 │   │   ├── combiner.sh
 │   │   └── update_tree.sh
+│   ├── tool_api_docs.md
 │   └── tree.md
 ├── notebooks
 │   ├── fqaho_simulation.ipynb
@@ -250,12 +263,31 @@ tree.md
 │   └── vowel_loop3.ipynb
 ├── postchain_tests.log
 ├── render.yaml
+├── reports
+│   ├── search_report_anthropic_20250307_145453.md
+│   ├── search_report_anthropic_20250307_150249.md
+│   ├── search_report_anthropic_20250307_151027.md
+│   ├── search_report_anthropic_20250307_151401.md
+│   ├── search_report_cohere_20250307_145508.md
+│   ├── search_report_fireworks_20250307_145512.md
+│   ├── search_report_google_20250307_145715.md
+│   ├── search_tools_report_20250307_142734.md
+│   ├── search_tools_report_20250307_144002.md
+│   ├── search_tools_report_20250307_144255.md
+│   ├── search_tools_report_20250307_144342.md
+│   ├── search_tools_report_20250307_144942.md
+│   └── search_tools_report_20250307_145014.md
+├── scripts
+│   ├── generate_provider_reports.sh
+│   ├── generate_quick_search_report.sh
+│   ├── generate_search_report.sh
+│   └── generate_single_provider_report.sh
 ├── tests
 │   └── postchain
 │       └── test_framework.py
 └── ~
 
-65 directories, 175 files
+67 directories, 205 files
 
 === File: docs/CHANGELOG.md ===
 
@@ -2476,33 +2508,43 @@ For now, we'll continue with the current approach to make rapid progress, while 
 
 - [x] Select web search API providers (DuckDuckGo, Tavily, Brave Search)
 - [x] Configure API keys and environment variables
-- [ ] Document API limitations and rate limits
-- [ ] Create fallback logic between search providers
+- [x] Document API limitations and rate limits
+- [x] Create fallback logic between search providers
+- [x] Create provider switching logic
 - [ ] Implement caching to reduce API calls
+- [x] Test provider fallback scenarios
 
 #### Primary Search Implementation (Tavily)
 
-- [ ] Create Tavily search tool interface (`app/tools/tavily_search.py`)
-- [ ] Implement structured result formatting
-- [ ] Add image inclusion capabilities
-- [ ] Write standalone unit tests (`tests/tools/test_tavily_search.py`)
-- [ ] Document Tavily search API usage
+- [x] Create Tavily search tool interface (`app/tools/tavily_search.py`)
+- [x] Implement structured result formatting
+- [x] Add image inclusion capabilities
+- [x] Write standalone unit tests (`tests/tools/test_tavily_search.py`)
+- [x] Document Tavily API usage & limitations (`docs/tool_api_docs.md`)
 
 #### Backup Search Implementations
 
-- [ ] Implement DuckDuckGo search (for development/testing)
-- [ ] Implement Brave Search alternative
-- [ ] Create provider switching logic
-- [ ] Test provider fallback scenarios
+- [x] Implement DuckDuckGo search (for development/testing)
+- [x] Implement Brave Search alternative
+- [x] Create provider switching logic
+- [x] Test provider fallback scenarios
 - [ ] Document multi-provider strategy
 
 #### Web Search Integration Tests
 
-- [ ] Create test for web search in multimodel chat thread
-- [ ] Test different query types and result handling
-- [ ] Verify context maintenance with search results
-- [ ] Test search provider fallback
-- [ ] Document integration patterns
+- [x] Create test for web search in multimodel chat thread
+- [x] Test different query types and result handling
+- [x] Verify context maintenance with search results
+- [x] Test search provider fallback
+- [x] Document integration patterns
+
+#### Web Search Improvements
+
+- [x] Add timestamp to system prompt to help models understand current date
+- [x] Add trust instructions to help models accept search results that contradict training data
+- [x] Add usage guidance in search results for events after model training cutoff
+- [x] Test handling of search results about "future" events relative to model training
+- [x] Document best practices for prompting models with recent events
 
 ### 3️⃣ Qdrant Integration
 

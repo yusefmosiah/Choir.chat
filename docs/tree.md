@@ -110,8 +110,12 @@
 │   │   ├── tools
 │   │   │   ├── __init__.py
 │   │   │   ├── base.py
+│   │   │   ├── brave_search.py
 │   │   │   ├── calculator.py
-│   │   │   └── conversation.py
+│   │   │   ├── conversation.py
+│   │   │   ├── duckduckgo_search.py
+│   │   │   ├── tavily_search.py
+│   │   │   └── web_search.py
 │   │   └── utils.py
 │   ├── main.py
 │   ├── postchain_tests.log
@@ -173,9 +177,17 @@
 │       ├── test_user_thread_endpoints.py
 │       └── tools
 │           ├── __init__.py
+│           ├── direct_search_diagnostic.py
+│           ├── direct_search_test.py
 │           ├── run_tool_tests.py
+│           ├── test_brave_search.py
 │           ├── test_calculator.py
-│           └── test_multimodel_with_tools.py
+│           ├── test_duckduckgo_search.py
+│           ├── test_multimodel_with_tools.py
+│           ├── test_recent_events.py
+│           ├── test_search_tools_report.py
+│           ├── test_tavily_search.py
+│           └── test_updated_search.py
 ├── choir_coin
 │   └── choir_coin
 │       ├── Move.lock
@@ -230,6 +242,7 @@
 │   ├── scripts
 │   │   ├── combiner.sh
 │   │   └── update_tree.sh
+│   ├── tool_api_docs.md
 │   └── tree.md
 ├── notebooks
 │   ├── fqaho_simulation.ipynb
@@ -237,9 +250,28 @@
 │   └── vowel_loop3.ipynb
 ├── postchain_tests.log
 ├── render.yaml
+├── reports
+│   ├── search_report_anthropic_20250307_145453.md
+│   ├── search_report_anthropic_20250307_150249.md
+│   ├── search_report_anthropic_20250307_151027.md
+│   ├── search_report_anthropic_20250307_151401.md
+│   ├── search_report_cohere_20250307_145508.md
+│   ├── search_report_fireworks_20250307_145512.md
+│   ├── search_report_google_20250307_145715.md
+│   ├── search_tools_report_20250307_142734.md
+│   ├── search_tools_report_20250307_144002.md
+│   ├── search_tools_report_20250307_144255.md
+│   ├── search_tools_report_20250307_144342.md
+│   ├── search_tools_report_20250307_144942.md
+│   └── search_tools_report_20250307_145014.md
+├── scripts
+│   ├── generate_provider_reports.sh
+│   ├── generate_quick_search_report.sh
+│   ├── generate_search_report.sh
+│   └── generate_single_provider_report.sh
 ├── tests
 │   └── postchain
 │       └── test_framework.py
 └── ~
 
-65 directories, 175 files
+67 directories, 205 files
