@@ -2,7 +2,7 @@ fastapi==0.115.4
 uvicorn[standard]==0.27.1
 gunicorn==20.1.0
 python-dotenv==1.0.0
-litellm==1.61.20
+litellm==1.63.0
 openai==1.65.2
 qdrant-client==1.12.1
 pydantic==2.9.2
@@ -10,10 +10,10 @@ pydantic-settings==2.6.1
 tiktoken==0.8.0
 tokenizers==0.15.2
 PyYAML==6.0.1
-pysui==0.72.0
+pysui==0.79.0
 pytest==8.0.0
 pytest-asyncio==0.23.5
-httpx==0.25.2
+httpx>=0.25.2
 
 # LangGraph dependencies - pinned to compatible versions
 langchain==0.3.19
@@ -25,6 +25,7 @@ langchain-cohere==0.4.2
 langchain-mistralai==0.2.7
 langchain-fireworks==0.2.7
 langchain-qdrant==0.2.0
+langchain-groq==0.2.4
 langgraph==0.3.2
 langserve==0.3.1
 

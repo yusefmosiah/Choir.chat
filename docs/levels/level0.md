@@ -227,6 +227,7 @@ tree.md
 │   ├── plan_langgraph.md
 │   ├── plan_langgraph_postchain.md
 │   ├── plan_libsql.md
+│   ├── plan_model_config_checklist.md
 │   ├── plan_postchain_checklist.md
 │   ├── scripts
 │   │   ├── combiner.sh
@@ -243,7 +244,7 @@ tree.md
 │       └── test_framework.py
 └── ~
 
-63 directories, 165 files
+63 directories, 166 files
 
 === File: docs/CHANGELOG.md ===
 
