@@ -136,6 +136,18 @@ tree.md
 │   ├── pytest.ini
 │   ├── requirements.txt
 │   ├── run_tests.sh
+│   ├── test_reports
+│   │   └── groq
+│   │       ├── deepseek_r1_distill_llama_70b_specdec_super_bowl_search_20250307_180115.json
+│   │       ├── deepseek_r1_distill_llama_70b_specdec_super_bowl_search_20250307_180115.md
+│   │       ├── deepseek_r1_distill_llama_70b_super_bowl_search_20250307_180124.json
+│   │       ├── deepseek_r1_distill_llama_70b_super_bowl_search_20250307_180124.md
+│   │       ├── deepseek_r1_distill_qwen_32b_super_bowl_search_20250307_180112.json
+│   │       ├── deepseek_r1_distill_qwen_32b_super_bowl_search_20250307_180112.md
+│   │       ├── llama_3.3_70b_versatile_super_bowl_search_20250307_180054.json
+│   │       ├── llama_3.3_70b_versatile_super_bowl_search_20250307_180054.md
+│   │       ├── qwen_qwq_32b_super_bowl_search_20250307_180055.json
+│   │       └── qwen_qwq_32b_super_bowl_search_20250307_180055.md
 │   └── tests
 │       ├── __init__.py
 │       ├── conftest.py
@@ -159,6 +171,8 @@ tree.md
 │       │   ├── test_simple_multimodel_stream.py
 │       │   ├── test_structured_output.py
 │       │   ├── test_structured_output_abstracted.py
+│       │   ├── test_tool_multimodel.py
+│       │   ├── test_tool_random_multimodel.py
 │       │   └── test_utils.py
 │       ├── results
 │       │   ├── basic_flow
@@ -199,7 +213,7 @@ tree.md
 │           ├── test_brave_search.py
 │           ├── test_calculator.py
 │           ├── test_duckduckgo_search.py
-│           ├── test_langgraph_providers.py
+│           ├── test_langgraph_providers_tools.py
 │           ├── test_multimodel_with_tools.py
 │           ├── test_provider_langgraph.py
 │           ├── test_recent_events.py
@@ -269,22 +283,6 @@ tree.md
 ├── postchain_tests.log
 ├── render.yaml
 ├── reports
-│   ├── bind_tools_capability_summary.md
-│   ├── search_report_anthropic_20250307_145453.md
-│   ├── search_report_anthropic_20250307_150249.md
-│   ├── search_report_anthropic_20250307_151027.md
-│   ├── search_report_anthropic_20250307_151401.md
-│   ├── search_report_anthropic_20250307_152440.md
-│   ├── search_report_anthropic_20250307_152654.md
-│   ├── search_report_cohere_20250307_145508.md
-│   ├── search_report_fireworks_20250307_145512.md
-│   ├── search_report_google_20250307_145715.md
-│   ├── search_tools_report_20250307_142734.md
-│   ├── search_tools_report_20250307_144002.md
-│   ├── search_tools_report_20250307_144255.md
-│   ├── search_tools_report_20250307_144342.md
-│   ├── search_tools_report_20250307_144942.md
-│   └── search_tools_report_20250307_145014.md
 ├── scripts
 │   ├── generate_provider_reports.sh
 │   ├── generate_quick_search_report.sh
@@ -295,7 +293,7 @@ tree.md
 │       └── test_framework.py
 └── ~
 
-67 directories, 213 files
+69 directories, 209 files
 
 === File: docs/CHANGELOG.md ===
 

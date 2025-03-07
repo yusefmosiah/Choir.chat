@@ -101,6 +101,77 @@ def get_groq_models(config: Config) -> List[str]:
         config.GROQ_DEEPSEEK_R1_DISTILL_LLAMA_70B
     ]
 
+def get_tool_compatible_models(config: Config) -> Dict[str, List[str]]:
+    """
+    Get a dictionary of models known to work with tool use, organized by provider.
+
+    Based on comprehensive testing results from plan_tools_checklist.md.
+
+    Args:
+        config: Application configuration with model names
+
+    Returns:
+        Dictionary with provider keys and lists of compatible model names
+    """
+    return {
+        "openai": [
+            config.OPENAI_O1,
+            config.OPENAI_O3_MINI,
+            config.OPENAI_GPT_4O_MINI,
+        ],
+        "anthropic": [
+            config.ANTHROPIC_CLAUDE_37_SONNET,
+            config.ANTHROPIC_CLAUDE_35_HAIKU,
+        ],
+        "google": [
+            config.GOOGLE_GEMINI_20_FLASH,
+        ],
+        "mistral": [
+            config.MISTRAL_SMALL_LATEST,
+            config.MISTRAL_LARGE_LATEST,
+            config.MISTRAL_PIXTRAL_12B,
+            config.MISTRAL_PIXTRAL_LARGE,
+            config.MISTRAL_CODESTRAL,
+        ],
+        "groq": [
+            config.GROQ_QWEN_QWQ_32B,
+            config.GROQ_DEEPSEEK_R1_DISTILL_LLAMA_70B,
+        ]
+    }
+
+def initialize_tool_compatible_model_list(config: Config, disabled_providers: set = None) -> List[ModelConfig]:
+    """
+    Initialize the list of models verified to work with tool calls.
+
+    Args:
+        config: Application configuration with API keys
+        disabled_providers: Set of provider names to exclude (e.g., {"openai", "anthropic"})
+
+    Returns:
+        List of models verified to support tool use
+    """
+    models = []
+    disabled_providers = disabled_providers or set()
+    tool_models = get_tool_compatible_models(config)
+
+    # Add models from each provider if API key is available and provider not disabled
+    if config.OPENAI_API_KEY and "openai" not in disabled_providers:
+        models.extend([ModelConfig("openai", m) for m in tool_models.get("openai", [])])
+
+    if config.ANTHROPIC_API_KEY and "anthropic" not in disabled_providers:
+        models.extend([ModelConfig("anthropic", m) for m in tool_models.get("anthropic", [])])
+
+    if config.GOOGLE_API_KEY and "google" not in disabled_providers:
+        models.extend([ModelConfig("google", m) for m in tool_models.get("google", [])])
+
+    if config.MISTRAL_API_KEY and "mistral" not in disabled_providers:
+        models.extend([ModelConfig("mistral", m) for m in tool_models.get("mistral", [])])
+
+    if config.GROQ_API_KEY and "groq" not in disabled_providers:
+        models.extend([ModelConfig("groq", m) for m in tool_models.get("groq", [])])
+
+    return models
+
 def initialize_model_list(config: Config, disabled_providers: set = None) -> List[ModelConfig]:
     """Initialize the list of available models from all providers.
 
@@ -343,7 +414,8 @@ def get_streaming_model(model_name: str, config: Config) -> BaseChatModel:
 
 def convert_to_langchain_messages(messages: List[Dict[str, str]], provider: Optional[str] = None) -> List[Any]:
     """
-    Convert dictionary-based messages to LangChain message objects.
+    Convert dictionary-based messages to LangChain message objects,
+    handling provider-specific formatting requirements.
 
     Args:
         messages: List of message dictionaries with 'role' and 'content' keys
@@ -352,33 +424,92 @@ def convert_to_langchain_messages(messages: List[Dict[str, str]], provider: Opti
     Returns:
         List of LangChain message objects
     """
-    is_anthropic = provider and "anthropic" in provider.lower() if provider else False
+    provider_lower = provider.lower() if provider else ""
+    is_anthropic = "anthropic" in provider_lower
+    is_google = "google" in provider_lower
+    is_mistral = "mistral" in provider_lower
 
-    lc_messages = []
+    # Provider-specific pre-processing
+    processed_messages = []
     for msg in messages:
-        if msg["role"] == "system":
-            lc_messages.append(SystemMessage(content=msg["content"]))
-        elif msg["role"] == "user":
-            lc_messages.append(HumanMessage(content=msg["content"]))
-        elif msg["role"] == "assistant":
-            lc_messages.append(AIMessage(content=msg["content"]))
-        elif msg["role"] == "tool":
+        # Skip empty content messages for Anthropic
+        if is_anthropic and msg.get("role") == "assistant" and (not msg.get("content") or len(msg.get("content", "").strip()) == 0):
+            continue
+
+        # For Google Gemini, ensure content is never empty
+        if is_google and (not msg.get("content") or len(msg.get("content", "").strip()) == 0):
+            msg = msg.copy()  # Create a copy to avoid modifying the original
+            msg["content"] = " "  # Use a space instead of empty string
+
+        # For Mistral, handle message sequence constraints
+        if is_mistral:
+            # Mistral requires that the last message is either from user or a tool response
+            # If it's an assistant message with no content, skip it
+            if msg.get("role") == "assistant" and (not msg.get("content") or len(msg.get("content", "").strip()) == 0):
+                continue
+
+        processed_messages.append(msg)
+
+    # If Mistral and the last message is an assistant message, convert to user format
+    if is_mistral and processed_messages and processed_messages[-1].get("role") == "assistant":
+        last_msg = processed_messages[-1]
+        processed_messages[-1] = {
+            "role": "user",
+            "content": f"Previous assistant response: {last_msg.get('content', '')}"
+        }
+
+    # Now convert to LangChain message objects
+    lc_messages = []
+    for msg in processed_messages:
+        role = msg.get("role", "")
+        content = msg.get("content", "")
+
+        # Make sure content is not empty
+        if not content:
+            content = " "  # Space instead of empty string
+
+        if role == "system":
+            lc_messages.append(SystemMessage(content=content))
+        elif role == "user":
+            lc_messages.append(HumanMessage(content=content))
+        elif role == "assistant":
+            # Handle special case for Mistral
+            if is_mistral and "tool_calls" in msg:
+                # Format tool calls in a way Mistral can understand
+                formatted_content = content if content else "I'll help you with that."
+                lc_messages.append(AIMessage(content=formatted_content))
+            else:
+                lc_messages.append(AIMessage(content=content))
+        elif role == "tool":
             # For Anthropic models, don't use ToolMessage as they have their own format
             if is_anthropic:
                 # Convert tool messages to user messages for Anthropic
-                lc_messages.append(HumanMessage(content=f"Tool results: {msg['content']}"))
+                tool_name = msg.get("name", "tool")
+                lc_messages.append(HumanMessage(content=f"Tool '{tool_name}' results: {content}"))
+            elif is_mistral:
+                # Mistral prefers tool messages in a specific format
+                tool_name = msg.get("name", "tool")
+                tool_call_id = msg.get("tool_call_id", "unknown_id")
+                lc_messages.append(ToolMessage(
+                    content=content,
+                    tool_call_id=tool_call_id,
+                    name=tool_name
+                ))
             else:
-                # Handle tool messages - parse tool name from the content if possible
-                tool_name = "unknown_tool"
-                content = msg["content"]
+                # Handle tool messages - extract information from the message
+                tool_name = msg.get("name", "unknown_tool")
+                tool_call_id = msg.get("tool_call_id", "unknown_id")
+                lc_messages.append(ToolMessage(
+                    content=content,
+                    tool_call_id=tool_call_id,
+                    name=tool_name
+                ))
 
-                # Try to extract tool name if in format [tool_name] output: result
-                tool_match = re.match(r"\[([\w_]+)\]\s+output:", content)
-                if tool_match:
-                    tool_name = tool_match.group(1)
+    # If Google Gemini and there are no messages or the only message is a system message,
+    # add a simple user message to satisfy Gemini's requirements
+    if is_google and (len(lc_messages) == 0 or (len(lc_messages) == 1 and isinstance(lc_messages[0], SystemMessage))):
+        lc_messages.append(HumanMessage(content="Hello"))
 
-                lc_messages.append(ToolMessage(content=content, tool_call_id=tool_name))
-        # Ignore other message types
     return lc_messages
 
 def convert_tools_to_pydantic(tools: List[Any]) -> List[Type[BaseModel]]:
