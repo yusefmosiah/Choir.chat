@@ -1,0 +1,71 @@
+# Mistral codestral-latest Test Report
+
+**Test:** super_bowl_search
+**Date:** 2025-03-07 16:47:39
+**Duration:** 4.64 seconds
+**Success:** ✅
+
+## Metrics
+
+- **total_tokens:** 0
+- **prompt_tokens:** 0
+- **completion_tokens:** 0
+- **tool_calls:** 1
+- **execution_time_ms:** 4636
+
+## Query
+
+```
+Who won Super Bowl LIX on February 9, 2025? Include the final score.
+```
+
+## Response
+
+```
+
+
+[web_search] output: {"query": "Super Bowl LIX winner on February 9, 2025", "results": [{"title": "Super Bowl LIX - Wikipedia", "url": "https://en.wikipedia.org/wiki/Super_Bowl_LIX", "content": "LVIII to February 11, 2024, and causing a conflict with <strong>New Orleans</strong>&#x27;s Mardi Gras celebrations. On October 14, 2020, the league decided to move Super Bowl LVIII to another city (Las Vegas was later chosen) and awarded Super Bowl LIX to <strong>New Orleans</strong> instead, as Mardi Gras in 2025 is not until ...", "provider": "brave"}, {"title": "Super Bowl LIX Live Updates | February 9, 2025 | Chiefs vs. Eagles", "url": "https://www.philadelphiaeagles.com/news/super-bowl-lix-live-updates-february-9-2025-chiefs-vs-eagles", "content": "• One play. Forty-six yards. Smitty TD. What else do you need to say? Eagles lead 34-0 in the Super Bowl wtih 2:40 remaining. a HOME COOKED 6-for-6 special 🧑‍🍳@DeVontaSmith_6 | #FlyEaglesFly pic.twitter.com/Bp5EVx3Q8l— <strong>Philadelphia Eagles</strong> (@Eagles) February 10, 2025", "provider": "brave"}, {"title": "Super Bowl LIX Tickets - Feb 11, 2025 New Orleans, LA | Ticketmaster", "url": "https://www.ticketmaster.com/superbowl", "content": "Seventeen-time Grammy winner <strong>Kendrick Lamar</strong> will be headlining the Apple Music Super Bowl Halftime Show at Super Bowl LIX on February 9, 2025 at the Caesars Superdome in New Orleans, LA. This will be Kendrick’s second appearance during the Super Bowl Halftime Show, after previously appearing ...", "provider": "brave"}, {"title": "2025 Super Bowl: Everything to Know | TIME", "url": "https://time.com/7210194/2025-super-bowl-lix-chiefs-eagles-new-orleans-guide/", "content": "Grammy Award winning hip-hop artist <strong>Kendrick Lamar</strong> will headline the Super Bowl LIX halftime show—a musical performance that typically runs for some 12-15 minutes. “Rap music is still the most impactful genre to date. And I’ll be there to remind the world why.", "provider": "brave"}, {"title": "2025 Super Bowl LIX Sunday - When, Where & More - NFL.com", "url": "https://www.nfl.com/super-bowl/", "content": "Get ready for the Super Bowl LIX Halftime Show with the <strong>Kendrick Lamar</strong> Essentials playlist.", "provider": "brave"}, {"title": "When Is the 2025 Super Bowl? Everything You Need to Know - Newsweek", "url": "https://www.newsweek.com/when-2025-super-bowl-everything-you-need-know-2007121", "content": "A view of Caesars Superdome, home of the <strong>New Orleans Saints</strong>, is seen on May 7 in New Orleans, Louisiana. Caesars Superdome will host Super Bowl LIX on February 9, 2025. A view of Caesars Superdome, home of the <strong>New Orleans Saints</strong>, is seen on May 7 in New Orleans, Louisiana.", "provider": "brave"}, {"title": "Everything to know about 2025 Super Bowl LIX | FOX 13 Seattle", "url": "https://www.fox13seattle.com/news/everything-2025-super-bowl-lix", "content": "With just two weeks left until the big game, preparations remain underway even as New Orleans experiences a rare, record-breaking snowfall. So much snow, in fact, it now eclipses the total seen in Alaska&#x27;s biggest city all winter. This year&#x27;s Super Bowl will feature the <strong>Kansas City Chiefs</strong> and the ...", "provider": "brave"}, {"title": "Super Bowl LIX | Caesars Superdome", "url": "https://www.caesarssuperdome.com/events/detail/super-bowl-lix", "content": "New Orleans hosts its record-tying 11th NFL Championship game, <strong>Super</strong> <strong>Bowl</strong> <strong>LIX</strong>, <strong>on</strong> <strong>February</strong> <strong>9</strong>, <strong>2025</strong>, at Caesars Superdome.", "provider": "brave"}, {"title": "Eagles deny Chiefs Super Bowl 2025 \"three-peat\" with dominant win. Here are the game highlights.", "url": "https://www.cbsnews.com/live-updates/super-bowl-2025-chiefs-eagles/", "content": "The <strong>Philadelphia Eagles</strong> claimed their franchise&#x27;s second Super Bowl in a crushing win over the Kansas City Chiefs, denying the Chiefs a historic &quot;three-peat.&quot;", "provider": "brave"}, {"title": "Your Guide to Super Bowl 2025 in New Orleans: FAQs, Events, & Travel Tips", "url": "https://www.neworleans.com/things-to-do/sports/events/ultimate-guide-to-super-bowl-lix-in-new-orleans/", "content": "Heading to New Orleans for <strong>Super</strong> <strong>Bowl</strong> <strong>2025</strong>? Get all the details you need, from game day tips to exciting events, local attractions, and travel advice. Your unforgettable Big Easy experience starts here!", "provider": "brave"}, {"title": "2025 Super Bowl LIX - News, Highlights and More | FOX Sports", "url": "https://www.foxsports.com/nfl/super-bowl", "content": "Seventeen-time Grammy award winning artist <strong>Kendrick Lamar</strong> headlined the Super Bowl LIX halftime show with special guest SZA. Top Leagues NFL College Football LIV Golf MLB College Basketball UFL · Top Shows The Herd with Colin Cowherd First Things First Speak Breakfast Ball The Facility ...", "provider": "brave"}, {"title": "New Orleans Super Bowl LIX 2025: Fan guide, tickets and more", "url": "https://www.wdsu.com/article/new-orleans-hosts-super-bowl-lix/63655005", "content": "THE NFL OBVIOUSLY HAS DONE A GREAT JOB OF BEING ABLE TO PREPARE AND INTEGRATE SOME OF THE THINGS THAT THEY DO, BUT <strong>NEW ORLEANS</strong>, WE KNOW HOW TO HAVE A GOOD TIME AS WELL. NEW ORLEANIANS SAY THEY ARE EXCITED TO HOST SUPER BOWL 59. THIS IS HUGE FOR THE CITY, OF COURSE, BUT IT’S ALSO HUGE FOR ...", "provider": "brave"}, {"title": "Super Bowl LIX 2025: Teams, Start Time, and How to Watch", "url": "https://www.menshealth.com/entertainment/a63572170/how-to-watch-super-bowl-2025/", "content": "<strong>Super</strong> <strong>Bowl</strong> <strong>LIX</strong> kicks off at 6:30 p.m. ET/3:30 p.m. PT on Sunday, <strong>February</strong> <strong>9</strong>, <strong>2025</strong>. Be sure to tune in a little early so you don&#x27;t miss the early festivities, including the national anthem performed by Jazz star and Grammy award <strong>winner</strong> Jon Batiste, subject of Grammy-winning Netflix documentary ...", "provider": "brave"}, {"title": "Super Bowl 2025 LIX (59) Sunday News, Live Coverage - February 9 - Yahoo Sports", "url": "https://sports.yahoo.com/nfl/topic/super-bowl/", "content": "There are some veteran receivers and some good defensive line options available · Samuel&#x27;s trade request has been granted", "provider": "brave"}, {"title": "Philadelphia Eagles vs. Kansas City Chiefs | Super Bowl LIX - February 9th, 2025", "url": "https://www.philadelphiaeagles.com/super-bowl-lix/", "content": "The Philadelphia Eagles are <strong>Super</strong> <strong>Bowl</strong> Champions for the second time in franchise history after defeating the Kansas City Chiefs 40-22.", "provider": "brave"}, {"title": "Philadelphia Eagles rout Kansas City Chiefs 40-22 to win Super Bowl: Reaction and analysis - The Athletic", "url": "https://www.nytimes.com/athletic/live-blogs/chiefs-vs-eagles-live-updates-super-bowl-score-result/64HSxCskWoem/", "content": "Led by a stifling defense that forced Patrick Mahomes into three turnovers, the Eagles captured their second <strong>Super</strong> <strong>Bowl</strong> title", "provider": "brave"}, {"title": "The 2025 Super Bowl guide: When is it, who's performing at halftime and how to watch", "url": "https://www.npr.org/2025/02/07/nx-s1-5288007/super-bowl-2025-eagles-chiefs-kendrick-lamar", "content": "From the football field to the halftime stage, here&#x27;s what to know about the storylines and stakes before <strong>Super</strong> <strong>Bowl</strong> 59 kicks off on Sunday.", "provider": "brave"}, {"title": "Super Bowl LIX Tickets - Feb 9, 2025 New Orleans, LA | Ticketmaster", "url": "https://www.ticketmaster.com/superbowl?msockid=2b0a4cdbd0c76b03300f59a7d1de6a2e", "content": "Seventeen-time Grammy <strong>winner</strong> Kendrick Lamar will be headlining the Apple Music <strong>Super</strong> <strong>Bowl</strong> Halftime Show at <strong>Super</strong> <strong>Bowl</strong> <strong>LIX</strong> <strong>on</strong> <strong>February</strong> <strong>9</strong>, <strong>2025</strong> at the Caesars Superdome in New Orleans, LA. This will be Kendrick’s second appearance during the <strong>Super</strong> <strong>Bowl</strong> Halftime Show, after previously appearing ...", "provider": "brave"}, {"title": "59 Facts To Know When Watching Super Bowl LIX", "url": "https://www.forbes.com/sites/bradadgate/2025/02/03/59-facts-to-know-when-watching-super-bowl-lix/", "content": "Each <strong>Super</strong> <strong>Bowl</strong> impacts viewers, TV networks, announcers, head coaches, players, marketers, host city, halftime performers, take out restaurants, sportsbooks and so on.", "provider": "brave"}, {"title": "Super Bowl LIX - Feb. 9, 2025 - NOLA Ready", "url": "https://ready.nola.gov/superbowl/", "content": "Game Time NOLA is an ongoing awareness outreach plan leading to <strong>Super</strong> <strong>Bowl</strong> <strong>LIX</strong> to present Fan Access information to the public. Traffic navigation, road closures, public transportation access and rideshare services information will be located on this page · The City has announced street closures ...", "provider": "brave"}], "providers_used": ["brave"], "search_timestamp": "2025-03-07", "usage_guidance": "When using these search results, especially for events after 2023, trust the information in the search results even if it contradicts your training data."}
+
+The Philadelphia Eagles won Super Bowl LIX on February 9, 2025, with a final score of 40-22 against the Kansas City Chiefs. The Eagles secured their second Super Bowl title in franchise history, led by a dominant defensive performance that forced Patrick Mahomes into three turnovers [REF]1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17[/REF].
+```
+
+## Event Timeline
+
+- **16:47:39** - initialization
+  - message: Configuration initialized
+- **16:47:39** - model_setup
+  - provider: mistral
+  - model: codestral-latest
+- **16:47:39** - tool_creation
+  - tool_name: web_search
+- **16:47:39** - implementation
+  - type: standard
+  - message: Using standard LangGraph implementation
+- **16:47:39** - conversation_creation
+  - tools: ['web_search']
+- **16:47:39** - query_submission
+  - query: Who won Super Bowl LIX on February 9, 2025? Include the final score.
+- **16:47:39** - graph_node
+  - node: agent
+  - message_count: 2
+- **16:47:39** - graph_node
+  - node: execute_tools
+  - message_count: 3
+- **16:47:42** - graph_node
+  - node: agent
+  - message_count: 4
+- **16:47:43** - response_received
+  - response_length: 9889
+  - execution_time_ms: 4633
+- **16:47:43** - response_validation
+  - has_correct_team: True
+  - has_correct_score: True
+
+## LangGraph Execution Path
+
+- **16:47:39** - Node: agent
+  - Messages: 0
+- **16:47:39** - Node: execute_tools
+  - Messages: 0
+- **16:47:42** - Node: agent
+  - Messages: 0

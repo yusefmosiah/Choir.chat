@@ -1,0 +1,102 @@
+{
+  "provider": "groq",
+  "model": "llama-3.3-70b-versatile",
+  "test_name": "super_bowl_search",
+  "timestamp": "2025-03-07T16:44:57.120412",
+  "duration_seconds": 0.686338,
+  "query": "Who won Super Bowl LIX on February 9, 2025? Include the final score.",
+  "success": false,
+  "error": "Response incomplete",
+  "events": [
+    {
+      "timestamp": "2025-03-07T16:44:57.120416",
+      "event_type": "initialization",
+      "details": {
+        "message": "Configuration initialized"
+      }
+    },
+    {
+      "timestamp": "2025-03-07T16:44:57.120420",
+      "event_type": "model_setup",
+      "details": {
+        "provider": "groq",
+        "model": "llama-3.3-70b-versatile"
+      }
+    },
+    {
+      "timestamp": "2025-03-07T16:44:57.120494",
+      "event_type": "tool_creation",
+      "details": {
+        "tool_name": "web_search"
+      }
+    },
+    {
+      "timestamp": "2025-03-07T16:44:57.120496",
+      "event_type": "implementation",
+      "details": {
+        "type": "standard",
+        "message": "Using standard LangGraph implementation"
+      }
+    },
+    {
+      "timestamp": "2025-03-07T16:44:57.122444",
+      "event_type": "conversation_creation",
+      "details": {
+        "tools": [
+          "web_search"
+        ]
+      }
+    },
+    {
+      "timestamp": "2025-03-07T16:44:57.122446",
+      "event_type": "query_submission",
+      "details": {
+        "query": "Who won Super Bowl LIX on February 9, 2025? Include the final score."
+      }
+    },
+    {
+      "timestamp": "2025-03-07T16:44:57.124075",
+      "event_type": "graph_node",
+      "details": {
+        "node": "agent",
+        "message_count": 2
+      }
+    },
+    {
+      "timestamp": "2025-03-07T16:44:57.806687",
+      "event_type": "response_received",
+      "details": {
+        "response_length": 82,
+        "execution_time_ms": 684
+      }
+    },
+    {
+      "timestamp": "2025-03-07T16:44:57.806695",
+      "event_type": "response_validation",
+      "details": {
+        "has_correct_team": false,
+        "has_correct_score": false
+      }
+    }
+  ],
+  "messages": [],
+  "graph_state": [
+    {
+      "node": "agent",
+      "timestamp": "2025-03-07T16:44:57.124071",
+      "messages_summary": [],
+      "message_count": 0
+    }
+  ],
+  "metrics": {
+    "total_tokens": 0,
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "tool_calls": 0,
+    "execution_time_ms": 686
+  },
+  "response": {
+    "role": "assistant",
+    "content": "<function=web_search {\"query\": \"Super Bowl LIX winner and final score\"}</function>"
+  }
+}

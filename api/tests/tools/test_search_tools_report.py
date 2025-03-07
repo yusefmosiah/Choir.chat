@@ -12,6 +12,7 @@ import sys
 from datetime import datetime
 from typing import Dict, Any, List, Union, Optional
 from pathlib import Path
+import re
 
 import pytest
 from tqdm import tqdm
@@ -132,10 +133,21 @@ class SearchToolsEvaluator:
         logger.info(f"Report saved to: {self.report_path}")
 
     async def _evaluate_tool_with_model(self, model: ModelConfig, tool: Any, tool_name: str):
-        """Evaluate a specific tool with a specific model."""
-        self.report_content.append(f"#### Tool: {tool_name}\n")
+        """
+        Evaluate a single tool with a specific model.
 
-        # Create a conversation with this tool
+        Args:
+            model: Model configuration
+            tool: The tool to test
+            tool_name: Name of the tool
+
+        Returns:
+            List of evaluation results for each test query
+        """
+        logger.info(f"Evaluating model: {model}")
+        results = []
+
+        # Create a conversation with this model and the tool
         conversation = ConversationWithTools(
             models=[model],
             tools=[tool],
@@ -143,102 +155,115 @@ class SearchToolsEvaluator:
         )
 
         # Log system prompt
+        self.report_content.append(f"#### Tool: {tool_name}\n")
         self.report_content.append("**System Prompt:**\n")
         self.report_content.append(f"```\n{conversation.system_prompt}\n```\n")
 
-        # Run each test query
-        for test in tqdm(self.test_queries, desc=f"Testing {tool_name} with {model}", leave=False):
-            self.report_content.append(f"##### Query: {test['name']}\n")
-            self.report_content.append(f"**Description:** {test['description']}\n")
-            self.report_content.append(f"**Prompt:** {test['query']}\n")
+        for i, test_query in enumerate(self.test_queries):
+            # Add a delay between queries to avoid rate limiting
+            if i > 0:
+                # Longer delay for Anthropic models which have stricter rate limits
+                if "anthropic" in model.provider:
+                    await asyncio.sleep(5)  # 5 seconds delay for Anthropic
+                else:
+                    await asyncio.sleep(1)  # 1 second delay for other providers
 
-            # Capture start time
+            query_name = test_query["name"]
+            query_description = test_query["description"]
+            query_prompt = test_query["query"]
+
+            self.report_content.append(f"##### Query: {query_name}\n")
+            self.report_content.append(f"**Description:** {query_description}\n")
+            self.report_content.append(f"**Prompt:** {query_prompt}\n")
+
+            # Start timing
             start_time = time.time()
 
             # Process the message
             try:
-                result = await conversation.process_message(test['query'])
+                response = await conversation.process_message(query_prompt)
+                response_text = response["content"]
 
-                # Calculate elapsed time
-                elapsed_time = time.time() - start_time
+                # End timing
+                end_time = time.time()
+                elapsed = end_time - start_time
 
                 # Extract the search query and results if available
-                response_content = result.get('content', 'No response')
+                response_content = response_text
                 search_query = None
                 search_results = None
 
-                # Look for tool usage
-                if "[web_search] input:" in response_content:
-                    # Extract search query
-                    search_query_start = response_content.find("[web_search] input:") + len("[web_search] input:")
-                    search_query_end = response_content.find("\n", search_query_start)
-                    if search_query_end == -1:
-                        search_query_end = len(response_content)
-                    search_query = response_content[search_query_start:search_query_end].strip()
-
-                    # Extract search results if present
-                    if "[web_search] output:" in response_content:
-                        search_results_start = response_content.find("[web_search] output:") + len("[web_search] output:")
-                        search_results_end = response_content.find("\n\n", search_results_start)
-                        if search_results_end == -1:
-                            search_results_end = len(response_content)
-                        search_results = response_content[search_results_start:search_results_end].strip()
-
-                # Log the search query if found
-                if search_query:
+                # Check if there is a tool call and it's a search query
+                tool_call_match = re.search(r"\[(web_search|tavily|search|brave|duckduckgo)\]\s+input:\s*(.*?)(?=\n\n|\n\[|\Z)", response_text, re.DOTALL)
+                if tool_call_match:
+                    search_query = tool_call_match.group(2).strip()
                     self.report_content.append(f"**Search Query:** {search_query}\n")
 
-                # Log the search results if found (truncated for readability)
-                if search_results:
-                    # Try to parse and pretty-print if it's JSON
-                    try:
-                        search_results_obj = json.loads(search_results)
-                        # Include only relevant parts for readability
-                        readable_results = {
-                            "query": search_results_obj.get("query", ""),
-                            "results_count": len(search_results_obj.get("results", [])),
-                            "sample_results": search_results_obj.get("results", [])[:5],  # Show first 5 results
-                            "providers_used": search_results_obj.get("providers_used", [])
-                        }
-                        self.report_content.append("**Search Results (sample):**\n")
+                    # Check if there are search results after the tool call
+                    if "[web_search] output:" in response_text or "[tavily] output:" in response_text or "[brave] output:" in response_text or "[duckduckgo] output:" in response_text:
+                        # Extract the results between the tool output marker and the next section
+                        results_pattern = r"(\[(?:web_search|tavily|search|brave|duckduckgo)\]\s+output:)(.*?)(?=\n\n\n|\Z)"
+                        results_match = re.search(results_pattern, response_text, re.DOTALL)
 
-                        # Add a note if we're only showing a subset of results
-                        total_results = len(search_results_obj.get("results", []))
-                        if total_results > 5:
-                            self.report_content.append(f"*Note: Showing 5 of {total_results} total results*\n")
+                        if results_match:
+                            raw_results = results_match.group(2).strip()
 
-                        self.report_content.append(f"```json\n{json.dumps(readable_results, indent=2)}\n```\n")
-                    except:
-                        # If not valid JSON, show truncated raw text
-                        self.report_content.append("**Search Results (truncated):**\n")
-                        self.report_content.append(f"```\n{search_results[:500]}...\n```\n")
+                            # Try to parse as JSON if it looks like JSON
+                            if raw_results.startswith("{") and raw_results.endswith("}"):
+                                try:
+                                    search_results = json.loads(raw_results)
+                                    # Limit sample results to 5 for readability
+                                    if "results" in search_results and len(search_results["results"]) > 5:
+                                        sample_results = search_results["results"][:5]
+                                        results_count = len(search_results["results"])
+                                        search_results_sample = {
+                                            "query": search_results.get("query", ""),
+                                            "results_count": results_count,
+                                            "sample_results": sample_results
+                                        }
+                                        self.report_content.append(f"**Search Results (sample):**\n\n*Note: Showing 5 of {results_count} total results*\n\n```json\n{json.dumps(search_results_sample, indent=2)}\n```\n")
+                                    else:
+                                        self.report_content.append(f"**Search Results:**\n\n```json\n{json.dumps(search_results, indent=2)}\n```\n")
+                                except json.JSONDecodeError:
+                                    # If it's not valid JSON, just show the raw results
+                                    self.report_content.append(f"**Search Results:**\n\n```\n{raw_results}\n```\n")
+                            else:
+                                # Not JSON-formatted, show as plain text
+                                self.report_content.append(f"**Search Results:**\n\n```\n{raw_results}\n```\n")
 
-                # Log the model's final answer
-                self.report_content.append("**Model Response:**\n")
-
-                # If there's a clear division between tool output and model's final answer, show just the final answer
-                final_answer = response_content
-                if "\n\n" in response_content and "[web_search] output:" in response_content:
-                    parts = response_content.split("\n\n")
-                    for i, part in enumerate(parts):
-                        if "[web_search] output:" in part and i+1 < len(parts):
-                            final_answer = "\n\n".join(parts[i+1:])
-                            break
-
-                self.report_content.append(f"```\n{final_answer}\n```\n")
+                # Add model response
+                self.report_content.append(f"**Model Response:**\n\n```\n{response_content}\n```\n")
 
                 # Performance metrics
-                self.report_content.append(f"**Time:** {elapsed_time:.2f} seconds\n")
+                self.report_content.append(f"**Time:** {elapsed:.2f} seconds\n")
 
                 # Basic accuracy metrics for specific test cases
-                has_correct_info = self._check_answer_accuracy(test['name'], response_content)
+                has_correct_info = self._check_answer_accuracy(query_name, response_content)
                 self.report_content.append(f"**Contains Expected Information:** {has_correct_info}\n")
 
+                results.append({
+                    "query_name": query_name,
+                    "query_description": query_description,
+                    "query_prompt": query_prompt,
+                    "response_text": response_text,
+                    "search_query": search_query,
+                    "search_results": search_results,
+                    "elapsed": elapsed,
+                    "has_correct_info": has_correct_info
+                })
+
             except Exception as e:
+                logger.error(f"Error during evaluation: {str(e)}")
                 self.report_content.append(f"**ERROR:** {str(e)}\n")
+                results.append({
+                    "query_name": query_name,
+                    "error": str(e)
+                })
 
             # Add spacing between test cases
             self.report_content.append("\n")
+
+        return results
 
     def _check_answer_accuracy(self, test_name: str, response: str) -> bool:
         """Check if the response contains expected information for known test cases."""

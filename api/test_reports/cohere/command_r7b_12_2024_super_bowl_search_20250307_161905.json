@@ -1,0 +1,99 @@
+{
+  "provider": "cohere",
+  "model": "command-r7b-12-2024",
+  "test_name": "super_bowl_search",
+  "timestamp": "2025-03-07T16:19:05.995211",
+  "duration_seconds": 0.017082,
+  "query": "Who won Super Bowl LIX on February 9, 2025? Include the final score.",
+  "success": false,
+  "error": "Response incomplete",
+  "events": [
+    {
+      "timestamp": "2025-03-07T16:19:05.995215",
+      "event_type": "initialization",
+      "details": {
+        "message": "Configuration initialized"
+      }
+    },
+    {
+      "timestamp": "2025-03-07T16:19:05.995220",
+      "event_type": "model_setup",
+      "details": {
+        "provider": "cohere",
+        "model": "command-r7b-12-2024"
+      }
+    },
+    {
+      "timestamp": "2025-03-07T16:19:05.995300",
+      "event_type": "tool_creation",
+      "details": {
+        "tool_name": "web_search"
+      }
+    },
+    {
+      "timestamp": "2025-03-07T16:19:05.995303",
+      "event_type": "implementation",
+      "details": {
+        "type": "cohere_specific",
+        "message": "Using specialized Cohere implementation"
+      }
+    },
+    {
+      "timestamp": "2025-03-07T16:19:05.995318",
+      "event_type": "cohere_implementation",
+      "details": {
+        "message": "Using Cohere-specific implementation for tool usage"
+      }
+    },
+    {
+      "timestamp": "2025-03-07T16:19:06.012158",
+      "event_type": "model_creation",
+      "details": {
+        "model": "command-r7b-12-2024"
+      }
+    },
+    {
+      "timestamp": "2025-03-07T16:19:06.012166",
+      "event_type": "implementation_approach",
+      "details": {
+        "approach": "simple_bind_tools"
+      }
+    },
+    {
+      "timestamp": "2025-03-07T16:19:06.012213",
+      "event_type": "error",
+      "details": {
+        "message": "Error in Cohere implementation: Unsupported tool type <class 'app.tools.web_search.WebSearchTool'>. Tool must be passed in as a BaseTool instance, JSON schema dict, or BaseModel type."
+      }
+    },
+    {
+      "timestamp": "2025-03-07T16:19:06.012227",
+      "event_type": "response_received",
+      "details": {
+        "response_length": 175,
+        "execution_time_ms": 17
+      }
+    },
+    {
+      "timestamp": "2025-03-07T16:19:06.012229",
+      "event_type": "response_validation",
+      "details": {
+        "has_correct_team": false,
+        "has_correct_score": false
+      }
+    }
+  ],
+  "messages": [],
+  "graph_state": [],
+  "metrics": {
+    "total_tokens": 0,
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "tool_calls": 0,
+    "execution_time_ms": 17
+  },
+  "response": {
+    "content": "I encountered an error: Unsupported tool type <class 'app.tools.web_search.WebSearchTool'>. Tool must be passed in as a BaseTool instance, JSON schema dict, or BaseModel type.",
+    "role": "assistant"
+  }
+}

@@ -1,0 +1,102 @@
+{
+  "provider": "groq",
+  "model": "deepseek-r1-distill-qwen-32b",
+  "test_name": "super_bowl_search",
+  "timestamp": "2025-03-07T16:45:03.695010",
+  "duration_seconds": 2.704476,
+  "query": "Who won Super Bowl LIX on February 9, 2025? Include the final score.",
+  "success": false,
+  "error": "Response incomplete",
+  "events": [
+    {
+      "timestamp": "2025-03-07T16:45:03.695018",
+      "event_type": "initialization",
+      "details": {
+        "message": "Configuration initialized"
+      }
+    },
+    {
+      "timestamp": "2025-03-07T16:45:03.695028",
+      "event_type": "model_setup",
+      "details": {
+        "provider": "groq",
+        "model": "deepseek-r1-distill-qwen-32b"
+      }
+    },
+    {
+      "timestamp": "2025-03-07T16:45:03.695294",
+      "event_type": "tool_creation",
+      "details": {
+        "tool_name": "web_search"
+      }
+    },
+    {
+      "timestamp": "2025-03-07T16:45:03.695301",
+      "event_type": "implementation",
+      "details": {
+        "type": "standard",
+        "message": "Using standard LangGraph implementation"
+      }
+    },
+    {
+      "timestamp": "2025-03-07T16:45:03.698089",
+      "event_type": "conversation_creation",
+      "details": {
+        "tools": [
+          "web_search"
+        ]
+      }
+    },
+    {
+      "timestamp": "2025-03-07T16:45:03.698095",
+      "event_type": "query_submission",
+      "details": {
+        "query": "Who won Super Bowl LIX on February 9, 2025? Include the final score."
+      }
+    },
+    {
+      "timestamp": "2025-03-07T16:45:03.699835",
+      "event_type": "graph_node",
+      "details": {
+        "node": "agent",
+        "message_count": 2
+      }
+    },
+    {
+      "timestamp": "2025-03-07T16:45:06.399309",
+      "event_type": "response_received",
+      "details": {
+        "response_length": 222,
+        "execution_time_ms": 2701
+      }
+    },
+    {
+      "timestamp": "2025-03-07T16:45:06.399327",
+      "event_type": "response_validation",
+      "details": {
+        "has_correct_team": false,
+        "has_correct_score": false
+      }
+    }
+  ],
+  "messages": [],
+  "graph_state": [
+    {
+      "node": "agent",
+      "timestamp": "2025-03-07T16:45:03.699827",
+      "messages_summary": [],
+      "message_count": 0
+    }
+  ],
+  "metrics": {
+    "total_tokens": 0,
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "tool_calls": 0,
+    "execution_time_ms": 2704
+  },
+  "response": {
+    "role": "assistant",
+    "content": "To find out who won Super Bowl LIX on February 9, 2025, and the final score, I need to perform a web search.\n\n<tools>\n{\"name\": \"web_search\", \"arguments\": {\"query\": \"Super Bowl LIX winner February 9, 2025 result\"}}\n</tools>"
+  }
+}

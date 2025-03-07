@@ -1,27 +1,41 @@
 """
-Conversation wrapper with tool support.
+Conversation wrapper with tool support using LangGraph.
 """
 import logging
-import re
+import json
 import random
-import asyncio
-from typing import List, Dict, Any, Optional, Set
+from typing import List, Dict, Any, Optional, Tuple, Union, Callable, TypedDict, cast
 from datetime import datetime
 
-from langchain_core.messages import HumanMessage, AIMessage, SystemMessage, ToolMessage
+from langchain_core.messages import (
+    BaseMessage,
+    HumanMessage,
+    AIMessage,
+    SystemMessage,
+    ToolMessage,
+    FunctionMessage,
+    ChatMessage
+)
+from langgraph.graph import END, StateGraph
+from langgraph.graph.message import MessageGraph
+from langgraph.prebuilt import ToolNode, chat_agent_executor
 
 from app.config import Config
 from app.langchain_utils import (
     ModelConfig,
     initialize_model_list,
-    abstract_llm_completion_stream
+    abstract_llm_completion_stream,
+    get_base_model,
+    convert_tools_to_pydantic
 )
 from .base import BaseTool
 
 logger = logging.getLogger(__name__)
 
 class ConversationWithTools:
-    """Manages a conversation that supports tool use across multiple models."""
+    """
+    Manages a conversation that supports tool use across multiple models using LangGraph.
+    """
 
     def __init__(
         self,
@@ -31,7 +45,7 @@ class ConversationWithTools:
         system_prompt: Optional[str] = None,
     ):
         """
-        Initialize a conversation with tools.
+        Initialize a conversation with tools using LangGraph.
 
         Args:
             models: List of models to use for the conversation
@@ -42,102 +56,233 @@ class ConversationWithTools:
         self.models = models
         self.tools = tools
         self.config = config or Config()
+        self.current_model = None
 
         # Get the current date to include in the system prompt
         current_date = datetime.now().strftime("%Y-%m-%d")
 
         # Create default system prompt with date if not provided
         if system_prompt is None:
+            # Format tool descriptions for the system prompt
+            tool_descriptions = []
+            for tool in tools:
+                tool_desc = f"- {tool.name}: {tool.description}"
+                tool_descriptions.append(tool_desc)
+
+            tool_section = "\n".join(tool_descriptions)
+
             # Define the system prompt with date and tool instructions
             self.system_prompt = f"""Today's date is {current_date}. You are a helpful AI assistant with access to tools.
+
+You have access to the following tools:
+{tool_section}
+
+When you need information that might be beyond your knowledge or requires real-time data, use an appropriate tool. The tools will automatically be called with your specified parameters, and the results will be returned to you.
+
 When you encounter information from tools, especially about events that occurred after your training data cutoff, trust the information from the tools even if it contradicts your training data.
-
-You will be given access to the following tools: {', '.join([tool.name for tool in tools])}.
-
-Only use these tools when needed, by outputting text in the format:
-[tool name] input: [tool input]
-
-For example:
-[calculator] input: 2 + 2
-[web_search] input: latest news about AI regulations
-
-The output of the tool will be shown to you, and you can continue the conversation afterwards.
 """
         else:
             self.system_prompt = system_prompt + f"\n\nToday's date is {current_date}."
 
+        # Initialize conversation state
         self.messages = [
-            {"role": "system", "content": self.system_prompt}
+            SystemMessage(content=self.system_prompt)
         ]
-        self.current_model = None
 
-    def _extract_tool_calls(self, content: str) -> List[Dict[str, Any]]:
-        """Extract tool calls from a response.
+        # Build the graph
+        self._build_graph()
+
+    def _build_graph(self):
+        """Build the LangGraph conversation graph with tools."""
+        # Create a message graph
+        builder = MessageGraph()
+
+        # Add agent node that processes messages using the model
+        builder.add_node("agent", self._run_model)
+
+        # Add tool execution node
+        builder.add_node("execute_tools", self._execute_tools)
+
+        # Add routing logic to determine if we need to execute tools
+        builder.add_conditional_edges(
+            "agent",
+            self._route_after_agent,
+            {
+                "execute_tools": "execute_tools",
+                "end": END
+            }
+        )
+
+        # After executing tools, return to the agent for further processing
+        builder.add_edge("execute_tools", "agent")
+
+        # Set entry point
+        builder.set_entry_point("agent")
+
+        # Compile the graph
+        self.graph = builder.compile()
+        logger.info(f"Built conversation graph with {len(self.tools)} tools")
+
+    async def _run_model(self, state: List[BaseMessage]) -> List[BaseMessage]:
+        """
+        Run the model on the current state to generate a response.
 
         Args:
-            content: Response content to extract tool calls from
+            state: List of messages representing the conversation state
 
         Returns:
-            List of tool calls in the format {tool_name, input}
+            Updated list of messages with the model's response
         """
-        # Extract tool calls using regex pattern
-        # This matches both formats:
-        # [tool_name] input: input_text
-        # [tool] input: input_text (for backward compatibility)
-        pattern = r"\[([\w]+)\]\s+input:\s*(.*?)(?=\n\n|\n\[|\Z)"
-        matches = re.finditer(pattern, content, re.DOTALL)
+        # If no current model, select the first one
+        if self.current_model is None:
+            self.current_model = self.models[0]
 
-        tool_calls = []
-        for match in matches:
-            tool_name = match.group(1)
-            tool_input = match.group(2).strip()
+        logger.info(f"Running model: {self.current_model}")
 
-            # If tool_name is "tool", try to infer the actual tool from available tools
-            if tool_name == "tool" and self.tools:
-                # For now, just use the first available tool as default
-                tool_name = self.tools[0].name
+        try:
+            # Get the base LLM for this model
+            model = get_base_model(str(self.current_model), self.config)
 
-            tool_calls.append({
-                "tool_name": tool_name,
-                "input": tool_input
-            })
+            # Bind tools to the model if we have any
+            if self.tools:
+                # Convert our tools to LangChain-compatible Pydantic models
+                pydantic_tools = convert_tools_to_pydantic(self.tools)
 
-        return tool_calls
+                # Log information about the tools being bound
+                tool_names = [tool.name for tool in self.tools]
+                logger.info(f"Binding tools to model: {tool_names}")
 
-    async def _execute_tool_calls(self, tool_calls: List[Dict[str, Any]]) -> str:
-        """Execute tool calls and format the results.
+                # Bind the tools using LangChain's bind_tools method
+                model = model.bind_tools(pydantic_tools)
+                logger.info(f"Successfully bound {len(pydantic_tools)} tools to model {self.current_model}")
+
+            # Generate a response using the model with the current conversation state
+            logger.info(f"Generating response with {len(state)} messages")
+            response = await model.ainvoke(state)
+
+            # Log information about the response
+            if hasattr(response, "tool_calls") and response.tool_calls:
+                logger.info(f"Model response includes {len(response.tool_calls)} tool calls")
+                for i, tc in enumerate(response.tool_calls):
+                    logger.info(f"Tool call {i+1}: {tc.get('name')} with args: {tc.get('args')}")
+            else:
+                logger.info("Model response contains no tool calls")
+
+            # Return updated state with model response
+            return state + [response]
+
+        except Exception as e:
+            logger.error(f"Error in model execution: {str(e)}", exc_info=True)
+            # Create an error message if the model fails
+            error_message = AIMessage(content=f"I encountered an error: {str(e)}")
+            return state + [error_message]
+
+    def _route_after_agent(self, state: List[BaseMessage]) -> str:
+        """
+        Determine the next step based on the current state.
 
         Args:
-            tool_calls: List of tool calls to execute
+            state: List of messages representing the conversation state
 
         Returns:
-            Formatted tool results
+            Next node to execute
         """
+        # Check the last message for tool calls
+        last_message = state[-1]
+
+        # Only check for the modern tool_calls attribute
+        if hasattr(last_message, "tool_calls") and last_message.tool_calls:
+            logger.info(f"Detected {len(last_message.tool_calls)} tool calls in message")
+            return "execute_tools"
+
+        logger.info("No tool calls detected, ending conversation turn")
+        return "end"
+
+    async def _execute_tools(self, state: List[BaseMessage]) -> List[BaseMessage]:
+        """
+        Execute any tool calls in the last message.
+
+        Args:
+            state: List of messages representing the conversation state
+
+        Returns:
+            Updated list of messages with tool execution results
+        """
+        last_message = state[-1]
         results = []
 
-        for call in tool_calls:
-            tool_name = call["tool_name"]
-            tool_input = call["input"]
+        # Handle only the modern tool_calls format
+        if hasattr(last_message, "tool_calls") and last_message.tool_calls:
+            for tool_call in last_message.tool_calls:
+                tool_name = tool_call.get("name")
+                tool_args = tool_call.get("args")
+                tool_id = tool_call.get("id", "unknown")
 
-            # Find the tool by name
-            tool = next((t for t in self.tools if t.name == tool_name), None)
+                # Find matching tool
+                tool = next((t for t in self.tools if t.name == tool_name), None)
 
-            if tool is None:
-                result = f"Error: Tool '{tool_name}' not found."
-            else:
-                try:
-                    result = await tool.run(tool_input)
-                except Exception as e:
-                    result = f"Error executing {tool_name}: {str(e)}"
+                if tool:
+                    try:
+                        logger.info(f"Executing tool: {tool_name} with args: {tool_args}")
 
-            formatted_result = f"[{tool_name}] output: {result}"
-            results.append(formatted_result)
+                        # Extract the appropriate parameter
+                        # For web_search tools, we expect a "query" parameter
+                        if isinstance(tool_args, dict) and "query" in tool_args:
+                            tool_input = tool_args["query"]
+                        # For other tools, use the full args or convert to string
+                        elif isinstance(tool_args, dict):
+                            if len(tool_args) == 1 and next(iter(tool_args.values())) is not None:
+                                # If there's only one argument, use its value
+                                tool_input = next(iter(tool_args.values()))
+                            else:
+                                # Use the full args dict
+                                tool_input = tool_args
+                        else:
+                            tool_input = str(tool_args) if tool_args is not None else ""
 
-        return "\n\n".join(results)
+                        result = await tool.run(tool_input)
+                        logger.info(f"Tool execution result length: {len(str(result))}")
+
+                        # Create a proper ToolMessage with the correct tool_call_id
+                        results.append(
+                            ToolMessage(
+                                content=str(result),
+                                tool_call_id=tool_id,
+                                name=tool_name
+                            )
+                        )
+                    except Exception as e:
+                        logger.error(f"Error executing tool {tool_name}: {str(e)}", exc_info=True)
+                        results.append(
+                            ToolMessage(
+                                content=f"Error executing {tool_name}: {str(e)}",
+                                tool_call_id=tool_id,
+                                name=tool_name
+                            )
+                        )
+                else:
+                    logger.warning(f"Tool '{tool_name}' not found")
+                    results.append(
+                        ToolMessage(
+                            content=f"Error: Tool '{tool_name}' not found.",
+                            tool_call_id=tool_id,
+                            name=tool_name
+                        )
+                    )
+
+        if not results:
+            logger.warning("No tool results generated")
+
+        return state + results
 
     async def process_message(self, user_message: str) -> Dict[str, Any]:
         """
         Process a user message, potentially using tools to generate a response.
+
+        This method:
+        1. Adds the user message to the conversation state
+        2. Passes the state to the LangGraph for processing
+        3. Formats the result into a consistent response structure
 
         Args:
             user_message: The message from the user
@@ -145,132 +290,122 @@ The output of the tool will be shown to you, and you can continue the conversati
         Returns:
             The assistant's response, including tool usage
         """
-        # Add user message
-        self.messages.append({"role": "user", "content": user_message})
+        # Convert user message to HumanMessage and record message ID
+        human_message = HumanMessage(content=user_message)
+        user_message_id = getattr(human_message, "id", None)
 
-        # If no current model, select the first one
-        if self.current_model is None:
-            self.current_model = self.models[0]
+        # Add to internal state for tracking
+        initial_message_count = len(self.messages)
+        self.messages.append(human_message)
 
-        logger.info(f"Using model: {self.current_model}")
-
-        # Create messages array with system prompt
-        formatted_messages = [
-            {"role": "system", "content": self.system_prompt}
-        ]
-        formatted_messages.extend(self.messages)
-
-        # Generate initial response
-        response_content = ""
         try:
-            async for chunk in abstract_llm_completion_stream(
-                model_name=str(self.current_model),
-                messages=formatted_messages,
-                config=self.config
-            ):
-                response_content += chunk
-        except Exception as e:
-            logger.error(f"Error in initial response generation: {str(e)}")
-            response_content = f"Error: {str(e)}"
-            return {"role": "assistant", "content": response_content}
+            # Invoke the graph with current messages
+            logger.info(f"Processing message with {len(self.messages)} messages in state")
+            result = await self.graph.ainvoke(self.messages)
 
-        # Extract and execute tool calls
-        tool_calls = self._extract_tool_calls(response_content)
+            # Update internal state with the resulting messages
+            self.messages = result
 
-        if tool_calls:
-            logger.info(f"Found {len(tool_calls)} tool calls in response")
+            # Find new messages by comparing with the initial state
+            new_messages = self.messages[initial_message_count:]
+            logger.info(f"Graph execution added {len(new_messages)} messages")
 
-            # Execute tools
-            tool_results = await self._execute_tool_calls(tool_calls)
+            # Extract assistant and tool messages from the new messages
+            ai_messages = [msg for msg in new_messages if isinstance(msg, AIMessage)]
+            tool_messages = [msg for msg in new_messages if isinstance(msg, ToolMessage)]
 
-            # Add assistant message with tool calls
-            self.messages.append({"role": "assistant", "content": response_content})
+            logger.info(f"Extracted {len(ai_messages)} AI messages and {len(tool_messages)} tool messages")
 
-            # Handle models differently based on their provider
-            # Some models need special handling for tool results
-            is_mistral = "mistral/" in str(self.current_model)
-            is_cohere = "cohere/" in str(self.current_model)
-            is_anthropic = "anthropic/" in str(self.current_model)
+            # Format the final response
+            response_parts = []
 
-            # Both Mistral and Cohere need tool results as user messages
-            if is_mistral or is_cohere:
-                # Add tool results as a user message
-                self.messages.append({"role": "user", "content": f"Tool results: {tool_results}"})
-            elif is_anthropic:
-                # For Anthropic models, we need to extract tool use IDs and format the results differently
-                # Instead of sending a tool message, we need to update the last user message with tool results
-                # Since we don't have access to the actual tool_use_id from Anthropic's response,
-                # we'll use a different approach and format tool results as a regular user message
-                self.messages.append({"role": "user", "content": f"The tools returned the following results:\n\n{tool_results}"})
-            else:
-                # For other models, add tool results as a tool message
-                # This uses the proper LangChain ToolMessage type for models that support it
-                self.messages.append({"role": "tool", "content": tool_results})
+            # Include the initial AI response
+            if ai_messages:
+                # Log debug info about the first AI message
+                first_ai = ai_messages[0]
+                logger.debug(f"First AI message type: {type(first_ai)}")
+                logger.debug(f"First AI message content type: {type(first_ai.content)}")
 
-            # Select a different model for continuation to test context preservation
-            previous_model = self.current_model
-            remaining_models = [m for m in self.models if m != previous_model]
-            if remaining_models:
-                self.current_model = random.choice(remaining_models)
-            logger.info(f"Switching model from {previous_model} to {self.current_model}")
+                # Ensure we're getting a string from the content
+                content = first_ai.content
+                if not isinstance(content, str):
+                    # Handle Anthropic's structured format
+                    if isinstance(content, list):
+                        # Extract text from structured content
+                        text_parts = []
+                        for item in content:
+                            if isinstance(item, dict) and "text" in item:
+                                text_parts.append(item["text"])
+                        content = "".join(text_parts)
+                    else:
+                        # Convert other content types to string
+                        content = str(content)
 
-            # Generate follow-up response
-            follow_up_content = ""
+                response_parts.append(content)
+                logger.info(f"Added initial AI response of length {len(content)}")
 
-            # Create appropriately formatted messages for the next model
-            new_mistral = "mistral/" in str(self.current_model)
+            # Include tool results, if any
+            if tool_messages:
+                # Format tool responses consistently
+                tool_results = []
+                for msg in tool_messages:
+                    tool_name = getattr(msg, "name", "tool")
 
-            # Handle message formatting based on the model type
-            if new_mistral:
-                # For Mistral, simpler formatting works better
-                formatted_messages = [
-                    {"role": "system", "content": self.system_prompt}
-                ]
+                    # Ensure content is a string
+                    content = msg.content
+                    if not isinstance(content, str):
+                        content = str(content)
 
-                # Add messages but prevent consecutive assistant messages
-                last_role = None
-                for msg in self.messages:
-                    # Skip consecutive assistant messages for Mistral
-                    if msg["role"] == "assistant" and last_role == "assistant":
-                        continue
-                    formatted_messages.append(msg)
-                    last_role = msg["role"]
+                    tool_results.append(f"[{tool_name}] output: {content}")
 
-                # Make sure the last message is a user message for Mistral
-                if last_role == "assistant":
-                    formatted_messages.append({
-                        "role": "user",
-                        "content": "Please continue with your response."
-                    })
-            else:
-                # For other models, standard formatting
-                formatted_messages = [
-                    {"role": "system", "content": self.system_prompt}
-                ]
-                # Add all previous messages
-                formatted_messages.extend(self.messages)
+                formatted_tool_results = "\n\n".join(tool_results)
+                response_parts.append(formatted_tool_results)
+                logger.info(f"Added {len(tool_results)} tool results")
 
-            try:
-                async for chunk in abstract_llm_completion_stream(
-                    model_name=str(self.current_model),
-                    messages=formatted_messages,
-                    config=self.config
-                ):
-                    follow_up_content += chunk
-            except Exception as e:
-                logger.error(f"Error in follow-up response generation: {str(e)}")
-                follow_up_content = f"Error in streaming with {self.current_model}: {str(e)}"
+            # Include the follow-up AI response, if any
+            if len(ai_messages) > 1:
+                last_ai = ai_messages[-1]
 
-            final_content = f"{response_content}\n\n{tool_results}\n\n{follow_up_content}"
+                # Ensure we're getting a string from the content
+                content = last_ai.content
+                if not isinstance(content, str):
+                    # Handle Anthropic's structured format
+                    if isinstance(content, list):
+                        # Extract text from structured content
+                        text_parts = []
+                        for item in content:
+                            if isinstance(item, dict) and "text" in item:
+                                text_parts.append(item["text"])
+                        content = "".join(text_parts)
+                    else:
+                        # Convert other content types to string
+                        content = str(content)
 
-            # Add final assistant message
-            self.messages.append({"role": "assistant", "content": follow_up_content})
+                response_parts.append(content)
+                logger.info(f"Added follow-up AI response of length {len(content)}")
+
+            # Make sure all response parts are strings before joining
+            for i, part in enumerate(response_parts):
+                if not isinstance(part, str):
+                    logger.warning(f"Response part {i} is not a string: {type(part)}")
+                    response_parts[i] = str(part)
+
+            # Combine all parts with clear separation
+            final_content = "\n\n".join(response_parts)
+
+            if not final_content.strip():
+                # Handle the case where no content was generated
+                logger.warning("No content generated by the model or tools")
+                final_content = "I apologize, but I wasn't able to generate a proper response. Please try rephrasing your query."
 
             return {"role": "assistant", "content": final_content}
-        else:
-            # No tool calls, just add the response
-            self.messages.append({"role": "assistant", "content": response_content})
-            return {"role": "assistant", "content": response_content}
+
+        except Exception as e:
+            logger.error(f"Error in conversation graph execution: {str(e)}", exc_info=True)
+            return {
+                "role": "assistant",
+                "content": f"I apologize, but I encountered an error while processing your message: {str(e)}"
+            }
 
     async def multi_turn_conversation(self, messages: List[str], max_turns: int = 3) -> List[Dict[str, Any]]:
         """Run a multi-turn conversation.

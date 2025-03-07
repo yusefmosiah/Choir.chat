@@ -1,0 +1,102 @@
+{
+  "provider": "google",
+  "model": "gemini-2.0-flash-lite",
+  "test_name": "super_bowl_search",
+  "timestamp": "2025-03-07T16:34:12.665699",
+  "duration_seconds": 0.766328,
+  "query": "Who won Super Bowl LIX on February 9, 2025? Include the final score.",
+  "success": false,
+  "error": "Response incomplete",
+  "events": [
+    {
+      "timestamp": "2025-03-07T16:34:12.665710",
+      "event_type": "initialization",
+      "details": {
+        "message": "Configuration initialized"
+      }
+    },
+    {
+      "timestamp": "2025-03-07T16:34:12.665722",
+      "event_type": "model_setup",
+      "details": {
+        "provider": "google",
+        "model": "gemini-2.0-flash-lite"
+      }
+    },
+    {
+      "timestamp": "2025-03-07T16:34:12.666094",
+      "event_type": "tool_creation",
+      "details": {
+        "tool_name": "web_search"
+      }
+    },
+    {
+      "timestamp": "2025-03-07T16:34:12.666103",
+      "event_type": "implementation",
+      "details": {
+        "type": "standard",
+        "message": "Using standard LangGraph implementation"
+      }
+    },
+    {
+      "timestamp": "2025-03-07T16:34:12.670311",
+      "event_type": "conversation_creation",
+      "details": {
+        "tools": [
+          "web_search"
+        ]
+      }
+    },
+    {
+      "timestamp": "2025-03-07T16:34:12.670319",
+      "event_type": "query_submission",
+      "details": {
+        "query": "Who won Super Bowl LIX on February 9, 2025? Include the final score."
+      }
+    },
+    {
+      "timestamp": "2025-03-07T16:34:12.672934",
+      "event_type": "graph_node",
+      "details": {
+        "node": "agent",
+        "message_count": 2
+      }
+    },
+    {
+      "timestamp": "2025-03-07T16:34:13.431999",
+      "event_type": "response_received",
+      "details": {
+        "response_length": 107,
+        "execution_time_ms": 762
+      }
+    },
+    {
+      "timestamp": "2025-03-07T16:34:13.432003",
+      "event_type": "response_validation",
+      "details": {
+        "has_correct_team": false,
+        "has_correct_score": false
+      }
+    }
+  ],
+  "messages": [],
+  "graph_state": [
+    {
+      "node": "agent",
+      "timestamp": "2025-03-07T16:34:12.672913",
+      "messages_summary": [],
+      "message_count": 0
+    }
+  ],
+  "metrics": {
+    "total_tokens": 0,
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "tool_calls": 0,
+    "execution_time_ms": 766
+  },
+  "response": {
+    "role": "assistant",
+    "content": "I can't give you the results of Super Bowl LIX. Since today is March 7, 2025, the game hasn't happened yet."
+  }
+}

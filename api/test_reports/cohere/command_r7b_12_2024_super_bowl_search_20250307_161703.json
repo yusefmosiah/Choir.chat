@@ -1,0 +1,105 @@
+{
+  "provider": "cohere",
+  "model": "command-r7b-12-2024",
+  "test_name": "super_bowl_search",
+  "timestamp": "2025-03-07T16:17:03.020360",
+  "duration_seconds": 0.028664,
+  "query": "Who won Super Bowl LIX on February 9, 2025? Include the final score.",
+  "success": false,
+  "error": "Response incomplete",
+  "events": [
+    {
+      "timestamp": "2025-03-07T16:17:03.020365",
+      "event_type": "initialization",
+      "details": {
+        "message": "Configuration initialized"
+      }
+    },
+    {
+      "timestamp": "2025-03-07T16:17:03.020372",
+      "event_type": "model_setup",
+      "details": {
+        "provider": "cohere",
+        "model": "command-r7b-12-2024"
+      }
+    },
+    {
+      "timestamp": "2025-03-07T16:17:03.020508",
+      "event_type": "tool_creation",
+      "details": {
+        "tool_name": "web_search"
+      }
+    },
+    {
+      "timestamp": "2025-03-07T16:17:03.020511",
+      "event_type": "implementation",
+      "details": {
+        "type": "cohere_specific",
+        "message": "Using specialized Cohere implementation"
+      }
+    },
+    {
+      "timestamp": "2025-03-07T16:17:03.020529",
+      "event_type": "cohere_implementation",
+      "details": {
+        "message": "Using Cohere-specific implementation for tool usage"
+      }
+    },
+    {
+      "timestamp": "2025-03-07T16:17:03.041842",
+      "event_type": "model_creation",
+      "details": {
+        "model": "command-r7b-12-2024"
+      }
+    },
+    {
+      "timestamp": "2025-03-07T16:17:03.041968",
+      "event_type": "graph_creation",
+      "details": {
+        "message": "Created state graph for Cohere"
+      }
+    },
+    {
+      "timestamp": "2025-03-07T16:17:03.047242",
+      "event_type": "graph_compiled",
+      "details": {
+        "message": "LangGraph compiled"
+      }
+    },
+    {
+      "timestamp": "2025-03-07T16:17:03.047256",
+      "event_type": "query_submission",
+      "details": {
+        "query": "Who won Super Bowl LIX on February 9, 2025? Include the final score."
+      }
+    },
+    {
+      "timestamp": "2025-03-07T16:17:03.048925",
+      "event_type": "error",
+      "details": {
+        "message": "Error in Cohere implementation: No synchronous function provided to \"agent\".\nEither initialize with a synchronous function or invoke via the async API (ainvoke, astream, etc.)"
+      }
+    },
+    {
+      "timestamp": "2025-03-07T16:17:03.048942",
+      "event_type": "response_validation",
+      "details": {
+        "has_correct_team": false,
+        "has_correct_score": false
+      }
+    }
+  ],
+  "messages": [],
+  "graph_state": [],
+  "metrics": {
+    "total_tokens": 0,
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "tool_calls": 0,
+    "execution_time_ms": 29
+  },
+  "response": {
+    "content": "I encountered an error: No synchronous function provided to \"agent\".\nEither initialize with a synchronous function or invoke via the async API (ainvoke, astream, etc.)",
+    "role": "assistant"
+  }
+}

@@ -1690,6 +1690,118 @@ For now, we'll continue with the current approach to make rapid progress, while 
 - [x] Test handling of search results about "future" events relative to model training
 - [x] Document best practices for prompting models with recent events
 
+#### LangGraph Provider Compatibility
+
+- [x] Test web search tool with different providers in LangGraph
+- [x] Document provider-specific compatibility issues
+- [x] Identify best-performing models for tool usage
+- [x] Create detailed test reports for each provider/model
+
+##### Provider Compatibility Findings
+
+1. **OpenAI Models**: ✅ 75% Success
+
+   - ❌ gpt-4o: Failed the test - didn't return the correct score (34-0 instead of 40-22) despite successful tool usage
+   - ✅ gpt-4o-mini: Successfully used web search tool and returned correct information
+   - ✅ o1: Successfully used web search tool and returned correct information
+   - ✅ o3-mini: Successfully used web search tool and returned correct information
+   - Implementation note: All models correctly used function calling, but gpt-4o had incorrect information in its response
+
+2. **Anthropic Models**: ✅ 100% Success
+
+   - Claude-3.7-Sonnet: Successfully used web search tool and returned correct information
+   - Claude-3.5-Haiku: Successfully used web search tool and returned correct information
+   - Consistent function calling format and reliable tool usage
+
+3. **Google Models**: ⚠️ 25% Success (Mixed Results)
+
+   - ✅ gemini-2.0-flash: Successfully used web search tool and returned correct information
+   - ❌ gemini-2.0-flash-lite: Failed to use web search tool; responded as if it couldn't access future information
+   - ❌ gemini-2.0-pro-exp-02-05: Failed due to "500 Internal error occurred" from Google API
+   - ❌ gemini-2.0-flash-thinking-exp-01-21: Failed because "Function calling is not enabled for this model"
+   - Implementation note: Only production models reliably support function calling
+
+4. **Cohere Models**: ❌ 0% Success
+
+   - Failed to properly use tools despite claiming compatibility
+   - Different tool calling format requires custom implementation
+   - Requires direct integration of search results rather than tool-based interaction
+
+5. **Fireworks Models**: ❌ 0% Success
+
+   - deepseek-r1: Failed to make any tool calls; gave a general response without using the tool
+   - deepseek-v3: Initially failed to make tool calls but eventually performed a web search using Brave; however, still failed to provide the correct team or score
+   - qwen2p5-coder-32b-instruct: Failed to make any tool calls; responded with incorrect information
+   - qwen-qwq-32b: Returned a 404 error indicating the model was not found or accessible
+   - Implementation note: The models either didn't use tools at all or failed to properly integrate tool results
+
+6. **Mistral Models**: ✅ 80% Success
+
+   - ✅ pixtral-12b-2409: Successfully used web search tool and returned correct information
+   - ❌ mistral-small-latest: Failed due to rate limit exceeded error (429 response)
+   - ✅ pixtral-large-latest: Successfully used web search tool and returned correct information
+   - ✅ mistral-large-latest: Successfully used web search tool and returned correct information
+   - ✅ codestral-latest: Successfully used web search tool and returned correct information
+   - Implementation note: Mistral models show excellent tool usage capabilities when API limits aren't reached
+
+7. **Groq Models**: ✅ 40% Success
+   - ❌ llama-3.3-70b-versatile: Failed to make any tool calls; gave a general response without using the tool
+   - ✅ qwen-qwq-32b: Successfully used web search tool and returned correct information
+   - ❌ deepseek-r1-distill-qwen-32b: Failed to make any tool calls; gave a response without using the tool
+   - ❌ deepseek-r1-distill-llama-70b-specdec: Failed due to 503 Service Unavailable error
+   - ✅ deepseek-r1-distill-llama-70b: Successfully used web search tool and returned correct information
+   - Implementation note: Inconsistent results, with some models using tools effectively while others don't attempt tool usage
+
+##### LangGraph Tool Compatibility Matrix
+
+| Provider  | Models Tested | Success Rate | Top Performing Models                       | Common Failure Modes                                          |
+| --------- | ------------- | ------------ | ------------------------------------------- | ------------------------------------------------------------- |
+| OpenAI    | 4             | 75%          | o1, o3-mini, gpt-4o-mini                    | Incorrect information despite tool usage                      |
+| Anthropic | 2             | 100%         | Claude-3.7-Sonnet, Claude-3.5-Haiku         | None observed                                                 |
+| Google    | 4             | 25%          | gemini-2.0-flash                            | Function calling not supported, API errors                    |
+| Cohere    | Multiple      | 0%           | None                                        | Different tool calling format requiring custom implementation |
+| Fireworks | 4             | 0%           | None                                        | No tool usage attempts, 404 errors                            |
+| Mistral   | 5             | 80%          | mistral-large-latest, codestral-latest      | Rate limiting errors (429)                                    |
+| Groq      | 5             | 40%          | qwen-qwq-32b, deepseek-r1-distill-llama-70b | No tool usage, service unavailable errors                     |
+
+##### Updated Implementation Recommendations
+
+- **For Production**: Use Anthropic or Mistral models for most reliable tool usage; OpenAI's o1, o3-mini, or gpt-4o-mini as alternatives
+- **Most Accurate**: Anthropic models maintain their 100% success rate, with Mistral models close behind at 80%
+- **Best Performance/Cost**: Mistral's large models and smaller OpenAI models offer good balance of reliability and cost
+- **Custom Implementations**: Maintain provider-specific implementations for Cohere and providers with inconsistent tool support
+- **Error Handling**: Improve error handling for rate limits, API failures, and service unavailable errors
+- **Fallback Strategy**: Implement provider detection and fallback to direct content integration for models lacking function calling
+
+##### Next Steps for Tool Integration
+
+- Create a unified tool interface that can adapt to provider-specific requirements
+- Implement automatic fallback mechanisms for models that don't support function calling
+- Add rate limit handling with exponential backoff for providers like Mistral
+- Develop robust error handling for API failures and service outages
+- Continue testing emerging models and updating compatibility matrix
+
+##### In-Depth Analysis of Successful Tool Usage
+
+Based on the examination of test reports from successful models, we've identified several key factors that contribute to effective tool usage:
+
+1. **Tool Call Format Consistency**: Successful models like Mistral and Groq's `qwen-qwq-32b` consistently format their tool calls in a way that matches the expected OpenAI function calling format.
+
+2. **Query Refinement**: Top-performing models often refine the user's query to create more focused search terms (e.g., "Super Bowl LIX 2025 winner final score" instead of the original query) which leads to more relevant results.
+
+3. **Response Quality**: Successful models not only use the tools correctly but also synthesize the information into coherent, accurate responses that directly answer the user's question.
+
+4. **Error Resilience**: Models that handle search provider errors gracefully (falling back to alternative providers) show better overall performance.
+
+5. **Tool Selection Intelligence**: Many failures stem from models not even attempting to use tools. This suggests we need better tool selection prompting or fallback approaches for these models.
+
+For implementation, we should ensure our tool interface handles these variations by:
+
+- Normalizing tool call formats across different providers
+- Providing clear instructions about when and how to use tools
+- Implementing fallback mechanisms for models that don't make tool calls
+- Monitoring and handling rate limits and API errors proactively
+
 ### 3️⃣ Qdrant Integration
 
 #### Qdrant Setup

@@ -6,8 +6,8 @@ across multiple model providers.
 
 import logging
 import random
-from typing import Dict, Any, List, Optional, Tuple, AsyncGenerator
-from pydantic import BaseModel
+from typing import Dict, Any, List, Optional, Tuple, AsyncGenerator, Type
+from pydantic import BaseModel, Field, create_model
 from dataclasses import dataclass
 import re
 
@@ -43,10 +43,10 @@ class ModelConfig:
 def get_openai_models(config: Config) -> List[str]:
     """Get available OpenAI models"""
     return [
-        config.OPENAI_GPT_45_PREVIEW,
+        # config.OPENAI_GPT_45_PREVIEW,
         config.OPENAI_GPT_4O,
         config.OPENAI_GPT_4O_MINI,
-        config.OPENAI_O1,
+        # config.OPENAI_O1,
         config.OPENAI_O3_MINI
     ]
 
@@ -81,7 +81,8 @@ def get_fireworks_models(config: Config) -> List[str]:
     return [
         config.FIREWORKS_DEEPSEEK_R1,
         config.FIREWORKS_DEEPSEEK_V3,
-        config.FIREWORKS_QWEN25_CODER
+        config.FIREWORKS_QWEN25_CODER,
+        config.FIREWORKS_QWEN_QWQ_32B
     ]
 
 def get_cohere_models(config: Config) -> List[str]:
@@ -380,12 +381,48 @@ def convert_to_langchain_messages(messages: List[Dict[str, str]], provider: Opti
         # Ignore other message types
     return lc_messages
 
+def convert_tools_to_pydantic(tools: List[Any]) -> List[Type[BaseModel]]:
+    """
+    Convert BaseTool instances to Pydantic models for use with bind_tools.
+
+    Args:
+        tools: List of BaseTool instances
+
+    Returns:
+        List of Pydantic model classes that can be used with bind_tools
+    """
+    pydantic_tools = []
+
+    for tool in tools:
+        # For WebSearchTool and similar tools, we want to use a different schema
+        if hasattr(tool, "name") and "search" in tool.name.lower():
+            # Create a special model for search tools that accepts a query parameter
+            tool_model = create_model(
+                tool.name,  # Use the tool name as the class name
+                __doc__=tool.description if hasattr(tool, "description") else f"Search using {tool.name}",
+                query=(str, Field(..., description="The search query to look up"))
+            )
+        else:
+            # Default model for other tools
+            tool_model = create_model(
+                tool.name if hasattr(tool, "name") else "Tool",  # Use the tool name as the class name
+                __doc__=tool.description if hasattr(tool, "description") else "A tool to perform a task",
+                input=(str, Field(..., description="Input to the tool")),  # Add an input field
+            )
+        pydantic_tools.append(tool_model)
+
+        # Log the schema of the created tool model
+        logger.info(f"Created Pydantic model for {tool.name if hasattr(tool, 'name') else 'Tool'}")
+
+    return pydantic_tools
+
 async def abstract_llm_completion(
     model_name: str,
     messages: List[Dict[str, str]],
     config: Config,
     temperature: Optional[float] = None,
-    max_tokens: Optional[int] = None
+    max_tokens: Optional[float] = None,
+    tools: Optional[List[Any]] = None
 ) -> Dict[str, Any]:
     """
     Unified interface for basic chat completion across providers.
@@ -396,6 +433,7 @@ async def abstract_llm_completion(
         config: Application configuration object
         temperature: Optional temperature override
         max_tokens: Optional max tokens override
+        tools: Optional list of tools to pass to the model
 
     Returns:
         Dictionary with status, content, provider, and model information
@@ -415,12 +453,38 @@ async def abstract_llm_completion(
         model = get_base_model(model_name, config)
         lc_messages = convert_to_langchain_messages(messages, provider)
 
+        # If tools are provided, use bind_tools for models that support it
+        if tools and tools:
+            # Only use bind_tools for providers known to support it
+            if provider in ["anthropic", "openai", "azure", "mistral", "cohere", "google"]:
+                logger.info(f"Binding {len(tools)} tools to {model_name}")
+                # Convert our tools to Pydantic models for bind_tools
+                pydantic_tools = convert_tools_to_pydantic(tools)
+                model = model.bind_tools(pydantic_tools)
+                logger.info(f"Successfully bound tools to {model_name}")
+
         # Invoke the model
         response = await model.ainvoke(lc_messages)
 
+        # Process the content which might be in different formats
+        content = response.content
+        processed_content = ""
+
+        # Handle when content is a list (like with Anthropic's structured format)
+        if isinstance(content, list):
+            for item in content:
+                if isinstance(item, dict) and "text" in item:
+                    processed_content += item["text"]
+        # Normal string content
+        elif isinstance(content, str):
+            processed_content = content
+        else:
+            # Fallback for other formats
+            processed_content = str(content)
+
         return {
             "status": "success",
-            "content": response.content,
+            "content": processed_content,
             "provider": get_model_provider(model_name)[0],
             "model": model_name,
             "raw_response": response
@@ -439,7 +503,8 @@ async def abstract_llm_completion_stream(
     messages: List[Dict[str, str]],
     config: Config,
     temperature: Optional[float] = None,
-    max_tokens: Optional[int] = None
+    max_tokens: Optional[float] = None,
+    tools: Optional[List[Any]] = None
 ) -> AsyncGenerator[str, None]:
     """
     Unified interface for streaming chat completion across providers.
@@ -451,6 +516,7 @@ async def abstract_llm_completion_stream(
         config: Application configuration object
         temperature: Optional temperature override
         max_tokens: Optional max tokens override
+        tools: Optional list of tools to make available to the model
 
     Yields:
         String tokens as they are generated
@@ -466,35 +532,58 @@ async def abstract_llm_completion_stream(
                 temp_config.MAX_TOKENS = max_tokens
             config = temp_config
 
+        # Get provider information
+        provider, clean_model_name = get_model_provider(model_name)
+
         # Get streaming-enabled model
-        provider, _ = get_model_provider(model_name)
         model = get_streaming_model(model_name, config)
         lc_messages = convert_to_langchain_messages(messages, provider)
+
+        # If tools are provided, use bind_tools for models that support it
+        if tools and tools:
+            # Only use bind_tools for providers known to support it
+            if provider in ["anthropic", "openai", "azure", "mistral", "cohere", "google"]:
+                logger.info(f"Binding {len(tools)} tools to {model_name}")
+                # Convert our tools to Pydantic models for bind_tools
+                pydantic_tools = convert_tools_to_pydantic(tools)
+                model = model.bind_tools(pydantic_tools)
+                logger.info(f"Successfully bound tools to {model_name}")
 
         # Stream the tokens
         async for chunk in model.astream(lc_messages):
             # Extract content from different types of chunks
             if isinstance(chunk, AIMessageChunk):
-                # For AIMessageChunks, content is directly accessible
-                if chunk.content:
-                    yield chunk.content
-            elif isinstance(chunk, AIMessage):
-                # For complete AIMessages (some providers might return these)
-                if chunk.content:
-                    yield chunk.content
-            elif isinstance(chunk, BaseMessage):
-                # Generic handling for other message types
-                if chunk.content:
-                    yield chunk.content
-            elif hasattr(chunk, "content"):
-                # For objects with content attribute
-                if chunk.content:
-                    yield chunk.content
-            else:
-                # Fallback for other formats (e.g., dictionaries or strings)
-                content = str(chunk)
-                if content:
+                content = chunk.content
+                # Handle when content is a list (like with Anthropic's structured format)
+                if isinstance(content, list):
+                    for item in content:
+                        if isinstance(item, dict) and "text" in item:
+                            yield item["text"]
+                # Normal string content
+                elif isinstance(content, str) and content:
                     yield content
+            elif isinstance(chunk, AIMessage):
+                content = chunk.content
+                # Handle when content is a list (like with Anthropic's structured format)
+                if isinstance(content, list):
+                    for item in content:
+                        if isinstance(item, dict) and "text" in item:
+                            yield item["text"]
+                # Normal string content
+                elif isinstance(content, str) and content:
+                    yield content
+            elif hasattr(chunk, "content"):
+                content = chunk.content
+                # Handle when content is a list (like with Anthropic's structured format)
+                if isinstance(content, list):
+                    for item in content:
+                        if isinstance(item, dict) and "text" in item:
+                            yield item["text"]
+                # Normal string content
+                elif isinstance(content, str) and content:
+                    yield content
+            elif isinstance(chunk, str) and chunk:
+                yield chunk
 
     except Exception as e:
         error_message = f"Error in streaming with {model_name}: {str(e)}"

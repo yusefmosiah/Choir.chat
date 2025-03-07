@@ -56,7 +56,7 @@ class Config:
     AZURE_CHAT_MODEL: str = "azure/gpt-4o-2024-08-06"
 
     # OpenAI models
-    OPENAI_GPT_45_PREVIEW: str = "gpt-4.5-preview"
+    # OPENAI_GPT_45_PREVIEW: str = "gpt-4.5-preview"
     OPENAI_GPT_4O: str = "gpt-4o"
     OPENAI_GPT_4O_MINI: str = "gpt-4o-mini"
     OPENAI_O1: str = "o1"
@@ -86,7 +86,7 @@ class Config:
     FIREWORKS_DEEPSEEK_R1: str = "deepseek-r1"
     FIREWORKS_DEEPSEEK_V3: str = "deepseek-v3"
     FIREWORKS_QWEN25_CODER: str = "qwen2p5-coder-32b-instruct"
-    FIREWORKS_QWEN_QWQ_32B: str = "qwen-qwq-32b"
+    FIREWORKS_QWEN_QWQ_32B: str = "qwq-32b"
 
     # Groq models
     GROQ_LLAMA3_3_70B_VERSATILE: str = "llama-3.3-70b-versatile"

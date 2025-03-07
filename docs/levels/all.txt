@@ -136,6 +136,134 @@ tree.md
 │   ├── pytest.ini
 │   ├── requirements.txt
 │   ├── run_tests.sh
+│   ├── test_reports
+│   │   ├── anthropic
+│   │   │   ├── claude_3_5_haiku_latest_super_bowl_search_20250307_160927.json
+│   │   │   ├── claude_3_5_haiku_latest_super_bowl_search_20250307_160927.md
+│   │   │   ├── claude_3_5_haiku_latest_super_bowl_search_20250307_162901.json
+│   │   │   ├── claude_3_5_haiku_latest_super_bowl_search_20250307_162901.md
+│   │   │   ├── claude_3_5_haiku_latest_super_bowl_search_20250307_164203.json
+│   │   │   ├── claude_3_5_haiku_latest_super_bowl_search_20250307_164203.md
+│   │   │   ├── claude_3_7_sonnet_latest_super_bowl_search_20250307_160909.json
+│   │   │   ├── claude_3_7_sonnet_latest_super_bowl_search_20250307_160909.md
+│   │   │   ├── claude_3_7_sonnet_latest_super_bowl_search_20250307_162851.json
+│   │   │   ├── claude_3_7_sonnet_latest_super_bowl_search_20250307_162851.md
+│   │   │   ├── claude_3_7_sonnet_latest_super_bowl_search_20250307_164152.json
+│   │   │   └── claude_3_7_sonnet_latest_super_bowl_search_20250307_164152.md
+│   │   ├── cohere
+│   │   │   ├── command_r7b_12_2024_super_bowl_search_20250307_160947.json
+│   │   │   ├── command_r7b_12_2024_super_bowl_search_20250307_160947.md
+│   │   │   ├── command_r7b_12_2024_super_bowl_search_20250307_161256.json
+│   │   │   ├── command_r7b_12_2024_super_bowl_search_20250307_161256.md
+│   │   │   ├── command_r7b_12_2024_super_bowl_search_20250307_161703.json
+│   │   │   ├── command_r7b_12_2024_super_bowl_search_20250307_161703.md
+│   │   │   ├── command_r7b_12_2024_super_bowl_search_20250307_161905.json
+│   │   │   ├── command_r7b_12_2024_super_bowl_search_20250307_161905.md
+│   │   │   ├── command_r7b_12_2024_super_bowl_search_20250307_162145.json
+│   │   │   ├── command_r7b_12_2024_super_bowl_search_20250307_162145.md
+│   │   │   ├── command_r7b_12_2024_super_bowl_search_20250307_162206.json
+│   │   │   ├── command_r7b_12_2024_super_bowl_search_20250307_162206.md
+│   │   │   ├── command_r7b_12_2024_super_bowl_search_20250307_162248.json
+│   │   │   ├── command_r7b_12_2024_super_bowl_search_20250307_162248.md
+│   │   │   ├── command_r7b_12_2024_super_bowl_search_20250307_164047.json
+│   │   │   └── command_r7b_12_2024_super_bowl_search_20250307_164047.md
+│   │   ├── fireworks
+│   │   │   ├── deepseek_r1_super_bowl_search_20250307_164059.json
+│   │   │   ├── deepseek_r1_super_bowl_search_20250307_164059.md
+│   │   │   ├── deepseek_r1_super_bowl_search_20250307_164655.json
+│   │   │   ├── deepseek_r1_super_bowl_search_20250307_164655.md
+│   │   │   ├── deepseek_r1_super_bowl_search_20250307_165128.json
+│   │   │   ├── deepseek_r1_super_bowl_search_20250307_165128.md
+│   │   │   ├── deepseek_v3_super_bowl_search_20250307_164104.json
+│   │   │   ├── deepseek_v3_super_bowl_search_20250307_164104.md
+│   │   │   ├── deepseek_v3_super_bowl_search_20250307_164700.json
+│   │   │   ├── deepseek_v3_super_bowl_search_20250307_164700.md
+│   │   │   ├── deepseek_v3_super_bowl_search_20250307_165138.json
+│   │   │   ├── deepseek_v3_super_bowl_search_20250307_165138.md
+│   │   │   ├── qwen2p5_coder_32b_instruct_super_bowl_search_20250307_164106.json
+│   │   │   ├── qwen2p5_coder_32b_instruct_super_bowl_search_20250307_164106.md
+│   │   │   ├── qwen2p5_coder_32b_instruct_super_bowl_search_20250307_164708.json
+│   │   │   ├── qwen2p5_coder_32b_instruct_super_bowl_search_20250307_164708.md
+│   │   │   ├── qwen2p5_coder_32b_instruct_super_bowl_search_20250307_165146.json
+│   │   │   ├── qwen2p5_coder_32b_instruct_super_bowl_search_20250307_165146.md
+│   │   │   ├── qwen_qwq_32b_super_bowl_search_20250307_164709.json
+│   │   │   ├── qwen_qwq_32b_super_bowl_search_20250307_164709.md
+│   │   │   ├── qwq_32b_super_bowl_search_20250307_165147.json
+│   │   │   └── qwq_32b_super_bowl_search_20250307_165147.md
+│   │   ├── google
+│   │   │   ├── gemini_2.0_flash_lite_super_bowl_search_20250307_162830.json
+│   │   │   ├── gemini_2.0_flash_lite_super_bowl_search_20250307_162830.md
+│   │   │   ├── gemini_2.0_flash_lite_super_bowl_search_20250307_163412.json
+│   │   │   ├── gemini_2.0_flash_lite_super_bowl_search_20250307_163412.md
+│   │   │   ├── gemini_2.0_flash_super_bowl_search_20250307_162822.json
+│   │   │   ├── gemini_2.0_flash_super_bowl_search_20250307_162822.md
+│   │   │   ├── gemini_2.0_flash_super_bowl_search_20250307_163406.json
+│   │   │   ├── gemini_2.0_flash_super_bowl_search_20250307_163406.md
+│   │   │   ├── gemini_2.0_flash_thinking_exp_01_21_super_bowl_search_20250307_162835.json
+│   │   │   ├── gemini_2.0_flash_thinking_exp_01_21_super_bowl_search_20250307_162835.md
+│   │   │   ├── gemini_2.0_flash_thinking_exp_01_21_super_bowl_search_20250307_163417.json
+│   │   │   ├── gemini_2.0_flash_thinking_exp_01_21_super_bowl_search_20250307_163417.md
+│   │   │   ├── gemini_2.0_pro_exp_02_05_super_bowl_search_20250307_162831.json
+│   │   │   ├── gemini_2.0_pro_exp_02_05_super_bowl_search_20250307_162831.md
+│   │   │   ├── gemini_2.0_pro_exp_02_05_super_bowl_search_20250307_163413.json
+│   │   │   └── gemini_2.0_pro_exp_02_05_super_bowl_search_20250307_163413.md
+│   │   ├── groq
+│   │   │   ├── deepseek_r1_distill_llama_70b_specdec_super_bowl_search_20250307_164506.json
+│   │   │   ├── deepseek_r1_distill_llama_70b_specdec_super_bowl_search_20250307_164506.md
+│   │   │   ├── deepseek_r1_distill_llama_70b_specdec_super_bowl_search_20250307_164806.json
+│   │   │   ├── deepseek_r1_distill_llama_70b_specdec_super_bowl_search_20250307_164806.md
+│   │   │   ├── deepseek_r1_distill_llama_70b_super_bowl_search_20250307_164506.json
+│   │   │   ├── deepseek_r1_distill_llama_70b_super_bowl_search_20250307_164506.md
+│   │   │   ├── deepseek_r1_distill_llama_70b_super_bowl_search_20250307_164806.json
+│   │   │   ├── deepseek_r1_distill_llama_70b_super_bowl_search_20250307_164806.md
+│   │   │   ├── deepseek_r1_distill_qwen_32b_super_bowl_search_20250307_164503.json
+│   │   │   ├── deepseek_r1_distill_qwen_32b_super_bowl_search_20250307_164503.md
+│   │   │   ├── deepseek_r1_distill_qwen_32b_super_bowl_search_20250307_164803.json
+│   │   │   ├── deepseek_r1_distill_qwen_32b_super_bowl_search_20250307_164803.md
+│   │   │   ├── llama_3.3_70b_versatile_super_bowl_search_20250307_164457.json
+│   │   │   ├── llama_3.3_70b_versatile_super_bowl_search_20250307_164457.md
+│   │   │   ├── llama_3.3_70b_versatile_super_bowl_search_20250307_164757.json
+│   │   │   ├── llama_3.3_70b_versatile_super_bowl_search_20250307_164757.md
+│   │   │   ├── qwen_qwq_32b_super_bowl_search_20250307_164457.json
+│   │   │   ├── qwen_qwq_32b_super_bowl_search_20250307_164457.md
+│   │   │   ├── qwen_qwq_32b_super_bowl_search_20250307_164758.json
+│   │   │   └── qwen_qwq_32b_super_bowl_search_20250307_164758.md
+│   │   ├── mistral
+│   │   │   ├── codestral_latest_super_bowl_search_20250307_164328.json
+│   │   │   ├── codestral_latest_super_bowl_search_20250307_164328.md
+│   │   │   ├── codestral_latest_super_bowl_search_20250307_164739.json
+│   │   │   ├── codestral_latest_super_bowl_search_20250307_164739.md
+│   │   │   ├── mistral_large_latest_super_bowl_search_20250307_164323.json
+│   │   │   ├── mistral_large_latest_super_bowl_search_20250307_164323.md
+│   │   │   ├── mistral_large_latest_super_bowl_search_20250307_164733.json
+│   │   │   ├── mistral_large_latest_super_bowl_search_20250307_164733.md
+│   │   │   ├── mistral_small_latest_super_bowl_search_20250307_164312.json
+│   │   │   ├── mistral_small_latest_super_bowl_search_20250307_164312.md
+│   │   │   ├── mistral_small_latest_super_bowl_search_20250307_164726.json
+│   │   │   ├── mistral_small_latest_super_bowl_search_20250307_164726.md
+│   │   │   ├── pixtral_12b_2409_super_bowl_search_20250307_164306.json
+│   │   │   ├── pixtral_12b_2409_super_bowl_search_20250307_164306.md
+│   │   │   ├── pixtral_12b_2409_super_bowl_search_20250307_164721.json
+│   │   │   ├── pixtral_12b_2409_super_bowl_search_20250307_164721.md
+│   │   │   ├── pixtral_large_latest_super_bowl_search_20250307_164312.json
+│   │   │   ├── pixtral_large_latest_super_bowl_search_20250307_164312.md
+│   │   │   ├── pixtral_large_latest_super_bowl_search_20250307_164726.json
+│   │   │   └── pixtral_large_latest_super_bowl_search_20250307_164726.md
+│   │   └── openai
+│   │       ├── gpt_4o_mini_super_bowl_search_20250307_163757.json
+│   │       ├── gpt_4o_mini_super_bowl_search_20250307_163757.md
+│   │       ├── gpt_4o_mini_super_bowl_search_20250307_164239.json
+│   │       ├── gpt_4o_mini_super_bowl_search_20250307_164239.md
+│   │       ├── gpt_4o_super_bowl_search_20250307_163741.json
+│   │       ├── gpt_4o_super_bowl_search_20250307_163741.md
+│   │       ├── gpt_4o_super_bowl_search_20250307_164234.json
+│   │       ├── gpt_4o_super_bowl_search_20250307_164234.md
+│   │       ├── o1_super_bowl_search_20250307_163809.json
+│   │       ├── o1_super_bowl_search_20250307_163809.md
+│   │       ├── o3_mini_super_bowl_search_20250307_163820.json
+│   │       ├── o3_mini_super_bowl_search_20250307_163820.md
+│   │       ├── o3_mini_super_bowl_search_20250307_164245.json
+│   │       └── o3_mini_super_bowl_search_20250307_164245.md
 │   └── tests
 │       ├── __init__.py
 │       ├── conftest.py
@@ -192,11 +320,16 @@ tree.md
 │           ├── __init__.py
 │           ├── direct_search_diagnostic.py
 │           ├── direct_search_test.py
+│           ├── haiku_search_test.py
+│           ├── langgraph_test.py
 │           ├── run_tool_tests.py
+│           ├── test_anthropic_langgraph.py
 │           ├── test_brave_search.py
 │           ├── test_calculator.py
 │           ├── test_duckduckgo_search.py
+│           ├── test_langgraph_providers.py
 │           ├── test_multimodel_with_tools.py
+│           ├── test_provider_langgraph.py
 │           ├── test_recent_events.py
 │           ├── test_search_tools_report.py
 │           ├── test_tavily_search.py
@@ -264,10 +397,13 @@ tree.md
 ├── postchain_tests.log
 ├── render.yaml
 ├── reports
+│   ├── bind_tools_capability_summary.md
 │   ├── search_report_anthropic_20250307_145453.md
 │   ├── search_report_anthropic_20250307_150249.md
 │   ├── search_report_anthropic_20250307_151027.md
 │   ├── search_report_anthropic_20250307_151401.md
+│   ├── search_report_anthropic_20250307_152440.md
+│   ├── search_report_anthropic_20250307_152654.md
 │   ├── search_report_cohere_20250307_145508.md
 │   ├── search_report_fireworks_20250307_145512.md
 │   ├── search_report_google_20250307_145715.md
@@ -287,7 +423,7 @@ tree.md
 │       └── test_framework.py
 └── ~
 
-67 directories, 205 files
+75 directories, 333 files
 
 === File: docs/CHANGELOG.md ===
 
@@ -2545,6 +2681,118 @@ For now, we'll continue with the current approach to make rapid progress, while 
 - [x] Add usage guidance in search results for events after model training cutoff
 - [x] Test handling of search results about "future" events relative to model training
 - [x] Document best practices for prompting models with recent events
+
+#### LangGraph Provider Compatibility
+
+- [x] Test web search tool with different providers in LangGraph
+- [x] Document provider-specific compatibility issues
+- [x] Identify best-performing models for tool usage
+- [x] Create detailed test reports for each provider/model
+
+##### Provider Compatibility Findings
+
+1. **OpenAI Models**: ✅ 75% Success
+
+   - ❌ gpt-4o: Failed the test - didn't return the correct score (34-0 instead of 40-22) despite successful tool usage
+   - ✅ gpt-4o-mini: Successfully used web search tool and returned correct information
+   - ✅ o1: Successfully used web search tool and returned correct information
+   - ✅ o3-mini: Successfully used web search tool and returned correct information
+   - Implementation note: All models correctly used function calling, but gpt-4o had incorrect information in its response
+
+2. **Anthropic Models**: ✅ 100% Success
+
+   - Claude-3.7-Sonnet: Successfully used web search tool and returned correct information
+   - Claude-3.5-Haiku: Successfully used web search tool and returned correct information
+   - Consistent function calling format and reliable tool usage
+
+3. **Google Models**: ⚠️ 25% Success (Mixed Results)
+
+   - ✅ gemini-2.0-flash: Successfully used web search tool and returned correct information
+   - ❌ gemini-2.0-flash-lite: Failed to use web search tool; responded as if it couldn't access future information
+   - ❌ gemini-2.0-pro-exp-02-05: Failed due to "500 Internal error occurred" from Google API
+   - ❌ gemini-2.0-flash-thinking-exp-01-21: Failed because "Function calling is not enabled for this model"
+   - Implementation note: Only production models reliably support function calling
+
+4. **Cohere Models**: ❌ 0% Success
+
+   - Failed to properly use tools despite claiming compatibility
+   - Different tool calling format requires custom implementation
+   - Requires direct integration of search results rather than tool-based interaction
+
+5. **Fireworks Models**: ❌ 0% Success
+
+   - deepseek-r1: Failed to make any tool calls; gave a general response without using the tool
+   - deepseek-v3: Initially failed to make tool calls but eventually performed a web search using Brave; however, still failed to provide the correct team or score
+   - qwen2p5-coder-32b-instruct: Failed to make any tool calls; responded with incorrect information
+   - qwen-qwq-32b: Returned a 404 error indicating the model was not found or accessible
+   - Implementation note: The models either didn't use tools at all or failed to properly integrate tool results
+
+6. **Mistral Models**: ✅ 80% Success
+
+   - ✅ pixtral-12b-2409: Successfully used web search tool and returned correct information
+   - ❌ mistral-small-latest: Failed due to rate limit exceeded error (429 response)
+   - ✅ pixtral-large-latest: Successfully used web search tool and returned correct information
+   - ✅ mistral-large-latest: Successfully used web search tool and returned correct information
+   - ✅ codestral-latest: Successfully used web search tool and returned correct information
+   - Implementation note: Mistral models show excellent tool usage capabilities when API limits aren't reached
+
+7. **Groq Models**: ✅ 40% Success
+   - ❌ llama-3.3-70b-versatile: Failed to make any tool calls; gave a general response without using the tool
+   - ✅ qwen-qwq-32b: Successfully used web search tool and returned correct information
+   - ❌ deepseek-r1-distill-qwen-32b: Failed to make any tool calls; gave a response without using the tool
+   - ❌ deepseek-r1-distill-llama-70b-specdec: Failed due to 503 Service Unavailable error
+   - ✅ deepseek-r1-distill-llama-70b: Successfully used web search tool and returned correct information
+   - Implementation note: Inconsistent results, with some models using tools effectively while others don't attempt tool usage
+
+##### LangGraph Tool Compatibility Matrix
+
+| Provider  | Models Tested | Success Rate | Top Performing Models                       | Common Failure Modes                                          |
+| --------- | ------------- | ------------ | ------------------------------------------- | ------------------------------------------------------------- |
+| OpenAI    | 4             | 75%          | o1, o3-mini, gpt-4o-mini                    | Incorrect information despite tool usage                      |
+| Anthropic | 2             | 100%         | Claude-3.7-Sonnet, Claude-3.5-Haiku         | None observed                                                 |
+| Google    | 4             | 25%          | gemini-2.0-flash                            | Function calling not supported, API errors                    |
+| Cohere    | Multiple      | 0%           | None                                        | Different tool calling format requiring custom implementation |
+| Fireworks | 4             | 0%           | None                                        | No tool usage attempts, 404 errors                            |
+| Mistral   | 5             | 80%          | mistral-large-latest, codestral-latest      | Rate limiting errors (429)                                    |
+| Groq      | 5             | 40%          | qwen-qwq-32b, deepseek-r1-distill-llama-70b | No tool usage, service unavailable errors                     |
+
+##### Updated Implementation Recommendations
+
+- **For Production**: Use Anthropic or Mistral models for most reliable tool usage; OpenAI's o1, o3-mini, or gpt-4o-mini as alternatives
+- **Most Accurate**: Anthropic models maintain their 100% success rate, with Mistral models close behind at 80%
+- **Best Performance/Cost**: Mistral's large models and smaller OpenAI models offer good balance of reliability and cost
+- **Custom Implementations**: Maintain provider-specific implementations for Cohere and providers with inconsistent tool support
+- **Error Handling**: Improve error handling for rate limits, API failures, and service unavailable errors
+- **Fallback Strategy**: Implement provider detection and fallback to direct content integration for models lacking function calling
+
+##### Next Steps for Tool Integration
+
+- Create a unified tool interface that can adapt to provider-specific requirements
+- Implement automatic fallback mechanisms for models that don't support function calling
+- Add rate limit handling with exponential backoff for providers like Mistral
+- Develop robust error handling for API failures and service outages
+- Continue testing emerging models and updating compatibility matrix
+
+##### In-Depth Analysis of Successful Tool Usage
+
+Based on the examination of test reports from successful models, we've identified several key factors that contribute to effective tool usage:
+
+1. **Tool Call Format Consistency**: Successful models like Mistral and Groq's `qwen-qwq-32b` consistently format their tool calls in a way that matches the expected OpenAI function calling format.
+
+2. **Query Refinement**: Top-performing models often refine the user's query to create more focused search terms (e.g., "Super Bowl LIX 2025 winner final score" instead of the original query) which leads to more relevant results.
+
+3. **Response Quality**: Successful models not only use the tools correctly but also synthesize the information into coherent, accurate responses that directly answer the user's question.
+
+4. **Error Resilience**: Models that handle search provider errors gracefully (falling back to alternative providers) show better overall performance.
+
+5. **Tool Selection Intelligence**: Many failures stem from models not even attempting to use tools. This suggests we need better tool selection prompting or fallback approaches for these models.
+
+For implementation, we should ensure our tool interface handles these variations by:
+
+- Normalizing tool call formats across different providers
+- Providing clear instructions about when and how to use tools
+- Implementing fallback mechanisms for models that don't make tool calls
+- Monitoring and handling rate limits and API errors proactively
 
 ### 3️⃣ Qdrant Integration
 

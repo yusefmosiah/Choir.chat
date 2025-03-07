@@ -1,0 +1,102 @@
+{
+  "provider": "fireworks",
+  "model": "deepseek-v3",
+  "test_name": "super_bowl_search",
+  "timestamp": "2025-03-07T16:41:04.701042",
+  "duration_seconds": 2.187601,
+  "query": "Who won Super Bowl LIX on February 9, 2025? Include the final score.",
+  "success": false,
+  "error": "Response incomplete",
+  "events": [
+    {
+      "timestamp": "2025-03-07T16:41:04.701045",
+      "event_type": "initialization",
+      "details": {
+        "message": "Configuration initialized"
+      }
+    },
+    {
+      "timestamp": "2025-03-07T16:41:04.701048",
+      "event_type": "model_setup",
+      "details": {
+        "provider": "fireworks",
+        "model": "deepseek-v3"
+      }
+    },
+    {
+      "timestamp": "2025-03-07T16:41:04.701265",
+      "event_type": "tool_creation",
+      "details": {
+        "tool_name": "web_search"
+      }
+    },
+    {
+      "timestamp": "2025-03-07T16:41:04.701269",
+      "event_type": "implementation",
+      "details": {
+        "type": "standard",
+        "message": "Using standard LangGraph implementation"
+      }
+    },
+    {
+      "timestamp": "2025-03-07T16:41:04.702582",
+      "event_type": "conversation_creation",
+      "details": {
+        "tools": [
+          "web_search"
+        ]
+      }
+    },
+    {
+      "timestamp": "2025-03-07T16:41:04.702585",
+      "event_type": "query_submission",
+      "details": {
+        "query": "Who won Super Bowl LIX on February 9, 2025? Include the final score."
+      }
+    },
+    {
+      "timestamp": "2025-03-07T16:41:04.706868",
+      "event_type": "graph_node",
+      "details": {
+        "node": "agent",
+        "message_count": 2
+      }
+    },
+    {
+      "timestamp": "2025-03-07T16:41:06.888573",
+      "event_type": "response_received",
+      "details": {
+        "response_length": 248,
+        "execution_time_ms": 2186
+      }
+    },
+    {
+      "timestamp": "2025-03-07T16:41:06.888584",
+      "event_type": "response_validation",
+      "details": {
+        "has_correct_team": false,
+        "has_correct_score": false
+      }
+    }
+  ],
+  "messages": [],
+  "graph_state": [
+    {
+      "node": "agent",
+      "timestamp": "2025-03-07T16:41:04.706863",
+      "messages_summary": [],
+      "message_count": 0
+    }
+  ],
+  "metrics": {
+    "total_tokens": 0,
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "tool_calls": 0,
+    "execution_time_ms": 2188
+  },
+  "response": {
+    "role": "assistant",
+    "content": "Super Bowl LIX is scheduled to take place on February 9, 2025. As of today, March 7, 2025, the game has not yet occurred. The teams that will compete and the final score are not known at this time. Please check back after the event for the results."
+  }
+}

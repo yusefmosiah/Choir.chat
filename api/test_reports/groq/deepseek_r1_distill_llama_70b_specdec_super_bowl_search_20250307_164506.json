@@ -1,0 +1,102 @@
+{
+  "provider": "groq",
+  "model": "deepseek-r1-distill-llama-70b-specdec",
+  "test_name": "super_bowl_search",
+  "timestamp": "2025-03-07T16:45:06.401415",
+  "duration_seconds": 0.206458,
+  "query": "Who won Super Bowl LIX on February 9, 2025? Include the final score.",
+  "success": false,
+  "error": "Response incomplete",
+  "events": [
+    {
+      "timestamp": "2025-03-07T16:45:06.401426",
+      "event_type": "initialization",
+      "details": {
+        "message": "Configuration initialized"
+      }
+    },
+    {
+      "timestamp": "2025-03-07T16:45:06.401445",
+      "event_type": "model_setup",
+      "details": {
+        "provider": "groq",
+        "model": "deepseek-r1-distill-llama-70b-specdec"
+      }
+    },
+    {
+      "timestamp": "2025-03-07T16:45:06.401976",
+      "event_type": "tool_creation",
+      "details": {
+        "tool_name": "web_search"
+      }
+    },
+    {
+      "timestamp": "2025-03-07T16:45:06.401980",
+      "event_type": "implementation",
+      "details": {
+        "type": "standard",
+        "message": "Using standard LangGraph implementation"
+      }
+    },
+    {
+      "timestamp": "2025-03-07T16:45:06.405969",
+      "event_type": "conversation_creation",
+      "details": {
+        "tools": [
+          "web_search"
+        ]
+      }
+    },
+    {
+      "timestamp": "2025-03-07T16:45:06.405975",
+      "event_type": "query_submission",
+      "details": {
+        "query": "Who won Super Bowl LIX on February 9, 2025? Include the final score."
+      }
+    },
+    {
+      "timestamp": "2025-03-07T16:45:06.408743",
+      "event_type": "graph_node",
+      "details": {
+        "node": "agent",
+        "message_count": 2
+      }
+    },
+    {
+      "timestamp": "2025-03-07T16:45:06.607852",
+      "event_type": "response_received",
+      "details": {
+        "response_length": 120,
+        "execution_time_ms": 202
+      }
+    },
+    {
+      "timestamp": "2025-03-07T16:45:06.607855",
+      "event_type": "response_validation",
+      "details": {
+        "has_correct_team": false,
+        "has_correct_score": false
+      }
+    }
+  ],
+  "messages": [],
+  "graph_state": [
+    {
+      "node": "agent",
+      "timestamp": "2025-03-07T16:45:06.408734",
+      "messages_summary": [],
+      "message_count": 0
+    }
+  ],
+  "metrics": {
+    "total_tokens": 0,
+    "prompt_tokens": 0,
+    "completion_tokens": 0,
+    "tool_calls": 0,
+    "execution_time_ms": 206
+  },
+  "response": {
+    "role": "assistant",
+    "content": "I encountered an error: Error code: 503 - {'error': {'message': 'Service Unavailable', 'type': 'internal_server_error'}}"
+  }
+}
