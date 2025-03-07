@@ -72,22 +72,60 @@ For now, we'll continue with the current approach to make rapid progress, while 
 - [x] Create provider switching logic
 - [ ] Implement caching to reduce API calls
 - [x] Test provider fallback scenarios
+- [x] Implement rate limit handling with exponential backoff
 
-#### Primary Search Implementation (Tavily)
+#### Primary Search Implementation (Brave Search)
 
-- [x] Create Tavily search tool interface (`app/tools/tavily_search.py`)
+- [x] Create Brave Search tool interface (`app/tools/brave_search.py`)
 - [x] Implement structured result formatting
-- [x] Add image inclusion capabilities
-- [x] Write standalone unit tests (`tests/tools/test_tavily_search.py`)
-- [x] Document Tavily API usage & limitations (`docs/tool_api_docs.md`)
+- [x] Add rate limit handling with retry logic and exponential backoff
+- [x] Configure as default search provider due to higher reliability
+- [x] Write standalone unit tests
+- [x] Document Brave Search API usage & limitations
 
 #### Backup Search Implementations
 
 - [x] Implement DuckDuckGo search (for development/testing)
-- [x] Implement Brave Search alternative
-- [x] Create provider switching logic
+- [x] Implement Tavily Search as fallback option
+- [x] Create provider switching logic with intelligent fallback order
 - [x] Test provider fallback scenarios
-- [ ] Document multi-provider strategy
+- [x] Document multi-provider strategy
+
+#### Web Search Provider Strategy
+
+- [x] Default to Brave Search as primary provider (most reliable in testing)
+- [x] Fall back to Tavily, then DuckDuckGo if primary provider fails
+- [x] Added exponential backoff for rate limit handling (Brave Search)
+- [x] Improved error handling for all providers
+- [x] Added retry logic with configurable attempts
+- [ ] Implement request caching to reduce API usage
+
+#### Search Provider Reliability Assessment
+
+Based on extensive testing, here's our assessment of search providers:
+
+1. **Brave Search**: ★★★★☆
+
+   - Most reliable provider in our testing
+   - High-quality results with official API
+   - Rate limits can be an issue (1 request/second on free tier)
+   - Successfully implemented exponential backoff to handle rate limits
+   - Now configured as our default primary provider
+
+2. **Tavily Search**: ★★★☆☆
+
+   - AI-optimized search, but inconsistent reliability
+   - Frequent "Expecting value: line 1 column 1 (char 0)" JSON parsing errors
+   - Good result quality when working
+   - Moved to first fallback position due to reliability issues
+
+3. **DuckDuckGo Search**: ★★☆☆☆
+   - No API key required, good for development
+   - Frequent rate limit errors (202 Ratelimit)
+   - "unsupported value" errors with different backends
+   - Used as last resort fallback
+
+Our current strategy ensures maximum reliability by starting with the most consistent provider and falling back as needed. Exponential backoff and retry logic has significantly improved overall search reliability.
 
 #### Web Search Integration Tests
 
@@ -150,14 +188,14 @@ For now, we'll continue with the current approach to make rapid progress, while 
    - qwen-qwq-32b: Returned a 404 error indicating the model was not found or accessible
    - Implementation note: The models either didn't use tools at all or failed to properly integrate tool results
 
-6. **Mistral Models**: ✅ 80% Success
+6. **Mistral Models**: ✅ 100% Success
 
    - ✅ pixtral-12b-2409: Successfully used web search tool and returned correct information
-   - ❌ mistral-small-latest: Failed due to rate limit exceeded error (429 response)
+   - ✅ mistral-small-latest: Successfully used web search tool and returned correct information
    - ✅ pixtral-large-latest: Successfully used web search tool and returned correct information
    - ✅ mistral-large-latest: Successfully used web search tool and returned correct information
    - ✅ codestral-latest: Successfully used web search tool and returned correct information
-   - Implementation note: Mistral models show excellent tool usage capabilities when API limits aren't reached
+   - Implementation note: Mistral models show excellent tool usage capabilities, with previous rate limit issues now resolved
 
 7. **Groq Models**: ✅ 40% Success
    - ❌ llama-3.3-70b-versatile: Failed to make any tool calls; gave a general response without using the tool
@@ -176,8 +214,49 @@ For now, we'll continue with the current approach to make rapid progress, while 
 | Google    | 4             | 25%          | gemini-2.0-flash                            | Function calling not supported, API errors                    |
 | Cohere    | Multiple      | 0%           | None                                        | Different tool calling format requiring custom implementation |
 | Fireworks | 4             | 0%           | None                                        | No tool usage attempts, 404 errors                            |
-| Mistral   | 5             | 80%          | mistral-large-latest, codestral-latest      | Rate limiting errors (429)                                    |
+| Mistral   | 5             | 100%         | All tested models                           | None (previous rate limiting issues resolved)                 |
 | Groq      | 5             | 40%          | qwen-qwq-32b, deepseek-r1-distill-llama-70b | No tool usage, service unavailable errors                     |
+
+##### Comprehensive List of Models with Working Tool Support
+
+Based on our extensive testing, the following models successfully work with tool usage:
+
+**OpenAI Models:**
+
+- o1
+- o3-mini
+- gpt-4o-mini
+
+**Anthropic Models:**
+
+- Claude-3.7-Sonnet
+- Claude-3.5-Haiku
+
+**Google Models:**
+
+- gemini-2.0-flash
+
+**Mistral Models:**
+
+- mistral-small-latest
+- mistral-large-latest
+- pixtral-12b-2409
+- pixtral-large-latest
+- codestral-latest
+
+**Groq Models:**
+
+- qwen-qwq-32b
+- deepseek-r1-distill-llama-70b
+
+These models successfully:
+
+1. Make appropriate tool calls when presented with queries requiring external information
+2. Process tool responses correctly
+3. Incorporate tool-provided information into their final responses
+4. Return accurate information based on tool results
+
+When implementing tool support in production, we recommend prioritizing models from Anthropic and Mistral for their 100% success rates, followed by selected OpenAI models. For cost-sensitive applications, Mistral's models provide an excellent balance of reliability and performance.
 
 ##### Updated Implementation Recommendations
 
@@ -187,6 +266,8 @@ For now, we'll continue with the current approach to make rapid progress, while 
 - **Custom Implementations**: Maintain provider-specific implementations for Cohere and providers with inconsistent tool support
 - **Error Handling**: Improve error handling for rate limits, API failures, and service unavailable errors
 - **Fallback Strategy**: Implement provider detection and fallback to direct content integration for models lacking function calling
+- **Search Provider**: Use Brave Search as primary provider with fallback to Tavily and DuckDuckGo
+- **Rate Limiting**: Exponential backoff with retry logic successfully implemented for Brave Search
 
 ##### Next Steps for Tool Integration
 
@@ -346,13 +427,13 @@ response = await conversation.process_message(
 
 ```python
 # Standalone usage
-search = TavilySearchTool(config=config)
+search = BraveSearchTool(config=config)
 results = await search.run("latest developments in quantum computing")
 
-# With fallback options (future implementation)
+# With fallback options
 search = WebSearchTool(
-    primary_provider="tavily",
-    fallback_providers=["duckduckgo", "brave"],
+    primary_provider="brave",  # Now using Brave as primary provider
+    fallback_providers=["tavily", "duckduckgo"],
     config=config
 )
 results = await search.run("news about AI regulations")

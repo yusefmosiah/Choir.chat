@@ -4,6 +4,7 @@ Tavily search tool implementation.
 import os
 import logging
 import asyncio
+import json
 from typing import Dict, Any, List, Optional, Union
 
 # Conditional import since langchain_community might not be installed
@@ -127,10 +128,38 @@ class TavilySearchTool(BaseTool):
         try:
             # Run in executor since the LangChain tool is synchronous
             loop = asyncio.get_event_loop()
-            raw_results = await loop.run_in_executor(
-                None,
-                lambda: self._langchain_tool.invoke({"query": query})
-            )
+
+            # Add retry logic for better error handling
+            max_retries = 2
+            backoff_factor = 2
+            retry_count = 0
+
+            while retry_count <= max_retries:
+                try:
+                    raw_results = await loop.run_in_executor(
+                        None,
+                        lambda: self._langchain_tool.invoke({"query": query})
+                    )
+
+                    # Log raw response for debugging
+                    logger.debug(f"Raw Tavily response type: {type(raw_results)}")
+                    if isinstance(raw_results, str):
+                        logger.debug(f"Raw Tavily response prefix: {raw_results[:100]}")
+
+                    # Response validation
+                    if not raw_results:
+                        raise ValueError("Empty response from Tavily")
+
+                    # Break the retry loop on success
+                    break
+
+                except (ValueError, json.JSONDecodeError) as e:
+                    logger.warning(f"Tavily search attempt {retry_count+1} failed: {str(e)}")
+                    if retry_count == max_retries:
+                        raise
+                    retry_count += 1
+                    # Exponential backoff
+                    await asyncio.sleep(backoff_factor ** retry_count)
 
             # Format the results
             if isinstance(raw_results, list):

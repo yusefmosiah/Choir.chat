@@ -30,7 +30,7 @@ class WebSearchTool(BaseTool):
     def __init__(
         self,
         config: Config = None,
-        primary_provider: str = "tavily",
+        primary_provider: str = "brave",
         fallback_providers: Optional[List[str]] = None,
         max_results: int = 40,
         name: Optional[str] = None,
@@ -41,7 +41,7 @@ class WebSearchTool(BaseTool):
 
         Args:
             config: Application configuration
-            primary_provider: The primary search provider to use ('tavily', 'brave', or 'duckduckgo')
+            primary_provider: The primary search provider to use ('brave', 'tavily', or 'duckduckgo')
             fallback_providers: Ordered list of fallback providers if primary fails
             max_results: Maximum number of results to return
             name: Optional custom name for the tool
@@ -52,7 +52,7 @@ class WebSearchTool(BaseTool):
 
         # Set default fallback order if not provided
         if fallback_providers is None:
-            fallback_providers = ["duckduckgo", "brave"]  # Default fallback order
+            fallback_providers = ["tavily", "duckduckgo"]  # Changed fallback order
 
         self.primary_provider = primary_provider
         self.fallback_providers = fallback_providers
@@ -60,7 +60,7 @@ class WebSearchTool(BaseTool):
         # Initialize search providers
         self.search_tools = {}
 
-        # Try to initialize each provider
+        # Initialize all available providers
         self._initialize_providers()
 
         # Initialize the base class
@@ -72,7 +72,10 @@ class WebSearchTool(BaseTool):
         try:
             self.search_tools["tavily"] = TavilySearchTool(
                 config=self.config,
-                k=self.max_results
+                k=self.max_results,
+                max_results_length=4000,  # Increase result length for better context
+                include_raw_content=True,
+                include_images=False      # Disable images to focus on text content
             )
             logger.info("Tavily search provider initialized")
         except Exception as e:
@@ -82,7 +85,11 @@ class WebSearchTool(BaseTool):
         try:
             self.search_tools["duckduckgo"] = DuckDuckGoSearchTool(
                 config=self.config,
-                max_results=self.max_results
+                max_results=self.max_results,
+                region="wt-wt",           # Use worldwide region
+                time_period="m",          # Search last month by default
+                backend="api",            # Explicitly use API backend
+                safe_search="moderate"
             )
             logger.info("DuckDuckGo search provider initialized")
         except Exception as e:

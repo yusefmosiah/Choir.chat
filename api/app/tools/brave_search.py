@@ -117,8 +117,35 @@ class BraveSearchTool(BaseTool):
             if self.search_lang:
                 params["search_lang"] = self.search_lang
 
-            # Make the request
-            response = requests.get(self.API_ENDPOINT, headers=headers, params=params)
+            # Add rate limit handling with exponential backoff
+            max_retries = 3
+            backoff_factor = 1.5
+            current_retry = 0
+
+            while current_retry <= max_retries:
+                # Make the request
+                response = requests.get(self.API_ENDPOINT, headers=headers, params=params)
+
+                # Check if we hit a rate limit
+                if response.status_code == 429:
+                    current_retry += 1
+                    if current_retry > max_retries:
+                        logger.warning(f"Brave Search rate limit exceeded after {max_retries} retries")
+                        break
+
+                    # Get retry-after header if available, otherwise use exponential backoff
+                    retry_after = response.headers.get('Retry-After')
+                    if retry_after and retry_after.isdigit():
+                        wait_time = int(retry_after)
+                    else:
+                        wait_time = backoff_factor ** current_retry
+
+                    logger.info(f"Rate limit hit, retrying in {wait_time} seconds (attempt {current_retry}/{max_retries})")
+                    await asyncio.sleep(wait_time)
+                    continue
+
+                # Break the loop if we got a non-429 response
+                break
 
             # Check if the request was successful
             if response.status_code != 200:

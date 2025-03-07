@@ -31,8 +31,9 @@ class DuckDuckGoSearchTool(BaseTool):
         config: Config,
         max_results: int = 40,
         safe_search: str = "moderate",
-        region: Optional[str] = None,
-        time_period: Optional[str] = None,
+        region: Optional[str] = "wt-wt",
+        time_period: Optional[str] = "m",
+        backend: Optional[str] = "api",
         name: Optional[str] = None,
         description: Optional[str] = None
     ):
@@ -45,6 +46,7 @@ class DuckDuckGoSearchTool(BaseTool):
             safe_search: Safe search setting ('off', 'moderate', or 'strict')
             region: Region code for localized results (e.g., 'us-en')
             time_period: Time period filter ('d' for day, 'w' for week, 'm' for month, 'y' for year)
+            backend: Backend to use ('api', 'html', or 'lite')
             name: Optional custom name for the tool
             description: Optional custom description for the tool
         """
@@ -53,6 +55,7 @@ class DuckDuckGoSearchTool(BaseTool):
         self.safe_search = safe_search
         self.region = region
         self.time_period = time_period
+        self.backend = backend
 
         # Initialize the base class
         super().__init__(name=name, description=description)
@@ -81,21 +84,52 @@ class DuckDuckGoSearchTool(BaseTool):
         try:
             logger.info(f"Performing DuckDuckGo search for: {query}")
 
-            # Create DuckDuckGo search client
-            ddgs = DDGS()
+            # Try different backends if specified backend fails
+            backends_to_try = [self.backend] if self.backend else ["api", "html", "lite"]
 
-            # Execute search with a higher limit to ensure we get enough results
-            # since DDGS may filter some results internally
-            raw_results = list(ddgs.text(
-                query,
-                region=self.region,
-                safesearch=self.safe_search,
-                timelimit=self.time_period,
-                max_results=max(30, self.max_results * 2)  # Request more to ensure we get enough
-            ))
+            search_results = []
+            last_error = None
 
-            # Apply our own limit to ensure we get the exact number requested
-            search_results = raw_results[:self.max_results]
+            for backend in backends_to_try:
+                try:
+                    # Create DuckDuckGo search client
+                    ddgs = DDGS()
+
+                    logger.debug(f"Trying DuckDuckGo search with backend: {backend}")
+
+                    if backend == "api":
+                        # Use the API backend
+                        raw_results = list(ddgs.text(
+                            query,
+                            region=self.region,
+                            safesearch=self.safe_search,
+                            timelimit=self.time_period,
+                            max_results=max(30, self.max_results * 2),
+                            backend=backend
+                        ))
+                    else:
+                        # Use other backends
+                        raw_results = list(ddgs.text(
+                            query,
+                            region=self.region,
+                            safesearch=self.safe_search,
+                            timelimit=self.time_period,
+                            max_results=max(30, self.max_results * 2)
+                        ))
+
+                    # If we got results, use them and stop trying other backends
+                    if raw_results:
+                        search_results = raw_results[:self.max_results]
+                        break
+
+                except Exception as e:
+                    last_error = e
+                    logger.warning(f"DuckDuckGo search with {backend} backend failed: {str(e)}")
+                    continue  # Try next backend
+
+            # If all backends failed, raise the last error to be caught by outer try-except
+            if not search_results and last_error:
+                raise last_error
 
             # Process results
             formatted_results = []
