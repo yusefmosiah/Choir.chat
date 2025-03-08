@@ -282,17 +282,13 @@ tree.md
 ├── postchain_tests.log
 ├── render.yaml
 ├── reports
-├── scripts
-│   ├── generate_provider_reports.sh
-│   ├── generate_quick_search_report.sh
-│   ├── generate_search_report.sh
-│   └── generate_single_provider_report.sh
-├── tests
-│   └── postchain
-│       └── test_framework.py
-└── ~
+└── scripts
+    ├── generate_provider_reports.sh
+    ├── generate_quick_search_report.sh
+    ├── generate_search_report.sh
+    └── generate_single_provider_report.sh
 
-69 directories, 208 files
+66 directories, 207 files
 
 === File: docs/CHANGELOG.md ===
 
