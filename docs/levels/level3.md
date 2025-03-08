@@ -129,512 +129,6 @@ Because IDaaS revenues support the system’s operational costs, they help offse
 
 By offering Identity as a Service, Choir establishes a nuanced balance: anonymity remains a core value and default, while verified identity is treated as a premium feature. This approach ensures that governance decisions are accountable, advanced AI operations remain traceable to real individuals, and the platform remains compliant with jurisdictional regulations. Through IDaaS, Choir invites each user to choose the identity model that suits their needs, forging a new path forward for responsible digital communities.
 
-=== File: docs/plan_langgraph.md ===
-
-
-
-==
-plan_langgraph
-==
-
-
-# Migration Plan: Prompt Chain to LangGraph
-
-## Overview
-
-This document outlines a detailed plan for migrating the current custom prompt chain (Chorus Cycle) implementation to use LangChain and LangGraph. The migration will enable:
-
-1. Using multiple models in the same context with different providers
-2. Exposing the prompt chain via API
-3. Adding arbitrary tool support (web search, function calling, etc.)
-4. Allowing models to dynamically modify the prompt chain
-
-## 1. System Architecture
-
-### Current Architecture
-
-```
-┌─────────────────────────────────────────────┐
-│                 PromptChain                 │
-├─────────────────────────────────────────────┤
-│ ┌───────┐ ┌────────────┐ ┌──────────────┐  │
-│ │ Link 1 │ │   Link 2   │ │    Link 3    │  │
-│ │(Model A)│→│  (Model B) │→│   (Model C)  │  │
-│ └───────┘ └────────────┘ └──────────────┘  │
-└─────────────────────────────────────────────┘
-```
-
-### Target Architecture
-
-```
-┌────────────────────────────────────────────────────────────┐
-│                  LangGraph Application                     │
-├────────────────────────────────────────────────────────────┤
-│ ┌─────────────────────────────────────────────────────┐   │
-│ │                   StateGraph                         │   │
-│ │ ┌───────┐      ┌────────────┐      ┌──────────────┐ │   │
-│ │ │Action  │─────▶│Experience  │─────▶│  Intention   │ │   │
-│ │ │(Model A)│      │ (Model B)  │      │  (Model C)   │ │   │
-│ │ └───────┘      └────────────┘      └──────────────┘ │   │
-│ │     ▲                                      │        │   │
-│ │     │              ┌──────────────┐        │        │   │
-│ │     │              │  Observation │◀───────┘        │   │
-│ │     │              │  (Model D)   │                 │   │
-│ │     │              └──────────────┘                 │   │
-│ │     │                      │                        │   │
-│ │     │              ┌──────────────┐                 │   │
-│ │     │              │    Update    │                 │   │
-│ │     │              │  (Model E)   │                 │   │
-│ │     │              └──────────────┘                 │   │
-│ │     │                      │                        │   │
-│ │     └──────┐       ┌──────▼──────┐                  │   │
-│ │            │       │    Yield    │                  │   │
-│ │            └───────│  (Model F)  │                  │   │
-│ │                    └─────────────┘                  │   │
-│ └─────────────────────────────────────────────────────┘   │
-│                                                            │
-│ ┌─────────────────────┐  ┌───────────────────────────┐    │
-│ │     Tool Registry   │  │ Dynamic Chain Modifier    │    │
-│ │ ┌─────────────────┐ │  │ ┌─────────────────────┐   │    │
-│ │ │  Web Search     │ │  │ │ Add Phase           │   │    │
-│ │ ├─────────────────┤ │  │ ├─────────────────────┤   │    │
-│ │ │  Function Call  │ │  │ │ Modify Prompt       │   │    │
-│ │ ├─────────────────┤ │  │ ├─────────────────────┤   │    │
-│ │ │  Data Analysis  │ │  │ │ Change Model        │   │    │
-│ │ └─────────────────┘ │  │ └─────────────────────┘   │    │
-│ └─────────────────────┘  └───────────────────────────┘    │
-│                                                            │
-│ ┌────────────────────────────────────────────────────┐    │
-│ │                    LangServe API                   │    │
-│ └────────────────────────────────────────────────────┘    │
-└────────────────────────────────────────────────────────────┘
-```
-
-## 2. Component Implementation Plan
-
-### 2.1 Core State Graph (AEIOU Cycle)
-
-The existing AEIOU cycle will be implemented as a `StateGraph` in LangGraph:
-
-```python
-from langgraph.graph import StateGraph
-from typing import TypedDict, List
-from langchain_core.messages import BaseMessage
-
-# Define the state schema
-class ChorusState(TypedDict):
-    messages: List[BaseMessage]
-    phase: str
-    should_loop: bool
-    context: dict
-
-# Create the state graph
-graph = StateGraph(ChorusState)
-
-# Add nodes for each phase of the AEIOU cycle
-graph.add_node("action", action_handler)
-graph.add_node("experience", experience_handler)
-graph.add_node("intention", intention_handler)
-graph.add_node("observation", observation_handler)
-graph.add_node("update", update_handler)
-graph.add_node("yield", yield_handler)
-
-# Add edges between phases
-graph.add_edge("action", "experience")
-graph.add_edge("experience", "intention")
-graph.add_edge("intention", "observation")
-graph.add_edge("observation", "update")
-
-# Add conditional edge from update (can loop back to action or proceed to yield)
-def update_router(state: ChorusState):
-    if state["should_loop"]:
-        return "action"
-    else:
-        return "yield"
-
-graph.add_conditional_edges("update", update_router, ["action", "yield"])
-
-# Set entry point
-graph.set_entry_point("action")
-
-# Compile the graph
-chorus_chain = graph.compile()
-```
-
-### 2.2 Multi-Provider Model Integration
-
-Set up handlers for each phase that use different model providers:
-
-```python
-from langchain_openai import ChatOpenAI
-from langchain_anthropic import ChatAnthropic
-from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_mistralai import ChatMistralAI
-from langchain_fireworks import ChatFireworks
-from langchain_cohere import ChatCohere
-
-# Define models with different providers
-def setup_models():
-    models = {
-        "action": ChatMistralAI(
-            model="mistral-medium",
-            response_format={"type": "json_schema", "schema": SCHEMAS["ACTION"]["schema"]}
-        ),
-        "experience": ChatGoogleGenerativeAI(
-            model="gemini-pro",
-            response_format={"type": "json_schema", "schema": SCHEMAS["EXPERIENCE"]["schema"]}
-        ),
-        "intention": ChatFireworks(
-            model="deepseek-chat",
-            response_format={"type": "json_schema", "schema": SCHEMAS["INTENTION"]["schema"]}
-        ),
-        "observation": ChatAnthropic(
-            model="claude-3-haiku",
-            response_format={"type": "json_schema", "schema": SCHEMAS["OBSERVATION"]["schema"]}
-        ),
-        "update": ChatFireworks(
-            model="deepseek-chat",
-            response_format={"type": "json_schema", "schema": SCHEMAS["UPDATE"]["schema"]}
-        ),
-        "yield": ChatCohere(
-            model="command-r",
-            response_format={"type": "json_schema", "schema": SCHEMAS["YIELD"]["schema"]}
-        )
-    }
-    return models
-```
-
-### 2.3 Node Handlers Implementation
-
-Create handlers for each node in the graph:
-
-```python
-from langchain_core.prompts import ChatPromptTemplate
-
-# Example handler for the action phase
-def create_action_handler(model, system_prompt):
-    prompt = ChatPromptTemplate.from_messages([
-        ("system", system_prompt),
-        ("human", "{input}")
-    ])
-
-    chain = prompt | model
-
-    def action_handler(state: ChorusState):
-        # Extract the user input from the messages
-        user_input = state["messages"][-1].content if state["messages"] else ""
-
-        # Get model response
-        response = chain.invoke({"input": user_input})
-
-        # Update state
-        new_state = state.copy()
-        new_state["phase"] = "action"
-        new_state["context"] = {"action_result": response}
-
-        return new_state
-
-    return action_handler
-
-# Create handlers for each phase
-def setup_handlers(models, system_prompts):
-    handlers = {}
-    for phase in ["action", "experience", "intention", "observation", "update", "yield"]:
-        handlers[phase] = create_handler_for_phase(
-            phase,
-            models[phase],
-            system_prompts[phase]
-        )
-    return handlers
-```
-
-### 2.4 Tool Integration
-
-Implement a tool registry and tools for the models to use:
-
-```python
-from langchain.tools import Tool
-from langchain_community.tools import DuckDuckGoSearchRun
-from langchain_core.tools import tool
-
-# Create web search tool
-search_tool = DuckDuckGoSearchRun()
-
-# Create custom tool for adding a phase to the chain
-@tool
-def add_chain_phase(phase_name: str, system_prompt: str, position: str):
-    """Add a new phase to the prompt chain.
-
-    Args:
-        phase_name: The name of the new phase
-        system_prompt: The system prompt for the new phase
-        position: Where to add the phase (e.g., "after:observation")
-    """
-    # Implementation will be handled separately
-    return f"Added new phase: {phase_name} at position {position}"
-
-# Register tools
-tools = [
-    search_tool,
-    add_chain_phase
-]
-
-# Add tools to models that support function calling
-def add_tools_to_models(models, tools):
-    for phase, model in models.items():
-        if hasattr(model, "bind_tools"):
-            models[phase] = model.bind_tools(tools)
-    return models
-```
-
-### 2.5 Dynamic Chain Modification
-
-Implement the mechanism for dynamically modifying the chain:
-
-```python
-class ChainModifier:
-    def __init__(self, graph):
-        self.graph = graph
-        self.compiled_chain = None
-
-    def add_phase(self, phase_name, system_prompt, position):
-        # Parse position (e.g., "after:observation")
-        position_type, reference_phase = position.split(":")
-
-        # Create new model for this phase
-        new_model = ChatOpenAI(
-            model="gpt-3.5-turbo-0125",
-            response_format={"type": "json"}
-        )
-
-        # Create handler for new phase
-        new_handler = create_handler_for_phase(
-            phase_name,
-            new_model,
-            system_prompt
-        )
-
-        # Add node to graph
-        self.graph.add_node(phase_name, new_handler)
-
-        # Update edges based on position
-        if position_type == "after":
-            # Get the current outgoing edge
-            next_phase = self.graph.get_next_node(reference_phase)
-
-            # Remove existing edge
-            self.graph.remove_edge(reference_phase, next_phase)
-
-            # Add new edges
-            self.graph.add_edge(reference_phase, phase_name)
-            self.graph.add_edge(phase_name, next_phase)
-
-        # Recompile the graph
-        self.compiled_chain = self.graph.compile()
-        return self.compiled_chain
-```
-
-### 2.6 API Integration with LangServe
-
-Expose the chain as an API using LangServe:
-
-```python
-from fastapi import FastAPI
-from langserve import add_routes
-
-# Initialize FastAPI app
-app = FastAPI(title="Chorus Chain API")
-
-# Add routes for the chain
-add_routes(
-    app,
-    chorus_chain,
-    path="/chorus",
-    input_type=ChorusInput,  # Define this pydantic model
-    output_type=ChorusOutput, # Define this pydantic model
-)
-
-# Add route for modifying the chain
-@app.post("/modify_chain")
-async def modify_chain(modification: ChainModification):
-    result = chain_modifier.add_phase(
-        modification.phase_name,
-        modification.system_prompt,
-        modification.position
-    )
-    return {"status": "success", "message": f"Added phase: {modification.phase_name}"}
-```
-
-## 3. Implementation Phases
-
-### Phase 1: Individual Model Structured Output Testing
-
-- [x] Set up development environment with LangChain dependencies
-- [x] Create test harness for evaluating individual model capabilities
-- [x] Implement structured output schemas for each phase (action, experience, etc.)
-- [x] Test each provider's models (OpenAI, Anthropic, Google, Mistral, etc.) with the same schemas
-- [x] Document model-specific behaviors, strengths, and limitations
-- [ ] Create a compatibility matrix of which models work best for which phases
-
-### Phase 2: Tool Integration & Model-Specific Capabilities
-
-- [ ] Implement core tools (web search, function calls, etc.)
-- [ ] Test tool binding with each provider's models
-- [ ] Measure response quality and tool usage patterns across providers
-- [x] Implement provider-specific fallback mechanisms
-- [ ] Document tool calling capabilities across providers
-- [ ] Build adapter patterns to standardize tool interaction patterns
-
-### Phase 3: Basic LangGraph Composition
-
-- [x] Implement basic StateGraph with fixed AEIOU sequence
-- [x] Create handlers for each phase using configurable model selection
-- [x] Build state management system to pass context between models
-- [x] Implement basic error handling and retries
-- [x] Test end-to-end flow with simple prompts
-- [x] Compare performance metrics with current implementation
-
-### Phase 4: Advanced Flow Control
-
-- [x] Add conditional edges for looping behavior (understanding → action)
-- [x] Implement probability-based router logic for looping
-- [x] Create recursion limit mechanism to prevent infinite loops
-- [x] Test with complex multi-turn scenarios
-- [x] Implement cycle detection to prevent infinite loops
-- [ ] Measure performance impact of dynamic routing
-
-### Phase 5: Self-Modifying Chains
-
-- [ ] Create specialized tools for prompt engineering and chain modification
-- [ ] Allow models to define new graph nodes and edges
-- [ ] Implement safety guardrails for model-generated prompts and tools
-- [ ] Build validation system for dynamically created components
-- [ ] Test various scenarios of chain self-modification
-- [ ] Create observability layer to track chain evolution
-
-### Phase 6: API & Integration
-
-- [ ] Integrate into Choir api
-- [ ] Create standardized input/output schemas
-- [ ] Add authentication and rate limiting
-- [x] Implement streaming support for real-time updates
-- [ ] Create admin controls for monitoring chain modifications
-- [ ] Build integration examples with common frameworks
-- [ ] Document API usage patterns and best practices
-
-## 4. Implementation Status
-
-### Core Components
-
-| Component           | Status      | Description                                                          |
-| ------------------- | ----------- | -------------------------------------------------------------------- |
-| State Graph         | ✅ Complete | Successfully implemented full AEIOU-Y graph with all nodes and edges |
-| State Schema        | ✅ Complete | Implemented TypedDict for state management with proper annotations   |
-| Phase Handlers      | ✅ Complete | Created handlers for all phases with consistent state management     |
-| Conditional Routing | ✅ Complete | Implemented probability-based routing with recursion limits          |
-| Error Handling      | ✅ Complete | Added comprehensive error handling for various failure cases         |
-| Streaming Support   | ✅ Complete | Implemented streaming via astream methods with token callbacks       |
-
-### Advanced Features
-
-| Feature                    | Status         | Description                                                 |
-| -------------------------- | -------------- | ----------------------------------------------------------- |
-| Multi-Model Support        | 🔄 In Progress | Framework supports multiple models, API integration pending |
-| Tool Integration           | 🔄 In Progress | Framework prepared for tools, implementation pending        |
-| Dynamic Chain Modification | ⏱️ Planned     | Architecture supports modification, implementation pending  |
-| API Endpoints              | ⏱️ Planned     | Design prepared, implementation pending                     |
-| Performance Monitoring     | ⏱️ Planned     | Basic logging in place, detailed metrics pending            |
-
-### Testing and Validation
-
-| Test Category    | Status         | Description                                               |
-| ---------------- | -------------- | --------------------------------------------------------- |
-| Basic Flow       | ✅ Complete    | Verified linear progression through all phases            |
-| Looping Behavior | ✅ Complete    | Tested probability-based looping with various thresholds  |
-| Error Handling   | ✅ Complete    | Validated graceful recovery from various error conditions |
-| Tool Usage       | 🔄 In Progress | Framework prepared, awaiting tool implementation          |
-| Performance      | ⏱️ Planned     | Benchmarking framework designed, implementation pending   |
-
-## 5. Required Dependencies
-
-```
-langchain>=0.1.0
-langchain-core>=0.1.0
-langgraph>=0.0.15
-langserve>=0.0.30
-langchain-openai>=0.0.5
-langchain-anthropic>=0.1.0
-langchain-google-genai>=0.0.5
-langchain-mistralai>=0.0.1
-langchain-fireworks>=0.1.0
-langchain-cohere>=0.0.1
-pydantic>=2.0.0
-fastapi>=0.104.0
-uvicorn>=0.24.0
-```
-
-## 6. Compatibility Considerations
-
-### 6.1 LangChain vs Current Implementation
-
-| Feature           | Current Implementation | LangGraph Implementation     | Status         |
-| ----------------- | ---------------------- | ---------------------------- | -------------- |
-| Multiple Models   | Custom model caller    | Native LangChain integration | ✅ Implemented |
-| Structured Output | Custom JSON parsing    | Schema-based validation      | ✅ Implemented |
-| Chain Flow        | Linear with loop flag  | True graph with conditionals | ✅ Implemented |
-| Tool Support      | Limited                | Extensive built-in tools     | 🔄 In Progress |
-| Error Handling    | Basic fallbacks        | Robust retry mechanisms      | ✅ Implemented |
-| State Management  | Manual                 | Graph-managed state          | ✅ Implemented |
-
-### 6.2 Migration Strategies
-
-1. **Incremental Approach**: Start by migrating one phase at a time, keeping the rest of the system intact
-2. **Parallel Development**: Build the new system alongside the old one, gradually shifting traffic
-3. **Test-First Migration**: Create comprehensive tests before migration, then ensure equivalence
-
-## 7. Evaluation Metrics
-
-1. **Token Efficiency**: Compare token usage between current and LangGraph implementations
-2. **Latency**: Measure end-to-end response time
-3. **Error Rates**: Track parsing errors, model failures, and timeouts
-4. **Chain Modification Success**: Measure success rate of dynamic chain modifications
-5. **Tool Usage Accuracy**: Evaluate correct tool selection and parameter passing
-
-## 8. Next Steps
-
-Based on our current progress, the following tasks are prioritized:
-
-1. **Tool Integration**:
-
-   - Implement web search tool for real-time information retrieval
-   - Add function calling capabilities for common tasks
-   - Create testing framework for tool usage evaluation
-
-2. **Performance Optimization**:
-
-   - Benchmark token usage across different models and phases
-   - Identify bottlenecks in the current implementation
-   - Implement caching strategies for frequently accessed content
-
-3. **API Layer**:
-
-   - Complete Langserve integration for API exposure
-   - Create proper authentication and rate limiting
-   - Design detailed monitoring and observability
-
-4. **Documentation**:
-   - Create comprehensive API documentation
-   - Document best practices for custom tool development
-   - Create tutorials for extending the system
-
-## 9. Conclusion
-
-The migration to LangGraph has made significant progress, with the core architecture successfully implemented and tested. The current implementation provides a robust foundation for the Chorus Cycle, with improved state management, error handling, and flow control. The system is now ready for the next phase of development, focusing on tool integration, performance optimization, and API exposure.
-
-The implementation has validated the benefits of the LangGraph approach, particularly in terms of flexibility, maintainability, and extensibility. The graph-based structure allows for more complex flow patterns and better error recovery, while the standardized state management ensures consistency across phases.
-
-The migration will continue with an incremental approach, focusing on preserving functionality while adding new capabilities. The end result will be a more powerful, flexible, and maintainable implementation of the Chorus Cycle.
-
 === File: docs/plan_langgraph_postchain.md ===
 
 
@@ -663,23 +157,28 @@ Each step uses the same model (currently Claude 3.5 Haiku) with different system
 
 1. Implement the Chorus Cycle using LangGraph's StateGraph
 2. Create a multi-model workflow where different models handle different steps
-3. Add agentic capabilities with tools and dynamic routing
+3. Add agentic capabilities with integrated tools (Qdrant vector database and web search)
 4. Improve observability and debugging
 5. Enable dynamic chain modification
+6. Provide a unified streaming API endpoint for the entire cycle
 
-## Revised Implementation Approach
+## Revised Chorus Cycle Flow
 
-Our implementation approach will be highly iterative, focusing on validating each component individually before composition:
+The new Chorus Cycle will be enhanced with integrated tools:
 
-1. **Environment Setup**: First, add dependencies and configure API keys for all providers
-2. **Individual Model Testing**: Test each model in isolation before integration
-3. **Basic LangGraph**: Start with a simple single-node graph before building complexity
-4. **Incremental Integration**: Add components one at a time with thorough testing
-5. **Feature Tracking**: Use a checklist approach to track progress empirically
+1. **Action**: Initial LLM response to user input (vanilla LLM call)
+2. **Experience (Vector)**: Retrieve relevant information from vector database
+3. **Experience (Web)**: Retrieve recent information from web search
+4. **Intention**: Reflective analysis on prompt, action, and experiences
+5. **Observation**: Optional storage of important insights to vector database
+6. **Understanding**: Decision to continue or loop back to action
+7. **Yield**: Final synthesized response
+
+Each step can be handled by a different model provider, with proper context preservation between transitions.
 
 ## Implementation Checklist
 
-### Phase 0: Environment Setup and Dependency Testing
+### Phase 0: Environment Setup ✅
 
 - [x] Add LangGraph and related dependencies to requirements.txt
   ```
@@ -694,11 +193,11 @@ Our implementation approach will be highly iterative, focusing on validating eac
   langchain-fireworks>=0.1.0
   langchain-cohere>=0.0.1
   ```
-- [x] Understanding environment with necessary API keys for all providers
+- [x] Configure environment with necessary API keys for all providers
 - [x] Create simple test script to verify API connectivity with each provider
-- [ ] Document API rate limits and token quotas for each provider
+- [x] Document API rate limits and token quotas for each provider
 
-### Phase 1: Individual Model Testing
+### Phase 1: Individual Model Testing ✅
 
 - [x] Test each model in simple single-turn conversations
 - [x] Test each model in multi-turn conversations
@@ -708,63 +207,227 @@ Our implementation approach will be highly iterative, focusing on validating eac
   - [x] JSON schema validation
   - [x] Error handling for malformed outputs
   - [x] Consistency across multiple calls
-- [ ] Create compatibility matrix documenting strengths/weaknesses of each model
+- [x] Create compatibility matrix documenting strengths/weaknesses of each model
 
-### Phase 2: Basic LangGraph Integration
+### Phase 2: Basic LangGraph Integration ✅
 
 - [x] Set up project structure for PostChain
-- [x] Implement state schema with Pydantic
+- [x] Implement state schema with Pydantic/TypedDict
 - [x] Create simple single-node graph with one model
 - [x] Test state transitions and data flow
 - [x] Expand to basic linear chain with all AEIOU-Y steps
 - [x] Implement basic error handling and recovery
 
-### Phase 3: Multi-Model Integration
+### Phase 3: Multi-Model Integration ✅
 
 - [x] Define model configuration for each step
 - [x] Create model selection logic (including random model selection)
 - [x] Implement node handlers for each step
 - [x] Test cross-model context preservation
-- [ ] Evaluate performance and token usage
-- [ ] Optimize prompt templates for each model
+- [x] Evaluate performance and token usage
+- [x] Optimize prompt templates for each model
 
-### Phase 4: Tool Integration
+### Phase 4: Tool Integration 🚧
 
-- [ ] Implement basic tools (web search, retrieval)
-- [ ] Test tool compatibility with each model
-- [ ] Create tool registry
+- [x] Implement Qdrant vector database tools (search, store, delete)
+- [x] Implement web search tools
+- [x] Test tool compatibility with each model provider
+- [x] Create provider compatibility matrix for tool usage
 - [x] Implement tool usage tracking in state management
 - [x] Test error handling for tool failures
-- [ ] Measure tool effectiveness
+- [x] Measure tool effectiveness across models
+- [ ] Create specialized tool nodes for each phase:
+  - [ ] Experience (Vector): Vector database querying
+  - [ ] Experience (Web): Web search operations
+  - [ ] Observation: Vector database storage
 
-### Phase 5: Advanced Flow Control
+### Phase 5: Advanced Flow Control 🚧
 
 - [x] Implement conditional edges for looping
 - [x] Create dynamic routing based on probability-based decisions
-- [ ] Add web search node
+- [x] Add web search node integration
 - [x] Test complex flows with looping
 - [x] Implement cycle detection and recursion limits
 - [ ] Create visualization of graph execution
+- [ ] Implement branching logic for tool selection
 
-### Phase 6: API Integration
+### Phase 6: API Integration 🚧
 
-- [ ] Create API endpoints
+- [x] Create API endpoints
 - [x] Implement streaming support
+- [ ] Create unified streaming API endpoint for the entire cycle
 - [ ] Add authentication and rate limiting
 - [ ] Create client library
-- [ ] Test API performance
+- [x] Test API performance
 - [ ] Document API usage
 
-### Phase 7: Observability and Testing
+### Phase 7: Observability and Testing 🚧
 
 - [x] Add tracing and logging throughout the system
 - [x] Create comprehensive test suite for behavior verification
-- [ ] Implement performance monitoring
+- [x] Implement performance monitoring
 - [x] Create debugging tools (detailed logging)
 - [ ] Document troubleshooting procedures
 - [x] Conduct end-to-end testing with various scenarios
+- [ ] Test tool usage in real-world scenarios
 
-## Progress Summary (Updated)
+## Tool Integration Details
+
+### Qdrant Vector Database Tools ✅
+
+The Qdrant vector database tools have been successfully implemented and tested:
+
+1. **Search Tool (`qdrant_search`)**:
+
+   - Retrieves semantically similar information from the vector database
+   - Accepts query text and returns formatted results with relevance scores
+   - Compatible with all major providers (OpenAI, Anthropic, Mistral)
+   - Supports search limit configuration and collection specification
+
+2. **Store Tool (`qdrant_store`)**:
+
+   - Stores new information in the vector database
+   - Stores text content with automatically generated embeddings
+   - Supports metadata storage for additional context
+   - Returns vector IDs for future reference
+
+3. **Delete Tool (`qdrant_delete`)**:
+   - Removes vectors from the database by ID
+   - Provides confirmation of successful deletion
+   - Includes error handling for non-existent vectors
+
+
+### Web Search Tools ✅
+
+The web search tools enable retrieving up-to-date information:
+
+1. **Web Search Tool**:
+   - Performs searches for real-time information
+   - Returns relevant snippets and URLs
+   - Formats results for easy consumption by LLMs
+   - Handles attribution and source tracking
+
+## Implementation Plan for Next Phase
+
+### 1. State Schema Update
+
+The core state schema for our tool-enhanced Chorus Cycle:
+
+```python
+class ChorusToolState(TypedDict):
+    messages: List[Dict[str, Any]]
+    current_phase: str
+    loop_count: int
+    vector_search_results: Optional[List[Dict[str, Any]]]
+    web_search_results: Optional[List[Dict[str, Any]]]
+    stored_vector_ids: List[str]
+    loop_probability: float
+```
+
+### 2. Phase Handlers with Tool Integration
+
+Example of an Experience (Vector) phase handler:
+
+```python
+def experience_vector_handler(config: Config):
+    """Handler for the vector search experience phase."""
+    async def handler(state: ChorusToolState) -> ChorusToolState:
+        messages = state["messages"]
+
+        # Get the user prompt and action response
+        user_prompt = next((m["content"] for m in messages if m["role"] == "user"), "")
+        action_response = next((m["content"] for m in messages if m["role"] == "assistant"
+                              and m.get("phase") == "action"), "")
+
+        # Set up the system message for this phase
+        system_message = {
+            "role": "system",
+            "content": (
+                "You are the Experience phase of the Chorus Cycle. "
+                "Your task is to search the vector database for relevant information "
+                "related to the user's query and previous interactions. "
+                "You have access to the qdrant_search tool to find semantic matches."
+            )
+        }
+
+        # Create a message for the model to use the vector search tool
+        experience_prompt = {
+            "role": "user",
+            "content": (
+                f"Please search for information relevant to this query: '{user_prompt}'\n\n"
+                f"The initial response was: '{action_response}'\n\n"
+                "Use the qdrant_search tool to find semantically similar content."
+            )
+        }
+
+        # Use LangGraph's ToolNode pattern to handle the tool interaction
+        model = get_tool_compatible_model(config)
+        vector_search_result = await run_tool_interaction(
+            model=model,
+            tools=[qdrant_search],
+            messages=[system_message, experience_prompt]
+        )
+
+        # Extract and store the search results
+        vector_search_results = extract_search_results(vector_search_result)
+
+        # Update the state
+        new_messages = messages + [{
+            "role": "assistant",
+            "content": vector_search_result["messages"][-1]["content"],
+            "phase": "experience_vector"
+        }]
+
+        return {
+            **state,
+            "messages": new_messages,
+            "vector_search_results": vector_search_results,
+            "current_phase": "experience_vector"
+        }
+
+    return handler
+```
+
+### 3. Unified API Endpoint
+
+The new unified API endpoint will:
+
+1. Accept a user query
+2. Process it through the entire Chorus Cycle with tools
+3. Stream the results of each phase as they complete
+4. Return the final yield result
+
+```python
+@router.post("/chorus", response_model=StreamingResponse)
+async def process_chorus_cycle(request: ChorusRequest):
+    """Process a complete Chorus Cycle with integrated tools and streaming."""
+    config = Config()
+
+    # Initialize the Chorus graph with tools
+    graph = create_chorus_tool_graph(config)
+
+    # Create initial state
+    initial_state = {
+        "messages": [
+            {"role": "system", "content": SYSTEM_PROMPT_WITH_TIMESTAMP},
+            {"role": "user", "content": request.content}
+        ],
+        "current_phase": "start",
+        "loop_count": 0,
+        "vector_search_results": None,
+        "web_search_results": None,
+        "stored_vector_ids": [],
+        "loop_probability": 0.0
+    }
+
+    # Create streaming response
+    return StreamingResponse(
+        graph.astream(initial_state),
+        media_type="text/event-stream"
+    )
+```
+
+## Progress Summary
 
 We have made significant progress on the LangGraph PostChain implementation:
 
@@ -777,7 +440,7 @@ We have made significant progress on the LangGraph PostChain implementation:
 2. **Error Handling**:
 
    - Implemented robust error handling in streaming and callback scenarios
-   - Ensured graceful recovery from errors with appropriate phase setting (yield instead of error)
+   - Ensured graceful recovery from errors with appropriate phase setting
    - Added recursion limit safety to prevent infinite loops
 
 3. **Testing Framework**:
@@ -786,18 +449,31 @@ We have made significant progress on the LangGraph PostChain implementation:
    - Implemented analysis tools to verify phase distribution and transitions
    - Added tools for visualizing and tracking chain behavior
 
-4. **Next Steps**:
-   - Complete tool integration for web search and other capabilities
-   - Optimize for performance and token usage
-   - Implement robust API layer for integration with other systems
+4. **Tool Integration**:
+
+   - Successfully implemented and tested Qdrant vector database tools
+   - Verified cross-provider compatibility for tool usage
+   - Implemented RandomToolMultiModelTester for comprehensive testing
+   - Documented tool compatibility across different model providers
+
+5. **Next Steps**:
+   - Integrate tools directly into the Chorus Cycle workflow
+   - Split the Experience phase into Vector and Web search components
+   - Implement the Observation phase with vector storage capabilities
+   - Create a unified streaming API endpoint for the entire cycle
 
 ## Conclusion
 
-This implementation plan provides a structured approach to migrating the current Chorus Cycle to a multi-model agentic workflow using LangGraph. The resulting system will be more flexible, maintainable, and powerful, while preserving the core AEIOU-Y cycle functionality.
+The implementation of tool-enhanced Chorus Cycle represents a significant advancement over the current design. By integrating Qdrant vector database tools and web search capabilities, we can enhance the cycle's ability to retrieve and store information, improving the quality and relevance of responses.
 
-The migration can be performed incrementally, starting with a basic LangGraph implementation and gradually adding more advanced features like multi-model support, tool integration, and dynamic routing. This approach allows for continuous testing and evaluation throughout the development process.
+The revised implementation maintains the core AEIOU-Y structure while adding powerful new capabilities:
 
-The final system will leverage the strengths of different models for different steps of the cycle, use tools to enhance capabilities, and provide better observability and debugging features. It will also be more extensible, allowing for future enhancements like multi-agent orchestration, memory management, and custom model integration.
+1. **Richer Context**: Vector search and web search provide more comprehensive information
+2. **Memory Enhancement**: Vector storage allows observations to be persisted for future reference
+3. **Multi-Model Flexibility**: Different models can handle different phases of the cycle
+4. **Tool Agentic Capabilities**: Models can use tools within the appropriate phases
+
+This plan outlines a clear path forward to implementing a unified, streaming API endpoint that leverages the full power of the PostChain architecture with LangGraph and integrated tools.
 
 === File: docs/plan_libsql.md ===
 

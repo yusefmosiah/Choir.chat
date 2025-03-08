@@ -257,7 +257,6 @@
 │   │   └── level5.md
 │   ├── plan_anonymity_by_default.md
 │   ├── plan_identity_as_a_service.md
-│   ├── plan_langgraph.md
 │   ├── plan_langgraph_postchain.md
 │   ├── plan_libsql.md
 │   ├── plan_model_config_checklist.md
@@ -281,4 +280,4 @@
     ├── generate_search_report.sh
     └── generate_single_provider_report.sh
 
-66 directories, 213 files
+66 directories, 212 files
