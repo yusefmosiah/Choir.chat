@@ -257,7 +257,7 @@
 │   ├── plan_libsql.md
 │   ├── plan_model_config_checklist.md
 │   ├── plan_postchain_checklist.md
-│   ├── plan_tools_checklist.md
+│   ├── plan_tools_search_checklist.md
 │   ├── scripts
 │   │   ├── combiner.sh
 │   │   └── update_tree.sh

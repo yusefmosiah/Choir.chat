@@ -1574,12 +1574,12 @@ This checklist provides step-by-step instructions for setting up the PostChain p
 
 This checklist serves as a guide to ensure your PostChain implementation and test suite are correctly structured and functional. Follow it step-by-step to address any issues and facilitate smooth integration and testing.
 
-=== File: docs/plan_tools_checklist.md ===
+=== File: docs/plan_tools_search_checklist.md ===
 
 
 
 ==
-plan_tools_checklist
+plan_tools_search_checklist
 ==
 
 
