@@ -127,6 +127,8 @@ tree.md
 │   │   │   ├── calculator.py
 │   │   │   ├── conversation.py
 │   │   │   ├── duckduckgo_search.py
+│   │   │   ├── qdrant.py
+│   │   │   ├── qdrant_workflow.py
 │   │   │   ├── tavily_search.py
 │   │   │   └── web_search.py
 │   │   └── utils.py
@@ -216,6 +218,8 @@ tree.md
 │           ├── test_langgraph_providers_tools.py
 │           ├── test_multimodel_with_tools.py
 │           ├── test_provider_langgraph.py
+│           ├── test_qdrant.py
+│           ├── test_qdrant_workflow.py
 │           ├── test_recent_events.py
 │           ├── test_search_tools_report.py
 │           ├── test_tavily_search.py
@@ -270,6 +274,7 @@ tree.md
 │   ├── plan_libsql.md
 │   ├── plan_model_config_checklist.md
 │   ├── plan_postchain_checklist.md
+│   ├── plan_tools_qdrant_checklist.md
 │   ├── plan_tools_search_checklist.md
 │   ├── scripts
 │   │   ├── combiner.sh
@@ -288,7 +293,7 @@ tree.md
     ├── generate_search_report.sh
     └── generate_single_provider_report.sh
 
-66 directories, 207 files
+66 directories, 212 files
 
 === File: docs/CHANGELOG.md ===
 

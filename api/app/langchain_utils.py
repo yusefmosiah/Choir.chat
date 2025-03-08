@@ -115,7 +115,7 @@ def get_tool_compatible_models(config: Config) -> Dict[str, List[str]]:
     """
     return {
         "openai": [
-            config.OPENAI_O1,
+            # config.OPENAI_O1,
             config.OPENAI_O3_MINI,
             config.OPENAI_GPT_4O_MINI,
         ],
@@ -777,3 +777,105 @@ async def abstract_llm_structured_output(
             "provider": get_model_provider(model_name)[0],
             "model": model_name
         }
+
+async def langchain_llm_completion_stream(
+    model_name: str,
+    messages: List[BaseMessage],
+    config: Config,
+    temperature: Optional[float] = None,
+    max_tokens: Optional[int] = None,
+    tools: Optional[List[Any]] = None
+) -> BaseMessage:
+    """Get completions using LangChain message format.
+
+    This function bridges between LangChain's message format and our internal format,
+    allowing us to use our provider-agnostic completion with LangGraph tools.
+
+    Args:
+        model_name: The model to use
+        messages: The conversation messages in LangChain format
+        config: Configuration object
+        temperature: Optional temperature override
+        max_tokens: Optional max tokens override
+        tools: Optional list of LangChain tools to bind to the model
+
+    Returns:
+        LangChain BaseMessage response
+    """
+    # Get the provider
+    provider, model_provider_name = get_model_provider(model_name)
+
+    # Log tool binding
+    if tools:
+        logger.info(f"Binding {len(tools)} tools to {model_name}")
+
+    # Initialize the appropriate model class based on provider
+    model_cls = None
+    model_kwargs = {}
+
+    if provider == "openai":
+        model_cls = ChatOpenAI
+        model_kwargs = {
+            "model": model_provider_name,
+            "api_key": config.OPENAI_API_KEY,
+        }
+        # Only add temperature for non-o1 models
+        if model_provider_name != "o1" and temperature is not None:
+            model_kwargs["temperature"] = temperature or config.TEMPERATURE
+    elif provider == "anthropic":
+        model_cls = ChatAnthropic
+        model_kwargs = {
+            "model": model_provider_name,
+            "temperature": temperature or config.TEMPERATURE,
+            "api_key": config.ANTHROPIC_API_KEY,
+        }
+    elif provider == "google":
+        model_cls = ChatGoogleGenerativeAI
+        model_kwargs = {
+            "model": model_provider_name,
+            "temperature": temperature or config.TEMPERATURE,
+            "google_api_key": config.GOOGLE_API_KEY,
+        }
+    elif provider == "mistral":
+        model_cls = ChatMistralAI
+        model_kwargs = {
+            "model": model_provider_name,
+            "temperature": temperature or config.TEMPERATURE,
+            "api_key": config.MISTRAL_API_KEY,
+        }
+    elif provider == "fireworks":
+        model_cls = ChatFireworks
+        model_kwargs = {
+            "model": model_provider_name,
+            "temperature": temperature or config.TEMPERATURE,
+            "api_key": config.FIREWORKS_API_KEY,
+        }
+    elif provider == "groq":
+        model_cls = ChatGroq
+        model_kwargs = {
+            "model": model_provider_name,
+            "temperature": temperature or config.TEMPERATURE,
+            "api_key": config.GROQ_API_KEY,
+        }
+    else:
+        raise ValueError(f"Unsupported provider: {provider}")
+
+    # Create model instance
+    model = model_cls(**model_kwargs)
+
+    # Bind tools if provided
+    if tools:
+        for tool in tools:
+            # Convert pydantic schema if needed
+            if not hasattr(tool, "args_schema"):
+                tool_name = tool.__name__ if hasattr(tool, "__name__") else tool.name
+                logger.info(f"Created Pydantic model for Tool {tool_name}")
+
+        model_with_tools = model.bind_tools(tools)
+        logger.info(f"Successfully bound tools to {model_name}")
+
+        # Get AI response with tools
+        return await model_with_tools.ainvoke(messages)
+    else:
+        # Get AI response without tools
+        return await model.ainvoke(messages)

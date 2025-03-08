@@ -104,8 +104,40 @@ class DatabaseClient:
         }
         return await self.save_message(message)
 
+    async def delete_vector(self, vector_id: str, collection: Optional[str] = None) -> Dict[str, str]:
+        """Delete a vector from the vector database.
+
+        Args:
+            vector_id: The ID of the vector to delete
+            collection: Optional collection name (defaults to Config.MESSAGES_COLLECTION)
+
+        Returns:
+            Status message with the ID of the deleted vector
+        """
+        try:
+            # Use default collection if not specified
+            if collection is None:
+                collection = self.config.MESSAGES_COLLECTION
+
+            # Delete the vector
+            result = self.client.delete(
+                collection_name=collection,
+                points_selector=models.PointIdsList(
+                    points=[vector_id]
+                )
+            )
+
+            # Wait for the result to complete
+            if hasattr(result, "wait"):
+                result = result.wait()
+
+            return {"status": "success", "id": vector_id}
+        except Exception as e:
+            logger.error(f"Error deleting vector: {e}")
+            return {"status": "error", "message": str(e)}
+
     async def get_vector(self, vector_id: str) -> Optional[Dict[str, Any]]:
-        """Get a specific vector by ID."""
+        """Get a vector by ID."""
         try:
             result = self.client.retrieve(
                 collection_name=self.config.MESSAGES_COLLECTION,
