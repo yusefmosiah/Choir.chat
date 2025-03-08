@@ -18,7 +18,7 @@ async def test_qdrant_store_tool():
     test_content = f"Test content for store tool {uuid.uuid4()}"
 
     # Use the store tool
-    result = await qdrant_store(test_content)
+    result = await qdrant_store.ainvoke(test_content)
 
     # Verify results
     assert "Successfully stored" in result
@@ -34,11 +34,11 @@ async def test_qdrant_search_tool():
     """Test the Qdrant search tool."""
     # First store something to search for
     test_content = f"Test content for search tool {uuid.uuid4()}"
-    store_result = await qdrant_store(test_content)
+    store_result = await qdrant_store.ainvoke(test_content)
 
     # Use the search tool with the first few words
     search_query = test_content.split()[:3]
-    result = await qdrant_search(" ".join(search_query))
+    result = await qdrant_search.ainvoke(" ".join(search_query))
 
     # Verify results
     assert "Found semantically similar information" in result
@@ -50,13 +50,13 @@ async def test_qdrant_delete_tool():
     """Test the Qdrant delete tool."""
     # First store something to get an ID
     test_content = f"Test content for delete tool {uuid.uuid4()}"
-    store_result = await qdrant_store(test_content)
+    store_result = await qdrant_store.ainvoke(test_content)
 
     # Extract the ID from the result
     vector_id = store_result.split("ID: ")[1]
 
     # Delete the vector
-    delete_result = await qdrant_delete(vector_id)
+    delete_result = await qdrant_delete.ainvoke(vector_id)
 
     # Verify deletion
     assert "Successfully deleted" in delete_result
@@ -64,7 +64,7 @@ async def test_qdrant_delete_tool():
 
     # Verify the vector is no longer retrievable via search
     search_query = test_content.split()[:3]
-    search_result = await qdrant_search(" ".join(search_query))
+    search_result = await qdrant_search.ainvoke(" ".join(search_query))
     assert test_content not in search_result
 
 
@@ -126,13 +126,13 @@ async def test_qdrant_tool_sequence():
     """Test a sequence of Qdrant tool operations."""
     # 1. Store some content
     test_content = f"Test content for sequence {uuid.uuid4()}"
-    store_result = await qdrant_store(test_content)
+    store_result = await qdrant_store.ainvoke(test_content)
     assert "Successfully stored" in store_result
     vector_id = store_result.split("ID: ")[1]
 
     # 2. Search for the content
     search_query = test_content.split()[:3]
-    search_result = await qdrant_search(" ".join(search_query))
+    search_result = await qdrant_search.ainvoke(" ".join(search_query))
     assert test_content in search_result
 
     # Note: Delete will be tested later after implementing the delete method

@@ -179,6 +179,122 @@ async def test_qdrant_workflow_single_model():
         logger.warning("Store operation confirmed but couldn't extract vector ID for further tests")
 
 
+@pytest.mark.asyncio
+async def test_multi_model_compatibility():
+    """Test Qdrant tools with multiple model providers."""
+    config = Config()
+    logging.basicConfig(level=logging.INFO)
+    logger = logging.getLogger(__name__)
+
+    # Get tool-compatible models
+    tool_models = initialize_tool_compatible_model_list(config, disabled_providers={"openrouter"})
+
+    if len(tool_models) < 2:
+        pytest.skip("At least 2 different tool-compatible models needed for multi-model testing")
+
+    # Limit to at most 3 models for test duration
+    if len(tool_models) > 3:
+        tool_models = tool_models[:3]
+
+    results = {}
+    for model_config in tool_models:
+        try:
+            logger.info(f"Testing with model: {model_config}")
+
+            # Create workflow with this model
+            workflow = create_qdrant_workflow(model_config=model_config, config=config)
+
+            # Test basic operations
+            test_content = f"Test for {model_config}: Vector data {uuid.uuid4()}"
+            system_message = SystemMessage(content=(
+                "You are a helpful assistant with access to vector database operations. "
+                "Use the qdrant_store tool to store information when asked."
+            ))
+
+            # Store content
+            store_message = HumanMessage(content=f"Please store this exact text: '{test_content}'")
+
+            store_result = await workflow.ainvoke({
+                "messages": [system_message, store_message]
+            })
+
+            # Check if storage was successful and extract vector ID
+            vector_id = None
+            store_success = False
+
+            for msg in store_result["messages"]:
+                if "Successfully stored" in msg.content:
+                    store_success = True
+                    try:
+                        vector_id = msg.content.split("ID: ")[1].strip()
+                        logger.info(f"Found vector ID: {vector_id}")
+                    except (IndexError, AttributeError):
+                        pass
+                    break
+
+            # Search for content
+            search_success = False
+            if store_success:
+                search_message = HumanMessage(
+                    content=f"Use the qdrant_search tool to find information about: {test_content[:20]}"
+                )
+
+                search_result = await workflow.ainvoke({
+                    "messages": store_result["messages"] + [search_message]
+                })
+
+                # Check if search returned the original content
+                for msg in search_result["messages"]:
+                    if test_content in msg.content:
+                        search_success = True
+                        break
+
+            # Delete if we have a vector ID
+            delete_success = False
+            if vector_id:
+                delete_message = HumanMessage(
+                    content=f"Delete the vector with ID: {vector_id} using the qdrant_delete tool"
+                )
+
+                delete_result = await workflow.ainvoke({
+                    "messages": store_result["messages"] + [delete_message]
+                })
+
+                # Check if deletion was successful
+                for msg in delete_result["messages"]:
+                    if "Successfully deleted" in msg.content and vector_id in msg.content:
+                        delete_success = True
+                        break
+
+            # Record results
+            results[str(model_config)] = {
+                "store_success": store_success,
+                "search_success": search_success,
+                "delete_success": delete_success if vector_id else None
+            }
+
+        except Exception as e:
+            logger.error(f"Error testing {model_config}: {str(e)}")
+            results[str(model_config)] = {"error": str(e)}
+
+    # Generate report
+    logger.info("\n===== Model Compatibility Report =====")
+    for model, result in results.items():
+        logger.info(f"\n{model}:")
+        if "error" in result:
+            logger.info(f"  ❌ Error: {result['error']}")
+        else:
+            logger.info(f"  Store: {'✅' if result['store_success'] else '❌'}")
+            logger.info(f"  Search: {'✅' if result['search_success'] else '❌'}")
+            logger.info(f"  Delete: {'✅' if result['delete_success'] else '❌' if result['delete_success'] == False else '⚠️ Not tested'}")
+
+    # Make sure at least one model succeeded completely
+    assert any(
+        result.get("store_success") and result.get("search_success") and result.get("delete_success")
+        for model, result in results.items() if "error" not in result
+    ), "No model completed all operations successfully"
+
+
 if __name__ == "__main__":
     import asyncio
     logging.basicConfig(level=logging.INFO)

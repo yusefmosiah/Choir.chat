@@ -219,6 +219,7 @@ tree.md
 │           ├── test_multimodel_with_tools.py
 │           ├── test_provider_langgraph.py
 │           ├── test_qdrant.py
+│           ├── test_qdrant_multimodel.py
 │           ├── test_qdrant_workflow.py
 │           ├── test_recent_events.py
 │           ├── test_search_tools_report.py
@@ -293,7 +294,7 @@ tree.md
     ├── generate_search_report.sh
     └── generate_single_provider_report.sh
 
-66 directories, 212 files
+66 directories, 213 files
 
 === File: docs/CHANGELOG.md ===
 
