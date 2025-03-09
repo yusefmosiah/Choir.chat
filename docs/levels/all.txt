@@ -2168,7 +2168,7 @@ VERSION postchain_graph_api: 1.0
 - [ ] Document core API schema and endpoints
 - [ ] Create basic FastAPI route for Action phase only
 - [ ] Implement basic conversation context management
-- [ ] Add streaming support for phase-level (not token-level)
+- [ ] Add streaming support
 - [ ] Test Action phase endpoint with Postman/curl
 - [ ] Implement basic Swift client connectivity
 
