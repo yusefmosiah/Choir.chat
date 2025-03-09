@@ -77,6 +77,8 @@
 ├── api
 │   ├── Dockerfile
 │   ├── __init__.py
+│   ├── api
+│   │   └── static
 │   ├── app
 │   │   ├── __init__.py
 │   │   ├── chorus_cycle.py
@@ -90,6 +92,7 @@
 │   │   ├── postchain
 │   │   │   ├── __init__.py
 │   │   │   ├── api.py
+│   │   │   ├── postchain_graph.py
 │   │   │   ├── provider_info.md
 │   │   │   └── schemas
 │   │   │       ├── __init__.py
@@ -261,12 +264,14 @@
 │   ├── plan_libsql.md
 │   ├── plan_model_config_checklist.md
 │   ├── plan_postchain_checklist.md
+│   ├── plan_postchain_graph_api_checklist.md
 │   ├── plan_tools_qdrant_checklist.md
 │   ├── plan_tools_search_checklist.md
 │   ├── scripts
 │   │   ├── combiner.sh
 │   │   └── update_tree.sh
 │   └── tree.md
+├── frontend
 ├── notebooks
 │   ├── fqaho_simulation.ipynb
 │   ├── post_chain0.ipynb
@@ -280,4 +285,4 @@
     ├── generate_search_report.sh
     └── generate_single_provider_report.sh
 
-66 directories, 212 files
+69 directories, 214 files
