@@ -1303,7 +1303,8 @@ VERSION postchain_graph_api: 1.0
 - [ ] Implement basic conversation context management
 - [ ] Add streaming support
 - [ ] Test Action phase endpoint with Postman/curl
-- [ ] Implement basic Swift client connectivity
+- [ ] Implement basic Swift client connectivity given existing interface
+- [ ] Implement multi-turn conversation support
 
 ### 📋 Phase 2: Experience Enrichment
 
@@ -1320,15 +1321,14 @@ VERSION postchain_graph_api: 1.0
 - [ ] Add Observation phase with semantic linking
 - [ ] Refactor Understanding phase with improved loop logic
 - [ ] Implement Yield phase for final response generation
+- [ ] Add comprehensive error handling and fallbacks
 - [ ] Complete end-to-end testing of full PostChain
 - [ ] Finalize Swift client integration
 
 ### 📋 Phase 4: Advanced Features
 
-- [ ] Implement document/file upload support
 - [ ] Add context management with model-specific limits
-- [ ] Implement multi-turn conversation support
-- [ ] Add comprehensive error handling and fallbacks
+- [ ] Implement document/file upload support
 - [ ] Performance optimization and monitoring
 
 ## 🚩 Current Status & Next Steps
