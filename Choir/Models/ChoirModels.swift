@@ -33,19 +33,19 @@ enum Phase: String, CaseIterable, Identifiable {
         case .yield: return "arrow.down.circle.fill"
         }
     }
-    
+
     // Smart mapping from any string to a Phase enum
     static func from(_ string: String) -> Phase? {
         // Exact match by rawValue
         if let exact = Phase.allCases.first(where: { $0.rawValue == string }) {
             return exact
         }
-        
+
         // Description match
         if let byDescription = Phase.allCases.first(where: { $0.description == string }) {
             return byDescription
         }
-        
+
         // Partial/fuzzy match (case insensitive)
         let lowercased = string.lowercased()
         return Phase.allCases.first { phase in
@@ -91,10 +91,10 @@ class Message: ObservableObject, Identifiable, Equatable {
     let isUser: Bool
     let timestamp: Date
     @Published var isStreaming: Bool
-    
+
     // Store all phases with proper publishing
     @Published private var _phases: [Phase: String] = [:]
-    
+
     // Public interface that always returns all phases (with empty strings for missing ones)
     var phases: [Phase: String] {
         get {
@@ -102,10 +102,10 @@ class Message: ObservableObject, Identifiable, Equatable {
             var result = Phase.allCases.reduce(into: [Phase: String]()) { result, phase in
                 result[phase] = ""
             }
-            
+
             // Overlay with any actual content we have
             result.merge(_phases) { _, new in new }
-            
+
             return result
         }
         set {
@@ -125,7 +125,7 @@ class Message: ObservableObject, Identifiable, Equatable {
         self.isUser = isUser
         self.timestamp = timestamp
         self.isStreaming = isStreaming
-        
+
         // Initialize with all provided phases
         self._phases = phases
     }
@@ -134,16 +134,23 @@ class Message: ObservableObject, Identifiable, Equatable {
     static func == (lhs: Message, rhs: Message) -> Bool {
         lhs.id == rhs.id
     }
-    
-    // Helper method to update a specific phase
+
+    // Add explicit objectWillChange notifications for phase updates
     func updatePhase(_ phase: Phase, content: String) {
-        // Will automatically trigger SwiftUI updates through @Published
+        objectWillChange.send()
         _phases[phase] = content
-        
+
+        // Force SwiftUI to recognize deep changes
+        if !content.isEmpty {
+            let temp = _phases
+            _phases = [:]
+            _phases = temp
+        }
+
         // Simplified content update logic:
         // 1. Always update content for experience phase (highest priority)
         // 2. Update content for action phase only if experience is empty or we have placeholder content
-        if (phase == .experience && !content.isEmpty) || 
+        if (phase == .experience && !content.isEmpty) ||
            (phase == .action && (self.content == "..." || self.phases[.experience]?.isEmpty == true)) {
             self.content = content
         }
@@ -220,13 +227,13 @@ struct PostchainStreamEvent: Codable {
 extension PostchainStreamEvent {
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        
+
         currentPhase = try container.decode(String.self, forKey: .currentPhase)
         phaseState = try container.decode(String.self, forKey: .phaseState)
         content = try container.decode(String.self, forKey: .content)
         error = try container.decodeIfPresent(String.self, forKey: .error)
         threadId = try container.decodeIfPresent(String.self, forKey: .threadId)
-        
+
         // Handle metadata as a dynamic dictionary
         if let metadataContainer = try? container.decodeIfPresent([String: AnyCodable].self, forKey: .metadata) {
             var convertedMetadata: [String: Any] = [:]
@@ -238,16 +245,16 @@ extension PostchainStreamEvent {
             metadata = nil
         }
     }
-    
+
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        
+
         try container.encode(currentPhase, forKey: .currentPhase)
         try container.encode(phaseState, forKey: .phaseState)
         try container.encode(content, forKey: .content)
         try container.encodeIfPresent(error, forKey: .error)
         try container.encodeIfPresent(threadId, forKey: .threadId)
-        
+
         // Handle metadata encoding
         if let metadata = metadata {
             var encodableMetadata: [String: AnyCodable] = [:]
@@ -262,14 +269,14 @@ extension PostchainStreamEvent {
 // Helper struct to encode/decode Any values
 struct AnyCodable: Codable {
     let value: Any
-    
+
     init(_ value: Any) {
         self.value = value
     }
-    
+
     init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
-        
+
         if container.decodeNil() {
             value = NSNull()
         } else if let bool = try? container.decode(Bool.self) {
@@ -288,10 +295,10 @@ struct AnyCodable: Codable {
             throw DecodingError.dataCorruptedError(in: container, debugDescription: "AnyCodable cannot decode value")
         }
     }
-    
+
     func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
-        
+
         switch value {
         case is NSNull:
             try container.encodeNil()
@@ -308,7 +315,7 @@ struct AnyCodable: Codable {
         case let dictionary as [String: Any]:
             try container.encode(dictionary.mapValues { AnyCodable($0) })
         default:
-            let context = EncodingError.Context(codingPath: container.codingPath, 
+            let context = EncodingError.Context(codingPath: container.codingPath,
                                                debugDescription: "AnyCodable cannot encode \(type(of: value))")
             throw EncodingError.invalidValue(value, context)
         }

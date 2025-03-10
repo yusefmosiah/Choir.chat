@@ -63,19 +63,16 @@ class PostchainViewModel: ObservableObject {
 
     // Called by the coordinator to update the view model with new phase content
     func updatePhase(_ phase: Phase, state: String, content: String) {
-        // Skip empty updates
-        guard !content.isEmpty else { return }
-        
-        // Log experience phase updates for debugging
-        if phase == .experience {
-            print("🔍 ViewModel updating experience phase: \(content.prefix(30))...")
+        // Add explicit main thread execution
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+
+            // Update with animation to force UI refresh
+            withAnimation {
+                self.responses[phase] = content
+                self.objectWillChange.send()
+            }
         }
-        
-        // Update the phase content
-        responses[phase] = content
-        
-        // Notify observers about the change
-        objectWillChange.send()
     }
 
     // Helper method to update message with final response
@@ -84,7 +81,7 @@ class PostchainViewModel: ObservableObject {
 
         // Create a combined phases dictionary that merges existing phases with viewModel responses
         var combinedPhases = message.phases
-        
+
         // Add all phases from responses, overwriting any existing content
         for (phase, content) in responses {
             if !content.isEmpty {
@@ -104,7 +101,7 @@ class PostchainViewModel: ObservableObject {
         // Update the phases property
         updatedMessage.phases = combinedPhases
         updatedMessage.isStreaming = false
-        
+
         return updatedMessage
     }
 }

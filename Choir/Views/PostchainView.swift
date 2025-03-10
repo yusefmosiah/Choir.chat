@@ -32,6 +32,9 @@ struct PostchainView: View {
     }
 
     var body: some View {
+        // Force full content loading on appearance
+        let _ = phases
+        
         GeometryReader { geometry in
             let cardWidth = geometry.size.width * 0.98
             let sideCardWidth = geometry.size.width * 0.1
@@ -51,6 +54,7 @@ struct PostchainView: View {
                     .offset(x: calculateOffset(for: phase, cardWidth: cardWidth, totalWidth: totalWidth))
                     .zIndex(phase == selectedPhase ? 1 : 0)
                     .opacity(calculateOpacity(for: phase))
+                    .id("\(phase.rawValue)_\(phases[phase]?.count ?? 0)") // Force redraw when content changes
                 }
             }
             .frame(height: geometry.size.height * 0.99) // Back to using full height

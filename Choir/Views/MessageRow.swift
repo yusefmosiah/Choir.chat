@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct MessageRow: View {
-    let message: Message
+    @ObservedObject var message: Message
     let isProcessing: Bool
     @ObservedObject var viewModel: PostchainViewModel
 
@@ -58,23 +58,16 @@ struct MessageRow: View {
                 // Postchain view
                 let isActive = message.id == viewModel.coordinator.activeMessageId
 
-                // Create a complete representation of all phases
-                // If actively processing, use the viewModel's real-time data
-                // Otherwise use the stored message phases
-                
-                // Calculate which phases to display
-                let finalPhases: [Phase: String] = isActive ? viewModel.responses : message.phases
-                
-                // Log for debugging - we can remove this later
-//
-                
-                // Display the PostchainView with the appropriate phases
+                // Simplify phase handling
+                let finalPhases = message.phases.merging(viewModel.responses) { _, new in new }
+
                 PostchainView(
                     phases: finalPhases,
                     isProcessing: isProcessing,
-                    forceShowAllPhases: true, // Always show all phases
+                    forceShowAllPhases: true,
                     coordinator: viewModel.coordinator as? RESTPostchainCoordinator
                 )
+                .id("postchain_\(message.id)_\(message.phases.hashValue)") // More reliable tracking
                 .onAppear {
                     // Add additional logging about active phases on view appear
                     print("MessageRow.onAppear: Message \(message.id)")
