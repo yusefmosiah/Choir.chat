@@ -879,3 +879,116 @@ async def langchain_llm_completion_stream(
     else:
         # Get AI response without tools
         return await model.ainvoke(messages)
+
+async def astream_langchain_llm_completion(
+    model_name: str,
+    messages: List[BaseMessage],
+    config: Config,
+    temperature: Optional[float] = None,
+    max_tokens: Optional[int] = None,
+    tools: Optional[List[Any]] = None
+) -> AsyncIterator[AIMessageChunk]:
+    """Stream completions using LangChain message format.
+
+    This function bridges between LangChain's message format and our internal format,
+    allowing us to use our provider-agnostic completion with token-level streaming
+    in LangGraph.
+
+    Args:
+        model_name: The model to use
+        messages: The conversation messages in LangChain format
+        config: Configuration object
+        temperature: Optional temperature override
+        max_tokens: Optional max tokens override
+        tools: Optional list of LangChain tools to bind to the model
+
+    Returns:
+        AsyncIterator of AIMessageChunk objects for token-level streaming
+    """
+    # Extract provider from model name
+    provider, provider_model = get_model_provider(model_name)
+    logger.debug(f"Using {provider}/{provider_model} for streaming completion")
+
+    # Check for models that don't support temperature
+    temp_unsupported = False
+    if provider == "openai" and provider_model.startswith("o3"):
+        logger.info(f"Model {provider_model} doesn't support temperature parameter")
+        temp_unsupported = True
+        # Use a version of config with temperature removed
+        modified_config = copy.deepcopy(config)
+        modified_config.TEMPERATURE = None
+        # Get the streaming-enabled model directly with modified config
+        model = get_streaming_model(model_name, modified_config)
+    else:
+        # Get the streaming-enabled model directly
+        model = get_streaming_model(model_name, config)
+
+    # Special handling for Gemini models which require non-empty text in messages
+    if provider == "google" and provider_model.startswith("gemini"):
+        # Filter out empty messages
+        filtered_messages = []
+        for message in messages:
+            # For user messages, ensure they have content
+            if isinstance(message, HumanMessage):
+                if not message.content or message.content.strip() == "":
+                    # Add a default prompt if message is empty
+                    logger.info(f"Adding default content to empty user message for Gemini model")
+                    message.content = "Please continue."
+                filtered_messages.append(message)
+            # For system messages, ensure they have content
+            elif isinstance(message, SystemMessage):
+                if not message.content or message.content.strip() == "":
+                    # Skip empty system messages or add placeholder content
+                    logger.info(f"Adding default content to empty system message for Gemini model")
+                    message.content = "You are a helpful assistant."
+                filtered_messages.append(message)
+            # Include all other message types
+            else:
+                filtered_messages.append(message)
+
+        # Replace messages with filtered ones
+        messages = filtered_messages
+        logger.info(f"Prepared {len(messages)} messages for Gemini model")
+
+    # Override temperature if provided and supported by the model
+    if temperature is not None and not temp_unsupported:
+        if hasattr(model, "temperature"):
+            model.temperature = temperature
+
+    # Override max_tokens if provided
+    if max_tokens is not None:
+        if provider in ["anthropic", "cohere"]:
+            if hasattr(model, "max_tokens"):
+                model.max_tokens = max_tokens
+        else:
+            if hasattr(model, "max_tokens_to_sample"):
+                model.max_tokens_to_sample = max_tokens
+
+    # Bind tools if provided
+    if tools:
+        for tool in tools:
+            # Convert pydantic schema if needed
+            if not hasattr(tool, "args_schema"):
+                tool_name = tool.__name__ if hasattr(tool, "__name__") else tool.name
+                logger.info(f"Created Pydantic model for Tool {tool_name}")
+
+        model_with_tools = model.bind_tools(tools)
+        logger.info(f"Successfully bound tools to {model_name} for streaming")
+
+        # Stream response with tools
+        try:
+            async for chunk in model_with_tools.astream(messages):
+                yield chunk
+        except Exception as e:
+            logger.error(f"Error streaming from {model_name} with tools: {str(e)}")
+            # Yield a fallback message so the stream doesn't break
+            yield AIMessageChunk(content=f"Error streaming: {str(e)}")
+    else:
+        # Stream response without tools
+        try:
+            async for chunk in model.astream(messages):
+                yield chunk
+        except Exception as e:
+            logger.error(f"Error streaming from {model_name}: {str(e)}")
+            # Yield a fallback message so the stream doesn't break
+            yield AIMessageChunk(content=f"Error streaming: {str(e)}")

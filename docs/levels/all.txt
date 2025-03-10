@@ -105,6 +105,7 @@ tree.md
 │   │   ├── postchain
 │   │   │   ├── __init__.py
 │   │   │   ├── api.py
+│   │   │   ├── graph.py
 │   │   │   ├── postchain_graph.py
 │   │   │   ├── provider_info.md
 │   │   │   └── schemas
@@ -298,7 +299,7 @@ tree.md
     ├── generate_search_report.sh
     └── generate_single_provider_report.sh
 
-69 directories, 214 files
+69 directories, 215 files
 
 === File: docs/CHANGELOG.md ===
 
