@@ -3,7 +3,7 @@ import SwiftUI
 struct ThreadMessageList: View {
     let messages: [Message]
     let isProcessing: Bool
-    let viewModel: ChorusViewModel
+    let viewModel: PostchainViewModel
 
     var body: some View {
         ScrollView {

@@ -25,7 +25,7 @@ final class ChoirThreadTests: XCTestCase {
     }
 
     func testContextInCoordinator() async throws {
-        let coordinator = RESTChorusCoordinator()
+        let coordinator = RESTPostchainCoordinator()
         let thread = ChoirThread()
 
         // Add a message directly to messages array
@@ -46,7 +46,7 @@ final class ChoirThreadTests: XCTestCase {
     }
 
     func testMultiturnChat() async throws {
-        let coordinator = RESTChorusCoordinator()
+        let coordinator = RESTPostchainCoordinator()
         let thread = ChoirThread()
 
         // First message

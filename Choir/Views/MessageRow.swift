@@ -3,9 +3,9 @@ import SwiftUI
 struct MessageRow: View {
     let message: Message
     let isProcessing: Bool
-    @ObservedObject var viewModel: ChorusViewModel
+    @ObservedObject var viewModel: PostchainViewModel
 
-    init(message: Message, isProcessing: Bool = false, viewModel: ChorusViewModel) {
+    init(message: Message, isProcessing: Bool = false, viewModel: PostchainViewModel) {
         self.message = message
         self.isProcessing = isProcessing
         self.viewModel = viewModel
@@ -55,11 +55,11 @@ struct MessageRow: View {
                 }
                 .padding(.horizontal)
 
-                // Chorus cycle view
-                ChorusCycleView(
+                // Postchain view
+                PostchainView(
                     phases: isProcessing ? viewModel.responses : (message.chorusResult?.phases ?? [:]),
                     isProcessing: isProcessing,
-                    coordinator: viewModel.coordinator as? RESTChorusCoordinator
+                    coordinator: viewModel.coordinator as? RESTPostchainCoordinator
                 )
                 .frame(height: 400)
                 .padding(.top, 4)

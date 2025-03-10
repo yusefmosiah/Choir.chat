@@ -1,13 +1,13 @@
 import SwiftUI
 
-struct ChorusCycleView: View {
+struct PostchainView: View {
     let phases: [Phase: String]
     let isProcessing: Bool
     @State private var selectedPhase: Phase = .action
     @State private var dragOffset: CGFloat = 0
 
     // Optional coordinator to check processing status
-    var coordinator: RESTChorusCoordinator?
+    var coordinator: RESTPostchainCoordinator?
 
     // Computed property to get available phases in order
     private var availablePhases: [Phase] {
@@ -353,7 +353,7 @@ extension Phase {
 }
 
 #Preview {
-    ChorusCycleView(
+    PostchainView(
         phases: [
             .action: "I understand you said...",
             .experience: "Based on my experience...",

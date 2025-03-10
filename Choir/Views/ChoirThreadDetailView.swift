@@ -2,7 +2,7 @@ import SwiftUI
 
 struct ChoirThreadDetailView: View {
    let thread: ChoirThread
-   @ObservedObject var viewModel: ChorusViewModel
+   @ObservedObject var viewModel: PostchainViewModel
    @State private var input = ""
    @State private var processingMessage: String = ""
 
@@ -53,7 +53,7 @@ struct ChoirThreadDetailView: View {
    private func sendMessage(_ content: String) async {
        do {
            // Set the current thread in the coordinator
-           if let restCoordinator = viewModel.coordinator as? RESTChorusCoordinator {
+           if let restCoordinator = viewModel.coordinator as? RESTPostchainCoordinator {
                restCoordinator.currentChoirThread = thread
            }
 
@@ -86,6 +86,6 @@ struct ChoirThreadDetailView: View {
 #Preview {
    ChoirThreadDetailView(
        thread: ChoirThread(title: "Preview Thread"),
-       viewModel: ChorusViewModel(coordinator: MockChorusCoordinator())
+       viewModel: PostchainViewModel(coordinator: MockPostchainCoordinator())
    )
 }

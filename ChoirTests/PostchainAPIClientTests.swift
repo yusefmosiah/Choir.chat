@@ -1,8 +1,8 @@
 import XCTest
 @testable import Choir
 
-final class ChorusAPIClientTests: XCTestCase {
-    let api = ChorusAPIClient()
+final class PostchainAPIClientTests: XCTestCase {
+    let api = PostchainAPIClient()
 
     // Test data
     let testContent = "What is the capital of France?"
@@ -133,7 +133,7 @@ final class ChorusAPIClientTests: XCTestCase {
     }
 
     func testTimeout() async throws {
-        let shortTimeoutAPI = ChorusAPIClient(timeout: 0.001)
+        let shortTimeoutAPI = PostchainAPIClient(timeout: 0.001)
 
         do {
             let actionBody = ActionRequestBody(

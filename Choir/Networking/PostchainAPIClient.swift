@@ -10,12 +10,12 @@ enum APIError: Error {
     case invalidResponse(String)
 }
 
-class ChorusAPIClient {
+class PostchainAPIClient {
     #if DEBUG
-    // private let baseURL = "http://localhost:8000/api/chorus"
-   private let baseURL = "https://choir-chat.onrender.com/api/chorus"
+    // private let baseURL = "http://localhost:8000/api/postchain"
+   private let baseURL = "https://choir-chat.onrender.com/api/postchain"
     #else
-    private let baseURL = "https://choir-chat.onrender.com/api/chorus"
+    private let baseURL = "https://choir-chat.onrender.com/api/postchain"
     #endif
 
     private let session: URLSession

@@ -2,7 +2,7 @@ import Foundation
 import SwiftUI
 
 @MainActor
-class MockChorusCoordinator: ChorusCoordinator, ObservableObject {
+class MockPostchainCoordinator: PostchainCoordinator, ObservableObject {
     @Published private(set) var currentPhase: Phase = .action
     @Published private(set) var responses: [Phase: String] = [:]
     @Published private(set) var isProcessing = false
@@ -16,7 +16,7 @@ class MockChorusCoordinator: ChorusCoordinator, ObservableObject {
     private(set) var yieldResponse: YieldResponse?
 
     private var mockDelay: TimeInterval = 1.0
-    weak var viewModel: ChorusViewModel?
+    weak var viewModel: PostchainViewModel?
 
     required init() {}
 

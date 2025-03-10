@@ -2,7 +2,7 @@ import Foundation
 
 
 @MainActor
-protocol ChorusCoordinator {
+protocol PostchainCoordinator {
     // State
     var currentPhase: Phase { get }
     var responses: [Phase: String] { get }

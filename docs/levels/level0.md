@@ -32,30 +32,30 @@ tree.md
 │   ├── Choir.entitlements
 │   ├── ContentView.swift
 │   ├── Coordinators
-│   │   ├── MockChorusCoordinator.swift
-│   │   └── RESTChorusCoordinator.swift
+│   │   ├── MockPostchainCoordinator.swift
+│   │   └── RESTPostchainCoordinator.swift
 │   ├── Info.plist
 │   ├── Models
 │   │   ├── ChoirThread.swift
-│   │   ├── ChorusModels.swift
-│   │   └── Phase.swift
+│   │   ├── Phase.swift
+│   │   └── PostchainModels.swift
 │   ├── Networking
-│   │   └── ChorusAPIClient.swift
+│   │   └── PostchainAPIClient.swift
 │   ├── Preview Content
 │   │   └── Preview Assets.xcassets
 │   │       └── Contents.json
 │   ├── Protocols
-│   │   └── ChorusCoordinator.swift
+│   │   └── PostchainCoordinator.swift
 │   ├── Services
 │   │   ├── KeychainService.swift
 │   │   └── WalletManager.swift
 │   ├── ViewModels
-│   │   └── ChorusViewModel.swift
+│   │   └── PostchainViewModel.swift
 │   └── Views
 │       ├── ChoirThreadDetailView.swift
-│       ├── ChorusCycleView.swift
 │       ├── Components
 │       ├── MessageRow.swift
+│       ├── PostchainView.swift
 │       ├── Thread
 │       │   └── Components
 │       │       ├── ThreadInputBar.swift
@@ -83,7 +83,7 @@ tree.md
 │   ├── APIResponseTests.swift
 │   ├── ChoirTests.swift
 │   ├── ChoirThreadTests.swift
-│   └── ChorusAPIClientTests.swift
+│   └── PostchainAPIClientTests.swift
 ├── ChoirUITests
 │   ├── ChoirUITests.swift
 │   └── ChoirUITestsLaunchTests.swift
@@ -279,6 +279,7 @@ tree.md
 │   ├── plan_model_config_checklist.md
 │   ├── plan_postchain_checklist.md
 │   ├── plan_postchain_graph_api_checklist.md
+│   ├── plan_postchain_migration_checklist.md
 │   ├── plan_tools_qdrant_checklist.md
 │   ├── plan_tools_search_checklist.md
 │   ├── scripts
@@ -299,7 +300,7 @@ tree.md
     ├── generate_search_report.sh
     └── generate_single_provider_report.sh
 
-69 directories, 215 files
+69 directories, 216 files
 
 === File: docs/CHANGELOG.md ===
 

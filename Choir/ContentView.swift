@@ -8,13 +8,13 @@
 import SwiftUI
 
 struct ContentView: View {
-    @StateObject private var viewModel: ChorusViewModel
+    @StateObject private var viewModel: PostchainViewModel
     @State private var threads: [ChoirThread] = []
     @State private var selectedChoirThread: ChoirThread?
     @State private var showingWallet = false
 
     init() {
-        _viewModel = StateObject(wrappedValue: ChorusViewModel(coordinator: RESTChorusCoordinator()))
+        _viewModel = StateObject(wrappedValue: PostchainViewModel(coordinator: RESTPostchainCoordinator()))
     }
 
     var body: some View {

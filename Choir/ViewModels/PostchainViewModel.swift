@@ -1,21 +1,21 @@
 import SwiftUI
 
 @MainActor
-class ChorusViewModel: ObservableObject {
+class PostchainViewModel: ObservableObject {
     @Published private(set) var currentPhase: Phase
     @Published private(set) var responses: [Phase: String]
     @Published private(set) var isProcessing: Bool
     @Published private(set) var error: Error?
 
-    let coordinator: any ChorusCoordinator
+    let coordinator: any PostchainCoordinator
 
-    init(coordinator: any ChorusCoordinator) {
+    init(coordinator: any PostchainCoordinator) {
         self.coordinator = coordinator
         self.currentPhase = coordinator.currentPhase
         self.responses = coordinator.responses
         self.isProcessing = coordinator.isProcessing
 
-        if let restCoordinator = coordinator as? RESTChorusCoordinator {
+        if let restCoordinator = coordinator as? RESTPostchainCoordinator {
             restCoordinator.viewModel = self
         }
     }

@@ -1,8 +1,8 @@
 import SwiftUI
 
 @MainActor
-class RESTChorusCoordinator: ChorusCoordinator, ObservableObject {
-    private let api: ChorusAPIClient
+class RESTPostchainCoordinator: PostchainCoordinator, ObservableObject {
+    private let api: PostchainAPIClient
 
     // Use @Published to ensure SwiftUI updates
     @Published private(set) var currentPhase: Phase = .action
@@ -23,10 +23,10 @@ class RESTChorusCoordinator: ChorusCoordinator, ObservableObject {
     // Add context handling
     var currentChoirThread: ChoirThread?
 
-    weak var viewModel: ChorusViewModel?
+    weak var viewModel: PostchainViewModel?
 
     required init() {
-        self.api = ChorusAPIClient()
+        self.api = PostchainAPIClient()
     }
 
     func process(_ input: String) async throws {

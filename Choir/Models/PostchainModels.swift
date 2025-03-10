@@ -225,20 +225,20 @@ struct MessageContext: Codable {
     let content: String
     let isUser: Bool
     let timestamp: String
-    let chorusResult: [String: String]?
+    let postchainResult: [String: String]?
 
     enum CodingKeys: String, CodingKey {
         case content
         case isUser = "is_user"
         case timestamp
-        case chorusResult = "chorus_result"
+        case postchainResult = "postchain_result"
     }
 
     init(from message: Message) {
         self.content = message.content
         self.isUser = message.isUser
         self.timestamp = ISO8601DateFormatter().string(from: message.timestamp)
-        self.chorusResult = message.chorusResult?.phases.reduce(into: [String: String]()) { dict, pair in
+        self.postchainResult = message.chorusResult?.phases.reduce(into: [String: String]()) { dict, pair in
             dict[pair.key.rawValue] = pair.value
         }
     }
