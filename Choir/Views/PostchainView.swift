@@ -57,7 +57,9 @@ struct PostchainView: View {
             .gesture(
                 DragGesture()
                     .onChanged { value in
-                        dragOffset = value.translation.width
+                        withAnimation(.interactiveSpring()) {
+                            dragOffset = value.translation.width
+                        }
                     }
                     .onEnded { value in
                         let predictedEndOffset = value.predictedEndTranslation.width
@@ -87,8 +89,21 @@ struct PostchainView: View {
             )
             .padding(.bottom, 16) // Add padding at the bottom of the carousel
         }
+        .onAppear {
+            // Log available phases on appear for debugging
+            print("PostchainView onAppear: \(availablePhases.count) phases available")
+            for phase in availablePhases {
+                if let content = phases[phase], !content.isEmpty {
+                    print("  - Available: \(phase.rawValue) with content: \(content.prefix(20))...")
+                } else {
+                    print("  - Available: \(phase.rawValue) (empty)")
+                }
+            }
+        }
         // Use SwiftUI's natural reactivity for phase selection
         .onChange(of: phases) { oldPhases, newPhases in
+            print("PostchainView phases changed: \(newPhases.count) phases")
+            
             // Only auto-select if this is the first phase added and no phase is currently selected
             // This ensures we only change the selection on initial load
             if oldPhases.isEmpty && !newPhases.isEmpty {

@@ -65,6 +65,9 @@ struct MessageRow: View {
                 // Calculate which phases to display
                 let finalPhases: [Phase: String] = isActive ? viewModel.responses : message.phases
                 
+                // Log for debugging - we can remove this later
+//
+                
                 // Display the PostchainView with the appropriate phases
                 PostchainView(
                     phases: finalPhases,
@@ -73,7 +76,11 @@ struct MessageRow: View {
                     coordinator: viewModel.coordinator as? RESTPostchainCoordinator
                 )
                 .onAppear {
-                    // No-op
+                    // Add additional logging about active phases on view appear
+                    print("MessageRow.onAppear: Message \(message.id)")
+                    print("  - isActive: \(isActive), isProcessing: \(isProcessing)")
+                    print("  - Stored phases in message: \(message.phases.filter { !$0.value.isEmpty }.count)")
+                    print("  - View model phases: \(viewModel.responses.count)")
                 }
                 .onChange(of: isProcessing) { _, newValue in
                     // No-op

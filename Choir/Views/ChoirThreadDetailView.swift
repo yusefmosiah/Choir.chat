@@ -95,29 +95,25 @@ struct ChoirThreadDetailView: View {
            
            // Update the placeholder message with the final response
            if let lastIndex = thread.messages.indices.last {
-               // First notify that we're about to change the thread's messages
-               // This needs to happen BEFORE the change to ensure SwiftUI updates properly
-               thread.objectWillChange.send()
+               // Get the message (now an ObservableObject)
+               let message = thread.messages[lastIndex]
                
-               // Make sure to preserve all phases in the message
-               var updatedMessage = thread.messages[lastIndex]
-               
-               // Copy all phases from the viewModel to ensure they're properly stored
+               // Get all phases from the viewModel
                let allPhases = viewModel.responses
                
-               // Update phases directly
-               updatedMessage.phases = allPhases
-               updatedMessage.isStreaming = false
+               // Mark as no longer streaming
+               message.isStreaming = false
                
-               // Select the most appropriate content for display
+               // Update all phases from the viewModel
+               // This will automatically trigger SwiftUI updates
+               message.phases = allPhases
+               
+               // Update the displayed content based on available phases
                if let experienceContent = allPhases[.experience], !experienceContent.isEmpty {
-                   updatedMessage.content = experienceContent
+                   message.content = experienceContent
                } else if let actionContent = allPhases[.action], !actionContent.isEmpty {
-                   updatedMessage.content = actionContent
+                   message.content = actionContent
                }
-               
-               // Update the message with all phase content preserved
-               thread.messages[lastIndex] = updatedMessage
            }
        } catch {
            // Handle errors appropriately

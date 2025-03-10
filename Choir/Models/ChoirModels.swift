@@ -85,15 +85,15 @@ class ChoirThread: ObservableObject, Identifiable, Hashable {
     }
 }
 
-struct Message: Identifiable, Equatable {
+class Message: ObservableObject, Identifiable, Equatable {
     let id: UUID
-    var content: String
+    @Published var content: String
     let isUser: Bool
     let timestamp: Date
-    var isStreaming: Bool
+    @Published var isStreaming: Bool
     
-    // Store only the non-empty phases to save memory
-    private var _phaseContent: [Phase: String] = [:]
+    // Store all phases with proper publishing
+    @Published private var _phases: [Phase: String] = [:]
     
     // Public interface that always returns all phases (with empty strings for missing ones)
     var phases: [Phase: String] {
@@ -104,13 +104,13 @@ struct Message: Identifiable, Equatable {
             }
             
             // Overlay with any actual content we have
-            result.merge(_phaseContent) { _, new in new }
+            result.merge(_phases) { _, new in new }
             
             return result
         }
         set {
-            // Store only non-empty phases to save memory
-            _phaseContent = newValue.filter { !$0.value.isEmpty }
+            // Using @Published means we don't need to manually notify observers
+            _phases = newValue
         }
     }
 
@@ -126,13 +126,27 @@ struct Message: Identifiable, Equatable {
         self.timestamp = timestamp
         self.isStreaming = isStreaming
         
-        // Only store non-empty phase content
-        self._phaseContent = phases.filter { !$0.value.isEmpty }
+        // Initialize with all provided phases
+        self._phases = phases
     }
 
     // Equatable conformance
     static func == (lhs: Message, rhs: Message) -> Bool {
         lhs.id == rhs.id
+    }
+    
+    // Helper method to update a specific phase
+    func updatePhase(_ phase: Phase, content: String) {
+        // Will automatically trigger SwiftUI updates through @Published
+        _phases[phase] = content
+        
+        // Simplified content update logic:
+        // 1. Always update content for experience phase (highest priority)
+        // 2. Update content for action phase only if experience is empty or we have placeholder content
+        if (phase == .experience && !content.isEmpty) || 
+           (phase == .action && (self.content == "..." || self.phases[.experience]?.isEmpty == true)) {
+            self.content = content
+        }
     }
 }
 

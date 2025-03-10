@@ -221,29 +221,19 @@ class RESTPostchainCoordinator: PostchainCoordinator, ObservableObject {
                 return
             }
             
-            // Notify observers before updating
-            thread.objectWillChange.send()
+            // Get reference to the message (now an ObservableObject)
+            let message = thread.messages[messageIndex]
             
-            // Create updated message with the new content
-            var updatedMessage = thread.messages[messageIndex]
+            // Set streaming flag
+            message.isStreaming = true
             
-            // Update phases
-            var updatedPhases = updatedMessage.phases
-            updatedPhases[phase] = content
-            updatedMessage.phases = updatedPhases
-            updatedMessage.isStreaming = true
+            // Use the new helper method to update the phase
+            // This will automatically trigger SwiftUI updates through @Published
+            message.updatePhase(phase, content: content)
             
-            // Update main content display based on priority order
-            if phase == .experience && !content.isEmpty {
-                updatedMessage.content = content
-            } else if phase == .action && (updatedMessage.content == "..." || updatedMessage.phases[.experience]?.isEmpty != false) {
-                updatedMessage.content = content
-            }
+            // No need to update the array since we're working with a reference type
             
-            // Apply the update
-            thread.messages[messageIndex] = updatedMessage
-            
-            // Log update
+            // Log update for debugging
             if phase == .experience {
                 print("✅ Updated experience phase in message: \(content.prefix(20))...")
             }
