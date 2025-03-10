@@ -1,5 +1,5 @@
 import Foundation
-
+import SwiftUI
 
 @MainActor
 protocol PostchainCoordinator {
@@ -7,18 +7,50 @@ protocol PostchainCoordinator {
     var currentPhase: Phase { get }
     var responses: [Phase: String] { get }
     var isProcessing: Bool { get }
+    var isStreaming: Bool { get }
+
+    // Message tracking
+    var activeMessageId: UUID? { get set }
 
     // Core processing
     func process(_ input: String) async throws
     func cancel()
 
-    // Response state
-    var actionResponse: ActionResponse? { get }
-    var experienceResponse: ExperienceResponse? { get }
-    var intentionResponse: IntentionResponse? { get }
-    var observationResponse: ObservationResponse? { get }
-    var understandingResponse: UnderstandingResponse? { get }
-    var yieldResponse: YieldResponse? { get }
+    // Thread state
+    var currentChoirThread: ChoirThread? { get set }
+
+    // Phase tracking
+    func isProcessingPhase(_ phase: Phase) -> Bool
 
     init()
+}
+
+// Simple test implementation for previews and tests
+@MainActor
+class TestPostchainCoordinator: PostchainCoordinator {
+    var currentPhase: Phase = .action
+    var responses: [Phase: String] = [:]
+    var isProcessing = false
+    var isStreaming = false
+    var activeMessageId: UUID?
+    var currentChoirThread: ChoirThread?
+
+    required init() {}
+
+    func process(_ input: String) async throws {
+        isProcessing = true
+        responses[.action] = "Processing \(input)..."
+        try await Task.sleep(nanoseconds: 1_000_000_000)
+        responses[.action] = "Here's a response to: \(input)"
+        isProcessing = false
+    }
+
+    func cancel() {
+        isProcessing = false
+        responses = [:]
+    }
+
+    func isProcessingPhase(_ phase: Phase) -> Bool {
+        return isProcessing && phase == currentPhase
+    }
 }

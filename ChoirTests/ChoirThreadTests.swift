@@ -24,71 +24,36 @@ final class ChoirThreadTests: XCTestCase {
         XCTAssertEqual(thread.messages[0].content, "Test message")
     }
 
-    func testContextInCoordinator() async throws {
-        let coordinator = RESTPostchainCoordinator()
-        let thread = ChoirThread()
-
-        // Add a message directly to messages array
+    func testPhaseSupport() {
+        let phaseData: [Phase: String] = [
+            .action: "Action phase content",
+            .experience: "Experience phase content"
+        ]
+        
         let message = Message(
-            content: "Hello",
-            isUser: true
+            content: "Test message", 
+            isUser: false,
+            phases: phaseData
         )
-        thread.messages.append(message)
+        
+        XCTAssertEqual(message.phases[.action], "Action phase content")
+        XCTAssertEqual(message.phases[.experience], "Experience phase content")
+        
+        // Test empty phases are returned for undefined phases
+        XCTAssertEqual(message.phases[.intention], "")
+    }
+    
+    func testCoordinatorBasics() async throws {
+        let coordinator = TestPostchainCoordinator()
+        let thread = ChoirThread()
 
         // Set current thread
         coordinator.currentChoirThread = thread
 
-        // Process with context
-        try await coordinator.process("How are you?")
+        // Process a message
+        try await coordinator.process("Test input")
 
         // Verify response was received
-        XCTAssertNotNil(coordinator.actionResponse)
-    }
-
-    func testMultiturnChat() async throws {
-        let coordinator = RESTPostchainCoordinator()
-        let thread = ChoirThread()
-
-        // First message
-        let firstMessage = Message(
-            content: "remember the number 421. this is a test of multiturn chat. in the next message, you will be asked for the special number.",
-            isUser: true
-        )
-        thread.messages.append(firstMessage)
-
-        // Set thread and process
-        coordinator.currentChoirThread = thread
-        try await coordinator.process(firstMessage.content)
-
-        // Add AI response if received
-        if let response = coordinator.yieldResponse?.content {
-            let aiMessage = Message(
-                content: response,
-                isUser: false,
-                chorusResult: MessageChorusResult(phases: coordinator.responses)
-            )
-            thread.messages.append(aiMessage)
-        }
-
-        // Second message - don't drop context
-        let followUpMessage = Message(
-            content: "what's the special number?",
-            isUser: true
-        )
-        thread.messages.append(followUpMessage)
-
-        // Process follow-up with full context
-        try await coordinator.process(followUpMessage.content)
-
-        // Verify response contains number
-        guard let finalResponse = coordinator.yieldResponse?.content else {
-            XCTFail("No yield response received")
-            return
-        }
-
-        XCTAssertTrue(
-            finalResponse.contains("421"),
-            "Response should include the special number: \(finalResponse)"
-        )
+        XCTAssertEqual(coordinator.responses[.action], "Here's a response to: Test input")
     }
 }

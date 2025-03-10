@@ -95,7 +95,6 @@ class WalletManager: ObservableObject {
                 options: options
             )
 
-            print("Transaction executed: \(result.digest)")
             try await updateBalance(for: wallet)
         } catch {
             self.error = error

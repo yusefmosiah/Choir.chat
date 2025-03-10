@@ -41,12 +41,44 @@ struct ContentView: View {
             if let thread = selectedChoirThread {
                 ChoirThreadDetailView(thread: thread, viewModel: viewModel)
             } else {
-                Text("Select a thread")
-                    .foregroundStyle(.secondary)
+                VStack(spacing: 20) {
+                    Text("Choir")
+                        .font(.largeTitle)
+                        .bold()
+                    
+                    Image("Icon-App-1024x1024")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 200, height: 200)
+                        .padding()
+                        .opacity(0.7)
+                    
+                    Text("Select a thread or create a new one")
+                        .foregroundStyle(.secondary)
+                        .padding(.top, 20)
+                    
+                    Button(action: createNewChoirThread) {
+                        Label("Create New Thread", systemImage: "plus.circle.fill")
+                            .font(.headline)
+                            .padding()
+                            .background(Color.accentColor)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
+                    }
+                    .padding(.top, 10)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(Color(UIColor.systemBackground))
             }
         }
         .sheet(isPresented: $showingWallet) {
             WalletView()
+        }
+        .onAppear {
+            // Create a default thread if none exists
+            if threads.isEmpty {
+                createNewChoirThread()
+            }
         }
     }
 

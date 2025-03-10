@@ -6,12 +6,29 @@ struct PostchainView: View {
     @State private var selectedPhase: Phase = .action
     @State private var dragOffset: CGFloat = 0
 
+    // Force showing all phases even when not processing
+    var forceShowAllPhases: Bool = false
+
     // Optional coordinator to check processing status
     var coordinator: RESTPostchainCoordinator?
 
     // Computed property to get available phases in order
     private var availablePhases: [Phase] {
-        Phase.allCases.filter { phases[$0] != nil }
+        // Force all phases if requested
+        if forceShowAllPhases {
+            return Phase.allCases
+        }
+
+        // Otherwise, get phases that have real content or are being processed
+        return Phase.allCases.filter { phase in
+            // Has non-empty content
+            let hasContent = (phases[phase]?.isEmpty == false)
+
+            // Is currently being processed by the coordinator
+            let isProcessing = coordinator?.isProcessingPhase(phase) ?? false
+
+            return hasContent || isProcessing
+        }
     }
 
     var body: some View {
@@ -22,38 +39,18 @@ struct PostchainView: View {
 
             // Simplified to just the carousel without indicators
             ZStack {
-                ForEach(Phase.allCases) { phase in
-                    if let content = phases[phase] {
-                        // Phase has content
-                        PhaseCard(
-                            phase: phase,
-                            content: content,
-                            isSelected: phase == selectedPhase,
-                            isLoading: false,
-                            priors: phase == .experience ? coordinator?.experienceResponse?.priors : nil
-                        )
-                        .frame(width: cardWidth)
-                        .offset(x: calculateOffset(for: phase, cardWidth: cardWidth, totalWidth: totalWidth))
-                        .zIndex(phase == selectedPhase ? 1 : 0)
-                        .opacity(calculateOpacity(for: phase))
-                    } else if isProcessing {
-                        // Check if this is the next phase being processed
-                        let isCurrentlyProcessing = coordinator?.isProcessingPhase(phase) ?? false
-                        let isNextPhase = isNextPhaseToProcess(phase)
-
-                        if isCurrentlyProcessing || isNextPhase {
-                            PhaseCard(
-                                phase: phase,
-                                content: nil,
-                                isSelected: false,
-                                isLoading: true
-                            )
-                            .frame(width: cardWidth)
-                            .offset(x: calculateOffset(for: phase, cardWidth: cardWidth, totalWidth: totalWidth))
-                            .zIndex(0)
-                            .opacity(0.7)
-                        }
-                    }
+                // Only iterate through phases we should actually display
+                ForEach(availablePhases) { phase in
+                    PhaseCard(
+                        phase: phase,
+                        content: phases[phase] ?? "",
+                        isSelected: phase == selectedPhase,
+                        isLoading: (phases[phase]?.isEmpty ?? true) && isProcessing
+                    )
+                    .frame(width: cardWidth)
+                    .offset(x: calculateOffset(for: phase, cardWidth: cardWidth, totalWidth: totalWidth))
+                    .zIndex(phase == selectedPhase ? 1 : 0)
+                    .opacity(calculateOpacity(for: phase))
                 }
             }
             .frame(height: geometry.size.height * 0.99) // Back to using full height
@@ -90,15 +87,22 @@ struct PostchainView: View {
             )
             .padding(.bottom, 16) // Add padding at the bottom of the carousel
         }
-        // Remove the onChange handler completely since we want the user to control phase selection
-        // If you want to only auto-select when starting from zero phases, you could modify it like this:
-        .onChange(of: phases) { _, newPhases in
-            // Only auto-select if this is the first phase being added
-            if availablePhases.count == 1 {
-                withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                    selectedPhase = availablePhases[0]
+        // Use SwiftUI's natural reactivity for phase selection
+        .onChange(of: phases) { oldPhases, newPhases in
+            // Only auto-select if this is the first phase added and no phase is currently selected
+            // This ensures we only change the selection on initial load
+            if oldPhases.isEmpty && !newPhases.isEmpty {
+                // Start with action phase by default
+                if newPhases[.action] != nil {
+                    selectedPhase = .action
+                } else {
+                    // If action isn't available, select the first available phase
+                    selectedPhase = availablePhases.first ?? .action
                 }
             }
+
+            // Otherwise, respect the user's current selection
+            // This allows users to read at their own pace
         }
     }
 
@@ -182,7 +186,8 @@ struct PhaseCard: View {
     let content: String?
     let isSelected: Bool
     var isLoading: Bool = false
-    var priors: [String: Prior]? = nil
+    var priors: [Prior]? = nil
+
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -206,12 +211,14 @@ struct PhaseCard: View {
             .padding(.bottom, 8)
 
             if let content = content {
+                // Debug log for content rendering
+
                 ScrollView {
-                    Text(content)
+                    Text(content.isEmpty ? "No content available for this phase." : content)
                         .font(.body)
                         .lineSpacing(6)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                        .foregroundColor(phase == .yield ? .white : .primary)
+                        .foregroundColor(phase == .yield ? .white : (content.isEmpty ? .secondary : .primary))
                         .padding(.bottom, 4)
 
                     // Display priors if this is the experience phase and we have priors
@@ -222,10 +229,8 @@ struct PhaseCard: View {
                                 .padding(.top, 12)
                                 .foregroundColor(phase == .yield ? .white : .primary)
 
-                            ForEach(Array(priors.keys.sorted()), id: \.self) { key in
-                                if let prior = priors[key] {
-                                    PriorCard(prior: prior, priorKey: key)
-                                }
+                            ForEach(priors, id: \.self) { prior in
+                                PriorCard(prior: prior)
                             }
                         }
                     }
@@ -274,12 +279,11 @@ struct PhaseCard: View {
 
 struct PriorCard: View {
     let prior: Prior
-    let priorKey: String
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Text("Prior ID: \(priorKey)")
+                Text("Prior ID: \(prior.id)")
                     .font(.subheadline)
                     .foregroundColor(.secondary)
 
@@ -342,16 +346,6 @@ struct PriorCard: View {
     }
 }
 
-extension Phase {
-    var next: Phase? {
-        guard let currentIndex = Phase.allCases.firstIndex(of: self),
-              currentIndex + 1 < Phase.allCases.count else {
-            return nil
-        }
-        return Phase.allCases[currentIndex + 1]
-    }
-}
-
 #Preview {
     PostchainView(
         phases: [
@@ -360,7 +354,8 @@ extension Phase {
             .intention: "Your intention seems to be...",
             .yield: "Here's my response..."
         ],
-        isProcessing: true
+        isProcessing: true,
+        forceShowAllPhases: true
     )
     .frame(height: 500)
     .padding()

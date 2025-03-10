@@ -19,13 +19,10 @@
 │   ├── Choir.entitlements
 │   ├── ContentView.swift
 │   ├── Coordinators
-│   │   ├── MockPostchainCoordinator.swift
 │   │   └── RESTPostchainCoordinator.swift
 │   ├── Info.plist
 │   ├── Models
-│   │   ├── ChoirThread.swift
-│   │   ├── Phase.swift
-│   │   └── PostchainModels.swift
+│   │   └── ChoirModels.swift
 │   ├── Networking
 │   │   └── PostchainAPIClient.swift
 │   ├── Preview Content
@@ -91,14 +88,13 @@
 │   │   │   └── api.py
 │   │   ├── postchain
 │   │   │   ├── __init__.py
-│   │   │   ├── api.py
 │   │   │   ├── graph.py
 │   │   │   ├── postchain_graph.py
 │   │   │   ├── provider_info.md
-│   │   │   └── schemas
-│   │   │       ├── __init__.py
-│   │   │       ├── aeiou.py
-│   │   │       └── state.py
+│   │   │   ├── schemas
+│   │   │   │   ├── __init__.py
+│   │   │   │   └── state.py
+│   │   │   └── simple_graph.py
 │   │   ├── routers
 │   │   │   ├── balance.py
 │   │   │   ├── chorus.py
@@ -167,27 +163,6 @@
 │       │   ├── test_tool_multimodel.py
 │       │   ├── test_tool_random_multimodel.py
 │       │   └── test_utils.py
-│       ├── results
-│       │   ├── basic_flow
-│       │   │   ├── final_state.json
-│       │   │   ├── interactions.jsonl
-│       │   │   └── metadata.json
-│       │   ├── confidence_thresholds
-│       │   │   ├── final_state.json
-│       │   │   ├── interactions.jsonl
-│       │   │   └── metadata.json
-│       │   ├── error_handling
-│       │   │   ├── final_state.json
-│       │   │   ├── interactions.jsonl
-│       │   │   └── metadata.json
-│       │   ├── looping_behavior
-│       │   │   ├── final_state.json
-│       │   │   ├── interactions.jsonl
-│       │   │   └── metadata.json
-│       │   └── tool_integration
-│       │       ├── final_state.json
-│       │       ├── interactions.jsonl
-│       │       └── metadata.json
 │       ├── test_chorus_endpoints.py
 │       ├── test_core_endpoints.py
 │       ├── test_main.py
@@ -287,4 +262,4 @@
     ├── generate_search_report.sh
     └── generate_single_provider_report.sh
 
-69 directories, 216 files
+63 directories, 197 files

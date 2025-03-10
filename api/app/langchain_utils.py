@@ -6,7 +6,8 @@ across multiple model providers.
 
 import logging
 import random
-from typing import Dict, Any, List, Optional, Tuple, AsyncGenerator, Type
+import copy
+from typing import Dict, Any, List, Optional, Tuple, AsyncGenerator, AsyncIterator, Type, Union
 from pydantic import BaseModel, Field, create_model
 from dataclasses import dataclass
 import re
@@ -337,7 +338,7 @@ def get_streaming_model(model_name: str, config: Config) -> BaseChatModel:
     provider, clean_name = get_model_provider(model_name)
 
     if provider == "openai":
-        if clean_name in [config.OPENAI_O1, config.OPENAI_O3_MINI]:
+        if clean_name in [config.OPENAI_O3_MINI]:
             return ChatOpenAI(
                 api_key=config.OPENAI_API_KEY,
                 model=clean_name,
@@ -880,6 +881,125 @@ async def langchain_llm_completion_stream(
         # Get AI response without tools
         return await model.ainvoke(messages)
 
+async def post_llm(
+    model_name: str,
+    messages: List[BaseMessage],
+    config: Config,
+    response_model: Optional[Type[BaseModel]] = None,
+    stream: bool = False,
+    temperature: Optional[float] = None,
+    max_tokens: Optional[int] = None,
+    tools: Optional[List[Any]] = None
+) -> Union[BaseMessage, AsyncIterator[AIMessageChunk]]:
+    """
+    Enhanced LLM completion function with structured output and streaming support.
+    This is the recommended function for all PostChain interactions with LLMs.
+
+    Args:
+        model_name: The model to use
+        messages: The conversation messages in LangChain format
+        config: Configuration object
+        response_model: Optional Pydantic model for structured output
+        stream: Whether to stream the response
+        temperature: Optional temperature override
+        max_tokens: Optional max tokens override
+        tools: Optional list of LangChain tools to bind to the model
+
+    Returns:
+        Either a complete message or an async iterator of message chunks
+    """
+    # Extract provider from model name
+    provider, provider_model = get_model_provider(model_name)
+    logger.debug(f"Using {provider}/{provider_model} for completion")
+
+    # Check for models that don't support temperature
+    temp_unsupported = False
+    if provider == "openai" and provider_model.startswith("o3"):
+        logger.info(f"Model {provider_model} doesn't support temperature parameter")
+        temp_unsupported = True
+        temperature = None
+
+    # Initialize the model (streaming or non-streaming)
+    if stream:
+        model = get_streaming_model(model_name, config)
+    else:
+        model = get_base_model(model_name, config)
+
+    # Apply overrides
+    if temperature is not None and not temp_unsupported and hasattr(model, "temperature"):
+        model.temperature = temperature
+
+    if max_tokens is not None:
+        if hasattr(model, "max_tokens"):
+            model.max_tokens = max_tokens
+        elif hasattr(model, "max_tokens_to_sample"):
+            model.max_tokens_to_sample = max_tokens
+
+    # Handle special cases for different models
+    if provider == "google" and provider_model.startswith("gemini"):
+        messages = _prepare_messages_for_gemini(messages)
+
+    # Bind tools if provided
+    if tools:
+        tool_compatible_providers = ["anthropic", "openai", "azure", "mistral", "google"]
+        if provider in tool_compatible_providers:
+            logger.info(f"Binding {len(tools)} tools to {model_name}")
+            try:
+                # Convert pydantic schema if needed
+                pydantic_tools = convert_tools_to_pydantic(tools)
+                model = model.bind_tools(pydantic_tools)
+                logger.info(f"Successfully bound tools to {model_name}")
+            except Exception as e:
+                logger.error(f"Error binding tools to {model_name}: {str(e)}")
+
+    # Add structured output if provided
+    if response_model:
+        try:
+            model = model.with_structured_output(response_model)
+            logger.info(f"Applied structured output model {response_model.__name__} to {model_name}")
+        except Exception as e:
+            logger.error(f"Error applying structured output: {str(e)}")
+
+    # Execute request (streaming or non-streaming)
+    try:
+        if stream:
+            return model.astream(messages)
+        else:
+            return await model.ainvoke(messages)
+    except Exception as e:
+        logger.error(f"Error in post_llm with {model_name}: {str(e)}")
+        # Return a fallback message so the stream doesn't break
+        if stream:
+            async def error_stream():
+                yield AIMessageChunk(content=f"Error: {str(e)}")
+            return error_stream()
+        else:
+            return AIMessage(content=f"Error: {str(e)}")
+
+def _prepare_messages_for_gemini(messages: List[BaseMessage]) -> List[BaseMessage]:
+    """Prepare messages for Gemini models which require non-empty content."""
+    # Filter out empty messages
+    filtered_messages = []
+    for message in messages:
+        # For user messages, ensure they have content
+        if isinstance(message, HumanMessage):
+            if not message.content or str(message.content).strip() == "":
+                # Add a default prompt if message is empty
+                logger.info(f"Adding default content to empty user message for Gemini model")
+                message.content = "Please continue."
+            filtered_messages.append(message)
+        # For system messages, ensure they have content
+        elif isinstance(message, SystemMessage):
+            if not message.content or str(message.content).strip() == "":
+                # Skip empty system messages or add placeholder content
+                logger.info(f"Adding default content to empty system message for Gemini model")
+                message.content = "You are a helpful assistant."
+            filtered_messages.append(message)
+        # Include all other message types
+        else:
+            filtered_messages.append(message)
+    return filtered_messages
+
 async def astream_langchain_llm_completion(
     model_name: str,
     messages: List[BaseMessage],
@@ -889,6 +1009,8 @@ async def astream_langchain_llm_completion(
     tools: Optional[List[Any]] = None
 ) -> AsyncIterator[AIMessageChunk]:
     """Stream completions using LangChain message format.
+
+    DEPRECATED: Use post_llm with stream=True and response_model parameter instead.
 
     This function bridges between LangChain's message format and our internal format,
     allowing us to use our provider-agnostic completion with token-level streaming

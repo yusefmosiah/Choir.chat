@@ -48,7 +48,7 @@ struct MessageRow: View {
                     if isProcessing {
                         ProgressView()
                             .scaleEffect(0.7)
-                    } else if message.chorusResult != nil {
+                    } else if !message.isUser {
                         Image(systemName: "checkmark.circle.fill")
                             .foregroundColor(.accentColor)
                     }
@@ -56,11 +56,31 @@ struct MessageRow: View {
                 .padding(.horizontal)
 
                 // Postchain view
+                let isActive = message.id == viewModel.coordinator.activeMessageId
+
+                // Create a complete representation of all phases
+                // If actively processing, use the viewModel's real-time data
+                // Otherwise use the stored message phases
+                
+                // Calculate which phases to display
+                let finalPhases: [Phase: String] = isActive ? viewModel.responses : message.phases
+                
+                // Display the PostchainView with the appropriate phases
                 PostchainView(
-                    phases: isProcessing ? viewModel.responses : (message.chorusResult?.phases ?? [:]),
+                    phases: finalPhases,
                     isProcessing: isProcessing,
+                    forceShowAllPhases: true, // Always show all phases
                     coordinator: viewModel.coordinator as? RESTPostchainCoordinator
                 )
+                .onAppear {
+                    // No-op
+                }
+                .onChange(of: isProcessing) { _, newValue in
+                    // No-op
+                }
+                .onChange(of: viewModel.responses) { _, newResponses in
+                    // No-op
+                }
                 .frame(height: 400)
                 .padding(.top, 4)
                 .padding(.trailing, 40)
