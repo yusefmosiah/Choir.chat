@@ -189,9 +189,6 @@ def create_simple_postchain_graph(
             latest_human_message
         ]
 
-        # Get response
-        completion = ""
-
         # Convert to string if it's a ModelConfig
         if hasattr(model, "__str__"):
             model_name_str = str(model)
@@ -201,41 +198,48 @@ def create_simple_postchain_graph(
         provider, _ = get_model_provider(model_name_str)
 
         try:
-            # Use the new post_llm function with streaming enabled
-            stream_response = await post_llm(model_name_str, messages_for_api, config, stream=True)
-            async for chunk in stream_response:
-                # Create action phase AIMessage with phase metadata
+            # Get complete response from post_llm with phase streaming enabled
+            logger.info("Generating action phase response")
+            response = await post_llm(model_name_str, messages_for_api, config, stream=True)
+
+            # Process the response to get the complete content
+            completion = ""
+            async for chunk in response:
                 if hasattr(chunk, "content") and chunk.content:
-                    completion += chunk.content
+                    # With our modified post_llm, we'll get a single chunk with the complete content
+                    completion = chunk.content
+                    break
 
-                    # Create a new message with phase metadata for each chunk
-                    ai_message = create_message_with_phase(completion, "action")
+            # Create action phase AIMessage with phase metadata
+            ai_message = create_message_with_phase(completion, "action")
 
-                    # Update messages list, replacing any existing action message
-                    for i, msg in enumerate(state["messages"]):
-                        if isinstance(msg, AIMessage) and msg.additional_kwargs.get("phase") == "action":
-                            state["messages"].pop(i)
-                            break
-                    state["messages"].append(ai_message)
+            # Update messages list, replacing any existing action message
+            for i, msg in enumerate(state["messages"]):
+                if isinstance(msg, AIMessage) and msg.additional_kwargs.get("phase") == "action":
+                    state["messages"].pop(i)
+                    break
+            state["messages"].append(ai_message)
 
-                    # Yield streaming update for this phase
-                    yield {
-                        "messages": state["messages"],
-                        "current_phase": "action",
-                        "action_content": completion,
-                        "current_model": model
-                    }
+            # Yield complete action phase update
+            yield {
+                "messages": state["messages"],
+                "current_phase": "action",
+                "action_content": completion,
+                "current_model": model
+            }
+
+            # Store the action result in state for the next phase
+            state["action_content"] = completion
+
         except Exception as e:
             logger.error(f"Error in action_node: {str(e)}", exc_info=True)
             # Create a fallback message on error
             fallback_content = f"I encountered an issue while processing your query. Error: {str(e)}"
             ai_message = create_message_with_phase(fallback_content, "action")
             state["messages"].append(ai_message)
+            state["action_content"] = fallback_content
 
-        # Store the action result in state for the next phase
-        state["action_content"] = completion
-
-        # Final yield
+        # Final yield with complete state
         yield state
 
     # Define Experience Phase Node
@@ -259,49 +263,50 @@ def create_simple_postchain_graph(
         experience_messages = [system_message] + state["messages"]
 
         try:
-            # Use post_llm with proper config object
-            experience_content = ""
-            
             # For debugging - ensure we're sending a valid request to the model
             logger.info(f"Experience phase sending {len(experience_messages)} messages to model")
             for idx, msg in enumerate(experience_messages):
                 msg_type = msg.__class__.__name__
                 msg_content = msg.content[:100] + "..." if msg.content and len(msg.content) > 100 else msg.content
                 logger.info(f"Message {idx} ({msg_type}): {msg_content}")
-            
-            stream_response = await post_llm(model_name, experience_messages, config, stream=True)
 
-            # Process streamed content
-            async for chunk in stream_response:
+            # Get complete experience response with phase streaming enabled
+            logger.info("Generating experience phase response")
+            response = await post_llm(model_name, experience_messages, config, stream=True)
+
+            # Process the response to get the complete content
+            experience_content = ""
+            async for chunk in response:
                 if hasattr(chunk, "content") and chunk.content:
-                    experience_content += chunk.content
+                    # With our modified post_llm, we'll get a single chunk with the complete content
+                    experience_content = chunk.content
+                    break
 
-                    # Enhanced logging for experience content
-                    log_experience_content(experience_content, "Experience phase streaming")
-                    
-                    # Create a fresh copy of state to avoid modifying the original
-                    # This is important for LangGraph's state management
-                    new_state = state.copy()
-                    new_state["experience_content"] = experience_content
-                    new_state["current_phase"] = "experience"
+            # Log the complete experience content
+            log_experience_content(experience_content, "Experience phase complete")
 
-                    # Yield the updated state with experience content for streaming
-                    logger.info(f"Yielding experience update with {len(experience_content)} characters")
-                    yield new_state
-            
-            # If we have no content after streaming, create a default experience response
+            # Create a fresh copy of state to avoid modifying the original
+            new_state = state.copy()
+            new_state["experience_content"] = experience_content
+            new_state["current_phase"] = "experience"
+
+            # Yield the updated state with experience content
+            logger.info(f"Yielding experience update with {len(experience_content)} characters")
+            yield new_state
+
+            # If we have no content, create a default experience response
             if not experience_content:
                 logger.warning("Experience phase produced no content! Creating fallback content.")
                 experience_content = "Based on your query, I've leveraged my knowledge to provide this response. If you need more specific information or have questions about the details, please let me know."
-            
+
             # Create an experience message to add to the messages list
             logger.info(f"Creating final experience message with {len(experience_content)} characters")
             experience_message = create_message_with_phase(experience_content, "experience")
-            
+
             # Create a fresh copy of messages and append the experience message
             messages = state["messages"].copy()
             messages.append(experience_message)
-            
+
             # Create the final state
             final_state = {
                 **state,
@@ -309,10 +314,10 @@ def create_simple_postchain_graph(
                 "current_phase": "experience",
                 "experience_content": experience_content
             }
-            
+
             # Log the final experience message
             logger.info(f"Final experience message added to state, total messages: {len(messages)}")
-            
+
             # Yield the final state with the experience message included
             yield final_state
         except Exception as e:
@@ -442,11 +447,7 @@ async def stream_simple_postchain(
     experience_output = ""
     current_phase = "action"
 
-    # Track chunk count per phase for better debugging
-    action_chunks = 0
-    experience_chunks = 0
-
-    # Use stream_mode parameter explicitly
+    # Use stream_mode parameter explicitly for phase transitions
     stream_mode = "values"
     logger.info(f"Using stream_mode: {stream_mode}")
 
@@ -460,32 +461,30 @@ async def stream_simple_postchain(
         )
         yield initial_event.model_dump()
 
-        # Stream execution with values mode
+        # Stream execution with values mode (still enables phase-based streaming)
         logger.info("Starting graph.astream execution")
         event_count = 0
+        current_phase_content = {}  # Track content by phase
+
+        # Process each phase update from the graph
         async for chunk in graph.astream(initial_state, config=thread_config, stream_mode=stream_mode):
             event_count += 1
 
-            # For better debugging, log chunk type and content preview
             if isinstance(chunk, dict):
-                keys = list(chunk.keys())
-                logger.debug(f"[{event_count}] Chunk keys: {keys}")
-
-                # Debug: Check for experience_content
-                if "experience_content" in chunk:
-                    exp_content = chunk["experience_content"]
-                    logger.info(f"FOUND DIRECT experience_content in chunk: {len(exp_content)} chars")
-                    experience_output = exp_content
-
-                # Check if phase has changed
+                # Check if we have a phase transition or content update
                 if "current_phase" in chunk:
                     new_phase = chunk["current_phase"]
+
+                    # Handle phase transition
                     if new_phase != current_phase:
                         logger.info(f"Phase transition: {current_phase} -> {new_phase}")
 
-                        # Send completion event for previous phase
-                        if current_phase == "action":
-                            logger.info(f"Action phase complete - received {action_chunks} chunks, output length: {len(action_output)}")
+                        # Complete previous phase if we have content for it
+                        if current_phase == "action" and "action_content" in current_phase_content:
+                            action_output = current_phase_content["action_content"]
+                            logger.info(f"Action phase complete - output length: {len(action_output)}")
+
+                            # Send completion event for action phase
                             completion_event = PostchainStreamEvent(
                                 current_phase="action",
                                 phase_state="complete",
@@ -495,7 +494,7 @@ async def stream_simple_postchain(
                             logger.info(f"Sending action completion event with content length: {len(action_output)}")
                             yield completion_event.model_dump()
 
-                            # Send initial event for next phase
+                            # Send initial event for experience phase
                             initial_experience_event = PostchainStreamEvent(
                                 current_phase="experience",
                                 phase_state="in_progress",
@@ -507,121 +506,98 @@ async def stream_simple_postchain(
 
                         current_phase = new_phase
 
-                # Extract phase content from the chunk
+                # Extract and store content for each phase
                 if current_phase == "action" and "action_content" in chunk:
-                    action_chunks += 1
-                    action_output = chunk["action_content"]
-                    logger.info(f"[{event_count}] Action chunk {action_chunks}: {action_output[:30]}...")
+                    action_content = chunk["action_content"]
+                    current_phase_content["action_content"] = action_content
+                    action_output = action_content
 
-                    # Yield action phase update
+                    # Send action phase update with complete content
                     update_event = PostchainStreamEvent(
                         current_phase="action",
                         phase_state="in_progress",
-                        content=action_output,
+                        content=action_content,
                         thread_id=thread_id
                     )
+                    logger.info(f"Sending action phase content: {len(action_content)} chars")
                     yield update_event.model_dump()
 
-                # Check for experience content in various places
-                elif current_phase == "experience":
-                    # Primary location
-                    if "experience_content" in chunk:
-                        experience_chunks += 1
-                        chunk_exp_content = chunk["experience_content"]
-                        log_experience_content(chunk_exp_content)
+                # Handle experience phase content
+                elif current_phase == "experience" and "experience_content" in chunk:
+                    experience_content = chunk["experience_content"]
+                    current_phase_content["experience_content"] = experience_content
+                    experience_output = experience_content
 
-                        # CRITICAL: Store this content in our variable to preserve it
-                        experience_output = chunk_exp_content
+                    # Log the experience content
+                    log_experience_content(experience_content)
 
-                        # Yield experience phase update
-                        update_event = PostchainStreamEvent(
-                            current_phase="experience",
-                            phase_state="in_progress",
-                            content=experience_output,
-                            thread_id=thread_id
-                        )
+                    # Send experience phase update with complete content
+                    update_event = PostchainStreamEvent(
+                        current_phase="experience",
+                        phase_state="in_progress",
+                        content=experience_content,
+                        thread_id=thread_id
+                    )
+                    logger.info(f"Sending experience phase content: {len(experience_content)} chars")
+                    yield update_event.model_dump()
 
-                        # Log the actual content being sent in the event
-                        serialized = json.dumps(update_event.model_dump())
-                        logger.info(f"Sending experience update event with {len(experience_output)} chars: {serialized[:100]}...")
+                # Check nested messages for experience content as a fallback
+                elif current_phase == "experience" and "messages" in chunk:
+                    for message in chunk.get("messages", []):
+                        if hasattr(message, "additional_kwargs") and message.additional_kwargs.get("phase") == "experience":
+                            extracted_content = message.content
+                            if extracted_content and (not experience_output or len(extracted_content) > len(experience_output)):
+                                logger.info(f"Found experience content in message: {len(extracted_content)} chars")
+                                experience_output = extracted_content
+                                current_phase_content["experience_content"] = experience_output
 
-                        yield update_event.model_dump()
-
-                    # Check nested messages for experience content
-                    elif "messages" in chunk:
-                        for message in chunk.get("messages", []):
-                            if hasattr(message, "additional_kwargs") and message.additional_kwargs.get("phase") == "experience":
-                                extracted_content = message.content
-                                if extracted_content:
-                                    logger.info(f"Found experience content in message: {len(extracted_content)} chars")
-                                    experience_output = extracted_content
-
-                                    # Send update with this content
-                                    update_event = PostchainStreamEvent(
-                                        current_phase="experience",
-                                        phase_state="in_progress",
-                                        content=experience_output,
-                                        thread_id=thread_id
-                                    )
-                                    yield update_event.model_dump()
+                                # Send update with this content
+                                update_event = PostchainStreamEvent(
+                                    current_phase="experience",
+                                    phase_state="in_progress",
+                                    content=experience_output,
+                                    thread_id=thread_id
+                                )
+                                yield update_event.model_dump()
 
         logger.info(f"Completed streaming after {event_count} events")
-        logger.info(f"Final experience_output length: {len(experience_output)} chars")
 
-        # Fallback: If we've transitioned to experience phase but still have no content
-        if current_phase == "experience" and not experience_output:
-            logger.warning("Experience phase was detected but has no content - attempting recovery")
+        # Send final completion event for the last phase
+        logger.info(f"Sending final completion event for phase: {current_phase}")
 
-            # Attempt to retrieve experience content directly with a new invocation
-            try:
-                logger.info("Executing synchronous query to recover experience content")
-                # Use the final state we have to get the experience content
-                final_state = await graph.ainvoke(initial_state, config=thread_config)
+        if current_phase == "experience":
+            # Ensure we have experience content
+            if not experience_output and "experience_content" in current_phase_content:
+                experience_output = current_phase_content["experience_content"]
 
-                # Look for experience message in the final state
-                for message in final_state.get("messages", []):
-                    if hasattr(message, "additional_kwargs") and message.additional_kwargs.get("phase") == "experience":
-                        experience_output = message.content
-                        log_experience_content(experience_output, "Recovered experience")
-                        break
+            logger.info(f"Sending final experience completion with {len(experience_output)} chars")
+            completion_event = PostchainStreamEvent(
+                current_phase="experience",
+                phase_state="complete",
+                content=experience_output,
+                thread_id=thread_id
+            )
+            yield completion_event.model_dump()
+        elif current_phase == "action":
+            # This case handles if we never transition to experience phase
+            logger.info(f"Sending final action completion with {len(action_output)} chars")
+            completion_event = PostchainStreamEvent(
+                current_phase="action",
+                phase_state="complete",
+                content=action_output,
+                thread_id=thread_id
+            )
+            yield completion_event.model_dump()
 
-                # If we found direct experience_content in the state, use that
-                if "experience_content" in final_state:
-                    direct_exp = final_state["experience_content"]
-                    if direct_exp and len(direct_exp) > 0:
-                        experience_output = direct_exp
-                        log_experience_content(experience_output, "Recovered direct experience")
-            except Exception as e:
-                logger.error(f"Error recovering experience content: {str(e)}")
-
-        # Final check: Make sure we have experience content
-        if not experience_output and current_phase == "experience":
-            logger.warning("Still missing experience content - execution will proceed with empty content")
-
-        # Always force the final event to include whatever experience content we have
-        logger.info(f"Sending final experience completion with {len(experience_output)} chars")
-
-        # Send a final completion event for the experience phase
-        completion_event = PostchainStreamEvent(
-            current_phase="experience",
-            phase_state="complete",
-            content=experience_output,
-            thread_id=thread_id
-        )
-
-        # Log the final completion event that's being sent
-        serialized = json.dumps(completion_event.model_dump())
-        logger.info(f"Sending final completion event: {serialized[:100]}...")
-
-        yield completion_event.model_dump()
     except Exception as e:
         logger.error(f"Error in stream_simple_postchain: {str(e)}", exc_info=True)
 
         # Send an error event for the current phase
+        error_content = experience_output if current_phase == "experience" else action_output
         error_event = PostchainStreamEvent(
             current_phase=current_phase,
             phase_state="error",
-            content=experience_output if current_phase == "experience" else action_output,
+            content=error_content,
             thread_id=thread_id,
             error=str(e)
         )

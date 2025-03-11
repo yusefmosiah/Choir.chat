@@ -881,52 +881,88 @@ async def langchain_llm_completion_stream(
         # Get AI response without tools
         return await model.ainvoke(messages)
 
+def is_tool_compatible(model_name: str, config: Config) -> bool:
+    """
+    Check if a model is compatible with tool binding.
+
+    Args:
+        model_name: The model identifier string
+        config: Configuration object
+
+    Returns:
+        Boolean indicating if the model supports tool binding
+    """
+    provider, model_id = get_model_provider(model_name)
+
+    # Get list of tool-compatible models
+    tool_models = get_tool_compatible_models(config)
+
+    # Check if this provider/model combination is in the tool-compatible list
+    return provider in tool_models and model_id in tool_models.get(provider, [])
+
+def is_temperature_compatible(model_name: str) -> bool:
+    """
+    Check if a model supports temperature parameter.
+
+    Args:
+        model_name: The model identifier string
+
+    Returns:
+        Boolean indicating if the model supports temperature parameter
+    """
+    provider, model_id = get_model_provider(model_name)
+
+    # Models known to not support temperature
+    if provider == "openai" and model_id.startswith("o3"):
+        return False
+
+    # Add other temperature-incompatible models here as needed
+
+    # Default: most models support temperature
+    return True
+
 async def post_llm(
     model_name: str,
     messages: List[BaseMessage],
     config: Config,
     response_model: Optional[Type[BaseModel]] = None,
-    stream: bool = False,
+    stream: bool = False,  # We'll use this to determine whether to return complete messages or phase chunks
     temperature: Optional[float] = None,
     max_tokens: Optional[int] = None,
     tools: Optional[List[Any]] = None
 ) -> Union[BaseMessage, AsyncIterator[AIMessageChunk]]:
     """
-    Enhanced LLM completion function with structured output and streaming support.
-    This is the recommended function for all PostChain interactions with LLMs.
+    Enhanced LLM completion function with structured output support.
+    Modified to support phase-by-phase streaming without token-by-token streaming.
 
     Args:
         model_name: The model to use
         messages: The conversation messages in LangChain format
         config: Configuration object
         response_model: Optional Pydantic model for structured output
-        stream: Whether to stream the response
+        stream: Whether to enable phase-based streaming (not token-by-token)
         temperature: Optional temperature override
         max_tokens: Optional max tokens override
         tools: Optional list of LangChain tools to bind to the model
 
     Returns:
-        Either a complete message or an async iterator of message chunks
+        Either a complete message or an async iterator for phase chunks
     """
     # Extract provider from model name
     provider, provider_model = get_model_provider(model_name)
     logger.debug(f"Using {provider}/{provider_model} for completion")
 
-    # Check for models that don't support temperature
-    temp_unsupported = False
-    if provider == "openai" and provider_model.startswith("o3"):
-        logger.info(f"Model {provider_model} doesn't support temperature parameter")
-        temp_unsupported = True
+    # Check temperature compatibility
+    if temperature is not None and not is_temperature_compatible(model_name):
+        logger.info(f"Model {provider_model} doesn't support temperature parameter - ignoring temperature setting")
         temperature = None
 
-    # Initialize the model (streaming or non-streaming)
-    if stream:
-        model = get_streaming_model(model_name, config)
-    else:
-        model = get_base_model(model_name, config)
+    # Always use non-streaming mode for the model itself
+    # We'll handle the phase-based streaming in the LangGraph implementation
+    model = get_base_model(model_name, config)
 
     # Apply overrides
-    if temperature is not None and not temp_unsupported and hasattr(model, "temperature"):
+    if temperature is not None and hasattr(model, "temperature"):
         model.temperature = temperature
 
     if max_tokens is not None:
@@ -941,8 +977,8 @@ async def post_llm(
 
     # Bind tools if provided
     if tools:
-        tool_compatible_providers = ["anthropic", "openai", "azure", "mistral", "google"]
-        if provider in tool_compatible_providers:
+        # Check if this model is compatible with tool binding
+        if is_tool_compatible(model_name, config):
             logger.info(f"Binding {len(tools)} tools to {model_name}")
             try:
                 # Convert pydantic schema if needed
@@ -951,6 +987,8 @@ async def post_llm(
                 logger.info(f"Successfully bound tools to {model_name}")
             except Exception as e:
                 logger.error(f"Error binding tools to {model_name}: {str(e)}")
+        else:
+            logger.warning(f"Model {model_name} is not known to be compatible with tools - skipping tool binding")
 
     # Add structured output if provided
     if response_model:
@@ -960,15 +998,22 @@ async def post_llm(
         except Exception as e:
             logger.error(f"Error applying structured output: {str(e)}")
 
-    # Execute request (streaming or non-streaming)
+    # Execute request based on streaming mode
     try:
         if stream:
-            return model.astream(messages)
+            # For phase-based streaming, we still return a full response but wrapped in an async generator
+            # This allows LangGraph to continue its phase transitions
+            async def phase_streamer():
+                response = await model.ainvoke(messages)
+                yield AIMessageChunk(content=response.content)
+
+            return phase_streamer()
         else:
+            # For non-streaming mode, just return the full response
             return await model.ainvoke(messages)
     except Exception as e:
         logger.error(f"Error in post_llm with {model_name}: {str(e)}")
-        # Return a fallback message so the stream doesn't break
+        # Return a fallback message on error
         if stream:
             async def error_stream():
                 yield AIMessageChunk(content=f"Error: {str(e)}")
