@@ -8,17 +8,6 @@ class APIResponse(BaseModel):
     message: Optional[str] = None
     data: Optional[Dict[str, Any]] = None
 
-# Chorus cycle models
-class ChorusRequest(BaseModel):
-    content: str
-    thread_id: Optional[str] = None
-    previous_responses: Optional[Dict[str, str]] = None
-
-class ChorusResponse(BaseModel):
-    step: str = Field(..., description="The current phase name")
-    content: str = Field(..., description="The main response content")
-    confidence: float = Field(..., ge=0, le=1, description="Confidence score between 0 and 1")
-    reasoning: str = Field(..., description="Reasoning behind the response")
 
 # Vector operation models
 class VectorSearchRequest(BaseModel):
@@ -67,77 +56,3 @@ class MessageContext(BaseModel):
     chorus_result: Optional[Dict[str, str]] = None
 
 # Action models
-class ActionRequest(BaseModel):
-    content: str
-    thread_id: Optional[str] = None
-    context: Optional[List[MessageContext]] = None
-
-class ActionResponse(ChorusResponse):
-    pass
-
-# Experience models
-class ExperienceRequest(BaseModel):
-    content: str
-    thread_id: Optional[str] = None
-    action_response: str
-    context: Optional[List[MessageContext]] = None
-
-class ExperienceResponse(ChorusResponse):
-    pass
-
-class IntentionRequest(BaseModel):
-    content: str
-    thread_id: Optional[str] = None
-    action_response: str
-    experience_response: str
-    priors: Dict[str, Dict[str, Any]]
-    context: Optional[List[MessageContext]] = None
-
-class IntentionResponse(ChorusResponse):
-    selected_priors: List[str] = Field(
-        default_factory=list,
-        description="IDs of selected relevant priors"
-    )
-
-class ObservationRequest(BaseModel):
-    content: str
-    thread_id: Optional[str] = None
-    action_response: str
-    experience_response: str
-    intention_response: str
-    selected_priors: List[str]
-    priors: Dict[str, Dict[str, Any]]
-    context: Optional[List[MessageContext]] = None
-
-class ObservationResponse(ChorusResponse):
-    pass
-
-class UnderstandingRequest(BaseModel):
-    content: str
-    thread_id: Optional[str] = None
-    action_response: str
-    experience_response: str
-    intention_response: str
-    observation_response: str
-    patterns: List[Dict[str, str]]
-    selected_priors: List[str]
-    context: Optional[List[MessageContext]] = None
-
-class UnderstandingResponse(ChorusResponse):
-    should_yield: bool = Field(..., description="Whether to proceed to yield phase")
-    next_prompt: Optional[str] = Field(None, description="Next prompt if not yielding")
-
-class YieldRequest(BaseModel):
-    content: str
-    thread_id: Optional[str] = None
-    action_response: str
-    experience_response: str
-    intention_response: str
-    observation_response: str
-    understanding_response: str
-    selected_priors: List[str]
-    priors: Dict[str, Dict[str, Any]]
-    context: Optional[List[MessageContext]] = None
-
-class YieldResponse(ChorusResponse):
-    pass

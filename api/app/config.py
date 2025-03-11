@@ -96,7 +96,6 @@ class Config:
     GROQ_DEEPSEEK_R1_DISTILL_LLAMA_70B: str = "deepseek-r1-distill-llama-70b"
 
 
-    MAX_TOKENS: int = 4000
     TEMPERATURE: float = 0.7
 
     # Chunking configuration

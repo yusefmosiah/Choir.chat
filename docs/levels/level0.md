@@ -87,12 +87,8 @@ tree.md
 ├── api
 │   ├── Dockerfile
 │   ├── __init__.py
-│   ├── api
-│   │   └── static
 │   ├── app
 │   │   ├── __init__.py
-│   │   ├── chorus_cycle.py
-│   │   ├── chorus_graph.py
 │   │   ├── config.py
 │   │   ├── database.py
 │   │   ├── langchain_utils.py
@@ -110,8 +106,6 @@ tree.md
 │   │   │   └── simple_graph.py
 │   │   ├── routers
 │   │   │   ├── balance.py
-│   │   │   ├── chorus.py
-│   │   │   ├── embeddings.py
 │   │   │   ├── postchain.py
 │   │   │   ├── threads.py
 │   │   │   ├── users.py
@@ -161,7 +155,6 @@ tree.md
 │       │   ├── run_tests.py
 │       │   ├── test_cases.json
 │       │   ├── test_cases.py
-│       │   ├── test_fast_looping.py
 │       │   ├── test_framework.py
 │       │   ├── test_langgraph_multiturn.py
 │       │   ├── test_langgraph_multiturn_abstracted.py
@@ -172,15 +165,10 @@ tree.md
 │       │   ├── test_simple_multimodel.py
 │       │   ├── test_simple_multimodel_stream.py
 │       │   ├── test_structured_output.py
-│       │   ├── test_structured_output_abstracted.py
 │       │   ├── test_tool_multimodel.py
 │       │   ├── test_tool_random_multimodel.py
 │       │   └── test_utils.py
-│       ├── test_chorus_endpoints.py
-│       ├── test_core_endpoints.py
 │       ├── test_main.py
-│       ├── test_response_schemas.py
-│       ├── test_structured_outputs.py
 │       ├── test_sui_service.py
 │       ├── test_user_thread_endpoints.py
 │       └── tools
@@ -275,7 +263,7 @@ tree.md
     ├── generate_search_report.sh
     └── generate_single_provider_report.sh
 
-63 directories, 197 files
+61 directories, 187 files
 
 === File: docs/CHANGELOG.md ===
 

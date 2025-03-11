@@ -28,7 +28,6 @@ from app.langchain_utils import (
     initialize_model_list,
     initialize_tool_compatible_model_list,
     get_model_provider,
-    astream_langchain_llm_completion,
     post_llm
 )
 
@@ -137,7 +136,7 @@ def create_simple_postchain_graph(
             raise ValueError("No language models available. Please check API keys and configuration.")
 
         # Use the first available model
-        model = models[0]
+        model = models[1]
         logger.info(f"Using model: {model}")
 
     # Initialize the state graph
