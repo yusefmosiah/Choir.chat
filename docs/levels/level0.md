@@ -227,6 +227,15 @@ tree.md
 │   ├── evolution_token.md
 │   ├── fqaho_simulation.md
 │   ├── fqaho_visualization.md
+│   ├── implementation_slices
+│   │   ├── plan_lp_iteration_1.md
+│   │   ├── plan_lp_iteration_2.md
+│   │   ├── plan_lp_iteration_3.md
+│   │   ├── plan_lp_iteration_4.md
+│   │   ├── plan_lp_iteration_5.md
+│   │   ├── plan_lp_iteration_6.md
+│   │   ├── plan_lp_iteration_7.md
+│   │   └── plan_lp_iteration_8.md
 │   ├── levels
 │   │   ├── all.txt
 │   │   ├── level0.md
@@ -264,7 +273,7 @@ tree.md
     ├── generate_search_report.sh
     └── generate_single_provider_report.sh
 
-61 directories, 188 files
+62 directories, 196 files
 
 === File: docs/CHANGELOG.md ===
 
