@@ -62,13 +62,17 @@ class PostchainStreamEvent(BaseModel):
     error: Optional[str] = Field(None, description="Error message if applicable")
 
 # Prompt templates for phases
-ACTION_SYSTEM_PROMPT = """You are an action agent for the initial response to user queries.
+COMMON_SYSTEM_PROMPT = """You are a helpful AI assistant for Choir's PostChain system.
+You provide thoughtful and informative responses to user queries.
+"""
+
+ACTION_INSTRUCTION = """For this Action phase:
 Your task is to provide a clear, informative initial response based solely on the user's query.
 Do not use external tools or references at this stage - just respond with your best knowledge.
 Keep your response concise and focused on the core question.
 """
 
-EXPERIENCE_SYSTEM_PROMPT = """You are an experience agent for Choir's PostChain system.
+EXPERIENCE_INSTRUCTION = """For this Experience phase:
 Review the user's query and the initial action response.
 Your task is to provide a reflective analysis of the action response, adding deeper context and exploring related concepts.
 Consider different angles or interpretations of the query that might not have been addressed in the initial response.
@@ -77,12 +81,9 @@ Consider different angles or interpretations of the query that might not have be
 # Define state type alias
 MessagesState = Dict[str, Any]
 
-def create_system_message(phase: str = "action") -> SystemMessage:
-    """Create a system message for the specified phase."""
-    if phase == "experience":
-        return SystemMessage(content=EXPERIENCE_SYSTEM_PROMPT)
-    else:
-        return SystemMessage(content=ACTION_SYSTEM_PROMPT)
+def create_system_message() -> SystemMessage:
+    """Create a system message with the common system prompt."""
+    return SystemMessage(content=COMMON_SYSTEM_PROMPT)
 
 def create_message_with_phase(content: str, phase: str = "action") -> AIMessage:
     """
@@ -149,7 +150,7 @@ def create_postchain_graph(
             raise ValueError("No language models available. Please check API keys and configuration.")
 
         # Use the first available model
-        model = models[0]
+        model = models[1]
         logger.info(f"Using model: {model}")
 
     # Initialize the state graph with the new state model
@@ -175,11 +176,15 @@ def create_postchain_graph(
             # Get user input from last message
             user_input = state.messages[-1].content if state.messages else ""
 
-            # Process using LLM
-            prompt = f"You are a helpful AI assistant. Please respond to: {user_input}"
+            # Prepend action instructions to the user input for the initial action phase
+            enhanced_user_input = f"<action_instruction>{ACTION_INSTRUCTION}</action_instruction>\n\n{user_input}"
+
+            # Create messages list with common system prompt
+            messages = [create_system_message(), HumanMessage(content=enhanced_user_input)]
+
             # Convert model to a string format that post_llm expects
             model_name = f"{model.provider}/{model.model_name}" if hasattr(model, 'provider') and hasattr(model, 'model_name') else str(model)
-            response = await post_llm(model_name, [SystemMessage(content=ACTION_SYSTEM_PROMPT), HumanMessage(content=user_input)], config)
+            response = await post_llm(model_name, messages, config)
 
             # Update state
             state.phase_outputs["action"] = response.content if hasattr(response, 'content') else str(response)
@@ -230,17 +235,24 @@ def create_postchain_graph(
         try:
             # Get action output
             action_output = state.phase_outputs.get("action", "")
+            user_query = state.messages[-1].content if state.messages else ""
 
-            # For now, just add a simple enhancement
-            # If we need to call the model, use this format:
+            # For subsequent phases like experience, use the instructions as the complete user prompt
+            # This maintains the <system><user><assistant><user> pattern
+            experience_prompt = f"{EXPERIENCE_INSTRUCTION}\n\nUser query: {user_query}\n\nInitial response: {action_output}"
+
+            # Create messages list with common system prompt
+            # We add the previous action response as an assistant message to maintain the proper pattern
+            messages = [
+                create_system_message(),
+                HumanMessage(content=user_query),  # Original user query
+                AIMessage(content=action_output),  # Action phase response
+                HumanMessage(content=experience_prompt)  # Experience phase instructions
+            ]
+
             model_name = f"{model.provider}/{model.model_name}" if hasattr(model, 'provider') and hasattr(model, 'model_name') else str(model)
-            experience_response = await post_llm(model_name, [SystemMessage(content=EXPERIENCE_SYSTEM_PROMPT),
-                                             HumanMessage(content=f"User query: {state.messages[-1].content if state.messages else ''}"),
-                                             AIMessage(content=f"Initial response: {action_output}")], config)
+            experience_response = await post_llm(model_name, messages, config)
             experience_content = experience_response.content if hasattr(experience_response, 'content') else str(experience_response)
-
-            # # For simplicity, we'll just append a generic message
-            # experience_content = f"{action_output}\n\nI hope that helps! Is there anything else you'd like to know?"
 
             # Log for debugging
             log_experience_content(experience_content)
