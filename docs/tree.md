@@ -84,13 +84,12 @@
 │   │   │   └── api.py
 │   │   ├── postchain
 │   │   │   ├── __init__.py
-│   │   │   ├── graph.py
-│   │   │   ├── postchain_graph.py
 │   │   │   ├── provider_info.md
 │   │   │   ├── schemas
 │   │   │   │   ├── __init__.py
 │   │   │   │   └── state.py
 │   │   │   ├── simple_graph.py
+│   │   │   ├── state_manager.py
 │   │   │   └── utils.py
 │   │   ├── routers
 │   │   │   ├── balance.py
@@ -114,7 +113,10 @@
 │   │   │   ├── tavily_search.py
 │   │   │   └── web_search.py
 │   │   └── utils.py
+│   ├── custom_state_manager_test.log
+│   ├── debug_stream_content.log
 │   ├── main.py
+│   ├── postchain_memory_debug.log
 │   ├── postchain_tests.log
 │   ├── pyproject.toml
 │   ├── pytest.ini
@@ -153,7 +155,6 @@
 │       │   ├── test_random_multimodel_stream.py
 │       │   ├── test_simple_multimodel.py
 │       │   ├── test_simple_multimodel_stream.py
-│       │   ├── test_state_management.py
 │       │   ├── test_stream.py
 │       │   ├── test_structured_output.py
 │       │   ├── test_tool_multimodel.py
@@ -264,4 +265,4 @@
     ├── generate_search_report.sh
     └── generate_single_provider_report.sh
 
-62 directories, 200 files
+62 directories, 201 files

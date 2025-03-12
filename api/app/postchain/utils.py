@@ -9,7 +9,7 @@ import uuid
 import logging
 from typing import Dict, Any, List, Optional
 
-from langchain_core.messages import SystemMessage, HumanMessage
+from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
 from langgraph.checkpoint.memory import MemorySaver
 
 from app.postchain.schemas.state import PostChainState
@@ -62,14 +62,27 @@ def load_state(thread_id: str, user_query: str = None) -> PostChainState:
     try:
         existing_state = memory.get_state(config=thread_config)
         if existing_state:
+            # Log message count and types
+            logger.info(f"Loaded thread {thread_id} with {len(existing_state.messages)} messages")
+
+            # Log message details for debugging
+            for i, msg in enumerate(existing_state.messages):
+                msg_type = type(msg).__name__
+                content_preview = msg.content[:50] if hasattr(msg, 'content') else "No content"
+                phase = msg.additional_kwargs.get('phase') if hasattr(msg, 'additional_kwargs') else "No phase"
+                logger.info(f"Message {i}: {msg_type}, phase={phase}, content={content_preview}...")
+
             # Add the new message if provided
             if user_query:
                 existing_state.messages.append(HumanMessage(content=user_query))
+                logger.info(f"Added new user message: {user_query[:50]}...")
+
             return existing_state
     except Exception as e:
         logger.error(f"Error loading state for thread {thread_id}: {e}")
 
     # Create new state if loading failed or no existing state
+    logger.info(f"Creating new thread state for {thread_id}")
     initial_state = PostChainState(
         thread_id=thread_id,
         messages=[SystemMessage(content="You are a helpful AI assistant.")]
@@ -77,6 +90,7 @@ def load_state(thread_id: str, user_query: str = None) -> PostChainState:
 
     if user_query:
         initial_state.messages.append(HumanMessage(content=user_query))
+        logger.info(f"Added initial user message: {user_query[:50]}...")
 
     return initial_state
 
@@ -119,16 +133,32 @@ def format_stream_event(state: PostChainState, content: str = None, error: str =
 
     Args:
         state: The current PostChainState
-        content: Optional content override for the current phase
+        content: Optional explicit content for the current phase (overrides message content)
         error: Optional error message
 
     Returns:
         A formatted event dictionary for streaming
     """
+    # If content isn't provided, try to find it in messages for the current phase
+    event_content = content
+
+    if event_content is None and state.messages:
+        # Look for messages with this phase in metadata
+        for message in reversed(state.messages):
+            if (isinstance(message, AIMessage) and
+                hasattr(message, 'additional_kwargs') and
+                message.additional_kwargs.get('phase') == state.current_phase):
+                event_content = message.content
+                break
+
+    # Still no content, provide empty string
+    if event_content is None:
+        event_content = ""
+
     return {
         "current_phase": state.current_phase,
         "phase_state": state.phase_state.get(state.current_phase, "processing"),
-        "content": content or state.phase_outputs.get(state.current_phase, ""),
+        "content": event_content,
         "thread_id": state.thread_id,
         "error": error or state.error
     }

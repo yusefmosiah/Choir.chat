@@ -96,6 +96,8 @@ def create_message_with_phase(content: str, phase: str = "action") -> AIMessage:
     Returns:
         AIMessage with phase metadata
     """
+    # Log the creation for debugging
+    logger.info(f"Creating message for phase '{phase}' with content: {content[:50]}...")
     return AIMessage(content=content, additional_kwargs={"phase": phase})
 
 def log_experience_content(content, prefix="Experience phase"):
@@ -186,19 +188,35 @@ def create_postchain_graph(
             model_name = f"{model.provider}/{model.model_name}" if hasattr(model, 'provider') and hasattr(model, 'model_name') else str(model)
             response = await post_llm(model_name, messages, config)
 
-            # Update state
-            state.phase_outputs["action"] = response.content if hasattr(response, 'content') else str(response)
+            # Get response content
+            response_content = response.content if hasattr(response, 'content') else str(response)
+
+            # Log the content for debugging
+            logger.info(f"Action phase completed with content: {response_content[:100]}...")
+
+            # Create AI message with phase metadata and add to state
+            ai_message = create_message_with_phase(response_content, "action")
+            state.messages.append(ai_message)
+
+            # Update phase state
             state.phase_state["action"] = "complete"
 
-            # Yield updated state event
-            yield format_stream_event(state)
+            # Create event with explicit content
+            action_event = {
+                "current_phase": "action",
+                "phase_state": "complete",
+                "content": response_content,
+                "thread_id": state.thread_id
+            }
 
-            # Update state for next phase instead of returning
-            state.phase_outputs = {**state.phase_outputs, "action": response.content if hasattr(response, 'content') else str(response)}
+            # Yield event with explicit content rather than using format_stream_event
+            yield action_event
+
+            # Update state for next phase
             state.phase_state = {**state.phase_state, "action": "complete"}
             state.current_phase = "experience"
 
-            # Final yield with state updates (no return needed)
+            # Final yield with state updates
             yield state
 
         except Exception as e:
@@ -209,12 +227,11 @@ def create_postchain_graph(
             yield format_stream_event(state, error=str(e))
 
             # Update state for error case
-            state.phase_outputs = state.phase_outputs
             state.phase_state = {**state.phase_state, "action": "error"}
             state.error = str(e)
             state.current_phase = "yield"  # Skip to end on error
 
-            # Final yield with error state (no return needed)
+            # Final yield with error state
             yield state
 
     # Define Experience Phase Node
@@ -233,12 +250,36 @@ def create_postchain_graph(
         yield format_stream_event(state, content="Enhancing with relevant information...")
 
         try:
-            # Get action output
-            action_output = state.phase_outputs.get("action", "")
-            user_query = state.messages[-1].content if state.messages else ""
+            # Get the action message and user query from messages
+            user_query = ""
+            action_output = ""
+
+            # Find the most recent user message for the query
+            for message in reversed(state.messages):
+                if isinstance(message, HumanMessage):
+                    user_query = message.content
+                    break
+
+            # Find the most recent action message for action output
+            for message in reversed(state.messages):
+                if (isinstance(message, AIMessage) and
+                    hasattr(message, 'additional_kwargs') and
+                    message.additional_kwargs.get('phase') == 'action'):
+                    action_output = message.content
+                    break
+
+            # Fallbacks if we couldn't find messages
+            if not user_query:
+                user_query = "No user query found"
+                logger.warning("No user query found in messages")
+
+            if not action_output:
+                action_output = "No action output found"
+                logger.warning("No action output found in messages")
+            else:
+                logger.info(f"Found action output: {action_output[:50]}...")
 
             # For subsequent phases like experience, use the instructions as the complete user prompt
-            # This maintains the <system><user><assistant><user> pattern
             experience_prompt = f"{EXPERIENCE_INSTRUCTION}\n\nUser query: {user_query}\n\nInitial response: {action_output}"
 
             # Create messages list with common system prompt
@@ -257,35 +298,47 @@ def create_postchain_graph(
             # Log for debugging
             log_experience_content(experience_content)
 
-            # Update state
-            state.phase_outputs["experience"] = experience_content
+            # Create AI message with phase metadata and add to state
+            experience_message = create_message_with_phase(experience_content, "experience")
+            state.messages.append(experience_message)
+
+            # Update phase state
             state.phase_state["experience"] = "complete"
 
-            # Yield updated state event
-            yield format_stream_event(state)
+            # Create event with explicit content
+            experience_event = {
+                "current_phase": "experience",
+                "phase_state": "complete",
+                "content": experience_content,
+                "thread_id": state.thread_id
+            }
 
-            # Update state for next phase instead of returning
-            state.phase_outputs = {**state.phase_outputs, "experience": experience_content}
+            # Yield event with explicit content rather than using format_stream_event
+            yield experience_event
+
+            # Update state for next phase
             state.phase_state = {**state.phase_state, "experience": "complete"}
             state.current_phase = "yield"
 
-            # Final yield with state updates (no return needed)
+            # Final yield with state updates
             yield state
 
         except Exception as e:
             # Handle error
             handle_phase_error(state, "experience", e)
 
+            # Log the error details
+            logger.error(f"Experience phase error: {str(e)}", exc_info=True)
+
             # Yield error event
             yield format_stream_event(state, error=str(e))
 
             # Update state for error case
-            state.phase_outputs = state.phase_outputs
             state.phase_state = {**state.phase_state, "experience": "error"}
             state.error = str(e)
             state.current_phase = "yield"  # Skip to end on error
 
-            # Final yield with error state (no return needed)
+            # Final yield with error state
             yield state
 
     # Add nodes to the graph
@@ -368,17 +421,43 @@ async def stream_simple_postchain(
                 if node_name not in ["action", "experience"]:
                     continue
 
-                # Extract phase content
+                logger.info(f"Processing node {node_name} updates: {str(node_updates)[:200]}...")
+
+                # Attempt to find content from multiple sources
                 phase_content = ""
-                if "phase_outputs" in node_updates and node_name in node_updates["phase_outputs"]:
-                    phase_content = node_updates["phase_outputs"][node_name]
+
+                # First check explicit content in any format_stream_event calls
+                if "stream_events" in node_updates:
+                    for event in node_updates["stream_events"]:
+                        if isinstance(event, dict) and "content" in event and event["content"]:
+                            phase_content = event.get("content", "")
+                            logger.info(f"Found content in stream_events: {phase_content[:50]}...")
+                            break
+
+                # Next check messages if they were updated
+                if phase_content == "" and "messages" in node_updates and node_updates["messages"]:
+                    # Look for most recent AI message with this phase
+                    messages = node_updates["messages"]
+                    for msg in reversed(messages):
+                        if (isinstance(msg, AIMessage) and
+                            hasattr(msg, 'additional_kwargs') and
+                            msg.additional_kwargs.get('phase') == node_name):
+                            phase_content = msg.content
+                            logger.info(f"Found content in messages: {phase_content[:50]}...")
+                            break
+
+                # Log if we still have no content
+                if phase_content == "":
+                    logger.warning(f"No content found for {node_name} phase in node updates")
+                    # Debug log all keys in the update to help troubleshoot
+                    logger.debug(f"Available keys in node update: {list(node_updates.keys())}")
 
                 # Check phase state
                 phase_state = "processing"
                 if "phase_state" in node_updates and node_name in node_updates["phase_state"]:
                     phase_state = node_updates["phase_state"][node_name]
 
-                # Yield phase update event
+                # Yield phase update event with any content we found
                 yield {
                     "current_phase": node_name,
                     "phase_state": phase_state,

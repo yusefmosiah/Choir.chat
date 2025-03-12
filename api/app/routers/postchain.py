@@ -18,7 +18,6 @@ from app.postchain.utils import validate_thread_id, recover_state
 class SimplePostChainRequest(BaseModel):
     user_query: str = Field(..., description="The user's input query")
     thread_id: Optional[str] = Field(None, description="Optional thread ID for persistence")
-    stream: bool = Field(False, description="Whether to stream the response")
 
 class RecoverThreadRequest(BaseModel):
     thread_id: str = Field(..., description="Thread ID to recover")
@@ -43,58 +42,30 @@ async def process_simple_postchain(
     Process a request through the PostChain.
 
     This endpoint provides a PostChain response with Action and Experience phases.
-    Always streams updates for each phase, with format appropriate for the client's needs.
+    Always streams updates for each phase.
     """
     # Validate thread ID
     thread_id = validate_thread_id(request.thread_id)
 
     try:
-        # Set up streaming response
-        if request.stream:
-            # Client-side streaming (SSE format)
-            async def stream_generator():
-                async for chunk in stream_simple_postchain(
-                    user_query=request.user_query,
-                    config=config,
-                    thread_id=thread_id
-                ):
-                    # Convert chunk to JSON and yield with newline for proper SSE formatting
-                    yield f"data: {json.dumps(chunk)}\n\n"
-
-                # End of stream
-                yield "data: [DONE]\n\n"
-
-            # Return streaming response
-            return StreamingResponse(
-                stream_generator(),
-                media_type="text/event-stream"
-            )
-        else:
-            # For non-streaming clients, we still use the streaming function but collect all results
-            results = []
-            final_phase_outputs = {"action": "", "experience": ""}
-
+        # Client-side streaming (SSE format)
+        async def stream_generator():
             async for chunk in stream_simple_postchain(
                 user_query=request.user_query,
                 config=config,
                 thread_id=thread_id
             ):
-                results.append(chunk)
+                # Convert chunk to JSON and yield with newline for proper SSE formatting
+                yield f"data: {json.dumps(chunk)}\n\n"
 
-                # Keep track of the latest content for each phase
-                if chunk.get("phase_state") in ["processing", "complete"]:
-                    phase = chunk.get("current_phase")
-                    content = chunk.get("content", "")
-                    if phase in ["action", "experience"] and content:
-                        final_phase_outputs[phase] = content
+            # End of stream
+            yield "data: [DONE]\n\n"
 
-            # Return the final state as a single response
-            return {
-                "status": "success",
-                "phase_outputs": final_phase_outputs,
-                "user_query": request.user_query,
-                "thread_id": thread_id
-            }
+        # Return streaming response
+        return StreamingResponse(
+            stream_generator(),
+            media_type="text/event-stream"
+        )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error processing PostChain: {str(e)}")
 
