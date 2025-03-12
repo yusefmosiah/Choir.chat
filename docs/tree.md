@@ -35,16 +35,18 @@
 │   │   └── WalletManager.swift
 │   ├── ViewModels
 │   │   └── PostchainViewModel.swift
-│   └── Views
-│       ├── ChoirThreadDetailView.swift
-│       ├── Components
-│       ├── MessageRow.swift
-│       ├── PostchainView.swift
-│       ├── Thread
-│       │   └── Components
-│       │       ├── ThreadInputBar.swift
-│       │       └── ThreadMessageList.swift
-│       └── WalletView.swift
+│   ├── Views
+│   │   ├── ChoirThreadDetailView.swift
+│   │   ├── Components
+│   │   ├── MessageRow.swift
+│   │   ├── PostchainView.swift
+│   │   ├── Thread
+│   │   │   └── Components
+│   │   │       ├── ThreadInputBar.swift
+│   │   │       └── ThreadMessageList.swift
+│   │   └── WalletView.swift
+│   └── actor_model
+│       └── phase_worker_pool.py
 ├── Choir.xcodeproj
 │   ├── project.pbxproj
 │   ├── project.xcworkspace
@@ -71,6 +73,8 @@
 ├── ChoirUITests
 │   ├── ChoirUITests.swift
 │   └── ChoirUITestsLaunchTests.swift
+├── README.md
+├── actor_model.py
 ├── api
 │   ├── Dockerfile
 │   ├── __init__.py
@@ -84,7 +88,7 @@
 │   │   │   └── api.py
 │   │   ├── postchain
 │   │   │   ├── __init__.py
-│   │   │   ├── provider_info.md
+│   │   │   ├── checkpointer.py
 │   │   │   ├── schemas
 │   │   │   │   ├── __init__.py
 │   │   │   │   └── state.py
@@ -122,18 +126,6 @@
 │   ├── pytest.ini
 │   ├── requirements.txt
 │   ├── run_tests.sh
-│   ├── test_reports
-│   │   └── groq
-│   │       ├── deepseek_r1_distill_llama_70b_specdec_super_bowl_search_20250307_180115.json
-│   │       ├── deepseek_r1_distill_llama_70b_specdec_super_bowl_search_20250307_180115.md
-│   │       ├── deepseek_r1_distill_llama_70b_super_bowl_search_20250307_180124.json
-│   │       ├── deepseek_r1_distill_llama_70b_super_bowl_search_20250307_180124.md
-│   │       ├── deepseek_r1_distill_qwen_32b_super_bowl_search_20250307_180112.json
-│   │       ├── deepseek_r1_distill_qwen_32b_super_bowl_search_20250307_180112.md
-│   │       ├── llama_3.3_70b_versatile_super_bowl_search_20250307_180054.json
-│   │       ├── llama_3.3_70b_versatile_super_bowl_search_20250307_180054.md
-│   │       ├── qwen_qwq_32b_super_bowl_search_20250307_180055.json
-│   │       └── qwen_qwq_32b_super_bowl_search_20250307_180055.md
 │   └── tests
 │       ├── __init__.py
 │       ├── conftest.py
@@ -209,25 +201,19 @@
 ├── docker-compose.yml
 ├── docs
 │   ├── CHANGELOG.md
+│   ├── comp_provider_info.md
 │   ├── core_core.md
 │   ├── core_economics.md
 │   ├── core_state_transitions.md
 │   ├── data_engine_model.md
+│   ├── documentation_index.md
 │   ├── e_business.md
 │   ├── e_concept.md
 │   ├── evolution_naming.md
+│   ├── evolution_stack.md
 │   ├── evolution_token.md
 │   ├── fqaho_simulation.md
 │   ├── fqaho_visualization.md
-│   ├── implementation_slices
-│   │   ├── plan_lp_iteration_1.md
-│   │   ├── plan_lp_iteration_2.md
-│   │   ├── plan_lp_iteration_3.md
-│   │   ├── plan_lp_iteration_4.md
-│   │   ├── plan_lp_iteration_5.md
-│   │   ├── plan_lp_iteration_6.md
-│   │   ├── plan_lp_iteration_7.md
-│   │   └── plan_lp_iteration_8.md
 │   ├── levels
 │   │   ├── all.txt
 │   │   ├── level0.md
@@ -236,33 +222,37 @@
 │   │   ├── level3.md
 │   │   ├── level4.md
 │   │   └── level5.md
+│   ├── migration_langgraph_to_actor.md
+│   ├── phase_worker_pool_architecture.md
 │   ├── plan_anonymity_by_default.md
 │   ├── plan_identity_as_a_service.md
-│   ├── plan_langgraph_postchain.md
-│   ├── plan_langgraph_postchain_iteration.md
 │   ├── plan_libsql.md
 │   ├── plan_model_config_checklist.md
-│   ├── plan_postchain_checklist.md
-│   ├── plan_postchain_graph_api_checklist.md
-│   ├── plan_postchain_migration_checklist.md
-│   ├── plan_tools_qdrant_checklist.md
-│   ├── plan_tools_search_checklist.md
+│   ├── postchain_actor_model.md
 │   ├── scripts
 │   │   ├── combiner.sh
 │   │   └── update_tree.sh
+│   ├── security_considerations.md
+│   ├── stack_argument.md
+│   ├── stack_pivot_summary.md
 │   └── tree.md
+├── examples
+│   └── phase_worker_pool_demo.py
 ├── frontend
 ├── notebooks
 │   ├── fqaho_simulation.ipynb
 │   ├── post_chain0.ipynb
 │   └── vowel_loop3.ipynb
+├── post_chain_actors.py
 ├── postchain_tests.log
 ├── render.yaml
 ├── reports
-└── scripts
-    ├── generate_provider_reports.sh
-    ├── generate_quick_search_report.sh
-    ├── generate_search_report.sh
-    └── generate_single_provider_report.sh
+├── run_post_chain.py
+├── scripts
+│   ├── generate_provider_reports.sh
+│   ├── generate_quick_search_report.sh
+│   ├── generate_search_report.sh
+│   └── generate_single_provider_report.sh
+└── turso_integration.py
 
-62 directories, 201 files
+61 directories, 192 files

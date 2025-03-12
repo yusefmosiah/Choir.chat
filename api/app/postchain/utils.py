@@ -10,9 +10,9 @@ import logging
 from typing import Dict, Any, List, Optional
 
 from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
-from langgraph.checkpoint.memory import MemorySaver
 
 from app.postchain.schemas.state import PostChainState
+from app.postchain.state_manager import GLOBAL_STATE_MANAGER
 
 # Configure logging
 logger = logging.getLogger("postchain_utils")
@@ -25,12 +25,17 @@ def validate_thread_id(thread_id: str) -> str:
         thread_id: The thread ID to validate
 
     Returns:
-        A normalized UUID string
+        A normalized UUID string or the original if it's a test ID
 
     If the thread ID is invalid or None, a new UUID is generated.
     """
     if not thread_id:
         return str(uuid.uuid4())
+
+    # Special handling for test IDs
+    if thread_id.startswith('test-'):
+        logger.info(f"Using test thread ID: {thread_id}")
+        return thread_id
 
     # Check if valid UUID format
     try:
@@ -53,14 +58,11 @@ def load_state(thread_id: str, user_query: str = None) -> PostChainState:
         The loaded or newly created PostChainState
     """
     thread_id = validate_thread_id(thread_id)
-    memory = MemorySaver()
-    memory_key = f"postchain_{thread_id}"
 
-    # Configure thread for loading
-    thread_config = {"configurable": {"thread_id": thread_id, "checkpoint_id": memory_key}}
+    # Get state from state manager instead of MemorySaver
+    existing_state = GLOBAL_STATE_MANAGER.get_state(thread_id)
 
     try:
-        existing_state = memory.get_state(config=thread_config)
         if existing_state:
             # Log message count and types
             logger.info(f"Loaded thread {thread_id} with {len(existing_state.messages)} messages")
@@ -105,14 +107,10 @@ def recover_state(thread_id: str) -> Optional[PostChainState]:
         The recovered PostChainState or None if recovery failed
     """
     thread_id = validate_thread_id(thread_id)
-    memory = MemorySaver()
-    memory_key = f"postchain_{thread_id}"
 
-    # Configure thread for loading
-    thread_config = {"configurable": {"thread_id": thread_id, "checkpoint_id": memory_key}}
-
+    # Use state manager instead of MemorySaver
     try:
-        existing_state = memory.get_state(config=thread_config)
+        existing_state = GLOBAL_STATE_MANAGER.get_state(thread_id)
         if existing_state:
             # Mark any "processing" phases as "error" to indicate interruption
             for phase in existing_state.phase_state:

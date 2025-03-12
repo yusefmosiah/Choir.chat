@@ -43,3 +43,6 @@ class PostChainState(BaseModel):
         None,
         description="Error message if any"
     )
+
+    class Config:
+        arbitrary_types_allowed = True

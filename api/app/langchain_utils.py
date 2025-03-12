@@ -484,6 +484,109 @@ def is_temperature_compatible(model_name: str) -> bool:
     # Default: most models support temperature
     return True
 
+def _convert_serialized_messages(messages):
+    """
+    Convert serialized message dictionaries back into proper LangChain message objects.
+
+    Args:
+        messages: A list of messages that might be serialized dictionaries or already BaseMessage objects
+
+    Returns:
+        A list of properly converted LangChain message objects
+    """
+    converted_messages = []
+
+    for msg in messages:
+        # If it's already a BaseMessage, keep it as is
+        if isinstance(msg, BaseMessage):
+            converted_messages.append(msg)
+            continue
+
+        try:
+            # Handle dictionary-like objects with a 'type' field
+            if hasattr(msg, 'get') and callable(msg.get):
+                msg_type = None
+                content = ""
+                additional_kwargs = {}
+
+                # Check if it has a 'type' field
+                if hasattr(msg, 'type'):
+                    msg_type = msg.type
+                elif 'type' in msg:
+                    msg_type = msg['type']
+
+                # Extract content
+                if hasattr(msg, 'content'):
+                    content = msg.content
+                elif 'content' in msg:
+                    content = msg['content']
+
+                # Extract additional kwargs
+                if hasattr(msg, 'additional_kwargs'):
+                    additional_kwargs = msg.additional_kwargs
+                elif 'additional_kwargs' in msg:
+                    additional_kwargs = msg['additional_kwargs']
+
+                # Create appropriate message type based on the 'type' field
+                if msg_type == 'human' or msg_type == 'HumanMessage':
+                    converted_messages.append(HumanMessage(content=content, additional_kwargs=additional_kwargs))
+                elif msg_type == 'ai' or msg_type == 'AIMessage':
+                    converted_messages.append(AIMessage(content=content, additional_kwargs=additional_kwargs))
+                elif msg_type == 'system' or msg_type == 'SystemMessage':
+                    converted_messages.append(SystemMessage(content=content, additional_kwargs=additional_kwargs))
+                else:
+                    # Default to HumanMessage if type is unknown
+                    logger.warning(f"Unknown message type: {msg_type}, defaulting to HumanMessage")
+                    converted_messages.append(HumanMessage(content=content, additional_kwargs=additional_kwargs))
+            else:
+                # If it's not a dictionary-like object, convert it to a string and create a HumanMessage
+                logger.warning(f"Unknown message format: {type(msg)}, converting to string")
+                converted_messages.append(HumanMessage(content=str(msg)))
+        except Exception as e:
+            # If there's any error in conversion, log it and create a fallback HumanMessage
+            logger.warning(f"Error converting message: {e}, using fallback conversion")
+            try:
+                # Try to extract content if possible
+                if hasattr(msg, 'content'):
+                    content = msg.content
+                elif isinstance(msg, dict) and 'content' in msg:
+                    content = msg['content']
+                else:
+                    content = str(msg)
+
+                converted_messages.append(HumanMessage(content=content))
+            except:
+                # Last resort fallback
+                converted_messages.append(HumanMessage(content=str(msg)))
+
+    return converted_messages
+
+def get_provider_from_model_name(model_name: str) -> str:
+    """
+    Extract the provider from a model name.
+
+    Args:
+        model_name: The model name in the format "provider/model"
+
+    Returns:
+        The provider name
+    """
+    if "/" in model_name:
+        return model_name.split("/")[0]
+
+    # Default mappings for models without explicit provider
+    if model_name.startswith("gpt-"):
+        return "openai"
+    elif model_name.startswith("claude-"):
+        return "anthropic"
+    elif model_name.startswith("gemini-"):
+        return "google"
+    elif model_name.startswith("mistral-"):
+        return "mistral"
+
+    # Default to openai if unknown
+    return "openai"
+
 async def post_llm(
     model_name: str,
     messages: List[BaseMessage],
@@ -514,6 +617,13 @@ async def post_llm(
     # Extract provider from model name
     provider, provider_model = get_model_provider(model_name)
     logger.debug(f"Using {provider}/{provider_model} for completion")
+
+    # Convert any serialized messages to proper LangChain message objects
+    try:
+        messages = _convert_serialized_messages(messages)
+    except Exception as e:
+        logger.error(f"Error converting messages: {e}")
+        # If conversion fails, try to proceed with original messages
 
     # Check temperature compatibility
     if temperature is not None and not is_temperature_compatible(model_name):

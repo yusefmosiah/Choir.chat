@@ -1,5 +1,40 @@
 # Changelog
 
+## [Unreleased] - 2025-03-12
+
+### Changed
+
+- Major architectural pivot: Shifted from LangGraph to Actor Model architecture
+  - Adopted Thespian actor framework for agent communication
+  - Implemented Phase Worker Pool pattern for modality support
+  - Added libSQL/Turso for combined SQL+vector storage
+  - Integrated PySUI for blockchain operations
+  - Established Docker+Phala deployment pipeline
+  - Preserved FQAHO economic model intact
+
+### Added
+
+- Defined new coherent technology stack:
+
+  - Thespian: Actor model framework for agent interactions
+  - libSQL/Turso: Combined SQL+vector database for state and RAG
+  - PySUI: Blockchain integration for tokenomics and citations
+  - Pydantic: Type safety for message passing between actors
+  - FastAPI/Uvicorn: High-performance async API layer
+  - Docker: Containerization for deployment
+  - Phala Network: Privacy-preserving computation platform for deployment
+
+- Extended the actor model with Phase Worker Pool pattern:
+  - Phases are now implemented as types (not just single instances)
+  - Actor implementations can be specialized by modality (text, audio, video, code)
+  - Worker Pool pattern abstracts AI models from actor implementations
+  - Support for specialized domain actors (medical, legal, financial)
+
+### Removed
+
+- Deprecated LangGraph dependency due to persistent memory management issues
+- Simplified architecture by eliminating graph-based state management complexities
+
 ## [2025-02-25] - 2025-02-25
 
 ### Added

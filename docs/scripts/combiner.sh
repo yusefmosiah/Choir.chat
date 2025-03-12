@@ -88,6 +88,10 @@ for doc in docs/*.md; do
     if ! grep -q "^$doc$" "/tmp/processed_files.txt"; then
         echo "$doc"
         uncategorized=$((uncategorized + 1))
+        # Append uncategorized files to all.txt
+        echo -e "\n=== File: $doc ===\n" >> docs/levels/all.txt
+        add_separator "$(basename "$doc" .md)" >> docs/levels/all.txt
+        cat "$doc" >> docs/levels/all.txt
     fi
 done
 
