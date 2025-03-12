@@ -103,7 +103,8 @@ tree.md
 │   │   │   ├── schemas
 │   │   │   │   ├── __init__.py
 │   │   │   │   └── state.py
-│   │   │   └── simple_graph.py
+│   │   │   ├── simple_graph.py
+│   │   │   └── utils.py
 │   │   ├── routers
 │   │   │   ├── balance.py
 │   │   │   ├── postchain.py
@@ -158,12 +159,15 @@ tree.md
 │       │   ├── test_framework.py
 │       │   ├── test_langgraph_multiturn.py
 │       │   ├── test_langgraph_multiturn_abstracted.py
+│       │   ├── test_multiturn.py
 │       │   ├── test_providers.py
 │       │   ├── test_providers_abstracted.py
 │       │   ├── test_random_multimodel.py
 │       │   ├── test_random_multimodel_stream.py
 │       │   ├── test_simple_multimodel.py
 │       │   ├── test_simple_multimodel_stream.py
+│       │   ├── test_state_management.py
+│       │   ├── test_stream.py
 │       │   ├── test_structured_output.py
 │       │   ├── test_tool_multimodel.py
 │       │   ├── test_tool_random_multimodel.py
@@ -273,7 +277,7 @@ tree.md
     ├── generate_search_report.sh
     └── generate_single_provider_report.sh
 
-62 directories, 196 files
+62 directories, 200 files
 
 === File: docs/CHANGELOG.md ===
 
