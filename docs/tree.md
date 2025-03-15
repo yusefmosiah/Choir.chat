@@ -217,6 +217,14 @@
 │   │   ├── developer_quickstart.md
 │   │   ├── message_protocol_reference.md
 │   │   ├── migration_guide_for_developers.md
+│   │   ├── phase_requirements
+│   │   │   ├── action_phase.md
+│   │   │   ├── experience_phase.md
+│   │   │   ├── intention_phase.md
+│   │   │   ├── observation_phase.md
+│   │   │   ├── phase_requirements_index.md
+│   │   │   ├── understanding_phase.md
+│   │   │   └── yield_phase.md
 │   │   └── state_management_patterns.md
 │   ├── 4-integration
 │   │   ├── blockchain_integration.md
@@ -285,4 +293,4 @@
     ├── generate_search_report.sh
     └── generate_single_provider_report.sh
 
-65 directories, 218 files
+66 directories, 225 files
