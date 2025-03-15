@@ -200,7 +200,43 @@
 │           └── choir_coin_tests.move
 ├── docker-compose.yml
 ├── docs
+│   ├── 1-concepts
+│   │   ├── actor_model_overview.md
+│   │   ├── postchain_conceptual_model.md
+│   │   └── scale_free_actor_architecture.md
+│   ├── 2-architecture
+│   │   ├── actor_hierarchy_diagram.md
+│   │   ├── actor_system_diagram.md
+│   │   ├── message_flow_diagrams.md
+│   │   ├── phase_worker_pool.md
+│   │   ├── stack_argument.md
+│   │   └── state_management_overview.md
+│   ├── 3-implementation
+│   │   ├── actor_debugging_guide.md
+│   │   ├── actor_implementation_guide.md
+│   │   ├── actor_testing_guide.md
+│   │   ├── developer_quickstart.md
+│   │   ├── message_protocol_reference.md
+│   │   ├── migration_guide_for_developers.md
+│   │   └── state_management_patterns.md
+│   ├── 4-integration
+│   │   ├── blockchain_integration.md
+│   │   ├── identity_service.md
+│   │   └── libsql_integration.md
+│   ├── 5-operations
+│   │   ├── deployment_guide.md
+│   │   ├── monitoring_observability.md
+│   │   └── testing_strategy.md
+│   ├── 6-business
+│   │   ├── anonymity_by_default.md
+│   │   ├── business_model.md
+│   │   └── evolution_token.md
 │   ├── CHANGELOG.md
+│   ├── README.md
+│   ├── architecture_reorganization_checklist.md
+│   ├── architecture_reorganization_plan.md
+│   ├── architecture_transformation_checklist.md
+│   ├── architecture_transition_narrative.md
 │   ├── comp_provider_info.md
 │   ├── core_core.md
 │   ├── core_economics.md
@@ -214,6 +250,7 @@
 │   ├── evolution_token.md
 │   ├── fqaho_simulation.md
 │   ├── fqaho_visualization.md
+│   ├── index.md
 │   ├── levels
 │   │   ├── all.txt
 │   │   ├── level0.md
@@ -222,6 +259,7 @@
 │   │   ├── level3.md
 │   │   ├── level4.md
 │   │   └── level5.md
+│   ├── migration_guide_for_developers.md
 │   ├── migration_langgraph_to_actor.md
 │   ├── phase_worker_pool_architecture.md
 │   ├── plan_anonymity_by_default.md
@@ -231,6 +269,8 @@
 │   ├── postchain_actor_model.md
 │   ├── scripts
 │   │   ├── combiner.sh
+│   │   ├── move_docs.sh
+│   │   ├── reorganization_script_design.md
 │   │   └── update_tree.sh
 │   ├── security_considerations.md
 │   ├── stack_argument.md
@@ -238,15 +278,12 @@
 │   └── tree.md
 ├── examples
 │   └── phase_worker_pool_demo.py
-├── frontend
 ├── notebooks
 │   ├── fqaho_simulation.ipynb
 │   ├── post_chain0.ipynb
 │   └── vowel_loop3.ipynb
 ├── post_chain_actors.py
-├── postchain_tests.log
 ├── render.yaml
-├── reports
 ├── run_post_chain.py
 ├── scripts
 │   ├── generate_provider_reports.sh
@@ -255,4 +292,4 @@
 │   └── generate_single_provider_report.sh
 └── turso_integration.py
 
-61 directories, 192 files
+65 directories, 225 files

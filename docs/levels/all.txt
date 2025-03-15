@@ -213,7 +213,43 @@ tree.md
 │           └── choir_coin_tests.move
 ├── docker-compose.yml
 ├── docs
+│   ├── 1-concepts
+│   │   ├── actor_model_overview.md
+│   │   ├── postchain_conceptual_model.md
+│   │   └── scale_free_actor_architecture.md
+│   ├── 2-architecture
+│   │   ├── actor_hierarchy_diagram.md
+│   │   ├── actor_system_diagram.md
+│   │   ├── message_flow_diagrams.md
+│   │   ├── phase_worker_pool.md
+│   │   ├── stack_argument.md
+│   │   └── state_management_overview.md
+│   ├── 3-implementation
+│   │   ├── actor_debugging_guide.md
+│   │   ├── actor_implementation_guide.md
+│   │   ├── actor_testing_guide.md
+│   │   ├── developer_quickstart.md
+│   │   ├── message_protocol_reference.md
+│   │   ├── migration_guide_for_developers.md
+│   │   └── state_management_patterns.md
+│   ├── 4-integration
+│   │   ├── blockchain_integration.md
+│   │   ├── identity_service.md
+│   │   └── libsql_integration.md
+│   ├── 5-operations
+│   │   ├── deployment_guide.md
+│   │   ├── monitoring_observability.md
+│   │   └── testing_strategy.md
+│   ├── 6-business
+│   │   ├── anonymity_by_default.md
+│   │   ├── business_model.md
+│   │   └── evolution_token.md
 │   ├── CHANGELOG.md
+│   ├── README.md
+│   ├── architecture_reorganization_checklist.md
+│   ├── architecture_reorganization_plan.md
+│   ├── architecture_transformation_checklist.md
+│   ├── architecture_transition_narrative.md
 │   ├── comp_provider_info.md
 │   ├── core_core.md
 │   ├── core_economics.md
@@ -227,6 +263,7 @@ tree.md
 │   ├── evolution_token.md
 │   ├── fqaho_simulation.md
 │   ├── fqaho_visualization.md
+│   ├── index.md
 │   ├── levels
 │   │   ├── all.txt
 │   │   ├── level0.md
@@ -235,6 +272,7 @@ tree.md
 │   │   ├── level3.md
 │   │   ├── level4.md
 │   │   └── level5.md
+│   ├── migration_guide_for_developers.md
 │   ├── migration_langgraph_to_actor.md
 │   ├── phase_worker_pool_architecture.md
 │   ├── plan_anonymity_by_default.md
@@ -244,6 +282,8 @@ tree.md
 │   ├── postchain_actor_model.md
 │   ├── scripts
 │   │   ├── combiner.sh
+│   │   ├── move_docs.sh
+│   │   ├── reorganization_script_design.md
 │   │   └── update_tree.sh
 │   ├── security_considerations.md
 │   ├── stack_argument.md
@@ -251,15 +291,12 @@ tree.md
 │   └── tree.md
 ├── examples
 │   └── phase_worker_pool_demo.py
-├── frontend
 ├── notebooks
 │   ├── fqaho_simulation.ipynb
 │   ├── post_chain0.ipynb
 │   └── vowel_loop3.ipynb
 ├── post_chain_actors.py
-├── postchain_tests.log
 ├── render.yaml
-├── reports
 ├── run_post_chain.py
 ├── scripts
 │   ├── generate_provider_reports.sh
@@ -268,7 +305,7 @@ tree.md
 │   └── generate_single_provider_report.sh
 └── turso_integration.py
 
-61 directories, 192 files
+65 directories, 225 files
 
 === File: docs/CHANGELOG.md ===
 
@@ -2082,6 +2119,832 @@ The CHIP token has transcended its initial conception as a mere utility token. I
 The evolution of CHIP from a utility token to a multifaceted representation of value and participation is a testament to the dynamic and emergent nature of the Choir platform. It reflects a deeper understanding of the relationship between technology, economics, and human collaboration.
 
 
+=== File: docs/README.md ===
+
+
+
+==
+README
+==
+
+
+# Choir Documentation
+
+## Documentation Reorganization: From Graphs to Actors
+
+Choir has undergone a significant architectural pivot from a graph-based to an actor-based architecture. This document explains the documentation reorganization that accompanies this architectural change.
+
+## Why We're Reorganizing
+
+The shift from LangGraph to an actor model represents more than just a technical implementation change—it reflects a fundamental rethinking of how we conceptualize and build AI systems. Our documentation needed to evolve alongside this architectural shift to:
+
+1. **Reflect the actor model paradigm** - Providing mental models that align with actor-based thinking
+2. **Organize information coherently** - Creating a logical progression from concepts to implementation
+3. **Support both new and existing users** - Making the transition smoother for those familiar with the previous architecture
+4. **Enable future extensions** - Building a documentation structure that can grow with the system
+
+## New Documentation Structure
+
+The documentation has been reorganized into a clear, hierarchical structure:
+
+### 1. Core Concepts
+
+Fundamental ideas that remain consistent regardless of implementation:
+
+- [Actor Model Overview](1-concepts/actor_model_overview.md) - Introduction to the actor model
+- [Scale-Free Actor Architecture](1-concepts/scale_free_actor_architecture.md) - Fractal patterns in actor systems
+- [PostChain Conceptual Model](postchain_actor_model.md) - The core AEIOU-Y framework
+
+### 2. Architecture
+
+Detailed information about the actor-based architecture:
+
+- [Actor System Diagrams](2-architecture/actor_system_diagram.md) - Visual representations of the actor system
+- [Architecture Transition Narrative](architecture_transition_narrative.md) - The story of our architectural evolution
+- [Stack Argument](stack_argument.md) - Rationale for our technology choices
+
+### 3. Implementation
+
+Practical guidance for implementing actor-based systems:
+
+- [Developer Quickstart](3-implementation/developer_quickstart.md) - Fast onboarding guide
+- [Message Protocol Reference](message_protocol_reference.md) - Comprehensive message format documentation
+- [State Management Patterns](3-implementation/state_management_patterns.md) - Best practices for actor state
+
+### 4-6. Integration, Operations, Business
+
+Additional sections covering integration with external systems, operational concerns, and business aspects.
+
+## Documentation as Code
+
+Our documentation follows these principles:
+
+1. **Version Control** - Documentation evolves alongside code
+2. **Markdown Format** - All documents use Markdown for consistency and readability
+3. **Diagrams as Code** - Architecture diagrams use Mermaid.js for maintainability
+4. **Clear Hierarchy** - Numbered directories create a logical progression
+
+## Navigation
+
+The primary entry point is [index.md](index.md), which provides links to all major sections.
+
+For a chronological view of Choir's evolution, see the [CHANGELOG.md](CHANGELOG.md).
+
+## The Meta-Story
+
+This documentation reorganization represents more than just moving files—it embodies our shift toward thinking in terms of actors, messages, and encapsulated state. The structure itself reflects the actor model's principles:
+
+- **Isolation** - Each document has a clear, focused purpose
+- **Message-Based** - Documents reference each other through explicit links
+- **Hierarchy** - Clear organization from abstract concepts to concrete implementation
+
+By reorganizing our documentation in this way, we aim to make the actor model more intuitive and accessible, helping users understand not just how to use the system, but why it's designed this way.
+
+## Contributing to Documentation
+
+If you'd like to contribute to the documentation:
+
+1. Review the [Architecture Reorganization Plan](architecture_reorganization_plan.md)
+2. Follow the existing folder structure and naming conventions
+3. Use Markdown for all documentation
+4. Include diagrams using Mermaid.js where appropriate
+5. Submit a pull request with your changes
+
+## Feedback
+
+This documentation reorganization is an ongoing process. If you have suggestions, questions, or feedback about the documentation structure, please open an issue on our GitHub repository.
+
+=== File: docs/architecture_reorganization_checklist.md ===
+
+
+
+==
+architecture_reorganization_checklist
+==
+
+
+# Architecture Reorganization Checklist
+
+This checklist tracks the implementation of Choir's documentation reorganization to support the transition from a graph-based to an actor-based architecture.
+
+## Phase 1: Directory Structure Setup
+
+**Status: Complete**
+
+- [x] Create `docs/1-concepts` directory
+- [x] Create `docs/2-architecture` directory
+- [x] Create `docs/3-implementation` directory
+- [x] Create `docs/4-integration` directory
+- [x] Create `docs/5-operations` directory
+- [x] Create `docs/6-business` directory
+- [x] Create `docs/7-archived` directory
+
+## Phase 2: Core Architecture Documentation
+
+**Status: Complete**
+
+- [x] Create Actor Model Overview
+- [x] Create Architecture Transition Narrative
+- [x] Create System Architecture Overview
+- [x] Create Actor Hierarchy Diagram
+- [x] Create Message Flow Diagrams
+- [x] Create State Management Overview
+
+## Phase 3: Implementation Documentation
+
+**Status: Complete**
+
+- [x] Create Actor Implementation Guide
+- [x] Create Message Protocol Reference
+- [x] Create State Management Patterns
+- [x] Create Actor Testing Guide
+- [x] Create Actor Debugging Guide
+
+## Phase 4: Integration and Operations
+
+**Status: Complete**
+
+- [x] Create libSQL Integration Guide
+- [x] Create Blockchain Integration Guide
+- [x] Create Deployment Guide
+- [x] Create Testing Strategy
+- [x] Create Monitoring Observability Guide
+
+## Phase 5: Business and Conceptual
+
+**Status: Partial**
+
+- [ ] Update Business Documentation
+- [ ] Update Economic Model
+- [x] Create Glossary of Terms
+
+## Phase 6: Migration and Archiving
+
+**Status: Complete**
+
+- [x] Create Migration Guide for Developers
+- [x] Move deprecated graph-based documentation to archive
+- [x] Add deprecation notices to archived documents
+
+## Phase 7: Validation and Review
+
+**Status: Not Started**
+
+- [ ] Review all documentation for consistency
+- [ ] Validate links between documents
+- [ ] Ensure all code examples are up-to-date
+- [ ] Gather feedback from team members
+
+## Next Steps
+
+1. Create missing directories ✅
+2. Move existing documents to proper locations ✅
+3. Create Migration Guide for Developers ✅
+4. Create Actor Hierarchy Diagram ✅
+5. Create Message Flow Diagrams ✅
+6. Create State Management Overview ✅
+7. Create Message Protocol Reference ✅
+8. Create State Management Patterns ✅
+9. Update content in moved documents to reflect actor architecture ✅
+10. Add deprecation notices to archived documents ✅
+11. Create Actor Testing Guide ✅
+12. Create Actor Debugging Guide ✅
+13. Update business documentation
+14. Review and validate all documentation
+
+=== File: docs/architecture_reorganization_plan.md ===
+
+
+
+==
+architecture_reorganization_plan
+==
+
+
+# Architecture Reorganization Plan
+
+## Executive Summary
+
+This document outlines the plan for reorganizing Choir's documentation to reflect our architectural pivot from a graph-based implementation (LangGraph) to an actor-based architecture. The plan covers both structure and content changes needed to accurately document the new architecture.
+
+## Objectives
+
+1. **Accurately Reflect the New Architecture**: The documentation should properly explain the actor model approach that has replaced the graph-based architecture.
+2. **Provide Clear Migration Guidance**: Developers familiar with the previous architecture need a clear path for understanding and adopting the new approach.
+3. **Organize Information Hierarchically**: Create a documentation structure that progresses from concepts to implementation details.
+4. **Preserve Valuable Content**: Retain and transform relevant content from existing documentation.
+5. **Integrate Code Examples**: Connect documentation with real implementation examples from the codebase.
+
+## New Documentation Structure
+
+The documentation will be reorganized into the following hierarchy:
+
+```
+docs/
+├── README.md                          # Overview of documentation
+├── index.md                           # Main entry point and navigation
+├── CHANGELOG.md                       # Project history
+├── architecture_reorganization_plan.md  # This document
+├── architecture_transition_narrative.md  # The story of our architectural pivot
+├── 1-concepts/                        # Fundamental concepts
+│   ├── actor_model_overview.md        # Introduction to the actor model
+│   ├── scale_free_actor_architecture.md  # Fractal patterns in actor systems
+│   └── postchain_conceptual_model.md  # The AEIOU-Y framework
+├── 2-architecture/                    # System architecture
+│   ├── actor_system_diagram.md        # Visual representation with mermaid.js
+│   ├── stack_argument.md              # Technology choices rationale
+│   └── phase_worker_pool.md           # Phase workers architecture
+├── 3-implementation/                  # Implementation details
+│   ├── developer_quickstart.md        # Getting started guide
+│   ├── message_protocol_reference.md  # Comprehensive message format docs
+│   ├── state_management_patterns.md   # Actor state management patterns
+│   └── actor_implementation_guide.md  # How to implement new actors
+├── 4-integration/                     # Integration with other systems
+│   ├── libsql_integration.md          # Database integration
+│   ├── blockchain_integration.md      # Sui blockchain integration
+│   └── identity_service.md            # Identity management
+├── 5-operations/                      # Deployment and operations
+│   ├── deployment_guide.md            # Deployment instructions
+│   ├── testing_strategy.md            # Testing approach
+│   └── monitoring_observability.md    # Monitoring and observability
+├── 6-business/                        # Business aspects
+│   ├── business_model.md              # Business model and strategy
+│   └── evolution_token.md             # Token design and economics
+└── archive/                           # Archived documentation
+    └── langgraph/                     # LangGraph-specific content
+```
+
+## Content Migration Plan
+
+### Phase 1: Core Architecture Documentation
+
+1. **Actor Model Overview** (1-concepts/actor_model_overview.md)
+   - Create comprehensive introduction to actor model principles
+   - Explain advantages over graph-based approaches
+   - Connect to conceptual implementation in `actor_model.py`
+   - Reference example in `examples/phase_worker_pool_demo.py`
+
+2. **Architecture Transition Narrative** (architecture_transition_narrative.md)
+   - Create narrative explaining the journey from graphs to actors
+   - Document key decision points and lessons learned
+   - Describe benefits of the actor approach for Post Chain
+
+3. **Stack Argument** (2-architecture/stack_argument.md)
+   - Migrate and expand content from existing stack_argument.md
+   - Detail technology choices (Thespian, libSQL/Turso, PySUI, etc.)
+   - Explain synergies between technologies
+
+4. **Phase Worker Pool Documentation** (2-architecture/phase_worker_pool.md)
+   - Base on content from phase_worker_pool_architecture.md
+   - Reference implementation in examples/phase_worker_pool_demo.py
+
+### Phase 2: Implementation Documentation
+
+5. **Message Protocol Reference** (3-implementation/message_protocol_reference.md)
+   - Create comprehensive guide to message formats
+   - Document all message types and structures
+   - Provide examples from actual code
+
+6. **State Management Patterns** (3-implementation/state_management_patterns.md)
+   - Document patterns for actor state management
+   - Cover persistence with libSQL/Turso
+   - Connect to implementation in turso_integration.py
+
+7. **Developer Quickstart** (3-implementation/developer_quickstart.md)
+   - Create practical guide to getting started
+   - Include setup instructions, basic examples
+   - Reference run_post_chain.py as a working example
+
+8. **Actor Implementation Guide** (3-implementation/actor_implementation_guide.md)
+   - Create step-by-step guide for implementing new actors
+   - Provide patterns and best practices
+   - Reference real examples from codebase
+
+### Phase 3: Integration and Operations
+
+9. **libSQL Integration** (4-integration/libsql_integration.md)
+   - Adapt content from plan_libsql.md
+   - Explain database schema and query patterns
+   - Connect to implementation in turso_integration.py
+
+10. **Blockchain Integration** (4-integration/blockchain_integration.md)
+    - Create guide for blockchain integration
+    - Cover Sui smart contracts and interaction
+    - Reference choir_coin implementation
+
+11. **Deployment and Operations** (5-operations/* files)
+    - Create deployment guides
+    - Document testing strategies
+    - Explain monitoring approach
+
+### Phase 4: Business and Conceptual
+
+12. **Business Documentation** (6-business/* files)
+    - Migrate relevant content from e_business.md
+    - Adapt evolution_token.md
+
+13. **Conceptual Documentation** (1-concepts/*)
+    - Adapt core economic model documentation
+    - Create PostChain conceptual model based on current documentation
+
+### Phase 5: Archiving
+
+14. **Archive LangGraph Documentation**
+    - Move LangGraph-specific documents to archive/langgraph
+    - Preserve for reference but mark as deprecated
+
+## Code Integration Strategy
+
+Existing code files provide valuable examples that should be integrated into the documentation:
+
+1. **actor_model.py**
+   - Reference in actor_model_overview.md
+   - Use examples in message_protocol_reference.md
+   - Extract patterns for state_management_patterns.md
+
+2. **run_post_chain.py**
+   - Feature in developer_quickstart.md
+   - Use as example in actor_implementation_guide.md
+
+3. **turso_integration.py**
+   - Reference in libsql_integration.md
+   - Use examples in state_management_patterns.md
+
+4. **examples/phase_worker_pool_demo.py**
+   - Feature in phase_worker_pool.md
+   - Reference in actor_implementation_guide.md
+
+## Metadata and Cross-Referencing
+
+To ensure a cohesive documentation experience:
+
+1. **Every document should include**:
+   - Creation/updated dates
+   - Relevant file references
+   - Clear navigation links
+
+2. **Cross-references**:
+   - Documents should link to related content
+   - Code examples should reference documentation
+   - Implementation docs should reference concepts
+
+## Documentation Style Guidelines
+
+1. **Technical Accuracy**: Documentation must precisely reflect the current implementation
+2. **Progressive Disclosure**: Start with concepts, then progressively reveal implementation details
+3. **Code Examples**: Include real code examples from the codebase with proper attribution
+4. **Diagrams**: Use mermaid.js for consistent diagram style (code-as-diagrams)
+5. **Markdown Formatting**: Consistent heading structure, code blocks, and emphasis
+
+## Implementation Timeline
+
+1. **Week 1**: Core architecture documents
+   - Actor Model Overview
+   - Architecture Transition Narrative
+   - Stack Argument
+
+2. **Week 2**: Implementation documents
+   - Message Protocol Reference
+   - State Management Patterns
+   - Developer Quickstart
+
+3. **Week 3**: Integration & Operations
+   - libSQL Integration
+   - Blockchain Integration
+   - Deployment guides
+
+4. **Week 4**: Business, Concepts, & Cleanup
+   - Business documentation
+   - Conceptual refinement
+   - Cross-linking and validation
+
+## Success Metrics
+
+The documentation reorganization will be considered successful when:
+
+1. New developers can understand and contribute to the actor-based implementation
+2. Existing developers can clearly see how to migrate from the graph approach
+3. All major components and patterns are documented with real code examples
+4. Documentation structure reflects the architectural organization
+
+## Next Steps
+
+1. Create the basic directory structure
+2. Implement the reorganization script
+3. Begin with high-priority documents
+4. Review and refine
+
+=== File: docs/architecture_transformation_checklist.md ===
+
+
+
+==
+architecture_transformation_checklist
+==
+
+
+# Choir Architectural Transformation Checklist
+
+This checklist tracks the transformation of Choir's architecture from a graph-based to an actor-based design. It outlines the specific architectural components, patterns, and implementation steps needed to realize the actor-based vision.
+
+## Architectural Vision
+
+Choir's actor architecture follows a hierarchical model:
+
+1. **PostChain Thread Actors**: Supervise the entire process flow through AEIOU-Y phases
+2. **Phase Actors**: Specialized actors for each phase (Action, Experience, Intention, Observation, Understanding, Yield)
+3. **Pydantic AI Agents**: Configured AI model workers managed by Phase Actors
+
+This creates a phase-by-phase streaming model rather than token-by-token streaming, establishing clear boundaries and checkpoints in the process flow.
+
+## Phase 1: Core Actor Framework
+
+**Status: Not Started**
+
+- [ ] Establish Thespian actor system configuration
+
+  - [ ] Choose appropriate ActorSystem implementation (`simpleSystemBase` for development)
+  - [ ] Configure supervision strategies
+  - [ ] Set up message handling framework
+
+- [ ] Create base actor classes
+
+  - [ ] `BaseActor` with common functionality
+  - [ ] `ProcessingActor` for phase implementations
+  - [ ] `SupervisorActor` for thread management
+  - [ ] `AgentManagerActor` for Pydantic AI integration
+
+- [ ] Implement state persistence framework
+  - [ ] Design Pydantic state models
+  - [ ] Implement file-based persistence
+  - [ ] Create state migration infrastructure
+
+## Phase 2: Thread Actor Implementation
+
+**Status: Not Started**
+
+- [ ] Design PostChain Thread Actor
+
+  - [ ] Define message protocol for thread lifecycle
+  - [ ] Implement phase sequencing logic
+  - [ ] Create supervision mechanism for Phase Actors
+  - [ ] Design error handling and recovery strategy
+
+- [ ] Implement Thread State Management
+
+  - [ ] Define thread state model
+  - [ ] Implement conversation history tracking
+  - [ ] Create state persistence mechanism
+  - [ ] Design thread lifecycle (creation, execution, completion, archival)
+
+- [ ] Create Thread Orchestration System
+  - [ ] Design mechanism for creating new threads
+  - [ ] Implement thread monitoring and status reporting
+  - [ ] Create API for thread management
+  - [ ] Design system for concurrent thread execution
+
+## Phase 3: Phase Actor Implementation
+
+**Status: Not Started**
+
+- [ ] Design Phase Actor Base Class
+
+  - [ ] Define common interface and behavior
+  - [ ] Implement context management strategy
+  - [ ] Create agent integration framework
+  - [ ] Design error handling patterns
+
+- [ ] Implement Individual Phase Actors
+
+  - [ ] Action Phase Actor
+
+    - [ ] Define specific message types
+    - [ ] Implement context preparation logic
+    - [ ] Design prompt management
+    - [ ] Create tools specific to action phase
+
+  - [ ] Experience Phase Actor
+
+    - [ ] Define specific message types
+    - [ ] Implement context preparation logic
+    - [ ] Design prompt management
+    - [ ] Create tools specific to experience phase
+
+  - [ ] Intention Phase Actor
+
+    - [ ] Define specific message types
+    - [ ] Implement context preparation logic
+    - [ ] Design prompt management
+    - [ ] Create tools specific to intention phase
+
+  - [ ] Observation Phase Actor
+
+    - [ ] Define specific message types
+    - [ ] Implement context preparation logic
+    - [ ] Design prompt management
+    - [ ] Create tools specific to observation phase
+
+  - [ ] Understanding Phase Actor
+
+    - [ ] Define specific message types
+    - [ ] Implement context preparation logic
+    - [ ] Design prompt management
+    - [ ] Create tools specific to understanding phase
+
+  - [ ] Yield Phase Actor
+    - [ ] Define specific message types
+    - [ ] Implement context preparation logic
+    - [ ] Design prompt management
+    - [ ] Create tools specific to yield phase
+
+- [ ] Configure Phase Transitions
+  - [ ] Define transition rules between phases
+  - [ ] Implement conditional logic for phase sequencing
+  - [ ] Create feedback mechanisms between phases
+  - [ ] Design retry and fallback strategies
+
+## Phase 4: Pydantic AI Agent Integration
+
+**Status: Not Started**
+
+- [ ] Design Agent Management System
+
+  - [ ] Create agent configuration framework
+  - [ ] Implement agent lifecycle management
+  - [ ] Design prompt templating system
+  - [ ] Establish tool registration mechanism
+
+- [ ] Implement Agent Communication
+
+  - [ ] Define message protocol between Actors and Agents
+  - [ ] Create serialization/deserialization logic
+  - [ ] Implement async communication patterns
+  - [ ] Design error handling and retry logic
+
+- [ ] Create Phase-Specific Agent Tools
+  - [ ] Design tool interfaces
+  - [ ] Implement common utilities
+  - [ ] Create phase-specific tool collections
+  - [ ] Establish tool discovery mechanism
+
+## Phase 5: Message Protocol Implementation
+
+**Status: Not Started**
+
+- [ ] Define Base Message Types
+
+  - [ ] Create core message structure
+  - [ ] Implement message validation
+  - [ ] Design message routing
+  - [ ] Establish serialization format
+
+- [ ] Implement Thread Control Messages
+
+  - [ ] Thread creation messages
+  - [ ] Thread status/control messages
+  - [ ] Thread termination messages
+  - [ ] Error notification messages
+
+- [ ] Implement Phase Processing Messages
+
+  - [ ] Phase initiation messages
+  - [ ] Phase context update messages
+  - [ ] Phase completion messages
+  - [ ] Phase error messages
+
+- [ ] Implement Agent Communication Messages
+  - [ ] Agent request messages
+  - [ ] Agent response messages
+  - [ ] Tool invocation messages
+  - [ ] Status update messages
+
+## Phase 6: Testing Infrastructure
+
+**Status: Not Started**
+
+- [ ] Design Actor Testing Framework
+
+  - [ ] Create actor test harness
+  - [ ] Implement message mocking system
+  - [ ] Design state verification tools
+  - [ ] Establish test actor system
+
+- [ ] Implement Phase-Specific Tests
+
+  - [ ] Create test cases for each phase actor
+  - [ ] Implement integration tests for phase transitions
+  - [ ] Design performance tests
+  - [ ] Create fault injection tests
+
+- [ ] Create End-to-End Testing System
+  - [ ] Design test thread scenarios
+  - [ ] Implement thread verification tools
+  - [ ] Create test data generators
+  - [ ] Establish continuous testing framework
+
+## Phase 7: Migration from Graph-Based Architecture
+
+**Status: Not Started**
+
+- [ ] Analyze Existing Graph-Based Code
+
+  - [ ] Map graph nodes to actor types
+  - [ ] Identify state management patterns
+  - [ ] Catalog message flows
+  - [ ] Document external integrations
+
+- [ ] Create Adapter Layer (if needed)
+
+  - [ ] Design interfaces compatible with both architectures
+  - [ ] Implement translation layer for messages
+  - [ ] Create state conversion utilities
+  - [ ] Establish feature parity verification
+
+- [ ] Design Incremental Migration Plan
+
+  - [ ] Identify critical path components
+  - [ ] Establish migration sequence
+  - [ ] Create rollback mechanisms
+  - [ ] Design verification tests for each stage
+
+- [ ] Execute Phased Rollout
+  - [ ] Migrate core framework first
+  - [ ] Transition thread management
+  - [ ] Convert phase implementations
+  - [ ] Update external integrations
+
+## Phase 8: Documentation and Knowledge Transfer
+
+**Status: In Progress**
+
+- [x] Create Core Architecture Documentation
+
+  - [x] Actor Model Overview
+  - [x] Architecture Transition Narrative
+  - [x] System Architecture Overview
+  - [x] Actor Hierarchy Diagram
+  - [x] Message Flow Diagrams
+  - [x] State Management Overview
+
+- [x] Create Implementation Documentation
+
+  - [x] Actor Implementation Guide
+  - [x] Message Protocol Reference
+  - [x] State Management Patterns
+  - [x] Actor Testing Guide
+  - [x] Actor Debugging Guide
+
+- [ ] Update Integration Documentation
+
+  - [x] libSQL Integration Guide
+  - [x] Blockchain Integration Guide
+  - [x] Deployment Guide
+  - [x] Testing Strategy
+  - [x] Monitoring Observability Guide
+
+- [ ] Create Migration Documentation
+  - [x] Migration Guide for Developers
+  - [x] Update moved documents to reflect actor architecture
+  - [x] Add deprecation notices to archived documents
+
+## Current Implementation Focus
+
+Our current focus is on Phase 8 (Documentation and Knowledge Transfer) to establish a solid foundation for implementation. The next implementation steps will be:
+
+1. ✅ Create Message Protocol Reference document
+2. ✅ Create State Management Patterns document
+3. ✅ Update moved documents to reflect actor architecture
+4. ✅ Add deprecation notices to archived documents
+5. ✅ Create Actor Testing Guide
+6. ✅ Create Actor Debugging Guide
+7. Begin implementation of Core Actor Framework (Phase 1)
+
+## Next Actions for Architectural Implementation
+
+1. Define the basic actor classes that will form the foundation of the system
+2. Implement a prototype PostChain Thread Actor
+3. Create a prototype Phase Actor
+4. Establish the Pydantic AI Agent integration pattern
+5. Define the core message types for actor communication
+
+=== File: docs/architecture_transition_narrative.md ===
+
+
+
+==
+architecture_transition_narrative
+==
+
+
+# From Graphs to Actors: A Transition Narrative
+
+## The Story of Architectural Evolution
+
+Architecture is not just about technology—it's about the narratives we construct to make sense of complex systems. The transition from a graph-based to an actor-based architecture in Choir represents more than a technical implementation choice; it embodies a shift in how we conceptualize, build, and evolve intelligent systems.
+
+This document frames our documentation reorganization within this larger narrative of transition, explaining not just what has changed, but why it matters and how it reflects deeper patterns in system design.
+
+## The Graph Era: Structured Relationships
+
+Our journey began with the graph paradigm, where relationships between components were explicit and centrally coordinated:
+
+```
+LangGraph → StateGraph → Checkpoints → Centralized Control
+```
+
+This approach aligned with traditional software design principles:
+- Central coordination of state
+- Explicit edges defining relationships
+- Predetermined flow of control
+- Global visibility of system state
+
+The graph model provided clarity and predictability for simple workflows, but as Choir evolved, we encountered increasing complexity:
+- Memory management became challenging
+- State synchronization grew brittle
+- Error boundaries blurred
+- Modality extensions required graph redesigns
+
+## The Actor Transition: Emergent Intelligence
+
+The pivot to an actor-based architecture marks a fundamental shift in thinking:
+
+```
+Actors → Messages → State Encapsulation → Emergent Behavior
+```
+
+This transition reflects deeper patterns of complex system design:
+- Distributed state ownership
+- Message-based coordination
+- Failure isolation and resilience
+- Natural extension points
+
+The actor model doesn't just solve technical problems—it aligns with how complex systems naturally evolve and organize in the world around us.
+
+## Meta-Patterns: Scale-Free Design
+
+At the heart of this transition lies a powerful meta-pattern: **scale-free design**. Actor systems exhibit similar principles at every level, from individual actors to entire distributed networks. This fractal quality creates conceptual coherence across the system:
+
+1. **Consistency Across Scales**: The same patterns apply from micro to macro
+2. **Locality with Global Emergence**: Simple local rules create complex global behaviors
+3. **Resilience Through Isolation**: Failures are contained and managed
+4. **Natural Extension**: New capabilities can be added naturally
+
+These patterns align with our understanding of natural complex systems—from neural networks to ecosystems to social structures.
+
+## Documentation as Narrative
+
+Our documentation reorganization mirrors this architectural transition:
+
+| Previous Structure | New Structure |
+|-------------------|---------------|
+| Function-focused | Concept-focused |
+| Implementation details first | Mental models first |
+| Linear progression | Layered understanding |
+| Tool-specific documentation | Principle-based documentation |
+
+The new documentation structure creates a coherent narrative path:
+1. **Concepts**: Building mental models (Actor Model, FQAHO, Scale-Free Architecture)
+2. **Architecture**: Understanding system components and relationships
+3. **Implementation**: Practical guidance for working with the system
+4. **Integration**: Connecting with external systems
+5. **Operations**: Running and maintaining the system
+6. **Business**: Understanding the larger context
+
+This structure reflects how we learn and understand complex systems—starting with mental models and progressively adding detail.
+
+## Implications: Beyond Implementation
+
+This transition carries implications beyond technical implementation:
+
+1. **Development Experience**: Developers can reason about isolated components without understanding the entire system
+2. **Operational Resilience**: Systems can recover and adapt without central coordination
+3. **Evolutionary Capability**: New features can be added without system-wide redesign
+4. **Cognitive Scalability**: The mental models remain consistent as the system grows
+
+By aligning our architecture with natural patterns of complex systems, we create technology that's more intuitive to develop, more resilient to change, and more capable of emergent intelligence.
+
+## The Transition Process
+
+The migration from graph-based to actor-based architecture follows a thoughtful trajectory:
+
+1. **Conceptual Alignment**: Understanding the actor model principles
+2. **Core Implementation**: Building the fundamental actor infrastructure
+3. **Progressive Migration**: Moving functionality from graphs to actors
+4. **Capability Extension**: Adding new features enabled by the actor model
+5. **Documentation Evolution**: Reorganizing knowledge to reflect the new paradigm
+
+This isn't a "rewrite"—it's an evolution, preserving the core conceptual strengths of the system while reimagining its implementation.
+
+## Conclusion: Stories That Scale
+
+The stories we tell ourselves about our systems shape how we build, maintain, and evolve them. By transitioning from graphs to actors, we're adopting a narrative that scales naturally with increasing complexity.
+
+In a world of hypercomplex systems and explosive change, we need architecture patterns that provide conceptual coherence across scales. The actor model gives us such a pattern—a story that works from the smallest component to the largest system.
+
+Our documentation reorganization is part of this larger narrative—providing not just information about implementation details, but a coherent mental model for understanding and working with complex, evolving systems.
+
+By understanding this transition as part of a larger pattern, we position ourselves to build systems that don't just function today, but can evolve with the challenges of tomorrow.
+
 === File: docs/comp_provider_info.md ===
 
 
@@ -2245,6 +3108,812 @@ When contributing to documentation:
 3. Mark superseded documents as archived
 4. Include visual diagrams where appropriate
 5. Provide code examples for technical concepts
+
+=== File: docs/index.md ===
+
+
+
+==
+index
+==
+
+
+# Choir Documentation
+
+Welcome to the Choir documentation. This documentation has been reorganized to reflect the architectural pivot from LangGraph to the Actor Model.
+
+## Documentation Structure
+
+The documentation is organized into the following sections:
+
+## 1. Core Concepts
+
+Fundamental concepts that remain consistent regardless of the implementation:
+
+- [Actor Model Overview](1-concepts/actor_model_overview.md) - Introduction to the actor model architecture
+- [PostChain (AEIOU-Y) Conceptual Model](postchain_actor_model.md) - The core AEIOU-Y framework
+- [FQAHO Model](fqaho_visualization.md) - The Fractional Quantum Anharmonic Oscillator economic model
+- [Core Economics](core_economics.md) - Economic principles and tokenomics
+- [Core State Transitions](core_state_transitions.md) - State transition principles
+- [Evolution: Naming](evolution_naming.md) - Naming conventions and evolution
+
+## 2. Architecture
+
+Detailed information about the actor-based architecture:
+
+- [Actor System Diagrams](2-architecture/actor_system_diagram.md) - Visual representations of the actor system
+- [Stack Argument](stack_argument.md) - Rationale for the actor-based technology stack
+- [PostChain Actor Model](postchain_actor_model.md) - Technical implementation of PostChain using actors
+- [Phase Worker Pool Architecture](phase_worker_pool_architecture.md) - Extension of the actor model with worker pools
+- [Security Considerations](security_considerations.md) - Security architecture and considerations
+
+## 3. Implementation
+
+Practical guidance for implementing the actor-based architecture:
+
+- [Developer Quickstart](3-implementation/developer_quickstart.md) - Fast onboarding for new developers
+- [Migration Plan](migration_langgraph_to_actor.md) - Step-by-step migration from LangGraph to Actor Model
+- [Actor Implementation Guide](actor_implementation_guide.md) - Detailed guidelines for implementing actors
+- [Message Protocol Reference](message_protocol_reference.md) - Documentation of message formats
+- [State Management Patterns](3-implementation/state_management_patterns.md) - Best practices for actor state management
+
+## 4. Integration
+
+Information about integrating with external systems:
+
+- [libSQL Integration](plan_libsql.md) - Database integration
+- [Blockchain Integration](blockchain_integration.md) - Integration with Sui blockchain
+- [Identity as a Service](plan_identity_as_a_service.md) - Identity management
+
+## 5. Operations
+
+Documentation for deployment, testing, and operations:
+
+- [Deployment Guide](deployment_guide.md) - Instructions for deploying the actor-based system
+- [Testing Strategy](testing_strategy.md) - Approach to testing actor-based systems
+- [Monitoring and Observability](monitoring_observability.md) - Monitoring the actor system
+
+## 6. Business and Strategy
+
+Business aspects of Choir:
+
+- [Business Model](e_business.md) - Business model and strategy
+- [Evolution Token](evolution_token.md) - Token design and economics
+- [Anonymity by Default](plan_anonymity_by_default.md) - Privacy principles
+
+## Archive
+
+Documents preserved for reference but potentially outdated due to the architectural pivot:
+
+- [LangGraph-specific documentation](archive/) - Previous architecture documents
+
+## Development Timeline
+
+- [Changelog](CHANGELOG.md) - Historical development timeline
+- [Architecture Reorganization Plan](architecture_reorganization_plan.md) - Plan for documentation updates
+
+## Contributing to Documentation
+
+See the [Architecture Reorganization Plan](architecture_reorganization_plan.md) for information on the documentation structure and contribution guidelines.
+
+When contributing to documentation:
+
+1. Follow the established folder structure
+2. Use Markdown for all documentation
+3. Include diagrams using Mermaid.js where appropriate
+4. Provide code examples for technical concepts
+5. Update the index when adding new documents
+
+=== File: docs/migration_guide_for_developers.md ===
+
+
+
+==
+migration_guide_for_developers
+==
+
+
+# Migration Guide for Developers
+
+This guide provides a step-by-step approach for migrating code from Choir's previous graph-based architecture (LangGraph) to the new actor-based architecture. It includes code transformation examples, pattern comparisons, and testing strategies.
+
+## Table of Contents
+
+1. [Introduction](#introduction)
+2. [Architectural Differences](#architectural-differences)
+3. [Migration Strategy](#migration-strategy)
+4. [Code Transformation Patterns](#code-transformation-patterns)
+5. [Testing Migration](#testing-migration)
+6. [Performance Considerations](#performance-considerations)
+7. [Migration Checklist](#migration-checklist)
+8. [Examples](#examples)
+
+## Introduction
+
+Choir has undergone a significant architectural pivot from a graph-based implementation using LangGraph to an actor-based architecture. This guide is designed to help developers migrate existing code and understand the new architectural patterns.
+
+The migration process is not just about rewriting code—it's about adopting a new mental model for building AI systems. The actor model provides several advantages over the graph-based approach, including:
+
+- Better isolation and fault tolerance
+- More natural scaling
+- Clearer state management
+- More flexible message passing
+- Easier extension with new capabilities
+
+This guide will walk you through the process of migrating your code to take advantage of these benefits.
+
+## Architectural Differences
+
+### Graph-Based Architecture (LangGraph)
+
+In the graph-based architecture:
+
+- **Nodes** represent processing steps
+- **Edges** define explicit flow between nodes
+- **State** is centrally managed and passed between nodes
+- **Execution** follows a predetermined path
+- **Error handling** is managed at the graph level
+
+```python
+# Example LangGraph code
+from langgraph.graph import StateGraph
+
+# Define the state
+class GraphState(TypedDict):
+    input: str
+    action_output: str
+    experience_output: str
+    intention_output: str
+    observation_output: str
+    understanding_output: str
+    yield_output: str
+
+# Create the graph
+graph = StateGraph(GraphState)
+
+# Add nodes
+graph.add_node("action", action_node)
+graph.add_node("experience", experience_node)
+graph.add_node("intention", intention_node)
+graph.add_node("observation", observation_node)
+graph.add_node("understanding", understanding_node)
+graph.add_node("yield", yield_node)
+
+# Add edges
+graph.add_edge("action", "experience")
+graph.add_edge("experience", "intention")
+graph.add_edge("intention", "observation")
+graph.add_edge("observation", "understanding")
+graph.add_edge("understanding", "yield")
+
+# Compile the graph
+chain = graph.compile()
+```
+
+### Actor-Based Architecture
+
+In the actor-based architecture:
+
+- **Actors** are independent entities with their own state
+- **Messages** are passed between actors
+- **State** is encapsulated within each actor
+- **Execution** is message-driven and can be dynamic
+- **Error handling** is localized to each actor
+
+```python
+# Example Actor code
+class ActionActor(Actor):
+    def __init__(self, actor_id=None):
+        super().__init__(actor_id)
+        self.state = {}
+
+    async def receive(self, message):
+        if message.type == "PROCESS_INPUT":
+            # Process the input
+            result = self._process_input(message.data["input"])
+
+            # Return the result
+            return Response(
+                type="ACTION_COMPLETE",
+                data={"result": result}
+            )
+        else:
+            return ErrorResponse(f"Unknown message type: {message.type}")
+
+    def _process_input(self, input_data):
+        # Implementation-specific processing
+        return {"processed": input_data}
+```
+
+## Migration Strategy
+
+The recommended migration strategy follows these steps:
+
+1. **Understand the Actor Model**: Familiarize yourself with actor model concepts
+2. **Identify Actors**: Map graph nodes to potential actors
+3. **Define Messages**: Design the message protocol between actors
+4. **Implement Actors**: Create actor classes for each component
+5. **Refactor State Management**: Move from centralized to encapsulated state
+6. **Implement Message Flows**: Replace explicit edges with message passing
+7. **Test and Validate**: Ensure the migrated code behaves correctly
+
+### Incremental Migration
+
+For large codebases, consider an incremental migration approach:
+
+1. **Create Actor Wrappers**: Wrap existing graph nodes in actors
+2. **Migrate One Component at a Time**: Start with leaf nodes
+3. **Use Adapter Patterns**: Create adapters between graph and actor components
+4. **Gradually Replace Graph Components**: Replace graph nodes with actors over time
+
+## Code Transformation Patterns
+
+### Pattern 1: Node to Actor Transformation
+
+Transform graph nodes into actors:
+
+**Before (Graph Node):**
+
+```python
+def action_node(state: GraphState) -> dict:
+    input_text = state["input"]
+
+    # Process the input
+    result = process_input(input_text)
+
+    # Return the updated state
+    return {"action_output": result}
+```
+
+**After (Actor):**
+
+```python
+class ActionActor(Actor):
+    def __init__(self, actor_id=None):
+        super().__init__(actor_id)
+        self.state = {}
+
+    async def receive(self, message):
+        if message.type == "PROCESS_INPUT":
+            input_text = message.data["input"]
+
+            # Process the input
+            result = self._process_input(input_text)
+
+            # Return the result
+            return Response(
+                type="ACTION_COMPLETE",
+                data={"result": result}
+            )
+        else:
+            return ErrorResponse(f"Unknown message type: {message.type}")
+
+    def _process_input(self, input_text):
+        # Same implementation as the original process_input
+        return process_input(input_text)
+```
+
+### Pattern 2: Edge to Message Transformation
+
+Transform graph edges into message passing:
+
+**Before (Graph Edges):**
+
+```python
+# Define the conditional edge
+def should_continue(state):
+    return "continue" if state["understanding_output"]["continue"] else "end"
+
+# Add edges
+graph.add_edge("action", "experience")
+graph.add_edge("experience", "intention")
+graph.add_edge("intention", "observation")
+graph.add_edge("observation", "understanding")
+graph.add_edge("understanding", should_continue)
+graph.add_edge("understanding", "yield", condition=lambda s: should_continue(s) == "continue")
+graph.add_edge("understanding", "end", condition=lambda s: should_continue(s) == "end")
+```
+
+**After (Message Passing):**
+
+```python
+class UnderstandingActor(Actor):
+    async def receive(self, message):
+        if message.type == "PROCESS_OBSERVATION":
+            # Process the observation
+            result = self._process_observation(message.data["observation"])
+
+            # Determine the next step
+            if result["continue"]:
+                # Send message to the yield actor
+                yield_actor = await self.get_actor("yield_actor")
+                await yield_actor.send(
+                    Message(
+                        type="PROCESS_UNDERSTANDING",
+                        data={"understanding": result}
+                    )
+                )
+            else:
+                # End the process
+                end_actor = await self.get_actor("end_actor")
+                await end_actor.send(
+                    Message(
+                        type="END_PROCESS",
+                        data={"understanding": result}
+                    )
+                )
+
+            # Return the result
+            return Response(
+                type="UNDERSTANDING_COMPLETE",
+                data={"result": result}
+            )
+        else:
+            return ErrorResponse(f"Unknown message type: {message.type}")
+```
+
+### Pattern 3: State Transformation
+
+Transform centralized state to encapsulated state:
+
+**Before (Centralized State):**
+
+```python
+# Define the state
+class GraphState(TypedDict):
+    input: str
+    action_output: str
+    experience_output: str
+    intention_output: str
+    observation_output: str
+    understanding_output: str
+    yield_output: str
+
+# Access state in a node
+def experience_node(state: GraphState) -> dict:
+    action_output = state["action_output"]
+
+    # Process the action output
+    result = process_action_output(action_output)
+
+    # Return the updated state
+    return {"experience_output": result}
+```
+
+**After (Encapsulated State):**
+
+```python
+class ExperienceActor(Actor):
+    def __init__(self, actor_id=None):
+        super().__init__(actor_id)
+        self.state = {
+            "processed_messages": 0,
+            "last_action_output": None
+        }
+
+    async def receive(self, message):
+        if message.type == "PROCESS_ACTION":
+            # Update state
+            self.state["processed_messages"] += 1
+            self.state["last_action_output"] = message.data["action_output"]
+
+            # Process the action output
+            result = self._process_action_output(message.data["action_output"])
+
+            # Return the result
+            return Response(
+                type="EXPERIENCE_COMPLETE",
+                data={"result": result}
+            )
+        else:
+            return ErrorResponse(f"Unknown message type: {message.type}")
+
+    def _process_action_output(self, action_output):
+        # Same implementation as the original process_action_output
+        return process_action_output(action_output)
+```
+
+### Pattern 4: Error Handling Transformation
+
+Transform graph-level error handling to actor-level error handling:
+
+**Before (Graph Error Handling):**
+
+```python
+try:
+    result = chain.invoke({"input": "Hello, world!"})
+except Exception as e:
+    print(f"Error in graph execution: {e}")
+    # Handle the error at the graph level
+```
+
+**After (Actor Error Handling):**
+
+```python
+class ActionActor(Actor):
+    async def receive(self, message):
+        try:
+            if message.type == "PROCESS_INPUT":
+                # Process the input
+                result = self._process_input(message.data["input"])
+
+                # Return the result
+                return Response(
+                    type="ACTION_COMPLETE",
+                    data={"result": result}
+                )
+            else:
+                return ErrorResponse(f"Unknown message type: {message.type}")
+        except Exception as e:
+            # Handle the error at the actor level
+            self.log_error(f"Error processing message: {e}")
+            return ErrorResponse(f"Error processing message: {str(e)}")
+```
+
+## Testing Migration
+
+### Unit Testing
+
+Test individual actors:
+
+```python
+async def test_action_actor():
+    # Create the actor
+    actor = ActionActor("test_action_actor")
+
+    # Send a test message
+    response = await actor.receive(
+        Message(
+            type="PROCESS_INPUT",
+            data={"input": "Hello, world!"}
+        )
+    )
+
+    # Verify the response
+    assert response.type == "ACTION_COMPLETE"
+    assert "result" in response.data
+    assert response.data["result"]["processed"] == "Hello, world!"
+```
+
+### Integration Testing
+
+Test interactions between actors:
+
+```python
+async def test_action_experience_integration():
+    # Create the actors
+    action_actor = ActionActor("action_actor")
+    experience_actor = ExperienceActor("experience_actor")
+
+    # Register actors with the system
+    actor_system.register(action_actor)
+    actor_system.register(experience_actor)
+
+    # Send a message to the action actor
+    action_response = await action_actor.receive(
+        Message(
+            type="PROCESS_INPUT",
+            data={"input": "Hello, world!"}
+        )
+    )
+
+    # Send the action result to the experience actor
+    experience_response = await experience_actor.receive(
+        Message(
+            type="PROCESS_ACTION",
+            data={"action_output": action_response.data["result"]}
+        )
+    )
+
+    # Verify the experience response
+    assert experience_response.type == "EXPERIENCE_COMPLETE"
+    assert "result" in experience_response.data
+```
+
+### End-to-End Testing
+
+Test the complete workflow:
+
+```python
+async def test_post_chain():
+    # Create the PostChain
+    post_chain = PostChain()
+
+    # Process input through the PostChain
+    result = await post_chain.process("Hello, world!")
+
+    # Verify the result
+    assert "response" in result
+    assert result["response"] != ""
+```
+
+### Comparison Testing
+
+Compare the results of the graph-based and actor-based implementations:
+
+```python
+async def test_migration_equivalence():
+    # Create the graph-based implementation
+    graph = create_graph()
+
+    # Create the actor-based implementation
+    post_chain = PostChain()
+
+    # Process the same input through both implementations
+    graph_result = graph.invoke({"input": "Hello, world!"})
+    actor_result = await post_chain.process("Hello, world!")
+
+    # Verify that the results are equivalent
+    assert graph_result["yield_output"] == actor_result["response"]
+```
+
+## Performance Considerations
+
+### Performance Comparison
+
+When migrating from graphs to actors, consider these performance aspects:
+
+1. **Latency**: Actor-based systems may have different latency characteristics
+2. **Throughput**: Actor-based systems can often achieve higher throughput
+3. **Scalability**: Actor-based systems scale more naturally
+4. **Resource Usage**: Actor-based systems may have different resource usage patterns
+
+### Performance Testing
+
+Implement performance tests to compare the graph-based and actor-based implementations:
+
+```python
+async def benchmark_performance():
+    # Create the implementations
+    graph = create_graph()
+    post_chain = PostChain()
+
+    # Benchmark the graph-based implementation
+    graph_start_time = time.time()
+    for i in range(100):
+        graph.invoke({"input": f"Test input {i}"})
+    graph_time = time.time() - graph_start_time
+
+    # Benchmark the actor-based implementation
+    actor_start_time = time.time()
+    for i in range(100):
+        await post_chain.process(f"Test input {i}")
+    actor_time = time.time() - actor_start_time
+
+    # Compare the results
+    print(f"Graph-based implementation: {graph_time:.2f} seconds")
+    print(f"Actor-based implementation: {actor_time:.2f} seconds")
+    print(f"Performance difference: {(graph_time - actor_time) / graph_time * 100:.2f}%")
+```
+
+## Migration Checklist
+
+Use this checklist to track your migration progress:
+
+- [ ] **Preparation**
+
+  - [ ] Understand the actor model concepts
+  - [ ] Identify actors in your system
+  - [ ] Design the message protocol
+  - [ ] Create a migration plan
+
+- [ ] **Implementation**
+
+  - [ ] Create actor base classes
+  - [ ] Implement individual actors
+  - [ ] Implement message passing
+  - [ ] Refactor state management
+  - [ ] Implement error handling
+
+- [ ] **Testing**
+
+  - [ ] Write unit tests for actors
+  - [ ] Write integration tests for actor interactions
+  - [ ] Write end-to-end tests for workflows
+  - [ ] Compare results with the original implementation
+  - [ ] Benchmark performance
+
+- [ ] **Deployment**
+  - [ ] Update deployment scripts
+  - [ ] Configure monitoring for actors
+  - [ ] Implement logging for actors
+  - [ ] Deploy the migrated system
+  - [ ] Monitor performance and behavior
+
+## Examples
+
+### Example 1: PostChain Migration
+
+This example shows the migration of the PostChain from a graph-based to an actor-based implementation:
+
+**Before (Graph-Based PostChain):**
+
+```python
+from langgraph.graph import StateGraph
+
+# Define the state
+class PostChainState(TypedDict):
+    input: str
+    action_output: str
+    experience_output: str
+    intention_output: str
+    observation_output: str
+    understanding_output: str
+    yield_output: str
+
+# Create the graph
+graph = StateGraph(PostChainState)
+
+# Add nodes
+graph.add_node("action", action_node)
+graph.add_node("experience", experience_node)
+graph.add_node("intention", intention_node)
+graph.add_node("observation", observation_node)
+graph.add_node("understanding", understanding_node)
+graph.add_node("yield", yield_node)
+
+# Add edges
+graph.add_edge("action", "experience")
+graph.add_edge("experience", "intention")
+graph.add_edge("intention", "observation")
+graph.add_edge("observation", "understanding")
+graph.add_edge("understanding", "yield")
+
+# Compile the graph
+post_chain = graph.compile()
+
+# Use the PostChain
+result = post_chain.invoke({"input": "Hello, world!"})
+print(result["yield_output"])
+```
+
+**After (Actor-Based PostChain):**
+
+```python
+class PostChain:
+    def __init__(self):
+        # Create the actor system
+        self.actor_system = ActorSystem()
+
+        # Create the actors
+        self.action_actor = ActionActor("action_actor")
+        self.experience_actor = ExperienceActor("experience_actor")
+        self.intention_actor = IntentionActor("intention_actor")
+        self.observation_actor = ObservationActor("observation_actor")
+        self.understanding_actor = UnderstandingActor("understanding_actor")
+        self.yield_actor = YieldActor("yield_actor")
+
+        # Register the actors
+        self.actor_system.register(self.action_actor)
+        self.actor_system.register(self.experience_actor)
+        self.actor_system.register(self.intention_actor)
+        self.actor_system.register(self.observation_actor)
+        self.actor_system.register(self.understanding_actor)
+        self.actor_system.register(self.yield_actor)
+
+    async def process(self, input_text):
+        # Process the input through the PostChain
+        action_response = await self.action_actor.receive(
+            Message(
+                type="PROCESS_INPUT",
+                data={"input": input_text}
+            )
+        )
+
+        experience_response = await self.experience_actor.receive(
+            Message(
+                type="PROCESS_ACTION",
+                data={"action_output": action_response.data["result"]}
+            )
+        )
+
+        intention_response = await self.intention_actor.receive(
+            Message(
+                type="PROCESS_EXPERIENCE",
+                data={"experience_output": experience_response.data["result"]}
+            )
+        )
+
+        observation_response = await self.observation_actor.receive(
+            Message(
+                type="PROCESS_INTENTION",
+                data={"intention_output": intention_response.data["result"]}
+            )
+        )
+
+        understanding_response = await self.understanding_actor.receive(
+            Message(
+                type="PROCESS_OBSERVATION",
+                data={"observation_output": observation_response.data["result"]}
+            )
+        )
+
+        yield_response = await self.yield_actor.receive(
+            Message(
+                type="PROCESS_UNDERSTANDING",
+                data={"understanding_output": understanding_response.data["result"]}
+            )
+        )
+
+        # Return the final result
+        return {
+            "response": yield_response.data["result"],
+            "phases": {
+                "action_phase": action_response.data["result"],
+                "experience_phase": experience_response.data["result"],
+                "intention_phase": intention_response.data["result"],
+                "observation_phase": observation_response.data["result"],
+                "understanding_phase": understanding_response.data["result"],
+                "yield_phase": yield_response.data["result"]
+            }
+        }
+```
+
+### Example 2: Conditional Flow Migration
+
+This example shows the migration of conditional flow logic:
+
+**Before (Graph Conditional Flow):**
+
+```python
+# Define the conditional edge
+def should_continue(state):
+    return "continue" if state["understanding_output"]["continue"] else "end"
+
+# Add conditional edges
+graph.add_edge("understanding", "yield", condition=lambda s: should_continue(s) == "continue")
+graph.add_edge("understanding", "end", condition=lambda s: should_continue(s) == "end")
+```
+
+**After (Actor Conditional Flow):**
+
+```python
+class UnderstandingActor(Actor):
+    async def receive(self, message):
+        if message.type == "PROCESS_OBSERVATION":
+            # Process the observation
+            result = self._process_observation(message.data["observation_output"])
+
+            # Determine the next step based on the result
+            if result["continue"]:
+                # Send message to the yield actor
+                yield_actor = await self.get_actor("yield_actor")
+                await yield_actor.send(
+                    Message(
+                        type="PROCESS_UNDERSTANDING",
+                        data={"understanding_output": result}
+                    )
+                )
+            else:
+                # Send message to the end actor
+                end_actor = await self.get_actor("end_actor")
+                await end_actor.send(
+                    Message(
+                        type="END_PROCESS",
+                        data={"understanding_output": result}
+                    )
+                )
+
+            # Return the result
+            return Response(
+                type="UNDERSTANDING_COMPLETE",
+                data={"result": result}
+            )
+        else:
+            return ErrorResponse(f"Unknown message type: {message.type}")
+```
+
+## Conclusion
+
+Migrating from a graph-based to an actor-based architecture requires a shift in thinking, but the benefits are substantial. By following this guide, you can successfully migrate your code and take advantage of the actor model's benefits.
+
+For more detailed information, refer to:
+
+- [Actor Model Overview](1-concepts/actor_model_overview.md)
+- [Architecture Transition Narrative](architecture_transition_narrative.md)
+- [Message Protocol Reference](3-implementation/message_protocol_reference.md)
+- [State Management Patterns](3-implementation/state_management_patterns.md)
+- [Actor Implementation Guide](3-implementation/actor_implementation_guide.md)
 
 === File: docs/migration_langgraph_to_actor.md ===
 
