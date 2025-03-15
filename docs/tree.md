@@ -206,10 +206,13 @@
 │   ├── 2-architecture
 │   │   ├── actor_hierarchy_diagram.md
 │   │   ├── actor_system_diagram.md
+│   │   ├── architecture_integration.md
 │   │   ├── message_flow_diagrams.md
 │   │   ├── phase_worker_pool.md
 │   │   ├── stack_argument.md
-│   │   └── state_management_overview.md
+│   │   ├── state_management_overview.md
+│   │   ├── thread_contract_model.md
+│   │   └── token_economy_model.md
 │   ├── 3-implementation
 │   │   ├── actor_debugging_guide.md
 │   │   ├── actor_implementation_guide.md
@@ -293,4 +296,4 @@
     ├── generate_search_report.sh
     └── generate_single_provider_report.sh
 
-66 directories, 225 files
+66 directories, 228 files
