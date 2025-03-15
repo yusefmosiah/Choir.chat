@@ -1,6 +1,50 @@
 # Choir Documentation
 
-Welcome to the Choir documentation. This documentation has been reorganized to reflect the architectural pivot from LangGraph to the Actor Model.
+## Core Concepts
+
+The Choir platform is built around a sophisticated conceptual model implemented through an actor-based architecture:
+
+- [Actor Model Overview](1-concepts/actor_model_overview.md) - Introduction to the actor model
+- [Scale-Free Actor Architecture](1-concepts/scale_free_actor_architecture.md) - Fractal patterns in actor systems
+- [PostChain Temporal Logic](1-concepts/postchain_temporal_logic.md) - The temporal essence of each AEIOU-Y phase
+- [PostChain Actor Model](1-concepts/postchain_actor_model.md) - Implementing the PostChain with actors
+
+## Architecture
+
+Technical architecture and design decisions:
+
+- [Actor System Diagrams](2-architecture/actor_system_diagram.md) - Visual representations of the actor system
+- [Architecture Transition Narrative](2-architecture/architecture_transition_narrative.md) - The story of our architectural evolution
+- [Stack Argument](2-architecture/stack_argument.md) - Rationale for our technology choices
+
+## Implementation
+
+Practical guidance for implementing actor-based systems:
+
+- [Developer Quickstart](3-implementation/developer_quickstart.md) - Fast onboarding guide
+- [Message Protocol Reference](3-implementation/message_protocol_reference.md) - Comprehensive message format documentation
+- [State Management Patterns](3-implementation/state_management_patterns.md) - Best practices for actor state
+
+## Actor-Based Context Management
+
+Choir's actor model enables sophisticated context management through specialized phase responsibilities:
+
+| Phase         | Temporal Focus       | Context Responsibility               |
+| ------------- | -------------------- | ------------------------------------ |
+| Action        | Immediate present    | Initial framing and response         |
+| Experience    | Past knowledge       | Adding search results and knowledge  |
+| Intention     | Desired future       | Focusing on user goals               |
+| Observation   | Future preservation  | Tagging and connecting concepts      |
+| Understanding | Temporal integration | Deciding what information to release |
+| Yield         | Process completion   | Determining cycle continuation       |
+
+## Documentation Roadmap
+
+- **Current Phase**: Architecture refinement and documentation alignment
+- **Next Steps**: Implementation guidance and testing framework
+- **Open Questions**: Advanced context management strategies and model integration
+
+Explore the documentation sections above to understand how Choir implements an actor-based architecture to support the PostChain model of AI orchestration.
 
 ## Documentation Structure
 

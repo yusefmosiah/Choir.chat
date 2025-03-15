@@ -2,7 +2,6 @@
 ## Output of $ tree -I 'venv|archive|__pycache__|iOS_Example|dependencies' | pbcopy
 
 .
-├── CLAUDE.md
 ├── Choir
 │   ├── App
 │   │   └── ChoirApp.swift
@@ -73,8 +72,6 @@
 ├── ChoirUITests
 │   ├── ChoirUITests.swift
 │   └── ChoirUITestsLaunchTests.swift
-├── README.md
-├── actor_model.py
 ├── api
 │   ├── Dockerfile
 │   ├── __init__.py
@@ -202,7 +199,9 @@
 ├── docs
 │   ├── 1-concepts
 │   │   ├── actor_model_overview.md
+│   │   ├── postchain_actor_model.md
 │   │   ├── postchain_conceptual_model.md
+│   │   ├── postchain_temporal_logic.md
 │   │   └── scale_free_actor_architecture.md
 │   ├── 2-architecture
 │   │   ├── actor_hierarchy_diagram.md
@@ -259,17 +258,14 @@
 │   │   ├── level3.md
 │   │   ├── level4.md
 │   │   └── level5.md
-│   ├── migration_guide_for_developers.md
 │   ├── migration_langgraph_to_actor.md
 │   ├── phase_worker_pool_architecture.md
 │   ├── plan_anonymity_by_default.md
 │   ├── plan_identity_as_a_service.md
 │   ├── plan_libsql.md
-│   ├── plan_model_config_checklist.md
 │   ├── postchain_actor_model.md
 │   ├── scripts
 │   │   ├── combiner.sh
-│   │   ├── move_docs.sh
 │   │   ├── reorganization_script_design.md
 │   │   └── update_tree.sh
 │   ├── security_considerations.md
@@ -282,14 +278,11 @@
 │   ├── fqaho_simulation.ipynb
 │   ├── post_chain0.ipynb
 │   └── vowel_loop3.ipynb
-├── post_chain_actors.py
 ├── render.yaml
-├── run_post_chain.py
-├── scripts
-│   ├── generate_provider_reports.sh
-│   ├── generate_quick_search_report.sh
-│   ├── generate_search_report.sh
-│   └── generate_single_provider_report.sh
-└── turso_integration.py
+└── scripts
+    ├── generate_provider_reports.sh
+    ├── generate_quick_search_report.sh
+    ├── generate_search_report.sh
+    └── generate_single_provider_report.sh
 
-65 directories, 225 files
+65 directories, 218 files
