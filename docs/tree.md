@@ -102,6 +102,8 @@
 │   │   │   ├── __init__.py
 │   │   │   ├── chorus.py
 │   │   │   └── sui_service.py
+│   │   ├── thespian
+│   │   │   └── hello.py
 │   │   ├── tools
 │   │   │   ├── __init__.py
 │   │   │   ├── base.py
@@ -152,6 +154,8 @@
 │       ├── test_main.py
 │       ├── test_sui_service.py
 │       ├── test_user_thread_endpoints.py
+│       ├── thespian
+│       │   └── test_hello.py
 │       └── tools
 │           ├── __init__.py
 │           ├── direct_search_diagnostic.py
@@ -296,4 +300,4 @@
     ├── generate_search_report.sh
     └── generate_single_provider_report.sh
 
-66 directories, 228 files
+68 directories, 230 files

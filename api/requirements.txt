@@ -5,7 +5,7 @@ python-dotenv==1.0.0
 litellm==1.63.0
 openai==1.65.2
 qdrant-client==1.12.1
-pydantic==2.9.2
+pydantic>=2.10.0
 pydantic-settings==2.6.1
 tiktoken==0.8.0
 tokenizers==0.15.2
@@ -34,3 +34,5 @@ langserve==0.3.1
 # Additional tools - pinned to compatible versions
 langchain-community==0.3.18
 duckduckgo-search==7.5.0
+
+thespian>=4.0.1
