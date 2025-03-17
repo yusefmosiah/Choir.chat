@@ -561,31 +561,6 @@ def _convert_serialized_messages(messages):
 
     return converted_messages
 
-def get_provider_from_model_name(model_name: str) -> str:
-    """
-    Extract the provider from a model name.
-
-    Args:
-        model_name: The model name in the format "provider/model"
-
-    Returns:
-        The provider name
-    """
-    if "/" in model_name:
-        return model_name.split("/")[0]
-
-    # Default mappings for models without explicit provider
-    if model_name.startswith("gpt-"):
-        return "openai"
-    elif model_name.startswith("claude-"):
-        return "anthropic"
-    elif model_name.startswith("gemini-"):
-        return "google"
-    elif model_name.startswith("mistral-"):
-        return "mistral"
-
-    # Default to openai if unknown
-    return "openai"
 
 async def post_llm(
     model_name: str,
