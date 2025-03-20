@@ -1,7 +1,5 @@
 # Choir Stack Evolution
 
-This document chronicles the architectural evolution of Choir, highlighting key technology pivots and their rationales.
-
 ## Evolution Phases
 
 ### Phase 1: Prototype Era
@@ -57,11 +55,11 @@ This document chronicles the architectural evolution of Choir, highlighting key 
 
 ---
 
-### Phase 4: Actor Model Maturity
+### Phase 4: MCP Architecture
 ```python
 | Component       | Technology          | Rationale                          |
 |-----------------|---------------------|------------------------------------|
-| Core Framework  | Thespian            | Robust actor model implementation  |
+| Core Framework  | MCP Architecture            | Service-oriented phase implementation  |
 | Validation      | PydanticAI          | Type-safe LLM interactions         |
 | Database        | libSQL/Turso        | Embedded+cloud sync                |
 | Mobile          | Swift+Sui           | Move protocol integration          |
@@ -69,14 +67,14 @@ This document chronicles the architectural evolution of Choir, highlighting key 
 ```
 
 **Current Advantages:**
-- Distributed actor-based architecture
+- Distributed MCP-based architecture
 - Confidential computing integration
 - Strong type safety across stack
 
 ## Key Evolution Drivers
 
 1. **Concurrency Model Evolution**
-   - Elixir Processes → Python Threads → Thespian Actors
+   - Elixir Processes → Python Threads → MCP Servers
 
 2. **State Management Journey**
    - Phoenix Contexts → LangGraph Checkpoints → Actor Persistence
@@ -92,9 +90,9 @@ This document chronicles the architectural evolution of Choir, highlighting key 
 
 ## Architectural Lessons
 
-1. **Actor Model Insights**
-   - Supervision hierarchies prove essential for reliability
-   - Decentralized state management enables scalability
+1. **MCP Architecture Insights**
+   - Service boundaries improve system reliability and maintainability
+   - Decentralized state management enhances scalability
 
 2. **Blockchain Realities**
    - Move protocol's resource-oriented design superior for financial primitives
@@ -112,7 +110,7 @@ This document chronicles the architectural evolution of Choir, highlighting key 
 
 ```mermaid
 graph LR
-    Current[Thespian/PydanticAI/libSQL/Sui]
+    Current[MCP/PydanticAI/libSQL/Sui]
     --> RustCore[Rust Core Services]
     --> SGX[Full Memory Enclaves]
     --> ZK[Zero-Knowledge Proofs]

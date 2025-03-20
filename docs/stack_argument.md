@@ -1,183 +1,161 @@
-# The Choir Stack Argument
+# The Choir Stack Argument: MCP Architecture
 
 ## Executive Summary
 
-The Choir PostChain is built on a coherent technology stack designed specifically for efficient, secure multi-agent AI systems. Our architecture pivots from graph-based to actor-based models, providing superior state management, natural agent encapsulation, and robust message passing. This document outlines the rationale, benefits, and security implications of our technology choices.
+The Choir PostChain is built on a coherent technology stack designed specifically for efficient, secure multi-agent AI systems. Our architecture pivots from graph-based to MCP-based models, providing superior service encapsulation, clear tool boundaries and enhanced scalability. This document outlines the rationale, benefits, and security implications of our technology choices in the context of MCP.
 
-## The Actor Model Advantage
+## The MCP Architecture Advantage
 
-After extensive experimentation with graph-based approaches, we've determined that the actor model provides the optimal foundation for Choir's multi-agent AI architecture. This isn't merely a technical preference—it's a fundamental alignment with the nature of agent-based systems.
+After extensive experimentation with LangGraph, we've determined that the MCP architecture provides the optimal foundation for Choir's multi-agent AI system. This is not merely a technical preference—it's a fundamental alignment with the nature of service-oriented, distributed systems.
 
-### Why Actors Over Graphs?
+### Why MCP over Graphs?
 
-The actor model proved superior for our needs due to:
+The MCP architecture proved superior for our needs due to:
 
-1. **Natural Agent Boundaries** - Each phase worker maintains isolated state
-2. **Modality Support** - Easy addition of text/audio/video handlers
-3. **Fault Containment** - Actor crashes don't destabilize whole system
-4. **Deployment Flexibility** - Mix of local and cloud actors
-5. **State Persistence** - Each actor manages own libSQL connection
+1.  **Service Boundaries** - Each phase is a separate, encapsulated service
+2.  **Tool Control** - Explicitly defined and limited tool access for each phase
+3.  **Fault Isolation** - Server crashes in one phase do not destabilize others
+4.  **Deployment Flexibility** - Phases can be deployed and scaled independently
+5.  **Resource Management** - Each server manages its own resources efficiently
 
 ### Performance Characteristics
 
-| Aspect           | LangGraph         | Actor Model       |
+| Aspect           | LangGraph         | MCP Architecture       |
 | ---------------- | ----------------- | ----------------- |
-| Memory Usage     | 2-4GB per session | 500MB-1GB         |
-| Error Recovery   | Full restart      | Per-actor restart |
+| Memory Usage     | 2-4GB per session | 500MB-1GB per server         |
+| Error Recovery   | Full restart      | Per-server restart |
 | Scaling          | Vertical          | Horizontal        |
 | Modality Support | Single            | Multiple          |
+| Tool Control     | Implicit          | Explicit          |
 
-### The AEIOU-Y PostChain as Actors
+### The AEIOU-Y PostChain as MCP Servers
 
-The PostChain concept (Action, Experience, Intention, Observation, Understanding, Yield) maps perfectly to specialized actors:
+The PostChain concept (Action, Experience, Intention, Observation, Understanding, Yield) maps perfectly to specialized MCP servers:
 
-- **Action Actor**: Processes initial user input and generates preliminary responses
-- **Experience Actor**: Enriches context with historical knowledge and RAG retrievals
-- **Intention Actor**: Aligns responses with identified user intents
-- **Observation Actor**: Records semantic patterns and connections between interactions
-- **Understanding Actor**: Makes decisions about processing flow and continuation
-- **Yield Actor**: Produces final, polished responses to users
+- **Action Server**: Processes initial user input and generates preliminary responses
+- **Experience Server**: Enriches context with historical knowledge and RAG retrievals
+- **Intention Server**: Aligns responses with identified user intents
+- **Observation Server**: Records semantic patterns and connections between interactions
+- **Understanding Server**: Makes decisions about processing flow and continuation
+- **Yield Server**: Produces final, polished responses to users
 
 ## The Coherent Stack
 
-Our technology choices form a carefully considered, synergistic stack that maximizes developer productivity while ensuring security, scalability, and performance.
+Our technology choices form a carefully considered, synergistic stack that maximizes developer productivity while ensuring security, scalability, and performance for an MCP-based architecture.
 
-### Thespian: Actor Framework
+### MCP: Core Framework
 
-**Why Thespian?** As a mature Python actor system, Thespian provides robust message-passing semantics, actor lifecycle management, and concurrency handling—precisely what's needed for our agent architecture. It allows us to implement the PostChain as a system of communicating specialized agents.
+**Why MCP?** Model Context Protocol (MCP) provides a standardized framework for building modular, interoperable AI services. MCP enables:
 
-**Core Benefits:**
-
-- Pure Python implementation for development speed
-- Strong message-passing semantics
-- Proven in production systems
-- Clean actor lifecycle management
+- Clear separation of concerns between phases as independent servers
+- Standardized communication protocol for inter-service communication
+- Tool and resource management for each phase
+- Flexible deployment and scaling options
 
 ### libSQL/Turso: Combined SQL+Vector Database
 
-**Why libSQL/Turso?** Our agents need both structured storage (SQL) and vector capabilities (embeddings) to manage state and knowledge. libSQL provides a SQLite-compatible database with vector extensions, enabling:
+**Why libSQL/Turso?** MCP servers may need both structured storage (SQL) and vector capabilities (embeddings) to manage state and knowledge. libSQL provides:
 
-- Persistent storage of agent states
-- Vector similarity search for knowledge retrieval
-- Compact deployment footprint
-- Replication capabilities for reliability
+- Persistent storage for MCP server states
+- Vector similarity search for knowledge retrieval within phases
+- Compact deployment footprint for each server
+- Local persistence with optional cloud sync via Turso
 
 ### PySUI: Blockchain Integration
 
-**Why Sui Blockchain?** Our citation-reward mechanism requires a fast, efficient blockchain with smart contract capabilities. Sui offers:
+**Why Sui Blockchain?** Integration with blockchain for citation rewards and economic mechanisms remains a core requirement. Sui offers:
 
-- High throughput for citation transactions
-- Move-based smart contracts for citation logic
+- High throughput for on-chain transactions
+- Move-based smart contracts for economic logic
 - Economic infrastructure for CHIP tokens
-- Growing ecosystem and developer support
+- Secure and transparent reward distribution
 
 ### Pydantic: Type Safety
 
-**Why Pydantic?** Agent communication requires well-structured, validated messages. Pydantic provides:
+**Why Pydantic?** Message passing between MCP servers and the Python API requires well-structured, validated data. Pydantic provides:
 
-- Runtime type validation for message integrity
-- Self-documenting type definitions
-- Integration with FastAPI
-- High performance validation
+- Runtime type validation for data integrity
+- Self-documenting data models
+- Integration with FastAPI for API validation
+- Performance and ease of use in Python
 
 ### FastAPI/Uvicorn: API Layer
 
-**Why FastAPI?** For external communication, we need a high-performance async API layer:
+**Why FastAPI?** For external communication and orchestration, we need a high-performance async API layer:
 
-- Async-first design complementing our actor model
-- Automatic OpenAPI documentation
+- Async-first design for efficient handling of MCP server requests
+- Automatic OpenAPI documentation for API discoverability
 - Pydantic integration for request/response validation
-- Excellent performance characteristics
+- Excellent performance and scalability
 
 ### Docker: Containerization
 
-**Why Docker?** For deployment flexibility, we containerize our stack:
+**Why Docker?** For deployment flexibility and isolation of MCP servers, we use containerization:
 
-- Consistent environment across development and production
-- Simplified deployment to various platforms
-- Efficient resource utilization
-- Ability to scale horizontally
+- Consistent environments for each MCP server across development and production
+- Simplified deployment and management of multiple servers
+- Efficient resource utilization through container isolation
+- Enables horizontal scaling of individual MCP servers
 
 ### Phala Network: Secure Computation
 
-**Why Phala?** Security is paramount for AI systems. Phala Network provides:
+**Why Phala?** Security and confidentiality are paramount for AI systems. Phala Network provides:
 
-- Confidential computing environment
-- Blockchain-based trust guarantees
-- Protection from host-level attacks
-- Decentralized execution environment
+- Confidential computing environment for MCP servers
+- TEE (Trusted Execution Environment) protection for secure execution
+- Blockchain-based trust and attestation guarantees
+- Protection against data breaches and unauthorized access
 
-## Security Considerations
+## Security Considerations of MCP Architecture
 
-In the age of advancing AI capabilities, security must be foundational rather than an afterthought. Our stack addresses security at multiple levels:
+In the age of advancing AI capabilities, security must be foundational. Our MCP-based stack enhances security through:
 
-### Actor-Based Security
+### MCP-Based Security
 
-The actor model inherently improves security by:
+The MCP architecture inherently improves security by:
 
-- Isolating components from each other
-- Limiting the blast radius of compromises
-- Enforcing explicit communication channels
-- Enabling fine-grained permission models
+- Enforcing clear boundaries and isolation between phases as separate servers
+- Providing explicit control over tools and resources available to each phase
+- Limiting the potential impact of vulnerabilities to individual servers
+- Simplifying security auditing and policy enforcement for each phase
 
 ### Blockchain Security
 
-Integrating with Sui and deploying on Phala provides:
+Integration with Sui and deployment on Phala provides:
 
-- Immutable transaction records
-- Cryptographic verification of citations
-- Economic security through stake mechanisms
-- Resilience against tampering attempts
+- Immutable transaction records for economic actions
+- Cryptographic verification of on-chain data
+- Economic security through stake-based mechanisms
+- Tamper-proof audit trails for critical operations
 
 ### Confidential Computation
 
-Phala Network provides confidential computing guarantees:
+Phala Network provides confidential computing guarantees for MCP servers:
 
-- TEE (Trusted Execution Environment) protection
-- Encryption of data in use, not just at rest/transit
-- Attestation for computational integrity
-- Resistance to privileged attackers
+- TEE (Trusted Execution Environment) protection for code and data within servers
+- Encryption of data in use, protecting against insider threats and data breaches
+- Remote attestation to verify the integrity of the execution environment
+- Enhanced privacy and security for sensitive AI computations
 
 ## Migration Path
 
-Our transition from graph-based to actor-based architecture follows a phased approach:
+Our transition to the MCP architecture follows a phased approach:
 
-1. **Core Actor Framework Implementation**: Establish the fundamental actor model infrastructure
-2. **PostChain Actor Development**: Implement specialized actors for each AEIOU-Y phase
-3. **State Migration**: Transfer relevant state from graph-based storage to actor-based storage
-4. **Integration Testing**: Verify end-to-end functionality with the new architecture
-5. **Performance Optimization**: Tune actor communication and concurrency patterns
-
-## Future Optimization Potential
-
-While our current Python-based stack provides the optimal balance of development speed and functionality, we've architected with future optimization in mind:
-
-### Rust Migration Path
-
-The actor model provides a clean migration path to Rust for performance-critical components:
-
-- Actix or similar Rust actor frameworks can replace Thespian
-- Rust's strong type system can strengthen message passing
-- Specialized actors can be reimplemented one by one
-
-### CUDA Acceleration
-
-For computation-heavy actors, CUDA optimization provides another dimension:
-
-- Model inference can bypass Python overhead
-- Tensor operations can run at near-native speed
-- Embedding generation can be significantly accelerated
+1.  **Define MCP Server Interfaces**: Define clear interfaces and communication protocols for each phase's MCP server.
+2.  **Implement Core MCP Servers**: Develop the basic server structure for each AEIOU-Y phase using the MCP framework.
+3.  **Integrate Langchain Utils**:  Incorporate the existing `langchain_utils.py` for model interactions within MCP servers.
+4.  **Implement SSE Streaming**: Add Server-Sent Events for real-time communication from MCP servers to the Python API.
+5.  **Orchestrate with Python API**:  Update the Python API to manage and orchestrate the MCP server calls and SSE streams.
+6.  **Deployment and Testing**: Deploy the MCP-based architecture in Docker and Phala Network for comprehensive testing.
 
 ## Conclusion
 
-The Choir stack represents a carefully considered, coherent approach to building secure, scalable multi-agent AI systems. By embracing the actor model and selecting complementary technologies, we've created an architecture that:
+The Choir stack, now pivoting to an MCP-based architecture, represents a carefully considered and coherent approach to building secure, scalable multi-agent AI systems. By embracing MCP and selecting complementary technologies, we've created an architecture that:
 
-- Naturally expresses agent behaviors and interactions
-- Manages conversational context efficiently
-- Provides strong security guarantees
-- Integrates blockchain-based economic incentives
-- Scales effectively for production deployment
+- Naturally expresses phase-based AI workflows as modular services
+- Provides strong security and isolation between phases
+- Manages conversational context and state efficiently within each server
+- Integrates blockchain-based economic incentives and secure computation
+- Scales effectively for robust, production-ready deployment
 
-Our technology choices aren't merely pragmatic—they're philosophical. We believe that agent-based AI systems should be built on architectures that naturally express agent autonomy, communication, and specialization. The actor model provides precisely this foundation.
-
-The Choir PostChain, implemented on this stack, represents the next evolution of multi-agent AI systems—more resilient, more scalable, and more aligned with how intelligent systems naturally operate.
+Our technology choices reflect a commitment to building AI systems that are not only intelligent but also robust, secure, and transparent. The MCP architecture provides a solid foundation for realizing this vision.

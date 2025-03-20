@@ -30,7 +30,7 @@ Fundamental ideas that remain consistent regardless of implementation:
 Detailed information about the actor-based architecture:
 
 - [Actor System Diagrams](2-architecture/actor_system_diagram.md) - Visual representations of the actor system
-- [Architecture Transition Narrative](architecture_transition_narrative.md) - The story of our architectural evolution
+- [Architecture Transition Narrative](archive/architecture_transition_narrative.md) - The story of our architectural evolution
 - [Stack Argument](stack_argument.md) - Rationale for our technology choices
 
 ### 3. Implementation
@@ -74,7 +74,7 @@ By reorganizing our documentation in this way, we aim to make the actor model mo
 
 If you'd like to contribute to the documentation:
 
-1. Review the [Architecture Reorganization Plan](architecture_reorganization_plan.md)
+1. Review the [Architecture Reorganization Plan](archive/architecture_reorganization_plan.md)
 2. Follow the existing folder structure and naming conventions
 3. Use Markdown for all documentation
 4. Include diagrams using Mermaid.js where appropriate

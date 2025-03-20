@@ -228,7 +228,6 @@ tree.md
 │   │   ├── architecture_integration.md
 │   │   ├── message_flow_diagrams.md
 │   │   ├── phase_worker_pool.md
-│   │   ├── stack_argument.md
 │   │   ├── state_management_overview.md
 │   │   ├── thread_contract_model.md
 │   │   └── token_economy_model.md
@@ -238,7 +237,6 @@ tree.md
 │   │   ├── actor_testing_guide.md
 │   │   ├── developer_quickstart.md
 │   │   ├── message_protocol_reference.md
-│   │   ├── migration_guide_for_developers.md
 │   │   ├── phase_requirements
 │   │   │   ├── action_phase.md
 │   │   │   ├── experience_phase.md
@@ -262,11 +260,7 @@ tree.md
 │   │   └── evolution_token.md
 │   ├── CHANGELOG.md
 │   ├── README.md
-│   ├── architecture_reorganization_checklist.md
-│   ├── architecture_reorganization_plan.md
 │   ├── architecture_reorganization_plan_mcp.md
-│   ├── architecture_transformation_checklist.md
-│   ├── architecture_transition_narrative.md
 │   ├── comp_provider_info.md
 │   ├── core_core.md
 │   ├── core_economics.md
@@ -289,7 +283,6 @@ tree.md
 │   │   ├── level3.md
 │   │   ├── level4.md
 │   │   └── level5.md
-│   ├── migration_langgraph_to_actor.md
 │   ├── phase_worker_pool_architecture.md
 │   ├── plan_anonymity_by_default.md
 │   ├── plan_identity_as_a_service.md
@@ -316,7 +309,7 @@ tree.md
     ├── generate_search_report.sh
     └── generate_single_provider_report.sh
 
-70 directories, 231 files
+70 directories, 224 files
 
 === File: docs/CHANGELOG.md ===
 
@@ -333,9 +326,8 @@ CHANGELOG.md
 
 ### Changed
 
-- Major architectural pivot: Shifted from LangGraph to Actor Model architecture
-  - Adopted Thespian actor framework for agent communication
-  - Implemented Phase Worker Pool pattern for modality support
+- Major architectural pivot: Shifted from LangGraph to MCP Architecture
+  - Transitioned to Model Context Protocol (MCP) architecture
   - Added libSQL/Turso for combined SQL+vector storage
   - Integrated PySUI for blockchain operations
   - Established Docker+Phala deployment pipeline
@@ -345,19 +337,19 @@ CHANGELOG.md
 
 - Defined new coherent technology stack:
 
-  - Thespian: Actor model framework for agent interactions
+  - Model Context Protocol (MCP) architecture: Service-oriented architecture for phases
   - libSQL/Turso: Combined SQL+vector database for state and RAG
   - PySUI: Blockchain integration for tokenomics and citations
-  - Pydantic: Type safety for message passing between actors
+  - Pydantic: Type safety for message passing between services
   - FastAPI/Uvicorn: High-performance async API layer
   - Docker: Containerization for deployment
   - Phala Network: Privacy-preserving computation platform for deployment
 
-- Extended the actor model with Phase Worker Pool pattern:
-  - Phases are now implemented as types (not just single instances)
-  - Actor implementations can be specialized by modality (text, audio, video, code)
-  - Worker Pool pattern abstracts AI models from actor implementations
-  - Support for specialized domain actors (medical, legal, financial)
+- Extended the Post Chain with Phase Worker Pool pattern:
+  - Phases are now implemented as MCP servers (not just single instances)
+  - Server implementations can be specialized by modality (text, audio, video, code)
+  - Worker Pool pattern abstracts AI models from server implementations
+  - Support for specialized domain servers (medical, legal, financial)
 
 ### Removed
 

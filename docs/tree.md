@@ -215,7 +215,6 @@
 │   │   ├── architecture_integration.md
 │   │   ├── message_flow_diagrams.md
 │   │   ├── phase_worker_pool.md
-│   │   ├── stack_argument.md
 │   │   ├── state_management_overview.md
 │   │   ├── thread_contract_model.md
 │   │   └── token_economy_model.md
@@ -225,7 +224,6 @@
 │   │   ├── actor_testing_guide.md
 │   │   ├── developer_quickstart.md
 │   │   ├── message_protocol_reference.md
-│   │   ├── migration_guide_for_developers.md
 │   │   ├── phase_requirements
 │   │   │   ├── action_phase.md
 │   │   │   ├── experience_phase.md
@@ -249,11 +247,7 @@
 │   │   └── evolution_token.md
 │   ├── CHANGELOG.md
 │   ├── README.md
-│   ├── architecture_reorganization_checklist.md
-│   ├── architecture_reorganization_plan.md
 │   ├── architecture_reorganization_plan_mcp.md
-│   ├── architecture_transformation_checklist.md
-│   ├── architecture_transition_narrative.md
 │   ├── comp_provider_info.md
 │   ├── core_core.md
 │   ├── core_economics.md
@@ -276,7 +270,6 @@
 │   │   ├── level3.md
 │   │   ├── level4.md
 │   │   └── level5.md
-│   ├── migration_langgraph_to_actor.md
 │   ├── phase_worker_pool_architecture.md
 │   ├── plan_anonymity_by_default.md
 │   ├── plan_identity_as_a_service.md
@@ -303,4 +296,4 @@
     ├── generate_search_report.sh
     └── generate_single_provider_report.sh
 
-70 directories, 231 files
+70 directories, 224 files

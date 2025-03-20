@@ -5,7 +5,7 @@
 > **For current documentation, please refer to:**
 >
 > - [Actor Model Overview](../1-concepts/actor_model_overview.md)
-> - [Architecture Transition Narrative](../architecture_transition_narrative.md)
+> - [Architecture Transition Narrative](architecture_transition_narrative.md)
 > - [Migration Guide for Developers](../3-implementation/migration_guide_for_developers.md)
 
 ---

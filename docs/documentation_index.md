@@ -12,18 +12,16 @@ These documents describe the fundamental concepts that remain consistent regardl
 
 ## Architecture Documentation
 
-These documents describe the new actor-based architecture:
-
-- [Stack Argument](stack_argument.md) - Rationale for the actor-based technology stack
-- [PostChain Actor Model](postchain_actor_model.md) - Technical implementation of PostChain using actors
+These documents describe the new MCP-based architecture:
+- [Stack Argument](stack_argument.md) - Rationale for the MCP-based technology stack
 - [Security Considerations](security_considerations.md) - Security architecture and considerations
 
 ## Migration Documents
 
-These documents guide the transition from LangGraph to the actor model:
+These documents guide the transition from LangGraph to the MCP architecture:
 
 - [Migration Plan](migration_langgraph_to_actor.md) - Step-by-step migration plan
-- [Migration Checklist](plan_postchain_migration_checklist.md) - (Needs update for actor model)
+- [Migration Checklist](plan_postchain_migration_checklist.md) - (Needs update for MCP architecture)
 
 ## Implementation Guidelines
 
@@ -37,7 +35,7 @@ These documents provide practical guidance for implementation:
 
 These documents cover integration with external systems:
 
-- [libSQL Integration](plan_libsql.md) - Database integration (to be updated for actor model)
+- [libSQL Integration](plan_libsql.md) - Database integration (to be updated for MCP architecture)
 - [Blockchain Integration](blockchain_integration.md) - (To be created)
 - [Identity as a Service](plan_identity_as_a_service.md) - Identity management
 
@@ -64,6 +62,12 @@ These documents are preserved for reference but may be outdated due to the archi
 - [LangGraph PostChain Iteration](plan_langgraph_postchain_iteration.md) - Previous iteration plan (archived)
 - [PostChain Graph API Checklist](plan_postchain_graph_api_checklist.md) - Previous API plans (archived)
 - [Tools Qdrant Checklist](plan_tools_qdrant_checklist.md) - Previous vector DB integration (archived)
+- [Actor Model Overview](1-concepts/actor_model_overview.md) - Introduction to the actor model (archived)
+- [PostChain Actor Model](docs/postchain_actor_model.md) - Technical implementation of PostChain using actors (archived)
+- [Scale-Free Actor Architecture](1-concepts/scale_free_actor_architecture.md) - Fractal patterns in actor systems (archived)
+- [Phase Worker Pool Architecture](phase_worker_pool_architecture.md) - Extension of the actor model with worker pools (archived)
+- [Migration Plan](migration_langgraph_to_actor.md) - Step-by-step LangGraph to Actor migration plan (archived)
+
 
 ## Development Timeline
 
@@ -75,17 +79,17 @@ The changelog tracks the project's evolution:
 
 | Document                     | Status  | Priority | Target      | Changes Needed          |
 | ---------------------------- | ------- | -------- | ----------- | ----------------------- |
-| PostChain Actor Model        | Created | High     | Completed   |                         |
-| Stack Argument               | Created | High     | Completed   |                         |
-| Migration Plan               | Updated | High     | Completed   | Add actor model details |
+| PostChain Actor Model        | Created | High     | Completed   | Archived                |
+| Stack Argument               | Created | High     | Completed   | Update to MCP           |
+| Migration Plan               | Updated | High     | Completed   | Update to MCP           |
 | Security Considerations      | Updated | High     | Completed   | Add TEE integration     |
-| Actor Development Guidelines | Created | High     | In progress |
-| Message Protocol Design      | Planned | High     |
-| State Persistence Patterns   | Planned | Medium   |
-| Testing Strategy             | Planned | Medium   |
-| Deployment Guide             | Planned | Medium   |
-| Monitoring and Observability | Planned | Low      |
-| Blockchain Integration       | Planned | Medium   |
+| Actor Development Guidelines | Created | High     | In progress | Archived                |
+| Message Protocol Design      | Planned | High     |             |                         |
+| State Persistence Patterns   | Planned | Medium   |             |                         |
+| Testing Strategy             | Planned | Medium   |             |                         |
+| Deployment Guide             | Planned | Medium   |             |                         |
+| Monitoring and Observability | Planned | Low      |             |                         |
+| Blockchain Integration       | Planned | Medium   |             |                         |
 
 ## Documentation Principles
 
