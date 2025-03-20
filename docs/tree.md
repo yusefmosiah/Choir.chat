@@ -36,7 +36,6 @@
 │   │   └── PostchainViewModel.swift
 │   ├── Views
 │   │   ├── ChoirThreadDetailView.swift
-│   │   ├── Components
 │   │   ├── MessageRow.swift
 │   │   ├── PostchainView.swift
 │   │   ├── Thread
@@ -86,10 +85,13 @@
 │   │   ├── postchain
 │   │   │   ├── __init__.py
 │   │   │   ├── checkpointer.py
+│   │   │   ├── nodes
+│   │   │   ├── prompts
 │   │   │   ├── schemas
 │   │   │   │   ├── __init__.py
 │   │   │   │   └── state.py
 │   │   │   ├── simple_graph.py
+│   │   │   ├── state
 │   │   │   ├── state_manager.py
 │   │   │   └── utils.py
 │   │   ├── routers
@@ -249,6 +251,7 @@
 │   ├── README.md
 │   ├── architecture_reorganization_checklist.md
 │   ├── architecture_reorganization_plan.md
+│   ├── architecture_reorganization_plan_mcp.md
 │   ├── architecture_transformation_checklist.md
 │   ├── architecture_transition_narrative.md
 │   ├── comp_provider_info.md
@@ -300,4 +303,4 @@
     ├── generate_search_report.sh
     └── generate_single_provider_report.sh
 
-68 directories, 230 files
+70 directories, 231 files
