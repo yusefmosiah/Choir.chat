@@ -1,45 +1,51 @@
 # Choir Documentation
 
+# Choir: Building a Tokenized Marketplace of Ideas on the Model Context Protocol
+
 ## Core Concepts
 
-The Choir platform is built around a sophisticated conceptual model implemented through an MCP-based architecture:
-- [PostChain Temporal Logic](1-concepts/postchain_temporal_logic.md) - The temporal essence of each AEIOU-Y phase
+The Choir platform is a revolutionary system for building collective intelligence, structured around a sophisticated conceptual model and implemented with a cutting-edge Model Context Protocol (MCP) architecture.  Explore the foundational concepts:
+- [PostChain Temporal Logic](postchain_temporal_logic.md) - The temporal essence of each AEIOU-Y phase, driving dynamic and context-aware AI workflows.
+- [FQAHO Model](fqaho_visualization.md) - The Fractional Quantum Anharmonic Oscillator economic model, powering a self-improving token economy that rewards quality and innovation.
+- [Core Economics](core_economics.md) -  The economic principles and tokenomics of CHIP, designed to create a sustainable and equitable ecosystem for knowledge creation.
+- [Core State Transitions](core_state_transitions.md) - The carefully defined state transitions that govern the evolution of threads and the flow of value within Choir.
+- [Evolution: Naming](evolution_naming.md) -  The story behind the evolution of Choir's name, reflecting the project's journey and vision.
 
-## Architecture
+## Architecture: MCP-Powered Scalability and Modularity
 
-Technical architecture and design decisions:
+Choir's technical architecture is now built on the **Model Context Protocol (MCP)**, a strategic pivot that provides a robust and scalable foundation for our vision:
+- [Stack Argument](stack_argument.md) -  The compelling rationale behind our technology choices, emphasizing the advantages of the MCP-based stack for Choir.
+- [Security Considerations](security_considerations.md) -  A deep dive into the security architecture of Choir, highlighting the benefits of MCP and confidential computing for building a trustworthy AI platform.
 
-- [Architecture Transition Narrative](2-architecture/architecture_transition_narrative.md) - The story of our architectural evolution
-- [Stack Argument](stack_argument.md) - Rationale for our technology choices
+## Implementation: Building the Revolution, One Phase at a Time
 
-## Implementation
+Explore the practical implementation of Choir's MCP-based architecture:
+- [Developer Quickstart](developer_quickstart.md) -  A fast onboarding guide for developers to start building MCP-powered phases and applications for Choir.
+- [State Management Patterns](state_management_patterns.md) - Best practices and design patterns for managing state efficiently and robustly within MCP-based AI systems.
 
-Practical guidance for implementation:
+## MCP-Based Context Management: Orchestrating the Flow of Knowledge
 
-- [Developer Quickstart](3-implementation/developer_quickstart.md) - Fast onboarding guide
-- [Message Protocol Reference](3-implementation/message_protocol_reference.md) - Comprehensive message format documentation
-- [State Management Patterns](3-implementation/state_management_patterns.md) - Best practices for state
-
-## MCP-Based Context Management
-
-Choir's MCP architecture enables sophisticated context management through specialized phase responsibilities:
+Choir leverages the power of MCP to enable sophisticated context management, with each phase playing a specialized role in orchestrating the flow of knowledge:
 
 | Phase         | Temporal Focus       | Context Responsibility               |
 | ------------- | -------------------- | ------------------------------------ |
-| Action        | Immediate present    | Initial framing and response         |
-| Experience    | Past knowledge       | Adding search results and knowledge  |
-| Intention     | Desired future       | Focusing on user goals               |
-| Observation   | Future preservation  | Tagging and connecting concepts      |
-| Understanding | Temporal integration | Deciding what information to release |
-| Yield         | Process completion   | Determining cycle continuation       |
+| Action        | Immediate present    | Initial framing and response, setting the stage for the conversation.         |
+| Experience    | Past knowledge       | Enriching context with search results, knowledge graph retrievals, and relevant prior experiences.  |
+| Intention     | Desired future       | Focusing on user goals and intents, guiding the AI towards user-centric outcomes.               |
+| Observation   | Future preservation  | Tagging and connecting concepts, building a rich semantic network for long-term knowledge growth.      |
+| Understanding | Temporal integration | Deciding what information to release and prune, optimizing context for efficiency and relevance. |
+| Yield         | Process completion   | Determining cycle continuation and recursion, generating the final, user-facing response.       |
 
-## Documentation Roadmap
+## A Vision for the Future: Personal AI and the Tokenized Marketplace of Ideas
 
-- **Current Phase**: Architecture refinement and documentation alignment
-- **Next Steps**: Implementation guidance and testing framework
-- **Open Questions**: Advanced context management strategies and model integration
+Choir is not just building another AI application; we are building a **transformative platform for the future of AI and human collaboration**:
 
-Explore the documentation sections above to understand how Choir implements an MCP-based architecture to support the PostChain model of AI orchestration.
+- **Revolutionizing Consumer Finance:** Empowering users with AI-driven tools to optimize their financial lives and achieve financial freedom.
+- **Creating a Live Streaming Home Production Studio:**  Transforming home entertainment and content creation with AI-powered tools for interactive and immersive experiences.
+- **Building a Tokenized Marketplace of Ideas:**  Fostering a new kind of online platform where quality ideas are valued, rewarded, and drive the emergence of collective intelligence.
+- **Democratizing AI Training and Ownership:**  Enabling users to participate in and benefit from the AI revolution, owning a piece of the AI infrastructure and contributing to a self-improving, community-driven AI ecosystem.
+
+Explore the documentation sections above to understand how Choir's MCP-based architecture is designed to realize this ambitious vision and build a truly revolutionary platform for the age of personal AI.
 
 ## Documentation Structure
 
@@ -48,7 +54,13 @@ The documentation is organized into the following sections:
 ## 1. Core Concepts
 
 Fundamental concepts that remain consistent regardless of the implementation:
-- [PostChain (AEIOU-Y) Conceptual Model](postchain_actor_model.md) - The core AEIOU-Y framework
+- Phases:
+    - [Action](docs/phase_requirements/action_phase.md)
+    - [Experience](docs/phase_requirements/experience_phase.md)
+    - [Intention](docs/phase_requirements/intention_phase.md)
+    - [Observation](docs/phase_requirements/observation_phase.md)
+    - [Understanding](docs/phase_requirements/understanding_phase.md)
+    - [Yield](docs/phase_requirements/yield_phase.md)
 - [FQAHO Model](fqaho_visualization.md) - The Fractional Quantum Anharmonic Oscillator economic model
 - [Core Economics](core_economics.md) - Economic principles and tokenomics
 - [Core State Transitions](core_state_transitions.md) - State transition principles
@@ -63,10 +75,8 @@ Detailed information about the MCP-based architecture:
 ## 3. Implementation
 
 Practical guidance for implementing the MCP-based architecture:
-- [Developer Quickstart](3-implementation/developer_quickstart.md) - Fast onboarding for new developers
-- [Migration Plan](migration_langgraph_to_actor.md) - Step-by-step migration from LangGraph to MCP
-- [Message Protocol Reference](message_protocol_reference.md) - Documentation of message formats
-- [State Management Patterns](3-implementation/state_management_patterns.md) - Best practices for state management
+- [Developer Quickstart](developer_quickstart.md) - Fast onboarding for new developers
+- [State Management Patterns](state_management_patterns.md) - Best practices for state management
 
 ## 4. Integration
 
@@ -76,15 +86,7 @@ Information about integrating with external systems:
 - [Blockchain Integration](blockchain_integration.md) - Integration with Sui blockchain
 - [Identity as a Service](plan_identity_as_a_service.md) - Identity management
 
-## 5. Operations
-
-Documentation for deployment, testing, and operations:
-
-- [Deployment Guide](deployment_guide.md) - Instructions for deploying the MCP-based system
-- [Testing Strategy](testing_strategy.md) - Approach to testing MCP-based systems
-- [Monitoring and Observability](monitoring_observability.md) - Monitoring the MCP system
-
-## 6. Business and Strategy
+## 5. Business and Strategy
 
 Business aspects of Choir:
 
@@ -92,20 +94,12 @@ Business aspects of Choir:
 - [Evolution Token](evolution_token.md) - Token design and economics
 - [Anonymity by Default](plan_anonymity_by_default.md) - Privacy principles
 
-## Archive
-
-Documents preserved for reference but potentially outdated due to the architectural pivot:
-
-- [LangGraph-specific documentation](archive/) - Previous architecture documents
-
 ## Development Timeline
 
 - [Changelog](CHANGELOG.md) - Historical development timeline
-- [Architecture Reorganization Plan](archive/architecture_reorganization_plan.md) - Plan for documentation updates
+
 
 ## Contributing to Documentation
-
-See the [Architecture Reorganization Plan](archive/architecture_reorganization_plan.md) for information on the documentation structure and contribution guidelines.
 
 When contributing to documentation:
 

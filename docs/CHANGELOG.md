@@ -4,35 +4,34 @@
 
 ### Changed
 
-- Major architectural pivot: Shifted from LangGraph to MCP Architecture
-  - Transitioned to Model Context Protocol (MCP) architecture
-  - Added libSQL/Turso for combined SQL+vector storage
-  - Integrated PySUI for blockchain operations
-  - Established Docker+Phala deployment pipeline
-  - Preserved FQAHO economic model intact
+- **Major Architectural Pivot: Shifted from LangGraph to MCP Architecture**
+  - Transitioned to Model Context Protocol (MCP) architecture for the Choir platform.
+  - Adopted a service-oriented architecture with each PostChain phase implemented as a separate MCP server.
+  - Implemented MCP Resources for efficient conversation state management and context sharing.
+  - Leveraged MCP Notifications for real-time updates and communication between Host and Servers.
+  - Replaced LangGraph-based workflow orchestration with a Host-application-centric orchestration model using asynchronous tasks.
+  - Refined the focus on modularity, scalability, and security through the MCP architecture.
 
 ### Added
 
-- Defined new coherent technology stack:
+- **Coherent Technology Stack for MCP Architecture:**
+  - **Model Context Protocol (MCP) Architecture:** Service-oriented architecture for PostChain phases, enabling modularity and scalability.
+  - **libSQL/Turso:** Integrated libSQL/Turso for server-specific state persistence and potential "conversation state resource" management.
+  - **PySUI:** Maintained PySUI for blockchain integration and economic actions.
+  - **Pydantic:** Continued use of Pydantic for type safety and message validation in the MCP architecture.
+  - **FastAPI/Uvicorn:** Continued use of FastAPI/Uvicorn for the Python API layer, now orchestrating MCP server interactions.
+  - **Docker:** Maintained Docker for containerization and deployment of MCP servers.
+  - **Phala Network:** Maintained Phala Network for TEE-secured operations and confidential computing for MCP servers.
 
-  - Model Context Protocol (MCP) architecture: Service-oriented architecture for phases
-  - libSQL/Turso: Combined SQL+vector database for state and RAG
-  - PySUI: Blockchain integration for tokenomics and citations
-  - Pydantic: Type safety for message passing between services
-  - FastAPI/Uvicorn: High-performance async API layer
-  - Docker: Containerization for deployment
-  - Phala Network: Privacy-preserving computation platform for deployment
-
-- Extended the Post Chain with Phase Worker Pool pattern:
-  - Phases are now implemented as MCP servers (not just single instances)
-  - Server implementations can be specialized by modality (text, audio, video, code)
-  - Worker Pool pattern abstracts AI models from server implementations
-  - Support for specialized domain servers (medical, legal, financial)
+- **Enhanced Token Economy and Reward System (RL-Driven CHIP):**
+  - **CHIP Tokens as Training Signals for AI:**  Evolved the CHIP token to act as training signals for AI models, driving a self-improving AI ecosystem.
+  - **Novelty and Citation Rewards:** Implemented novelty rewards for original prompts and citation rewards for salient contributions, algorithmically distributed by AI models.
+  - **FQHO Contract as Data Marketplace Foundation:**  Defined the FQAHO contract as the basis for a data marketplace within Choir, enabling CHIP-based data access and contribution pricing.
+  - **"AI Supercomputer Box" Vision:** Incorporated the "AI Supercomputer Box" concept as a tangible product embodiment of the Choir platform and CHIP token utility, envisioning a premium, rent-to-own consumer appliance for private, personalized AI and content creation.
 
 ### Removed
 
-- Deprecated LangGraph dependency due to persistent memory management issues
-- Simplified architecture by eliminating graph-based state management complexities
+- Deprecated LangGraph dependency and graph-based state management due to scalability and maintenance concerns.
 
 ## [2025-02-25] - 2025-02-25
 

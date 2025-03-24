@@ -1,6 +1,6 @@
 # Core State Transitions
 
-VERSION core_state_transitions: 7.0
+VERSION core_state_transitions: 7.1 (Reward Clarifications)
 
 The state transition system orchestrates the evolution of thread states through carefully defined transformations. These transitions follow precise fractional mathematical principles that ensure non-local energy conservation, dynamic parameter recalibration, and frequency coherence across the network.
 
@@ -14,6 +14,22 @@ Dynamic Parameter Evolution follows principles of fractional quantum mechanics. 
 
 Frequency Management reflects collective organization through coupled oscillators with fractional damping. The thread frequency evolves through three interacting modes: the message mode normalizes activity rate by the fractional power of co-author count, the value mode applies logarithmic scaling to energy per co-author, and the coupling strength maintains an inverse relationship with co-author count raised to the fractional power. These modes work together to create natural organizational rhythms with long-range correlations.
 
+**Reward System and Token Distribution (Clarified Phase-Specific Rewards):**
+
+The reward system operates through precisely defined state transitions with memory effects. MCP servers, specifically AI models within the **Experience and Yield phases**, algorithmically distribute CHIP tokens based on contribution quality and network effects:
+
+1.  **Novelty Rewards (Issued in the Experience Phase):**
+    *   **Purpose:** To incentivize the creation of *novel and original prompts and messages* that expand the knowledge space of the Choir ecosystem.
+    *   **Mechanism:** AI models within the **Experience phase** analyze new user prompts and messages for *semantic novelty* compared to existing content in the platform's vector databases.
+    *   **Distribution:** CHIP tokens are algorithmically distributed as **novelty rewards** to users who submit prompts and messages that are deemed sufficiently novel and original by the Experience phase AI models.
+    *   **Timing:** Novelty rewards are issued **during the Experience phase**, as part of the context enrichment and knowledge retrieval process.
+
+2.  **Citation Rewards (Issued in the Yield Phase):**
+    *   **Purpose:** To incentivize users to create *salient and impactful contributions* that are recognized and valued by the community, and to foster the growth of a richly interconnected knowledge network through citations.
+    *   **Mechanism:** AI models within the **Yield phase** analyze the citation network and identify messages that have been *cited by other users as "priors"*.
+    *   **Distribution:** CHIP tokens are algorithmically distributed as **citation rewards** to users whose messages have been cited, based on the *salience* and *influence* of their cited contributions (as measured by citation metrics and FQAHO parameters).
+    *   **Timing:** Citation rewards are issued **during the Yield phase**, as part of the final response rendering and output formatting process, with inline links to citations providing transparent recognition of valuable contributions.
+
 The reward system operates through precisely defined state transitions with memory effects. New message rewards follow a fractional time-based decay described by R(t) = R_total × k/(1 + k·t_period)^(α/2), where k represents the decay constant (2.04), t_period spans the total time period of four years, and α is the thread's fractional parameter. Prior citation rewards strengthen thread coupling by drawing from treasury balance based on quality score ratios, expressed as V(p) = B_t × Q(p)^(α/2)/∑Q(i)^(α/2). Citations create frequency coupling between threads, with each thread's frequency increasing by 5% of the other's frequency, modulated by the fractional parameter. Treasury management maintains system solvency through careful balance tracking, where split decisions increase the balance, prior rewards decrease it, and system rewards add to it, all while maintaining a minimum balance for stability.
 
 The system's core properties maintain stability through:
@@ -23,7 +39,7 @@ The system's core properties maintain stability through:
 3. Frequency alignment through fractional organizational coupling
 4. Lévy flight-like value propagation through the network
 
-Error handling ensures transition validity through multiple safeguards. Fractional energy conservation violations trigger immediate rejection. Parameter instability blocks updates until recalibration completes. Frequency decoherence blocks transitions that would disrupt organizational patterns. Phase transition failures maintain the previous state to ensure system stability.
+Error handling defines transition validity through multiple safeguards. Fractional energy conservation violations trigger immediate rejection. Parameter instability blocks updates until recalibration completes. Frequency decoherence blocks transitions that would disrupt organizational patterns. Phase transition failures maintain the previous state to ensure system stability.
 
 Through these precisely defined transitions, the system maintains fractional quantum anharmonic stability while enabling organic evolution of thread states. The careful balance of non-local energy conservation, dynamic parameter modulation, and frequency alignment creates a robust framework for organic growth and adaptation with memory effects.
 

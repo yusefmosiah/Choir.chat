@@ -2,9 +2,9 @@
 
 # Revised prefix arrays
 level0_prefixes=("")  # Basic technical integration
-level1_prefixes=("core")  # Core system components
+level1_prefixes=("core" "requirements")  # Core system components
 level2_prefixes=("e")           # Business/concept/implementation
-level3_prefixes=("plan")               # State/economic models
+level3_prefixes=("plan")               # Plans
 level4_prefixes=("fqaho")     # Simulations
 level5_prefixes=("evolution" "data")             # Foundational principles
 

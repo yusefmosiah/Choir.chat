@@ -34,17 +34,15 @@
 │   │   └── WalletManager.swift
 │   ├── ViewModels
 │   │   └── PostchainViewModel.swift
-│   ├── Views
-│   │   ├── ChoirThreadDetailView.swift
-│   │   ├── MessageRow.swift
-│   │   ├── PostchainView.swift
-│   │   ├── Thread
-│   │   │   └── Components
-│   │   │       ├── ThreadInputBar.swift
-│   │   │       └── ThreadMessageList.swift
-│   │   └── WalletView.swift
-│   └── actor_model
-│       └── phase_worker_pool.py
+│   └── Views
+│       ├── ChoirThreadDetailView.swift
+│       ├── MessageRow.swift
+│       ├── PostchainView.swift
+│       ├── Thread
+│       │   └── Components
+│       │       ├── ThreadInputBar.swift
+│       │       └── ThreadMessageList.swift
+│       └── WalletView.swift
 ├── Choir.xcodeproj
 │   ├── project.pbxproj
 │   ├── project.xcworkspace
@@ -203,61 +201,18 @@
 │           └── choir_coin_tests.move
 ├── docker-compose.yml
 ├── docs
-│   ├── 1-concepts
-│   │   ├── actor_model_overview.md
-│   │   ├── postchain_actor_model.md
-│   │   ├── postchain_conceptual_model.md
-│   │   ├── postchain_temporal_logic.md
-│   │   └── scale_free_actor_architecture.md
-│   ├── 2-architecture
-│   │   ├── actor_hierarchy_diagram.md
-│   │   ├── actor_system_diagram.md
-│   │   ├── architecture_integration.md
-│   │   ├── message_flow_diagrams.md
-│   │   ├── phase_worker_pool.md
-│   │   ├── state_management_overview.md
-│   │   ├── thread_contract_model.md
-│   │   └── token_economy_model.md
-│   ├── 3-implementation
-│   │   ├── actor_debugging_guide.md
-│   │   ├── actor_implementation_guide.md
-│   │   ├── actor_testing_guide.md
-│   │   ├── developer_quickstart.md
-│   │   ├── message_protocol_reference.md
-│   │   ├── phase_requirements
-│   │   │   ├── action_phase.md
-│   │   │   ├── experience_phase.md
-│   │   │   ├── intention_phase.md
-│   │   │   ├── observation_phase.md
-│   │   │   ├── phase_requirements_index.md
-│   │   │   ├── understanding_phase.md
-│   │   │   └── yield_phase.md
-│   │   └── state_management_patterns.md
-│   ├── 4-integration
-│   │   ├── blockchain_integration.md
-│   │   ├── identity_service.md
-│   │   └── libsql_integration.md
-│   ├── 5-operations
-│   │   ├── deployment_guide.md
-│   │   ├── monitoring_observability.md
-│   │   └── testing_strategy.md
-│   ├── 6-business
-│   │   ├── anonymity_by_default.md
-│   │   ├── business_model.md
-│   │   └── evolution_token.md
 │   ├── CHANGELOG.md
-│   ├── README.md
 │   ├── architecture_reorganization_plan_mcp.md
+│   ├── blockchain_integration.md
 │   ├── comp_provider_info.md
 │   ├── core_core.md
 │   ├── core_economics.md
 │   ├── core_state_transitions.md
 │   ├── data_engine_model.md
-│   ├── documentation_index.md
+│   ├── developer_quickstart.md
 │   ├── e_business.md
 │   ├── e_concept.md
 │   ├── evolution_naming.md
-│   ├── evolution_stack.md
 │   ├── evolution_token.md
 │   ├── fqaho_simulation.md
 │   ├── fqaho_visualization.md
@@ -270,21 +225,27 @@
 │   │   ├── level3.md
 │   │   ├── level4.md
 │   │   └── level5.md
-│   ├── phase_worker_pool_architecture.md
+│   ├── libsql_integration.md
 │   ├── plan_anonymity_by_default.md
-│   ├── plan_identity_as_a_service.md
+│   ├── plan_cadcad_modeling.md
+│   ├── plan_chip_materialization.md
 │   ├── plan_libsql.md
-│   ├── postchain_actor_model.md
+│   ├── postchain_temporal_logic.md
+│   ├── require_action_phase.md
+│   ├── require_experience_phase.md
+│   ├── require_intention_phase.md
+│   ├── require_observation_phase.md
+│   ├── require_phase_requirements_index.md
+│   ├── require_understanding_phase.md
+│   ├── require_yield_phase.md
 │   ├── scripts
 │   │   ├── combiner.sh
-│   │   ├── reorganization_script_design.md
 │   │   └── update_tree.sh
 │   ├── security_considerations.md
 │   ├── stack_argument.md
 │   ├── stack_pivot_summary.md
+│   ├── state_management_patterns.md
 │   └── tree.md
-├── examples
-│   └── phase_worker_pool_demo.py
 ├── notebooks
 │   ├── fqaho_simulation.ipynb
 │   ├── post_chain0.ipynb
@@ -296,4 +257,4 @@
     ├── generate_search_report.sh
     └── generate_single_provider_report.sh
 
-70 directories, 224 files
+61 directories, 194 files

@@ -1,450 +1,113 @@
-# libSQL Integration Plan for Choir
+# libSQL Integration Plan for Choir: Expanded Role Across Architecture
 
 ## Overview
 
-This document outlines the implementation plan for integrating libSQL/Turso as the local persistence layer for the Choir application. This system will provide both offline functionality and synchronization with our global vector database infrastructure, while supporting the FQAHO model parameters and Post Chain architecture.
-
-## Core Objectives
-
-1. Implement libSQL as the primary local persistence solution
-2. Design a flexible schema that can accommodate evolving data models
-3. Implement vector search capabilities to support semantic matching in the Experience phase
-4. Create a synchronization system between local and global databases
-5. Support the FQAHO model parameters (α, K₀, m) in the database schema
-6. Enable offline functionality with seamless online synchronization
-
-## Implementation Philosophy
-
-Our approach to database implementation will be guided by these principles:
-
-1. **Core System First** - Focus on getting the core UX and system operational before fully committing to a database schema
-2. **Flexibility** - Design the database to be adaptable as our data model evolves
-3. **Incremental Implementation** - Add database features in phases, starting with the most essential components
-4. **Performance** - Optimize for mobile device constraints and offline-first operation
-
-## Technical Implementation
-
-### 1. Database Setup and Initialization
-
-```swift
-import Libsql
-
-class DatabaseService {
-    static let shared = try! DatabaseService()
-
-    private let database: Database
-    private let connection: Connection
-
-    private init() throws {
-        // Get path to document directory for local database
-        let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
-        let dbPath = documentsDirectory.appendingPathComponent("choir.db").path
-
-        // Initialize database with sync capabilities
-        self.database = try Database(
-            path: dbPath,
-            url: Environment.tursoDbUrl,      // Remote database URL
-            authToken: Environment.tursoToken, // Authentication token
-            syncInterval: 10000               // Sync every 10 seconds
-        )
-
-        self.connection = try database.connect()
-
-        // Initialize schema
-        try setupSchema()
-    }
-
-    private func setupSchema() throws {
-        try connection.execute("""
-            -- Users table
-            CREATE TABLE IF NOT EXISTS users (
-                id TEXT PRIMARY KEY,
-                name TEXT,
-                last_active INTEGER
-            );
-
-            -- Threads table
-            CREATE TABLE IF NOT EXISTS threads (
-                id TEXT PRIMARY KEY,
-                title TEXT,
-                created_at INTEGER,
-                updated_at INTEGER,
-                k0 REAL,           -- FQAHO parameter K₀
-                alpha REAL,        -- FQAHO parameter α (fractional)
-                m REAL             -- FQAHO parameter m
-            );
-
-            -- Messages table with vector support
-            CREATE TABLE IF NOT EXISTS messages (
-                id TEXT PRIMARY KEY,
-                thread_id TEXT,
-                user_id TEXT,
-                content TEXT,
-                embedding F32_BLOB(1536),  -- Vector embedding for semantic search
-                phase TEXT,                -- Post Chain phase identifier
-                created_at INTEGER,
-                approval_status TEXT,      -- For approval/refusal statistics
-                FOREIGN KEY(thread_id) REFERENCES threads(id),
-                FOREIGN KEY(user_id) REFERENCES users(id)
-            );
-
-            -- Vector index for similarity search in Experience phase
-            CREATE INDEX IF NOT EXISTS messages_embedding_idx
-            ON messages(libsql_vector_idx(embedding));
-
-            -- Parameter history for FQAHO model tracking
-            CREATE TABLE IF NOT EXISTS parameter_history (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                thread_id TEXT,
-                timestamp INTEGER,
-                k0 REAL,
-                alpha REAL,
-                m REAL,
-                event_type TEXT,  -- What caused the parameter change
-                FOREIGN KEY(thread_id) REFERENCES threads(id)
-            );
-        """)
-    }
-}
-```
-
-### 2. Thread and Message Operations
-
-```swift
-extension DatabaseService {
-    // MARK: - Thread Operations
-
-    func createThread(id: String, title: String, k0: Double, alpha: Double, m: Double) throws {
-        let now = Int(Date().timeIntervalSince1970)
-
-        try connection.execute("""
-            INSERT INTO threads (id, title, created_at, updated_at, k0, alpha, m)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        """, [id, title, now, now, k0, alpha, m])
-
-        // Record initial parameters
-        try connection.execute("""
-            INSERT INTO parameter_history (thread_id, timestamp, k0, alpha, m, event_type)
-            VALUES (?, ?, ?, ?, ?, ?)
-        """, [id, now, k0, alpha, m, "thread_creation"])
-    }
-
-    func getThread(id: String) throws -> Thread? {
-        let results = try connection.query(
-            "SELECT * FROM threads WHERE id = ?",
-            [id]
-        )
-
-        guard let result = results.first else { return nil }
-
-        return Thread(
-            id: result["id"] as! String,
-            title: result["title"] as! String,
-            createdAt: Date(timeIntervalSince1970: TimeInterval(result["created_at"] as! Int)),
-            updatedAt: Date(timeIntervalSince1970: TimeInterval(result["updated_at"] as! Int)),
-            k0: result["k0"] as! Double,
-            alpha: result["alpha"] as! Double,
-            m: result["m"] as! Double
-        )
-    }
-
-    func updateThreadParameters(threadId: String, k0: Double, alpha: Double, m: Double, eventType: String) throws {
-        let now = Int(Date().timeIntervalSince1970)
-
-        // Update thread
-        try connection.execute("""
-            UPDATE threads
-            SET k0 = ?, alpha = ?, m = ?, updated_at = ?
-            WHERE id = ?
-        """, [k0, alpha, m, now, threadId])
-
-        // Record parameter change
-        try connection.execute("""
-            INSERT INTO parameter_history (thread_id, timestamp, k0, alpha, m, event_type)
-            VALUES (?, ?, ?, ?, ?, ?)
-        """, [threadId, now, k0, alpha, m, eventType])
-    }
-
-    // MARK: - Message Operations
-
-    func createMessage(id: String, threadId: String, userId: String, content: String,
-                       embedding: [Float], phase: String) throws {
-        let now = Int(Date().timeIntervalSince1970)
-        let vectorString = "vector32('\(embedding)')"
-
-        try connection.execute("""
-            INSERT INTO messages (id, thread_id, user_id, content, embedding, phase, created_at, approval_status)
-            VALUES (?, ?, ?, ?, \(vectorString), ?, ?, 'pending')
-        """, [id, threadId, userId, content, phase, now])
-
-        // Update thread's last activity
-        try connection.execute("""
-            UPDATE threads
-            SET updated_at = ?
-            WHERE id = ?
-        """, [now, threadId])
-    }
-
-    func updateMessageApprovalStatus(messageId: String, status: String) throws {
-        try connection.execute("""
-            UPDATE messages
-            SET approval_status = ?
-            WHERE id = ?
-        """, [status, messageId])
-
-        // If we wanted to update FQAHO parameters based on approval/refusal, we could do that here
-        if let message = try getMessage(id: messageId),
-           let thread = try getThread(id: message.threadId) {
-
-            // Calculate new parameters based on approval/refusal
-            let newK0 = calculateNewK0(currentK0: thread.k0, approvalStatus: status)
-            let newAlpha = calculateNewAlpha(currentAlpha: thread.alpha, approvalStatus: status)
-            let newM = calculateNewM(currentM: thread.m, approvalStatus: status)
-
-            try updateThreadParameters(
-                threadId: message.threadId,
-                k0: newK0,
-                alpha: newAlpha,
-                m: newM,
-                eventType: "message_\(status)"
-            )
-        }
-    }
-
-    func getMessage(id: String) throws -> Message? {
-        let results = try connection.query(
-            "SELECT * FROM messages WHERE id = ?",
-            [id]
-        )
-
-        guard let result = results.first else { return nil }
-
-        return Message(
-            id: result["id"] as! String,
-            threadId: result["thread_id"] as! String,
-            userId: result["user_id"] as! String,
-            content: result["content"] as! String,
-            phase: result["phase"] as! String,
-            createdAt: Date(timeIntervalSince1970: TimeInterval(result["created_at"] as! Int)),
-            approvalStatus: result["approval_status"] as! String
-        )
-    }
-}
-```
-
-### 3. Vector Search for Experience Phase
-
-```swift
-extension DatabaseService {
-    // Find semantically similar messages for the Experience phase
-    func findSimilarExperiences(threadId: String, queryEmbedding: [Float], limit: Int = 5) throws -> [Message] {
-        let vectorString = "vector32('\(queryEmbedding)')"
-
-        let results = try connection.query("""
-            SELECT m.*
-            FROM vector_top_k('messages_embedding_idx', \(vectorString), ?) as v
-            JOIN messages m ON m.rowid = v.id
-            WHERE m.thread_id = ?
-            AND m.approval_status = 'approved'
-        """, [limit, threadId])
-
-        return results.map { result in
-            Message(
-                id: result["id"] as! String,
-                threadId: result["thread_id"] as! String,
-                userId: result["user_id"] as! String,
-                content: result["content"] as! String,
-                phase: result["phase"] as! String,
-                createdAt: Date(timeIntervalSince1970: TimeInterval(result["created_at"] as! Int)),
-                approvalStatus: result["approval_status"] as! String
-            )
-        }
-    }
-
-    // Get experiences with prior parameter values (for display in Experience step)
-    func getExperiencesWithPriors(threadId: String, limit: Int = 10) throws -> [(Message, ParameterSet)] {
-        let results = try connection.query("""
-            SELECT m.*, p.k0, p.alpha, p.m
-            FROM messages m
-            JOIN parameter_history p ON
-                m.thread_id = p.thread_id AND
-                m.created_at >= p.timestamp
-            WHERE m.thread_id = ?
-            AND m.phase = 'experience'
-            ORDER BY m.created_at DESC
-            LIMIT ?
-        """, [threadId, limit])
-
-        return results.map { result in
-            let message = Message(
-                id: result["id"] as! String,
-                threadId: result["thread_id"] as! String,
-                userId: result["user_id"] as! String,
-                content: result["content"] as! String,
-                phase: result["phase"] as! String,
-                createdAt: Date(timeIntervalSince1970: TimeInterval(result["created_at"] as! Int)),
-                approvalStatus: result["approval_status"] as! String
-            )
-
-            let parameters = ParameterSet(
-                k0: result["k0"] as! Double,
-                alpha: result["alpha"] as! Double,
-                m: result["m"] as! Double
-            )
-
-            return (message, parameters)
-        }
-    }
-}
-```
-
-### 4. Synchronization Management
-
-```swift
-extension DatabaseService {
-    // Trigger manual sync with remote database
-    func syncWithRemote() throws {
-        try database.sync()
-    }
-
-    // Check if a sync is needed
-    var needsSync: Bool {
-        // Implementation depends on how we track local changes
-        // Could check for pending operations or time since last sync
-        return true
-    }
-
-    // Handle network status changes
-    func handleNetworkStatusChange(isOnline: Bool) {
-        if isOnline && needsSync {
-            do {
-                try syncWithRemote()
-            } catch {
-                print("Sync error: \(error)")
-                // Handle sync failure
-            }
-        }
-    }
-}
-```
-
-### 5. FQAHO Parameter Calculation Functions
-
-```swift
-extension DatabaseService {
-    // Calculate new K₀ value based on approval/refusal
-    private func calculateNewK0(currentK0: Double, approvalStatus: String) -> Double {
-        // Implementation of FQAHO model K₀ adjustment
-        let adjustment: Double = approvalStatus == "approved" ? 0.05 : -0.08
-        return max(0.1, min(10.0, currentK0 + adjustment))
-    }
-
-    // Calculate new α value based on approval/refusal
-    private func calculateNewAlpha(currentAlpha: Double, approvalStatus: String) -> Double {
-        // Implementation of FQAHO model α adjustment
-        // Fractional parameter capturing memory effects
-        let adjustment: Double = approvalStatus == "approved" ? 0.02 : -0.03
-        return max(0.1, min(2.0, currentAlpha + adjustment))
-    }
-
-    // Calculate new m value based on approval/refusal
-    private func calculateNewM(currentM: Double, approvalStatus: String) -> Double {
-        // Implementation of FQAHO model m adjustment
-        let adjustment: Double = approvalStatus == "approved" ? -0.01 : 0.02
-        return max(0.5, min(5.0, currentM + adjustment))
-    }
-}
-```
-
-## Phased Implementation Approach
-
-Given that UX has more pressing issues and the data model is still evolving, we'll adopt a phased approach to database implementation:
-
-### Phase 1: Core UX Development (Current Focus)
-
-- Continue developing the core UI and interaction flow
-- Prioritize UX improvements over database implementation
-- Use in-memory or mock data for testing
-
-### Phase 2: Schema Development and Validation
-
-- Finalize initial schema design as the core system stabilizes
-- Create prototypes to validate the schema with real usage patterns
-- Ensure the schema can adapt to evolving requirements
-
-### Phase 3: Basic Database Implementation
-
-- Implement basic CRUD operations for threads and messages
-- Set up the database connection and initialization
-- Create simplified data services for the UI to consume
-
-### Phase 4: Vector Search Implementation
-
-- Add vector embedding storage and search
-- Connect the Experience phase to vector similarity search
-- Optimize for performance and memory usage
-
-### Phase 5: FQAHO Parameter Support
-
-- Implement parameter storage and history tracking
-- Add parameter calculation algorithms
-- Connect parameter adjustments to the UI
-
-### Phase 6: Synchronization
-
-- Configure embedded replicas
-- Implement sync management
-- Handle offline/online transitions
-
-## Integration with Post Chain Phases
-
-The libSQL implementation will support all phases of the Post Chain:
-
-1. **Action** - Store user messages and initial parameters
-2. **Experience** - Use vector search to find relevant prior experiences
-3. **Understanding** - Track message reactions and parameter adjustments
-4. **Web Search** - Store search results with vector embeddings for future reference
-5. **Tool Use** - Record tool usage patterns and outcomes
-
-## Flexible Schema Design Principles
-
-Since the data model is still evolving, the database schema should follow these principles:
-
-1. **Versioned Schema** - Include version markers in the schema to facilitate future migrations
-2. **Nullable Fields** - Use nullable fields where appropriate to accommodate evolving requirements
-3. **Isolated Tables** - Keep related concepts in separate tables to minimize the impact of changes
-4. **Extensible Records** - Consider using a JSON or blob field for attributes that might change frequently
-5. **Minimal Dependencies** - Limit foreign key constraints to essential relationships
-
-## Future Considerations
-
-1. **Multi-device Sync**
-
-   - Ensure consistent user experience across devices
-   - Handle conflict resolution
-
-2. **Advanced Vector Quantization**
-
-   - Implement quantization for more efficient storage
-   - Optimize for mobile device constraints
-
-3. **Partitioned User Databases**
-
-   - Implement per-user database isolation
-   - Support multi-tenancy within the app
-
-4. **Backup and Recovery**
-
-   - Implement regular backup mechanisms
-   - Create recovery procedures
-
-5. **Extensions for Multimodal Support**
-   - Extend schema for image and audio data
-   - Implement multimodal vector embeddings
-
-## Resources
-
-- [Turso Swift Documentation](https://docs.turso.tech/swift)
-- [libSQL Swift GitHub Repository](https://github.com/tursodatabase/libsql-swift)
-- [Embedded Replicas Documentation](https://docs.turso.tech/embedded-replicas)
-- [Vector Search Documentation](https://docs.turso.tech/vector-search)
+This document outlines the expanded integration plan for libSQL/Turso within the Choir platform, highlighting its use not only for MCP server-specific state persistence but also for **local data storage within the Swift client application**.  This document clarifies how libSQL/Turso fits into the overall Choir architecture alongside Qdrant (for vector database) and Sui (for blockchain), creating a multi-layered data persistence strategy.
+
+## Core Objectives (Expanded Scope for libSQL/Turso)
+
+1.  **libSQL for Server-Specific State Persistence (MCP Servers):** Utilize libSQL as the primary solution for local persistence of server-specific data within each MCP server (phase server), enabling efficient caching and server-local data management.
+2.  **libSQL for Client-Side Data Storage (Swift Client):** Integrate libSQL into the Swift client application (iOS app) to provide **local, on-device data storage** for user data, conversation history, and application settings, enabling offline functionality and improved data management within the mobile client.
+3.  **Flexible Schema Across Client and Servers:** Design flexible libSQL schemas that can accommodate the evolving data models in both MCP servers and the Swift client application, ensuring adaptability and maintainability.
+4.  **Complementary to Qdrant and Sui:** Clearly define the distinct roles of libSQL/Turso, Qdrant, and Sui within the Choir stack, emphasizing how libSQL/Turso complements these technologies rather than replacing them.
+5.  **Simplify for MVP Scope (Focus on Essential Functionalities):** Focus the libSQL integration plan on the essential database functionalities needed for the MVP in both MCP servers and the Swift client, deferring more advanced features like multi-device sync or advanced quantization to later phases.
+
+## Revised Implementation Plan (Expanded libSQL Role)
+
+### 1. libSQL for MCP Server-Specific State Persistence (Detailed)
+
+*   **Embedded libSQL in Each MCP Server (Phase Servers):**  Each MCP server (Action Server, Experience Server, etc.) will embed a lightweight libSQL database instance for managing its *server-specific state*.
+*   **Server-Specific State Schema (Flexible and Minimal):** Design a flexible and minimal libSQL schema for server-specific state, focusing on common use cases like caching and temporary data storage.  Example schema (generic cache and server state tables):
+
+    ```sql
+    -- Generic cache table for MCP servers (reusable across servers)
+    CREATE TABLE IF NOT EXISTS server_cache (
+        key TEXT PRIMARY KEY,  -- Cache key (e.g., URI, query parameters)
+        value BLOB,          -- Cached data (can be text, JSON, binary)
+        timestamp INTEGER     -- Timestamp of cache entry
+    );
+
+    -- Server-specific state table (example - Experience Server - customizable per server)
+    CREATE TABLE IF NOT EXISTS experience_server_state (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        last_sync_time INTEGER,
+        # ... add server-specific state fields as needed ...
+    );
+    ```
+
+*   **MCP Server SDK Utilities for libSQL Access:**  Provide utility functions and helper classes within the MCP Server SDK (Python, TypeScript, etc.) to simplify common libSQL operations within server code (as outlined in the previous `docs/3-implementation/state_management_patterns.md` update).
+
+### 2. libSQL for Client-Side Data Storage (Swift Client Application)
+
+*   **Embedded libSQL in Swift iOS Client:** Integrate the libSQL Swift SDK directly into the iOS client application. This embedded database will be used for:
+    *   **Local Conversation History Persistence:** Storing the full conversation history (messages, user prompts, AI responses) locally on the user's device, enabling offline access to past conversations and a seamless user experience even without a network connection.
+    *   **User Settings and Preferences:** Persisting user-specific settings, preferences, and application state locally on the device.
+    *   **Client-Side Caching (Optional):**  Potentially using libSQL for client-side caching of resources or data fetched from MCP servers to improve app responsiveness and reduce network traffic (though HTTP caching mechanisms might be more appropriate for HTTP-based resources).
+*   **Swift Client-Side Schema (Conversation History and User Data):** Design a libSQL schema within the Swift client application to efficiently store and manage:
+
+    ```sql
+    -- Client-Side Conversation History Table
+    CREATE TABLE IF NOT EXISTS conversation_history (
+        id TEXT PRIMARY KEY,  -- Unique conversation ID
+        title TEXT,           -- Conversation title
+        created_at INTEGER,   -- Creation timestamp
+        updated_at INTEGER    -- Last updated timestamp
+    );
+
+    -- Client-Side Messages Table (within each conversation)
+    CREATE TABLE IF NOT EXISTS messages (
+        id TEXT PRIMARY KEY,
+        conversation_id TEXT,
+        role TEXT,             -- "user" or "assistant"
+        content TEXT,          -- Message content
+        timestamp INTEGER,     -- Message timestamp
+        # ... other message-specific metadata ...
+        FOREIGN KEY(conversation_id) REFERENCES conversation_history(id)
+    );
+
+    -- Client-Side User Settings Table
+    CREATE TABLE IF NOT EXISTS user_settings (
+        setting_name TEXT PRIMARY KEY,
+        setting_value TEXT     -- Store setting values as TEXT or JSON
+    );
+    ```
+
+*   **Swift Data Services for libSQL Access:** Create Swift data service classes or modules within the iOS client application to provide clean and abstracted APIs for accessing and manipulating data in the local libSQL database (e.g., `ConversationHistoryService`, `UserSettingsService`).
+
+### 3. Vector Search (Qdrant for Global Knowledge, libSQL - Optional and Limited)
+
+*   **Qdrant Remains the Primary Vector Database (Global Knowledge Base):**  **Qdrant remains the primary vector database solution for Choir**, used for the global knowledge base, semantic search in the Experience phase, and long-term storage of vector embeddings for messages and other content.  Qdrant's scalability, feature richness, and performance are essential for handling the large-scale vector search requirements of the Choir platform.
+*   **libSQL Vector Search - *Optional* for Highly Localized Client-Side Features (Consider Sparingly):**  While libSQL offers vector search capabilities, **consider using libSQL vector search *sparingly* and only for *highly localized, client-side features* where a lightweight, embedded vector search is truly beneficial.**  For most vector search needs, especially those related to the global knowledge base and the Experience phase, Qdrant is the more appropriate and scalable solution.  Over-reliance on libSQL vector search could limit scalability and performance in the long run.
+
+### 4. Synchronization Management (Simplified for MVP - Focus on Local Data, Cloud Sync - Future)
+
+*   **No Multi-Device Sync for MVP (Defer):** Multi-device synchronization of conversation history or server state via Turso cloud sync is **explicitly deferred for the MVP**.
+*   **Local Persistence as MVP Focus:** The primary goal of libSQL integration for the MVP is to provide **robust local persistence** in both MCP servers and the Swift client application.
+*   **Cloud Backup and Sync via Turso - Future Roadmap Item:** Cloud backup and multi-device sync via Turso (or other cloud sync mechanisms) remain valuable **future roadmap items** to be considered in later phases, to enhance user data portability and accessibility across devices.
+
+## Phased Implementation Approach (libSQL Integration - Expanded)
+
+The phased approach to libSQL integration now encompasses both MCP servers and the Swift client:
+
+### Phase 1: Core UX and Workflow (No Database Dependency - Current Focus)
+
+- Continue developing the core UI and PostChain workflow, minimizing dependencies on databases for initial prototyping and UX validation.
+
+### Phase 2: Basic libSQL Integration - Server-Side State Persistence (MVP Phase)
+
+- Implement libSQL integration in MCP servers for server-specific state persistence and caching (as outlined in the previous plan).
+
+### Phase 3: libSQL Integration - Swift Client-Side Persistence (MVP Phase)
+
+- Integrate libSQL into the Swift client application for local conversation history and user settings persistence.
+- Create Swift data services to manage client-side libSQL database access.
+
+### Phase 4: (Optional) Vector Search Integration (MVP or Post-MVP - Re-evaluated)
+
+- Re-evaluate the need for vector search in libSQL for the MVP. If deemed essential for a simplified MVP Experience phase, implement basic libSQL vector search.
+- Otherwise, defer vector search implementation to post-MVP phases and plan for Qdrant integration for scalable vector search.
+
+### Phase 5: (Future) Advanced libSQL Features and Cloud Sync
+
+- In later phases, explore and implement more advanced libSQL/Turso features, including cloud sync, multi-device support, and potential performance optimizations.
+

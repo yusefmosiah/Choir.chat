@@ -84,7 +84,6 @@ The documentation will be updated to reflect the new MCP architecture:
 2.  Updated: Documentation index and navigation to remove actor-model specific content
 3.  To be added: MCP architecture diagrams and descriptions
 4.  To be added: MCP server implementation guidelines
-5.  Archived: Actor-model specific documentation to `docs/archive`
 
 ## Conclusion
 

@@ -17,27 +17,35 @@ VERSION core_system: 7.0
 
 Note: This document describes the core system architecture, with initial focus on TestFlight functionality. More sophisticated event-driven mechanisms described here will be implemented post-funding.
 
-The Choir system is built around a clear hierarchy of truth and state management. At its foundation, the blockchain serves as the authoritative source for all ownership and economic state – thread ownership, token balances, message hashes, and co-author lists. This ensures that the economic model, with its fractional equity distribution and fractional quantum anharmonic thread evolution (where dynamic parameter modulation is driven by approval/refusal feedback and memory effects), has an immutable and verifiable foundation.
+The Choir system, in its MCP architecture, is structured around a clear hierarchy of truth and state management, now implemented as a network of interconnected **Model Context Protocol (MCP) servers**.
 
-Alongside the blockchain, Qdrant acts as the authoritative source for all content and semantic relationships. It stores the actual message content, embeddings, and the growing network of citations and semantic links. This separation of concerns allows the system to maintain both economic integrity through the blockchain and rich semantic relationships through the vector database.
+At the foundation, the **blockchain** (Sui) remains the authoritative source of truth for economic state, managing thread ownership, token balances (CHIP), message hashes, and co-author lists. **This entire economic framework is governed by the FQAHO (Fractional Quantum Anharmonic Oscillator) model and the CHIP token economy.** This ensures the FQAHO-based economic model's integrity and verifiability.
 
-The AEIOU-Y chorus cycle sits at the heart of the interaction model, processing user input through a series of well-defined steps. The cycle begins with pure response in the Action step, enriches it with prior knowledge in the Experience step, aligns with user intent in the Intention step, records semantic connections in the Observation step, decides on continuation in the Update step, and produces the final response in the Yield step.
+**libSQL/Turso databases** are used by each MCP server for local persistence of phase-specific state and data, including vector embeddings. This distributed database approach enhances scalability and fault isolation.
 
-State updates flow naturally between these components. When a user submits input, the system coordinates necessary updates across the UI, blockchain, and vector store. The chorus cycle processes the input while maintaining system state consistency. These state changes are carefully managed to maintain data integrity and system coherence.
+**Qdrant** continues to serve as the authoritative source for content and semantic relationships, storing message content, embeddings, and citation networks, now accessed by the Experience phase MCP server.
 
-The economic model employs FQAHO-based dynamics: the system parameters (α, K₀, m) evolve based on thread history and network position. The fractional parameter α captures memory effects and non-local interactions, decreasing from 2 toward 1 as threads mature. The anharmonic coefficient K₀ increases when a thread receives many refusals and decreases with strong approval. The potential order m reflects thread complexity and network depth. This parameter evolution naturally filters quality while accounting for memory effects and non-local interactions.
+The **AEIOU-Y Post Chain** is now realized as a sequence of specialized **MCP servers** (Action, Experience, Intention, Observation, Understanding, Yield), each responsible for a distinct phase of the user interaction cycle.  User input is processed sequentially through these servers, each contributing to the evolving conversation state.
 
-Equity is distributed according to fractional formulas, ensuring fair value attribution while maintaining mathematical elegance and accounting for memory effects. The distribution follows E(s) = (1/N) \* (s/P₀)^(α/2), balancing co-author count with stake amount and the thread's fractional parameter.
+**MCP clients** within each server facilitate communication with other phase-servers, using a standardized message protocol over SSE streams for efficient, asynchronous communication and streaming responses.
 
-The knowledge system builds a growing semantic network through citations and prior references, with non-local interactions captured by the fractional approach. Each message can reference previous messages as priors, creating a web of semantic relationships with long-range correlations. These relationships are stored in Qdrant and help inform future responses through the Experience step of the chorus cycle.
+State updates are managed within each MCP server's local libSQL/Turso database, with the "conversation state resource" being managed by the Host application and accessible to servers as needed. This distributed state management approach enhances scalability and resilience.
 
-State management follows the natural hierarchy of truth. The chain state is authoritative for ownership and economics. The vector state is authoritative for content and semantics. Local state serves only to coordinate UI updates and handle temporary synchronization needs. This clear hierarchy ensures system consistency while enabling responsive user interaction.
+The economic model, based on FQAHO dynamics and the CHIP token, is now integrated into the MCP architecture, with economic actions triggered and recorded via PySUI interactions with the Sui blockchain from within MCP servers.
 
-All of this is implemented using Swift's modern concurrency system. Async/await enables clean asynchronous code. Structured concurrency through task groups ensures proper resource management. The architecture maintains loose coupling between components while ensuring system coherence.
+This MCP architecture enables a more modular, scalable, and secure Choir system. Each phase, as an independent MCP server, encapsulates its logic and state, improving maintainability and fault isolation. The use of Phala Network for deployment further enhances security and confidentiality.
 
-The result is a system that combines economic incentives, semantic knowledge, and natural interaction patterns into a coherent whole. The blockchain provides economic integrity. The vector database enables semantic richness. The chorus cycle creates natural interaction. The fractional quantum approach captures memory effects and non-local interactions. And Swift's concurrency model keeps it all running smoothly and safely.
+The result is a distributed, service-oriented system that combines:
 
-This architecture enables the system to evolve naturally. The semantic network grows organically through usage with long-range correlations. The economic model creates emergent quality barriers through coupled parameter evolution. And the whole system maintains consistency through its clear hierarchy of truth and well-defined state management patterns.
+- **Economic Incentives (CHIP token, FQAHO)**: Managed on-chain via Sui and PySUI.
+- **Semantic Knowledge (Qdrant)**: Accessed and utilized by the Experience phase server.
+- **Natural Interaction Patterns (AEIOU-Y Post Chain)**: Implemented as a sequence of specialized MCP servers.
+- **Fractional Quantum Dynamics (FQAHO)**: Encapsulated within the economic model and parameter evolution logic.
+- **Swift Concurrency (replaced by Python Async/await in MCP servers)**:  Each MCP server leverages Python's async/await for efficient concurrent operations.
+- **libSQL/Turso**: Provides local persistence and vector search for each MCP server, enabling efficient state and knowledge management within phases.
+- **Phala Network**: Provides confidential computing environment for secure and private operations.
+
+This architecture enables the Choir system to evolve into a truly scalable, robust, and secure platform for building a tokenized marketplace of ideas and upgrading human financial decision-making.
 
 === File: docs/core_economics.md ===
 
@@ -48,81 +56,75 @@ core_economics
 ==
 
 
-# Core Economic Model
+# Core Economic Model: Fueling a Self-Improving AI Ecosystem with CHIP Tokens
 
-VERSION core_economics: 7.0
+VERSION core_economics: 8.0 (RL-Driven Data Economy)
 
-The economic model operates as a fractional quantum anharmonic system, anchored by the Move Virtual Machine as its source of truth. The model orchestrates value flows through stake dynamics modulated by collective feedback signals and non-local memory effects.
+The economic model of Choir is not just about transactions and value exchange; it's about creating a **self-sustaining engine for AI improvement and a thriving marketplace for valuable human data.**  The CHIP token is at the heart of this engine, acting as both the fuel and the training signal for a revolutionary AI ecosystem.
 
-At its foundation, the system tracks economic events through the blockchain. These events capture stake movements, parameter adjustments, equity distributions, and reward issuance. Each event carries a unique identifier, precise timestamp, and rich metadata that ensures perfect traceability.
+## CHIP: Beyond a Utility Token - A Training Signal and Data Currency
 
-The chain state manager serves as the authoritative bridge between the economic model and the blockchain. It retrieves thread economics directly from smart contracts, maintaining an accurate view of stake prices, model parameters, token balances, and equity distributions. All economic transactions flow through this manager, ensuring that on-chain state changes trigger appropriate event cascades throughout the system.
+The CHIP token transcends the limitations of a traditional utility token. It is designed to be:
 
-The model's core strength lies in its fractional quantum anharmonic calculations. The base price follows a modified FQAHO model:
+*   **A Representation of Contribution and Ownership:** CHIP tokens represent a stake in the collective intelligence of Choir, acknowledging and rewarding user contributions to the platform's knowledge base.
+*   **A Training Signal for AI Models:** CHIP tokens, distributed as novelty and citation rewards, act as *direct training signals* for AI models within the Choir ecosystem, guiding them to optimize for desired behaviors and high-quality content generation.
+*   **The Currency of a Data Marketplace:** CHIP tokens are the *exclusive currency* for accessing and transacting with the valuable, human-generated data within the Choir platform, creating a demand-driven data marketplace.
+*   **A Driver of Network Effects and Value Accrual:** The CHIP token economy is designed to create powerful network effects, driving user engagement, data creation, AI improvement, and sustainable token value accrual.
 
-P₀ = S₀[(2n+1)^(α/2) + (K₀λ)^{α/(m+1)}]
+## The FQAHO Contract: Governing a Dynamic Data Marketplace
 
-Where:
+The Fractional Quantum Anharmonic Oscillator (FQAHO) contract, implemented on the Sui blockchain, is the **economic heart of the Choir data marketplace**. It provides a dynamic and nuanced mechanism for:
 
-- α = Fractional parameter (1<α≤2) capturing memory effects and non-local interactions
-- K₀ = Anharmonic coefficient dynamically modulated by recent approval/refusal statistics
-- m = Potential order reflecting thread complexity and network depth
-- n = Excitation level (capturing thread activity)
+*   **Stake Pricing and Value Discovery:** The FQAHO model dynamically determines the stake price for contributing to threads, reflecting the evolving value of knowledge and user attention within the ecosystem.
+*   **Data Access and Contribution Pricing:** The FQAHO contract governs the "price of data" within each thread. Users "pay" CHIP tokens (stake) to contribute to threads, and this contribution can be seen as a *price for accessing and adding value to the data within that thread*.
+*   **Incentivizing Quality and Salience:** The FQAHO contract, through its integration with the novelty and citation reward mechanisms, incentivizes users and AI agents to create *high-quality, novel, and salient contributions* that are valuable for AI training and knowledge building.
+*   **Decentralized Governance and Economic Evolution:** The FQAHO contract is designed to be *governed by CHIP token holders*, allowing the community to democratically shape the rules of the data marketplace and evolve the economic model over time.
 
-The fractional parameter α evolves according to:
+## Reward Mechanisms: Fueling the AI Data Engine
 
-α(t,q) = 2 - δ₁(1-e^(-t/τ)) - δ₂q
+The CHIP token economy is driven by two key reward mechanisms, algorithmically distributed by AI models within the Choir platform:
 
-Where t represents normalized thread age, q measures quality through approval ratios, τ sets the time constant, and δ₁, δ₂ determine sensitivity.
+1.  **Novelty Rewards (Experience Phase - Driving Data Diversity):**
+    *   **Purpose:** To incentivize the creation of *novel and original prompts and messages*, ensuring a diverse and ever-expanding dataset for AI training.
+    *   **Mechanism:** AI models in the Experience Phase analyze new user contributions for semantic novelty compared to existing data in the platform's vector databases.
+    *   **Distribution:** CHIP tokens are algorithmically distributed as novelty rewards to users who submit contributions deemed sufficiently novel, encouraging exploration of new ideas and knowledge domains.
 
-Equity distribution follows a fractional square root law reflecting quantum amplitude principles:
+2.  **Citation Rewards (Yield Phase - Driving Predictive Salience and Data Quality):**
+    *   **Purpose:** To incentivize users to create *salient and impactful contributions* that are recognized and valued by the community, and to reward the creation of high-quality, human-labeled training data through citations.
+    *   **Mechanism:** AI models in the Yield Phase analyze the citation network, identifying messages that have been cited as valuable "priors" by other users.
+    *   **Distribution:** CHIP tokens are algorithmically distributed as citation rewards to users whose messages have been cited, based on the *salience* and *influence* of their contributions, as measured by citation metrics and FQAHO parameters.
 
-E(s) = (1/N) \* (s/P₀)^(α/2)
+These reward mechanisms are not just about distributing tokens; they are **direct training signals for AI models within Choir**.  AI models learn to identify and reward the very data that is most valuable for their own improvement and for the growth of the collective intelligence of the platform.
 
-This formula elegantly balances the number of co-authors N with the stake amount s, normalized by the base price P₀, ensuring fair value distribution across participants while accounting for memory effects.
+## Data Marketplace Dynamics: CHIP as Data Purchase Power
 
-The economic handler processes these events through a carefully orchestrated flow. When stake is deposited, it calculates new equity shares based on the current parameter values and organizational frequency. Collective feedback triggers parameter recalculations that maintain system equilibrium. Each event flows through the handler, ensuring proper economic state transitions.
+The CHIP token economy creates a dynamic **data marketplace** within Choir, where:
 
-Analytics and monitoring provide real-time insight into the economic system's health. The system tracks stake movements, parameter adjustments, equity distributions, and reward issuance. This data feeds back into the system, enabling natural price discovery and value distribution.
+*   **CHIP Tokens are the Currency of Data Access:** AI companies, researchers, developers, and even individual users who want to access the high-quality, human-generated data within Choir must **purchase CHIP tokens** to participate in the data marketplace.
+*   **Data is "Sold" at a "Quantum Level" (Thread-Specific Contracts):** Data access and contribution pricing are governed by the FQAHO contract at a granular, thread-specific level. Each thread effectively has its own "data contract" that determines the terms of data access and contribution within that thread.
+*   **Data Scarcity and Privacy Drive Value:** The deliberate emphasis on **data scarcity and user privacy** within Choir is a key driver of CHIP token value.  By limiting data sales and prioritizing user control, Choir creates a marketplace for *premium, high-quality, and ethically sourced data*, which is increasingly valuable in the AI age.
+*   **CHIP Holder Governance of Data Marketplace Terms:** CHIP token holders have **governance rights to shape the rules and policies of the data marketplace**, ensuring that it remains aligned with the community's values and long-term interests.
 
-The economic model's strength emerges from several key principles. The blockchain serves as the immutable source of truth, while value flows follow fractional conservation laws. Price discovery emerges naturally through eigenvalue patterns of the fractional system, and state changes propagate through Lévy flight-like transitions. Most importantly, complex economic behaviors arise organically from these simple underlying rules.
+## Business Sustainability and the "Pays for Itself" Model
 
-Through this careful balance of blockchain authority, fractional mathematical precision, and natural value flows, the economic model creates a self-sustaining ecosystem for knowledge work. The system's elegance lies in how these principles work together, creating a robust economic framework that adapts and evolves while maintaining fundamental stability.
+The CHIP token economy is designed to create a **self-sustaining ecosystem** where value flows naturally and benefits all participants.  The "AI Supercomputer Box" and the IDaaS premium features are key components of the business model, designed to:
 
-# Dynamic Parameter Evolution
+*   **Drive CHIP Token Demand and Utility:**  Create tangible use cases for CHIP tokens, increasing their demand and utility beyond just platform-internal rewards.
+*   **Generate Revenue to Support Platform Operations:**  Revenue from "AI Supercomputer Box" sales/rent-to-own and IDaaS subscriptions will fund the ongoing development, maintenance, and operational costs of the Choir platform and the token economy.
+*   **"Pays for Itself" Value Proposition for Users:**  The "AI Supercomputer Box" is designed to be a valuable asset that "pays for itself" over time through:
+    *   **Financial Optimization and Savings (AI Household Assistant Features).**
+    *   **Token Earning for Background Compute Work.**
+    *   **Access to a Thriving Data Marketplace and Future AI-Powered Services.**
 
-## Fractional Parameter (α)
+## Conclusion: Building a Self-Improving, Data-Driven AI Ecosystem
 
-α(t,q) = 2 - δ₁(1-e^(-t/τ)) - δ₂q
+The core economic model of Choir, centered around the CHIP token and the FQAHO contract, is designed to create a **self-improving, data-driven AI ecosystem** where:
 
-## Anharmonic Coefficient (K₀)
+*   **Human Ingenuity and AI Intelligence are Synergistically Combined:**  The platform leverages the unique strengths of both human users and AI models to create a powerful engine for knowledge creation and problem-solving.
+*   **Data is Recognized and Valued as a Core Asset:**  User data contributions are explicitly recognized as valuable assets and are rewarded through the CHIP token economy.
+*   **Value Flows Naturally and Incentives are Aligned:**  The token economy is designed to align the incentives of users, AI agents, and the platform itself, creating a virtuous cycle of growth, quality, and value creation.
+*   **CHIP Tokens Fuel a Self-Improving AI Engine:**  CHIP tokens are not just a currency; they are the *fuel and the training signals* that drive the continuous improvement and evolution of the Choir AI ecosystem, creating a truly revolutionary and sustainable model for the future of AI and online collaboration.
 
-K₀(r,α) = K₀*base * (1 + γ₁r) \_ (2/α)^γ₂
-
-## Potential Order (m)
-
-m(c,n) = 2 + β₁tanh(c/c₀) + β₂log(1+n/n₀)
-
-## Implementation in Actor Model
-
-```python
-class EconomicActor(Actor[EconomicState]):
-    async def adjust_parameters(self, thread_state: ThreadState):
-        """Update FQAHO parameters based on thread activity"""
-        # Calculate new α using memory decay formula
-        new_alpha = 2 - self.delta1*(1 - math.exp(-thread_state.age/self.tau))
-                      - self.delta2*thread_state.quality_score
-
-        # Update thread parameters
-        await self.blockchain_actor.send(
-            ParameterUpdate(
-                thread_id=thread_state.id,
-                alpha=new_alpha,
-                k0=calculate_new_k0(thread_state.refusal_rate),
-                m=calculate_new_m(thread_state.citation_count)
-            )
-        )
-```
 
 === File: docs/core_state_transitions.md ===
 
@@ -135,7 +137,7 @@ core_state_transitions
 
 # Core State Transitions
 
-VERSION core_state_transitions: 7.0
+VERSION core_state_transitions: 7.1 (Reward Clarifications)
 
 The state transition system orchestrates the evolution of thread states through carefully defined transformations. These transitions follow precise fractional mathematical principles that ensure non-local energy conservation, dynamic parameter recalibration, and frequency coherence across the network.
 
@@ -149,6 +151,22 @@ Dynamic Parameter Evolution follows principles of fractional quantum mechanics. 
 
 Frequency Management reflects collective organization through coupled oscillators with fractional damping. The thread frequency evolves through three interacting modes: the message mode normalizes activity rate by the fractional power of co-author count, the value mode applies logarithmic scaling to energy per co-author, and the coupling strength maintains an inverse relationship with co-author count raised to the fractional power. These modes work together to create natural organizational rhythms with long-range correlations.
 
+**Reward System and Token Distribution (Clarified Phase-Specific Rewards):**
+
+The reward system operates through precisely defined state transitions with memory effects. MCP servers, specifically AI models within the **Experience and Yield phases**, algorithmically distribute CHIP tokens based on contribution quality and network effects:
+
+1.  **Novelty Rewards (Issued in the Experience Phase):**
+    *   **Purpose:** To incentivize the creation of *novel and original prompts and messages* that expand the knowledge space of the Choir ecosystem.
+    *   **Mechanism:** AI models within the **Experience phase** analyze new user prompts and messages for *semantic novelty* compared to existing content in the platform's vector databases.
+    *   **Distribution:** CHIP tokens are algorithmically distributed as **novelty rewards** to users who submit prompts and messages that are deemed sufficiently novel and original by the Experience phase AI models.
+    *   **Timing:** Novelty rewards are issued **during the Experience phase**, as part of the context enrichment and knowledge retrieval process.
+
+2.  **Citation Rewards (Issued in the Yield Phase):**
+    *   **Purpose:** To incentivize users to create *salient and impactful contributions* that are recognized and valued by the community, and to foster the growth of a richly interconnected knowledge network through citations.
+    *   **Mechanism:** AI models within the **Yield phase** analyze the citation network and identify messages that have been *cited by other users as "priors"*.
+    *   **Distribution:** CHIP tokens are algorithmically distributed as **citation rewards** to users whose messages have been cited, based on the *salience* and *influence* of their cited contributions (as measured by citation metrics and FQAHO parameters).
+    *   **Timing:** Citation rewards are issued **during the Yield phase**, as part of the final response rendering and output formatting process, with inline links to citations providing transparent recognition of valuable contributions.
+
 The reward system operates through precisely defined state transitions with memory effects. New message rewards follow a fractional time-based decay described by R(t) = R_total × k/(1 + k·t_period)^(α/2), where k represents the decay constant (2.04), t_period spans the total time period of four years, and α is the thread's fractional parameter. Prior citation rewards strengthen thread coupling by drawing from treasury balance based on quality score ratios, expressed as V(p) = B_t × Q(p)^(α/2)/∑Q(i)^(α/2). Citations create frequency coupling between threads, with each thread's frequency increasing by 5% of the other's frequency, modulated by the fractional parameter. Treasury management maintains system solvency through careful balance tracking, where split decisions increase the balance, prior rewards decrease it, and system rewards add to it, all while maintaining a minimum balance for stability.
 
 The system's core properties maintain stability through:
@@ -158,7 +176,7 @@ The system's core properties maintain stability through:
 3. Frequency alignment through fractional organizational coupling
 4. Lévy flight-like value propagation through the network
 
-Error handling ensures transition validity through multiple safeguards. Fractional energy conservation violations trigger immediate rejection. Parameter instability blocks updates until recalibration completes. Frequency decoherence blocks transitions that would disrupt organizational patterns. Phase transition failures maintain the previous state to ensure system stability.
+Error handling defines transition validity through multiple safeguards. Fractional energy conservation violations trigger immediate rejection. Parameter instability blocks updates until recalibration completes. Frequency decoherence blocks transitions that would disrupt organizational patterns. Phase transition failures maintain the previous state to ensure system stability.
 
 Through these precisely defined transitions, the system maintains fractional quantum anharmonic stability while enabling organic evolution of thread states. The careful balance of non-local energy conservation, dynamic parameter modulation, and frequency alignment creates a robust framework for organic growth and adaptation with memory effects.
 

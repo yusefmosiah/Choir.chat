@@ -7,6 +7,8 @@ We will create a separate MCP server for each of the six PostChain phases: Actio
 *   **`reasoning` stream:**  For emitting tokens representing the reasoning process of the phase. This stream is optional and may be empty for phases without explicit reasoning steps.
 *   **`answer` stream:** For emitting the final output tokens of the phase.
 
+[reconsider this: maybe leverage sequential thinking tool to abstract over reasoning, such that reasoning doesnt always come first. or maybe use pydantic types to have "thoughts" precede the answer. options...]
+
 Each MCP server will:
 
 *   **Random Model Selection:**  Each server will randomly select a model at initialization from the list returned by `get_tool_compatible_models(config)` in `langchain_utils.py` (for random model mode).
