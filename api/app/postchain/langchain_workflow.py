@@ -2,7 +2,7 @@ import asyncio
 import logging
 from typing import List, Dict, Any, AsyncIterator, Optional
 
-from langchain_core.messages import HumanMessage, AIMessage, SystemMessage, BaseMessage
+from langchain_core.messages import HumanMessage, AIMessage, SystemMessage, BaseMessage, ToolMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.runnables import RunnablePassthrough, RunnableLambda
 
@@ -218,7 +218,13 @@ Your task: Provide a reflective analysis adding deeper context.
                     tool_output = f"Error: Tool '{tool_name}' not found."
                     logger.error(tool_output)
 
-                tool_messages.append(ToolMessage(content=str(tool_output), tool_call_id=tool_id))
+                tool_messages.append(
+                    ToolMessage(
+                        content=str(tool_output),
+                        tool_call_id=tool_id,
+                        name=tool_name
+                    )
+                )
 
             experience_messages.extend(tool_messages)
 

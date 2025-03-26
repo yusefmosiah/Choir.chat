@@ -1,5 +1,5 @@
 """
-PostChain implementation using LangGraph.
+PostChain implementationGraph.
 """
 
 __version__ = "0.1.0"
