@@ -7,123 +7,100 @@ including thread ID validation, state management, and formatting utilities.
 
 import uuid
 import logging
-from typing import Dict, Any, List, Optional
+import json
+import os
+from typing import Dict, Any, List, Optional, Union
 
 from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
 
 from app.postchain.schemas.state import PostChainState
-from app.postchain.state_manager import GLOBAL_STATE_MANAGER
+# from app.postchain.state_manager import GLOBAL_STATE_MANAGER # Removed state_manager import
 
 # Configure logging
 logger = logging.getLogger("postchain_utils")
 
+STATE_STORAGE_DIR = "thread_state" # Define directory for thread state storage
+
+def save_state(state: PostChainState) -> bool:
+    """Save PostChainState to a JSON file."""
+    thread_id = state.thread_id
+    if not thread_id:
+        logger.warning("Attempted to save state with no thread_id")
+        return False
+
+    # Ensure storage directory exists
+    if not os.path.exists(STATE_STORAGE_DIR):
+        os.makedirs(STATE_STORAGE_DIR, exist_ok=True)
+
+    filepath = os.path.join(STATE_STORAGE_DIR, f"{thread_id}.json")
+    try:
+        with open(filepath, 'w') as f:
+            json.dump(state.dict(), f, indent=2)
+        logger.debug(f"Saved state for thread {thread_id} to disk")
+        return True
+    except Exception as e:
+        logger.error(f"Error saving state to disk for thread {thread_id}: {e}", exc_info=True)
+        return False
+
+def recover_state(thread_id: str) -> Optional[PostChainState]:
+    """Recover PostChainState from a JSON file."""
+    thread_id = validate_thread_id(thread_id)
+    filepath = os.path.join(STATE_STORAGE_DIR, f"{thread_id}.json")
+
+    if not os.path.exists(filepath):
+        logger.debug(f"No state file found on disk for thread {thread_id}")
+        return None
+
+    try:
+        with open(filepath, 'r') as f:
+            state_dict = json.load(f)
+            loaded_state = PostChainState.parse_obj(state_dict) # Load state directly from dict
+            logger.info(f"Recovered state from disk for thread {thread_id} with {len(loaded_state.messages)} messages")
+            return loaded_state
+    except FileNotFoundError:
+        logger.debug(f"No state file found on disk for thread {thread_id}")
+        return None
+    except json.JSONDecodeError:
+        logger.error(f"JSONDecodeError while loading state for thread {thread_id}, state file possibly corrupted. Returning None.", exc_info=True)
+    except Exception as e:
+        logger.error(f"Error loading state from disk for thread {thread_id}: {e}", exc_info=True)
+    return None
+
+def delete_state(thread_id: str) -> bool: # Add delete_state function
+    """Delete state file for a thread."""
+    thread_id = validate_thread_id(thread_id)
+    filepath = os.path.join(STATE_STORAGE_DIR, f"{thread_id}.json")
+    try:
+        if os.path.exists(filepath):
+            os.remove(filepath)
+            logger.info(f"Deleted state file for thread {thread_id} from disk")
+            return True
+        logger.info(f"No state file found to delete for thread {thread_id}")
+        return False
+    except Exception as e:
+        logger.error(f"Error deleting state file for thread {thread_id}: {e}", exc_info=True)
+        return False
+
+
 def validate_thread_id(thread_id: str) -> str:
-    """
-    Validate and normalize thread ID.
+    """Validate and return a thread_id string.
 
     Args:
         thread_id: The thread ID to validate
 
     Returns:
-        A normalized UUID string or the original if it's a test ID
+        The validated thread_id
 
-    If the thread ID is invalid or None, a new UUID is generated.
+    Raises:
+        ValueError: If thread_id is not a valid UUID string
     """
-    if not thread_id:
-        return str(uuid.uuid4())
-
-    # Special handling for test IDs
-    if thread_id.startswith('test-'):
-        logger.info(f"Using test thread ID: {thread_id}")
+    try:
+        uuid.UUID(thread_id)
         return thread_id
-
-    # Check if valid UUID format
-    try:
-        uuid_obj = uuid.UUID(thread_id)
-        return str(uuid_obj)
     except ValueError:
-        # If not valid UUID, generate new one
-        logger.warning(f"Invalid thread ID format: {thread_id}. Generating new UUID.")
-        return str(uuid.uuid4())
+        logger.error(f"Invalid thread_id format: {thread_id}")
+        raise ValueError(f"Invalid thread_id format: {thread_id}")
 
-def load_state(thread_id: str, user_query: str = None) -> PostChainState:
-    """
-    Load existing state or create new one.
-
-    Args:
-        thread_id: The thread ID to load state for
-        user_query: Optional user query to add to the state
-
-    Returns:
-        The loaded or newly created PostChainState
-    """
-    thread_id = validate_thread_id(thread_id)
-
-    # Get state from state manager instead of MemorySaver
-    existing_state = GLOBAL_STATE_MANAGER.get_state(thread_id)
-
-    try:
-        if existing_state:
-            # Log message count and types
-            logger.info(f"Loaded thread {thread_id} with {len(existing_state.messages)} messages")
-
-            # Log message details for debugging
-            for i, msg in enumerate(existing_state.messages):
-                msg_type = type(msg).__name__
-                content_preview = msg.content[:50] if hasattr(msg, 'content') else "No content"
-                phase = msg.additional_kwargs.get('phase') if hasattr(msg, 'additional_kwargs') else "No phase"
-                logger.info(f"Message {i}: {msg_type}, phase={phase}, content={content_preview}...")
-
-            # Add the new message if provided
-            if user_query:
-                existing_state.messages.append(HumanMessage(content=user_query))
-                logger.info(f"Added new user message: {user_query[:50]}...")
-
-            return existing_state
-    except Exception as e:
-        logger.error(f"Error loading state for thread {thread_id}: {e}")
-
-    # Create new state if loading failed or no existing state
-    logger.info(f"Creating new thread state for {thread_id}")
-    initial_state = PostChainState(
-        thread_id=thread_id,
-        messages=[SystemMessage(content="You are a helpful AI assistant.")]
-    )
-
-    if user_query:
-        initial_state.messages.append(HumanMessage(content=user_query))
-        logger.info(f"Added initial user message: {user_query[:50]}...")
-
-    return initial_state
-
-def recover_state(thread_id: str) -> Optional[PostChainState]:
-    """
-    Attempt to recover state from interrupted conversation.
-
-    Args:
-        thread_id: The thread ID to recover state for
-
-    Returns:
-        The recovered PostChainState or None if recovery failed
-    """
-    thread_id = validate_thread_id(thread_id)
-
-    # Use state manager instead of MemorySaver
-    try:
-        existing_state = GLOBAL_STATE_MANAGER.get_state(thread_id)
-        if existing_state:
-            # Mark any "processing" phases as "error" to indicate interruption
-            for phase in existing_state.phase_state:
-                if existing_state.phase_state[phase] == "processing":
-                    existing_state.phase_state[phase] = "error"
-                    existing_state.error = "Conversation was interrupted"
-
-            return existing_state
-    except Exception as e:
-        logger.error(f"Error recovering state for thread {thread_id}: {e}")
-        return None
-
-    return None
 
 def format_stream_event(state: PostChainState, content: str = None, error: str = None) -> Dict[str, Any]:
     """

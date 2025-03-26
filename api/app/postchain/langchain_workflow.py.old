@@ -413,7 +413,7 @@ async def run_yield_phase(
 async def run_langchain_postchain_workflow(
     query: str,
     thread_id: str,
-    message_history: List[BaseMessage],
+    # message_history: List[BaseMessage], # No longer needed, history loaded from store
     config: Config,
     # Allow overriding models per phase for testing
     action_mc_override: Optional[ModelConfig] = None,
@@ -450,11 +450,10 @@ async def run_langchain_postchain_workflow(
         return
 
     # --- State Management ---
-    # Load history from in-memory store and merge with passed history
+    # Load history from in-memory store, or initialize new list
     global conversation_history_store
-    stored_history = conversation_history_store.get(thread_id, [])
-    merged_history = stored_history + message_history
-    current_messages = merged_history + [HumanMessage(content=query)]
+    message_history = conversation_history_store.get(thread_id, [])
+    current_messages = message_history + [HumanMessage(content=query)]
 
     # --- Workflow Definition using LCEL (Simplified) ---
 

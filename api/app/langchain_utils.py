@@ -119,6 +119,7 @@ def get_tool_compatible_models(config: Config) -> Dict[str, List[str]]:
             # config.OPENAI_O1,
             config.OPENAI_O3_MINI,
             config.OPENAI_GPT_4O_MINI,
+            config.OPENAI_GPT_4O,
         ],
         "anthropic": [
             config.ANTHROPIC_CLAUDE_37_SONNET,

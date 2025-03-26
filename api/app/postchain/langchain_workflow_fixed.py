@@ -413,7 +413,7 @@ async def run_yield_phase(
 async def run_langchain_postchain_workflow(
     query: str,
     thread_id: str,
-    message_history: List[BaseMessage],
+    # message_history: List[BaseMessage], # No longer needed, history loaded from store
     config: Config,
     # Allow overriding models per phase for testing
     action_mc_override: Optional[ModelConfig] = None,
@@ -437,12 +437,12 @@ async def run_langchain_postchain_workflow(
         if not models:
             raise ValueError("No models available.")
         # Use override if provided, otherwise select randomly (using fixed examples for now)
-        action_model_config = action_mc_override or models[1]
-        experience_model_config = experience_mc_override or models[0]
-        intention_model_config = intention_mc_override or models[1]
-        observation_model_config = observation_mc_override or models[0]
-        understanding_model_config = understanding_mc_override or models[0]
-        yield_model_config = yield_mc_override or models[1]
+        action_model_config = action_mc_override or models[0]
+        experience_model_config = experience_mc_override or models[1]
+        intention_model_config = intention_mc_override or models[2]
+        observation_model_config = observation_mc_override or models[3]
+        understanding_model_config = understanding_mc_override or models[4]
+        yield_model_config = yield_mc_override or models[5]
         # TODO: Implement actual random selection if overrides are None
     except Exception as e:
         logger.error(f"Failed to initialize models: {e}")
@@ -450,11 +450,10 @@ async def run_langchain_postchain_workflow(
         return
 
     # --- State Management ---
-    # Load history from in-memory store and merge with passed history
+    # Load history from in-memory store, or initialize new list
     global conversation_history_store
-    stored_history = conversation_history_store.get(thread_id, [])
-    merged_history = stored_history + message_history
-    current_messages = merged_history + [HumanMessage(content=query)]
+    message_history = conversation_history_store.get(thread_id, [])
+    current_messages = message_history + [HumanMessage(content=query)]
 
     # --- Workflow Definition using LCEL (Simplified) ---
 
