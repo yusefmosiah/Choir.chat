@@ -21,7 +21,6 @@ from app.config import Config
 from app.langchain_utils import ModelConfig, initialize_model_list
 from app.tools.web_search import WebSearchTool
 from app.tools.tavily_search import TavilySearchTool
-from app.tools.duckduckgo_search import DuckDuckGoSearchTool
 from app.tools.brave_search import BraveSearchTool
 from app.tools.conversation import ConversationWithTools
 
@@ -56,7 +55,6 @@ class SearchToolsEvaluator:
             logger.warning(f"Tavily search tool initialization failed: {e}")
             self.has_tavily = False
 
-        self.duckduckgo_tool = DuckDuckGoSearchTool(config=self.config)
 
         try:
             self.brave_tool = BraveSearchTool(config=self.config)
@@ -111,7 +109,6 @@ class SearchToolsEvaluator:
             self.report_content.append("2. Tavily Search Tool\n")
         if self.has_brave:
             self.report_content.append("3. Brave Search Tool\n")
-        self.report_content.append("4. DuckDuckGo Search Tool\n\n")
 
         # Run tests for each model with the combined WebSearchTool
         self.report_content.append("## Evaluation Results\n")
@@ -194,15 +191,15 @@ class SearchToolsEvaluator:
                 search_results = None
 
                 # Check if there is a tool call and it's a search query
-                tool_call_match = re.search(r"\[(web_search|tavily|search|brave|duckduckgo)\]\s+input:\s*(.*?)(?=\n\n|\n\[|\Z)", response_text, re.DOTALL)
+                tool_call_match = re.search(r"\[(web_search|tavily|search|brave)\]\s+input:\s*(.*?)(?=\n\n|\n\[|\Z)", response_text, re.DOTALL)
                 if tool_call_match:
                     search_query = tool_call_match.group(2).strip()
                     self.report_content.append(f"**Search Query:** {search_query}\n")
 
                     # Check if there are search results after the tool call
-                    if "[web_search] output:" in response_text or "[tavily] output:" in response_text or "[brave] output:" in response_text or "[duckduckgo] output:" in response_text:
+                    if "[web_search] output:" in response_text or "[tavily] output:" in response_text or "[brave] output:" in response_text:
                         # Extract the results between the tool output marker and the next section
-                        results_pattern = r"(\[(?:web_search|tavily|search|brave|duckduckgo)\]\s+output:)(.*?)(?=\n\n\n|\Z)"
+                        results_pattern = r"(\[(?:web_search|tavily|search|brave)\]\s+output:)(.*?)(?=\n\n\n|\Z)"
                         results_match = re.search(results_pattern, response_text, re.DOTALL)
 
                         if results_match:

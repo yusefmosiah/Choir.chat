@@ -5,16 +5,17 @@ from typing import List, Dict, Any, AsyncIterator, Optional
 from langchain_core.messages import HumanMessage, AIMessage, SystemMessage, BaseMessage, ToolMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.runnables import RunnablePassthrough, RunnableLambda
+import json # Added for parsing tool results
 
 # Local imports
 from app.config import Config
 from app.langchain_utils import post_llm, ModelConfig, initialize_tool_compatible_model_list
-from app.postchain.schemas.state import PostChainState # Reusing state schema for structure if helpful
+from app.postchain.schemas.state import PostChainState, ExperiencePhaseOutput, SearchResult, VectorSearchResult # Import new schemas
 from app.postchain.utils import format_stream_event #, save_state, recover_state # Removed state management utils
 
 # Langchain Tool Imports (Example)
-from langchain_community.tools import DuckDuckGoSearchRun
-# from app.tools.qdrant import QdrantSearchTool # Placeholder for Qdrant tool
+from app.tools.brave_search import BraveSearchTool
+from app.tools.qdrant import qdrant_search # Import the specific tool function
 
 # Configure logging
 logger = logging.getLogger("postchain_langchain")
@@ -46,7 +47,7 @@ Review the user's query and the initial action response.
 Your task is to provide a reflective analysis of the action response, adding deeper context and exploring related concepts.
 Consider different angles or interpretations of the query that might not have been addressed in the initial response.
 You have access to the following tools:
-- DuckDuckGoSearchRun: Use this for general web searches to find recent information or broader context.
+- BraveSearchTool: Use this for general web searches to find recent information or broader context.
 - QdrantSearchTool: Use this to search the internal knowledge base for relevant past conversations or documents.
 Use these tools *only if necessary* to gather external information or internal knowledge relevant to the query and initial response.
 """
@@ -133,13 +134,14 @@ async def run_experience_phase(
     messages: List[BaseMessage],
     config: Config,
     model_config: ModelConfig
-) -> Dict[str, Any]:
+) -> ExperiencePhaseOutput: # Updated return type
     """Runs the Experience phase using LCEL, including tool handling."""
     logger.info(f"Running Experience phase with model: {model_config.provider}/{model_config.model_name}")
 
     # --- Instantiate Tools ---
-    # TODO: Instantiate QdrantSearchTool properly, potentially passing config/client
-    tools = [DuckDuckGoSearchRun()] #, QdrantSearchTool()] # Add Qdrant tool when ready
+    # Note: qdrant_search is already decorated with @tool, so we just pass the function.
+    # Langchain handles the instantiation and schema generation.
+    tools = [BraveSearchTool(config=config), qdrant_search] # Add Qdrant tool
 
     # Prepare prompt - find last user query and last AI (Action) response
     last_user_msg = next((m for m in reversed(messages) if isinstance(m, HumanMessage)), None)
@@ -184,7 +186,10 @@ Your task: Provide a reflective analysis adding deeper context.
 
         # --- Tool Call Handling ---
         tool_messages: List[ToolMessage] = []
-        if hasattr(response, 'tool_calls') and response.tool_calls: # Check attribute exists and is not empty
+        web_results_list: List[SearchResult] = []
+        vector_results_list: List[VectorSearchResult] = []
+
+        if hasattr(response, 'tool_calls') and response.tool_calls:
             logger.info(f"Detected {len(response.tool_calls)} tool calls.")
             experience_messages.append(response) # Add the AI message with tool_calls
 
@@ -195,32 +200,83 @@ Your task: Provide a reflective analysis adding deeper context.
                 logger.info(f"Executing tool: {tool_name} with args: {tool_args}")
 
                 # Find and execute the corresponding tool
+                # Note: We match by name. BraveSearchTool has name 'brave_search', qdrant_search has name 'qdrant_search'.
                 tool_to_execute = next((t for t in tools if hasattr(t, 'name') and t.name == tool_name), None)
-                tool_output = ""
+                tool_output_str = "" # Raw string output from the tool
+                parsed_results = [] # Parsed results for structured storage
+
                 if tool_to_execute:
                     try:
-                        # Assuming tools have an 'arun' method
                         # Adapt based on tool's expected input (dict vs string)
+                        # Use asyncio.to_thread for synchronous run method if arun is not available
+                        input_arg_val = None
                         if isinstance(tool_args, dict):
-                             input_arg = tool_args.get('query', tool_args)
-                             if not isinstance(input_arg, str): input_arg = str(input_arg)
-                             tool_output = await tool_to_execute.arun(input_arg)
+                            # Qdrant expects dict, Brave expects query string within dict
+                            input_arg_val = tool_args.get('query', tool_args)
+                            if not isinstance(input_arg_val, str): input_arg_val = str(input_arg_val) # Ensure string for run/arun
                         elif isinstance(tool_args, str):
-                             tool_output = await tool_to_execute.arun(tool_args)
+                            input_arg_val = tool_args
+
+                        if input_arg_val is not None:
+                            if hasattr(tool_to_execute, 'arun'):
+                                tool_output_str = await tool_to_execute.arun(input_arg_val)
+                            elif hasattr(tool_to_execute, 'run'):
+                                # Check if 'run' is async or sync
+                                if asyncio.iscoroutinefunction(tool_to_execute.run):
+                                    # Await async 'run' method directly
+                                    tool_output_str = await tool_to_execute.run(input_arg_val)
+                                else:
+                                    # Run synchronous 'run' method in a separate thread
+                                    tool_output_str = await asyncio.to_thread(tool_to_execute.run, input_arg_val)
+                            else:
+                                tool_output_str = f"Error: Tool {tool_name} has neither 'run' nor 'arun' method."
+                                logger.error(tool_output_str)
                         else:
-                             tool_output = f"Error: Unsupported tool args format for {tool_name}: {type(tool_args)}"
-                             logger.error(tool_output)
+                            tool_output_str = f"Error: Unsupported tool args format for {tool_name}: {type(tool_args)}"
+                            logger.error(tool_output_str) # Log error here as well
+
+                        # --- Parse Tool Output ---
+                        # Ensure tool_output_str is actually a string before parsing
+                        if isinstance(tool_output_str, str):
+                            try:
+                                # Attempt to parse JSON for structured results (Brave, potentially others)
+                                parsed_output = json.loads(tool_output_str)
+                                if isinstance(parsed_output, dict) and "results" in parsed_output:
+                                    raw_results = parsed_output["results"]
+                                    if tool_name == "brave_search":
+                                        for res in raw_results:
+                                            web_results_list.append(SearchResult(
+                                                title=res.get("title", ""),
+                                                url=res.get("url", ""),
+                                                content=res.get("content", res.get("description", "")), # Use description as fallback
+                                                provider=tool_name
+                                            ))
+                                    # Add parsing logic for other tools if needed
+
+                            except json.JSONDecodeError:
+                                # If not JSON, assume it's a string summary (like qdrant_search)
+                                logger.debug(f"Tool {tool_name} output is not JSON, treating as string summary.")
+                                if tool_name == "qdrant_search":
+                                    # Qdrant tool returns a string summary. Create a single VectorSearchResult.
+                                    vector_results_list.append(VectorSearchResult(
+                                        content=tool_output_str,
+                                        score=0.0, # Add required score field (placeholder)
+                                    provider=tool_name,
+                                    # Add other fields like score, metadata if parseable or available
+                                ))
+                            # Keep tool_output_str as is for the LLM ToolMessage
 
                     except Exception as tool_err:
-                        tool_output = f"Error executing tool {tool_name}: {tool_err}"
-                        logger.error(tool_output, exc_info=True)
+                        tool_output_str = f"Error executing tool {tool_name}: {tool_err}"
+                        logger.error(tool_output_str, exc_info=True)
                 else:
-                    tool_output = f"Error: Tool '{tool_name}' not found."
-                    logger.error(tool_output)
+                    tool_output_str = f"Error: Tool '{tool_name}' not found."
+                    logger.error(tool_output_str)
 
+                # Append the raw tool output string to the message for the LLM
                 tool_messages.append(
                     ToolMessage(
-                        content=str(tool_output),
+                        content=tool_output_str, # Pass the raw string output
                         tool_call_id=tool_id,
                         name=tool_name
                     )
@@ -230,27 +286,35 @@ Your task: Provide a reflective analysis adding deeper context.
 
             # --- Second LLM Call (with tool results) ---
             logger.info("Calling LLM again with tool results.")
-            experience_chain_no_tools = RunnableLambda(lambda msgs: post_llm(
+            # Need to await the result of post_llm here
+            response = await post_llm(
                 f"{model_config.provider}/{model_config.model_name}",
-                msgs,
+                experience_messages, # Pass messages including tool results
                 config
-            ))
-            response = await experience_chain_no_tools.ainvoke(experience_messages) # AWAIT HERE
+            )
 
             # Check response type after second call
             if not isinstance(response, AIMessage):
                 error_msg = f"Unexpected response type from experience model (second call): {type(response)}. Content: {response}"
                 logger.error(error_msg)
-                return {"error": error_msg}
+                return ExperiencePhaseOutput(experience_response=AIMessage(content="Error processing tool results."), error=error_msg)
 
             logger.info(f"Experience phase second call completed. Response: {response.content[:100]}...")
 
-        # Return the final response
-        return {"experience_response": response}
+        # Return the structured output
+        return ExperiencePhaseOutput(
+            experience_response=response,
+            web_results=web_results_list,
+            vector_results=vector_results_list # Will be empty if qdrant tool wasn't called or parsing failed
+        )
 
     except Exception as e:
         logger.error(f"Error during Experience phase: {e}", exc_info=True)
-        return {"error": f"Experience phase failed: {e}"}
+        # Return structured error
+        return ExperiencePhaseOutput(
+            experience_response=AIMessage(content=f"Experience phase failed: {e}"),
+            error=f"Experience phase failed: {e}"
+        )
 
 async def run_intention_phase(
     messages: List[BaseMessage],
@@ -476,19 +540,32 @@ async def run_langchain_postchain_workflow(
 
     # 2. Experience Phase
     yield {"phase": "experience", "status": "running"}
-    experience_result = await run_experience_phase(current_messages, config, experience_model_config)
+    experience_output: ExperiencePhaseOutput = await run_experience_phase(current_messages, config, experience_model_config)
 
-    if "error" in experience_result:
-        yield {"phase": "experience", "status": "error", "content": experience_result["error"]}
+    if experience_output.error:
+        yield {
+            "phase": "experience",
+            "status": "error",
+            "content": experience_output.error,
+            "web_results": [], # Ensure lists are present even on error
+            "vector_results": []
+        }
         return # Stop workflow on error
 
-    experience_response: AIMessage = experience_result["experience_response"]
-    current_messages.append(experience_response)
+    # Add the AI's response message to the history
+    current_messages.append(experience_output.experience_response)
 
     # Update in-memory history store
     conversation_history_store[thread_id] = current_messages
 
-    yield {"phase": "experience", "status": "complete", "content": experience_response.content}
+    # Yield the completion event including search results
+    yield {
+        "phase": "experience",
+        "status": "complete",
+        "content": experience_output.experience_response.content,
+        "web_results": [res.dict() for res in experience_output.web_results], # Convert Pydantic models to dicts for JSON serialization
+        "vector_results": [res.dict() for res in experience_output.vector_results]
+    }
 
     # 3. Intention Phase
     yield {"phase": "intention", "status": "running"}

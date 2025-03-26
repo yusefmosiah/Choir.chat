@@ -4,7 +4,7 @@ State schema for the PostChain graph.
 
 from typing import List, Dict, Any, Optional
 from pydantic import BaseModel, Field
-from langchain_core.messages import BaseMessage
+from langchain_core.messages import BaseMessage, AIMessage # Import AIMessage
 
 class PostChainState(BaseModel):
     """
@@ -46,3 +46,31 @@ class PostChainState(BaseModel):
 
     class Config:
         arbitrary_types_allowed = True
+
+# --- Search Result Models ---
+
+class SearchResult(BaseModel):
+    """Represents a single web search result."""
+    title: str = Field(..., description="Title of the search result")
+    url: str = Field(..., description="URL of the search result")
+    content: str = Field(..., description="Snippet or content summary")
+    provider: Optional[str] = Field(None, description="Search provider (e.g., brave, tavily)")
+
+class VectorSearchResult(BaseModel):
+    """Represents a single vector database search result."""
+    content: str = Field(..., description="Content of the retrieved document chunk")
+    score: float = Field(..., description="Similarity score")
+    metadata: Dict[str, Any] = Field(default_factory=dict, description="Associated metadata")
+    provider: Optional[str] = Field("qdrant", description="Vector DB provider")
+
+# --- Phase Output Models ---
+
+class ExperiencePhaseOutput(BaseModel):
+    """Structured output for the Experience phase."""
+    experience_response: AIMessage = Field(..., description="The AI's reflective analysis message")
+    web_results: List[SearchResult] = Field(default_factory=list, description="List of web search results used")
+    vector_results: List[VectorSearchResult] = Field(default_factory=list, description="List of vector search results used")
+    error: Optional[str] = Field(None, description="Error message if the phase failed")
+
+    class Config:
+        arbitrary_types_allowed = True # Allow AIMessage

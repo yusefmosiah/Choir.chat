@@ -1,4 +1,4 @@
-<![CDATA[#!/bin/bash
+#!/bin/bash
 
 # API endpoint URL
 API_URL="http://localhost:8000/api/postchain/langchain"

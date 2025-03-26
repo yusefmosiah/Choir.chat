@@ -26,13 +26,9 @@ langchain-mistralai==0.2.7
 langchain-fireworks==0.2.7
 langchain-qdrant==0.2.0
 langchain-groq==0.2.4
-langgraph==0.3.2
-langserve==0.3.1
 
 
 
 # Additional tools - pinned to compatible versions
 langchain-community==0.3.18
-duckduckgo-search==7.5.0
 
-thespian>=4.0.1

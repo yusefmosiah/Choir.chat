@@ -112,19 +112,13 @@ tree.md
 │   │   │   └── vectors.py
 │   │   ├── services
 │   │   │   ├── __init__.py
-│   │   │   ├── chorus.py
 │   │   │   └── sui_service.py
-│   │   ├── thespian
-│   │   │   └── hello.py
 │   │   ├── tools
 │   │   │   ├── __init__.py
 │   │   │   ├── base.py
 │   │   │   ├── brave_search.py
 │   │   │   ├── calculator.py
-│   │   │   ├── conversation.py
-│   │   │   ├── duckduckgo_search.py
 │   │   │   ├── qdrant.py
-│   │   │   ├── qdrant_workflow.py
 │   │   │   ├── tavily_search.py
 │   │   │   └── web_search.py
 │   │   └── utils.py
@@ -142,50 +136,25 @@ tree.md
 │       ├── conftest.py
 │       ├── postchain
 │       │   ├── __init__.py
-│       │   ├── analysis.py
 │       │   ├── random_gen_prompts.md
-│       │   ├── run_all_tests.py
-│       │   ├── run_tests.py
 │       │   ├── test_cases.json
-│       │   ├── test_cases.py
-│       │   ├── test_framework.py
 │       │   ├── test_langchain_workflow.py
-│       │   ├── test_langgraph_multiturn.py
-│       │   ├── test_langgraph_multiturn_abstracted.py
-│       │   ├── test_multiturn.py
 │       │   ├── test_providers.py
 │       │   ├── test_providers_abstracted.py
-│       │   ├── test_random_multimodel.py
-│       │   ├── test_random_multimodel_stream.py
-│       │   ├── test_simple_multimodel.py
 │       │   ├── test_simple_multimodel_stream.py
-│       │   ├── test_stream.py
 │       │   ├── test_structured_output.py
-│       │   ├── test_tool_multimodel.py
-│       │   ├── test_tool_random_multimodel.py
 │       │   └── test_utils.py
 │       ├── test_main.py
 │       ├── test_sui_service.py
 │       ├── test_user_thread_endpoints.py
-│       ├── thespian
-│       │   └── test_hello.py
 │       └── tools
 │           ├── __init__.py
 │           ├── direct_search_diagnostic.py
 │           ├── direct_search_test.py
-│           ├── haiku_search_test.py
-│           ├── langgraph_test.py
 │           ├── run_tool_tests.py
-│           ├── test_anthropic_langgraph.py
 │           ├── test_brave_search.py
 │           ├── test_calculator.py
-│           ├── test_duckduckgo_search.py
-│           ├── test_langgraph_providers_tools.py
 │           ├── test_multimodel_with_tools.py
-│           ├── test_provider_langgraph.py
-│           ├── test_qdrant.py
-│           ├── test_qdrant_multimodel.py
-│           ├── test_qdrant_workflow.py
 │           ├── test_recent_events.py
 │           ├── test_search_tools_report.py
 │           ├── test_tavily_search.py
@@ -272,7 +241,7 @@ tree.md
     ├── generate_single_provider_report.sh
     └── test_postchain_multiturn.sh
 
-61 directories, 196 files
+59 directories, 167 files
 
 === File: docs/CHANGELOG.md ===
 

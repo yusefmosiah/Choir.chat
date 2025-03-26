@@ -9,7 +9,6 @@ from typing import Dict, Any, List, Optional, Union, Tuple
 from app.config import Config
 from app.tools.base import BaseTool
 from app.tools.tavily_search import TavilySearchTool
-from app.tools.duckduckgo_search import DuckDuckGoSearchTool
 from app.tools.brave_search import BraveSearchTool
 
 
@@ -41,7 +40,7 @@ class WebSearchTool(BaseTool):
 
         Args:
             config: Application configuration
-            primary_provider: The primary search provider to use ('brave', 'tavily', or 'duckduckgo')
+            primary_provider: The primary search provider to use ('brave', 'tavily', etc)
             fallback_providers: Ordered list of fallback providers if primary fails
             max_results: Maximum number of results to return
             name: Optional custom name for the tool
@@ -52,7 +51,7 @@ class WebSearchTool(BaseTool):
 
         # Set default fallback order if not provided
         if fallback_providers is None:
-            fallback_providers = ["tavily", "duckduckgo"]  # Changed fallback order
+            fallback_providers = ["tavily"]  # Changed fallback order
 
         self.primary_provider = primary_provider
         self.fallback_providers = fallback_providers
@@ -81,19 +80,6 @@ class WebSearchTool(BaseTool):
         except Exception as e:
             logger.warning(f"Failed to initialize Tavily search: {e}")
 
-        # Try to initialize DuckDuckGo
-        try:
-            self.search_tools["duckduckgo"] = DuckDuckGoSearchTool(
-                config=self.config,
-                max_results=self.max_results,
-                region="wt-wt",           # Use worldwide region
-                time_period="m",          # Search last month by default
-                backend="api",            # Explicitly use API backend
-                safe_search="moderate"
-            )
-            logger.info("DuckDuckGo search provider initialized")
-        except Exception as e:
-            logger.warning(f"Failed to initialize DuckDuckGo search: {e}")
 
         # Try to initialize Brave
         try:
