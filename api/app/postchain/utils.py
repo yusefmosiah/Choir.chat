@@ -14,7 +14,6 @@ from typing import Dict, Any, List, Optional, Union
 from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
 
 from app.postchain.schemas.state import PostChainState
-# from app.postchain.state_manager import GLOBAL_STATE_MANAGER # Removed state_manager import
 
 # Configure logging
 logger = logging.getLogger("postchain_utils")

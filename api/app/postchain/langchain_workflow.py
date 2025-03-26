@@ -429,21 +429,15 @@ async def run_langchain_postchain_workflow(
     """
     logger.info(f"Starting Langchain PostChain workflow for thread {thread_id}")
 
-    # --- Model Selection (Hardcoded for now as per plan) ---
-    # TODO: Implement more sophisticated selection later if needed
-    # Using the first tool-compatible model for simplicity, similar to simple_graph.py logic
+    # --- Hardcoded Model Sequence ---
     try:
-        models = initialize_tool_compatible_model_list(config)
-        if not models:
-            raise ValueError("No models available.")
-        # Use override if provided, otherwise select randomly (using fixed examples for now)
-        action_model_config = action_mc_override or models[1]
-        experience_model_config = experience_mc_override or models[0]
-        intention_model_config = intention_mc_override or models[1]
-        observation_model_config = observation_mc_override or models[0]
-        understanding_model_config = understanding_mc_override or models[0]
-        yield_model_config = yield_mc_override or models[1]
-        # TODO: Implement actual random selection if overrides are None
+        # Define model sequence per phase based on user specification
+        action_model_config = ModelConfig("google", "gemini-2.0-flash")
+        experience_model_config = ModelConfig("openai", "gpt-4o-mini")
+        intention_model_config = ModelConfig("anthropic", "claude-3-5-haiku-latest")
+        observation_model_config = ModelConfig("mistral", "mistral-small-latest")
+        understanding_model_config = ModelConfig("groq", "qwen-qwq-32b")
+        yield_model_config = ModelConfig("openai", "o3-mini")
     except Exception as e:
         logger.error(f"Failed to initialize models: {e}")
         yield {"error": f"Model initialization failed: {e}"}
