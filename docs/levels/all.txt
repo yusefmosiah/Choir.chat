@@ -94,8 +94,10 @@ tree.md
 │   │   │   ├── __init__.py
 │   │   │   └── api.py
 │   │   ├── postchain
+│   │   │   ├── README.md
 │   │   │   ├── __init__.py
 │   │   │   ├── checkpointer.py
+│   │   │   ├── langchain_workflow.py
 │   │   │   ├── nodes
 │   │   │   ├── prompts
 │   │   │   ├── schemas
@@ -150,6 +152,7 @@ tree.md
 │       │   ├── test_cases.json
 │       │   ├── test_cases.py
 │       │   ├── test_framework.py
+│       │   ├── test_langchain_workflow.py
 │       │   ├── test_langgraph_multiturn.py
 │       │   ├── test_langgraph_multiturn_abstracted.py
 │       │   ├── test_multiturn.py
@@ -230,6 +233,7 @@ tree.md
 │   ├── fqaho_simulation.md
 │   ├── fqaho_visualization.md
 │   ├── index.md
+│   ├── langchain_postchain_checklist.md
 │   ├── levels
 │   │   ├── all.txt
 │   │   ├── level0.md
@@ -270,7 +274,7 @@ tree.md
     ├── generate_search_report.sh
     └── generate_single_provider_report.sh
 
-61 directories, 194 files
+61 directories, 198 files
 
 === File: docs/CHANGELOG.md ===
 
@@ -2710,6 +2714,30 @@ When contributing to documentation:
 3. Include diagrams using Mermaid.js where appropriate
 4. Provide code examples for technical concepts
 5. Update the index when adding new documents
+
+=== File: docs/langchain_postchain_checklist.md ===
+
+
+
+==
+langchain_postchain_checklist
+==
+
+
+# Langchain PostChain Implementation Checklist
+
+This checklist outlines the steps to implement the PostChain workflow directly using Langchain on the `langchain-postchain` branch.
+
+- [ ] **Branch Creation:** Create a new Git branch named `langchain-postchain` from the current `main` branch.
+- [ ] **Langchain PostChain Implementation:** Implement the PostChain workflow directly using Langchain.
+    - [ ] Define Langchain Chains or Agents for each phase (Action, Experience, Intention, Observation, Understanding, Yield).
+    - [ ] Hardcode specific model choices for each phase.
+    - [ ] Implement granular control over service calls (Qdrant, Sui, web search, etc.) within the Langchain implementation.
+    - [ ] Reuse code from the previous LangGraph implementation where applicable, adapting it to a simpler Langchain workflow.
+- [ ] **Testing:** Implement basic tests to ensure the Langchain PostChain is functional.
+    - [ ] Unit tests for individual phases.
+    - [ ] Basic integration tests for the overall workflow.
+- [ ] **Documentation:** Add a basic README or documentation within the `api/app/postchain` directory to describe the Langchain PostChain implementation and its components.
 
 === File: docs/libsql_integration.md ===
 
