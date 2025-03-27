@@ -138,6 +138,8 @@ class Message: ObservableObject, Identifiable, Equatable {
     // Add explicit objectWillChange notifications for phase updates
     func updatePhase(_ phase: Phase, content: String) {
         objectWillChange.send()
+        
+        // Store the phase content
         _phases[phase] = content
 
         // Force SwiftUI to recognize deep changes
@@ -147,12 +149,17 @@ class Message: ObservableObject, Identifiable, Equatable {
             _phases = temp
         }
 
-        // Simplified content update logic:
-        // 1. Always update content for experience phase (highest priority)
-        // 2. Update content for action phase only if experience is empty or we have placeholder content
-        if (phase == .experience && !content.isEmpty) ||
-           (phase == .action && (self.content == "..." || self.phases[.experience]?.isEmpty == true)) {
-            self.content = content
+        // Only update the main content if it's empty or a placeholder
+        // This prevents overwriting the main content with phase content from other messages
+        if self.content.isEmpty || self.content == "..." {
+            // For initial content, prioritize yield > experience > action
+            if phase == .yield && !content.isEmpty {
+                self.content = content
+            } else if phase == .experience && !content.isEmpty && (self.content.isEmpty || self.content == "...") {
+                self.content = content
+            } else if phase == .action && !content.isEmpty && (self.content.isEmpty || self.content == "...") {
+                self.content = content
+            }
         }
     }
 }

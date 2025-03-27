@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct PostchainView: View {
+    // Unique identifier for this view instance to prevent state sharing
+    let viewId: UUID
     let phases: [Phase: String]
     let isProcessing: Bool
     @State private var selectedPhase: Phase = .action
@@ -11,6 +13,14 @@ struct PostchainView: View {
 
     // Optional coordinator to check processing status
     var coordinator: RESTPostchainCoordinator?
+    
+    init(phases: [Phase: String], isProcessing: Bool, forceShowAllPhases: Bool = false, coordinator: RESTPostchainCoordinator? = nil, viewId: UUID = UUID()) {
+        self.phases = phases
+        self.isProcessing = isProcessing
+        self.forceShowAllPhases = forceShowAllPhases
+        self.coordinator = coordinator
+        self.viewId = viewId
+    }
 
     // Computed property to get available phases in order
     private var availablePhases: [Phase] {
@@ -54,7 +64,7 @@ struct PostchainView: View {
                     .offset(x: calculateOffset(for: phase, cardWidth: cardWidth, totalWidth: totalWidth))
                     .zIndex(phase == selectedPhase ? 1 : 0)
                     .opacity(calculateOpacity(for: phase))
-                    .id("\(phase.rawValue)_\(phases[phase]?.count ?? 0)") // Force redraw when content changes
+                    .id("\(viewId)_\(phase.rawValue)_\(phases[phase]?.count ?? 0)") // Force redraw when content changes, include viewId for uniqueness
                 }
             }
             .frame(height: geometry.size.height * 0.99) // Back to using full height
@@ -108,20 +118,29 @@ struct PostchainView: View {
         .onChange(of: phases) { oldPhases, newPhases in
             print("PostchainView phases changed: \(newPhases.count) phases")
             
-            // Only auto-select if this is the first phase added and no phase is currently selected
-            // This ensures we only change the selection on initial load
-            if oldPhases.isEmpty && !newPhases.isEmpty {
-                // Start with action phase by default
+            // Only auto-select if this is the very first time phases are loaded and they were previously empty
+            // This ensures we only change the selection on initial load, not on subsequent updates
+            if oldPhases.isEmpty && !newPhases.isEmpty && selectedPhase == .action && !availablePhases.contains(selectedPhase) {
+                // Start with action phase by default, but only if we haven't selected a phase yet
                 if newPhases[.action] != nil {
                     selectedPhase = .action
                 } else {
                     // If action isn't available, select the first available phase
                     selectedPhase = availablePhases.first ?? .action
                 }
+                
+                print("PostchainView auto-selected phase: \(selectedPhase)")
+            } else {
+                // If the currently selected phase is not available anymore, select the first available phase
+                if !availablePhases.contains(selectedPhase) && !availablePhases.isEmpty {
+                    selectedPhase = availablePhases.first ?? .action
+                    print("PostchainView selected first available phase: \(selectedPhase)")
+                } else {
+                    // Otherwise, respect the user's current selection
+                    // This allows users to read at their own pace
+                    print("PostchainView keeping current selection: \(selectedPhase)")
+                }
             }
-
-            // Otherwise, respect the user's current selection
-            // This allows users to read at their own pace
         }
     }
 
@@ -374,7 +393,8 @@ struct PriorCard: View {
             .yield: "Here's my response..."
         ],
         isProcessing: true,
-        forceShowAllPhases: true
+        forceShowAllPhases: true,
+        viewId: UUID()
     )
     .frame(height: 500)
     .padding()

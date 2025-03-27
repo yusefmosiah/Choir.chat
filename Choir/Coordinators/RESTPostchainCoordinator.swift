@@ -207,26 +207,30 @@ class RESTPostchainCoordinator: PostchainCoordinator, ObservableObject {
 
             // Get reference to the message (now an ObservableObject)
             let message = thread.messages[messageIndex]
+            
+            // IMPORTANT: Only update the message that's currently being processed
+            // This ensures each message maintains its own independent phases
+            if message.id == activeMessageId {
+                // Set streaming flag
+                message.isStreaming = true
 
-            // Set streaming flag
-            message.isStreaming = true
+                // Use the helper method to update the phase
+                // This will automatically trigger SwiftUI updates through @Published
+                message.updatePhase(phase, content: content)
 
-            // Use the helper method to update the phase
-            // This will automatically trigger SwiftUI updates through @Published
-            message.updatePhase(phase, content: content)
+                // Log update for debugging
+                if phase == .experience {
+                    print("✅ Updated experience phase in message \(message.id): \(content.prefix(20))...")
+                }
 
-            // No need to update the array since we're working with a reference type
+                // Add explicit notification
+                message.objectWillChange.send()
 
-            // Log update for debugging
-            if phase == .experience {
-                print("✅ Updated experience phase in message: \(content.prefix(20))...")
+                // Force SwiftUI to recognize changes in parent thread
+                self.currentChoirThread?.objectWillChange.send()
+            } else {
+                print("⚠️ Attempted to update message \(message.id) but active message is \(String(describing: activeMessageId))")
             }
-
-            // Add explicit notification
-            message.objectWillChange.send()
-
-            // Force SwiftUI to recognize changes in parent thread
-            self.currentChoirThread?.objectWillChange.send()
         }
     }
     
