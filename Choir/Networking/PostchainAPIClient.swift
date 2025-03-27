@@ -113,13 +113,9 @@ class PostchainAPIClient {
         let config = URLSessionConfiguration.default
         let delegateQueue = OperationQueue()
         delegateQueue.maxConcurrentOperationCount = 1
-        let session = URLSession(configuration: config, delegate: nil, delegateQueue: delegateQueue)
-
-        let task = session.dataTask(with: request)
-
-        // Use a delegate with a reference to the onPhaseUpdate and onComplete callbacks
+        
+        // Create the delegate first
         let sseDelegate = SSEDelegate(
-            dataTask: task,
             onEventReceived: { eventData in
                 if eventData == "[DONE]" {
                     DispatchQueue.main.async {
@@ -187,12 +183,11 @@ class PostchainAPIClient {
             }
         )
 
-        // Keep a reference to the delegate
-        URLSession.shared.delegateQueue.addOperation {
-            task.delegate = sseDelegate
-        }
-
-        // Start the streaming task
+        // Create a session with the delegate
+        let session = URLSession(configuration: config, delegate: sseDelegate, delegateQueue: delegateQueue)
+        
+        // Create and start the task
+        let task = session.dataTask(with: request)
         task.resume()
     }
 
