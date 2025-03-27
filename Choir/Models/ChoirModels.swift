@@ -187,7 +187,6 @@ class Message: ObservableObject, Identifiable, Equatable {
         }
     }
 }
-}
 // MARK: - API Models
 /// Simplified Prior model for display purposes only
 struct Prior: Codable, Hashable {
