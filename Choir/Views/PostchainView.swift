@@ -3,8 +3,14 @@ import SwiftUI
 struct PostchainView: View {
     // Unique identifier for this view instance to prevent state sharing
     let viewId: UUID
-    let phases: [Phase: String]
+    
+    // Reference to the specific message this view is displaying
+    let message: Message
+    
+    // Processing state
     let isProcessing: Bool
+    
+    // Selected phase state
     @State private var selectedPhase: Phase = .action
     @State private var dragOffset: CGFloat = 0
 
@@ -14,12 +20,20 @@ struct PostchainView: View {
     // Optional coordinator to check processing status
     var coordinator: RESTPostchainCoordinator?
     
-    init(phases: [Phase: String], isProcessing: Bool, forceShowAllPhases: Bool = false, coordinator: RESTPostchainCoordinator? = nil, viewId: UUID = UUID()) {
-        self.phases = phases
+    // Computed property to get phases directly from the message
+    private var phases: [Phase: String] {
+        return message.phases
+    }
+    
+    init(message: Message, isProcessing: Bool, forceShowAllPhases: Bool = false, coordinator: RESTPostchainCoordinator? = nil, viewId: UUID = UUID()) {
+        self.message = message
         self.isProcessing = isProcessing
         self.forceShowAllPhases = forceShowAllPhases
         self.coordinator = coordinator
         self.viewId = viewId
+        
+        // Print debug info
+        print("PostchainView initialized for message \(message.id) with \(message.phases.count) phases")
     }
 
     // Computed property to get available phases in order
@@ -226,16 +240,16 @@ struct PhaseCard: View {
     var isLoading: Bool = false
     var priors: [Prior]? = nil
 
-
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: 12) {
+            // Simplified header with just the icon and phase name
             HStack {
                 Image(systemName: phase.symbol)
-                    .imageScale(.large)
+                    .imageScale(.medium)
                     .foregroundColor(phase == .yield ? .white : .accentColor)
 
-                Text(phase.description)
-                    .font(.title3)
+                Text(phase.rawValue.capitalized) // Just use the phase name instead of description
+                    .font(.headline)
                     .fontWeight(.semibold)
                     .foregroundColor(phase == .yield ? .white : .primary)
 
@@ -246,72 +260,57 @@ struct PhaseCard: View {
                         .scaleEffect(0.7)
                 }
             }
-            .padding(.bottom, 8)
+            .padding(.bottom, 4)
 
-            if let content = content {
-                // Debug log for content rendering
-
+            if let content = content, !content.isEmpty {
                 ScrollView {
-                    Text(content.isEmpty ? "No content available for this phase." : content)
+                    Text(content)
                         .font(.body)
-                        .lineSpacing(6)
+                        .lineSpacing(5)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                        .foregroundColor(phase == .yield ? .white : (content.isEmpty ? .secondary : .primary))
-                        .padding(.bottom, 4)
-
-                    // Display priors if this is the experience phase and we have priors
-                    if phase == .experience, let priors = priors, !priors.isEmpty {
-                        VStack(alignment: .leading, spacing: 10) {
-                            Text("Available Priors:")
-                                .font(.headline)
-                                .padding(.top, 12)
-                                .foregroundColor(phase == .yield ? .white : .primary)
-
-                            ForEach(priors, id: \.self) { prior in
-                                PriorCard(prior: prior)
-                            }
-                        }
-                    }
+                        .foregroundColor(phase == .yield ? .white : .primary)
                 }
-                .frame(minHeight: 400)
+                .frame(minHeight: 300) // Reduced height
             } else if isLoading {
-                VStack(spacing: 16) {
+                VStack(spacing: 12) {
                     Spacer()
                     HStack {
                         Spacer()
                         ProgressView()
-                        Text("Processing \(phase.description)...")
+                        Text("Loading...")
                             .foregroundColor(phase == .yield ? .white.opacity(0.8) : .secondary)
                         Spacer()
                     }
                     Spacer()
                 }
-                .padding(.vertical, 40)
+                .padding(.vertical, 20)
             } else {
-                Spacer()
+                Text("No content available")
+                    .foregroundColor(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.vertical, 20)
             }
         }
-        .padding(16)
+        .padding(12)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(
-            RoundedRectangle(cornerRadius: 16)
+            RoundedRectangle(cornerRadius: 12)
                 .fill(phase == .yield
                       ? Color.accentColor
                       : Color(UIColor.systemBackground))
-                .shadow(color: Color.black.opacity(isSelected ? 0.25 : 0.1),
-                        radius: isSelected ? 10 : 4,
+                .shadow(color: Color.black.opacity(isSelected ? 0.2 : 0.1),
+                        radius: isSelected ? 8 : 3,
                         x: 0,
-                        y: isSelected ? 4 : 2)
+                        y: isSelected ? 3 : 1)
         )
         .overlay(
-            RoundedRectangle(cornerRadius: 16)
+            RoundedRectangle(cornerRadius: 12)
                 .stroke(isSelected
                         ? (phase == .yield ? Color.white : Color.accentColor)
                         : Color.gray.opacity(0.2),
-                        lineWidth: isSelected ? 2.5 : 1)
+                        lineWidth: isSelected ? 2 : 1)
         )
         .padding(.horizontal, 4)
-        .padding(.bottom, 0)
     }
 }
 
@@ -385,17 +384,23 @@ struct PriorCard: View {
 }
 
 #Preview {
-    PostchainView(
+    let testMessage = Message(
+        content: "Test message content",
+        isUser: false,
         phases: [
             .action: "I understand you said...",
             .experience: "Based on my experience...",
             .intention: "Your intention seems to be...",
             .yield: "Here's my response..."
-        ],
+        ]
+    )
+    
+    return PostchainView(
+        message: testMessage,
         isProcessing: true,
         forceShowAllPhases: true,
         viewId: UUID()
     )
-    .frame(height: 500)
+    .frame(height: 400) // Reduced height
     .padding()
 }

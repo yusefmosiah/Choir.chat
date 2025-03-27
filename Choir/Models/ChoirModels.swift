@@ -91,10 +91,11 @@ class Message: ObservableObject, Identifiable, Equatable {
     let isUser: Bool
     let timestamp: Date
     @Published var isStreaming: Bool
-
-    // Store all phases with proper publishing
-    @Published private var _phases: [Phase: String] = [:]
-
+    
+    // Each message has its own dedicated phase content dictionary
+    // This ensures complete isolation between messages
+    @Published private var phaseContent: [Phase: String] = [:]
+    
     // Public interface that always returns all phases (with empty strings for missing ones)
     var phases: [Phase: String] {
         get {
@@ -104,13 +105,14 @@ class Message: ObservableObject, Identifiable, Equatable {
             }
 
             // Overlay with any actual content we have
-            result.merge(_phases) { _, new in new }
+            result.merge(phaseContent) { _, new in new }
 
             return result
         }
         set {
             // Using @Published means we don't need to manually notify observers
-            _phases = newValue
+            objectWillChange.send()
+            phaseContent = newValue
         }
     }
 
@@ -127,7 +129,14 @@ class Message: ObservableObject, Identifiable, Equatable {
         self.isStreaming = isStreaming
 
         // Initialize with all provided phases
-        self._phases = phases
+        self.phaseContent = phases
+        
+        // Pre-initialize all phases with empty strings
+        for phase in Phase.allCases {
+            if self.phaseContent[phase] == nil {
+                self.phaseContent[phase] = ""
+            }
+        }
     }
 
     // Equatable conformance
@@ -137,20 +146,13 @@ class Message: ObservableObject, Identifiable, Equatable {
 
     // Add explicit objectWillChange notifications for phase updates
     func updatePhase(_ phase: Phase, content: String) {
+        // Explicitly notify observers
         objectWillChange.send()
         
-        // Store the phase content
-        _phases[phase] = content
-
-        // Force SwiftUI to recognize deep changes
-        if !content.isEmpty {
-            let temp = _phases
-            _phases = [:]
-            _phases = temp
-        }
-
+        // Store the phase content in this message's dedicated dictionary
+        phaseContent[phase] = content
+        
         // Only update the main content if it's empty or a placeholder
-        // This prevents overwriting the main content with phase content from other messages
         if self.content.isEmpty || self.content == "..." {
             // For initial content, prioritize yield > experience > action
             if phase == .yield && !content.isEmpty {
@@ -161,9 +163,27 @@ class Message: ObservableObject, Identifiable, Equatable {
                 self.content = content
             }
         }
+        
+        print("Message \(id): Updated phase \(phase.rawValue) with content length: \(content.count)")
+    }
+    
+    // Get phase content for this specific message
+    func getPhaseContent(_ phase: Phase) -> String {
+        return phaseContent[phase] ?? ""
+    }
+    
+    // Clear all phases (for debugging/testing)
+    func clearPhases() {
+        objectWillChange.send()
+        phaseContent.removeAll()
+        
+        // Pre-initialize all phases with empty strings
+        for phase in Phase.allCases {
+            phaseContent[phase] = ""
+        }
     }
 }
-
+}
 // MARK: - API Models
 /// Simplified Prior model for display purposes only
 struct Prior: Codable, Hashable {
