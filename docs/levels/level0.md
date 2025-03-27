@@ -36,7 +36,7 @@ tree.md
 │   ├── Models
 │   │   └── ChoirModels.swift
 │   ├── Networking
-│   │   └── PostchainAPIClient.swift
+│   │   └── RESTPostchainAPIClient.swift
 │   ├── Preview Content
 │   │   └── Preview Assets.xcassets
 │   │       └── Contents.json
@@ -78,7 +78,7 @@ tree.md
 │   ├── APIResponseTests.swift
 │   ├── ChoirTests.swift
 │   ├── ChoirThreadTests.swift
-│   └── PostchainAPIClientTests.swift
+│   └── RESTPostchainAPIClientTests.swift
 ├── ChoirUITests
 │   ├── ChoirUITests.swift
 │   └── ChoirUITestsLaunchTests.swift

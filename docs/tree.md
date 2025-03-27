@@ -23,7 +23,7 @@
 │   ├── Models
 │   │   └── ChoirModels.swift
 │   ├── Networking
-│   │   └── PostchainAPIClient.swift
+│   │   └── RESTPostchainAPIClient.swift
 │   ├── Preview Content
 │   │   └── Preview Assets.xcassets
 │   │       └── Contents.json
@@ -65,7 +65,7 @@
 │   ├── APIResponseTests.swift
 │   ├── ChoirTests.swift
 │   ├── ChoirThreadTests.swift
-│   └── PostchainAPIClientTests.swift
+│   └── RESTPostchainAPIClientTests.swift
 ├── ChoirUITests
 │   ├── ChoirUITests.swift
 │   └── ChoirUITestsLaunchTests.swift
