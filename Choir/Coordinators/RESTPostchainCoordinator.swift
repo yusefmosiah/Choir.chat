@@ -3,7 +3,7 @@ import SwiftUI
 
 @MainActor
 class RESTPostchainCoordinator: PostchainCoordinator, ObservableObject {
-    private let api: PostchainAPIClient
+    private let api: RESTPostchainAPIClient
     private var streamTask: Task<Void, Error>?
 
     // Use @Published to ensure SwiftUI updates
@@ -11,6 +11,10 @@ class RESTPostchainCoordinator: PostchainCoordinator, ObservableObject {
     @Published private(set) var responses: [Phase: String] = [:]
     @Published private(set) var isProcessing = false
     @Published private(set) var processingPhases: Set<Phase> = []
+    
+    // Search results
+    @Published private(set) var webResults: [SearchResult] = []
+    @Published private(set) var vectorResults: [VectorSearchResult] = []
 
     // Always use streaming
     var isStreaming = true
@@ -25,7 +29,7 @@ class RESTPostchainCoordinator: PostchainCoordinator, ObservableObject {
     weak var viewModel: PostchainViewModel?
 
     required init() {
-        self.api = PostchainAPIClient()
+        self.api = RESTPostchainAPIClient()
 
         // Pre-initialize all phases with empty content to ensure cards are always displayed
         // This is critical for proper SwiftUI rendering
@@ -51,6 +55,8 @@ class RESTPostchainCoordinator: PostchainCoordinator, ObservableObject {
         isProcessing = true
         currentPhase = .action
         processingPhases = []
+        webResults = []
+        vectorResults = []
 
         // Pre-initialize phases with empty content to ensure cards are always displayed
         for phase in Phase.allCases {
@@ -59,11 +65,6 @@ class RESTPostchainCoordinator: PostchainCoordinator, ObservableObject {
 
         // Notify view model of initial state
         viewModel?.updateState()
-
-        // Get context at the start
-        let messages = thread?.messages.dropLast(2) ?? []
-        // Create contexts from messages (commenting out for now since MessageContext isn't found)
-        // let contexts = messages.map { MessageContext(from: $0) }
 
         // Create a streaming task
         isStreaming = true
@@ -74,17 +75,11 @@ class RESTPostchainCoordinator: PostchainCoordinator, ObservableObject {
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             // Store a reference to the task to enable cancellation
             self.streamTask = Task {
-                // Create a simple request body for the streaming API
-                let simpleBody = SimplePostchainRequestBody(
-                    userQuery: input,
-                    threadID: thread?.id.uuidString
-                )
-
-                // Set up streaming
-                self.api.streamPost(
-                    endpoint: "simple",
-                    body: simpleBody,
-                    onPhaseUpdate: { [weak self] phase, outputs in
+                // Set up streaming with the langchain endpoint
+                self.api.streamLangchain(
+                    query: input,
+                    threadId: thread?.id.uuidString ?? UUID().uuidString,
+                    onPhaseUpdate: { [weak self] phase, status, content, webResults, vectorResults in
                         guard let self = self else { return }
 
                         Task { @MainActor in
@@ -110,53 +105,42 @@ class RESTPostchainCoordinator: PostchainCoordinator, ObservableObject {
 
                             // Always update the current phase
                             self.currentPhase = phaseEnum
+                            
+                            // Store search results if available
+                            if let webResults = webResults {
+                                self.webResults = webResults
+                            }
+                            
+                            if let vectorResults = vectorResults {
+                                self.vectorResults = vectorResults
+                            }
 
-                            // Process all outputs with a consistent approach
-                            for (phaseKey, content) in outputs {
-                                print("🔄 Processing output for phase key: \(phaseKey) with content length: \(content.count)")
+                            // Only update if we have actual content
+                            if !content.isEmpty {
+                                print("🔄 Processing output for phase: \(phase) with content length: \(content.count)")
+                                
+                                // Update the view model directly with this phase
+                                // SwiftUI reactivity will handle the rest
+                                self.viewModel?.updatePhase(phaseEnum, state: status, content: content)
 
-                                // Use our smart Phase mapping to determine the phase
-                                guard let targetPhase = Phase.from(phaseKey) else {
-                                    print("⚠️ Unknown phase key: \(phaseKey)")
-                                    continue
-                                }
-
-                                // Special logging for experience phase
-                                if targetPhase == .experience && !content.isEmpty {
-                                    print("🔍 Experience phase content: \(content.prefix(30))...")
-                                }
-
-                                // Only update if we have actual content
-                                if !content.isEmpty {
-                                    // Update the view model directly with this phase
-                                    // SwiftUI reactivity will handle the rest
-                                    self.viewModel?.updatePhase(targetPhase, state: "streaming", content: content)
-
-                                    // Update our local responses dictionary
-                                    self.responses[targetPhase] = content
-                                }
-
+                                // Update our local responses dictionary
+                                self.responses[phaseEnum] = content
+                                
                                 // Update processing state
-                                self.processingPhases.insert(targetPhase)
+                                self.processingPhases.insert(phaseEnum)
 
                                 // Update the message in the thread directly
-                                self.updateMessageInThread(targetPhase, content: content)
+                                self.updateMessageInThread(phaseEnum, content: content)
+                            }
+                            
+                            // If phase is complete, remove it from processing phases
+                            if status == "complete" {
+                                self.processingPhases.remove(phaseEnum)
                             }
                         }
                     },
                     onComplete: {
                         Task { @MainActor in
-
-                            // Log the final state of responses
-
-                            // Log what's in action and experience phases
-                            if let actionContent = self.responses[.action] {
-                            }
-
-                            if let experienceContent = self.responses[.experience] {
-                            } else {
-                            }
-
                             // Mark processing as complete
                             self.processingPhases.removeAll()
                             self.isProcessing = false
@@ -227,7 +211,7 @@ class RESTPostchainCoordinator: PostchainCoordinator, ObservableObject {
             // Set streaming flag
             message.isStreaming = true
 
-            // Use the new helper method to update the phase
+            // Use the helper method to update the phase
             // This will automatically trigger SwiftUI updates through @Published
             message.updatePhase(phase, content: content)
 
@@ -244,5 +228,15 @@ class RESTPostchainCoordinator: PostchainCoordinator, ObservableObject {
             // Force SwiftUI to recognize changes in parent thread
             self.currentChoirThread?.objectWillChange.send()
         }
+    }
+    
+    // Helper to recover thread state
+    func recoverThread(threadId: String) async throws -> ThreadRecoveryResponse {
+        return try await api.recoverThread(threadId: threadId)
+    }
+    
+    // Helper to check API health
+    func checkHealth() async throws -> HealthCheckResponse {
+        return try await api.healthCheck()
     }
 }
