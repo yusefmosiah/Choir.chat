@@ -36,6 +36,7 @@
 │   │   └── PostchainViewModel.swift
 │   └── Views
 │       ├── ChoirThreadDetailView.swift
+│       ├── ExperienceSourcesView.swift
 │       ├── MessageRow.swift
 │       ├── PostchainView.swift
 │       ├── Thread
@@ -226,6 +227,7 @@
     ├── generate_quick_search_report.sh
     ├── generate_search_report.sh
     ├── generate_single_provider_report.sh
+    ├── sources_displaying.sh
     └── test_postchain_multiturn.sh
 
-59 directories, 167 files
+59 directories, 169 files

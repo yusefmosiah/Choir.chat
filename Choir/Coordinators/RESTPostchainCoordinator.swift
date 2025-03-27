@@ -11,7 +11,7 @@ class RESTPostchainCoordinator: PostchainCoordinator, ObservableObject {
     @Published private(set) var responses: [Phase: String] = [:]
     @Published private(set) var isProcessing = false
     @Published private(set) var processingPhases: Set<Phase> = []
-    
+
     // Search results
     @Published private(set) var webResults: [SearchResult] = []
     @Published private(set) var vectorResults: [VectorSearchResult] = []
@@ -105,12 +105,12 @@ class RESTPostchainCoordinator: PostchainCoordinator, ObservableObject {
 
                             // Always update the current phase
                             self.currentPhase = phaseEnum
-                            
+
                             // Store search results if available
                             if let webResults = webResults {
                                 self.webResults = webResults
                             }
-                            
+
                             if let vectorResults = vectorResults {
                                 self.vectorResults = vectorResults
                             }
@@ -118,21 +118,27 @@ class RESTPostchainCoordinator: PostchainCoordinator, ObservableObject {
                             // Only update if we have actual content
                             if !content.isEmpty {
                                 print("🔄 Processing output for phase: \(phase) with content length: \(content.count)")
-                                
-                                // Update the view model directly with this phase
-                                // SwiftUI reactivity will handle the rest
-                                self.viewModel?.updatePhase(phaseEnum, state: status, content: content)
 
-                                // Update our local responses dictionary
+                                // Update the view model directly with phase content AND results
+                                // SwiftUI reactivity will handle the rest
+                                self.viewModel?.updatePhaseData(
+                                    phase: phaseEnum,
+                                    status: status,
+                                    content: content,
+                                    webResults: self.webResults, // Pass stored results
+                                    vectorResults: self.vectorResults // Pass stored results
+                                )
+
+                                // Update our local responses dictionary (only text content)
                                 self.responses[phaseEnum] = content
-                                
+
                                 // Update processing state
                                 self.processingPhases.insert(phaseEnum)
 
                                 // Update the message in the thread directly
                                 self.updateMessageInThread(phaseEnum, content: content)
                             }
-                            
+
                             // If phase is complete, remove it from processing phases
                             if status == "complete" {
                                 self.processingPhases.remove(phaseEnum)
@@ -207,7 +213,7 @@ class RESTPostchainCoordinator: PostchainCoordinator, ObservableObject {
 
             // Get reference to the message (now an ObservableObject)
             let message = thread.messages[messageIndex]
-            
+
             // IMPORTANT: Only update the message that's currently being processed
             // This ensures each message maintains its own independent phases
             if message.id == activeMessageId {
@@ -233,12 +239,12 @@ class RESTPostchainCoordinator: PostchainCoordinator, ObservableObject {
             }
         }
     }
-    
+
     // Helper to recover thread state
     func recoverThread(threadId: String) async throws -> ThreadRecoveryResponse {
         return try await api.recoverThread(threadId: threadId)
     }
-    
+
     // Helper to check API health
     func checkHealth() async throws -> HealthCheckResponse {
         return try await api.healthCheck()

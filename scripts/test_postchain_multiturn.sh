@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # API endpoint URL
-API_URL="http://localhost:8000/api/postchain/langchain"
-
+# API_URL="http://localhost:8000/api/postchain/langchain"
+API_URL="https://choir-chat.onrender.com/api/postchain/langchain"
 # Generate a UUID for thread_id
 THREAD_ID=$(uuidgen)
 echo "THREAD_ID: $THREAD_ID"

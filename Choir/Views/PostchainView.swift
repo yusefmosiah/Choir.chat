@@ -3,19 +3,22 @@ import SwiftUI
 struct PostchainView: View {
     // Unique identifier for this view instance to prevent state sharing
     let viewId: UUID
-    
+
     // Reference to the specific message this view is displaying
     @ObservedObject var message: Message
-    
+
     // Processing state
     let isProcessing: Bool
-    
+
     // Drag state
     @State private var dragOffset: CGFloat = 0
-    
+
     // Track whether the view has appeared to prevent multiple initializations
     @State private var hasAppeared: Bool = false
-    
+
+    // ViewModel (passed down for ExperienceSourcesView)
+    @ObservedObject var viewModel: PostchainViewModel // Added viewModel
+
     // Computed property to get the selected phase from the message
     private var selectedPhase: Phase {
         get { message.selectedPhase }
@@ -27,19 +30,21 @@ struct PostchainView: View {
 
     // Optional coordinator to check processing status
     var coordinator: RESTPostchainCoordinator?
-    
+
     // Computed property to get phases directly from the message
     private var phases: [Phase: String] {
         return message.phases
     }
-    
-    init(message: Message, isProcessing: Bool, forceShowAllPhases: Bool = false, coordinator: RESTPostchainCoordinator? = nil, viewId: UUID = UUID()) {
+
+    // Updated initializer to accept viewModel
+    init(message: Message, isProcessing: Bool, viewModel: PostchainViewModel, forceShowAllPhases: Bool = false, coordinator: RESTPostchainCoordinator? = nil, viewId: UUID = UUID()) {
         self.message = message
         self.isProcessing = isProcessing
+        self.viewModel = viewModel // Initialize viewModel
         self.forceShowAllPhases = forceShowAllPhases
         self.coordinator = coordinator
         self.viewId = viewId
-        
+
         // Print debug info
         print("PostchainView initialized for message \(message.id) with \(message.phases.count) phases")
     }
@@ -66,7 +71,7 @@ struct PostchainView: View {
     var body: some View {
         // Force full content loading on appearance
         let _ = phases
-        
+
         GeometryReader { geometry in
             let cardWidth = geometry.size.width * 0.98
             let sideCardWidth = geometry.size.width * 0.1
@@ -76,11 +81,13 @@ struct PostchainView: View {
             ZStack {
                 // Only iterate through phases we should actually display
                 ForEach(availablePhases) { phase in
-                    PhaseCard(
+                    PhaseCard( // Pass viewModel here
                         phase: phase,
                         content: phases[phase] ?? "",
                         isSelected: phase == selectedPhase,
-                        isLoading: (phases[phase]?.isEmpty ?? true) && isProcessing
+                        isLoading: (phases[phase]?.isEmpty ?? true) && isProcessing,
+                        viewModel: viewModel, // Pass viewModel down
+                        messageId: message.id.uuidString // Pass messageId
                     )
                     .frame(width: cardWidth)
                     .offset(x: calculateOffset(for: phase, cardWidth: cardWidth, totalWidth: totalWidth))
@@ -135,11 +142,11 @@ struct PostchainView: View {
         .onAppear {
             // Log available phases on appear for debugging
             print("PostchainView onAppear for message \(message.id): \(availablePhases.count) phases available, hasAppeared: \(hasAppeared)")
-            
+
             // Set initial phase ONLY if this is the first time the view appears
             if !hasAppeared {
                 hasAppeared = true
-                
+
                 // Set initial phase only if we don't have a valid selection yet
                 if !availablePhases.contains(message.selectedPhase) && !availablePhases.isEmpty {
                     // Start with yield phase if available (most important), then experience, then action
@@ -163,7 +170,7 @@ struct PostchainView: View {
             } else {
                 print("PostchainView: View has already appeared, keeping selection: \(message.selectedPhase)")
             }
-            
+
             // Log available phases
             for phase in availablePhases {
                 if let content = phases[phase], !content.isEmpty {
@@ -260,54 +267,110 @@ struct PhaseCard: View {
     let isSelected: Bool
     var isLoading: Bool = false
     var priors: [Prior]? = nil
+    @ObservedObject var viewModel: PostchainViewModel
+    var messageId: String? // Add messageId parameter
+    
+    // --- Computed Properties for Styling ---
+    
+    private var cardBackgroundColor: Color {
+        phase == .yield ? Color.accentColor : Color(.systemBackground) // Use semantic color
+    }
+
+    private var primaryTextColor: Color {
+        phase == .yield ? .white : .primary
+    }
+
+    private var secondaryTextColor: Color {
+        phase == .yield ? .white.opacity(0.8) : .secondary
+    }
+
+    private var headerIconColor: Color {
+        phase == .yield ? .white : .accentColor
+    }
+
+    private var shadowOpacity: Double {
+        isSelected ? 0.2 : 0.1
+    }
+
+    private var shadowRadius: CGFloat {
+        isSelected ? 8 : 3
+    }
+
+    private var shadowYOffset: CGFloat {
+        isSelected ? 3 : 1
+    }
+
+    private var overlayStrokeColor: Color {
+        if isSelected {
+            return phase == .yield ? Color.white : Color.accentColor
+        } else {
+            return Color.gray.opacity(0.2)
+        }
+    }
+
+    private var overlayLineWidth: CGFloat {
+        isSelected ? 2 : 1
+    }
+
+    // --- Body ---
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            // Simplified header with just the icon and phase name
+            // Header
             HStack {
                 Image(systemName: phase.symbol)
                     .imageScale(.medium)
-                    .foregroundColor(phase == .yield ? .white : .accentColor)
+                    .foregroundColor(headerIconColor)
 
-                Text(phase.rawValue.capitalized) // Just use the phase name instead of description
+                Text(phase.rawValue.capitalized)
                     .font(.headline)
                     .fontWeight(.semibold)
-                    .foregroundColor(phase == .yield ? .white : .primary)
+                    .foregroundColor(primaryTextColor)
 
                 Spacer()
 
                 if isLoading {
                     ProgressView()
                         .scaleEffect(0.7)
+                        .tint(secondaryTextColor) // Ensure progress view matches text color
                 }
             }
             .padding(.bottom, 4)
 
+            // Content Area
             if let content = content, !content.isEmpty {
                 ScrollView {
-                    Text(content)
-                        .font(.body)
-                        .lineSpacing(5)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .foregroundColor(phase == .yield ? .white : .primary)
+                    if phase == .experience {
+                        // Pass viewModel and messageId to ensure each experience phase has independent state
+                        ExperienceSourcesView(viewModel: viewModel, messageId: messageId)
+                    } else {
+                        Text(content)
+                            .font(.body)
+                            .lineSpacing(5)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .foregroundColor(primaryTextColor)
+                    }
                 }
                 .frame(minHeight: 300) // Reduced height
             } else if isLoading {
+                // Loading State
                 VStack(spacing: 12) {
                     Spacer()
                     HStack {
                         Spacer()
                         ProgressView()
+                            .tint(secondaryTextColor) // Match text color
                         Text("Loading...")
-                            .foregroundColor(phase == .yield ? .white.opacity(0.8) : .secondary)
+                            .foregroundColor(secondaryTextColor)
                         Spacer()
                     }
                     Spacer()
                 }
                 .padding(.vertical, 20)
             } else {
+                // Empty State
                 Text("No content available")
-                    .foregroundColor(.secondary)
+                    .foregroundColor(.secondary) // Use standard secondary for empty state
                     .frame(maxWidth: .infinity, alignment: .center)
                     .padding(.vertical, 20)
             }
@@ -316,20 +379,15 @@ struct PhaseCard: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(
             RoundedRectangle(cornerRadius: 12)
-                .fill(phase == .yield
-                      ? Color.accentColor
-                      : Color(UIColor.systemBackground))
-                .shadow(color: Color.black.opacity(isSelected ? 0.2 : 0.1),
-                        radius: isSelected ? 8 : 3,
+                .fill(cardBackgroundColor)
+                .shadow(color: Color.black.opacity(shadowOpacity),
+                        radius: shadowRadius,
                         x: 0,
-                        y: isSelected ? 3 : 1)
+                        y: shadowYOffset)
         )
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-                .stroke(isSelected
-                        ? (phase == .yield ? Color.white : Color.accentColor)
-                        : Color.gray.opacity(0.2),
-                        lineWidth: isSelected ? 2 : 1)
+                .stroke(overlayStrokeColor, lineWidth: overlayLineWidth)
         )
         .padding(.horizontal, 4)
     }
@@ -381,7 +439,7 @@ struct PriorCard: View {
         .padding()
         .background(
             RoundedRectangle(cornerRadius: 12)
-                .fill(Color(UIColor.secondarySystemBackground))
+                .fill(Color(.secondarySystemBackground)) // Use semantic color
         )
         .overlay(
             RoundedRectangle(cornerRadius: 12)
@@ -405,20 +463,27 @@ struct PriorCard: View {
 }
 
 #Preview {
+    // Mock ViewModel for Preview
+    let previewViewModel = PostchainViewModel(coordinator: RESTPostchainCoordinator())
+    // Add mock data to previewViewModel if needed for ExperienceSourcesView
+    // previewViewModel.vectorSources = ["Mock Vector Source"]
+    // previewViewModel.webSearchSources = ["https://mock.web.source"]
+
     let testMessage = Message(
         content: "Test message content",
         isUser: false,
         phases: [
             .action: "I understand you said...",
-            .experience: "Based on my experience...",
+            .experience: "Based on my experience...", // Content for experience phase
             .intention: "Your intention seems to be...",
             .yield: "Here's my response..."
         ]
     )
-    
+
     return PostchainView(
         message: testMessage,
         isProcessing: true,
+        viewModel: previewViewModel, // Pass the mock viewModel
         forceShowAllPhases: true,
         viewId: UUID()
     )

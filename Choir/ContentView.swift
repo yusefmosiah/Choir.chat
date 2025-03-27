@@ -4,7 +4,6 @@
 //
 //  Created by Yusef Mosiah Nathanson on 11/9/24.
 //
-
 import SwiftUI
 
 struct ContentView: View {
@@ -26,12 +25,13 @@ struct ContentView: View {
             }
             .navigationTitle("ChoirThreads")
             .toolbar {
-                ToolbarItem(placement: .primaryAction) {
+                ToolbarItem(placement: .navigationBarTrailing) { // Explicit placement for the primary action
                     Button(action: createNewChoirThread) {
                         Label("New ChoirThread", systemImage: "plus")
                     }
                 }
-                ToolbarItem(placement: .navigationBarLeading) {
+
+                ToolbarItem(placement: .navigationBarLeading) { // Keep explicit placement for leading item
                     Button(action: { showingWallet = true }) {
                         Label("Wallet", systemImage: "wallet.pass")
                     }
@@ -45,18 +45,18 @@ struct ContentView: View {
                     Text("Choir")
                         .font(.largeTitle)
                         .bold()
-                    
+
                     Image("Icon-App-1024x1024")
                         .resizable()
                         .scaledToFit()
                         .frame(width: 200, height: 200)
                         .padding()
                         .opacity(0.7)
-                    
+
                     Text("Select a thread or create a new one")
                         .foregroundStyle(.secondary)
                         .padding(.top, 20)
-                    
+
                     Button(action: createNewChoirThread) {
                         Label("Create New Thread", systemImage: "plus.circle.fill")
                             .font(.headline)
@@ -68,7 +68,7 @@ struct ContentView: View {
                     .padding(.top, 10)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(Color(UIColor.systemBackground))
+                .background(Color.secondary.opacity(0.1))
             }
         }
         .sheet(isPresented: $showingWallet) {

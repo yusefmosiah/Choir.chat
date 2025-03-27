@@ -28,7 +28,7 @@ struct MessageRow: View {
                 .frame(maxWidth: .infinity, alignment: .trailing)
                 .background(Color.accentColor)
                 .foregroundColor(.white)
-                .cornerRadius(16)
+                .cornerRadius(16) // Use standard cornerRadius
                 .padding(.leading, 40)
             }
             // AI messages - directly show the chorus cycle
@@ -62,6 +62,7 @@ struct MessageRow: View {
                 PostchainView(
                     message: message,
                     isProcessing: isProcessing,
+                    viewModel: viewModel, // Pass viewModel
                     forceShowAllPhases: true,
                     coordinator: viewModel.coordinator as? RESTPostchainCoordinator,
                     viewId: message.id // Use message ID as the view ID for uniqueness
@@ -93,23 +94,38 @@ struct MessageRow: View {
     }
 }
 
-// Helper for custom corner radius
-extension View {
-    func cornerRadius(_ radius: CGFloat, corners: UIRectCorner) -> some View {
-        clipShape(RoundedCorner(radius: radius, corners: corners))
-    }
-}
+// Removed UIKit-dependent custom corner radius extension
 
-struct RoundedCorner: Shape {
-    var radius: CGFloat = .infinity
-    var corners: UIRectCorner = .allCorners
+#Preview {
+    // Mock ViewModel for Preview
+    let previewViewModel = PostchainViewModel(coordinator: RESTPostchainCoordinator())
+    // Add mock data if needed
+    // previewViewModel.vectorSources = ["Mock Vector Source"]
+    // previewViewModel.webSearchSources = ["https://mock.web.source"]
 
-    func path(in rect: CGRect) -> Path {
-        let path = UIBezierPath(
-            roundedRect: rect,
-            byRoundingCorners: corners,
-            cornerRadii: CGSize(width: radius, height: radius)
-        )
-        return Path(path.cgPath)
+    // Mock User Message
+    let userMessage = Message(
+        content: "This is a user message.",
+        isUser: true
+    )
+
+    // Mock AI Message with phases
+    let aiMessage = Message(
+        content: "This is the initial AI response.",
+        isUser: false,
+        phases: [
+            .action: "Action phase content.",
+            .experience: "Experience phase content.",
+            .yield: "Final yield content."
+        ]
+    )
+
+    return ScrollView { // Wrap in ScrollView for context
+        VStack {
+            MessageRow(message: userMessage, viewModel: previewViewModel)
+            MessageRow(message: aiMessage, isProcessing: true, viewModel: previewViewModel)
+            MessageRow(message: aiMessage, isProcessing: false, viewModel: previewViewModel)
+        }
+        .padding()
     }
 }

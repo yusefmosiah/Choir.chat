@@ -1,3 +1,25 @@
+enum APIError: Error {
+    case invalidURL
+    case invalidResponse
+    case decodingError
+    case encodingError
+    case networkError(Error)
+    case serverError(statusCode: Int)
+    case invalidEventData
+    case unknown
+}
+
+struct ServerSentEvent {
+    let id: String?
+    let event: String?
+    let data: String?
+    let retry: Int?
+}
+
+protocol SSEDelegate: AnyObject {
+    func didReceiveEvent(_ event: ServerSentEvent)
+    func didReceiveError(_ error: APIError)
+}
 import Foundation
 import SwiftUI
 
@@ -91,15 +113,15 @@ class Message: ObservableObject, Identifiable, Equatable {
     let isUser: Bool
     let timestamp: Date
     @Published var isStreaming: Bool
-    
+
     // Store the currently selected phase for this message
     // This ensures the selection persists even if the view is recreated
     @Published var selectedPhase: Phase = .action
-    
+
     // Each message has its own dedicated phase content dictionary
     // This ensures complete isolation between messages
     @Published private var phaseContent: [Phase: String] = [:]
-    
+
     // Public interface that always returns all phases (with empty strings for missing ones)
     var phases: [Phase: String] {
         get {
@@ -134,7 +156,7 @@ class Message: ObservableObject, Identifiable, Equatable {
 
         // Initialize with all provided phases
         self.phaseContent = phases
-        
+
         // Pre-initialize all phases with empty strings
         for phase in Phase.allCases {
             if self.phaseContent[phase] == nil {
@@ -152,10 +174,10 @@ class Message: ObservableObject, Identifiable, Equatable {
     func updatePhase(_ phase: Phase, content: String) {
         // Explicitly notify observers
         objectWillChange.send()
-        
+
         // Store the phase content in this message's dedicated dictionary
         phaseContent[phase] = content
-        
+
         // Only update the main content if it's empty or a placeholder
         if self.content.isEmpty || self.content == "..." {
             // For initial content, prioritize yield > experience > action
@@ -167,20 +189,19 @@ class Message: ObservableObject, Identifiable, Equatable {
                 self.content = content
             }
         }
-        
+
         print("Message \(id): Updated phase \(phase.rawValue) with content length: \(content.count)")
     }
-    
+
     // Get phase content for this specific message
     func getPhaseContent(_ phase: Phase) -> String {
         return phaseContent[phase] ?? ""
     }
-    
     // Clear all phases (for debugging/testing)
     func clearPhases() {
         objectWillChange.send()
         phaseContent.removeAll()
-        
+
         // Pre-initialize all phases with empty strings
         for phase in Phase.allCases {
             phaseContent[phase] = ""
@@ -346,8 +367,9 @@ struct AnyCodable: Codable {
             try container.encode(dictionary.mapValues { AnyCodable($0) })
         default:
             let context = EncodingError.Context(codingPath: container.codingPath,
-                                               debugDescription: "AnyCodable cannot encode \(type(of: value))")
+                                                debugDescription: "AnyCodable cannot encode \(type(of: value))")
             throw EncodingError.invalidValue(value, context)
         }
+
     }
 }
