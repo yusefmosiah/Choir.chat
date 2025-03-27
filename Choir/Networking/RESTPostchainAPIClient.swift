@@ -3,10 +3,11 @@ import SwiftUI
 
 // MARK: - REST Postchain API Client
 class RESTPostchainAPIClient {
-    #if DEBUG
+    #if DEBUG && targetEnvironment(simulator)
+    // Use localhost for simulator
     private let baseURL = "http://localhost:8000/api/postchain"
-    // private let baseURL = "https://choir-chat.onrender.com/api/postchain"
     #else
+    // Use public URL for physical devices and release builds
     private let baseURL = "https://choir-chat.onrender.com/api/postchain"
     #endif
     
@@ -27,6 +28,15 @@ class RESTPostchainAPIClient {
         
         encoder = JSONEncoder()
         encoder.keyEncodingStrategy = .convertToSnakeCase
+        
+        #if DEBUG
+        print("📱 RESTPostchainAPIClient initialized with baseURL: \(baseURL)")
+        #if targetEnvironment(simulator)
+        print("📱 Running in simulator")
+        #else
+        print("📱 Running on device")
+        #endif
+        #endif
     }
     
     // Regular POST request for non-streaming endpoints
@@ -86,7 +96,12 @@ class RESTPostchainAPIClient {
         onComplete: @escaping () -> Void,
         onError: @escaping (Error) -> Void
     ) {
+        #if DEBUG
+        print("📱 RESTPostchainAPIClient.streamLangchain called with query: \(query.prefix(20))..., threadId: \(threadId)")
+        #endif
+        
         guard let url = URL(string: "\(baseURL)/langchain") else {
+            print("❌ Invalid URL: \(baseURL)/langchain")
             onError(APIError.invalidURL)
             return
         }
@@ -113,13 +128,9 @@ class RESTPostchainAPIClient {
         let config = URLSessionConfiguration.default
         let delegateQueue = OperationQueue()
         delegateQueue.maxConcurrentOperationCount = 1
-        let session = URLSession(configuration: config, delegate: nil, delegateQueue: delegateQueue)
         
-        let task = session.dataTask(with: request)
-        
-        // Use a delegate with a reference to the onPhaseUpdate and onComplete callbacks
+        // Create the delegate first
         let sseDelegate = SSEDelegate(
-            dataTask: task,
             onEventReceived: { eventData in
                 if eventData == "[DONE]" {
                     DispatchQueue.main.async {
@@ -219,13 +230,21 @@ class RESTPostchainAPIClient {
             }
         )
         
-        // Keep a reference to the delegate
-        URLSession.shared.delegateQueue.addOperation {
-            task.delegate = sseDelegate
-        }
+        // Create a session with the delegate
+        let session = URLSession(configuration: config, delegate: sseDelegate, delegateQueue: delegateQueue)
         
-        // Start the streaming task
+        // Create and start the task
+        let task = session.dataTask(with: request)
+        
+        #if DEBUG
+        print("📱 Starting URLSession task for \(baseURL)/langchain")
+        #endif
+        
         task.resume()
+        
+        #if DEBUG
+        print("📱 URLSession task resumed")
+        #endif
     }
     
     // Recover thread state

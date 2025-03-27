@@ -55,19 +55,18 @@ struct MessageRow: View {
                 }
                 .padding(.horizontal)
 
-                // Postchain view
+                // Postchain view - pass the message directly
                 let isActive = message.id == viewModel.coordinator.activeMessageId
 
-                // Simplify phase handling
-                let finalPhases = message.phases.merging(viewModel.responses) { _, new in new }
-
+                // Use the message directly with the new PostchainView
                 PostchainView(
-                    phases: finalPhases,
+                    message: message,
                     isProcessing: isProcessing,
                     forceShowAllPhases: true,
-                    coordinator: viewModel.coordinator as? RESTPostchainCoordinator
+                    coordinator: viewModel.coordinator as? RESTPostchainCoordinator,
+                    viewId: message.id // Use message ID as the view ID for uniqueness
                 )
-                .id("postchain_\(message.id)_\(message.phases.hashValue)") // More reliable tracking
+                .id("postchain_\(message.id)_\(message.phases.hashValue)_\(UUID())") // Even more reliable tracking
                 .onAppear {
                     // Add additional logging about active phases on view appear
                     print("MessageRow.onAppear: Message \(message.id)")
@@ -86,10 +85,7 @@ struct MessageRow: View {
                 .padding(.trailing, 40)
             }
 
-            Text(message.timestamp, style: .time)
-                .font(.caption2)
-                .foregroundColor(.secondary)
-                .padding(.horizontal, 4)
+            // Timestamp removed to save space
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 4)

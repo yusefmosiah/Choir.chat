@@ -3,10 +3,11 @@ import SwiftUI
 
 // MARK: - Streaming API client
 class PostchainAPIClient {
-    #if DEBUG
+    #if DEBUG && targetEnvironment(simulator)
+    // Use localhost for simulator
     private let baseURL = "http://localhost:8000/api/postchain"
-    // private let baseURL = "https://choir-chat.onrender.com/api/postchain"
     #else
+    // Use public URL for physical devices and release builds
     private let baseURL = "https://choir-chat.onrender.com/api/postchain"
     #endif
 
@@ -27,6 +28,15 @@ class PostchainAPIClient {
 
         encoder = JSONEncoder()
         encoder.keyEncodingStrategy = .convertToSnakeCase
+        
+        #if DEBUG
+        print("📱 PostchainAPIClient initialized with baseURL: \(baseURL)")
+        #if targetEnvironment(simulator)
+        print("📱 Running in simulator")
+        #else
+        print("📱 Running on device")
+        #endif
+        #endif
     }
 
     // Regular POST request for non-streaming endpoints
@@ -113,13 +123,9 @@ class PostchainAPIClient {
         let config = URLSessionConfiguration.default
         let delegateQueue = OperationQueue()
         delegateQueue.maxConcurrentOperationCount = 1
-        let session = URLSession(configuration: config, delegate: nil, delegateQueue: delegateQueue)
-
-        let task = session.dataTask(with: request)
-
-        // Use a delegate with a reference to the onPhaseUpdate and onComplete callbacks
+        
+        // Create the delegate first
         let sseDelegate = SSEDelegate(
-            dataTask: task,
             onEventReceived: { eventData in
                 if eventData == "[DONE]" {
                     DispatchQueue.main.async {
@@ -187,12 +193,11 @@ class PostchainAPIClient {
             }
         )
 
-        // Keep a reference to the delegate
-        URLSession.shared.delegateQueue.addOperation {
-            task.delegate = sseDelegate
-        }
-
-        // Start the streaming task
+        // Create a session with the delegate
+        let session = URLSession(configuration: config, delegate: sseDelegate, delegateQueue: delegateQueue)
+        
+        // Create and start the task
+        let task = session.dataTask(with: request)
         task.resume()
     }
 
@@ -261,26 +266,30 @@ class PostchainAPIClient {
 
 // Helper class to process Server-Sent Events (SSE)
 class SSEDelegate: NSObject, URLSessionDataDelegate {
-    private var task: URLSessionDataTask
     private let onEventReceived: (String) -> Void
     private let onError: (Error) -> Void
     private var buffer = ""
 
-    init(dataTask: URLSessionDataTask, onEventReceived: @escaping (String) -> Void, onError: @escaping (Error) -> Void) {
-        self.task = dataTask
+    init(onEventReceived: @escaping (String) -> Void, onError: @escaping (Error) -> Void) {
         self.onEventReceived = onEventReceived
         self.onError = onError
         super.init()
     }
 
     func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
+        #if DEBUG
+        print("📱 SSEDelegate received data: \(data.count) bytes")
+        #endif
 
         guard let string = String(data: data, encoding: .utf8) else {
+            print("❌ SSEDelegate could not decode data as UTF-8")
             onError(APIError.decodingError(NSError(domain: "SSE", code: 0, userInfo: [NSLocalizedDescriptionKey: "Could not decode data as UTF-8"])))
             return
         }
 
-        // Debug the raw data
+        #if DEBUG
+        print("📱 SSEDelegate received string: \(string.prefix(50))...")
+        #endif
 
         // Append to the buffer
         buffer += string
@@ -293,14 +302,26 @@ class SSEDelegate: NSObject, URLSessionDataDelegate {
             // Process a complete SSE event
             if let dataLine = eventString.range(of: "data: ") {
                 let eventData = String(eventString[dataLine.upperBound...])
+                #if DEBUG
+                print("📱 SSEDelegate processing event: \(eventData.prefix(50))...")
+                #endif
                 onEventReceived(eventData)
+            } else {
+                #if DEBUG
+                print("⚠️ SSEDelegate received event without 'data:' prefix: \(eventString.prefix(50))...")
+                #endif
             }
         }
     }
 
     func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
         if let error = error {
+            print("❌ SSEDelegate task completed with error: \(error.localizedDescription)")
             onError(APIError.networkError(error))
+        } else {
+            #if DEBUG
+            print("📱 SSEDelegate task completed successfully")
+            #endif
         }
     }
 }
