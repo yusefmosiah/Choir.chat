@@ -5,17 +5,22 @@ struct PostchainView: View {
     let viewId: UUID
     
     // Reference to the specific message this view is displaying
-    let message: Message
+    @ObservedObject var message: Message
     
     // Processing state
     let isProcessing: Bool
     
-    // Selected phase state
-    @State private var selectedPhase: Phase = .action
+    // Drag state
     @State private var dragOffset: CGFloat = 0
     
     // Track whether the view has appeared to prevent multiple initializations
     @State private var hasAppeared: Bool = false
+    
+    // Computed property to get the selected phase from the message
+    private var selectedPhase: Phase {
+        get { message.selectedPhase }
+        set { message.selectedPhase = newValue }
+    }
 
     // Force showing all phases even when not processing
     var forceShowAllPhases: Bool = false
@@ -82,6 +87,13 @@ struct PostchainView: View {
                     .zIndex(phase == selectedPhase ? 1 : 0)
                     .opacity(calculateOpacity(for: phase))
                     .id("\(viewId)_\(phase.rawValue)_\(phases[phase]?.count ?? 0)") // Force redraw when content changes, include viewId for uniqueness
+                    .onTapGesture {
+                        // When a card is tapped, select it
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                            message.selectedPhase = phase
+                            print("PostchainView: User tapped to select phase: \(phase)")
+                        }
+                    }
                 }
             }
             .frame(height: geometry.size.height * 0.99) // Back to using full height
@@ -103,7 +115,7 @@ struct PostchainView: View {
 
                             if targetIndex >= 0 && targetIndex < availablePhases.count {
                                 withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                                    selectedPhase = availablePhases[targetIndex]
+                                    message.selectedPhase = availablePhases[targetIndex]
                                     dragOffset = 0
                                 }
                             } else {
@@ -129,27 +141,27 @@ struct PostchainView: View {
                 hasAppeared = true
                 
                 // Set initial phase only if we don't have a valid selection yet
-                if !availablePhases.contains(selectedPhase) && !availablePhases.isEmpty {
+                if !availablePhases.contains(message.selectedPhase) && !availablePhases.isEmpty {
                     // Start with yield phase if available (most important), then experience, then action
                     if availablePhases.contains(.yield) {
-                        selectedPhase = .yield
+                        message.selectedPhase = .yield
                         print("PostchainView: Initially selecting yield phase")
                     } else if availablePhases.contains(.experience) {
-                        selectedPhase = .experience
+                        message.selectedPhase = .experience
                         print("PostchainView: Initially selecting experience phase")
                     } else if availablePhases.contains(.action) {
-                        selectedPhase = .action
+                        message.selectedPhase = .action
                         print("PostchainView: Initially selecting action phase")
                     } else {
                         // Otherwise, select the first available phase
-                        selectedPhase = availablePhases.first ?? .action
-                        print("PostchainView: Initially selecting first available phase: \(selectedPhase)")
+                        message.selectedPhase = availablePhases.first ?? .action
+                        print("PostchainView: Initially selecting first available phase: \(message.selectedPhase)")
                     }
                 } else {
-                    print("PostchainView: Keeping current selection on first appear: \(selectedPhase)")
+                    print("PostchainView: Keeping current selection on first appear: \(message.selectedPhase)")
                 }
             } else {
-                print("PostchainView: View has already appeared, keeping selection: \(selectedPhase)")
+                print("PostchainView: View has already appeared, keeping selection: \(message.selectedPhase)")
             }
             
             // Log available phases
@@ -161,29 +173,10 @@ struct PostchainView: View {
                 }
             }
         }
-        // Use SwiftUI's natural reactivity for phase selection
-        .onChange(of: phases) { oldPhases, newPhases in
-            print("PostchainView phases changed: \(newPhases.count) phases for message \(message.id)")
-            
-            // IMPORTANT: NEVER auto-select a different phase when phases change
-            // This ensures we always respect the user's current selection
-            
-            // Only check if the current selection is still valid
-            if !availablePhases.isEmpty && !availablePhases.contains(selectedPhase) {
-                // Only in this extreme case (current selection is no longer available),
-                // select the first available phase
-                if let firstPhase = availablePhases.first {
-                    print("PostchainView: Current selection \(selectedPhase) no longer available, selecting first available: \(firstPhase)")
-                    selectedPhase = firstPhase
-                }
-            } else {
-                // ALWAYS keep the user's current selection when phases change
-                print("PostchainView: Phases changed but keeping user selection: \(selectedPhase)")
-            }
-            
-            // Log the available phases after the change
-            print("PostchainView: Available phases after change: \(availablePhases.map { $0.rawValue }.joined(separator: ", "))")
-        }
+        // IMPORTANT: We're NOT using onChange for phases anymore
+        // The selection is stored in the message object, so it persists
+        // even when the view is recreated
+        .id("postchain_view_\(message.id)_\(viewId)") // Stable ID to prevent recreation
     }
 
     private func calculateOffset(for phase: Phase, cardWidth: CGFloat, totalWidth: CGFloat) -> CGFloat {

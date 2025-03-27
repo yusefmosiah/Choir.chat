@@ -92,6 +92,10 @@ class Message: ObservableObject, Identifiable, Equatable {
     let timestamp: Date
     @Published var isStreaming: Bool
     
+    // Store the currently selected phase for this message
+    // This ensures the selection persists even if the view is recreated
+    @Published var selectedPhase: Phase = .action
+    
     // Each message has its own dedicated phase content dictionary
     // This ensures complete isolation between messages
     @Published private var phaseContent: [Phase: String] = [:]
