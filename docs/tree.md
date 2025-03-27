@@ -118,7 +118,6 @@
 │   ├── pyproject.toml
 │   ├── pytest.ini
 │   ├── requirements.txt
-│   ├── run_tests.sh
 │   └── tests
 │       ├── __init__.py
 │       ├── conftest.py
@@ -230,4 +229,4 @@
     ├── sources_displaying.sh
     └── test_postchain_multiturn.sh
 
-59 directories, 169 files
+59 directories, 168 files
