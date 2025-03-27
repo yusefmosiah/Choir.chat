@@ -261,13 +261,11 @@ class PostchainAPIClient {
 
 // Helper class to process Server-Sent Events (SSE)
 class SSEDelegate: NSObject, URLSessionDataDelegate {
-    private var task: URLSessionDataTask
     private let onEventReceived: (String) -> Void
     private let onError: (Error) -> Void
     private var buffer = ""
 
-    init(dataTask: URLSessionDataTask, onEventReceived: @escaping (String) -> Void, onError: @escaping (Error) -> Void) {
-        self.task = dataTask
+    init(onEventReceived: @escaping (String) -> Void, onError: @escaping (Error) -> Void) {
         self.onEventReceived = onEventReceived
         self.onError = onError
         super.init()
