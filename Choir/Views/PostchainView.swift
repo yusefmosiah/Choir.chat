@@ -13,6 +13,9 @@ struct PostchainView: View {
     // Selected phase state
     @State private var selectedPhase: Phase = .action
     @State private var dragOffset: CGFloat = 0
+    
+    // Track whether the view has appeared to prevent multiple initializations
+    @State private var hasAppeared: Bool = false
 
     // Force showing all phases even when not processing
     var forceShowAllPhases: Bool = false
@@ -119,7 +122,37 @@ struct PostchainView: View {
         }
         .onAppear {
             // Log available phases on appear for debugging
-            print("PostchainView onAppear: \(availablePhases.count) phases available")
+            print("PostchainView onAppear for message \(message.id): \(availablePhases.count) phases available, hasAppeared: \(hasAppeared)")
+            
+            // Set initial phase ONLY if this is the first time the view appears
+            if !hasAppeared {
+                hasAppeared = true
+                
+                // Set initial phase only if we don't have a valid selection yet
+                if !availablePhases.contains(selectedPhase) && !availablePhases.isEmpty {
+                    // Start with yield phase if available (most important), then experience, then action
+                    if availablePhases.contains(.yield) {
+                        selectedPhase = .yield
+                        print("PostchainView: Initially selecting yield phase")
+                    } else if availablePhases.contains(.experience) {
+                        selectedPhase = .experience
+                        print("PostchainView: Initially selecting experience phase")
+                    } else if availablePhases.contains(.action) {
+                        selectedPhase = .action
+                        print("PostchainView: Initially selecting action phase")
+                    } else {
+                        // Otherwise, select the first available phase
+                        selectedPhase = availablePhases.first ?? .action
+                        print("PostchainView: Initially selecting first available phase: \(selectedPhase)")
+                    }
+                } else {
+                    print("PostchainView: Keeping current selection on first appear: \(selectedPhase)")
+                }
+            } else {
+                print("PostchainView: View has already appeared, keeping selection: \(selectedPhase)")
+            }
+            
+            // Log available phases
             for phase in availablePhases {
                 if let content = phases[phase], !content.isEmpty {
                     print("  - Available: \(phase.rawValue) with content: \(content.prefix(20))...")
@@ -130,31 +163,26 @@ struct PostchainView: View {
         }
         // Use SwiftUI's natural reactivity for phase selection
         .onChange(of: phases) { oldPhases, newPhases in
-            print("PostchainView phases changed: \(newPhases.count) phases")
+            print("PostchainView phases changed: \(newPhases.count) phases for message \(message.id)")
             
-            // Only auto-select if this is the very first time phases are loaded and they were previously empty
-            // This ensures we only change the selection on initial load, not on subsequent updates
-            if oldPhases.isEmpty && !newPhases.isEmpty && selectedPhase == .action && !availablePhases.contains(selectedPhase) {
-                // Start with action phase by default, but only if we haven't selected a phase yet
-                if newPhases[.action] != nil {
-                    selectedPhase = .action
-                } else {
-                    // If action isn't available, select the first available phase
-                    selectedPhase = availablePhases.first ?? .action
+            // IMPORTANT: NEVER auto-select a different phase when phases change
+            // This ensures we always respect the user's current selection
+            
+            // Only check if the current selection is still valid
+            if !availablePhases.isEmpty && !availablePhases.contains(selectedPhase) {
+                // Only in this extreme case (current selection is no longer available),
+                // select the first available phase
+                if let firstPhase = availablePhases.first {
+                    print("PostchainView: Current selection \(selectedPhase) no longer available, selecting first available: \(firstPhase)")
+                    selectedPhase = firstPhase
                 }
-                
-                print("PostchainView auto-selected phase: \(selectedPhase)")
             } else {
-                // If the currently selected phase is not available anymore, select the first available phase
-                if !availablePhases.contains(selectedPhase) && !availablePhases.isEmpty {
-                    selectedPhase = availablePhases.first ?? .action
-                    print("PostchainView selected first available phase: \(selectedPhase)")
-                } else {
-                    // Otherwise, respect the user's current selection
-                    // This allows users to read at their own pace
-                    print("PostchainView keeping current selection: \(selectedPhase)")
-                }
+                // ALWAYS keep the user's current selection when phases change
+                print("PostchainView: Phases changed but keeping user selection: \(selectedPhase)")
             }
+            
+            // Log the available phases after the change
+            print("PostchainView: Available phases after change: \(availablePhases.map { $0.rawValue }.joined(separator: ", "))")
         }
     }
 
