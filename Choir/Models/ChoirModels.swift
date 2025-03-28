@@ -117,6 +117,9 @@ class Message: ObservableObject, Identifiable, Equatable {
     // Store the currently selected phase for this message
     // This ensures the selection persists even if the view is recreated
     @Published var selectedPhase: Phase = .action
+    
+    // Store the current page index (0-based) for each Phase
+    @Published var phaseCurrentPage: [Phase: Int] = [:]
 
     // Each message has its own dedicated phase content dictionary
     // This ensures complete isolation between messages
@@ -197,6 +200,23 @@ class Message: ObservableObject, Identifiable, Equatable {
     func getPhaseContent(_ phase: Phase) -> String {
         return phaseContent[phase] ?? ""
     }
+    
+    // Get the current page for a given phase
+    func currentPage(for phase: Phase) -> Int {
+        // Return stored page or default to 0
+        return phaseCurrentPage[phase, default: 0]
+    }
+    
+    // Set the current page for a given phase
+    func setCurrentPage(for phase: Phase, page: Int) {
+        let newPage = max(0, page) // Ensure page index is not negative
+        // Only update and notify if the value actually changes
+        if phaseCurrentPage[phase, default: 0] != newPage {
+            objectWillChange.send() // Explicitly notify observers before changing
+            phaseCurrentPage[phase] = newPage
+        }
+    }
+    
     // Clear all phases (for debugging/testing)
     func clearPhases() {
         objectWillChange.send()

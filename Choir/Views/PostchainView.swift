@@ -1,4 +1,5 @@
 import SwiftUI
+import Foundation
 
 struct PostchainView: View {
     // Unique identifier for this view instance to prevent state sharing
@@ -81,13 +82,13 @@ struct PostchainView: View {
             ZStack {
                 // Only iterate through phases we should actually display
                 ForEach(availablePhases) { phase in
-                    PhaseCard( // Pass viewModel here
+                    PhaseCard(
                         phase: phase,
-                        content: phases[phase] ?? "",
+                        message: message,
                         isSelected: phase == selectedPhase,
                         isLoading: (phases[phase]?.isEmpty ?? true) && isProcessing,
-                        viewModel: viewModel, // Pass viewModel down
-                        messageId: message.id.uuidString // Pass messageId
+                        viewModel: viewModel,
+                        messageId: message.id.uuidString
                     )
                     .frame(width: cardWidth)
                     .offset(x: calculateOffset(for: phase, cardWidth: cardWidth, totalWidth: totalWidth))
@@ -261,206 +262,6 @@ struct PostchainView: View {
     }
 }
 
-struct PhaseCard: View {
-    let phase: Phase
-    let content: String?
-    let isSelected: Bool
-    var isLoading: Bool = false
-    var priors: [Prior]? = nil
-    @ObservedObject var viewModel: PostchainViewModel
-    var messageId: String? // Add messageId parameter
-
-    // --- Computed Properties for Styling ---
-
-    private var cardBackgroundColor: Color {
-        phase == .yield ? Color.accentColor : Color(.systemBackground) // Use semantic color
-    }
-
-    private var primaryTextColor: Color {
-        phase == .yield ? .white : .primary
-    }
-
-    private var secondaryTextColor: Color {
-        phase == .yield ? .white.opacity(0.8) : .secondary
-    }
-
-    private var headerIconColor: Color {
-        phase == .yield ? .white : .accentColor
-    }
-
-    private var shadowOpacity: Double {
-        isSelected ? 0.2 : 0.1
-    }
-
-    private var shadowRadius: CGFloat {
-        isSelected ? 8 : 3
-    }
-
-    private var shadowYOffset: CGFloat {
-        isSelected ? 3 : 1
-    }
-
-    private var overlayStrokeColor: Color {
-        if isSelected {
-            return phase == .yield ? Color.white : Color.accentColor
-        } else {
-            return Color.gray.opacity(0.2)
-        }
-    }
-
-    private var overlayLineWidth: CGFloat {
-        isSelected ? 2 : 1
-    }
-
-    // --- Body ---
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            // Header
-            HStack {
-                Image(systemName: phase.symbol)
-                    .imageScale(.medium)
-                    .foregroundColor(headerIconColor)
-
-                Text(phase.rawValue.capitalized)
-                    .font(.headline)
-                    .fontWeight(.semibold)
-                    .foregroundColor(primaryTextColor)
-
-                Spacer()
-
-                if isLoading {
-                    ProgressView()
-                        .scaleEffect(0.7)
-                        .tint(secondaryTextColor) // Ensure progress view matches text color
-                }
-            }
-            .padding(.bottom, 4)
-
-            // Content Area
-            if let content = content, !content.isEmpty {
-                ScrollView {
-                    if phase == .experience {
-                        // Pass viewModel and messageId to ensure each experience phase has independent state
-                        ExperienceSourcesView(viewModel: viewModel, messageId: messageId)
-                    } else {
-                        Text(content)
-                            .font(.body)
-                            .lineSpacing(5)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .foregroundColor(primaryTextColor)
-                    }
-                }
-                // .frame(minHeight: 300) // Reduced height
-            } else if isLoading {
-                // Loading State
-                VStack(spacing: 12) {
-                    Spacer()
-                    HStack {
-                        Spacer()
-                        ProgressView()
-                            .tint(secondaryTextColor) // Match text color
-                        Text("Loading...")
-                            .foregroundColor(secondaryTextColor)
-                        Spacer()
-                    }
-                    Spacer()
-                }
-                .padding(.vertical, 20)
-            } else {
-                // Empty State
-                Text("No content available")
-                    .foregroundColor(.secondary) // Use standard secondary for empty state
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .padding(.vertical, 20)
-            }
-        }
-        .padding(12)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(cardBackgroundColor)
-                .shadow(color: Color.black.opacity(shadowOpacity),
-                        radius: shadowRadius,
-                        x: 0,
-                        y: shadowYOffset)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(overlayStrokeColor, lineWidth: overlayLineWidth)
-        )
-        .padding(.horizontal, 4)
-    }
-}
-
-struct PriorCard: View {
-    let prior: Prior
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Text("Prior ID: \(prior.id)")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-
-                Spacer()
-
-                Text("Similarity: \(Int(prior.similarity * 100))%")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
-
-            Text(prior.content)
-                .font(.body)
-                .lineLimit(3)
-
-            HStack {
-                if let threadID = prior.threadID {
-                    Text("Thread: \(threadID)")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-
-                Spacer()
-
-                if let step = prior.step {
-                    Text("Phase: \(step)")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-
-                if let createdAt = prior.createdAt {
-                    Text("Created: \(formattedDate(createdAt))")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
-            }
-        }
-        .padding()
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color(.secondarySystemBackground)) // Use semantic color
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(Color.gray.opacity(0.2), lineWidth: 1)
-        )
-    }
-
-    private func formattedDate(_ dateString: String) -> String {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
-
-        if let date = dateFormatter.date(from: dateString) {
-            let displayFormatter = DateFormatter()
-            displayFormatter.dateStyle = .short
-            displayFormatter.timeStyle = .short
-            return displayFormatter.string(from: date)
-        }
-
-        return dateString
-    }
-}
 
 #Preview {
     // Mock ViewModel for Preview

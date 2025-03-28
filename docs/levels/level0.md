@@ -51,7 +51,10 @@ tree.md
 │       ├── ChoirThreadDetailView.swift
 │       ├── ExperienceSourcesView.swift
 │       ├── MessageRow.swift
+│       ├── PaginatedTextView.swift
+│       ├── PhaseCard.swift
 │       ├── PostchainView.swift
+│       ├── PriorCard.swift
 │       ├── Thread
 │       │   └── Components
 │       │       ├── ThreadInputBar.swift
@@ -236,7 +239,7 @@ tree.md
     ├── sources_displaying.sh
     └── test_postchain_multiturn.sh
 
-59 directories, 162 files
+59 directories, 165 files
 
 === File: docs/CHANGELOG.md ===
 
