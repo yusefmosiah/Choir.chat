@@ -101,8 +101,10 @@ struct PostchainView: View {
                             print("PostchainView: User tapped to select phase: \(phase)")
                             
                             // Update the view model's current phase if this is the active message
-                            if let messageId = message.id.uuidString, messageId == viewModel.activeMessageId {
-                                viewModel.selectPhase(phase, for: messageId)
+                            if let message = message, 
+                               let messageIdStr = messageId,
+                               messageIdStr == viewModel.activeMessageId {
+                                viewModel.selectPhase(phase, for: messageIdStr)
                             }
                         }
                     }
@@ -132,8 +134,10 @@ struct PostchainView: View {
                                 }
                                 
                                 // Update the view model's current phase if this is the active message
-                                if let messageId = message.id.uuidString, messageId == viewModel.activeMessageId {
-                                    viewModel.selectPhase(availablePhases[targetIndex], for: messageId)
+                                if let message = message,
+                                   let messageIdStr = messageId,
+                                   messageIdStr == viewModel.activeMessageId {
+                                    viewModel.selectPhase(availablePhases[targetIndex], for: messageIdStr)
                                 }
                             } else {
                                 withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
@@ -389,8 +393,14 @@ struct PhaseCard: View {
                     } else {
                         PageView(
                             content: content,
-                            currentPage: $currentPage,
-                            totalPages: $totalPages,
+                            currentPage: Binding<Int>(
+                                get: { currentPage },
+                                set: { currentPage = $0 }
+                            ),
+                            totalPages: Binding<Int>(
+                                get: { totalPages },
+                                set: { totalPages = $0 }
+                            ),
                             textColor: primaryTextColor
                         )
                         .transition(.asymmetric(
@@ -444,8 +454,8 @@ struct PhaseCard: View {
                                 }
                                 
                                 // Also update the view model if this is the active message
-                                if let messageId = messageId, messageId == viewModel.activeMessageId {
-                                    viewModel.selectPhase(previousPhase, for: messageId)
+                                if let messageIdStr = messageId, messageIdStr == viewModel.activeMessageId {
+                                    viewModel.selectPhase(previousPhase, for: messageIdStr)
                                 }
                             }
                         }
@@ -479,8 +489,8 @@ struct PhaseCard: View {
                                 }
                                 
                                 // Also update the view model if this is the active message
-                                if let messageId = messageId, messageId == viewModel.activeMessageId {
-                                    viewModel.selectPhase(nextPhase, for: messageId)
+                                if let messageIdStr = messageId, messageIdStr == viewModel.activeMessageId {
+                                    viewModel.selectPhase(nextPhase, for: messageIdStr)
                                 }
                             }
                         }
