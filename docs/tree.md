@@ -141,7 +141,6 @@
 │           ├── __init__.py
 │           ├── direct_search_diagnostic.py
 │           ├── direct_search_test.py
-│           ├── run_tool_tests.py
 │           ├── test_brave_search.py
 │           ├── test_calculator.py
 │           ├── test_multimodel_with_tools.py
@@ -224,4 +223,4 @@
     ├── sources_displaying.sh
     └── test_postchain_multiturn.sh
 
-59 directories, 163 files
+59 directories, 162 files
