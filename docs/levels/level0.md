@@ -213,7 +213,6 @@ tree.md
 │   ├── plan_cadcad_modeling.md
 │   ├── plan_chip_materialization.md
 │   ├── plan_libsql.md
-│   ├── plan_postchain_data.md
 │   ├── postchain_temporal_logic.md
 │   ├── require_action_phase.md
 │   ├── require_experience_phase.md
@@ -243,7 +242,7 @@ tree.md
     ├── sources_displaying.sh
     └── test_postchain_multiturn.sh
 
-59 directories, 169 files
+59 directories, 168 files
 
 === File: docs/CHANGELOG.md ===
 
