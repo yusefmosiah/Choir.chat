@@ -45,7 +45,7 @@ async def run_action_phase(
     # A more robust approach might use specific prompt templates or message roles.
     last_message = messages[-1]
     if isinstance(last_message, HumanMessage):
-        action_query = f"<action_instruction>{action_instruction()}</action_instruction>\n\n{last_message.content}"
+        action_query = f"<action_instruction>{action_instruction(model_config)}</action_instruction>\n\n{last_message.content}"
         action_messages = [SystemMessage(content=COMMON_SYSTEM_PROMPT)] + messages[:-1] + [HumanMessage(content=action_query)]
     else:
         # Fallback if the last message isn't HumanMessage (shouldn't happen in normal flow)
@@ -100,7 +100,7 @@ async def run_experience_phase(
         logger.error("Could not find previous user query or action response for Experience phase.")
         return {"error": "Experience phase failed: Missing context."}
 
-    experience_query = f"""<experience_instruction>{experience_instruction()}</experience_instruction>
+    experience_query = f"""<experience_instruction>{experience_instruction(model_config)}</experience_instruction>
 
 Original Query: {last_user_msg.content}
 
@@ -274,7 +274,7 @@ async def run_intention_phase(
     logger.info(f"Running Intention phase with model: {model_config.provider}/{model_config.model_name}")
 
     # Prepare prompt - include full history
-    intention_query = f"<intention_instruction>{intention_instruction()}</intention_instruction>"
+    intention_query = f"<intention_instruction>{intention_instruction(model_config)}</intention_instruction>"
 
     intention_messages = [SystemMessage(content=COMMON_SYSTEM_PROMPT)] + messages + [HumanMessage(content=intention_query)]
 
@@ -313,7 +313,7 @@ async def run_observation_phase(
     logger.info(f"Running Observation phase with model: {model_config.provider}/{model_config.model_name}")
 
     # Prepare prompt - include full history
-    observation_query = f"<observation_instruction>{observation_instruction()}</observation_instruction>"
+    observation_query = f"<observation_instruction>{observation_instruction(model_config)}</observation_instruction>"
 
     observation_messages = [SystemMessage(content=COMMON_SYSTEM_PROMPT)] + messages + [HumanMessage(content=observation_query)]
     # Define the runnable chain for the observation phase
@@ -352,7 +352,7 @@ async def run_understanding_phase(
     logger.info(f"Running Understanding phase with model: {model_config.provider}/{model_config.model_name}")
 
     # Prepare prompt - include full history
-    understanding_query = f"<understanding_instruction>{understanding_instruction()}</understanding_instruction>"
+    understanding_query = f"<understanding_instruction>{understanding_instruction(model_config)}</understanding_instruction>"
 
     understanding_messages = [SystemMessage(content=COMMON_SYSTEM_PROMPT)] + messages + [HumanMessage(content=understanding_query)]
 
@@ -391,7 +391,7 @@ async def run_yield_phase(
     """Runs the Yield phase using LCEL."""
     logger.info(f"Running Yield phase with model: {model_config.provider}/{model_config.model_name}")
 
-    yield_query = f"<yield_instruction>{yield_instruction()}</yield_instruction>"
+    yield_query = f"<yield_instruction>{yield_instruction(model_config)}</yield_instruction>"
 
     # Include system prompt and relevant history (maybe just understanding?) for final response generation
     # For simplicity, using full history here, but could be optimized
