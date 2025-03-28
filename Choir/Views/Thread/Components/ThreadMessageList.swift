@@ -7,7 +7,7 @@ struct ThreadMessageList: View {
 
     var body: some View {
         ScrollView {
-            LazyVStack(alignment: .leading, spacing: 12) {
+            LazyVStack(alignment: .leading, spacing: 4) {
                 ForEach(messages) { message in
                     MessageRow(
                         message: message,

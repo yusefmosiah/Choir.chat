@@ -82,7 +82,7 @@ struct MessageRow: View {
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 4)
-        .padding(.bottom, 24)
+        .padding(.bottom, 8) // Reduced from 24 to 8
     }
 }
 
