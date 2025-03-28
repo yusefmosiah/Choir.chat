@@ -90,8 +90,38 @@ struct PhaseCard: View {
             if !content.isEmpty {
                 GeometryReader { geometry in
                     if phase == .experience {
-                        // Pass viewModel and messageId to ensure each experience phase has independent state
-                        ExperienceSourcesView(viewModel: viewModel, messageId: messageId)
+                        // Pass viewModel, messageId, and pagination properties to ExperienceSourcesView
+                        ExperienceSourcesView(
+                            viewModel: viewModel, 
+                            messageId: messageId,
+                            currentPage: pageBinding,
+                            onNavigateToPreviousPhase: {
+                                // Find previous available phase and select it
+                                if let phaseIndex = Phase.allCases.firstIndex(of: phase), 
+                                   phaseIndex > 0 {
+                                    let previousPhase = Phase.allCases[phaseIndex - 1]
+                                    // Set the last page of the previous phase
+                                    withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                                        message.selectedPhase = previousPhase
+                                        // Reset the current page to the last page of the previous phase
+                                        message.phaseCurrentPage[previousPhase] = 999 // Will be adjusted to max available
+                                    }
+                                }
+                            },
+                            onNavigateToNextPhase: {
+                                // Find next available phase and select it
+                                if let phaseIndex = Phase.allCases.firstIndex(of: phase), 
+                                   phaseIndex < Phase.allCases.count - 1 {
+                                    let nextPhase = Phase.allCases[phaseIndex + 1]
+                                    // Set the first page of the next phase
+                                    withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                                        message.selectedPhase = nextPhase
+                                        // Reset the current page to the first page of the next phase
+                                        message.phaseCurrentPage[nextPhase] = 0
+                                    }
+                                }
+                            }
+                        )
                     } else {
                         PaginatedTextView(
                             text: content,
@@ -106,8 +136,7 @@ struct PhaseCard: View {
                                     withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
                                         message.selectedPhase = previousPhase
                                         // Reset the current page to the last page of the previous phase
-                                        // Using a default high value that will be clamped to max available
-                                        message.phaseCurrentPage[previousPhase] = 999 // Will be adjusted to max available page
+                                        message.phaseCurrentPage[previousPhase] = 999 // Will be adjusted to max available
                                     }
                                 }
                             },
