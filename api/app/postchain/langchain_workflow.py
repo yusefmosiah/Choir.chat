@@ -502,8 +502,8 @@ async def run_langchain_postchain_workflow(
     # --- Hardcoded Model Sequence ---
     try:
         # Define model sequence per phase based on user specification
-        action_model_config = ModelConfig("google", "gemini-2.0-flash")
-        experience_model_config = ModelConfig("openai", "gpt-4o-mini")
+        action_model_config = ModelConfig("groq", "llama-3.1-8b-instant")
+        experience_model_config = ModelConfig("google", "gemini-2.0-flash")
         intention_model_config = ModelConfig("anthropic", "claude-3-5-haiku-latest")
         observation_model_config = ModelConfig("mistral", "mistral-small-latest")
         understanding_model_config = ModelConfig("groq", "qwen-qwq-32b")

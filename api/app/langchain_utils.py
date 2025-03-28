@@ -234,8 +234,8 @@ def get_model_provider(model_name: str) -> Tuple[str, str]:
         provider, clean_model_name = model_name.split("/", 1)
         return provider, clean_model_name
 
-    # Default to OpenAI if no prefix is provided
-    return "openai", model_name
+    # Default to "default" if no prefix is provided
+    return "default", model_name
 
 def get_base_model(model_name: str, config: Config) -> BaseChatModel:
     """

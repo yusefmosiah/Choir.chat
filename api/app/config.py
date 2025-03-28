@@ -94,6 +94,7 @@ class Config:
     GROQ_DEEPSEEK_R1_DISTILL_QWEN_32B: str = "deepseek-r1-distill-qwen-32b"
     GROQ_DEEPSEEK_R1_DISTILL_LLAMA_70B_SPECDEC: str = "deepseek-r1-distill-llama-70b-specdec"
     GROQ_DEEPSEEK_R1_DISTILL_LLAMA_70B: str = "deepseek-r1-distill-llama-70b"
+    GROQ_LLAMA_3_1_8B_INSTANT: str = "llama-3.1-8b-instant"
 
 
     TEMPERATURE: float = 0.7
