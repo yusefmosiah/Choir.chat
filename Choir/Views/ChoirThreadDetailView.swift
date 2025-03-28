@@ -4,21 +4,41 @@ struct ChoirThreadDetailView: View {
    let thread: ChoirThread
    @ObservedObject var viewModel: PostchainViewModel
    @State private var input = ""
+   @Namespace private var scrollSpace
+   @State private var lastMessageId: String? = nil
+   @State private var scrollToBottom = false
 
    var body: some View {
        VStack {
-           ScrollView {
-               LazyVStack(alignment: .leading, spacing: 12) {
-                   ForEach(thread.messages) { message in
-                       MessageRow(
-                           message: message,
-                           isProcessing: message == thread.messages.last && viewModel.isProcessing,
-                           viewModel: viewModel
-                       )
-                       // Let SwiftUI handle the updates naturally
+           ScrollViewReader { scrollProxy in
+               ScrollView {
+                   LazyVStack(alignment: .leading, spacing: 12) {
+                       ForEach(thread.messages) { message in
+                           MessageRow(
+                               message: message,
+                               isProcessing: message == thread.messages.last && viewModel.isProcessing,
+                               viewModel: viewModel
+                           )
+                           .id(message.id)
+                       }
+                       Color.clear
+                           .frame(height: 1)
+                           .id("bottomScrollAnchor")
+                   }
+                   .padding()
+               }
+               .onChange(of: thread.messages.count) { _, _ in
+                   withAnimation(.easeOut(duration: 0.3)) {
+                       scrollProxy.scrollTo("bottomScrollAnchor", anchor: .bottom)
                    }
                }
-               .padding()
+               .onChange(of: viewModel.responses) { _, _ in
+                   if let lastMessage = thread.messages.last, !lastMessage.isUser {
+                       withAnimation(.easeOut(duration: 0.3)) {
+                           scrollProxy.scrollTo("bottomScrollAnchor", anchor: .bottom)
+                       }
+                   }
+               }
            }
 
            HStack {
@@ -36,7 +56,7 @@ struct ChoirThreadDetailView: View {
                    Button("Send") {
                        guard !input.isEmpty else { return }
                        let messageContent = input
-                       input = "" // Clear input immediately
+                       input = "" 
 
                        Task {
                            await sendMessage(messageContent)
@@ -55,28 +75,22 @@ struct ChoirThreadDetailView: View {
 
    private func sendMessage(_ content: String) async {
        do {
-           // Set the current thread in the coordinator
            if let restCoordinator = viewModel.coordinator as? RESTPostchainCoordinator {
                restCoordinator.currentChoirThread = thread
            }
 
-           // Add user message
            let userMessage = Message(
                content: content,
                isUser: true
            )
            thread.messages.append(userMessage)
 
-           // Add placeholder AI message with pre-initialized phases
-           // This ensures all phase cards are properly rendered from the start
            var emptyPhases: [Phase: String] = [:]
            
-           // Initialize all possible phases to ensure cards render properly
            for phase in Phase.allCases {
                emptyPhases[phase] = ""
            }
            
-           // Create the message with pre-initialized phases
            var placeholderMessage = Message(
                content: "...",
                isUser: false,
@@ -84,31 +98,19 @@ struct ChoirThreadDetailView: View {
                isStreaming: true
            )
            
-           // Add it to the thread
            thread.messages.append(placeholderMessage)
            
-           // Add a proper observer using @ObservedObject to automatically update when viewModel changes
-           // The @ObservedObject on the viewModel parameter ensures this happens automatically now
-
-           // Process the input and keep track of responses
            try await viewModel.process(content)
            
-           // Update the placeholder message with the final response
            if let lastIndex = thread.messages.indices.last {
-               // Get the message (now an ObservableObject)
                let message = thread.messages[lastIndex]
                
-               // Get all phases from the viewModel
                let allPhases = viewModel.responses
                
-               // Mark as no longer streaming
                message.isStreaming = false
                
-               // Update all phases from the viewModel
-               // This will automatically trigger SwiftUI updates
                message.phases = allPhases
                
-               // Update the displayed content based on available phases
                if let experienceContent = allPhases[.experience], !experienceContent.isEmpty {
                    message.content = experienceContent
                } else if let actionContent = allPhases[.action], !actionContent.isEmpty {
@@ -116,12 +118,10 @@ struct ChoirThreadDetailView: View {
                }
            }
        } catch {
-           // Handle errors appropriately
            print("Error processing message: \(error)")
        }
    }
    
-   // Clean up when the view disappears
    private func cleanup() {
        // No more timers to cleanup
    }
