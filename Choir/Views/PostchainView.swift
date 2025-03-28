@@ -47,6 +47,11 @@ struct PostchainView: View {
 
         // Print debug info
         print("PostchainView initialized for message \(message.id) with \(message.phases.count) phases")
+        
+        // Debug: Check if the message is in the coordinator's messages array
+        let messageExists = viewModel.coordinator.messages.contains(where: { $0.id == message.id })
+        print("Message \(message.id) exists in coordinator's messages array: \(messageExists)")
+        print("Total messages in coordinator: \(viewModel.coordinator.messages.count)")
     }
 
     // Computed property to get available phases in order
@@ -291,8 +296,11 @@ struct PhaseCard: View {
         if let messageId = messageId, let uuid = UUID(uuidString: messageId) {
             // Try to find the message in the view model
             // This is a simplified approach - in a real app, you'd have a more direct way to access the message
-            return viewModel.coordinator.messages.first(where: { $0.id == uuid })
+            let foundMessage = viewModel.coordinator.messages.first(where: { $0.id == uuid })
+            print("PhaseCard: Looking for message with ID \(uuid), found: \(foundMessage != nil)")
+            return foundMessage
         }
+        print("PhaseCard: No valid messageId provided")
         return nil
     }
     
@@ -393,26 +401,35 @@ struct PhaseCard: View {
                                 removal: .move(edge: currentPage == 0 ? .leading : .trailing)
                             ))
                     } else {
-                        PageView(
-                            content: content,
-                            currentPage: Binding<Int>(
-                                get: { self.currentPage },
-                                set: { newValue in
-                                    if let message = self.message {
-                                        message.setCurrentPage(newValue, for: self.phase)
+                        // Fallback to direct text display if there's an issue with the message
+                        if message == nil {
+                            Text(content)
+                                .font(.body)
+                                .lineSpacing(5)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .foregroundColor(primaryTextColor)
+                        } else {
+                            PageView(
+                                content: content,
+                                currentPage: Binding<Int>(
+                                    get: { self.currentPage },
+                                    set: { newValue in
+                                        if let message = self.message {
+                                            message.setCurrentPage(newValue, for: self.phase)
+                                        }
                                     }
-                                }
-                            ),
-                            totalPages: Binding<Int>(
-                                get: { self.totalPages },
-                                set: { newValue in
-                                    if let message = self.message {
-                                        message.setTotalPages(newValue, for: self.phase)
+                                ),
+                                totalPages: Binding<Int>(
+                                    get: { self.totalPages },
+                                    set: { newValue in
+                                        if let message = self.message {
+                                            message.setTotalPages(newValue, for: self.phase)
+                                        }
                                     }
-                                }
-                            ),
-                            textColor: primaryTextColor
-                        )
+                                ),
+                                textColor: primaryTextColor
+                            )
+                        }
                         .transition(.asymmetric(
                             insertion: .move(edge: currentPage == 0 ? .trailing : .leading),
                             removal: .move(edge: currentPage == 0 ? .leading : .trailing)
@@ -445,86 +462,91 @@ struct PhaseCard: View {
             
             // Page navigation controls
             if let content = content, !content.isEmpty, phase != .experience {
-                HStack {
-                    Spacer()
-                    
-                    // Previous page or previous phase
-                    Button(action: {
-                        if currentPage > 0 {
-                            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                                if let message = message {
-                                    message.setCurrentPage(currentPage - 1, for: phase)
+                // Only show page navigation if we have a valid message or if we're in fallback mode
+                if message != nil || totalPages > 1 {
+                    HStack {
+                        Spacer()
+                        
+                        // Previous page or previous phase
+                        Button(action: {
+                            if currentPage > 0 {
+                                withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                                    if let message = message {
+                                        message.setCurrentPage(currentPage - 1, for: phase)
+                                    }
                                 }
-                            }
-                        } else if let previousPhaseIndex = Phase.allCases.firstIndex(of: phase), 
-                                  previousPhaseIndex > 0 {
-                            let previousPhase = Phase.allCases[previousPhaseIndex - 1]
-                            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                                // Update the message's selected phase
-                                if let message = message {
-                                    message.selectedPhase = previousPhase
-                                }
-                                
-                                // Also update the view model if this is the active message
-                                if let message = message {
-                                    let messageIdStr = message.id.uuidString
-                                    if messageIdStr == viewModel.activeMessageId {
-                                        viewModel.selectPhase(previousPhase, for: messageIdStr)
+                            } else if let previousPhaseIndex = Phase.allCases.firstIndex(of: phase), 
+                                      previousPhaseIndex > 0 {
+                                let previousPhase = Phase.allCases[previousPhaseIndex - 1]
+                                withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                                    // Update the message's selected phase
+                                    if let message = message {
+                                        message.selectedPhase = previousPhase
+                                        
+                                        // Also update the view model if this is the active message
+                                        let messageIdStr = message.id.uuidString
+                                        if messageIdStr == viewModel.activeMessageId {
+                                            viewModel.selectPhase(previousPhase, for: messageIdStr)
+                                        }
+                                    } else {
+                                        // Fallback for when message is nil
+                                        viewModel.setCurrentPhase(previousPhase)
                                     }
                                 }
                             }
+                        }) {
+                            Image(systemName: "chevron.left")
+                                .foregroundColor(primaryTextColor.opacity(currentPage > 0 ? 1.0 : 0.5))
+                                .padding(8)
+                                .background(Circle().fill(primaryTextColor.opacity(0.1)))
                         }
-                    }) {
-                        Image(systemName: "chevron.left")
-                            .foregroundColor(primaryTextColor.opacity(currentPage > 0 ? 1.0 : 0.5))
-                            .padding(8)
-                            .background(Circle().fill(primaryTextColor.opacity(0.1)))
-                    }
-                    .disabled(currentPage == 0 && Phase.allCases.firstIndex(of: phase) == 0)
-                    
-                    // Page indicator
-                    Text("\(currentPage + 1) / \(max(totalPages, 1))")
-                        .font(.caption)
-                        .foregroundColor(primaryTextColor)
-                        .padding(.horizontal, 8)
-                    
-                    // Next page or next phase
-                    Button(action: {
-                        if currentPage < totalPages - 1 {
-                            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                                if let message = message {
-                                    message.setCurrentPage(currentPage + 1, for: phase)
+                        .disabled(currentPage == 0 && Phase.allCases.firstIndex(of: phase) == 0)
+                        
+                        // Page indicator
+                        Text("\(currentPage + 1) / \(max(totalPages, 1))")
+                            .font(.caption)
+                            .foregroundColor(primaryTextColor)
+                            .padding(.horizontal, 8)
+                        
+                        // Next page or next phase
+                        Button(action: {
+                            if currentPage < totalPages - 1 {
+                                withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                                    if let message = message {
+                                        message.setCurrentPage(currentPage + 1, for: phase)
+                                    }
                                 }
-                            }
-                        } else if let nextPhaseIndex = Phase.allCases.firstIndex(of: phase), 
-                                  nextPhaseIndex < Phase.allCases.count - 1 {
-                            let nextPhase = Phase.allCases[nextPhaseIndex + 1]
-                            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                                // Update the message's selected phase
-                                if let message = message {
-                                    message.selectedPhase = nextPhase
-                                }
-                                
-                                // Also update the view model if this is the active message
-                                if let message = message {
-                                    let messageIdStr = message.id.uuidString
-                                    if messageIdStr == viewModel.activeMessageId {
-                                        viewModel.selectPhase(nextPhase, for: messageIdStr)
+                            } else if let nextPhaseIndex = Phase.allCases.firstIndex(of: phase), 
+                                      nextPhaseIndex < Phase.allCases.count - 1 {
+                                let nextPhase = Phase.allCases[nextPhaseIndex + 1]
+                                withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                                    // Update the message's selected phase
+                                    if let message = message {
+                                        message.selectedPhase = nextPhase
+                                        
+                                        // Also update the view model if this is the active message
+                                        let messageIdStr = message.id.uuidString
+                                        if messageIdStr == viewModel.activeMessageId {
+                                            viewModel.selectPhase(nextPhase, for: messageIdStr)
+                                        }
+                                    } else {
+                                        // Fallback for when message is nil
+                                        viewModel.setCurrentPhase(nextPhase)
                                     }
                                 }
                             }
+                        }) {
+                            Image(systemName: "chevron.right")
+                                .foregroundColor(primaryTextColor.opacity(currentPage < totalPages - 1 ? 1.0 : 0.5))
+                                .padding(8)
+                                .background(Circle().fill(primaryTextColor.opacity(0.1)))
                         }
-                    }) {
-                        Image(systemName: "chevron.right")
-                            .foregroundColor(primaryTextColor.opacity(currentPage < totalPages - 1 ? 1.0 : 0.5))
-                            .padding(8)
-                            .background(Circle().fill(primaryTextColor.opacity(0.1)))
+                        .disabled(currentPage == totalPages - 1 && Phase.allCases.firstIndex(of: phase) == Phase.allCases.count - 1)
+                        
+                        Spacer()
                     }
-                    .disabled(currentPage == totalPages - 1 && Phase.allCases.firstIndex(of: phase) == Phase.allCases.count - 1)
-                    
-                    Spacer()
+                    .padding(.top, 8)
                 }
-                .padding(.top, 8)
             }
         }
         .padding(12)
@@ -543,10 +565,18 @@ struct PhaseCard: View {
         )
         .padding(.horizontal, 4)
         .onAppear {
+            // Debug the message state
+            print("PhaseCard.onAppear for phase \(phase.rawValue): message is \(message != nil ? "available" : "nil")")
+            
             // Only reset to first page when the card first appears
             // This ensures we maintain page state during re-renders
-            if let message = message, message.getCurrentPage(for: phase) == 0 {
-                message.setCurrentPage(0, for: phase)
+            if let message = message {
+                if message.getCurrentPage(for: phase) == 0 {
+                    message.setCurrentPage(0, for: phase)
+                }
+                print("PhaseCard.onAppear: Current page for \(phase.rawValue) is \(message.getCurrentPage(for: phase))")
+            } else {
+                print("PhaseCard.onAppear: No message available, using default page state")
             }
         }
     }
