@@ -269,9 +269,9 @@ struct PhaseCard: View {
     var priors: [Prior]? = nil
     @ObservedObject var viewModel: PostchainViewModel
     var messageId: String? // Add messageId parameter
-    
+
     // --- Computed Properties for Styling ---
-    
+
     private var cardBackgroundColor: Color {
         phase == .yield ? Color.accentColor : Color(.systemBackground) // Use semantic color
     }
@@ -351,7 +351,7 @@ struct PhaseCard: View {
                             .foregroundColor(primaryTextColor)
                     }
                 }
-                .frame(minHeight: 300) // Reduced height
+                // .frame(minHeight: 300) // Reduced height
             } else if isLoading {
                 // Loading State
                 VStack(spacing: 12) {

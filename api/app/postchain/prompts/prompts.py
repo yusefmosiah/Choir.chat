@@ -1,11 +1,5 @@
 from datetime import datetime
 
-def common_system_prompt(model_config=None):
-    return f"""Timestamp: {datetime.now().isoformat()}
-You are a helpful AI assistant for Choir's PostChain system.
-You provide thoughtful and informative responses to user queries.
-"""
-
 def action_instruction(model_config):
     return f"""Timestamp: {datetime.now().isoformat()}
 For this Action phase:

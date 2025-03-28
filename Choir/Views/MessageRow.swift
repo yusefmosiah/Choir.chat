@@ -35,14 +35,6 @@ struct MessageRow: View {
             else {
                 // Header with AI icon
                 HStack {
-                    Image(systemName: "person.circle.fill")
-                        .foregroundColor(.accentColor)
-                        .opacity(0.8)
-
-                    Text("AI Assistant")
-                        .font(.headline)
-                        .foregroundColor(.primary)
-
                     Spacer()
 
                     if isProcessing {
@@ -94,7 +86,7 @@ struct MessageRow: View {
     }
 }
 
-// Removed UIKit-dependent custom corner radius extension
+
 
 #Preview {
     // Mock ViewModel for Preview
