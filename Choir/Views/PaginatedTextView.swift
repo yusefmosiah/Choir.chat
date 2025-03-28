@@ -5,6 +5,10 @@ struct PaginatedTextView: View {
     let availableSize: CGSize
     @Binding var currentPage: Int
     
+    // Add callbacks for phase navigation
+    var onNavigateToPreviousPhase: (() -> Void)?
+    var onNavigateToNextPhase: (() -> Void)?
+    
     // Internal state
     @State private var pages: [String] = [""]
     @State private var totalPages: Int = 1
@@ -22,26 +26,28 @@ struct PaginatedTextView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             
-            Spacer()
-            
-            // Page controls
+            // Page controls - reduced vertical padding and made more compact
             HStack {
                 Button(action: {
                     if currentPage > 0 {
                         currentPage -= 1
+                    } else if let navigateToPrevious = onNavigateToPreviousPhase {
+                        // If on first page, navigate to previous phase
+                        navigateToPrevious()
                     }
                 }) {
                     Image(systemName: "chevron.left")
-                        .imageScale(.medium)
-                        .padding(8)
+                        .imageScale(.small)
+                        .padding(4) // Reduced padding
                 }
-                .disabled(currentPage <= 0)
-                .foregroundColor(currentPage <= 0 ? .gray : .accentColor)
+                // Only disable if on first page AND no previous phase callback
+                .disabled(currentPage <= 0 && onNavigateToPreviousPhase == nil)
+                .foregroundColor(currentPage <= 0 && onNavigateToPreviousPhase == nil ? .gray : .accentColor)
                 
                 Spacer()
                 
                 Text("Page \(currentPage + 1) of \(totalPages)")
-                    .font(.caption)
+                    .font(.caption2) // Smaller font
                     .foregroundColor(.secondary)
                 
                 Spacer()
@@ -49,20 +55,25 @@ struct PaginatedTextView: View {
                 Button(action: {
                     if currentPage < totalPages - 1 {
                         currentPage += 1
+                    } else if let navigateToNext = onNavigateToNextPhase {
+                        // If on last page, navigate to next phase
+                        navigateToNext()
                     }
                 }) {
                     Image(systemName: "chevron.right")
-                        .imageScale(.medium)
-                        .padding(8)
+                        .imageScale(.small)
+                        .padding(4) // Reduced padding
                 }
-                .disabled(currentPage >= totalPages - 1)
-                .foregroundColor(currentPage >= totalPages - 1 ? .gray : .accentColor)
+                // Only disable if on last page AND no next phase callback
+                .disabled(currentPage >= totalPages - 1 && onNavigateToNextPhase == nil)
+                .foregroundColor(currentPage >= totalPages - 1 && onNavigateToNextPhase == nil ? .gray : .accentColor)
             }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 8)
+            .padding(.horizontal, 8) // Reduced horizontal padding
+            .padding(.vertical, 4) // Reduced vertical padding
             .background(Color(.secondarySystemBackground).opacity(0.6))
             .cornerRadius(8)
-            .padding(.bottom, 8)
+            .padding(.bottom, 2) // Reduced bottom padding to position closer to the bottom
+            .padding(.top, 4) // Added small top padding to separate from content
         }
         .onAppear {
             recalculatePages()
