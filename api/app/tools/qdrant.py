@@ -5,6 +5,7 @@ allowing models to search for semantically similar content and store new informa
 """
 
 import uuid
+import logging
 from typing import Dict, List, Optional, Any
 
 from langchain_core.tools import tool
@@ -15,6 +16,9 @@ from app.database import DatabaseClient
 # Get database client
 config = Config()
 db_client = DatabaseClient(config)
+
+# Configure logging
+logger = logging.getLogger("qdrant_tool")
 
 
 @tool
@@ -42,16 +46,22 @@ async def qdrant_search(query: str, collection: str = None, limit: int = 5) -> s
     # Search for similar vectors
     results = await db_client.search_vectors(query_vector, limit=limit)
 
-    if not results:
+
+    #deduplicate results by content using comprehension
+    unique_results = [r for i, r in enumerate(results) if i == 0 or r["content"] != results[i - 1]["content"]]
+
+    if not unique_results:
         return f"No semantically similar information found for: '{query}'"
 
     # Format results
     formatted_results = "Found semantically similar information:\n\n"
-    for i, result in enumerate(results, 1):
+
+    for i, result in enumerate(unique_results, 1):
         content = result.get("content", "No content")
         score = result.get("score", 0)
         formatted_results += f"{i}. (Score: {score:.2f}) {content}\n\n"
 
+    logger.info(f"FFFFormatted results: {formatted_results}")
     return formatted_results
 
 
