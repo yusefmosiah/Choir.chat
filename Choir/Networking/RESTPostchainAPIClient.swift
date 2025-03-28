@@ -1,5 +1,4 @@
 import Foundation
-import Choir
 import SwiftUI
 
 // MARK: - REST Postchain API Client

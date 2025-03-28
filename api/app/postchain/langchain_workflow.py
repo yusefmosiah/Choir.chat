@@ -12,6 +12,7 @@ from app.config import Config
 from app.langchain_utils import post_llm, ModelConfig
 from app.postchain.schemas.state import PostChainState, ExperiencePhaseOutput, SearchResult, VectorSearchResult # Import new schemas
 from app.postchain.utils import format_stream_event #, save_state, recover_state # Removed state management utils
+from app.postchain.prompts.prompts import action_instruction, experience_instruction, intention_instruction, understanding_instruction, observation_instruction, yield_instruction
 
 # Langchain Tool Imports (Example)
 from app.tools.brave_search import BraveSearchTool
@@ -20,68 +21,12 @@ from app.tools.qdrant import qdrant_search # Import the specific tool function
 # Configure logging
 logger = logging.getLogger("postchain_langchain")
 
-# --- Prompts (Reused from simple_graph.py) ---
-
-COMMON_SYSTEM_PROMPT = """You are a helpful AI assistant for Choir's PostChain system.
-You provide thoughtful and informative responses to user queries.
+COMMON_SYSTEM_PROMPT = """You are representing Choir's PostChain, in which many different AI models collaborate to provide an improvisational, dynamic, and contextually rich response in a single harmonized voice.
 """
 
 # --- In-memory state store (replace with persistent store later) ---
 conversation_history_store: Dict[str, List[BaseMessage]] = {}
 
-ACTION_INSTRUCTION = """For this Action phase:
-Your task is to provide a clear, informative initial response based on the user's query.
-Do not use external tools or references at this stage - just respond with your best knowledge.
-Keep your response concise and focused on the core question.
-
-Your initial response is the first packet in a wave of ai responses, the Choir's Postchain.
-Subsequent responses will come from different AI models, with different capabilities, each adding their unique perspective and insights, all continuing the same voice and flow.
-
-"""
-
-EXPERIENCE_INSTRUCTION = """For this Experience phase:
-Review the user's query and the initial action response.
-Your task is to provide a live integration with the global state of the world, adding deeper context and exploring salient concepts.
-You have access to the following tools:
-- BraveSearchTool: Use this for general web searches to find recent information or broader context.
-- QdrantSearchTool: Use this to search the internal knowledge base for relevant past conversations or documents.
-Use these tools *eagerly* to gather external information or internal knowledge relevant to the query and initial response.
-Continue flowing with the same voice as the previous phase, action.
-"""
-
-INTENTION_INSTRUCTION = """For this Intention phase:
-Review the conversation history, including the user query, action response, and experience analysis.
-Your task is to identify the user's underlying goal or intention.
-Summarize the refined intention clearly. Consider if the goal is simple or complex.
-If the goal seems unclear or ambiguous, state that and suggest potential clarifications.
-Continue flowing with the same voice as the previous phase, experience.
-"""
-
-OBSERVATION_INSTRUCTION = """For this Observation phase:
-Review the entire conversation history, including the identified intention.
-Your task is to identify key concepts, entities, and potential semantic connections or relationships within the conversation.
-Summarize these observations. Note any important entities or concepts that should be remembered or linked for future reference.
-Do not generate a response to the user, focus solely on observing and summarizing connections.
-Continue flowing with the same voice as the previous phase, intention.
-"""
-
-UNDERSTANDING_INSTRUCTION = """For this Understanding phase:
-Review the entire conversation history, including all previous phase outputs (Action, Experience, Intention, Observation).
-Your task is to synthesize the information and decide what is most relevant to retain for the final response or next steps.
-Filter out less relevant details or tangential information identified in previous phases.
-Summarize the core understanding derived from the conversation so far.
-Do not generate a response to the user, focus on synthesizing and filtering the context.
-Continue flowing with the same voice as the previous phase, observation.
-"""
-
-YIELD_INSTRUCTION = """For this Yield phase:
-Review the synthesized understanding from the previous phase.
-Your task is to generate the final, user-facing response based on this understanding.
-Ensure the response is coherent, addresses the user's original query and refined intention, and incorporates relevant context gathered throughout the process.
-
-Your response is the final packet in the wave of ai responses, the Choir's Postchain.
-Continue flowing with the same voice as the previous phase, understanding.
-"""
 
 # --- Phase Implementations using LCEL ---
 
@@ -98,7 +43,7 @@ async def run_action_phase(
     # A more robust approach might use specific prompt templates or message roles.
     last_message = messages[-1]
     if isinstance(last_message, HumanMessage):
-        action_query = f"<action_instruction>{ACTION_INSTRUCTION}</action_instruction>\n\n{last_message.content}"
+        action_query = f"<action_instruction>{action_instruction()}</action_instruction>\n\n{last_message.content}"
         action_messages = [SystemMessage(content=COMMON_SYSTEM_PROMPT)] + messages[:-1] + [HumanMessage(content=action_query)]
     else:
         # Fallback if the last message isn't HumanMessage (shouldn't happen in normal flow)
@@ -153,7 +98,7 @@ async def run_experience_phase(
         logger.error("Could not find previous user query or action response for Experience phase.")
         return {"error": "Experience phase failed: Missing context."}
 
-    experience_query = f"""<experience_instruction>{EXPERIENCE_INSTRUCTION}</experience_instruction>
+    experience_query = f"""<experience_instruction>{experience_instruction()}</experience_instruction>
 
 Original Query: {last_user_msg.content}
 
@@ -327,7 +272,7 @@ async def run_intention_phase(
     logger.info(f"Running Intention phase with model: {model_config.provider}/{model_config.model_name}")
 
     # Prepare prompt - include full history
-    intention_query = f"<intention_instruction>{INTENTION_INSTRUCTION}</intention_instruction>\n\nReview the conversation history and identify the user's intention."
+    intention_query = f"<intention_instruction>{intention_instruction()}</intention_instruction>"
 
     intention_messages = [SystemMessage(content=COMMON_SYSTEM_PROMPT)] + messages + [HumanMessage(content=intention_query)]
 
@@ -366,7 +311,7 @@ async def run_observation_phase(
     logger.info(f"Running Observation phase with model: {model_config.provider}/{model_config.model_name}")
 
     # Prepare prompt - include full history
-    observation_query = f"<observation_instruction>{OBSERVATION_INSTRUCTION}</observation_instruction>\n\nReview the conversation history and summarize key observations and connections."
+    observation_query = f"<observation_instruction>{observation_instruction()}</observation_instruction>"
 
     observation_messages = [SystemMessage(content=COMMON_SYSTEM_PROMPT)] + messages + [HumanMessage(content=observation_query)]
     # Define the runnable chain for the observation phase
@@ -405,7 +350,7 @@ async def run_understanding_phase(
     logger.info(f"Running Understanding phase with model: {model_config.provider}/{model_config.model_name}")
 
     # Prepare prompt - include full history
-    understanding_query = f"<understanding_instruction>{UNDERSTANDING_INSTRUCTION}</understanding_instruction>\n\nReview the conversation history and provide a synthesized understanding, filtering irrelevant details."
+    understanding_query = f"<understanding_instruction>{understanding_instruction()}</understanding_instruction>"
 
     understanding_messages = [SystemMessage(content=COMMON_SYSTEM_PROMPT)] + messages + [HumanMessage(content=understanding_query)]
 
@@ -444,17 +389,7 @@ async def run_yield_phase(
     """Runs the Yield phase using LCEL."""
     logger.info(f"Running Yield phase with model: {model_config.provider}/{model_config.model_name}")
 
-    # Prepare prompt - include full history, focusing on the understanding synthesis
-    last_understanding_msg = next((m for m in reversed(messages) if m.additional_kwargs.get("phase") == "understanding"), None) # Assuming phase is stored in kwargs
-    if not last_understanding_msg:
-         # Fallback: use the last AI message if understanding phase marker isn't found reliably
-         last_understanding_msg = next((m for m in reversed(messages) if isinstance(m, AIMessage)), None)
-
-    if not last_understanding_msg:
-        logger.error("Could not find previous understanding response for Yield phase.")
-        return {"error": "Yield phase failed: Missing context."}
-
-    yield_query = f"<yield_instruction>{YIELD_INSTRUCTION}</yield_instruction>\n\nSynthesized Understanding:\n{last_understanding_msg.content}\n\nGenerate the final user-facing response."
+    yield_query = f"<yield_instruction>{yield_instruction()}</yield_instruction>"
 
     # Include system prompt and relevant history (maybe just understanding?) for final response generation
     # For simplicity, using full history here, but could be optimized
