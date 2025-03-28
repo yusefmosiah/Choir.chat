@@ -101,10 +101,11 @@ struct PostchainView: View {
                             print("PostchainView: User tapped to select phase: \(phase)")
                             
                             // Update the view model's current phase if this is the active message
-                            if let message = message, 
-                               let messageIdStr = messageId,
-                               messageIdStr == viewModel.activeMessageId {
-                                viewModel.selectPhase(phase, for: messageIdStr)
+                            if let message = message {
+                                let messageIdStr = message.id.uuidString
+                                if messageIdStr == viewModel.activeMessageId {
+                                    viewModel.selectPhase(phase, for: messageIdStr)
+                                }
                             }
                         }
                     }
@@ -134,10 +135,11 @@ struct PostchainView: View {
                                 }
                                 
                                 // Update the view model's current phase if this is the active message
-                                if let message = message,
-                                   let messageIdStr = messageId,
-                                   messageIdStr == viewModel.activeMessageId {
-                                    viewModel.selectPhase(availablePhases[targetIndex], for: messageIdStr)
+                                if let message = message {
+                                    let messageIdStr = message.id.uuidString
+                                    if messageIdStr == viewModel.activeMessageId {
+                                        viewModel.selectPhase(availablePhases[targetIndex], for: messageIdStr)
+                                    }
                                 }
                             } else {
                                 withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
@@ -394,12 +396,20 @@ struct PhaseCard: View {
                         PageView(
                             content: content,
                             currentPage: Binding<Int>(
-                                get: { currentPage },
-                                set: { currentPage = $0 }
+                                get: { self.currentPage },
+                                set: { newValue in
+                                    if let message = self.message {
+                                        message.setCurrentPage(newValue, for: self.phase)
+                                    }
+                                }
                             ),
                             totalPages: Binding<Int>(
-                                get: { totalPages },
-                                set: { totalPages = $0 }
+                                get: { self.totalPages },
+                                set: { newValue in
+                                    if let message = self.message {
+                                        message.setTotalPages(newValue, for: self.phase)
+                                    }
+                                }
                             ),
                             textColor: primaryTextColor
                         )
@@ -442,7 +452,9 @@ struct PhaseCard: View {
                     Button(action: {
                         if currentPage > 0 {
                             withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                                currentPage -= 1
+                                if let message = message {
+                                    message.setCurrentPage(currentPage - 1, for: phase)
+                                }
                             }
                         } else if let previousPhaseIndex = Phase.allCases.firstIndex(of: phase), 
                                   previousPhaseIndex > 0 {
@@ -454,8 +466,11 @@ struct PhaseCard: View {
                                 }
                                 
                                 // Also update the view model if this is the active message
-                                if let messageIdStr = messageId, messageIdStr == viewModel.activeMessageId {
-                                    viewModel.selectPhase(previousPhase, for: messageIdStr)
+                                if let message = message {
+                                    let messageIdStr = message.id.uuidString
+                                    if messageIdStr == viewModel.activeMessageId {
+                                        viewModel.selectPhase(previousPhase, for: messageIdStr)
+                                    }
                                 }
                             }
                         }
@@ -477,7 +492,9 @@ struct PhaseCard: View {
                     Button(action: {
                         if currentPage < totalPages - 1 {
                             withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                                currentPage += 1
+                                if let message = message {
+                                    message.setCurrentPage(currentPage + 1, for: phase)
+                                }
                             }
                         } else if let nextPhaseIndex = Phase.allCases.firstIndex(of: phase), 
                                   nextPhaseIndex < Phase.allCases.count - 1 {
@@ -489,8 +506,11 @@ struct PhaseCard: View {
                                 }
                                 
                                 // Also update the view model if this is the active message
-                                if let messageIdStr = messageId, messageIdStr == viewModel.activeMessageId {
-                                    viewModel.selectPhase(nextPhase, for: messageIdStr)
+                                if let message = message {
+                                    let messageIdStr = message.id.uuidString
+                                    if messageIdStr == viewModel.activeMessageId {
+                                        viewModel.selectPhase(nextPhase, for: messageIdStr)
+                                    }
                                 }
                             }
                         }
@@ -526,7 +546,7 @@ struct PhaseCard: View {
             // Only reset to first page when the card first appears
             // This ensures we maintain page state during re-renders
             if let message = message, message.getCurrentPage(for: phase) == 0 {
-                currentPage = 0
+                message.setCurrentPage(0, for: phase)
             }
         }
     }
