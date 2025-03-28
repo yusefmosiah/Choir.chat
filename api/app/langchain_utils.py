@@ -138,6 +138,7 @@ def get_tool_compatible_models(config: Config) -> Dict[str, List[str]]:
         "groq": [
             config.GROQ_QWEN_QWQ_32B,
             config.GROQ_DEEPSEEK_R1_DISTILL_LLAMA_70B,
+            config.GROQ_LLAMA_3_1_8B_INSTANT
         ]
     }
 

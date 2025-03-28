@@ -34,22 +34,19 @@ Your task is to provide a clear, informative initial response based on the user'
 Do not use external tools or references at this stage - just respond with your best knowledge.
 Keep your response concise and focused on the core question.
 
-IMPORTANT: When responding to follow-up questions or references to previous parts of the conversation,
-you MUST explicitly reference the content from previous messages. For example, if the user asks
-"What was that number you mentioned earlier?", you should recall and specifically include
-the exact number from your previous messages.
+Your initial response is the first packet in a wave of ai responses, the Choir's Postchain.
+Subsequent responses will come from different AI models, with different capabilities, each adding their unique perspective and insights, all continuing the same voice and flow.
 
-Always maintain context continuity between conversation turns.
 """
 
 EXPERIENCE_INSTRUCTION = """For this Experience phase:
 Review the user's query and the initial action response.
-Your task is to provide a reflective analysis of the action response, adding deeper context and exploring related concepts.
-Consider different angles or interpretations of the query that might not have been addressed in the initial response.
+Your task is to provide a live integration with the global state of the world, adding deeper context and exploring salient concepts.
 You have access to the following tools:
 - BraveSearchTool: Use this for general web searches to find recent information or broader context.
 - QdrantSearchTool: Use this to search the internal knowledge base for relevant past conversations or documents.
-Use these tools *only if necessary* to gather external information or internal knowledge relevant to the query and initial response.
+Use these tools *eagerly* to gather external information or internal knowledge relevant to the query and initial response.
+Continue flowing with the same voice as the previous phase, action.
 """
 
 INTENTION_INSTRUCTION = """For this Intention phase:
@@ -57,6 +54,7 @@ Review the conversation history, including the user query, action response, and 
 Your task is to identify the user's underlying goal or intention.
 Summarize the refined intention clearly. Consider if the goal is simple or complex.
 If the goal seems unclear or ambiguous, state that and suggest potential clarifications.
+Continue flowing with the same voice as the previous phase, experience.
 """
 
 OBSERVATION_INSTRUCTION = """For this Observation phase:
@@ -64,6 +62,7 @@ Review the entire conversation history, including the identified intention.
 Your task is to identify key concepts, entities, and potential semantic connections or relationships within the conversation.
 Summarize these observations. Note any important entities or concepts that should be remembered or linked for future reference.
 Do not generate a response to the user, focus solely on observing and summarizing connections.
+Continue flowing with the same voice as the previous phase, intention.
 """
 
 UNDERSTANDING_INSTRUCTION = """For this Understanding phase:
@@ -72,13 +71,16 @@ Your task is to synthesize the information and decide what is most relevant to r
 Filter out less relevant details or tangential information identified in previous phases.
 Summarize the core understanding derived from the conversation so far.
 Do not generate a response to the user, focus on synthesizing and filtering the context.
+Continue flowing with the same voice as the previous phase, observation.
 """
 
 YIELD_INSTRUCTION = """For this Yield phase:
 Review the synthesized understanding from the previous phase.
 Your task is to generate the final, user-facing response based on this understanding.
 Ensure the response is coherent, addresses the user's original query and refined intention, and incorporates relevant context gathered throughout the process.
-Format the response clearly for the user. Decide if the process is complete or needs another cycle (for this simplified workflow, assume completion).
+
+Your response is the final packet in the wave of ai responses, the Choir's Postchain.
+Continue flowing with the same voice as the previous phase, understanding.
 """
 
 # --- Phase Implementations using LCEL ---
@@ -499,15 +501,19 @@ async def run_langchain_postchain_workflow(
     """
     logger.info(f"Starting Langchain PostChain workflow for thread {thread_id}")
 
-    # --- Hardcoded Model Sequence ---
+    # --- Model Configuration (Prioritize Overrides) ---
     try:
-        # Define model sequence per phase based on user specification
-        action_model_config = ModelConfig("groq", "llama-3.1-8b-instant")
-        experience_model_config = ModelConfig("google", "gemini-2.0-flash")
-        intention_model_config = ModelConfig("anthropic", "claude-3-5-haiku-latest")
-        observation_model_config = ModelConfig("mistral", "mistral-small-latest")
-        understanding_model_config = ModelConfig("groq", "qwen-qwq-32b")
-        yield_model_config = ModelConfig("openai", "o3-mini")
+        # Use override if provided, otherwise use default
+        action_model_config = action_mc_override if action_mc_override else ModelConfig("groq", "llama-3.1-8b-instant")
+        experience_model_config = experience_mc_override if experience_mc_override else ModelConfig("google", "gemini-2.0-flash")
+        intention_model_config = intention_mc_override if intention_mc_override else ModelConfig("anthropic", "claude-3-5-haiku-latest")
+        observation_model_config = observation_mc_override if observation_mc_override else ModelConfig("mistral", "mistral-small-latest")
+        understanding_model_config = understanding_mc_override if understanding_mc_override else ModelConfig("groq", "qwen-qwq-32b")
+        yield_model_config = yield_mc_override if yield_mc_override else ModelConfig("openai", "o3-mini")
+
+        # Log the final model configuration being used for this run
+        logger.info(f"Workflow Models - Action: {action_model_config}, Experience: {experience_model_config}, Intention: {intention_model_config}, Observation: {observation_model_config}, Understanding: {understanding_model_config}, Yield: {yield_model_config}")
+
     except Exception as e:
         logger.error(f"Failed to initialize models: {e}")
         yield {"error": f"Model initialization failed: {e}"}
