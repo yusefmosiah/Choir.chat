@@ -1,126 +1,119 @@
-# Blockchain Integration in Choir: Dedicated Blockchain Service Server with MCP
+# Blockchain Integration in Choir (Qdrant-Sui MVP)
+
+VERSION blockchain_integration: 8.0 (Qdrant-Sui MVP Focus)
 
 ## Overview
 
-This document outlines the blockchain integration strategy for Choir, now implemented with a dedicated **Blockchain Service Server** within the Model Context Protocol (MCP) architecture. This revised approach enhances modularity, security, and maintainability by centralizing all blockchain interactions within a single, TEE-protected MCP server.
+This document outlines the blockchain integration strategy for the Choir Qdrant-Sui MVP. This approach centralizes blockchain interactions within the main Python API backend, specifically using a dedicated service module (`sui_service.py`) to interact with the Sui blockchain via the PySUI SDK.
 
-## Core Blockchain Integration Goals (No Changes)
+## Core Blockchain Integration Goals
 
-The core goals of blockchain integration remain the same:
+The core goals of blockchain integration for the MVP and beyond remain:
 
-1.  **Immutable Record of Economic Actions:**  Utilize the Sui blockchain to create an immutable and transparent record of key economic events within Choir, such as token rewards, stake transactions, and governance decisions.
-2.  **Decentralized and Verifiable Token Economy:**  Implement the CHIP token economy using Sui smart contracts, enabling decentralized token distribution, governance, and value exchange.
-3.  **Secure and Transparent Reward Distribution:**  Ensure that CHIP token rewards for novelty and citations are distributed fairly, transparently, and verifiably on-chain.
-4.  **Enable On-Chain Governance:**  Empower CHIP token holders to participate in the decentralized governance of the Choir platform through on-chain voting and proposal mechanisms.
+1.  **Immutable Record of Economic Actions:** Utilize the Sui blockchain for a transparent record of key economic events, primarily simplified token rewards for the MVP.
+2.  **Decentralized and Verifiable Token Economy:** Implement the basic CHIP token using a Sui smart contract (`choir_coin.move`).
+3.  **Secure and Transparent Reward Distribution:** Ensure that CHIP token rewards (simplified for MVP) are distributed verifiably on-chain.
+4.  **(Future)** Enable On-Chain Governance: Lay the groundwork for future on-chain governance by CHIP token holders.
 
-## Revised Blockchain Integration Architecture: Dedicated Blockchain Service Server
+## MVP Blockchain Integration Architecture: Centralized API Service
 
-In the MCP architecture, blockchain integration is now handled by a **dedicated Blockchain Service Server**, which acts as the *sole interface* between the Choir platform and the Sui blockchain.
+In the Qdrant-Sui MVP architecture, blockchain integration is handled by the **Python API backend** via its `sui_service.py` module. This service acts as the *sole interface* between the Choir application logic and the Sui blockchain.
 
-**Key Components of the Revised Architecture:**
+**Key Components:**
 
-*   **Blockchain Service Server (New MCP Server):**
-    *   **Dedicated MCP Server:** A new, specialized MCP server is introduced, specifically designed to handle all blockchain interactions.
-    *   **PySUI Integration (Encapsulated):** The PySUI SDK for interacting with the Sui blockchain is *exclusively integrated within this server*. No other phase servers or the Host application directly include PySUI.
-    *   **TEE Deployment (Phala Network):** The Blockchain Service Server is deployed within a Phala Network Trusted Execution Environment (TEE), ensuring the secure isolation and protection of Sui private keys.
-    *   **MCP Tool Provider:** The Blockchain Service Server exposes MCP tools that encapsulate various blockchain operations (recording citations, fetching thread state, transferring tokens, etc.).
+*   **Python API Backend (FastAPI/Uvicorn):**
+    *   **Orchestrates Workflow:** Manages the PostChain workflow execution.
+    *   **Contains Blockchain Logic:** Includes the `sui_service.py` module responsible for all Sui interactions.
+    *   **Triggers Rewards:** After the PostChain workflow completes (Yield phase), the API calls functions within `sui_service.py` to process rewards based on data stored in Qdrant.
 
-*   **MCP Phase Servers (Action, Experience, Yield, etc.):**
-    *   **No Direct Blockchain Interaction:** Phase servers (Action, Experience, Yield, Intention, Observation, Understanding) **no longer directly interact with the Sui blockchain or PySUI.**
-    *   **Blockchain Interaction via MCP Tools:** When phase servers need to perform blockchain operations (e.g., Yield Server recording citation rewards), they do so by making **MCP tool calls to the Blockchain Service Server**.
-    *   **Simplified Logic and Focus:** Phase servers are simplified and focused on their core AI workflow logic, without the added complexity of blockchain integration.
+*   **`sui_service.py` (within API Backend):**
+    *   **PySUI Integration (Encapsulated):** The PySUI SDK for interacting with the Sui blockchain is exclusively used within this service module.
+    *   **Handles Transactions:** Constructs, signs (using keys managed by the API's environment/secrets), and submits transactions to the Sui network.
+    *   **Exposes Service Functions:** Provides functions (e.g., `record_reward`, `get_balance`) called internally by the API's orchestration logic.
 
-*   **Host Application (Python API):**
-    *   **Orchestrates MCP Servers:** The Host application continues to orchestrate the PostChain workflow and manage communication between MCP servers.
-    *   **No Direct Blockchain Interaction (Typically):** The Host application *typically does not directly interact with the Sui blockchain* in this architecture.  Blockchain interactions are encapsulated within the Blockchain Service Server.  In some advanced scenarios, the Host *could* potentially call tools on the Blockchain Service Server if needed, but direct PySUI integration in the Host is avoided.
+*   **PostChain Workflow (LCEL - within API Backend):**
+    *   **No Direct Blockchain Interaction:** The AEIOU-Y phase logic **does not directly interact with the Sui blockchain or PySUI.**
+    *   **Provides Reward Inputs:** The workflow (specifically data gathered by Experience and finalized by Yield) provides the necessary inputs (author ID, prior IDs, scores) for the API to trigger the reward calculation in `sui_service.py`.
 
-**Architecture Diagram (MCP with Dedicated Blockchain Service Server):**
+*   **Sui Blockchain:**
+    *   **Hosts CHIP Token Contract:** Runs the `choir_coin.move` smart contract defining the basic CHIP token.
+    *   **Records Transactions:** Stores the history of token transfers/mints executed by `sui_service.py`.
+
+**Architecture Diagram (Qdrant-Sui MVP):**
 
 ```mermaid
 graph LR
-    A[Host Application (Python API)] --> B(Action Server)
-    B --> C(Experience Server)
-    C --> D(Intention Server)
-    D --> E(Observation Server)
-    E --> F(Understanding Server)
-    F --> G(Yield Server)
-    G --> A
+    A[Client (SwiftUI)] --> B{Python API (FastAPI)};
+    B --> C[PostChain Workflow (LCEL)];
+    C -- Interacts via database.py --> D[(Qdrant)];
+    C -- Returns final data --> B;
+    B -- Triggers reward --> E[sui_service.py];
+    E -- Uses PySUI --> F[(Sui Blockchain)];
+    B -- Streams results --> A;
 
-    style A fill:#ccf,stroke:#333,stroke-width:2px
-    style B,C,D,E,F,G fill:#f9f,stroke:#333,stroke-width:2px
+    style B fill:#ccf,stroke:#333,stroke-width:2px;
+    style C,E fill:#f9f,stroke:#333,stroke-width:2px;
+    style D,F fill:#bfc,stroke:#333,stroke-width:2px;
 
-    subgraph PostChain MCP Servers
+    subgraph API Backend Container
         B
         C
-        D
         E
-        F
-        G
     end
 
-    H[Blockchain Service Server (TEE)] --> Sui[Sui Blockchain]
-    style H fill:#bfc,stroke:#333,stroke-width:2px
+    Communication Flow for Blockchain Operations (MVP):
 
-    YieldServer --> H
-    ExperienceServer --> H
-    subgraph Dedicated MCP Servers
-        H
-    end
+PostChain Completion: The PostChain workflow (running within the API) completes its final (Yield) phase. It returns the final AI message structure, including author ID, cited prior IDs, novelty score, and similarity scores.
 
-    linkStyle 0,1,2,3,4,5,6 stroke-dasharray: 5 5;
-    ```
+API Trigger: The main API logic receives the completed PostChain data.
 
-    Communication Flow for Blockchain Operations
-When a phase server (e.g., Yield Server) needs to perform a blockchain operation:
+Data Persistence: The API saves the final AI message to the choir collection in Qdrant.
 
-Phase Server (MCP Client Role) Initiates Tool Call: The phase server (acting as an MCP client) sends a callTool request to the Blockchain Service Server.
+Call Sui Service: The API calls the appropriate function within sui_service.py (e.g., process_rewards), passing the relevant data fetched from the newly saved Qdrant message (or held from the workflow result).
 
-Tool Selection and Parameters: The callTool request specifies the appropriate tool for the blockchain operation (e.g., record_citation, get_thread_state) and includes the necessary parameters (e.g., cited_message_id, citing_message_id, citation_value).
+Sui Service Execution: The sui_service.py function:
 
-Blockchain Service Server (Tool Execution within TEE): The Blockchain Service Server receives the callTool request and executes the corresponding tool logic within its secure TEE environment. This tool logic includes:
+Performs the (simplified for MVP) reward calculation.
 
-Using PySUI (securely encapsulated within the TEE) to construct and sign a Sui blockchain transaction.
+Looks up recipient Sui addresses if necessary (using Qdrant users collection via database.py).
 
-Interacting with the Sui blockchain to submit the transaction.
+Uses PySUI to construct and sign the necessary Sui transaction(s) (e.g., calling a basic mint_reward function in the choir_coin contract).
 
-Blockchain Service Server Returns Result: The Blockchain Service Server sends a CallToolResult back to the requesting phase server, indicating the outcome of the blockchain operation (success or failure) and potentially including transaction details.
+Submits the transaction to the Sui blockchain.
 
-MCP Tools Exposed by the Blockchain Service Server
-The Blockchain Service Server exposes a set of MCP tools to encapsulate various blockchain operations. Examples include:
+Result Handling: The sui_service.py function returns the transaction result (e.g., digest, success/failure) to the main API logic. The API logs this result. (Note: For MVP, the result might not be directly propagated back to the client UI).
 
-record_citation(cited_message_id, citing_message_id, citation_value): Records a citation event on the Sui blockchain, distributing CHIP token rewards.
+Service Functions Exposed by sui_service.py (MVP):
 
-get_thread_state(thread_id): Fetches the current economic state (stake price, FQAHO parameters) of a thread from the Sui smart contract.
+The sui_service.py module exposes internal functions called by the API orchestrator. Key functions for the MVP include:
 
-transfer_tokens(recipient_address, amount): Initiates a CHIP token transfer from the treasury or a designated account to a recipient address.
+process_rewards(message_id, author_user_id, cited_prior_ids, novelty_score, similarity_scores): Calculates (simplified) rewards and calls the mint/transfer function.
 
-get_treasury_balance(): Queries the current CHIP token balance of the treasury smart contract.
+_call_sui_mint(recipient_address, amount): Internal helper to interact with the Sui contract's mint function.
 
-get_verified_user_status(user_id): Checks if a user is KYC-verified and has a verified identity on the blockchain (for future IDaaS integration).
+get_balance(sui_address): Queries the SUI balance (primarily for testing/diagnostics in MVP). (Already implemented)
 
-submit_governance_vote(proposal_id, vote_choice): Allows verified users (or AI agents acting on their behalf) to submit votes in on-chain governance proposals.
+(Future) get_chip_balance(sui_address): Queries the CHIP token balance.
 
-The specific set of tools exposed by the Blockchain Service Server can be extended and customized as needed to support the evolving blockchain integration requirements of the Choir platform.
+(Future) get_thread_stake_price(thread_id): Fetches economic state from potential future FQAHO contract.
 
-Security Benefits of the Dedicated Blockchain Service Server
-This revised architecture with a dedicated Blockchain Service Server provides significant security advantages:
+Security Considerations (MVP):
 
-Centralized and Isolated Key Management: Private keys for Sui blockchain operations are centralized and isolated within a single, TEE-protected service. This drastically reduces the attack surface and simplifies key management.
+With blockchain interactions centralized in the API backend's sui_service.py:
 
-Reduced Attack Surface for Phase Servers: Phase servers (Action, Experience, Yield, etc.) no longer need to handle any blockchain-related code or private keys. This significantly reduces their attack surface and simplifies their security profile.
+API Key Management: The primary security concern is protecting the Sui private key used by the API backend. This key must be managed securely using environment variables, platform secrets management (e.g., Render secrets), or a dedicated secrets manager. It must not be hardcoded.
 
-Clear Security Boundary: The Blockchain Service Server acts as a clear security boundary for all blockchain interactions. Security audits and vulnerability assessments can be focused on this single, critical component, rather than needing to examine every phase server for potential blockchain security issues.
+Input Validation: The API must rigorously validate all data passed to sui_service.py functions, especially recipient addresses and amounts, to prevent manipulation or unintended transactions.
 
-Enhanced Auditability and Monitoring: All blockchain operations are now channeled through the Blockchain Service Server, making it easier to monitor and audit blockchain interactions and detect any suspicious activity.
+Service Isolation (Logical): While not physically isolated like a separate server/TEE, sui_service.py provides logical isolation. All blockchain interaction code is contained within this module, making it easier to audit and secure compared to scattering PySUI calls throughout the codebase.
 
-Simplified Security Policies: Security policies and access controls for blockchain operations can be集中管理 and enforced at the level of the Blockchain Service Server, simplifying overall system security management.
+Standard API Security: General API security practices (authentication, authorization, rate limiting, HTTPS) are essential to protect the endpoints that trigger the workflows leading to blockchain interactions.
 
-Deployment Considerations
-Docker Compose for Local Development: In a local development environment using Docker Compose, the Blockchain Service Server can be deployed as a separate Docker container alongside other MCP servers and the Host application.
+Deployment Considerations (MVP):
 
-Phala Network TEE Deployment (Production): For production deployments on Phala Network, the Blockchain Service Server's Docker container should be specifically configured to be deployed to a Phala TEE worker. The other phase servers and the Host application can be deployed to standard Phala workers or other infrastructure.
+API Container Deployment: The Python API, including sui_service.py and its PySUI dependency, is deployed as a single Docker container (e.g., on Render).
 
-Secure Key Provisioning to TEE Container: The deployment process must include a secure mechanism for provisioning the Sui private keys to the Blockchain Service Server container within the Phala TEE environment, ensuring that keys are never exposed outside the secure enclave.
+Secure Key Provisioning: The Sui private key required by sui_service.py must be securely provisioned to the deployed container's environment (e.g., using Render's secret management).
 
-Conclusion
-The dedicated Blockchain Service Server architecture provides a more modular, secure, and maintainable approach to blockchain integration within the Choir MCP system. By centralizing and isolating blockchain operations and key management within a TEE-protected service, this architecture enhances the overall security, scalability, and robustness of the Choir platform, paving the way for secure and scalable blockchain integration.
+Conclusion (MVP Focus)
+The Qdrant-Sui MVP utilizes a centralized approach for blockchain integration, embedding the logic within the main Python API backend via the sui_service.py module. This simplifies the architecture for the MVP, allowing focus on the core Qdrant data structures and the basic reward triggering mechanism. While deferring the complexities of distributed servers and TEEs, this approach provides a clear path to validating the fundamental interaction between AI-analyzed data in Qdrant and the Sui blockchain-based token economy. Secure management of the API's Sui key is paramount in this model.

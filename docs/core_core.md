@@ -1,35 +1,74 @@
-# Core System Overview
+# Core System Overview (Qdrant-Sui MVP)
 
-VERSION core_system: 7.0
+VERSION core_system: 8.0 (Qdrant-Sui MVP Focus)
 
-Note: This document describes the core system architecture, with initial focus on TestFlight functionality. More sophisticated event-driven mechanisms described here will be implemented post-funding.
+## Overview
 
-The Choir system, in its MCP architecture, is structured around a clear hierarchy of truth and state management, now implemented as a network of interconnected **Model Context Protocol (MCP) servers**.
+The Choir system, for its Minimum Viable Product (MVP), is architected around a focused stack designed to validate the core concepts of AI-driven conversation analysis and a tokenized reward mechanism. This MVP centers on **Qdrant** as the primary data and vector store and **Sui** as the blockchain layer for the CHIP token, orchestrated by a central **Python API**. While future iterations envision a distributed network of specialized servers, the MVP utilizes a streamlined architecture to accelerate validation.
 
-At the foundation, the **blockchain** (Sui) remains the authoritative source of truth for economic state, managing thread ownership, token balances (CHIP), message hashes, and co-author lists. **This entire economic framework is governed by the FQAHO (Fractional Quantum Anharmonic Oscillator) model and the CHIP token economy.** This ensures the FQAHO-based economic model's integrity and verifiability.
+## Foundational Principles (Informed by Broader Vision)
 
-**libSQL/Turso databases** are used by each MCP server for local persistence of phase-specific state and data, including vector embeddings. This distributed database approach enhances scalability and fault isolation.
+Even within the MVP's focused scope, Choir is built upon a clear hierarchy of truth and state management, guided by underlying principles:
 
-**Qdrant** continues to serve as the authoritative source for content and semantic relationships, storing message content, embeddings, and citation networks, now accessed by the Experience phase MCP server.
+1.  **Blockchain as Economic Truth (Sui):** The **Sui blockchain** serves as the *authoritative source of truth for the economic state*. In the MVP, this includes the basic existence of the CHIP token and the execution of simplified reward distributions. Ultimately, it will manage thread ownership, full token balances, message hashes, co-author lists, and the governance of the **FQAHO (Fractional Quantum Anharmonic Oscillator) economic model**.
+2.  **Qdrant as Semantic Truth:** **Qdrant** serves as the *authoritative source for content and semantic relationships*. It stores message content, user/thread data, phase-specific memory, embeddings, and eventually, citation networks.
+3.  **AEIOU-Y Post Chain as Interaction Pattern:** The **AEIOU-Y Post Chain** defines the natural interaction pattern for processing user input and generating nuanced AI responses. In the MVP, this pattern is implemented via the LCEL workflow.
+4.  **FQAHO as Economic Model:** The economic model, based on **FQAHO dynamics** and the CHIP token, underpins the reward system, even if its full dynamic implementation is post-MVP.
 
-The **AEIOU-Y Post Chain** is now realized as a sequence of specialized **MCP servers** (Action, Experience, Intention, Observation, Understanding, Yield), each responsible for a distinct phase of the user interaction cycle.  User input is processed sequentially through these servers, each contributing to the evolving conversation state.
+## Core Components (Qdrant-Sui MVP)
 
-**MCP clients** within each server facilitate communication with other phase-servers, using a standardized message protocol over SSE streams for efficient, asynchronous communication and streaming responses.
+1.  **Qdrant (Data & Vector Layer):**
+    *   **Role:** The authoritative source for persistent data relevant to the AI workflow and reward mechanism. Stores user mappings (linked to Sui addresses), thread metadata, conversation messages (user prompts and final AI responses with embedded phase outputs), and specialized memory collections (`intention_memory`, `observation_memory`).
+    *   **Function:** Enables semantic search (priors) for the Experience phase, stores structured outputs, and provides the necessary data inputs (novelty/similarity scores, author/prior linkage) for the reward system.
 
-State updates are managed within each MCP server's local libSQL/Turso database, with the "conversation state resource" being managed by the Host application and accessible to servers as needed. This distributed state management approach enhances scalability and resilience.
+2.  **Sui Blockchain (via PySUI Service):**
+    *   **Role:** Manages the CHIP token (basic contract) and handles reward distribution logic (simplified for MVP). The ultimate source of economic truth.
+    *   **Function (MVP):** Provides foundational token infrastructure. The `sui_service.py` within the API backend interacts with Sui (via PySUI) to execute basic reward actions.
 
-The economic model, based on FQAHO dynamics and the CHIP token, is now integrated into the MCP architecture, with economic actions triggered and recorded via PySUI interactions with the Sui blockchain from within MCP servers.
+3.  **Python API (FastAPI/Uvicorn - Orchestration Layer):**
+    *   **Role:** The central orchestrator connecting the client, AI logic, Qdrant, and Sui.
+    *   **Function:** Authenticates users (Sui signature), manages the PostChain workflow execution, handles Qdrant interactions, triggers reward calculations via the Sui service, and streams results to the client.
 
-This MCP architecture enables a more modular, scalable, and secure Choir system. Each phase, as an independent MCP server, encapsulates its logic and state, improving maintainability and fault isolation. The use of Phala Network for deployment further enhances security and confidentiality.
+4.  **PostChain Workflow (LCEL Implementation):**
+    *   **Role:** The core AI processing engine, implementing the AEIOU-Y pattern.
+    *   **Function:** Executes sequentially within the Python API (`langchain_workflow.py`). Phases interact with Qdrant (via `database.py`) for data retrieval/storage. Calculates scores needed for rewards.
 
-The result is a distributed, service-oriented system that combines:
+5.  **Supporting Technologies:**
+    *   **Langchain Utils (`langchain_utils.py`):** LLM abstraction.
+    *   **Pydantic:** Data validation.
+    *   **Docker:** API containerization.
+    *   **SwiftUI & Keychain:** Client UI and secure Sui key storage.
+    *   **Python Async/await:** Used within the API and LCEL workflow for efficient concurrent operations.
 
-- **Economic Incentives (CHIP token, FQAHO)**: Managed on-chain via Sui and PySUI.
-- **Semantic Knowledge (Qdrant)**: Accessed and utilized by the Experience phase server.
-- **Natural Interaction Patterns (AEIOU-Y Post Chain)**: Implemented as a sequence of specialized MCP servers.
-- **Fractional Quantum Dynamics (FQAHO)**: Encapsulated within the economic model and parameter evolution logic.
-- **Swift Concurrency (replaced by Python Async/await in MCP servers)**:  Each MCP server leverages Python's async/await for efficient concurrent operations.
-- **libSQL/Turso**: Provides local persistence and vector search for each MCP server, enabling efficient state and knowledge management within phases.
-- **Phala Network**: Provides confidential computing environment for secure and private operations.
+## MVP Architecture & Data Flow
 
-This architecture enables the Choir system to evolve into a truly scalable, robust, and secure platform for building a tokenized marketplace of ideas and upgrading human financial decision-making.
+The Qdrant-Sui MVP operates as follows:
+
+1.  User interacts via **SwiftUI Client**, authenticating using their **Sui** key.
+2.  Request hits the **Python API (FastAPI)**.
+3.  API orchestrates the **PostChain Workflow (LCEL)**.
+4.  PostChain phases interact with **Qdrant** for priors and memory, using **Langchain Utils** for LLM calls. Scores are calculated.
+5.  Final AI response (with embedded phase outputs/scores) is persisted in **Qdrant**.
+6.  API triggers the **Sui Service** for rewards based on Qdrant data.
+7.  API streams results back to the **SwiftUI Client**.
+
+This architecture validates the core loop: **User Input -> API Orchestration -> PostChain (Qdrant Interaction) -> Qdrant Persistence -> Reward Trigger (Sui Service)**.
+
+## Strategic Focus for MVP
+
+*   **Qdrant Centrality:** Validate Qdrant for storing diverse AI-related data and supporting semantic search.
+*   **Sui Integration:** Establish the basic workflow for triggering token rewards based on Qdrant data.
+*   **Leveraging Existing Code:** Utilize the current LCEL PostChain implementation.
+*   **Simplicity:** Defer complexities like distributed servers, advanced client caching, and TEE deployment.
+
+## The Combined Result (MVP)
+
+The MVP delivers a system combining:
+
+*   **Economic Incentives (CHIP token, Basic FQAHO Principles):** Managed via Sui and PySUI Service.
+*   **Semantic Knowledge (Qdrant):** Stored, accessed, and utilized by the PostChain workflow.
+*   **Natural Interaction Patterns (AEIOU-Y Post Chain):** Implemented via the LCEL workflow.
+*   **(Underlying) Fractional Quantum Dynamics (FQAHO):** The conceptual model guiding the economics, to be more fully realized post-MVP.
+*   **Python Async/await:** Powers the backend API and workflow.
+
+This streamlined MVP architecture focuses on demonstrating the fundamental interplay between semantic data storage (Qdrant) and a blockchain-based reward mechanism (Sui), laying the groundwork for the more complex, distributed, and secure system envisioned in the broader Choir architecture.

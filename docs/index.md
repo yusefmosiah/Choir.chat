@@ -1,51 +1,51 @@
 # Choir Documentation
 
-# Choir: Building a Tokenized Marketplace of Ideas on the Model Context Protocol
+# Choir: Building a Tokenized Marketplace of Ideas (Qdrant-Sui MVP)
 
 ## Core Concepts
 
-The Choir platform is a revolutionary system for building collective intelligence, structured around a sophisticated conceptual model and implemented with a cutting-edge Model Context Protocol (MCP) architecture.  Explore the foundational concepts:
+The Choir platform is a revolutionary system for building collective intelligence, structured around a sophisticated conceptual model. The Minimum Viable Product (MVP) focuses on validating the core data flow and reward mechanism using Qdrant and the Sui blockchain. Explore the foundational concepts:
 - [PostChain Temporal Logic](postchain_temporal_logic.md) - The temporal essence of each AEIOU-Y phase, driving dynamic and context-aware AI workflows.
-- [FQAHO Model](fqaho_visualization.md) - The Fractional Quantum Anharmonic Oscillator economic model, powering a self-improving token economy that rewards quality and innovation.
-- [Core Economics](core_economics.md) -  The economic principles and tokenomics of CHIP, designed to create a sustainable and equitable ecosystem for knowledge creation.
-- [Core State Transitions](core_state_transitions.md) - The carefully defined state transitions that govern the evolution of threads and the flow of value within Choir.
-- [Evolution: Naming](evolution_naming.md) -  The story behind the evolution of Choir's name, reflecting the project's journey and vision.
+- [FQAHO Model](fqaho_visualization.md) - The Fractional Quantum Anharmonic Oscillator economic model, powering a self-improving token economy that rewards quality and innovation (conceptual basis for MVP rewards).
+- [Core Economics](core_economics.md) - The economic principles and tokenomics of CHIP, designed to create a sustainable and equitable ecosystem for knowledge creation.
+- [Core State Transitions](core_state_transitions.md) - The carefully defined state transitions that govern the evolution of threads and the flow of value within Choir (principles guiding MVP implementation).
+- [Evolution: Naming](evolution_naming.md) - The story behind the evolution of Choir's name, reflecting the project's journey and vision.
 
-## Architecture: MCP-Powered Scalability and Modularity
+## Architecture (Qdrant-Sui MVP)
 
-Choir's technical architecture is now built on the **Model Context Protocol (MCP)**, a strategic pivot that provides a robust and scalable foundation for our vision:
-- [Stack Argument](stack_argument.md) -  The compelling rationale behind our technology choices, emphasizing the advantages of the MCP-based stack for Choir.
-- [Security Considerations](security_considerations.md) -  A deep dive into the security architecture of Choir, highlighting the benefits of MCP and confidential computing for building a trustworthy AI platform.
+Choir's MVP technical architecture centers on a Python API orchestrating interactions between Qdrant (data/vector storage) and the Sui blockchain (token/rewards).
+- [Core System Overview](core_core.md) - Description of the MVP architecture and components.
+- [Stack Argument](stack_argument.md) - The compelling rationale behind the technology choices for the MVP stack.
+- [Security Considerations](security_considerations.md) - A deep dive into the security architecture for the MVP's centralized API and data stores.
 
-## Implementation: Building the Revolution, One Phase at a Time
+## Implementation (Qdrant-Sui MVP)
 
-Explore the practical implementation of Choir's MCP-based architecture:
-- [Developer Quickstart](developer_quickstart.md) -  A fast onboarding guide for developers to start building MCP-powered phases and applications for Choir.
-- [State Management Patterns](state_management_patterns.md) - Best practices and design patterns for managing state efficiently and robustly within MCP-based AI systems.
+Explore the practical implementation of Choir's MVP architecture:
+- [State Management Patterns](state_management_patterns.md) - How state is managed within the central API and persisted in Qdrant for the MVP.
 
-## MCP-Based Context Management: Orchestrating the Flow of Knowledge
+## Context Management in the PostChain Workflow
 
-Choir leverages the power of MCP to enable sophisticated context management, with each phase playing a specialized role in orchestrating the flow of knowledge:
+Choir leverages the AEIOU-Y PostChain workflow to enable sophisticated context management, with each phase playing a specialized role in orchestrating the flow of knowledge within the API backend:
 
-| Phase         | Temporal Focus       | Context Responsibility               |
-| ------------- | -------------------- | ------------------------------------ |
-| Action        | Immediate present    | Initial framing and response, setting the stage for the conversation.         |
-| Experience    | Past knowledge       | Enriching context with search results, knowledge graph retrievals, and relevant prior experiences.  |
-| Intention     | Desired future       | Focusing on user goals and intents, guiding the AI towards user-centric outcomes.               |
-| Observation   | Future preservation  | Tagging and connecting concepts, building a rich semantic network for long-term knowledge growth.      |
-| Understanding | Temporal integration | Deciding what information to release and prune, optimizing context for efficiency and relevance. |
-| Yield         | Process completion   | Determining cycle continuation and recursion, generating the final, user-facing response.       |
+| Phase         | Temporal Focus       | Context Responsibility (within API Workflow) |
+| ------------- | -------------------- | -------------------------------------------- |
+| Action        | Immediate present    | Initial framing and response.                |
+| Experience    | Past knowledge       | Enriching context via Qdrant search (priors). |
+| Intention     | Desired future       | Focusing on user goals (using `intention_memory` in Qdrant). |
+| Observation   | Future preservation  | Structuring thread knowledge (using `observation_memory` in Qdrant). |
+| Understanding | Temporal integration | Deciding what information to prune from memory collections (Qdrant). |
+| Yield         | Process completion   | Generating the final response and preparing data for Qdrant/rewards. |
 
 ## A Vision for the Future: Personal AI and the Tokenized Marketplace of Ideas
 
 Choir is not just building another AI application; we are building a **transformative platform for the future of AI and human collaboration**:
 
 - **Revolutionizing Consumer Finance:** Empowering users with AI-driven tools to optimize their financial lives and achieve financial freedom.
-- **Creating a Live Streaming Home Production Studio:**  Transforming home entertainment and content creation with AI-powered tools for interactive and immersive experiences.
-- **Building a Tokenized Marketplace of Ideas:**  Fostering a new kind of online platform where quality ideas are valued, rewarded, and drive the emergence of collective intelligence.
-- **Democratizing AI Training and Ownership:**  Enabling users to participate in and benefit from the AI revolution, owning a piece of the AI infrastructure and contributing to a self-improving, community-driven AI ecosystem.
+- **Creating a Live Streaming Home Production Studio:** Transforming home entertainment and content creation with AI-powered tools for interactive and immersive experiences.
+- **Building a Tokenized Marketplace of Ideas:** Fostering a new kind of online platform where quality ideas are valued, rewarded, and drive the emergence of collective intelligence.
+- **Democratizing AI Training and Ownership:** Enabling users to participate in and benefit from the AI revolution, owning a piece of the AI infrastructure and contributing to a self-improving, community-driven AI ecosystem.
 
-Explore the documentation sections above to understand how Choir's MCP-based architecture is designed to realize this ambitious vision and build a truly revolutionary platform for the age of personal AI.
+Explore the documentation sections above to understand how Choir's Qdrant-Sui MVP architecture is designed to validate the core concepts needed to realize this ambitious vision.
 
 ## Documentation Structure
 
@@ -55,56 +55,59 @@ The documentation is organized into the following sections:
 
 Fundamental concepts that remain consistent regardless of the implementation:
 - Phases:
-    - [Action](docs/phase_requirements/action_phase.md)
-    - [Experience](docs/phase_requirements/experience_phase.md)
-    - [Intention](docs/phase_requirements/intention_phase.md)
-    - [Observation](docs/phase_requirements/observation_phase.md)
-    - [Understanding](docs/phase_requirements/understanding_phase.md)
-    - [Yield](docs/phase_requirements/yield_phase.md)
+    - [Action Requirements](require_action_phase.md)
+    - [Experience Requirements](require_experience_phase.md)
+    - [Intention Requirements](require_intention_phase.md)
+    - [Observation Requirements](require_observation_phase.md)
+    - [Understanding Requirements](require_understanding_phase.md)
+    - [Yield Requirements](require_yield_phase.md)
 - [FQAHO Model](fqaho_visualization.md) - The Fractional Quantum Anharmonic Oscillator economic model
 - [Core Economics](core_economics.md) - Economic principles and tokenomics
 - [Core State Transitions](core_state_transitions.md) - State transition principles
 - [Evolution: Naming](evolution_naming.md) - Naming conventions and evolution
 
-## 2. Architecture
+## 2. Architecture (MVP)
 
-Detailed information about the MCP-based architecture:
-- [Stack Argument](stack_argument.md) - Rationale for the MCP-based technology stack
-- [Security Considerations](security_considerations.md) - Security architecture and considerations
+Detailed information about the Qdrant-Sui MVP architecture:
+- [Core System Overview](core_core.md) - MVP architecture description.
+- [Stack Argument](stack_argument.md) - Rationale for the MVP technology stack.
+- [Security Considerations](security_considerations.md) - Security architecture for the MVP.
 
-## 3. Implementation
+## 3. Implementation (MVP)
 
-Practical guidance for implementing the MCP-based architecture:
-- [Developer Quickstart](developer_quickstart.md) - Fast onboarding for new developers
-- [State Management Patterns](state_management_patterns.md) - Best practices for state management
+Practical guidance for implementing the MVP architecture:
+- [State Management Patterns](state_management_patterns.md) - State management in the MVP.
 
-## 4. Integration
+## 4. Integration (MVP)
 
-Information about integrating with external systems:
+Information about integrating with external systems for the MVP:
+- [Blockchain Integration](blockchain_integration.md) - Integration with Sui blockchain for the MVP.
 
-- [libSQL Integration](plan_libsql.md) - Database integration
-- [Blockchain Integration](blockchain_integration.md) - Integration with Sui blockchain
-- [Identity as a Service](plan_identity_as_a_service.md) - Identity management
 
 ## 5. Business and Strategy
 
 Business aspects of Choir:
+- [Business Model](e_business.md) - Business model and strategy.
+- [Evolution Token](evolution_token.md) - Token design and economics.
+- [Anonymity by Default](plan_anonymity_by_default.md) - Privacy principles.
 
-- [Business Model](e_business.md) - Business model and strategy
-- [Evolution Token](evolution_token.md) - Token design and economics
-- [Anonymity by Default](plan_anonymity_by_default.md) - Privacy principles
+## 6. Planning & Future
+
+Documents outlining plans and future directions:
+- [Plan: CHIP Materialization (AI Supercomputer Box)](plan_chip_materialization.md) - Long-term hardware vision.
 
 ## Development Timeline
 
-- [Changelog](CHANGELOG.md) - Historical development timeline
+- [Changelog](CHANGELOG.md) - Historical development timeline.
 
 
 ## Contributing to Documentation
 
 When contributing to documentation:
 
-1. Follow the established folder structure
-2. Use Markdown for all documentation
-3. Include diagrams using Mermaid.js where appropriate
-4. Provide code examples for technical concepts
-5. Update the index when adding new documents
+1.  Focus documentation updates on the **Qdrant-Sui MVP** scope unless explicitly marked as "Future" or "Post-MVP".
+2.  Follow the established folder structure.
+3.  Use Markdown for all documentation.
+4.  Include diagrams using Mermaid.js where appropriate, reflecting the MVP architecture.
+5.  Provide code examples relevant to the MVP implementation.
+6.  Update this index when adding or significantly modifying documents.

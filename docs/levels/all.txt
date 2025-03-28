@@ -184,14 +184,12 @@ tree.md
 ├── docker-compose.yml
 ├── docs
 │   ├── CHANGELOG.md
-│   ├── architecture_reorganization_plan_mcp.md
 │   ├── blockchain_integration.md
 │   ├── comp_provider_info.md
 │   ├── core_core.md
 │   ├── core_economics.md
 │   ├── core_state_transitions.md
 │   ├── data_engine_model.md
-│   ├── developer_quickstart.md
 │   ├── e_business.md
 │   ├── e_concept.md
 │   ├── evolution_naming.md
@@ -199,7 +197,6 @@ tree.md
 │   ├── fqaho_simulation.md
 │   ├── fqaho_visualization.md
 │   ├── index.md
-│   ├── langchain_postchain_checklist.md
 │   ├── levels
 │   │   ├── all.txt
 │   │   ├── level0.md
@@ -208,11 +205,8 @@ tree.md
 │   │   ├── level3.md
 │   │   ├── level4.md
 │   │   └── level5.md
-│   ├── libsql_integration.md
 │   ├── plan_anonymity_by_default.md
-│   ├── plan_cadcad_modeling.md
 │   ├── plan_chip_materialization.md
-│   ├── plan_libsql.md
 │   ├── postchain_temporal_logic.md
 │   ├── require_action_phase.md
 │   ├── require_experience_phase.md
@@ -226,7 +220,6 @@ tree.md
 │   │   └── update_tree.sh
 │   ├── security_considerations.md
 │   ├── stack_argument.md
-│   ├── stack_pivot_summary.md
 │   ├── state_management_patterns.md
 │   └── tree.md
 ├── notebooks
@@ -242,7 +235,7 @@ tree.md
     ├── sources_displaying.sh
     └── test_postchain_multiturn.sh
 
-59 directories, 168 files
+59 directories, 161 files
 
 === File: docs/CHANGELOG.md ===
 
@@ -255,258 +248,275 @@ CHANGELOG.md
 
 # Changelog
 
+## [2025-03-27] - 2025-03-27
+
+### Changed
+
+-   **Architectural Focus Shift: Qdrant-Sui MVP Prioritized**
+    -   Refocused development efforts on a Minimum Viable Product (MVP) centered around **Qdrant** (data/vector store) and **Sui** (blockchain token/rewards).
+    *   Adopted a streamlined architecture using the existing **Python API (FastAPI)** as the central orchestrator.
+    *   Leveraging the current **LCEL-based PostChain workflow** (`langchain_workflow.py`) for MVP implementation speed.
+    *   Defined clear data structures and interactions between the API, PostChain phases, Qdrant collections (`choir`, `users`, `chat_threads`, `intention_memory`, `observation_memory`), and the `sui_service.py`.
+    *   Refined core documentation (`core_core.md`, `state_management_patterns.md`, `blockchain_integration.md`, `security_considerations.md`, `stack_argument.md`, `index.md`) to reflect the MVP scope and architecture.
+
+### Deferred (Post-MVP)
+
+-   Implementation of the full Model Context Protocol (MCP) server architecture.
+-   Integration of client-side libSQL caching for offline support.
+-   Deployment using Phala Network TEEs for confidential computing.
+-   Implementation of the full FQAHO dynamic economic model (MVP uses basic rewards).
+
 ## [Unreleased] - 2025-03-12
 
 ### Changed
 
-- **Major Architectural Pivot: Shifted from LangGraph to MCP Architecture**
-  - Transitioned to Model Context Protocol (MCP) architecture for the Choir platform.
-  - Adopted a service-oriented architecture with each PostChain phase implemented as a separate MCP server.
-  - Implemented MCP Resources for efficient conversation state management and context sharing.
-  - Leveraged MCP Notifications for real-time updates and communication between Host and Servers.
-  - Replaced LangGraph-based workflow orchestration with a Host-application-centric orchestration model using asynchronous tasks.
-  - Refined the focus on modularity, scalability, and security through the MCP architecture.
+-   **Major Architectural Pivot: Shifted from LangGraph to MCP Architecture**
+    -   Transitioned to Model Context Protocol (MCP) architecture for the Choir platform.
+    -   Adopted a service-oriented architecture with each PostChain phase implemented as a separate MCP server.
+    -   Implemented MCP Resources for efficient conversation state management and context sharing.
+    -   Leveraged MCP Notifications for real-time updates and communication between Host and Servers.
+    -   Replaced LangGraph-based workflow orchestration with a Host-application-centric orchestration model using asynchronous tasks.
+    -   Refined the focus on modularity, scalability, and security through the MCP architecture.
 
 ### Added
 
-- **Coherent Technology Stack for MCP Architecture:**
-  - **Model Context Protocol (MCP) Architecture:** Service-oriented architecture for PostChain phases, enabling modularity and scalability.
-  - **libSQL/Turso:** Integrated libSQL/Turso for server-specific state persistence and potential "conversation state resource" management.
-  - **PySUI:** Maintained PySUI for blockchain integration and economic actions.
-  - **Pydantic:** Continued use of Pydantic for type safety and message validation in the MCP architecture.
-  - **FastAPI/Uvicorn:** Continued use of FastAPI/Uvicorn for the Python API layer, now orchestrating MCP server interactions.
-  - **Docker:** Maintained Docker for containerization and deployment of MCP servers.
-  - **Phala Network:** Maintained Phala Network for TEE-secured operations and confidential computing for MCP servers.
+-   **Coherent Technology Stack for MCP Architecture:**
+    -   **Model Context Protocol (MCP) Architecture:** Service-oriented architecture for PostChain phases, enabling modularity and scalability.
+    -   **PySUI:** Maintained PySUI for blockchain integration and economic actions.
+    -   **Pydantic:** Continued use of Pydantic for type safety and message validation in the MCP architecture.
+    -   **FastAPI/Uvicorn:** Continued use of FastAPI/Uvicorn for the Python API layer, now orchestrating MCP server interactions.
+    -   **Docker:** Maintained Docker for containerization and deployment of MCP servers.
+    -   **Phala Network:** Maintained Phala Network for TEE-secured operations and confidential computing for MCP servers.
 
-- **Enhanced Token Economy and Reward System (RL-Driven CHIP):**
-  - **CHIP Tokens as Training Signals for AI:**  Evolved the CHIP token to act as training signals for AI models, driving a self-improving AI ecosystem.
-  - **Novelty and Citation Rewards:** Implemented novelty rewards for original prompts and citation rewards for salient contributions, algorithmically distributed by AI models.
-  - **FQHO Contract as Data Marketplace Foundation:**  Defined the FQAHO contract as the basis for a data marketplace within Choir, enabling CHIP-based data access and contribution pricing.
-  - **"AI Supercomputer Box" Vision:** Incorporated the "AI Supercomputer Box" concept as a tangible product embodiment of the Choir platform and CHIP token utility, envisioning a premium, rent-to-own consumer appliance for private, personalized AI and content creation.
+-   **Enhanced Token Economy and Reward System (RL-Driven CHIP):**
+    -   **CHIP Tokens as Training Signals for AI:** Evolved the CHIP token to act as training signals for AI models, driving a self-improving AI ecosystem.
+    -   **Novelty and Citation Rewards:** Implemented novelty rewards for original prompts and citation rewards for salient contributions, algorithmically distributed by AI models.
+    -   **FQHO Contract as Data Marketplace Foundation:** Defined the FQAHO contract as the basis for a data marketplace within Choir, enabling CHIP-based data access and contribution pricing.
+    -   **"AI Supercomputer Box" Vision:** Incorporated the "AI Supercomputer Box" concept as a tangible product embodiment of the Choir platform and CHIP token utility, envisioning a premium, rent-to-own consumer appliance for private, personalized AI and content creation.
 
 ### Removed
 
-- Deprecated LangGraph dependency and graph-based state management due to scalability and maintenance concerns.
+-   Deprecated LangGraph dependency and graph-based state management due to scalability and maintenance concerns.
 
 ## [2025-02-25] - 2025-02-25
 
 ### Added
 
-- Implemented UI carousel to improve user experience
-- Added display of priors in the Experience step
-- Resumed active development after coding hiatus
+-   Implemented UI carousel to improve user experience
+-   Added display of priors in the Experience step
+-   Resumed active development after coding hiatus
 
 ### Planned
 
-- API streaming implementation to enhance responsiveness
-- Model reconfiguration for improved performance
-- Go multimodel, then multimodal
-- OpenRouter integration
-- Conceptual evolution from "Chorus Cycle" to "Post Chain"
-  - Representing shift from harmonic oscillator (cycle) to anharmonic oscillator (chain)
-  - Aligning interface terminology with underlying FQAHO model
-- Client-side editable system prompts for customization
-- Additional phases in the Post Chain:
-  - Web search phase for real-time information access
-  - Sandboxed arbitrary tool use phase for enhanced capabilities
+-   API streaming implementation to enhance responsiveness
+-   Model reconfiguration for improved performance
+-   Go multimodel, then multimodal
+-   OpenRouter integration
+-   Conceptual evolution from "Chorus Cycle" to "Post Chain"
+    -   Representing shift from harmonic oscillator (cycle) to anharmonic oscillator (chain)
+    -   Aligning interface terminology with underlying FQAHO model
+-   Client-side editable system prompts for customization
+-   Additional phases in the Post Chain:
+    -   Web search phase for real-time information access
+    -   Sandboxed arbitrary tool use phase for enhanced capabilities
 
 ## [2025-02-24] - 2025-02-24
 
 ### Changed
 
-- Implemented fractional quantum anharmonic oscillator model for dynamic stake pricing
-- Added fractional parameter α to capture memory effects and non-local interactions
-- Revised parameter modulation formulas for K₀, α, and m to reflect interdependencies
-- Created simulation framework for parameter optimization
+-   Implemented fractional quantum anharmonic oscillator model for dynamic stake pricing
+-   Added fractional parameter α to capture memory effects and non-local interactions
+-   Revised parameter modulation formulas for K₀, α, and m to reflect interdependencies
+-   Created simulation framework for parameter optimization
 
 ## [2025-02-23] - 2025-02-23
 
 ### Changed
 
-- Documented quantum anharmonic oscillator model implementation and dynamic stake pricing mechanism via an effective anharmonic coefficient modulated by approval/refusal statistics.
+-   Documented quantum anharmonic oscillator model implementation and dynamic stake pricing mechanism via an effective anharmonic coefficient modulated by approval/refusal statistics.
 
 ## [Unreleased]
 
 ### Changed
 
-- Updated all documentation to version 6.0
-  - Transformed structured documentation into fluid prose
-  - Relaxed event-driven architecture requirements for initial TestFlight
-  - Clarified implementation priorities and post-funding features
-  - Maintained theoretical frameworks while focusing on core functionality
+-   Updated all documentation to version 6.0
+    -   Transformed structured documentation into fluid prose
+    -   Relaxed event-driven architecture requirements for initial TestFlight
+    -   Clarified implementation priorities and post-funding features
+    -   Maintained theoretical frameworks while focusing on core functionality
 
 ### Added
 
-- Initial Chorus cycle working in iOS simulator
-  - Basic message flow through phases
-  - Response handling
-  - State management
+-   Initial Chorus cycle working in iOS simulator
+    -   Basic message flow through phases
+    -   Response handling
+    -   State management
 
 ### Documented
 
-- Created 15 comprehensive issues covering:
-  - Core message system implementation
-  - Type reconciliation with Qdrant
-  - API client updates
-  - Coordinator message flow
-  - User identity management
-  - Thread state management
-  - Integration testing
-  - Error handling strategy
-  - Performance monitoring
-  - State recovery
-  - Thread sheet implementation
-  - Thread contract implementation
-  - Message rewards system
-  - LanceDB migration
-  - Citation visualization
+-   Created 15 comprehensive issues covering:
+    -   Core message system implementation
+    -   Type reconciliation with Qdrant
+    -   API client updates
+    -   Coordinator message flow
+    -   User identity management
+    -   Thread state management
+    -   Integration testing
+    -   Error handling strategy
+    -   Performance monitoring
+    -   State recovery
+    -   Thread sheet implementation
+    -   Thread contract implementation
+    -   Message rewards system
+    -   LanceDB migration
+    -   Citation visualization
 
 ### Architecture
 
-- Defined clear type system for messages
-- Planned migration to LanceDB
-- Structured multimodal support strategy
+-   Defined clear type system for messages
+-   Planned migration to LanceDB
+-   Structured multimodal support strategy
 
 ### Technical Debt
 
-- Identified areas needing more specification:
-  - Thread Sheet UI (marked as "AI SLOP")
-  - Reward formulas need verification
-  - Migration pipeline needs careful implementation
+-   Identified areas needing more specification:
+    -   Thread Sheet UI (marked as "AI SLOP")
+    -   Reward formulas need verification
+    -   Migration pipeline needs careful implementation
 
 ## [0.4.2] - 2024-11-09
 
 ### Added
 
-- Development principles with focus on groundedness
-- Basic chat interface implementation
-- SwiftData message persistence
-- Initial Action step foundation
+-   Development principles with focus on groundedness
+-   Basic chat interface implementation
+-   SwiftData message persistence
+-   Initial Action step foundation
 
 ### Changed
 
-- Shifted to iterative, ground-up development approach
-- Simplified initial implementation scope
-- Focused on working software over theoretical architecture
-- Adopted step-by-step Chorus Cycle implementation strategy
+-   Shifted to iterative, ground-up development approach
+-   Simplified initial implementation scope
+-   Focused on working software over theoretical architecture
+-   Adopted step-by-step Chorus Cycle implementation strategy
 
 ### Principles
 
-- Established groundedness as core development principle
-- Emphasized iterative growth and natural evolution
-- Prioritized practical progress over theoretical completeness
-- Introduced flexible, evidence-based development flow
+-   Established groundedness as core development principle
+-   Emphasized iterative growth and natural evolution
+-   Prioritized practical progress over theoretical completeness
+-   Introduced flexible, evidence-based development flow
 
 ## [0.4.1] - 2024-11-08
 
 ### Added
 
-- Self-creation process
-- Post-training concepts
-- Concurrent processing ideas
-- Democratic framing
-- Thoughtspace visualization
+-   Self-creation process
+-   Post-training concepts
+-   Concurrent processing ideas
+-   Democratic framing
+-   Thoughtspace visualization
 
 ### Changed
 
-- Renamed Update to Understanding
-- Enhanced step descriptions
-- Refined documentation focus
-- Improved pattern recognition
+-   Renamed Update to Understanding
+-   Enhanced step descriptions
+-   Refined documentation focus
+-   Improved pattern recognition
 
 ## [0.4.0] - 2024-10-30
 
 ### Added
 
-- Swift architecture plans
-- Frontend-driven design
-- Service layer concepts
-- Chorus cycle definition
+-   Swift architecture plans
+-   Frontend-driven design
+-   Service layer concepts
+-   Chorus cycle definition
 
 ### Changed
 
-- Enhanced system architecture
-- Refined core patterns
+-   Enhanced system architecture
+-   Refined core patterns
 
 ## [0.3.5] - 2024-09-01
 
-- Choir.chat as a web3 dapp
-- messed around with solana
-- used a lot of time messing with next.js/react/typescript/javascript
-- recognized that browser extension wallet is terrible ux
+-   Choir.chat as a web3 dapp
+-   messed around with solana
+-   used a lot of time messing with next.js/react/typescript/javascript
+-   recognized that browser extension wallet is terrible ux
 
 ## [0.3.0] - 2024-03-01
 
 ### Added
 
-- ChoirGPT development from winter 2023 to spring 2024
+-   ChoirGPT development from winter 2023 to spring 2024
 
-- First developed as a ChatGPT plugin, then a Custom GPT
-- The first global RAG system / collective intelligence as a GPT
+-   First developed as a ChatGPT plugin, then a Custom GPT
+-   The first global RAG system / collective intelligence as a GPT
 
 ## [0.2.10] - 2023-04-01
 
 ### Added
 
-- Ahpta development from winter 2022 to spring 2023
+-   Ahpta development from winter 2022 to spring 2023
 
 ## [0.2.9] - 2022-04-01
 
 ### Added
 
-- V10 development from fall 2021 to winter 2022
+-   V10 development from fall 2021 to winter 2022
 
 ## [0.2.8] - 2021-04-01
 
 ### Added
 
-- Elevisio development from spring 2020 to spring 2021
+-   Elevisio development from spring 2020 to spring 2021
 
 ## [0.2.7] - 2020-04-01
 
 ### Added
 
-- Bluem development from spring 2019 to spring 2020
+-   Bluem development from spring 2019 to spring 2020
 
 ## [0.2.6] - 2019-04-01
 
 ### Added
 
-- Blocstar development from fall 2018 to spring 2019
+-   Blocstar development from fall 2018 to spring 2019
 
 ## [0.2.5] - 2018-04-01
 
 ### Added
 
-- Phase4word development from summer 2017 to spring 2018
+-   Phase4word development from summer 2017 to spring 2018
 
 ### Changed
 
-- Showed Phase4word to ~50 people in spring 2018, received critical feedback
-- Codebase remains in 2018 vintage
+-   Showed Phase4word to ~50 people in spring 2018, received critical feedback
+-   Codebase remains in 2018 vintage
 
 ## [0.2.0] - 2016-06-20
 
 ### Added
 
-- Phase4 party concept
-- Early democracy technology
-- Initial value systems
+-   Phase4 party concept
+-   Early democracy technology
+-   Initial value systems
 
 ### Changed
 
-- Moved beyond truth measurement framing
-- Refined core concepts
+-   Moved beyond truth measurement framing
+-   Refined core concepts
 
 ## [0.1.0] - 2015-07-15
 
 ### Added
 
-- Initial simulation hypothesis insight
-- "Kandor"
-- Quantum information concepts
-- Planetary coherence vision
-- Core system ideas
+-   Initial simulation hypothesis insight
+-   "Kandor"
+-   Quantum information concepts
+-   Planetary coherence vision
+-   Core system ideas
 
 === File: docs/scripts/combiner.sh ===
 
@@ -635,41 +645,80 @@ core_core
 ==
 
 
-# Core System Overview
+# Core System Overview (Qdrant-Sui MVP)
 
-VERSION core_system: 7.0
+VERSION core_system: 8.0 (Qdrant-Sui MVP Focus)
 
-Note: This document describes the core system architecture, with initial focus on TestFlight functionality. More sophisticated event-driven mechanisms described here will be implemented post-funding.
+## Overview
 
-The Choir system, in its MCP architecture, is structured around a clear hierarchy of truth and state management, now implemented as a network of interconnected **Model Context Protocol (MCP) servers**.
+The Choir system, for its Minimum Viable Product (MVP), is architected around a focused stack designed to validate the core concepts of AI-driven conversation analysis and a tokenized reward mechanism. This MVP centers on **Qdrant** as the primary data and vector store and **Sui** as the blockchain layer for the CHIP token, orchestrated by a central **Python API**. While future iterations envision a distributed network of specialized servers, the MVP utilizes a streamlined architecture to accelerate validation.
 
-At the foundation, the **blockchain** (Sui) remains the authoritative source of truth for economic state, managing thread ownership, token balances (CHIP), message hashes, and co-author lists. **This entire economic framework is governed by the FQAHO (Fractional Quantum Anharmonic Oscillator) model and the CHIP token economy.** This ensures the FQAHO-based economic model's integrity and verifiability.
+## Foundational Principles (Informed by Broader Vision)
 
-**libSQL/Turso databases** are used by each MCP server for local persistence of phase-specific state and data, including vector embeddings. This distributed database approach enhances scalability and fault isolation.
+Even within the MVP's focused scope, Choir is built upon a clear hierarchy of truth and state management, guided by underlying principles:
 
-**Qdrant** continues to serve as the authoritative source for content and semantic relationships, storing message content, embeddings, and citation networks, now accessed by the Experience phase MCP server.
+1.  **Blockchain as Economic Truth (Sui):** The **Sui blockchain** serves as the *authoritative source of truth for the economic state*. In the MVP, this includes the basic existence of the CHIP token and the execution of simplified reward distributions. Ultimately, it will manage thread ownership, full token balances, message hashes, co-author lists, and the governance of the **FQAHO (Fractional Quantum Anharmonic Oscillator) economic model**.
+2.  **Qdrant as Semantic Truth:** **Qdrant** serves as the *authoritative source for content and semantic relationships*. It stores message content, user/thread data, phase-specific memory, embeddings, and eventually, citation networks.
+3.  **AEIOU-Y Post Chain as Interaction Pattern:** The **AEIOU-Y Post Chain** defines the natural interaction pattern for processing user input and generating nuanced AI responses. In the MVP, this pattern is implemented via the LCEL workflow.
+4.  **FQAHO as Economic Model:** The economic model, based on **FQAHO dynamics** and the CHIP token, underpins the reward system, even if its full dynamic implementation is post-MVP.
 
-The **AEIOU-Y Post Chain** is now realized as a sequence of specialized **MCP servers** (Action, Experience, Intention, Observation, Understanding, Yield), each responsible for a distinct phase of the user interaction cycle.  User input is processed sequentially through these servers, each contributing to the evolving conversation state.
+## Core Components (Qdrant-Sui MVP)
 
-**MCP clients** within each server facilitate communication with other phase-servers, using a standardized message protocol over SSE streams for efficient, asynchronous communication and streaming responses.
+1.  **Qdrant (Data & Vector Layer):**
+    *   **Role:** The authoritative source for persistent data relevant to the AI workflow and reward mechanism. Stores user mappings (linked to Sui addresses), thread metadata, conversation messages (user prompts and final AI responses with embedded phase outputs), and specialized memory collections (`intention_memory`, `observation_memory`).
+    *   **Function:** Enables semantic search (priors) for the Experience phase, stores structured outputs, and provides the necessary data inputs (novelty/similarity scores, author/prior linkage) for the reward system.
 
-State updates are managed within each MCP server's local libSQL/Turso database, with the "conversation state resource" being managed by the Host application and accessible to servers as needed. This distributed state management approach enhances scalability and resilience.
+2.  **Sui Blockchain (via PySUI Service):**
+    *   **Role:** Manages the CHIP token (basic contract) and handles reward distribution logic (simplified for MVP). The ultimate source of economic truth.
+    *   **Function (MVP):** Provides foundational token infrastructure. The `sui_service.py` within the API backend interacts with Sui (via PySUI) to execute basic reward actions.
 
-The economic model, based on FQAHO dynamics and the CHIP token, is now integrated into the MCP architecture, with economic actions triggered and recorded via PySUI interactions with the Sui blockchain from within MCP servers.
+3.  **Python API (FastAPI/Uvicorn - Orchestration Layer):**
+    *   **Role:** The central orchestrator connecting the client, AI logic, Qdrant, and Sui.
+    *   **Function:** Authenticates users (Sui signature), manages the PostChain workflow execution, handles Qdrant interactions, triggers reward calculations via the Sui service, and streams results to the client.
 
-This MCP architecture enables a more modular, scalable, and secure Choir system. Each phase, as an independent MCP server, encapsulates its logic and state, improving maintainability and fault isolation. The use of Phala Network for deployment further enhances security and confidentiality.
+4.  **PostChain Workflow (LCEL Implementation):**
+    *   **Role:** The core AI processing engine, implementing the AEIOU-Y pattern.
+    *   **Function:** Executes sequentially within the Python API (`langchain_workflow.py`). Phases interact with Qdrant (via `database.py`) for data retrieval/storage. Calculates scores needed for rewards.
 
-The result is a distributed, service-oriented system that combines:
+5.  **Supporting Technologies:**
+    *   **Langchain Utils (`langchain_utils.py`):** LLM abstraction.
+    *   **Pydantic:** Data validation.
+    *   **Docker:** API containerization.
+    *   **SwiftUI & Keychain:** Client UI and secure Sui key storage.
+    *   **Python Async/await:** Used within the API and LCEL workflow for efficient concurrent operations.
 
-- **Economic Incentives (CHIP token, FQAHO)**: Managed on-chain via Sui and PySUI.
-- **Semantic Knowledge (Qdrant)**: Accessed and utilized by the Experience phase server.
-- **Natural Interaction Patterns (AEIOU-Y Post Chain)**: Implemented as a sequence of specialized MCP servers.
-- **Fractional Quantum Dynamics (FQAHO)**: Encapsulated within the economic model and parameter evolution logic.
-- **Swift Concurrency (replaced by Python Async/await in MCP servers)**:  Each MCP server leverages Python's async/await for efficient concurrent operations.
-- **libSQL/Turso**: Provides local persistence and vector search for each MCP server, enabling efficient state and knowledge management within phases.
-- **Phala Network**: Provides confidential computing environment for secure and private operations.
+## MVP Architecture & Data Flow
 
-This architecture enables the Choir system to evolve into a truly scalable, robust, and secure platform for building a tokenized marketplace of ideas and upgrading human financial decision-making.
+The Qdrant-Sui MVP operates as follows:
+
+1.  User interacts via **SwiftUI Client**, authenticating using their **Sui** key.
+2.  Request hits the **Python API (FastAPI)**.
+3.  API orchestrates the **PostChain Workflow (LCEL)**.
+4.  PostChain phases interact with **Qdrant** for priors and memory, using **Langchain Utils** for LLM calls. Scores are calculated.
+5.  Final AI response (with embedded phase outputs/scores) is persisted in **Qdrant**.
+6.  API triggers the **Sui Service** for rewards based on Qdrant data.
+7.  API streams results back to the **SwiftUI Client**.
+
+This architecture validates the core loop: **User Input -> API Orchestration -> PostChain (Qdrant Interaction) -> Qdrant Persistence -> Reward Trigger (Sui Service)**.
+
+## Strategic Focus for MVP
+
+*   **Qdrant Centrality:** Validate Qdrant for storing diverse AI-related data and supporting semantic search.
+*   **Sui Integration:** Establish the basic workflow for triggering token rewards based on Qdrant data.
+*   **Leveraging Existing Code:** Utilize the current LCEL PostChain implementation.
+*   **Simplicity:** Defer complexities like distributed servers, advanced client caching, and TEE deployment.
+
+## The Combined Result (MVP)
+
+The MVP delivers a system combining:
+
+*   **Economic Incentives (CHIP token, Basic FQAHO Principles):** Managed via Sui and PySUI Service.
+*   **Semantic Knowledge (Qdrant):** Stored, accessed, and utilized by the PostChain workflow.
+*   **Natural Interaction Patterns (AEIOU-Y Post Chain):** Implemented via the LCEL workflow.
+*   **(Underlying) Fractional Quantum Dynamics (FQAHO):** The conceptual model guiding the economics, to be more fully realized post-MVP.
+*   **Python Async/await:** Powers the backend API and workflow.
+
+This streamlined MVP architecture focuses on demonstrating the fundamental interplay between semantic data storage (Qdrant) and a blockchain-based reward mechanism (Sui), laying the groundwork for the more complex, distributed, and secure system envisioned in the broader Choir architecture.
 
 === File: docs/core_economics.md ===
 
@@ -777,7 +826,7 @@ Frequency Management reflects collective organization through coupled oscillator
 
 **Reward System and Token Distribution (Clarified Phase-Specific Rewards):**
 
-The reward system operates through precisely defined state transitions with memory effects. MCP servers, specifically AI models within the **Experience and Yield phases**, algorithmically distribute CHIP tokens based on contribution quality and network effects:
+The reward system operates through precisely defined state transitions with memory effects. AI models within the **Experience and Yield phases**, algorithmically distribute CHIP tokens based on contribution quality and network effects:
 
 1.  **Novelty Rewards (Issued in the Experience Phase):**
     *   **Purpose:** To incentivize the creation of *novel and original prompts and messages* that expand the knowledge space of the Choir ecosystem.
@@ -1067,142 +1116,6 @@ Anonymity is not just a feature of Choir; it's a fundamental principle, a design
 
 Anonymity by default is a core design principle of Choir, one that reflects the platform's commitment to privacy, freedom of expression, and the creation of a truly meritocratic space for the exchange of ideas. It's a bold choice in a world where online platforms increasingly demand real-name identification, but it's a choice that has the potential to unlock new levels of creativity, honesty, and collective intelligence. By prioritizing anonymity, Choir is not just building a platform; it's building a new model for online interaction, one that empowers individuals and fosters a more open and equitable exchange of ideas.
 
-=== File: docs/plan_cadcad_modeling.md ===
-
-
-
-==
-plan_cadcad_modeling
-==
-
-
-# Plan: Building a cadCAD Model for the CHIP Token Economy
-
-## Overview
-
-This document outlines the plan for building a comprehensive cadCAD model of the CHIP token economy and the Fractional Quantum Anharmonic Oscillator (FQAHO) model that underpins it. This model will serve as a "virtual lab" for simulating, testing, and optimizing the token economy before and during the Choir platform's development and evolution.
-
-## Core Objectives of the cadCAD Model
-
-1.  **Validate FQAHO Model Dynamics:**  Rigorous testing and validation of the FQAHO model's behavior under various conditions and parameter settings.
-2.  **Optimize Tokenomics Parameters:**  Fine-tune the parameters of the CHIP token economy (reward formulas, FQAHO parameters, inflation rates, etc.) to achieve desired outcomes (sustainable token value, incentivized user behaviors, equitable distribution).
-3.  **Stress Test for Gaming and Collusion:**  Simulate potential attack vectors and gaming strategies to assess the token economy's resilience and identify vulnerabilities.
-4.  **Explore Different Economic Policies and Interventions:**  Model the impact of various economic policies and interventions (e.g., governance decisions, parameter adjustments, reward modifications) on the token economy.
-5.  **Generate Data for Visualization and Communication:**  Create simulation data that can be used to generate compelling visualizations and documentation to communicate the token economy's dynamics to users, developers, and investors.
-
-## cadCAD Model Components and Scope
-
-The cadCAD model will encompass the following key components of the CHIP token economy and Choir platform:
-
-1.  **Agents:**
-    *   **Human Users:** Model different types of human users with varying behaviors and strategies:
-        *   Content Creators: Users who generate prompts and messages.
-        *   Curators/Citators: Users who evaluate and cite valuable contributions.
-        *   Token Holders: Users who hold and trade CHIP tokens.
-        *   "Gamers": Users who attempt to game or exploit the reward system.
-    *   **AI Agents (Simplified Phase Servers):** Represent simplified versions of the key MCP phase servers (especially Understanding and Yield Servers) that:
-        *   Algorithmically distribute novelty and citation rewards.
-        *   Potentially participate in the token economy themselves (e.g., earning tokens, using tokens for resources).
-    *   **External Actors (Simplified):**  Model simplified representations of external market forces or actors that can influence the CHIP token price or ecosystem dynamics (e.g., "market makers," "speculators").
-
-2.  **State Variables:**
-    *   **CHIP Token State:**
-        *   Total supply, circulating supply, token distribution among users and AI agents.
-        *   Token price (even if starting with a simplified price model, can be refined later).
-        *   Treasury balance and token reserves.
-    *   **User State:**
-        *   Token balances, reputation scores (if implemented), activity levels (prompts created, citations given, etc.).
-        *   User "strategies" or behavioral models (even if simplified initially).
-    *   **Thread State:**
-        *   FQAHO parameters (α, K₀, m) for each thread.
-        *   Stake price for each thread.
-        *   Message history and citation network within threads (simplified representation).
-        *   "Quality scores" or metrics for threads (based on novelty, citations, user engagement).
-    *   **Global System State:**
-        *   Overall system health metrics (e.g., token velocity, Gini coefficient of token distribution, average user engagement).
-        *   Key performance indicators (KPIs) for the Choir platform (e.g., content creation rate, citation density, user growth).
-
-3.  **Policies (Agent Actions and Behaviors):**
-    *   **User Policies:**
-        *   `create_prompt_policy`:  Model user behavior in creating prompts (frequency, novelty, quality - even if these are initially simplified).
-        *   `cite_message_policy`: Model user behavior in citing messages (citation frequency, citation targets, "quality" of citations - initially simplified).
-        *   `trade_chip_policy`: Model user behavior in buying and selling CHIP tokens (trading frequency, price sensitivity, basic trading strategies).
-        *   `game_reward_system_policy`: Model "gamer" agents attempting to exploit or game the reward system (Sybil attacks, citation cartels, etc.).
-    *   **AI Agent (Phase Server) Policies:**
-        *   `distribute_novelty_rewards_policy`: Implement the algorithm for AI agents (Understanding/Yield Servers) to distribute novelty rewards based on defined metrics.
-        *   `distribute_citation_rewards_policy`: Implement the algorithm for AI agents to distribute citation rewards based on citation salience metrics and FQAHO parameters.
-        *   `adjust_fqaho_parameters_policy`: Implement the FQAHO parameter evolution formulas (α, K₀, m) based on system feedback and thread characteristics.
-
-4.  **Mechanisms (State Update Functions):**
-    *   **Token Issuance and Distribution Mechanisms:** Implement mechanisms for:
-        *   Issuing CHIP tokens as novelty rewards.
-        *   Distributing CHIP tokens as citation rewards.
-        *   (Optional) Token burning or deflationary mechanisms.
-    *   **Token Price Dynamics Mechanisms:** Implement a simplified model for CHIP token price dynamics (you can start with a basic supply-demand model or a simplified AMM simulation, and refine it later).
-    *   **FQHO Parameter Evolution Mechanisms:** Implement the FQAHO parameter evolution formulas as cadCAD state update functions, ensuring they are correctly linked to user actions and system feedback.
-    *   **State Persistence and Initialization Mechanisms:** Define how the cadCAD simulation state is initialized, persisted, and reset for different simulation runs.
-
-## Simulation Scenarios and Experiments
-
-The cadCAD model will be used to run various simulation scenarios and experiments to:
-
-1.  **Baseline Scenario (Organic Growth):**  Simulate the token economy under "normal" conditions with a mix of different user types and AI agent behaviors, without any external shocks or attacks.  Establish a baseline for comparison.
-2.  **Parameter Sensitivity Analysis:**  Perform parameter sweeps to systematically vary key parameters of the FQAHO model, reward formulas, and user behaviors to understand their impact on token price, user engagement, and ecosystem health.  Identify sensitive parameters and optimal parameter ranges.
-3.  **Gaming and Collusion Stress Tests:**  Simulate various gaming and collusion scenarios (Sybil attacks, citation cartels, etc.) to assess the token economy's resilience and identify vulnerabilities.  Test the effectiveness of anti-gaming mechanisms.
-4.  **Economic Policy Interventions:**  Simulate the impact of different economic policy interventions (e.g., changes to reward formulas, inflation rates, governance decisions) on the token economy.  Explore how governance can be used to steer the ecosystem towards desired outcomes.
-5.  **"Black Swan" Event Simulations:**  Simulate extreme or unexpected events (e.g., sudden surge in user activity, market crashes, AI model failures) to test the token economy's robustness and resilience to shocks.
-
-## Deliverables and Documentation
-
-The key deliverables of the cadCAD modeling effort will be:
-
-1.  **cadCAD Model Code (Python):**  A well-documented and modular Python codebase implementing the cadCAD model of the CHIP token economy.
-2.  **Simulation Data and Results:**  Data files (CSV, JSON, etc.) containing the results of various simulation runs and experiments.
-3.  **Visualizations and Dashboards:**  Interactive visualizations and dashboards (using Plotly, Dash, or similar tools) to explore and analyze simulation data.
-4.  **Technical Documentation (Paper/Website):**  A comprehensive technical document (paper or website) that explains:
-    *   The cadCAD model design and implementation.
-    *   The FQAHO model and token economy principles.
-    *   The simulation scenarios and experiments conducted.
-    *   Key findings and insights from the simulations.
-    *   Recommendations for token economy parameter settings and governance policies based on simulation results.
-
-## Phased Implementation Approach (cadCAD Modeling)
-
-The cadCAD modeling effort should also follow a phased approach:
-
-### Phase 1: Basic Core Model (MVP Focus)
-
-- Build a *simplified but representative* cadCAD model that captures the *core dynamics* of the CHIP token economy and FQAHO model.
-- Focus on modeling the *key agents* (users and AI agents), *core token earning and spending loops*, and *basic FQAHO parameter evolution*.
-- Run baseline simulations and basic parameter sensitivity analysis.
-
-### Phase 2: Enhanced Model Complexity and Validation
-
-- Add more complexity to the cadCAD model, including:
-    - More detailed user behavior models.
-    - More sophisticated AI agent logic.
-    - A more realistic token price model.
-    - Integration of external market factors.
-- Implement stress tests for gaming and collusion.
-- Validate the model against real-world data and user feedback (as the Choir platform evolves).
-
-### Phase 3: Advanced Simulations and Policy Optimization
-
-- Use the cadCAD model to explore and optimize different economic policies and governance mechanisms.
-- Conduct more sophisticated scenario analysis and "black swan" event simulations.
-- Use the model to guide the long-term evolution and refinement of the CHIP token economy.
-
-## Resources and Tools
-
-*   **cadCAD Python Library:** [https://docs.cadcad.org/](https://docs.cadcad.org/)
-*   **Python (for cadCAD Modeling and Analysis)**
-*   **Data Visualization Libraries (Plotly, Dash, Matplotlib, Seaborn)**
-*   **Cloud Compute Resources (for Running Large-Scale Simulations, if Needed)**
-
-## Conclusion
-
-Building a comprehensive cadCAD model of the CHIP token economy is a crucial investment for the Choir project. It will provide a "virtual lab" for rigorous testing, optimization, and validation of the token economy, ensuring its robustness, sustainability, and alignment with the project's ambitious goals for decentralized, AI-driven knowledge creation and value distribution. This data-driven approach to tokenomics design will be a key differentiator for Choir and a foundation for long-term success.
-
 === File: docs/plan_chip_materialization.md ===
 
 
@@ -1310,129 +1223,6 @@ The marketing and messaging for the "AI Supercomputer Box" should emphasize:
 5.  **Refine Marketing and Messaging for Hardware Launch:**  Develop a detailed marketing and messaging strategy for the "AI Supercomputer Box" hardware launch, targeting early adopters, content creators, and premium consumers.
 
 The "CHIP Materialization" plan for the "AI Supercomputer Box" represents a bold and ambitious step towards realizing the full potential of Choir and creating a truly transformative consumer AI product. By combining cutting-edge hardware, innovative software, and a revolutionary token economy, Choir is poised to redefine the future of home computing and personal AI.
-
-=== File: docs/plan_libsql.md ===
-
-
-
-==
-plan_libsql
-==
-
-
-# libSQL Integration Plan for Choir: Expanded Role Across Architecture
-
-## Overview
-
-This document outlines the expanded integration plan for libSQL/Turso within the Choir platform, highlighting its use not only for MCP server-specific state persistence but also for **local data storage within the Swift client application**.  This document clarifies how libSQL/Turso fits into the overall Choir architecture alongside Qdrant (for vector database) and Sui (for blockchain), creating a multi-layered data persistence strategy.
-
-## Core Objectives (Expanded Scope for libSQL/Turso)
-
-1.  **libSQL for Server-Specific State Persistence (MCP Servers):** Utilize libSQL as the primary solution for local persistence of server-specific data within each MCP server (phase server), enabling efficient caching and server-local data management.
-2.  **libSQL for Client-Side Data Storage (Swift Client):** Integrate libSQL into the Swift client application (iOS app) to provide **local, on-device data storage** for user data, conversation history, and application settings, enabling offline functionality and improved data management within the mobile client.
-3.  **Flexible Schema Across Client and Servers:** Design flexible libSQL schemas that can accommodate the evolving data models in both MCP servers and the Swift client application, ensuring adaptability and maintainability.
-4.  **Complementary to Qdrant and Sui:** Clearly define the distinct roles of libSQL/Turso, Qdrant, and Sui within the Choir stack, emphasizing how libSQL/Turso complements these technologies rather than replacing them.
-5.  **Simplify for MVP Scope (Focus on Essential Functionalities):** Focus the libSQL integration plan on the essential database functionalities needed for the MVP in both MCP servers and the Swift client, deferring more advanced features like multi-device sync or advanced quantization to later phases.
-
-## Revised Implementation Plan (Expanded libSQL Role)
-
-### 1. libSQL for MCP Server-Specific State Persistence (Detailed)
-
-*   **Embedded libSQL in Each MCP Server (Phase Servers):**  Each MCP server (Action Server, Experience Server, etc.) will embed a lightweight libSQL database instance for managing its *server-specific state*.
-*   **Server-Specific State Schema (Flexible and Minimal):** Design a flexible and minimal libSQL schema for server-specific state, focusing on common use cases like caching and temporary data storage.  Example schema (generic cache and server state tables):
-
-    ```sql
-    -- Generic cache table for MCP servers (reusable across servers)
-    CREATE TABLE IF NOT EXISTS server_cache (
-        key TEXT PRIMARY KEY,  -- Cache key (e.g., URI, query parameters)
-        value BLOB,          -- Cached data (can be text, JSON, binary)
-        timestamp INTEGER     -- Timestamp of cache entry
-    );
-
-    -- Server-specific state table (example - Experience Server - customizable per server)
-    CREATE TABLE IF NOT EXISTS experience_server_state (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        last_sync_time INTEGER,
-        # ... add server-specific state fields as needed ...
-    );
-    ```
-
-*   **MCP Server SDK Utilities for libSQL Access:**  Provide utility functions and helper classes within the MCP Server SDK (Python, TypeScript, etc.) to simplify common libSQL operations within server code (as outlined in the previous `docs/3-implementation/state_management_patterns.md` update).
-
-### 2. libSQL for Client-Side Data Storage (Swift Client Application)
-
-*   **Embedded libSQL in Swift iOS Client:** Integrate the libSQL Swift SDK directly into the iOS client application. This embedded database will be used for:
-    *   **Local Conversation History Persistence:** Storing the full conversation history (messages, user prompts, AI responses) locally on the user's device, enabling offline access to past conversations and a seamless user experience even without a network connection.
-    *   **User Settings and Preferences:** Persisting user-specific settings, preferences, and application state locally on the device.
-    *   **Client-Side Caching (Optional):**  Potentially using libSQL for client-side caching of resources or data fetched from MCP servers to improve app responsiveness and reduce network traffic (though HTTP caching mechanisms might be more appropriate for HTTP-based resources).
-*   **Swift Client-Side Schema (Conversation History and User Data):** Design a libSQL schema within the Swift client application to efficiently store and manage:
-
-    ```sql
-    -- Client-Side Conversation History Table
-    CREATE TABLE IF NOT EXISTS conversation_history (
-        id TEXT PRIMARY KEY,  -- Unique conversation ID
-        title TEXT,           -- Conversation title
-        created_at INTEGER,   -- Creation timestamp
-        updated_at INTEGER    -- Last updated timestamp
-    );
-
-    -- Client-Side Messages Table (within each conversation)
-    CREATE TABLE IF NOT EXISTS messages (
-        id TEXT PRIMARY KEY,
-        conversation_id TEXT,
-        role TEXT,             -- "user" or "assistant"
-        content TEXT,          -- Message content
-        timestamp INTEGER,     -- Message timestamp
-        # ... other message-specific metadata ...
-        FOREIGN KEY(conversation_id) REFERENCES conversation_history(id)
-    );
-
-    -- Client-Side User Settings Table
-    CREATE TABLE IF NOT EXISTS user_settings (
-        setting_name TEXT PRIMARY KEY,
-        setting_value TEXT     -- Store setting values as TEXT or JSON
-    );
-    ```
-
-*   **Swift Data Services for libSQL Access:** Create Swift data service classes or modules within the iOS client application to provide clean and abstracted APIs for accessing and manipulating data in the local libSQL database (e.g., `ConversationHistoryService`, `UserSettingsService`).
-
-### 3. Vector Search (Qdrant for Global Knowledge, libSQL - Optional and Limited)
-
-*   **Qdrant Remains the Primary Vector Database (Global Knowledge Base):**  **Qdrant remains the primary vector database solution for Choir**, used for the global knowledge base, semantic search in the Experience phase, and long-term storage of vector embeddings for messages and other content.  Qdrant's scalability, feature richness, and performance are essential for handling the large-scale vector search requirements of the Choir platform.
-*   **libSQL Vector Search - *Optional* for Highly Localized Client-Side Features (Consider Sparingly):**  While libSQL offers vector search capabilities, **consider using libSQL vector search *sparingly* and only for *highly localized, client-side features* where a lightweight, embedded vector search is truly beneficial.**  For most vector search needs, especially those related to the global knowledge base and the Experience phase, Qdrant is the more appropriate and scalable solution.  Over-reliance on libSQL vector search could limit scalability and performance in the long run.
-
-### 4. Synchronization Management (Simplified for MVP - Focus on Local Data, Cloud Sync - Future)
-
-*   **No Multi-Device Sync for MVP (Defer):** Multi-device synchronization of conversation history or server state via Turso cloud sync is **explicitly deferred for the MVP**.
-*   **Local Persistence as MVP Focus:** The primary goal of libSQL integration for the MVP is to provide **robust local persistence** in both MCP servers and the Swift client application.
-*   **Cloud Backup and Sync via Turso - Future Roadmap Item:** Cloud backup and multi-device sync via Turso (or other cloud sync mechanisms) remain valuable **future roadmap items** to be considered in later phases, to enhance user data portability and accessibility across devices.
-
-## Phased Implementation Approach (libSQL Integration - Expanded)
-
-The phased approach to libSQL integration now encompasses both MCP servers and the Swift client:
-
-### Phase 1: Core UX and Workflow (No Database Dependency - Current Focus)
-
-- Continue developing the core UI and PostChain workflow, minimizing dependencies on databases for initial prototyping and UX validation.
-
-### Phase 2: Basic libSQL Integration - Server-Side State Persistence (MVP Phase)
-
-- Implement libSQL integration in MCP servers for server-specific state persistence and caching (as outlined in the previous plan).
-
-### Phase 3: libSQL Integration - Swift Client-Side Persistence (MVP Phase)
-
-- Integrate libSQL into the Swift client application for local conversation history and user settings persistence.
-- Create Swift data services to manage client-side libSQL database access.
-
-### Phase 4: (Optional) Vector Search Integration (MVP or Post-MVP - Re-evaluated)
-
-- Re-evaluate the need for vector search in libSQL for the MVP. If deemed essential for a simplified MVP Experience phase, implement basic libSQL vector search.
-- Otherwise, defer vector search implementation to post-MVP phases and plan for Qdrant integration for scalable vector search.
-
-### Phase 5: (Future) Advanced libSQL Features and Cloud Sync
-
-- In later phases, explore and implement more advanced libSQL/Turso features, including cloud sync, multi-device support, and potential performance optimizations.
-
 # Level 4 Documentation
 
 
@@ -1829,7 +1619,7 @@ These visualizations are essential for understanding how value and influence pro
     *   **Visualization Components:**
         *   Nodes as Economic Entities: Represent different entities in the token economy as nodes in a Sankey diagram:
             *   User Groups: Different categories of users (Content Creators, Curators, etc.).
-            *   AI Agents (Phase Servers): Represent the aggregate economic activity of all MCP servers.
+            *   AI Agents (Phase Servers): Represent the aggregate economic activity of all phases.
             *   Treasury: Represent the Choir treasury or reserve fund.
             *   Token Holders: Represent CHIP token holders as a whole.
         *   Edges as Value Flows: Represent flows of CHIP tokens between entities as directed edges in the Sankey diagram.
@@ -2012,135 +1802,6 @@ The evolution of CHIP points towards a **new paradigm for tokenized value and AI
 
 The evolution of CHIP is a journey from a simple utility token to a **fundamental building block of a revolutionary AI-powered knowledge ecosystem.** It represents a shift from extractive platforms to **value-aligned, user-empowering, and self-improving systems** that have the potential to reshape the future of online interaction and collective intelligence.
 
-=== File: docs/architecture_reorganization_plan_mcp.md ===
-
-
-
-==
-architecture_reorganization_plan_mcp
-==
-
-
-# Detailed Plan: MCP Architecture for PostChain with SSE Streaming and Model Abstraction
-
-## 1. Define Model-Aware MCP Servers for Each Phase (SSE Streaming & Langchain Utils Integration)
-
-We will create a separate MCP server for each of the six PostChain phases: Action, Experience, Intention, Observation, Understanding, and Yield. Each server will be enhanced to support Server-Sent Events (SSE) for streaming output and will utilize the existing model abstraction layer in `api/app/langchain_utils.py`. Each server will provide *two* SSE streams:
-
-*   **`reasoning` stream:**  For emitting tokens representing the reasoning process of the phase. This stream is optional and may be empty for phases without explicit reasoning steps.
-*   **`answer` stream:** For emitting the final output tokens of the phase.
-
-[reconsider this: maybe leverage sequential thinking tool to abstract over reasoning, such that reasoning doesnt always come first. or maybe use pydantic types to have "thoughts" precede the answer. options...]
-
-Each MCP server will:
-
-*   **Random Model Selection:**  Each server will randomly select a model at initialization from the list returned by `get_tool_compatible_models(config)` in `langchain_utils.py` (for random model mode).
-*   **Fixed Model for Prototype:** For the initial prototype (in "fixed model mode"), each server will use `config.GOOGLE_GEMINI_20_FLASH` for simplicity and speed.
-*   **Utilize `langchain_utils.py`:** Import and use functions from `langchain_utils.py` (especially `get_base_model` and `convert_to_langchain_messages`) to initialize and interact with LLMs. This ensures consistency with the existing model abstraction layer.
-*   **Model Configuration:**  Each server will have a configuration option to switch between *fixed model* (`GOOGLE_GEMINI_20_FLASH`) and *random model selection* modes.
-*   **SSE Streaming with Reasoning Token Extraction:** Implement dual SSE streams (`reasoning` and `answer`) and model-specific logic for extracting reasoning tokens.  This logic will be tailored to the models chosen for each phase and will likely involve conditional parsing based on the model provider (e.g., checking for `</think>` for DeepSeek, `"reasoning"` field for Claude, etc.).
-
-## 2. Model and Tool Allocation per Phase (Refined Model Choices & Langchain Utils)
-
-*   **Action Server:**
-    *   Purpose: Handle user input, initial prompting, and route messages.
-    *   Model: Randomly selected from `get_tool_compatible_models(config)` (random mode).  *Fixed Prototype Model:* `config.GOOGLE_GEMINI_20_FLASH`.
-    *   Tools: `ask_followup_question`.
-    *   SSE Streams:  Primarily `answer` stream for the initial prompt or clarification questions. `reasoning` stream likely minimal.
-
-*   **Experience Server:**
-    *   Purpose: Enrich context with past knowledge, retrieve relevant information.
-    *   Models:  Randomly selected from `get_tool_compatible_models(config)` (random mode). *Fixed Prototype Model:* `config.GOOGLE_GEMINI_20_FLASH`.
-    *   Tools: `brave_web_search`, `fetch_url`, `qdrant`.
-    *   SSE Streams: `reasoning` stream could show search queries and document summaries as they are processed. `answer` stream would contain the final enriched context.
-
-*   **Intention Server:**
-    *   Purpose:  Model user intent, track goals, and focus information.
-    *   Model: Randomly selected from `get_tool_compatible_models(config)` (random mode). *Fixed Prototype Model:* `config.GOOGLE_GEMINI_20_FLASH`.
-    *   Tools:  None initially, focus on model-driven intent inference.
-    *   SSE Streams: `reasoning` stream would emit the thoughts generated by `sequentialthinking`. `answer` stream would contain the final inferred intent and goals.
-
-*   **Observation Server:**
-    *   Purpose: Track semantic connections, tag information, and preserve relationships.
-    *   Model: Randomly selected from `get_tool_compatible_models(config)` (random mode). *Fixed Prototype Model:* `config.GOOGLE_GEMINI_20_FLASH`.
-    *   Tools: None initially, focus on internal state management.
-    *   SSE Streams: `reasoning` stream could describe the semantic analysis process. `answer` stream would confirm the observation actions taken (tagging, linking, etc.).
-
-*   **Understanding Server:**
-    *   Purpose: Evaluate context, filter information, and manage information release.
-    *   Model: Randomly selected from `get_tool_compatible_models(config)` (random mode). *Fixed Prototype Model:* `config.GOOGLE_GEMINI_20_FLASH`.
-    *   Tools: None initially, focus on model-driven context evaluation and filtering.
-    *   SSE Streams: `reasoning` stream (showing context evaluation and filtering steps), `answer` stream (final refined context).
-
-*   **Yield Server:**
-    *   Purpose: Format output, decide on recursion, and complete the process.
-    *   Model: Randomly selected from `get_tool_compatible_models(config)` (random mode). *Fixed Prototype Model:* `config.GOOGLE_GEMINI_20_FLASH`.
-    *   Tools: `attempt_completion`, `write_to_file`.
-    *   SSE Streams: `reasoning` stream (for output formatting steps), `answer` stream (final formatted output).
-
-## 3. Orchestration and Communication (Python API, SSE, Langchain Utils, Dynamic Models)
-
-The Python API will:
-
-*   Use `langchain_utils.py` for any client-side model interactions if needed (though most model interactions will be within MCP servers).
-*   Orchestrate MCP server calls and SSE stream handling.
-*   Be aware that each phase can now use a *randomly selected* tool-compatible model.
-
-## 4. Prototyping and Testing (Model-Specific SSE, Langchain Utils Integration)
-
-Prototyping will involve:
-
-*   Selecting specific models for each of the Action, Experience, and Yield phases (as outlined above).
-*   Implementing model-specific reasoning token extraction in each server, tailored to the chosen models (DeepSeek, Claude, etc.).
-*   Integrating `langchain_utils.py` for model initialization within each MCP server.
-*   Testing the dual SSE streams with a UI that can display "reasoning" and "answer" tokens separately.  Start with a basic terminal UI for initial testing.
-
-## 5. Economic Actions and PySUI Integration (Later Phase)
-
-Integration with economic actions and PySUI will be considered in a later phase, after the core MCP and SSE architecture is functional and tested.
-
-## Mermaid Diagram for Plan:
-
-```mermaid
-graph LR
-    A[User Input] --> ActionServer
-    ActionServer -- Reasoning SSE --> PythonAPI
-    ActionServer -- Answer SSE --> PythonAPI
-    PythonAPI --> ExperienceServer
-    ExperienceServer -- Reasoning SSE --> PythonAPI
-    ExperienceServer -- Answer SSE --> PythonAPI
-    PythonAPI --> IntentionServer
-    IntentionServer -- Reasoning SSE --> PythonAPI
-    IntentionServer -- Answer SSE --> PythonAPI
-    PythonAPI --> ObservationServer
-    ObservationServer -- Reasoning SSE --> PythonAPI
-    ObservationServer -- Answer SSE --> PythonAPI
-    PythonAPI --> UnderstandingServer
-    UnderstandingServer -- Reasoning SSE --> PythonAPI
-    UnderstandingServer -- Answer SSE --> PythonAPI
-    PythonAPI --> YieldServer
-    YieldServer -- Reasoning SSE --> PythonAPI
-    YieldServer -- Answer SSE --> PythonAPI
-    PythonAPI --> B[User Output / Attempt Completion]
-
-    subgraph MCP Servers
-    ActionServer
-    ExperienceServer
-    IntentionServer
-    ObservationServer
-    UnderstandingServer
-    YieldServer
-    end
-
-    subgraph Python API
-    PythonAPI
-    end
-
-
-    style MCP Servers fill:#f9f,stroke:#333,stroke-width:2px
-    style Python API fill:#ccf,stroke:#333,stroke-width:2px
-    linkStyle 0,2,4,6,8,10,12,14,16,18 stroke-dasharray: 5 5;
-
 === File: docs/blockchain_integration.md ===
 
 
@@ -2150,132 +1811,125 @@ blockchain_integration
 ==
 
 
-# Blockchain Integration in Choir: Dedicated Blockchain Service Server with MCP
+# Blockchain Integration in Choir (Qdrant-Sui MVP)
+
+VERSION blockchain_integration: 8.0 (Qdrant-Sui MVP Focus)
 
 ## Overview
 
-This document outlines the blockchain integration strategy for Choir, now implemented with a dedicated **Blockchain Service Server** within the Model Context Protocol (MCP) architecture. This revised approach enhances modularity, security, and maintainability by centralizing all blockchain interactions within a single, TEE-protected MCP server.
+This document outlines the blockchain integration strategy for the Choir Qdrant-Sui MVP. This approach centralizes blockchain interactions within the main Python API backend, specifically using a dedicated service module (`sui_service.py`) to interact with the Sui blockchain via the PySUI SDK.
 
-## Core Blockchain Integration Goals (No Changes)
+## Core Blockchain Integration Goals
 
-The core goals of blockchain integration remain the same:
+The core goals of blockchain integration for the MVP and beyond remain:
 
-1.  **Immutable Record of Economic Actions:**  Utilize the Sui blockchain to create an immutable and transparent record of key economic events within Choir, such as token rewards, stake transactions, and governance decisions.
-2.  **Decentralized and Verifiable Token Economy:**  Implement the CHIP token economy using Sui smart contracts, enabling decentralized token distribution, governance, and value exchange.
-3.  **Secure and Transparent Reward Distribution:**  Ensure that CHIP token rewards for novelty and citations are distributed fairly, transparently, and verifiably on-chain.
-4.  **Enable On-Chain Governance:**  Empower CHIP token holders to participate in the decentralized governance of the Choir platform through on-chain voting and proposal mechanisms.
+1.  **Immutable Record of Economic Actions:** Utilize the Sui blockchain for a transparent record of key economic events, primarily simplified token rewards for the MVP.
+2.  **Decentralized and Verifiable Token Economy:** Implement the basic CHIP token using a Sui smart contract (`choir_coin.move`).
+3.  **Secure and Transparent Reward Distribution:** Ensure that CHIP token rewards (simplified for MVP) are distributed verifiably on-chain.
+4.  **(Future)** Enable On-Chain Governance: Lay the groundwork for future on-chain governance by CHIP token holders.
 
-## Revised Blockchain Integration Architecture: Dedicated Blockchain Service Server
+## MVP Blockchain Integration Architecture: Centralized API Service
 
-In the MCP architecture, blockchain integration is now handled by a **dedicated Blockchain Service Server**, which acts as the *sole interface* between the Choir platform and the Sui blockchain.
+In the Qdrant-Sui MVP architecture, blockchain integration is handled by the **Python API backend** via its `sui_service.py` module. This service acts as the *sole interface* between the Choir application logic and the Sui blockchain.
 
-**Key Components of the Revised Architecture:**
+**Key Components:**
 
-*   **Blockchain Service Server (New MCP Server):**
-    *   **Dedicated MCP Server:** A new, specialized MCP server is introduced, specifically designed to handle all blockchain interactions.
-    *   **PySUI Integration (Encapsulated):** The PySUI SDK for interacting with the Sui blockchain is *exclusively integrated within this server*. No other phase servers or the Host application directly include PySUI.
-    *   **TEE Deployment (Phala Network):** The Blockchain Service Server is deployed within a Phala Network Trusted Execution Environment (TEE), ensuring the secure isolation and protection of Sui private keys.
-    *   **MCP Tool Provider:** The Blockchain Service Server exposes MCP tools that encapsulate various blockchain operations (recording citations, fetching thread state, transferring tokens, etc.).
+*   **Python API Backend (FastAPI/Uvicorn):**
+    *   **Orchestrates Workflow:** Manages the PostChain workflow execution.
+    *   **Contains Blockchain Logic:** Includes the `sui_service.py` module responsible for all Sui interactions.
+    *   **Triggers Rewards:** After the PostChain workflow completes (Yield phase), the API calls functions within `sui_service.py` to process rewards based on data stored in Qdrant.
 
-*   **MCP Phase Servers (Action, Experience, Yield, etc.):**
-    *   **No Direct Blockchain Interaction:** Phase servers (Action, Experience, Yield, Intention, Observation, Understanding) **no longer directly interact with the Sui blockchain or PySUI.**
-    *   **Blockchain Interaction via MCP Tools:** When phase servers need to perform blockchain operations (e.g., Yield Server recording citation rewards), they do so by making **MCP tool calls to the Blockchain Service Server**.
-    *   **Simplified Logic and Focus:** Phase servers are simplified and focused on their core AI workflow logic, without the added complexity of blockchain integration.
+*   **`sui_service.py` (within API Backend):**
+    *   **PySUI Integration (Encapsulated):** The PySUI SDK for interacting with the Sui blockchain is exclusively used within this service module.
+    *   **Handles Transactions:** Constructs, signs (using keys managed by the API's environment/secrets), and submits transactions to the Sui network.
+    *   **Exposes Service Functions:** Provides functions (e.g., `record_reward`, `get_balance`) called internally by the API's orchestration logic.
 
-*   **Host Application (Python API):**
-    *   **Orchestrates MCP Servers:** The Host application continues to orchestrate the PostChain workflow and manage communication between MCP servers.
-    *   **No Direct Blockchain Interaction (Typically):** The Host application *typically does not directly interact with the Sui blockchain* in this architecture.  Blockchain interactions are encapsulated within the Blockchain Service Server.  In some advanced scenarios, the Host *could* potentially call tools on the Blockchain Service Server if needed, but direct PySUI integration in the Host is avoided.
+*   **PostChain Workflow (LCEL - within API Backend):**
+    *   **No Direct Blockchain Interaction:** The AEIOU-Y phase logic **does not directly interact with the Sui blockchain or PySUI.**
+    *   **Provides Reward Inputs:** The workflow (specifically data gathered by Experience and finalized by Yield) provides the necessary inputs (author ID, prior IDs, scores) for the API to trigger the reward calculation in `sui_service.py`.
 
-**Architecture Diagram (MCP with Dedicated Blockchain Service Server):**
+*   **Sui Blockchain:**
+    *   **Hosts CHIP Token Contract:** Runs the `choir_coin.move` smart contract defining the basic CHIP token.
+    *   **Records Transactions:** Stores the history of token transfers/mints executed by `sui_service.py`.
+
+**Architecture Diagram (Qdrant-Sui MVP):**
 
 ```mermaid
 graph LR
-    A[Host Application (Python API)] --> B(Action Server)
-    B --> C(Experience Server)
-    C --> D(Intention Server)
-    D --> E(Observation Server)
-    E --> F(Understanding Server)
-    F --> G(Yield Server)
-    G --> A
+    A[Client (SwiftUI)] --> B{Python API (FastAPI)};
+    B --> C[PostChain Workflow (LCEL)];
+    C -- Interacts via database.py --> D[(Qdrant)];
+    C -- Returns final data --> B;
+    B -- Triggers reward --> E[sui_service.py];
+    E -- Uses PySUI --> F[(Sui Blockchain)];
+    B -- Streams results --> A;
 
-    style A fill:#ccf,stroke:#333,stroke-width:2px
-    style B,C,D,E,F,G fill:#f9f,stroke:#333,stroke-width:2px
+    style B fill:#ccf,stroke:#333,stroke-width:2px;
+    style C,E fill:#f9f,stroke:#333,stroke-width:2px;
+    style D,F fill:#bfc,stroke:#333,stroke-width:2px;
 
-    subgraph PostChain MCP Servers
+    subgraph API Backend Container
         B
         C
-        D
         E
-        F
-        G
     end
 
-    H[Blockchain Service Server (TEE)] --> Sui[Sui Blockchain]
-    style H fill:#bfc,stroke:#333,stroke-width:2px
+    Communication Flow for Blockchain Operations (MVP):
 
-    YieldServer --> H
-    ExperienceServer --> H
-    subgraph Dedicated MCP Servers
-        H
-    end
+PostChain Completion: The PostChain workflow (running within the API) completes its final (Yield) phase. It returns the final AI message structure, including author ID, cited prior IDs, novelty score, and similarity scores.
 
-    linkStyle 0,1,2,3,4,5,6 stroke-dasharray: 5 5;
-    ```
+API Trigger: The main API logic receives the completed PostChain data.
 
-    Communication Flow for Blockchain Operations
-When a phase server (e.g., Yield Server) needs to perform a blockchain operation:
+Data Persistence: The API saves the final AI message to the choir collection in Qdrant.
 
-Phase Server (MCP Client Role) Initiates Tool Call: The phase server (acting as an MCP client) sends a callTool request to the Blockchain Service Server.
+Call Sui Service: The API calls the appropriate function within sui_service.py (e.g., process_rewards), passing the relevant data fetched from the newly saved Qdrant message (or held from the workflow result).
 
-Tool Selection and Parameters: The callTool request specifies the appropriate tool for the blockchain operation (e.g., record_citation, get_thread_state) and includes the necessary parameters (e.g., cited_message_id, citing_message_id, citation_value).
+Sui Service Execution: The sui_service.py function:
 
-Blockchain Service Server (Tool Execution within TEE): The Blockchain Service Server receives the callTool request and executes the corresponding tool logic within its secure TEE environment. This tool logic includes:
+Performs the (simplified for MVP) reward calculation.
 
-Using PySUI (securely encapsulated within the TEE) to construct and sign a Sui blockchain transaction.
+Looks up recipient Sui addresses if necessary (using Qdrant users collection via database.py).
 
-Interacting with the Sui blockchain to submit the transaction.
+Uses PySUI to construct and sign the necessary Sui transaction(s) (e.g., calling a basic mint_reward function in the choir_coin contract).
 
-Blockchain Service Server Returns Result: The Blockchain Service Server sends a CallToolResult back to the requesting phase server, indicating the outcome of the blockchain operation (success or failure) and potentially including transaction details.
+Submits the transaction to the Sui blockchain.
 
-MCP Tools Exposed by the Blockchain Service Server
-The Blockchain Service Server exposes a set of MCP tools to encapsulate various blockchain operations. Examples include:
+Result Handling: The sui_service.py function returns the transaction result (e.g., digest, success/failure) to the main API logic. The API logs this result. (Note: For MVP, the result might not be directly propagated back to the client UI).
 
-record_citation(cited_message_id, citing_message_id, citation_value): Records a citation event on the Sui blockchain, distributing CHIP token rewards.
+Service Functions Exposed by sui_service.py (MVP):
 
-get_thread_state(thread_id): Fetches the current economic state (stake price, FQAHO parameters) of a thread from the Sui smart contract.
+The sui_service.py module exposes internal functions called by the API orchestrator. Key functions for the MVP include:
 
-transfer_tokens(recipient_address, amount): Initiates a CHIP token transfer from the treasury or a designated account to a recipient address.
+process_rewards(message_id, author_user_id, cited_prior_ids, novelty_score, similarity_scores): Calculates (simplified) rewards and calls the mint/transfer function.
 
-get_treasury_balance(): Queries the current CHIP token balance of the treasury smart contract.
+_call_sui_mint(recipient_address, amount): Internal helper to interact with the Sui contract's mint function.
 
-get_verified_user_status(user_id): Checks if a user is KYC-verified and has a verified identity on the blockchain (for future IDaaS integration).
+get_balance(sui_address): Queries the SUI balance (primarily for testing/diagnostics in MVP). (Already implemented)
 
-submit_governance_vote(proposal_id, vote_choice): Allows verified users (or AI agents acting on their behalf) to submit votes in on-chain governance proposals.
+(Future) get_chip_balance(sui_address): Queries the CHIP token balance.
 
-The specific set of tools exposed by the Blockchain Service Server can be extended and customized as needed to support the evolving blockchain integration requirements of the Choir platform.
+(Future) get_thread_stake_price(thread_id): Fetches economic state from potential future FQAHO contract.
 
-Security Benefits of the Dedicated Blockchain Service Server
-This revised architecture with a dedicated Blockchain Service Server provides significant security advantages:
+Security Considerations (MVP):
 
-Centralized and Isolated Key Management: Private keys for Sui blockchain operations are centralized and isolated within a single, TEE-protected service. This drastically reduces the attack surface and simplifies key management.
+With blockchain interactions centralized in the API backend's sui_service.py:
 
-Reduced Attack Surface for Phase Servers: Phase servers (Action, Experience, Yield, etc.) no longer need to handle any blockchain-related code or private keys. This significantly reduces their attack surface and simplifies their security profile.
+API Key Management: The primary security concern is protecting the Sui private key used by the API backend. This key must be managed securely using environment variables, platform secrets management (e.g., Render secrets), or a dedicated secrets manager. It must not be hardcoded.
 
-Clear Security Boundary: The Blockchain Service Server acts as a clear security boundary for all blockchain interactions. Security audits and vulnerability assessments can be focused on this single, critical component, rather than needing to examine every phase server for potential blockchain security issues.
+Input Validation: The API must rigorously validate all data passed to sui_service.py functions, especially recipient addresses and amounts, to prevent manipulation or unintended transactions.
 
-Enhanced Auditability and Monitoring: All blockchain operations are now channeled through the Blockchain Service Server, making it easier to monitor and audit blockchain interactions and detect any suspicious activity.
+Service Isolation (Logical): While not physically isolated like a separate server/TEE, sui_service.py provides logical isolation. All blockchain interaction code is contained within this module, making it easier to audit and secure compared to scattering PySUI calls throughout the codebase.
 
-Simplified Security Policies: Security policies and access controls for blockchain operations can be集中管理 and enforced at the level of the Blockchain Service Server, simplifying overall system security management.
+Standard API Security: General API security practices (authentication, authorization, rate limiting, HTTPS) are essential to protect the endpoints that trigger the workflows leading to blockchain interactions.
 
-Deployment Considerations
-Docker Compose for Local Development: In a local development environment using Docker Compose, the Blockchain Service Server can be deployed as a separate Docker container alongside other MCP servers and the Host application.
+Deployment Considerations (MVP):
 
-Phala Network TEE Deployment (Production): For production deployments on Phala Network, the Blockchain Service Server's Docker container should be specifically configured to be deployed to a Phala TEE worker. The other phase servers and the Host application can be deployed to standard Phala workers or other infrastructure.
+API Container Deployment: The Python API, including sui_service.py and its PySUI dependency, is deployed as a single Docker container (e.g., on Render).
 
-Secure Key Provisioning to TEE Container: The deployment process must include a secure mechanism for provisioning the Sui private keys to the Blockchain Service Server container within the Phala TEE environment, ensuring that keys are never exposed outside the secure enclave.
+Secure Key Provisioning: The Sui private key required by sui_service.py must be securely provisioned to the deployed container's environment (e.g., using Render's secret management).
 
-Conclusion
-The dedicated Blockchain Service Server architecture provides a more modular, secure, and maintainable approach to blockchain integration within the Choir MCP system. By centralizing and isolating blockchain operations and key management within a TEE-protected service, this architecture enhances the overall security, scalability, and robustness of the Choir platform, paving the way for secure and scalable blockchain integration.
+Conclusion (MVP Focus)
+The Qdrant-Sui MVP utilizes a centralized approach for blockchain integration, embedding the logic within the main Python API backend via the sui_service.py module. This simplifies the architecture for the MVP, allowing focus on the core Qdrant data structures and the basic reward triggering mechanism. While deferring the complexities of distributed servers and TEEs, this approach provides a clear path to validating the fundamental interaction between AI-analyzed data in Qdrant and the Sui blockchain-based token economy. Secure management of the API's Sui key is paramount in this model.
 
 === File: docs/comp_provider_info.md ===
 
@@ -2325,244 +1979,6 @@ comp_provider_info
 
 *Data preserved from original LangGraph-era tests conducted 2025-03-01*
 
-=== File: docs/developer_quickstart.md ===
-
-
-
-==
-developer_quickstart
-==
-
-
-# Developer Quickstart: Building Your First Choir MCP Server (Python)
-
-Welcome to the Choir developer quickstart! This guide will walk you through building a simple Model Context Protocol (MCP) server using the Python SDK, specifically tailored for the Choir platform. By the end of this guide, you'll have a basic MCP server running that you can connect to a client and start extending with your own Choir phase logic.
-
-**Prerequisites:**
-
-*   **Python 3.10+ Installed:** Ensure you have Python 3.10 or a later version installed on your system.
-*   **uv Package Manager (Recommended):** We recommend using `uv` for Python package management. If you don't have it installed, follow the instructions [here](https://astral.sh/uv).
-*   **Basic Python Knowledge:** Familiarity with Python syntax and asynchronous programming (`async/await`) is helpful.
-*   **Understanding of MCP Core Concepts (Recommended):** While not strictly required, it's beneficial to have a basic understanding of MCP concepts like servers, clients, tools, and resources. You can review the [Core Architecture documentation](/docs/concepts/architecture) for a quick overview.
-
-**Step 1: Set Up Your Development Environment**
-
-1.  **Create a Project Directory:**
-    ```bash
-    mkdir choir-mcp-server-quickstart
-    cd choir-mcp-server-quickstart
-    ```
-
-2.  **Create a Virtual Environment (using uv):**
-    ```bash
-    uv venv
-    source .venv/bin/activate  # On Linux/macOS
-    .venv\Scripts\activate     # On Windows
-    ```
-
-3.  **Install the MCP Python SDK and httpx (for our example):**
-    ```bash
-    uv add "mcp[cli]" httpx
-    ```
-
-4.  **Create Your Server File:**
-    ```bash
-    touch server.py
-    ```
-
-**Step 2: Build a Basic MCP Server in Python**
-
-Open `server.py` in your code editor and paste the following code:
-
-```python
-import asyncio
-import httpx
-import mcp.types as types
-from mcp.server import Server
-from mcp.server.stdio import stdio_server
-
-# Initialize MCP Server
-app = Server("choir-quickstart-server")
-
-# National Weather Service API Base URL
-NWS_API_BASE = "https://api.weather.gov"
-
-@app.list_tools()
-async def list_tools() -> list[types.Tool]:
-    """Declare the tools this server provides."""
-    return [
-        types.Tool(
-            name="get_alerts",
-            description="Get weather alerts for a US state. Input is Two-letter US state code (e.g. CA, NY)",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "state": {"type": "string", "description": "Two-letter US state code (e.g. CA, NY)"}
-                },
-                "required": ["state"]
-            }
-        ),
-        types.Tool(
-            name="get_forecast",
-            description="Get weather forecast for a specific latitude/longitude",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "latitude": {"type": "number", "description": "Latitude of the location"},
-                    "longitude": {"type": "number", "description": "Longitude of the location"},
-                },
-                "required": ["latitude", "longitude"]
-            }
-        ),
-    ]
-
-@app.call_tool()
-async def call_tool(name: str, arguments: dict) -> list[types.TextContent | types.ImageContent | types.EmbeddedResource]:
-    """Implement tool execution logic."""
-    if name == "get_alerts":
-        state = arguments.get("state")
-        if not state:
-            return [types.TextContent(type="text", text="Error: Missing 'state' argument.")]
-        return await get_weather_alerts(state)
-    elif name == "get_forecast":
-        latitude = arguments.get("latitude")
-        longitude = arguments.get("longitude")
-        if not latitude or not longitude:
-            return [types.TextContent(type="text", text="Error: Missing 'latitude' or 'longitude' arguments.")]
-        return await get_weather_forecast(latitude, longitude)
-    else:
-        return [types.TextContent(type="text", text=f"Error: Tool '{name}' not found.")]
-
-
-async def get_weather_alerts(state: str) -> list[types.TextContent]:
-    """Helper function to fetch weather alerts from NWS API."""
-    url = f"{NWS_API_BASE}/alerts/active/area/{state.upper()}"
-    async with httpx.AsyncClient() as client:
-        response = await client.get(url)
-        if response.status_code == 200:
-            data = response.json()
-            if data and data["features"]:
-                alerts = [feature["properties"]["event"] for feature in data["features"]]
-                return [types.TextContent(type="text", text=f"Weather alerts for {state.upper()}: {', '.join(alerts)}")]
-            else:
-                return [types.TextContent(type="text", text=f"No active weather alerts found for {state.upper()}")]
-        else:
-            return [types.TextContent(type="text", text=f"Error fetching weather alerts for {state.upper()}")]
-
-
-async def get_weather_forecast(latitude: float, longitude: float) -> list[types.TextContent]:
-    """Helper function to fetch weather forecast from NWS API."""
-    points_url = f"{NWS_API_BASE}/points/{latitude},{longitude}"
-    async with httpx.AsyncClient() as client:
-        points_response = await client.get(points_url)
-        if points_response.status_code == 200:
-            points_data = points_response.json()
-            forecast_url = points_data["properties"]["forecast"]
-            forecast_response = await client.get(forecast_url)
-            if forecast_response.status_code == 200:
-                forecast_data = forecast_response.json()
-                periods = forecast_data["properties"]["periods"]
-                forecast_text = "\n".join([f"{p['name']}: {p['shortForecast']}, Temperature: {p['temperature']}°{p['temperatureUnit']}" for p in periods[:3]]) # Show next 3 periods
-                return [types.TextContent(type="text", text=f"Weather forecast for {latitude}, {longitude}:\n{forecast_text}")]
-            else:
-                return [types.TextContent(type="text", text=f"Error fetching forecast data.")]
-        else:
-            return [types.TextContent(type="text", text=f"Error fetching location data.")]
-
-
-async def main():
-    """Main function to run the MCP server."""
-    async with stdio_server() as streams:
-        await app.run(
-            streams[0],
-            streams[1],
-            app.create_initialization_options()
-        )
-
-if __name__ == "__main__":
-    asyncio.run(main)
-Use code with caution.
-Markdown
-Step 3: Run Your MCP Server
-
-Open your terminal in the choir-mcp-server-quickstart directory.
-
-Run the server using the mcp run command (provided by the mcp[cli] package):
-
-mcp run server.py
-Use code with caution.
-Bash
-You should see output indicating that your server is running and connected via stdio.
-
-Step 4: Test Your Server with MCP Inspector
-
-To test your server interactively, we'll use the MCP Inspector tool.
-
-Open a new terminal window (leave your server running in the first terminal).
-
-Run the MCP Inspector using npx:
-
-npx @modelcontextprotocol/inspector
-Use code with caution.
-Bash
-In the Inspector UI:
-
-Connection Pane: Select "Stdio Transport". The "Command" field should be pre-filled with something like node ...inspector/inspector.js. Replace the entire "Command" field with: uv run path/to/your/server.py. Make sure to replace path/to/your/server.py with the absolute path to your server.py file (e.g., /Users/yourusername/choir-mcp-server-quickstart/server.py).
-
-Click "Connect".
-
-If connection is successful: You should see the "Resources", "Prompts", and "Tools" tabs become active.
-
-If connection fails: Check the "Notifications" pane in the Inspector for error messages and double-check your server path and configuration.
-
-Explore the "Tools" Tab:
-
-You should see the two tools you defined in your server: get_alerts and get_forecast.
-
-Click on get_alerts. You'll see the "Input Schema" for the state argument.
-
-Enter a two-letter US state code (e.g., CA) in the "state" input field.
-
-Click "Call Tool".
-
-You should see the tool execution result in the "Output" pane, displaying weather alerts for California (or an error message if there are issues).
-
-Experiment with the get_forecast tool, providing latitude and longitude coordinates.
-
-Congratulations! You've built and tested your first Choir MCP server!
-
-Key Takeaways:
-
-MCP Server Structure: You've seen the basic structure of an MCP server using the Python SDK, including:
-
-Initializing the Server instance.
-
-Using decorators (@app.list_tools(), @app.call_tool()) to define tools and their handlers.
-
-Using stdio_server() to connect to the stdio transport.
-
-Tool Definition and Execution: You've learned how to:
-
-Define MCP tools with types.Tool and JSON Schemas for input arguments.
-
-Implement tool execution logic in Python functions decorated with @app.call_tool().
-
-Return tool results as types.TextContent or other content types.
-
-Testing with MCP Inspector: You've used the MCP Inspector to interactively test your server, list tools, call tools, and view results.
-
-Next Steps:
-
-Explore Resources and Prompts: Extend your server to implement MCP resources and prompts, following the examples in the MCP documentation.
-
-Integrate with Real-World Data Sources: Connect your MCP server to your own data sources, APIs, or databases to build more useful and personalized tools and resources.
-
-Build More Complex Tools and Workflows: Create more sophisticated MCP tools that perform complex operations, orchestrate multiple steps, or interact with external systems in more advanced ways.
-
-Connect to Claude Desktop (or other MCP Clients): Configure Claude Desktop (or other MCP clients) to connect to your server and use your custom tools and resources within a real AI application environment.
-
-Dive Deeper into MCP Documentation: Explore the full MCP documentation to learn about advanced features, transports, security considerations, and best practices for building robust and scalable MCP integrations.
-
 === File: docs/index.md ===
 
 
@@ -2574,52 +1990,52 @@ index
 
 # Choir Documentation
 
-# Choir: Building a Tokenized Marketplace of Ideas on the Model Context Protocol
+# Choir: Building a Tokenized Marketplace of Ideas (Qdrant-Sui MVP)
 
 ## Core Concepts
 
-The Choir platform is a revolutionary system for building collective intelligence, structured around a sophisticated conceptual model and implemented with a cutting-edge Model Context Protocol (MCP) architecture.  Explore the foundational concepts:
+The Choir platform is a revolutionary system for building collective intelligence, structured around a sophisticated conceptual model. The Minimum Viable Product (MVP) focuses on validating the core data flow and reward mechanism using Qdrant and the Sui blockchain. Explore the foundational concepts:
 - [PostChain Temporal Logic](postchain_temporal_logic.md) - The temporal essence of each AEIOU-Y phase, driving dynamic and context-aware AI workflows.
-- [FQAHO Model](fqaho_visualization.md) - The Fractional Quantum Anharmonic Oscillator economic model, powering a self-improving token economy that rewards quality and innovation.
-- [Core Economics](core_economics.md) -  The economic principles and tokenomics of CHIP, designed to create a sustainable and equitable ecosystem for knowledge creation.
-- [Core State Transitions](core_state_transitions.md) - The carefully defined state transitions that govern the evolution of threads and the flow of value within Choir.
-- [Evolution: Naming](evolution_naming.md) -  The story behind the evolution of Choir's name, reflecting the project's journey and vision.
+- [FQAHO Model](fqaho_visualization.md) - The Fractional Quantum Anharmonic Oscillator economic model, powering a self-improving token economy that rewards quality and innovation (conceptual basis for MVP rewards).
+- [Core Economics](core_economics.md) - The economic principles and tokenomics of CHIP, designed to create a sustainable and equitable ecosystem for knowledge creation.
+- [Core State Transitions](core_state_transitions.md) - The carefully defined state transitions that govern the evolution of threads and the flow of value within Choir (principles guiding MVP implementation).
+- [Evolution: Naming](evolution_naming.md) - The story behind the evolution of Choir's name, reflecting the project's journey and vision.
 
-## Architecture: MCP-Powered Scalability and Modularity
+## Architecture (Qdrant-Sui MVP)
 
-Choir's technical architecture is now built on the **Model Context Protocol (MCP)**, a strategic pivot that provides a robust and scalable foundation for our vision:
-- [Stack Argument](stack_argument.md) -  The compelling rationale behind our technology choices, emphasizing the advantages of the MCP-based stack for Choir.
-- [Security Considerations](security_considerations.md) -  A deep dive into the security architecture of Choir, highlighting the benefits of MCP and confidential computing for building a trustworthy AI platform.
+Choir's MVP technical architecture centers on a Python API orchestrating interactions between Qdrant (data/vector storage) and the Sui blockchain (token/rewards).
+- [Core System Overview](core_core.md) - Description of the MVP architecture and components.
+- [Stack Argument](stack_argument.md) - The compelling rationale behind the technology choices for the MVP stack.
+- [Security Considerations](security_considerations.md) - A deep dive into the security architecture for the MVP's centralized API and data stores.
 
-## Implementation: Building the Revolution, One Phase at a Time
+## Implementation (Qdrant-Sui MVP)
 
-Explore the practical implementation of Choir's MCP-based architecture:
-- [Developer Quickstart](developer_quickstart.md) -  A fast onboarding guide for developers to start building MCP-powered phases and applications for Choir.
-- [State Management Patterns](state_management_patterns.md) - Best practices and design patterns for managing state efficiently and robustly within MCP-based AI systems.
+Explore the practical implementation of Choir's MVP architecture:
+- [State Management Patterns](state_management_patterns.md) - How state is managed within the central API and persisted in Qdrant for the MVP.
 
-## MCP-Based Context Management: Orchestrating the Flow of Knowledge
+## Context Management in the PostChain Workflow
 
-Choir leverages the power of MCP to enable sophisticated context management, with each phase playing a specialized role in orchestrating the flow of knowledge:
+Choir leverages the AEIOU-Y PostChain workflow to enable sophisticated context management, with each phase playing a specialized role in orchestrating the flow of knowledge within the API backend:
 
-| Phase         | Temporal Focus       | Context Responsibility               |
-| ------------- | -------------------- | ------------------------------------ |
-| Action        | Immediate present    | Initial framing and response, setting the stage for the conversation.         |
-| Experience    | Past knowledge       | Enriching context with search results, knowledge graph retrievals, and relevant prior experiences.  |
-| Intention     | Desired future       | Focusing on user goals and intents, guiding the AI towards user-centric outcomes.               |
-| Observation   | Future preservation  | Tagging and connecting concepts, building a rich semantic network for long-term knowledge growth.      |
-| Understanding | Temporal integration | Deciding what information to release and prune, optimizing context for efficiency and relevance. |
-| Yield         | Process completion   | Determining cycle continuation and recursion, generating the final, user-facing response.       |
+| Phase         | Temporal Focus       | Context Responsibility (within API Workflow) |
+| ------------- | -------------------- | -------------------------------------------- |
+| Action        | Immediate present    | Initial framing and response.                |
+| Experience    | Past knowledge       | Enriching context via Qdrant search (priors). |
+| Intention     | Desired future       | Focusing on user goals (using `intention_memory` in Qdrant). |
+| Observation   | Future preservation  | Structuring thread knowledge (using `observation_memory` in Qdrant). |
+| Understanding | Temporal integration | Deciding what information to prune from memory collections (Qdrant). |
+| Yield         | Process completion   | Generating the final response and preparing data for Qdrant/rewards. |
 
 ## A Vision for the Future: Personal AI and the Tokenized Marketplace of Ideas
 
 Choir is not just building another AI application; we are building a **transformative platform for the future of AI and human collaboration**:
 
 - **Revolutionizing Consumer Finance:** Empowering users with AI-driven tools to optimize their financial lives and achieve financial freedom.
-- **Creating a Live Streaming Home Production Studio:**  Transforming home entertainment and content creation with AI-powered tools for interactive and immersive experiences.
-- **Building a Tokenized Marketplace of Ideas:**  Fostering a new kind of online platform where quality ideas are valued, rewarded, and drive the emergence of collective intelligence.
-- **Democratizing AI Training and Ownership:**  Enabling users to participate in and benefit from the AI revolution, owning a piece of the AI infrastructure and contributing to a self-improving, community-driven AI ecosystem.
+- **Creating a Live Streaming Home Production Studio:** Transforming home entertainment and content creation with AI-powered tools for interactive and immersive experiences.
+- **Building a Tokenized Marketplace of Ideas:** Fostering a new kind of online platform where quality ideas are valued, rewarded, and drive the emergence of collective intelligence.
+- **Democratizing AI Training and Ownership:** Enabling users to participate in and benefit from the AI revolution, owning a piece of the AI infrastructure and contributing to a self-improving, community-driven AI ecosystem.
 
-Explore the documentation sections above to understand how Choir's MCP-based architecture is designed to realize this ambitious vision and build a truly revolutionary platform for the age of personal AI.
+Explore the documentation sections above to understand how Choir's Qdrant-Sui MVP architecture is designed to validate the core concepts needed to realize this ambitious vision.
 
 ## Documentation Structure
 
@@ -2629,185 +2045,62 @@ The documentation is organized into the following sections:
 
 Fundamental concepts that remain consistent regardless of the implementation:
 - Phases:
-    - [Action](docs/phase_requirements/action_phase.md)
-    - [Experience](docs/phase_requirements/experience_phase.md)
-    - [Intention](docs/phase_requirements/intention_phase.md)
-    - [Observation](docs/phase_requirements/observation_phase.md)
-    - [Understanding](docs/phase_requirements/understanding_phase.md)
-    - [Yield](docs/phase_requirements/yield_phase.md)
+    - [Action Requirements](require_action_phase.md)
+    - [Experience Requirements](require_experience_phase.md)
+    - [Intention Requirements](require_intention_phase.md)
+    - [Observation Requirements](require_observation_phase.md)
+    - [Understanding Requirements](require_understanding_phase.md)
+    - [Yield Requirements](require_yield_phase.md)
 - [FQAHO Model](fqaho_visualization.md) - The Fractional Quantum Anharmonic Oscillator economic model
 - [Core Economics](core_economics.md) - Economic principles and tokenomics
 - [Core State Transitions](core_state_transitions.md) - State transition principles
 - [Evolution: Naming](evolution_naming.md) - Naming conventions and evolution
 
-## 2. Architecture
+## 2. Architecture (MVP)
 
-Detailed information about the MCP-based architecture:
-- [Stack Argument](stack_argument.md) - Rationale for the MCP-based technology stack
-- [Security Considerations](security_considerations.md) - Security architecture and considerations
+Detailed information about the Qdrant-Sui MVP architecture:
+- [Core System Overview](core_core.md) - MVP architecture description.
+- [Stack Argument](stack_argument.md) - Rationale for the MVP technology stack.
+- [Security Considerations](security_considerations.md) - Security architecture for the MVP.
 
-## 3. Implementation
+## 3. Implementation (MVP)
 
-Practical guidance for implementing the MCP-based architecture:
-- [Developer Quickstart](developer_quickstart.md) - Fast onboarding for new developers
-- [State Management Patterns](state_management_patterns.md) - Best practices for state management
+Practical guidance for implementing the MVP architecture:
+- [State Management Patterns](state_management_patterns.md) - State management in the MVP.
 
-## 4. Integration
+## 4. Integration (MVP)
 
-Information about integrating with external systems:
+Information about integrating with external systems for the MVP:
+- [Blockchain Integration](blockchain_integration.md) - Integration with Sui blockchain for the MVP.
 
-- [libSQL Integration](plan_libsql.md) - Database integration
-- [Blockchain Integration](blockchain_integration.md) - Integration with Sui blockchain
-- [Identity as a Service](plan_identity_as_a_service.md) - Identity management
 
 ## 5. Business and Strategy
 
 Business aspects of Choir:
+- [Business Model](e_business.md) - Business model and strategy.
+- [Evolution Token](evolution_token.md) - Token design and economics.
+- [Anonymity by Default](plan_anonymity_by_default.md) - Privacy principles.
 
-- [Business Model](e_business.md) - Business model and strategy
-- [Evolution Token](evolution_token.md) - Token design and economics
-- [Anonymity by Default](plan_anonymity_by_default.md) - Privacy principles
+## 6. Planning & Future
+
+Documents outlining plans and future directions:
+- [Plan: CHIP Materialization (AI Supercomputer Box)](plan_chip_materialization.md) - Long-term hardware vision.
 
 ## Development Timeline
 
-- [Changelog](CHANGELOG.md) - Historical development timeline
+- [Changelog](CHANGELOG.md) - Historical development timeline.
 
 
 ## Contributing to Documentation
 
 When contributing to documentation:
 
-1. Follow the established folder structure
-2. Use Markdown for all documentation
-3. Include diagrams using Mermaid.js where appropriate
-4. Provide code examples for technical concepts
-5. Update the index when adding new documents
-
-=== File: docs/langchain_postchain_checklist.md ===
-
-
-
-==
-langchain_postchain_checklist
-==
-
-
-# Langchain PostChain Implementation Checklist
-
-This checklist outlines the steps to implement the PostChain workflow directly using Langchain on the `langchain-postchain` branch.
-
-- [x] **Branch Creation:** Create a new Git branch named `langchain-postchain` from the current `main` branch.
-- [x] **Langchain PostChain Implementation:** Implement the PostChain workflow directly using Langchain.
-    - [x] Define Langchain Chains or Agents for each phase (Action, Experience, Intention, Observation, Understanding, Yield).
-    - [x] Hardcode specific model choices for each phase.
-    - [-] Implement granular control over service calls (Qdrant, Sui, web search, etc.) within the Langchain implementation.
-    - [x] Reuse code from the previous LangGraph implementation where applicable, adapting it to a simpler Langchain workflow.
-- [ ] **Testing:** Implement basic tests to ensure the Langchain PostChain is functional.
-    - [ ] Unit tests for individual phases.
-    - [x] Basic integration tests for the overall workflow.
-- [x] **Documentation:** Add a basic README or documentation within the `api/app/postchain` directory to describe the Langchain PostChain implementation and its components.
-
-=== File: docs/libsql_integration.md ===
-
-
-
-==
-libsql_integration
-==
-
-
-# libSQL Integration Plan for Choir MCP Architecture
-
-## Overview
-
-This document outlines the revised plan for integrating libSQL/Turso into the Choir platform, specifically within the context of the Model Context Protocol (MCP) architecture.  This plan focuses on leveraging libSQL/Turso for **server-specific state persistence** and explores the *potential* use for managing the "conversation state resource," while prioritizing essential functionalities for the MVP.
-
-## Core Objectives (Revised for MCP Architecture)
-
-1.  **libSQL for Server-Specific State Persistence:** Utilize libSQL as the primary solution for local persistence of server-specific data within MCP servers (phase servers).
-2.  **Flexible Schema for Server State:** Design a flexible libSQL schema to accommodate the evolving state requirements of different MCP servers and their tools.
-3.  **(Optional) Explore "Conversation State Resource" Management with libSQL (Host-Side):**  Discuss the *option* of using libSQL in the Host application to manage the "conversation state resource," but acknowledge that in-memory management might be sufficient for the MVP.
-4.  **Vector Search (If Still Relevant, Focus on Qdrant for MVP):**  Re-evaluate the relevance of vector search within libSQL for the Experience phase.  Acknowledge that Qdrant (or other dedicated vector databases) might be a more scalable and feature-rich solution for vector search in the long term, and that the MVP might initially focus on simpler vector search mechanisms or defer advanced vector search features.
-5.  **Simplify for MVP Scope:** Focus the libSQL integration plan on the *essential database functionalities* needed for the MVP, deferring more advanced features like multi-device sync or advanced quantization to later phases.
-
-## Revised Implementation Plan (MCP Architecture Focus)
-
-### 1. libSQL for MCP Server-Specific State Persistence
-
-*   **Embedded libSQL in Each MCP Server:** Each MCP server (Action Server, Experience Server, etc.) will embed a lightweight libSQL database instance. This local database will be used for:
-    *   **Caching:** Storing server-side caches (parsed context, API responses, etc.) for performance optimization.
-    *   **Server-Local Data:** Persisting any server-specific data that needs to survive server restarts or be managed locally (e.g., server-side logs, temporary data structures).
-*   **Simplified Schema for Server State:** Design a flexible and minimal libSQL schema for server-specific state.  This schema should be adaptable to the evolving needs of different phase servers and their tools.  Example schema (simplified):
-
-    ```sql
-    -- Generic cache table for MCP servers
-    CREATE TABLE IF NOT EXISTS server_cache (
-        key TEXT PRIMARY KEY,  -- Cache key (e.g., URI, query parameters)
-        value BLOB,          -- Cached data (can be text, JSON, binary)
-        timestamp INTEGER     -- Timestamp of cache entry
-    );
-
-    -- Server-specific state table (example - Experience Server)
-    CREATE TABLE IF NOT EXISTS experience_server_state (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        last_sync_time INTEGER,
-        # ... other server-specific state fields ...
-    );
-    ```
-
-*   **CRUD Operations in MCP Server SDK:**  Provide utility functions or helper classes within the MCP Server SDK (Python, TypeScript, etc.) to simplify common libSQL operations for servers:
-    *   `server.cache_get(key: str) -> Optional[bytes]`
-    *   `server.cache_set(key: str, value: bytes, expiry_seconds: int = None)`
-    *   `server.get_server_state() -> dict`
-    *   `server.set_server_state(state: dict)`
-
-### 2. (Optional) "Conversation State Resource" Management in Host Application (libSQL - Considered, but In-Memory Might Be Sufficient for MVP)
-
-*   **Discuss the Option, But Defer for MVP:**  While technically feasible, using libSQL to manage the "conversation state resource" in the Host application adds complexity and might be overkill for the MVP.
-*   **In-Memory Management for MVP (Recommended):** For the MVP, it is recommended to manage the "conversation state resource" primarily in-memory within the Host application (e.g., using Python dictionaries or lists). This simplifies the MVP implementation and reduces dependencies.
-*   **libSQL for Persistence in Later Phases (Scalability and Persistence):**  In later phases, if you need to handle very large conversation histories, multi-device sync, or more robust persistence for the "conversation state resource," you can *then* consider using libSQL (or a more scalable database) in the Host application to manage the resource.
-
-### 3. Vector Search (Re-evaluate for MVP - Focus on Qdrant or Simpler Mechanisms Initially)
-
-*   **Qdrant for Vector Search (Recommended for Scalability and Features):** For robust and scalable vector search capabilities, especially for the Experience phase's RAG functionality, **Qdrant (or other dedicated vector databases) remains the recommended solution in the long term.**
-*   **libSQL Vector Search - Consider for *Simplified* MVP (If Needed):**  libSQL *does* offer basic vector search capabilities.  For a *very simplified MVP*, you *could* consider using libSQL's vector search for basic semantic matching in the Experience phase, *if* you want to minimize external dependencies and keep everything within libSQL for initial prototyping.  However, be aware of the limitations of libSQL's vector search compared to dedicated vector databases like Qdrant (scalability, features, performance).
-*   **Defer Advanced Vector Search for MVP (Focus on Core Workflow First):**  For the *initial MVP*, it might be even more pragmatic to **defer advanced vector search features altogether** and focus on getting the *core PostChain workflow and UX* functional and validated first.  You could start with simpler keyword-based search or rule-based context retrieval in the Experience phase for the MVP, and then add more sophisticated vector search capabilities in later iterations.
-
-### 4. Synchronization Management (Simplified for MVP - Focus on Local Persistence)
-
-*   **No Multi-Device Sync for MVP (Defer):**  Multi-device synchronization of the conversation state or server state is **explicitly deferred for the MVP** to simplify the initial implementation and focus on core functionality.
-*   **Local Persistence for Data Safety (MVP Goal):**  The primary goal of libSQL integration for the MVP is to provide **local persistence** of server-specific state and (potentially) the conversation history resource to ensure data safety and to allow servers and clients to recover from restarts or disconnections.
-*   **Cloud Sync via Turso - Future Roadmap Item:**  Cloud sync via Turso (or other mechanisms) for multi-device access and data backup remains a **future roadmap item** to be considered in later phases, after the core MVP is validated.
-
-## Phased Implementation Approach (libSQL Integration)
-
-Given the focus on MVP and iterative development, the libSQL integration should follow a phased approach:
-
-### Phase 1: Core UX and Workflow (No Database Dependency - Current Focus)
-
-- Continue developing the core UI and PostChain workflow *without* a hard dependency on libSQL.
-- Use in-memory data structures or mock data for testing and prototyping.
-
-### Phase 2: Basic libSQL Integration for Server-Specific State (MVP Phase)
-
-- Implement libSQL integration for MCP servers to handle server-specific state persistence and caching.
-- Focus on the simplified libSQL schema for server state.
-- Create utility functions in the MCP Server SDK to simplify libSQL operations.
-- Test basic CRUD operations and server-side caching with libSQL.
-
-### Phase 3: (Optional) Vector Search Integration (MVP or Post-MVP)
-
-- If vector search is deemed essential for the MVP, implement basic vector search using libSQL's vector capabilities (or consider a simpler keyword-based fallback for the MVP).
-- If vector search is deferred for the MVP, plan for integration with Qdrant (or other dedicated vector DB) in a post-MVP phase.
-
-### Phase 4: (Future) Advanced libSQL Features and Cloud Sync
-
-- Explore and implement more advanced libSQL features (e.g., embedded replicas, more complex queries) as needed for scalability and performance.
-- Consider adding Turso cloud sync capabilities for multi-device access and data backup in a post-MVP phase.
-
-## Conclusion
-
-This revised libSQL integration plan prioritizes a pragmatic and iterative approach, focusing on the essential database functionalities needed for the Choir MVP within the MCP architecture. By leveraging libSQL for server-specific state persistence and deferring more complex features like multi-device sync and advanced vector search for later phases, the plan aims to balance functionality with development efficiency and to ensure a successful MVP launch.
+1.  Focus documentation updates on the **Qdrant-Sui MVP** scope unless explicitly marked as "Future" or "Post-MVP".
+2.  Follow the established folder structure.
+3.  Use Markdown for all documentation.
+4.  Include diagrams using Mermaid.js where appropriate, reflecting the MVP architecture.
+5.  Provide code examples relevant to the MVP implementation.
+6.  Update this index when adding or significantly modifying documents.
 
 === File: docs/postchain_temporal_logic.md ===
 
@@ -2820,55 +2113,55 @@ postchain_temporal_logic
 
 # PostChain Temporal Logic: The AEIOU-Y Flow in Time
 
-VERSION postchain_temporal_logic: 7.0 (MCP Architecture Alignment)
+VERSION postchain_temporal_logic: 8.0 (Qdrant-Sui MVP Focus)
 
-The PostChain (AEIOU-Y) is not just a sequence of phases; it's a carefully orchestrated **temporal flow**, where each phase embodies a distinct relationship to time, contributing to the overall coherence and effectiveness of the AI-driven conversational workflow within the MCP architecture.  Understanding this temporal logic is key to grasping how the PostChain creates a dynamic and context-aware conversational experience.
+The PostChain (AEIOU-Y) is not just a sequence of phases executed within the Choir backend; it's a carefully orchestrated **temporal flow**. Each phase embodies a distinct relationship to time, contributing to the overall coherence and effectiveness of the AI-driven conversational workflow. Understanding this temporal logic is key to grasping how the PostChain creates a dynamic and context-aware conversational experience, even within the MVP's streamlined architecture.
 
 **Each Phase Embodies a Distinct Temporal Focus:**
 
-The AEIOU-Y phases are designed to process user input and generate responses by systematically engaging with different temporal dimensions of the conversational context:
+The AEIOU-Y phases, implemented sequentially in the `langchain_workflow.py`, are designed to process user input and generate responses by systematically engaging with different temporal dimensions of the conversational context stored primarily in Qdrant:
 
 1.  **Action Phase: Immediate Present - The Now of Interaction**
 
-    *   **Temporal Focus:** The **immediate present moment** of user interaction. The Action phase is concerned with the "now" – the user's current input, the immediate context of the ongoing conversation, and the need for an *initial, direct response* to the user's prompt.
-    *   **Temporal Logic:**  **Reaction and Responsiveness.** The Action phase is designed to be highly responsive and reactive. It's about generating a quick, initial response to the user's input, setting the stage for the more deliberative phases that follow.  It operates in the *present moment*, acknowledging the user's immediate need for interaction.
-    *   **MCP Server Role:** The **Action Server** embodies this "immediate present" focus. It is the *first point of contact* in the PostChain workflow, receiving the user's prompt and initiating the conversational process.  It leverages fast, efficient AI models to generate a quick initial response and route the workflow to the next phase.
+    *   **Temporal Focus:** The **immediate present moment** of user interaction. The Action phase function is concerned with the "now" – the user's current input, the immediate context, and the need for an *initial, direct response*.
+    *   **Temporal Logic:** **Reaction and Responsiveness.** This phase is designed to be highly responsive. It generates a quick, initial response to the user's input, setting the stage for the more deliberative phases that follow. It operates in the *present moment*, acknowledging the user's immediate need for interaction.
+    *   **Role within Workflow:** The **Action phase function** is the *first point of contact* in the PostChain workflow, receiving the user's prompt and initiating the process. It leverages AI models (via `langchain_utils`) to generate a quick initial response and passes the context to the next phase.
 
 2.  **Experience Phase: Past Knowledge - Drawing on Memory and History**
 
-    *   **Temporal Focus:** The **past** – the accumulated knowledge, history, and prior experiences relevant to the current conversation. The Experience phase delves into the past to enrich the context and inform the AI's response with relevant historical information.
-    *   **Temporal Logic:** **Memory and Contextual Recall.** The Experience phase is about bringing the *past into the present*. It leverages memory (vector databases, knowledge graphs, past conversations) to provide context, depth, and relevance to the AI's understanding and response.  It draws on the *lessons of the past* to inform the current interaction.
-    *   **MCP Server Role:** The **Experience Server** embodies this "past knowledge" focus. It acts as the *memory and knowledge retrieval engine* of the PostChain. It uses tools like vector search and web search to access and retrieve relevant information from past conversations, knowledge bases, and external sources, enriching the context for subsequent phases.
+    *   **Temporal Focus:** The **past** – the accumulated knowledge, history, and prior experiences relevant to the current conversation, primarily stored in the Qdrant `choir` collection.
+    *   **Temporal Logic:** **Memory and Contextual Recall.** This phase is about bringing the *past into the present*. It leverages memory (Qdrant vector search on the `choir` collection) to provide context, depth, and relevance. It draws on the *lessons of the past* (relevant prior messages) to inform the current interaction and calculates novelty/similarity scores.
+    *   **Role within Workflow:** The **Experience phase function** acts as the *memory and knowledge retrieval engine*. It queries Qdrant for relevant priors, potentially uses external search tools, calculates scores, and enriches the context passed to the next phase.
 
 3.  **Intention Phase: Desired Future - Aligning with User Goals and Purpose**
 
-    *   **Temporal Focus:** The **future** – the user's *intended goals, desired outcomes, and future trajectory* of the conversation. The Intention phase looks ahead to anticipate the user's purpose and align the AI's response with the user's desired future state.
-    *   **Temporal Logic:** **Anticipation and Goal-Orientedness.** The Intention phase is about shaping the *present interaction* to achieve a *desired future state*. It leverages AI models to infer user intent, identify goals, and guide the conversation towards a productive and goal-oriented outcome.  It orients the present towards a *purposeful future*.
-    *   **MCP Server Role:** The **Intention Server** embodies this "desired future" focus. It acts as the *intent modeling and goal alignment engine* of the PostChain. It uses AI models to analyze user input, infer their intentions, and translate those intentions into actionable goals that guide the subsequent phases of the workflow.
+    *   **Temporal Focus:** The **future** – the user's *intended goals, desired outcomes, and future trajectory* of the conversation, potentially informed by the Qdrant `intention_memory` collection.
+    *   **Temporal Logic:** **Anticipation and Goal-Orientedness.** This phase is about shaping the *present interaction* to achieve a *desired future state*. It leverages AI models to infer user intent, identify goals (potentially storing/retrieving from `intention_memory`), and guide the conversation towards a productive outcome. It orients the present towards a *purposeful future*.
+    *   **Role within Workflow:** The **Intention phase function** acts as the *intent modeling and goal alignment engine*. It analyzes user input and context, infers intentions (interacting with `intention_memory` via the API/`database.py`), and passes the refined understanding of goals forward.
 
 4.  **Observation Phase: Future Preservation - Recording and Structuring Knowledge for the Long Term**
 
-    *   **Temporal Focus:** The **long-term future** – the need to *preserve, structure, and organize the knowledge* generated in the current conversation for future use and for the long-term evolution of the Choir knowledge ecosystem. The Observation phase looks far into the future, beyond the immediate conversation, to ensure the enduring value of the knowledge being created.
-    *   **Temporal Logic:** **Preservation and Knowledge Structuring.** The Observation phase is about making the *present conversation valuable for the future*. It focuses on capturing key insights, tagging information, and creating semantic connections that will enhance the long-term value and discoverability of the knowledge generated in the conversation.  It prepares the *present for the distant future*.
-    *   **MCP Server Role:** The **Observation Server** embodies this "future preservation" focus. It acts as the *knowledge structuring and semantic linking engine* of the PostChain. It uses AI models to analyze the conversation, identify key concepts, extract relationships, and create citations and semantic connections that are stored in the knowledge graph, contributing to the long-term growth of the Choir knowledge base.
+    *   **Temporal Focus:** The **long-term future** – the need to *preserve, structure, and organize knowledge* generated in the current conversation within the specific thread context, potentially using the Qdrant `observation_memory` collection.
+    *   **Temporal Logic:** **Preservation and Knowledge Structuring.** This phase is about making the *present conversation valuable for the future* within its thread. It focuses on capturing key insights or summaries (potentially storing/retrieving from `observation_memory`) to enhance the long-term value and retrievability of thread-specific knowledge. It prepares the *present for the future*.
+    *   **Role within Workflow:** The **Observation phase function** acts as the *thread-level knowledge structuring engine*. It analyzes the conversation, identifies key concepts or summaries relevant to the thread (interacting with `observation_memory` via the API/`database.py`), and passes this structured understanding forward.
 
 5.  **Understanding Phase: Temporal Integration - Synthesizing Past, Present, and Future**
 
-    *   **Temporal Focus:** **All temporal dimensions – past, present, and future – are integrated and synthesized** in the Understanding phase. This phase acts as the central temporal hub, bringing together the insights from the previous phases and making decisions based on a holistic understanding of the conversation's temporal context.
-    *   **Temporal Logic:** **Synthesis and Contextual Awareness.** The Understanding phase is about creating a *coherent and integrated understanding* of the conversation across time. It synthesizes the immediate present (Action), past knowledge (Experience), and desired future (Intention) to make informed decisions about the flow of the conversation and the AI's response.  It achieves *temporal coherence* by integrating all time perspectives.
-    *   **MCP Server Role:** The **Understanding Server** embodies this "temporal integration" focus. It acts as the *contextual synthesis and decision-making engine* of the PostChain. It uses AI models to evaluate the enriched context, filter information, prune irrelevant details, and make strategic decisions about how to proceed with the conversation, ensuring a coherent and purposeful flow through time.
+    *   **Temporal Focus:** **All temporal dimensions – past, present, and future – are integrated and synthesized**. This phase acts as the central temporal hub, bringing together insights from previous phases and Qdrant memory collections.
+    *   **Temporal Logic:** **Synthesis and Contextual Awareness.** This phase is about creating a *coherent and integrated understanding* of the conversation across time. It synthesizes the immediate present (Action), past knowledge (Experience), desired future (Intention), and thread context (Observation) to make informed decisions about the flow. It may also trigger pruning of stale entries in `intention_memory` or `observation_memory`. It achieves *temporal coherence*.
+    *   **Role within Workflow:** The **Understanding phase function** acts as the *contextual synthesis and decision-making engine*. It evaluates the enriched context, potentially filters information (triggering Qdrant deletes via the API/`database.py`), and passes the refined, integrated context to the final phase.
 
 6.  **Yield Phase: Process Completion - Bringing the Workflow to a Temporally Defined End**
 
-    *   **Temporal Focus:** The **defined end point** of the current PostChain workflow – the moment when a response is generated and the current cycle is completed. The Yield phase is concerned with bringing the temporal flow to a meaningful conclusion for the current turn.
-    *   **Temporal Logic:** **Completion and Cyclicality.** The Yield phase is about *bringing the current cycle to a close* while also setting the stage for *potential future cycles*. It generates the final response for the current turn, delivers it to the user, and determines whether the conversation should continue or if the current workflow is complete.  It marks the *end of the present cycle* and the *potential beginning of a new one*.
-    *   **MCP Server Role:** The **Yield Server** embodies this "process completion" focus. It acts as the *output formatting and workflow control engine* of the PostChain. It uses AI models to format the final response, generate inline citations, and make decisions about recursion or workflow termination, bringing the current cycle to a temporally defined end and preparing for potential future interactions.
+    *   **Temporal Focus:** The **defined end point** of the current PostChain workflow cycle – the moment when a response is generated.
+    *   **Temporal Logic:** **Completion and Cyclicality.** This phase is about *bringing the current cycle to a close*. It generates the final user-facing response based on the integrated understanding, bundles all intermediate phase outputs, and prepares the data structure to be saved in the Qdrant `choir` collection. It marks the *end of the present cycle*. (Note: Recursion logic might be simplified or deferred in MVP).
+    *   **Role within Workflow:** The **Yield phase function** acts as the *output formatting and finalization engine*. It formats the final response, gathers all preceding phase outputs, and returns the complete data structure to the API orchestrator for persistence in Qdrant and triggering the reward mechanism.
 
 **The AEIOU-Y Flow as a Temporal Dance:**
 
-The PostChain, viewed through its temporal logic, is like a carefully choreographed **dance through time**. Each phase takes its turn to engage with a different temporal dimension, building upon the previous phase and contributing to the overall temporal coherence of the conversational experience.  It's a dynamic and iterative process, where the AI and the user move through time together, building knowledge and understanding step by step, phase by phase, in a continuous and evolving flow.
+The PostChain, viewed through its temporal logic, remains a carefully choreographed **dance through time** within the workflow. Each phase function takes its turn to engage with a different temporal dimension, building upon the previous phase and contributing to the overall temporal coherence of the conversational experience. It's a dynamic process where the AI, guided by the workflow and interacting with Qdrant, builds knowledge and understanding step by step, phase by phase.
 
-By understanding this temporal logic, developers can design and implement more effective and nuanced AI agents within the Choir MCP architecture, creating conversational experiences that are not just intelligent but also deeply attuned to the temporal nature of human communication and knowledge creation.
+By understanding this temporal logic, developers can implement more effective and nuanced AI phase functions within the Choir workflow, creating conversational experiences that are not just intelligent but also deeply attuned to the temporal nature of human communication and knowledge creation.
 
 === File: docs/require_action_phase.md ===
 
@@ -4279,188 +3572,94 @@ security_considerations
 ==
 
 
-# Security Considerations for MCP-Based Choir Architecture
+# Security Considerations for Choir (Qdrant-Sui MVP)
+
+VERSION security_considerations: 8.0 (Qdrant-Sui MVP Focus)
 
 ## Introduction
 
-This document outlines the security considerations for Choir's MCP-based architecture, emphasizing the security benefits inherent in the Model Context Protocol and the integration with Phala Network's Trusted Execution Environment (TEE) for secure and confidential AI operations.
+This document outlines the security considerations for Choir's Qdrant-Sui Minimum Viable Product (MVP) architecture. This architecture centralizes AI workflow execution, data management (Qdrant), and blockchain interactions (Sui via `sui_service.py`) within a single Python API backend. Security focuses on protecting this central API, its data interactions, and the user's keys on the client side.
 
-## Threat Model (No Significant Changes, Review and Confirm)
+## Threat Model
 
-The system addresses the same categories of potential threats as previously defined.  *(Review the existing threat model in the document and confirm if it still accurately reflects the threat landscape for the MCP architecture.  No major changes are expected here, but a quick review is recommended.)*
+The system addresses the following potential threats:
 
-1.  **Blockchain Key Compromise**: Theft or unauthorized use of private keys used for Sui blockchain operations
-2.  **Contract Manipulation**: Unauthorized modification of contract parameters or execution
-3.  **Token Theft**: Unauthorized transfer or access to CHIP tokens
-4.  **Data Exfiltration**: Unauthorized access to or extraction of sensitive user data
-5.  **System Manipulation**: Unauthorized alterations to system behavior or state
-6.  **Model Attacks**: Prompt injection, jailbreaking, or other attacks on underlying AI models
-7.  **Resource Exhaustion**: Denial of service through excessive resource consumption
-8.  **Identity Spoofing**: Impersonation of legitimate users or system components
-9.  **Infrastructure Compromise**: Attacks on the underlying infrastructure components
+1.  **Blockchain Key Compromise**: Theft or unauthorized use of the API backend's private key used for Sui blockchain operations.
+2.  **Contract Manipulation**: Unauthorized modification of the basic CHIP token contract parameters or execution (less likely with MVP's simple contract).
+3.  **Token Theft**: Unauthorized triggering of reward distributions or transfers via the API.
+4.  **Data Exfiltration**: Unauthorized access to or extraction of sensitive user or conversation data stored in Qdrant.
+5.  **System Manipulation**: Unauthorized alterations to the API's behavior, PostChain workflow logic, or state stored in Qdrant.
+6.  **Model Attacks**: Prompt injection, jailbreaking, or other attacks targeting the LLMs used within the PostChain workflow.
+7.  **Resource Exhaustion**: Denial of service against the API backend or Qdrant through excessive requests.
+8.  **Identity Spoofing**: Impersonation of legitimate users via compromised Sui keys or authentication bypass.
+9.  **Infrastructure Compromise**: Attacks on the underlying infrastructure hosting the API backend and Qdrant (e.g., Render).
 
-## Secure Blockchain Operations using TEEs (Updated for MCP Context)
+## Secure Blockchain Operations (MVP Context)
 
-### Core Blockchain Security Goals (No Changes)
+### Core Blockchain Security Goals
 
-The core blockchain security goals remain the same. *(No changes needed here unless you want to rephrase for clarity)*
+1.  **Secure Key Management**: Securely store and manage the private key used by the API backend's `sui_service.py` for Sui blockchain operations.
+2.  **Protected Contract Interaction**: Ensure interactions with the Sui smart contract (basic CHIP token) are executed correctly.
+3.  **Tamper-Proof Token Management**: Handle CHIP token reward distributions (simplified for MVP) in a way that prevents unauthorized manipulation.
+4.  **Transaction Integrity**: Ensure that blockchain transactions initiated by the API are properly authorized and accurately reflect the intended action.
 
-1.  **Secure Key Management**: Store and manage private keys for Sui blockchain operations within TEEs
-2.  **Protected Contract Execution**: Execute Sui smart contracts in a secure, isolated environment
-3.  **Tamper-Proof Token Management**: Handle CHIP token distribution and management in a way that prevents unauthorized manipulation
-4.  **Transaction Integrity**: Ensure that all blockchain transactions are properly authorized and accurately executed
+### Security Architecture (Centralized API Service)
 
-### TEE-Based Security Architecture (Updated for MCP Servers)
+1.  **API Backend Key Management:** The Sui private key used by `sui_service.py` is the most critical secret. It **must** be managed securely:
+    *   **No Hardcoding:** Never hardcode the private key in the source code.
+    *   **Environment Variables/Secrets:** Store the key securely using environment variables injected during deployment (e.g., Render's secret management).
+    *   **Limited Access:** Restrict access to the production environment and secret management tools.
+2.  **Controlled Interaction:** All blockchain interactions are funneled through the `sui_service.py` module within the API backend. This centralizes the logic and reduces the points where the key is directly used.
+3.  **Input Validation:** The API must rigorously validate all parameters (recipient addresses, amounts) passed to `sui_service.py` functions before constructing blockchain transactions.
 
-The system continues to leverage Phala Network's TEEs, and this section is updated to reflect how TEEs secure **MCP servers**:
+## Data Security Measures (Qdrant & API)
 
-1.  **Private Key Isolation (TEE-Secured MCP Servers):** Blockchain private keys are managed and used by **MCP servers** and are isolated within the TEEs provided by Phala Network.  Keys never leave the secure enclave, protecting them from exposure on the host system.
-2.  **Secure Execution Environment (TEE-Secured MCP Servers):**  **MCP servers** execute blockchain-related code entirely within the TEE, ensuring a secure and isolated execution environment.
-3.  **Attestation and Verification (TEE-Secured MCP Servers):** The state and code of **MCP servers running within TEEs** can be cryptographically verified through remote attestation, ensuring they haven't been tampered with.
-4.  **End-to-End Protection (MCP Client -> MCP Server -> Blockchain):** The entire pipeline, from transaction requests initiated by the MCP client (Host application) to transaction creation and submission by **MCP servers**, is protected within the TEE environment.
+1.  **Data Classification:** Identify sensitive data stored in Qdrant (e.g., `intention_memory` content, user-Sui address mappings in `users`).
+2.  **Encryption Architecture:**
+    *   **Transit:** Use HTTPS for all communication between the client, API, and Qdrant (if Qdrant is hosted externally).
+    *   **At Rest (Qdrant):** Rely on Qdrant's underlying storage mechanisms and the hosting provider's infrastructure for at-rest encryption. Consider Qdrant's specific encryption features if available and necessary.
+    *   **At Rest (API Secrets):** Ensure the Sui private key and any other API secrets are stored encrypted at rest by the deployment platform (e.g., Render).
+3.  **Qdrant Access Control:**
+    *   Use API keys or other authentication mechanisms provided by Qdrant to restrict access to authorized services (only the Python API backend).
+    *   Implement logical access control within the API backend to ensure, for example, that `intention_memory` is only queried for the currently authenticated user.
 
-### Advantages Over Traditional Approaches (No Changes Needed)
+## Docker Container Security (API Backend)
 
-The advantages of TEE-based security remain the same. *(No changes needed here)*
+1.  **Minimal Images:** Use minimal base images (like `python:3.12-slim`) for the API backend container to reduce the attack surface.
+2.  **No Privileged Containers:** Run containers without unnecessary privileges.
+3.  **Immutable Infrastructure:** Treat containers as immutable; rebuild and redeploy rather than modifying running containers.
+4.  **Vulnerability Scanning:** Integrate vulnerability scanning into the CI/CD pipeline for the Docker image.
+5.  **Secret Management:** Inject secrets (like the Sui private key, Qdrant API key) securely into the container environment at runtime, not during the build process.
 
-1. **Elimination of Server-Side Key Storage**
-2. **Hardware-Level Protection**
-3. **Reduced Attack Surface**
-4. **Decentralized Security Model**
+## Model Security (PostChain Workflow)
 
-## MCP Architecture Security Benefits (New Section - Key Improvement)
+1.  **Input Validation/Sanitization:** Sanitize user input passed to the PostChain workflow and subsequently to LLMs to mitigate prompt injection risks.
+2.  **Output Filtering:** Filter or sanitize outputs from LLMs, especially if they might be displayed directly or used in sensitive contexts (though less critical if outputs primarily feed other phases or are stored).
+3.  **Prompt Security:** Be mindful of prompt engineering techniques to make models less susceptible to jailbreaking or instruction hijacking, particularly for phases that might execute tools based on LLM output (deferred post-MVP).
+4.  **Rate Limiting:** Implement rate limiting at the API gateway or within FastAPI to prevent abuse of LLM resources.
+5.  **Model Usage Monitoring:** Monitor LLM usage for anomalies that might indicate attacks or misuse.
 
-The shift to the MCP architecture itself provides significant security enhancements:
+## Security Logging and Monitoring
 
-1.  **Modular and Isolated Phase Servers:**  The MCP architecture enforces **strong modularity and isolation** by implementing each PostChain phase as a separate MCP server. This significantly limits the potential impact of security vulnerabilities:
-    *   **Fault Isolation:** A security breach or vulnerability in one MCP server (e.g., the Experience Server) is **contained within that server** and is less likely to compromise other phases or the entire system.
-    *   **Reduced Attack Surface per Server:** Each MCP server has a *smaller and more focused attack surface* compared to a monolithic application.  Security audits and vulnerability assessments become more manageable for individual servers.
-    *   **Principle of Least Privilege:** Each MCP server can be granted *only the necessary tools and resources* required for its specific phase, following the principle of least privilege and reducing the potential for misuse of broader system capabilities.
+1.  **Comprehensive Logging:** Log key security events within the API backend: authentication attempts (success/failure), significant state changes, calls to `sui_service.py`, errors, and potential security anomalies.
+2.  **Qdrant Auditing:** If Qdrant provides audit logging features, enable them to monitor database access and operations.
+3.  **Infrastructure Monitoring:** Utilize monitoring tools provided by the hosting platform (e.g., Render) to track resource usage, network traffic, and potential infrastructure-level threats.
+4.  **Anomaly Detection:** Implement basic anomaly detection rules based on logs and metrics (e.g., sudden spike in failed authentications, unusual Qdrant query patterns, high rate of reward triggers).
+5.  **Incident Response Plan:** Have a basic plan for responding to security incidents, including identifying the issue, containing the impact, remediating the vulnerability, and communicating appropriately.
 
-2.  **Explicit Tool and Resource Control:**  The Model Context Protocol provides **explicit control over tools and resources** that are exposed by each MCP server and accessible to clients (including other MCP servers acting as clients). This allows for fine-grained security policies:
-    *   **Tool Whitelisting and Sandboxing:**  Each MCP server can explicitly define and whitelist the tools it exposes, limiting the potential for malicious or unintended tool invocations.  Tools themselves can be sandboxed or restricted in their capabilities to further enhance security.
-    *   **Resource Access Control:**  Access to MCP resources (like the "conversation state resource") can be controlled and limited to authorized MCP servers, preventing unauthorized data access or exfiltration.
+## Future Security Enhancements (Post-MVP)
 
-3.  **Standardized Communication Protocol (MCP):**  The use of the Model Context Protocol (MCP) itself enhances security by:
-    *   **Well-Defined Message Schemas:** MCP's use of JSON-RPC and well-defined message schemas (requests, responses, notifications) enables **robust message validation and type checking**, reducing the risk of malformed or malicious messages being processed.
-    *   **Clear Communication Boundaries:** MCP enforces clear communication boundaries between clients and servers, making it easier to monitor and audit inter-component communication and to detect anomalies.
-    *   **Simplified Security Auditing:**  The standardized MCP protocol simplifies security auditing and analysis of communication flows within the system.
+While the MVP focuses on core security, future enhancements could include:
 
-## Actor Model Security Benefits (Largely Unchanged, Still Relevant)
+1.  **Formal Verification:** For critical smart contracts (like a more complex FQAHO or governance contract).
+2.  **Quantum-Resistant Cryptography:** For long-term key and signature security (relevant if Sui adopts it).
+3.  **Web Application Firewall (WAF):** Protect the API endpoint from common web attacks.
+4.  **Enhanced Authentication:** Implement more robust authentication mechanisms beyond simple signature verification if needed.
+5.  **Dedicated Secrets Management:** Integrate a dedicated secrets management solution (e.g., HashiCorp Vault) instead of relying solely on platform environment variables.
 
-The actor model's inherent security benefits remain relevant within the MCP architecture, as each MCP server internally can be built using actor-model principles:
+## Conclusion (MVP Focus)
 
-1.  **Isolation and Containment**
-2.  **Message Validation**
-3.  **Explicit Communication**
-4.  **Controlled Access**
-
-*(No changes needed in this section unless you want to rephrase for clarity in the context of MCP servers)*
-
-## Phala Network Security Integration (No Significant Changes)
-
-The section on Phala Network security integration remains largely unchanged, as the core benefits of TEEs for confidential computing and blockchain security are still the same. *(Review this section and make minor updates for clarity if needed, but no major changes are expected)*
-
-1.  **Confidential Computing**
-2.  **Isolated Execution**
-3.  **Remote Attestation**
-4.  **Blockchain Security**
-5.  **Key Protection**
-
-### Secure Key Management Architecture (No Significant Changes)
-
-The key management architecture within TEEs remains the same. *(Review and make minor updates for clarity if needed)*
-
-1.  **TEE-Only Keys**
-2.  **No Key Export**
-3.  **Key Usage Monitoring**
-4.  **Key Rotation Policies**
-5.  **Threshold Signatures**
-
-### Secure Contract Execution (No Significant Changes)
-
-The principles of secure contract execution within TEEs remain the same. *(Review and make minor updates for clarity if needed)*
-
-1.  **Isolated Execution**
-2.  **Parameter Validation**
-3.  **Transaction Review**
-4.  **Deterministic Execution**
-
-## Data Security Measures (Review and Update as Needed)
-
-Review and update this section to ensure it is still comprehensive and aligned with the MCP architecture and your current data handling practices.  Consider if any aspects need to be added or modified.
-
-1.  **Data Classification**
-2.  **Encryption Architecture**
-
-## Docker Container Security (Review and Update as Needed)
-
-Review and update this section to ensure it is still relevant and reflects your current Docker container security practices for MCP servers.
-
-1.  **Minimal Images**
-2.  **No Privileged Containers**
-3.  **Immutable Infrastructure**
-4.  **Vulnerability Scanning**
-5.  **Secret Management**
-
-## libSQL/Turso Security (New Section - Important Addition)
-
-Add a **new section specifically addressing the security considerations for libSQL/Turso integration**, as this is a new component in the MCP architecture:
-
-1.  **Connection Security**:
-    *   **TLS Encryption:**  Enforce TLS encryption for all connections to Turso cloud databases and for local connections where appropriate.
-    *   **Secure Connection Strings:**  Manage database connection strings securely, avoiding hardcoding credentials in code and using environment variables or secret management systems.
-
-2.  **Authentication and Authorization**:
-    *   **Authentication Mechanisms:**  Utilize strong authentication mechanisms provided by libSQL/Turso (API tokens, database-level authentication) to control access to databases.
-    *   **Authorization Policies:**  Implement fine-grained authorization policies to restrict database access to only authorized MCP servers and components, following the principle of least privilege.
-
-3.  **Query Parameterization**:
-    *   **Always Use Parameterized Queries:**  Enforce the use of parameterized queries (prepared statements) in all database interactions to **prevent SQL injection vulnerabilities.**  Avoid constructing SQL queries by directly concatenating user inputs or external data.
-    *   **Input Validation:**  Validate all inputs to database queries to further mitigate the risk of injection attacks.
-
-4.  **Data Encryption**:
-    *   **At-Rest Encryption (Turso Cloud):**  Leverage Turso's built-in at-rest encryption features for cloud databases to protect data stored in Turso's infrastructure.
-    *   **Consider Encryption for Local libSQL Databases (If Needed):**  For sensitive server-specific state stored in local libSQL databases, consider implementing encryption at rest (e.g., using SQLCipher or similar encryption extensions for SQLite/libSQL) if required by your security policies.
-
-5.  **Access Controls and Network Security**:
-    *   **Firewall Rules:**  Implement firewall rules to restrict network access to libSQL/Turso databases to only authorized components and networks.
-    *   **Database Access Auditing:**  Enable database access auditing (if provided by Turso or through custom logging) to monitor database operations and detect suspicious activity.
-    *   **Regular Security Audits:**  Include libSQL/Turso databases in regular security audits and vulnerability assessments of the Choir platform.
-
-## Model Security (Review and Update as Needed)
-
-Review and update this section to ensure it is still relevant and comprehensive in the context of the MCP architecture and your current AI model integration practices.
-
-1.  **Input Validation**
-2.  **Output Filtering**
-3.  **Prompt Security**
-4.  **Rate Limiting**
-5.  **Model Isolation**
-
-## Debugging Transport (Should this be Debugging and Monitoring?)
-
-This section seems mislabeled as "Debugging Transport." It should likely be renamed to "Security Monitoring and Response" (as it is in the next section) or "Security Logging and Monitoring" to better reflect its content.
-
-1.  **Monitoring Metrics**
-2.  **Anomaly Detection**
-3.  **Incident Response**
-
-*(Rename this section and review/update its content as needed)*
-
-## Future Security Enhancements (Review and Update as Needed)
-
-Review and update this section to include any new security enhancements that are relevant to the MCP architecture, TEE integration, and your evolving security roadmap.
-
-1.  **Formal Verification**
-2.  **Quantum-Resistant Cryptography**
-3.  **Enhanced Attestation**
-4.  **Federated Security**
-5.  **Advanced Threat Detection**
-
-## Conclusion (Update to Emphasize MCP and TEE Security Benefits)
-
-Update the conclusion to strongly emphasize the **security benefits of the MCP architecture** and the **robust security foundation provided by Phala Network TEE integration.** Reiterate that the layered security approach and proactive security measures are essential for building a trustworthy and secure AI platform like Choir.
+Securing the Choir Qdrant-Sui MVP relies heavily on securing the central Python API backend and its interactions. Key priorities include: **secure management of the API's Sui private key**, robust input validation for both API endpoints and LLM prompts, proper access control for Qdrant collections, and standard web application security practices for the API itself. While simpler than a distributed TEE-based architecture, this centralized model requires diligent protection of the API backend as the primary trusted component for data access and blockchain interactions in the MVP.
 
 === File: docs/stack_argument.md ===
 
@@ -4471,292 +3670,105 @@ stack_argument
 ==
 
 
-# The Choir Stack Argument: MCP Architecture - Building a Coherent and Scalable Foundation for AI
+# The Choir Stack Argument: Qdrant-Sui MVP
+
+VERSION stack_argument: 8.0 (Qdrant-Sui MVP Focus)
 
 ## Executive Summary
 
-This document argues for the strategic decision to adopt the **Model Context Protocol (MCP) architecture** as the foundation for Choir.  It details the compelling rationale behind this architectural pivot, emphasizing the significant advantages of MCP over previous graph-based approaches and highlighting the benefits of our chosen technology stack for building a robust, scalable, and future-proof AI platform.
-
-## The Compelling Case for MCP Architecture
-
-After rigorous experimentation and analysis, we have concluded that the **Model Context Protocol (MCP) architecture is the *optimal choice* for building Choir's ambitious multi-agent AI system.**  This is not merely a technical preference, but a fundamental architectural alignment driven by the inherent benefits of service-oriented, distributed systems for complex AI workflows.
-
-### Why MCP Architecture Outperforms Graph-Based Models (LangGraph) for Choir
-
-Our extensive experimentation with graph-based models like LangGraph revealed inherent limitations in scalability, maintainability, and security for our long-term vision. The MCP architecture emerged as the superior solution, offering:
-
-1.  **Clear Service Boundaries and Encapsulation:**  MCP enforces a service-oriented architecture where each phase of the PostChain becomes a **separate, encapsulated MCP server.** This modularity is crucial for:
-    *   **Improved Code Organization and Maintainability:**  Code for each phase is self-contained and easier to understand, test, and update.
-    *   **Enhanced Modularity and Reusability:**  Phase-servers become reusable components that can be combined and extended in flexible ways.
-
-2.  **Explicit Tool Control and Enhanced Security:** MCP provides **explicit control over the tools and resources available to each phase-server.** This is a significant security enhancement:
-    *   **Reduced Attack Surface:**  Each phase-server only has access to the tools it absolutely needs, limiting the potential impact of vulnerabilities.
-    *   **Improved Security Auditing and Policy Enforcement:** Security policies can be defined and enforced at the level of individual phase-servers, simplifying security management.
-
-3.  **Robust Fault Isolation and Increased Resilience:**  With MCP, each phase runs as a **separate server process**, providing robust fault isolation:
-    *   **Localized Error Recovery:**  If a server in one phase crashes or encounters an error, it does not destabilize the entire system.  Individual servers can be restarted and recovered independently, enhancing system resilience.
-    *   **Improved Stability and Uptime:**  Fault isolation contributes to higher overall system stability and uptime, crucial for production deployments.
-
-4.  **Flexible Deployment and Horizontal Scalability:** MCP's service-oriented architecture enables **flexible deployment and horizontal scalability**:
-    *   **Independent Deployment and Scaling:**  Phase-servers can be deployed and scaled independently based on their specific resource requirements and load patterns.
-    *   **Horizontal Scaling:**  To handle increased load, you can easily add more instances of specific phase-servers, scaling the system horizontally.
-    *   **Cloud-Native Architecture:**  MCP is inherently cloud-native and well-suited for deployment in containerized environments like Docker and orchestration platforms like Kubernetes.
-
-5.  **Efficient Resource Management and Optimized Performance:** MCP allows for **optimized resource management at the server level**:
-    *   **Server-Specific Resource Allocation:** Each phase-server can be configured with resources (CPU, memory, GPU) tailored to its specific needs, improving resource utilization efficiency.
-    *   **Server-Side Caching and State Management:** MCP servers can implement efficient server-side caching and state management strategies to optimize performance and reduce redundant computations.
-
-### Performance Benchmarks: MCP Architecture vs. LangGraph (Projected)
-
-While direct performance benchmarks are still underway, projected performance characteristics clearly favor the MCP architecture for Choir's requirements:
-
-| Aspect           | LangGraph (Projected)         | MCP Architecture (Projected)       | **MCP Advantage**                                     |
-| ---------------- | ----------------- | ----------------- | ----------------------------------------------------- |
-| **Memory Usage**     | 2-4GB per session | 500MB-1GB per server         | **2x-4x Reduction:**  More efficient memory utilization due to modularity. |
-| **Error Recovery**   | Full system restart      | Per-server restart | **Localized Recovery:** Faster and more graceful error handling.             |
-| **Scaling**          | Vertical (Monolithic)          | Horizontal (Service-Oriented)        | **Horizontal Scalability:**  Enables true horizontal scaling and distribution.        |
-| **Modality Support** | Single (Text-Centric)            | Multiple (Modality-Specific Servers)          | **Native Multi-Modality Support:**  Architecturally designed for diverse input modalities.      |
-| **Tool Control**     | Implicit, System-Wide          | Explicit, Per-Server        | **Enhanced Security & Control:** Fine-grained control over tool access, improved security.   |
-
-## The Coherent Stack: A Deep Dive into Technology Choices
-
-This section elaborates on the specific technologies chosen for the Choir MCP stack, explaining the rationale behind each selection and highlighting their synergistic contributions to the overall architecture.
-
-### MCP: Model Context Protocol - The Architectural Core
-
-- **Description**: As detailed above, MCP provides the fundamental service-oriented architecture, enabling modularity, scalability, and security.
-- **Key Benefits**: Service encapsulation, tool control, fault isolation, deployment flexibility, resource management.
-- **Why Chosen**: MCP is not just a framework; it's an architectural paradigm perfectly suited for complex multi-agent AI systems like Choir. It provides the necessary structure and standardization for building a robust and extensible platform.
-
-### libSQL/Turso: Local Persistence and Vector Search - The State and Knowledge Foundation
-
-- **Description**: libSQL (and its cloud-synced version, Turso) serves as the versatile database for each MCP server, providing both structured SQL storage and vector search capabilities.
-- **Key Features**:
-    - **SQLite Compatibility**:  Leveraging the robustness and ubiquity of SQLite for local persistence.
-    - **Vector Search Extensions**:  Integrating vector search functionality directly within the SQL database, simplifying data management for RAG and semantic similarity tasks.
-    - **Cloud Synchronization (Turso)**:  Offering optional cloud synchronization for data backup, multi-device consistency, and collaborative features.
-- **Why Chosen**: libSQL/Turso provides a unique combination of features that are essential for Choir's MCP architecture: local persistence for each server, vector search for efficient knowledge retrieval, and a lightweight footprint suitable for containerized deployments.
-
-### PySUI: Secure and High-Throughput Blockchain Integration
-
-- **Description**: PySUI facilitates seamless integration with the Sui blockchain, enabling on-chain management of CHIP tokens, citation rewards, and other economic mechanisms.
-- **Key Features**:
-    - **High-Throughput Transactions**:  Sui's architecture is designed for high transaction throughput and low latency, crucial for handling the potentially high volume of micro-transactions and interactions within the CHIP token economy.
-    - **Move-Based Smart Contracts**:  Sui's Move language provides a secure and resource-oriented smart contract language (Move) that is well-suited for implementing complex economic logic and tokenomics.
-    - **Decentralized and Transparent Tokenomics**:  Blockchain integration ensures transparency and decentralization for the CHIP token economy, building user trust and enabling community governance.
-- **Why Chosen**: Sui blockchain provides the performance, scalability, and security required for Choir's tokenized marketplace of ideas. Its Move language and resource-oriented architecture are particularly well-suited for implementing the FQAHO economic model and citation reward mechanisms.
-
-### Pydantic: Data Validation and Type Safety - The Communication Integrity Layer
-
-- **Description**: Pydantic is used extensively for data validation and type safety throughout the Choir stack, ensuring robust and reliable communication between components.
-- **Key Benefits**:
-    - **Runtime Data Validation**:  Pydantic enforces runtime type validation for all data exchanged between MCP servers and the Python API, preventing data corruption and ensuring data integrity.
-    - **Clear Data Models**:  Pydantic data models provide clear and self-documenting specifications for data structures, improving code maintainability and reducing integration errors.
-    - **API Integration**:  Pydantic integrates seamlessly with FastAPI for API request/response validation, simplifying API development and enhancing API security.
-- **Why Chosen**: Pydantic's emphasis on data validation and type safety is crucial for building a complex, distributed system like Choir. It helps catch errors early in the development process, improves code robustness, and ensures reliable communication between different components of the stack.
-
-### FastAPI/Uvicorn: Asynchronous API - The Orchestration and Communication Hub
-
-- **Description**: FastAPI (with Uvicorn) provides the high-performance asynchronous API layer for orchestrating MCP servers and handling external communication with the Choir client application.
-- **Key Features**:
-    - **Asynchronous Request Handling**:  FastAPI's asynchronous design enables efficient handling of concurrent requests and non-blocking communication with MCP servers.
-    *   **High Performance and Scalability**:  Uvicorn, as an ASGI server, provides excellent performance and scalability for handling a high volume of API requests.
-    *   **Automatic OpenAPI Documentation for API Discoverability**:  Generating automatic OpenAPI documentation, simplifying API discoverability and integration for client applications.
-    *   **Seamless Pydantic Integration for Data Validation**:  Integrating seamlessly with Pydantic for request/response validation, ensuring data integrity and simplifying API development.
-- **Why Chosen**: FastAPI/Uvicorn provides a modern, high-performance, and developer-friendly API layer that is essential for building a responsive and scalable application like Choir. Its asynchronous capabilities are particularly well-suited for orchestrating distributed MCP servers.
-
-### Docker: Containerization - The Deployment and Isolation Layer
-
-- **Description**: Docker is used to containerize each MCP server and the Python API, providing consistent, isolated, and portable deployment units.
-- **Key Benefits**:
-    - **Consistent Environments**:  Docker containers ensure consistent environments across development, testing, and production, eliminating "works on my machine" issues and simplifying deployment.
-    *   **Simplified Deployment**:  Docker simplifies the deployment and management of multiple interconnected services, making it easier to deploy and scale Choir.
-    *   **Resource Isolation**:  Docker containers provide lightweight process isolation, improving resource utilization and security.
-- **Why Chosen**: Docker is the industry-standard containerization platform, providing a mature and widely adopted solution for deploying and managing microservices-based applications like Choir.  It simplifies deployment, enhances scalability, and improves resource utilization.
-
-### Phala Network: Confidential Computing - The Security and Privacy Foundation
-
-- **Description**: Phala Network's confidential computing platform provides a secure execution environment (TEE) for MCP servers, protecting sensitive code and data.
-- **Key Features**:
-    - **Trusted Execution Environments (TEEs)**:  Ensuring that MCP server code and data are protected within secure hardware enclaves, even from node operators.
-    *   **Remote Attestation**:  Providing cryptographic attestation to verify the integrity and security of the TEE execution environment.
-    *   **Confidential Data Handling**:  Enabling secure processing of sensitive user data and economic transactions within the TEE.
-- **Why Chosen**: Phala Network is crucial for building a trustworthy and privacy-preserving AI platform.  Its confidential computing capabilities provide a strong security foundation for Choir, protecting user data and ensuring the integrity of blockchain operations.
-
-### cadCAD: Simulation and Economic Modeling - The Design and Validation Tool
-
-- **Description**: cadCAD (complex adaptive dynamics Computer-Aided Design) is a Python-based simulation and modeling tool used to design, test, and validate the FQAHO economic model and the overall Choir system dynamics.
-- **Key Features**:
-    - **Agent-Based Modeling**:  Enabling the simulation of complex agent interactions and emergent system behaviors.
-    *   **Stochastic Simulation**:  Supporting Monte Carlo simulations and other stochastic methods for analyzing system robustness and risk.
-    *   **Parameter Sweeping and Optimization**:  Facilitating the exploration of parameter spaces and the optimization of system parameters for desired economic and intelligence outcomes.
-    *   **Visualization and Analysis**:  Providing tools for visualizing simulation results and analyzing complex system dynamics.
-- **Why Chosen**: cadCAD is essential for the rigorous design, testing, and validation of Choir's complex FQAHO economic model and overall system dynamics.  It allows us to simulate different scenarios, analyze system behavior under various conditions, and optimize parameters to ensure economic stability, fairness, and alignment with the project's goals.
-
-## Security Considerations of MCP Architecture
-
-In the age of advancing AI capabilities, security must be foundational. Our MCP-based stack significantly enhances security and confidentiality, especially through the integration with Phala Network.
-
-### MCP-Based Security - Enhanced Isolation and Control
-
-The MCP architecture inherently improves security by:
-
-- Enforcing clear boundaries and isolation between phases as separate servers, limiting the impact of vulnerabilities.
-- Providing explicit control over tools and resources available to each phase, adhering to the principle of least privilege.
-- Simplifying security auditing and policy enforcement due to modularity and well-defined interfaces.
-- Reducing the attack surface by minimizing the code and tools exposed in each phase-server.
-
-### Phala Network Confidential Computing - Hardware-Level Security
-
-Integrating Phala Network's confidential computing platform provides hardware-level security guarantees for the most sensitive operations within Choir:
-
-- **TEE-Based Key Management**: Private keys for blockchain operations are generated and stored exclusively within secure TEEs, eliminating the risk of key exposure on traditional servers.
-- **Secure Contract Execution**: Smart contract execution occurs within the isolated TEE environment, protected from malicious actors and unauthorized access.
-- **Data Confidentiality**: Sensitive data and AI model weights can be processed and stored confidentially within the TEE, ensuring data privacy and preventing data breaches.
-- **Remote Attestation**:  Phala Network's remote attestation mechanisms allow users and auditors to cryptographically verify the integrity and security of the TEE execution environment, building trust and transparency.
-
-By combining the architectural security of MCP with the hardware-level security of Phala Network, Choir achieves a defense-in-depth security posture that is essential for building a trustworthy and resilient AI platform. This approach significantly reduces the risks associated with blockchain key compromise, data exfiltration, system manipulation, and other security threats common in AI and blockchain systems.
-
-## Migration Path: Phased Transition to MCP Architecture
-
-To ensure a smooth and well-managed transition from the previous LangGraph-based architecture to the new MCP architecture, we are adopting a phased migration approach:
-
-1.  **Phase 1: MCP Core Infrastructure Development (Current Phase)**
-    *   **Focus**: Building the core MCP server infrastructure for each of the PostChain phases (Action, Experience, Intention, Observation, Understanding, Yield).
-    *   **Key Tasks**:
-        - Implement basic MCP server templates and communication protocols.
-        - Integrate `langchain_utils.py` for model interactions within MCP servers.
-        - Establish SSE streaming for real-time communication from MCP servers to the Python API.
-        - Set up Docker containerization and deployment pipelines for MCP servers.
-    *   **Deliverables**: Functional MCP server infrastructure for all PostChain phases, basic SSE streaming, Dockerized deployment.
-
-2.  **Phase 2: Phase-by-Phase Migration and Testing**
-    *   **Focus**: Migrating each PostChain phase from the LangGraph implementation to the new MCP server architecture, one phase at a time.
-    *   **Key Tasks**:
-        - Migrate the Action Phase to its MCP server implementation.
-        - Thoroughly test the Action Server in isolation and in integration with the Python API.
-        - Repeat the migration and testing process for each of the remaining phases (Experience, Intention, Observation, Understanding, Yield), in a sequential and controlled manner.
-    *   **Deliverables**: Fully migrated and tested MCP server implementations for all PostChain phases, ensuring feature parity and performance improvements compared to the LangGraph architecture.
-
-3.  **Phase 3: Performance Optimization and Scalability Enhancements**
-    *   **Focus**: Optimizing the performance and scalability of the MCP-based Choir system.
-    *   **Key Tasks**:
-        - Conduct comprehensive performance benchmarking and profiling of the MCP architecture.
-        - Implement performance optimizations at the server level (e.g., caching, asynchronous processing, resource management).
-        - Implement horizontal scaling strategies for individual phase-servers to handle increased load.
-        - Explore and implement load balancing mechanisms for distributing requests across phase-server instances.
-    *   **Deliverables**: Optimized and scalable MCP-based Choir system capable of handling production-level loads and user traffic.
-
-4.  **Phase 4: Phala Network Integration and Confidential Computing Deployment**
-    *   **Focus**: Deploying the MCP-based Choir system on Phala Network's confidential computing platform to enhance security and privacy.
-    *   **Key Tasks**:
-        - Integrate Phala Network TEEs into the deployment pipeline for MCP servers.
-        - Implement secure key management and confidential data handling within TEEs.
-        - Conduct security audits and penetration testing of the TEE-based deployment.
-        - Deploy the production Choir system on Phala Network, leveraging confidential computing for enhanced security and user privacy.
-    *   **Deliverables**: Production deployment of the Choir MCP architecture on Phala Network, leveraging confidential computing for enhanced security and privacy.
-
-This phased migration path allows for a controlled and iterative transition to the MCP architecture, minimizing disruption and ensuring a robust and well-tested final system.  Each phase will be carefully documented and validated before proceeding to the next, ensuring a smooth and successful architectural pivot for Choir.
-
-=== File: docs/stack_pivot_summary.md ===
-
-
-
-==
-stack_pivot_summary
-==
-
-
-# Stack Pivot Summary: From LangGraph to MCP Architecture
-
-## Executive Summary
-
-Choir has undergone a significant architectural pivot, moving from a graph-based implementation using LangGraph to an MCP-based architecture. This document summarizes the rationale, advantages, and implementation plan for this transition.
-
-## Key Decisions
-
-1.  **Architectural Pattern**: MCP Architecture instead of Graph Model
-2.  **Core Framework**: Model Context Protocol (MCP) for server-based phases
-3.  **Database**: libSQL/Turso for SQL+vector capabilities
-4.  **Blockchain**: Sui via PySUI
-5.  **Type Safety**: Pydantic
-6.  **API**: FastAPI/Uvicorn
-7.  **Deployment**: Docker on Phala Network
-
-## Rationale for the Pivot
-
-After extensive experimentation with LangGraph, several challenges emerged, and further analysis suggested MCP as a more suitable architecture:
-
-1.  **Memory Management Issues**: Persistent problems with memory usage and state management in LangGraph remained unresolved.
-2.  **Debugging Complexity**: Difficulty in tracing and resolving issues in the complex LangGraph workflows.
-3.  **Architectural Mismatch**: LangGraph's graph model was not ideally suited for the desired phase-based, service-oriented architecture.
-4.  **Scalability Concerns**:  Uncertainties about the scalability of the LangGraph approach for long-term growth.
-5.  **Desire for Service Isolation**:  A need for better isolation and modularity between phases, which MCP servers could provide.
-
-## Advantages of MCP Architecture
-
-The MCP architecture provides significant advantages for Choir:
-
-1.  **Service Encapsulation**: Each phase is encapsulated as a separate MCP server, improving modularity and maintainability.
-2.  **Clear Tool Boundaries**:  Each phase's MCP server explicitly defines and controls the tools it can access, enhancing security and preventing runaway tool use.
-3.  **Improved Isolation**:  Fault isolation is enhanced as phases run in separate server processes.
-4.  **Resource Management**: Each MCP server manages its own resources, potentially improving resource utilization and stability.
-5.  **Scalability**:  The service-oriented nature of MCP architecture allows for easier scaling and distribution of phases.
-6.  **Technology Alignment**: MCP aligns well with the vision of decentralized, service-oriented AI and the use of Phala Network for secure enclaves.
-
-## PostChain as MCP Servers
-
-The AEIOU-Y PostChain maps naturally to specialized MCP servers, with each phase implemented as a separate server:
-
-- **Action Server**: Handles user input and initial response in the Action phase
-- **Experience Server**: Implements knowledge retrieval and context enrichment for the Experience phase
-- **Intention Server**: Focuses on user intent modeling and goal setting in the Intention phase
-- **Observation Server**: Manages semantic connections and information tagging for the Observation phase
-- **Understanding Server**: Performs context evaluation and filtering in the Understanding phase
-- **Yield Server**: Handles final response generation and process completion in the Yield phase
-
-## Technical Stack Synergy
-
-The components of the new MCP-based stack work together synergistically:
-
-- **MCP + FastAPI/Uvicorn**:  FastAPI provides a robust API layer for interacting with MCP servers.
-- **MCP + libSQL/Turso**: Each MCP server can use libSQL for local state persistence if needed.
-- **MCP + PySUI**: MCP servers can potentially integrate with PySUI for blockchain interactions in a modular way.
-- **Docker + Phala**: MCP servers can be containerized and deployed securely on Phala Network.
-
-## Migration Path
-
-The migration to MCP architecture will follow a structured path:
-
-1.  **Define MCP Server Interfaces**: Clearly define the tool and resource interfaces for each phase's MCP server.
-2.  **Implement Core MCP Servers**:  Develop the basic MCP server structure for each of the AEIOU-Y phases.
-3.  **Integrate Langchain Utils**:  Incorporate the existing `langchain_utils.py` for model interactions within MCP servers.
-4.  **Implement SSE Streaming**: Add SSE streaming capabilities to each MCP server for real-time output.
-5.  **Orchestrate with Python API**: Update the Python API to orchestrate calls to the new MCP servers and handle SSE streams.
-6.  **Deploy and Test**:  Deploy the MCP-based architecture in a local Docker environment and then on Phala Network for testing and validation.
-
-## Security Benefits of MCP Architecture
-
-The MCP architecture enhances security in several dimensions:
-
-1.  **Tool Control**:  Strict control over tools available to each phase, reducing the risk of unintended actions.
-2.  **Service Isolation**:  Phases run in separate server processes, limiting the impact of potential vulnerabilities in one phase.
-3.  **Clear Interfaces**:  Well-defined interfaces between phases (MCP protocol) improve system understanding and security analysis.
-4.  **Minimal Tool Exposure**:  Phases only expose necessary tools, reducing the attack surface.
-5.  **Phala Integration**:  Deployment on Phala Network provides confidential computing guarantees for sensitive operations within MCP servers.
-
-## Documentation Updates
-
-The documentation will be updated to reflect the new MCP architecture:
-
-1.  Updated: Stack Pivot Summary document to reflect MCP architecture
-2.  Updated: Documentation index and navigation to remove actor-model specific content
-3.  To be added: MCP architecture diagrams and descriptions
-4.  To be added: MCP server implementation guidelines
+This document argues for the focused technology stack selected for the **Choir Qdrant-Sui Minimum Viable Product (MVP)**. The primary goal of this MVP is to establish and validate the core data flow using Qdrant as the central data and vector store, integrated with a basic Sui blockchain mechanism for the CHIP token and reward structure. This stack leverages existing components where possible (like the current LCEL-based PostChain workflow) to accelerate MVP development while laying the foundation for future scalability.
+
+The core technologies for the Qdrant-Sui MVP are:
+
+1.  **Qdrant:** Central data layer for users, threads, messages (including embedded phase outputs), and phase-specific memory. Handles vector storage and semantic search.
+2.  **Sui (via PySUI Service):** Blockchain layer for the CHIP token and reward distribution mechanism (simplified for MVP).
+3.  **Python API (FastAPI/Uvicorn):** Orchestration layer handling client requests, PostChain execution, Qdrant interactions, and Sui service calls.
+4.  **PostChain Workflow (LCEL Implementation):** The existing `langchain_workflow.py` implementing the AEIOU-Y phases, adapted for refined Qdrant interactions.
+5.  **Langchain Utils (`langchain_utils.py`):** LLM abstraction layer used by the PostChain workflow.
+6.  **Pydantic:** Data validation for API and internal structures.
+7.  **Docker:** Containerization for deployment of the Python API.
+8.  **(Client Side) SwiftUI & Keychain:** User interface and secure Sui private key storage.
+
+## Qdrant-Sui MVP Goal
+
+The objective is to build a functional slice of the Choir system that demonstrates:
+
+1.  **Core Data Structure:** Storing users, threads, messages, and phase outputs in Qdrant using a refined schema.
+2.  **Semantic Search:** Utilizing Qdrant vector search within the Experience phase to find relevant priors.
+3.  **Phase-Specific Memory:** Implementing `intention_memory` and `observation_memory` in Qdrant.
+4.  **Reward Triggering:** Calculating basic novelty/similarity scores and triggering a (potentially simulated or basic) reward distribution via the Sui service based on message creation and citation.
+5.  **End-to-End Flow:** A user interacting via the SwiftUI client, triggering the PostChain workflow via the API, interacting with Qdrant, and potentially initiating a basic Sui reward action.
+
+## The Core MVP Stack & Rationale
+
+1.  **Qdrant (Central Data Layer):**
+    *   **Role:** The **single source of truth** for all data relevant to the AI processing loop and reward mechanism. Stores user mappings, thread metadata, core conversation turns (user prompts & final AI responses), embedded internal phase outputs, and phase-specific memory collections (`intention_memory`, `observation_memory`). Crucial for the Experience phase's vector search (global priors) and provides the necessary inputs (novelty/similarity scores, author/prior linkage) for the reward system.
+    *   **Why Chosen for MVP:** Essential for the core concept; vector search is fundamental to Experience/rewards. Centralizing here simplifies the MVP backend. Using existing collections (`choir`, `users`, `chat_threads`) with schema refinement is pragmatic. Adding `intention_memory` and `observation_memory` provides the necessary specialized storage.
+
+2.  **Sui (via PySUI Service - Blockchain Layer):**
+    *   **Role:** Manages the CHIP token (basic existence contract) and executes the reward distribution logic triggered by the API. For MVP, this logic might be simplified (e.g., basic minting or even off-chain logging of intended rewards). The `sui_service.py` encapsulates PySUI interactions.
+    *   **Why Chosen for MVP:** Core to the "tokenized marketplace" vision. Integrating a basic version early validates the concept and technical feasibility. PySUI provides the necessary SDK.
+
+3.  **Python API (FastAPI/Uvicorn - Orchestration Layer):**
+    *   **Role:** The central hub. Handles client authentication (via Sui signature verification), orchestrates the `langchain_workflow.py` execution for the PostChain, mediates all interactions with Qdrant (`database.py`), triggers the Sui service (`sui_service.py`) for rewards, and manages SSE streaming to the client.
+    *   **Why Chosen for MVP:** Provides a necessary interface between the client, the AI logic, and the data/blockchain layers. FastAPI is performant and integrates well with Pydantic.
+
+4.  **PostChain Workflow (LCEL - Core AI Logic):**
+    *   **Role:** Implements the AEIOU-Y phases sequentially using the existing Langchain Expression Language (LCEL) structure in `langchain_workflow.py`. This logic is adapted to read from/write to the designated Qdrant collections (via the API/`database.py`). The Experience phase calculates novelty/similarity scores. The Yield phase structures the final AI message with embedded phase outputs and triggers the reward calculation via the API.
+    *   **Why Chosen for MVP:** **Leverages existing, functional code.** Avoids a major refactor for the MVP, allowing faster progress on the core Qdrant/Sui integration. LCEL provides a clear structure for the sequential phase execution.
+
+5.  **Langchain Utils (`langchain_utils.py` - LLM Abstraction):**
+    *   **Role:** Provides a consistent interface to multiple LLM providers, allowing the PostChain workflow to utilize different models without being tightly coupled to specific provider APIs.
+    *   **Why Chosen for MVP:** Already implemented and essential for the PostChain workflow's LLM interactions. Supports flexibility.
+
+6.  **Pydantic (Data Integrity):**
+    *   **Role:** Ensures data consistency and validation for API requests/responses and internal data structures used within the PostChain workflow and Qdrant interactions.
+    *   **Why Chosen for MVP:** Best practice for robust Python development, especially with APIs and complex data structures. Reduces errors.
+
+7.  **Docker (Deployment):**
+    *   **Role:** Containerizes the Python API service (including all its dependencies like FastAPI, Langchain, PySUI, Qdrant client) for consistent and reproducible deployment.
+    *   **Why Chosen for MVP:** Standard for modern web service deployment, simplifying setup and ensuring environment consistency.
+
+8.  **(Client) SwiftUI & Keychain:**
+    *   **Role:** Provides the user interface for interaction. Securely stores the user's Sui private key using the device Keychain. Handles message signing for authentication. Displays streamed PostChain outputs.
+    *   **Why Chosen for MVP:** Native iOS provides the best user experience and secure key management capabilities required.
+
+## Why This Stack for the MVP?
+
+*   **Focus:** Directly targets the core Qdrant-Sui integration, which is the central hypothesis to validate.
+*   **Speed & Pragmatism:** Reuses the existing `langchain_workflow.py` (LCEL implementation), significantly reducing the initial development effort.
+*   **Simplicity:** Defers complexities not strictly necessary to prove the core Qdrant-Sui concept.
+*   **Validation:** Allows for rapid validation of the proposed Qdrant data structures, the basic reward trigger mechanism, and the end-to-end user flow.
+
+## Synergy within the MVP Stack
+
+The Qdrant-Sui MVP stack creates a clear data and execution flow:
+
+1.  **Client (SwiftUI):** User interacts, signs request with Sui key (Keychain).
+2.  **API (FastAPI):** Authenticates user (verifies signature, maps Sui address to Qdrant User ID via `users` collection), receives prompt, initiates PostChain workflow.
+3.  **PostChain (LCEL):** Executes AEIOU-Y phases sequentially.
+    *   Uses **Langchain Utils** to call LLMs.
+    *   Interacts with **Qdrant** via API/`database.py` for memory (`intention_memory`, `observation_memory`) and priors (`choir` collection).
+    *   Experience phase calculates novelty/similarity scores using Qdrant results.
+    *   Yield phase bundles outputs into a single AI message structure.
+4.  **API (FastAPI):** Receives final AI message structure from Yield, stores it in **Qdrant** (`choir` collection), triggers **Sui Service**.
+5.  **Sui Service:** Calculates basic reward distribution, interacts with **Sui Blockchain** (basic mint/log).
+6.  **API (FastAPI):** Streams phase outputs (via SSE) back to the Client.
+7.  **Client (SwiftUI):** Displays conversation and phase outputs.
+
+## Path Forward (Beyond MVP)
+
+This MVP stack provides a solid foundation. Future iterations can build upon it:
+
+*   **Refine Reward Logic:** Implement the sophisticated FQAHO-based reward splitting formula on Sui or via a secure off-chain oracle.
+*   **Scale PostChain:** Address performance bottlenecks in the `langchain_workflow.py` as needed, potentially by optimizing or modularizing phase execution.
+*   **Enhance Client:** Implement client-side caching for improved offline experience and UI responsiveness.
+*   **Security Hardening:** Implement enhanced security measures for the API and blockchain interactions.
+*   **Add Features:** Implement governance, advanced tool use, multi-modality, etc.
 
 ## Conclusion
 
-The pivot from LangGraph to the MCP architecture represents a strategic evolution for Choir.  By adopting MCP, we gain a more modular, scalable, and secure architecture that aligns better with the project's goals of decentralized, service-oriented AI. This transition positions Choir for long-term growth and innovation while maintaining the core AEIOU-Y PostChain conceptual framework.
+The proposed Qdrant-Sui MVP stack is a pragmatic and focused approach. It prioritizes the core integration of Qdrant for AI data management and Sui for the token economy, leveraging existing components like the LCEL-based PostChain workflow for rapid development and validation. This stack allows us to quickly test the fundamental concepts of Choir's data and reward system.
 
 === File: docs/state_management_patterns.md ===
 
@@ -4767,114 +3779,67 @@ state_management_patterns
 ==
 
 
-# State Management Patterns in Choir MCP Architecture
+# State Management Patterns in Choir (Qdrant-Sui MVP)
+
+VERSION state_management_patterns: 8.0 (Qdrant-Sui MVP Focus)
 
 ## Overview
 
-State management is a critical aspect of building robust and scalable AI systems, especially in a distributed architecture like Choir's Model Context Protocol (MCP) implementation. This document outlines the key state management patterns employed within the Choir MCP architecture, focusing on how state is handled in MCP servers and the Host application.
+State management is crucial for the Choir platform. In the Qdrant-Sui MVP, the primary focus is on managing state within the central Python API and persisting core data within Qdrant. This document outlines the state management patterns specific to this MVP architecture. Client-side caching and distributed server state are deferred post-MVP.
 
-## Key State Management Challenges in Distributed AI Systems
+## State Management in the Qdrant-Sui MVP
 
-In distributed AI systems like Choir, state management presents unique challenges:
+The state is primarily managed in two locations:
 
-*   **Concurrency:** Multiple clients and servers may interact concurrently, requiring mechanisms to manage shared state and prevent race conditions.
-*   **Scalability:** State management solutions must scale efficiently as the number of users, conversations, and servers grows.
-*   **Persistence:**  State often needs to be persisted across sessions and server restarts to maintain conversation history and system context.
-*   **Data Integrity:** Ensuring data consistency and integrity across distributed components is crucial, especially for critical state information.
-*   **Performance:** State management operations should be performant and minimize latency to maintain a responsive user experience.
+1.  **Python API (In-Memory during Request Processing):** The FastAPI application manages the *transient state* of a single PostChain execution cycle for a given user request.
+2.  **Qdrant (Persistent State):** Qdrant serves as the **persistent source of truth** for all core data entities required for the AI workflow and the reward system.
 
-## State Management in MCP Servers (Phase Servers)
+## 1. Python API: Orchestration & Transient State
 
-MCP servers in Choir are designed to be modular and relatively stateless with respect to the *global conversation state*. However, they do manage **server-specific state** for performance optimization and internal operations.
+*   **Role:** The Python API acts as the central orchestrator. For each incoming user request, it manages the flow through the PostChain (AEIOU-Y) phases implemented in `langchain_workflow.py`.
+*   **Transient State Handling:**
+    *   **Workflow Context:** During a single PostChain cycle triggered by a user message, the API holds the intermediate outputs from each phase (Action, Experience, etc.) in memory. This context (including text outputs, calculated scores, potential citations) is passed sequentially from one phase function to the next within the `langchain_workflow.py`.
+    *   **Stateless Between Requests:** The API itself aims to be largely stateless *between* distinct user requests/PostChain cycles. All necessary persistent state is fetched from or saved to Qdrant at the beginning or end of the request processing cycle.
+    *   **Concurrency:** FastAPI and Python's `asyncio` handle concurrent user requests. Care must be taken within the workflow logic if shared resources (beyond Qdrant/Sui services which handle their own concurrency) are accessed, but the primary state (conversation history, memory) is managed via Qdrant, pushing concurrency control largely to the database/service layer.
 
-### Server-Specific State: Caching and Local Persistence
+## 2. Qdrant: Persistent State Management
 
-*   **Purpose:**  MCP servers utilize server-specific state primarily for **caching** frequently accessed data and **local persistence** of temporary or server-specific information.
-*   **Caching Strategies:**
-    *   **In-Memory Caching:** Servers can use in-memory caches (e.g., dictionaries, hash maps) to store parsed context, API responses, or database query results that are likely to be reused within the same turn or across rapid consecutive turns.
-    *   **Cache Invalidation:**  Implement cache invalidation strategies (e.g., time-based expiration, event-driven invalidation) to ensure cached data remains reasonably fresh and consistent.
-*   **Local Persistence with libSQL/Turso:**
-    *   **Purpose:** For server-specific state that needs to persist across server restarts or for larger datasets that don't fit in memory, servers can leverage **libSQL/Turso for local persistence.**
-    *   **Use Cases:**  Caching large resources segments, storing server-local indexes or data structures, logging server-specific events.
-    *   **Embedded libSQL:**  Each MCP server can embed a lightweight libSQL database instance for local persistence, ensuring data is stored close to the compute.
-    *   **Turso Sync (Optional):**  For certain server-specific state, you *could* potentially leverage Turso's cloud sync capabilities for backup or limited state sharing between server instances (though this is less common for server-specific state, which is typically meant to be isolated).
-*   **Stateless with Respect to Global Conversation State:**  Crucially, MCP servers are designed to be **stateless with respect to the *global conversation state***. They do not persistently store or manage the overall conversation history. This responsibility is delegated to the Host application.
+*   **Role:** Qdrant is the **authoritative persistent store** for the MVP.
+*   **Managed Entities:**
+    *   **`users`:** Maps Sui addresses to internal user IDs. Persistent user identity link.
+    *   **`chat_threads`:** Stores metadata about conversation threads. Persistent thread context.
+    *   **`choir` (Messages):** Stores the core conversational turns (user prompts, final AI responses). Critically, AI responses embed the outputs from *all* internal PostChain phases (`phase_outputs` dictionary), novelty/similarity scores, and citation links (`cited_prior_ids`). This collection is the persistent record of the conversation history and the primary input for reward calculations.
+    *   **`intention_memory`:** Persists user-specific goals and preferences across multiple turns and sessions, queryable by the Intention phase. Filtered by `user_id`.
+    *   **`observation_memory`:** Persists thread-specific concepts and summaries across multiple turns and sessions, queryable by the Observation phase (and potentially Experience). Filtered by `thread_id`.
+*   **Data Integrity & Access:** The Python API (via `database.py`) is responsible for all CRUD operations on Qdrant, ensuring data is structured according to the defined schemas (using Pydantic for validation) before persistence. Access control for user-specific memory (`intention_memory`) is enforced by filtering queries based on the authenticated `user_id`.
 
-### Accessing the "Conversation State Resource" from Servers
+## 3. Client (SwiftUI): UI State & Keychain
 
-MCP servers access the global conversation state through the **"conversation state resource"** provided by the Host application.
+*   **Role:** Manages the user interface state and secure key storage.
+*   **State Handled:**
+    *   **UI State:** Current view, input field content, display state of messages and phases (fetched from API).
+    *   **Sui Private Key:** Securely stored in the device Keychain. Used for signing authentication messages.
+*   **No Persistent App Data (MVP):** For the MVP, the client **does not** maintain its own persistent cache of conversation history. It fetches conversation data from the API as needed for display. Offline access is deferred post-MVP.
 
-*   **Pull-Based Resource Fetching:** Servers use the `exchange.readResource(ReadResourceRequest)` method (provided by the MCP Client SDK) to *pull* the "conversation state resource" from the Host *when needed*.
-*   **Resource URI as Context Pointer:** The Host application provides the URI of the "conversation state resource" (e.g., `conversation://current-history`) to servers in each `callTool` request (typically as a tool argument).
-*   **On-Demand Fetching:** Servers only fetch the resource content *when their tool logic requires access to the conversation state*. They don't need to maintain a persistent, live connection to the conversation state.
-*   **Efficient Resource Access:**  The MCP resource mechanism is designed to be relatively efficient for data transfer, especially for text-based resources like conversation histories.
+## State Flow Example (Single Turn)
 
-### Host Application Management of the "Conversation State Resource"
+1.  User sends message via SwiftUI Client. Client signs request hash with Sui Key.
+2.  Python API receives request, verifies signature, maps Sui Address to Qdrant User ID (`users` collection). Fetches relevant thread context (`chat_threads`, recent messages from `choir`).
+3.  API initiates PostChain workflow (`langchain_workflow.py`) with user message and thread context.
+4.  **Phase Execution (Transient State):**
+    *   Action phase runs.
+    *   Experience phase runs: Queries `choir` (Qdrant) for priors, calculates scores.
+    *   Intention phase runs: Queries/updates `intention_memory` (Qdrant).
+    *   Observation phase runs: Queries/updates `observation_memory` (Qdrant).
+    *   Understanding phase runs: May trigger deletes in `intention_memory`/`observation_memory` (Qdrant).
+    *   Yield phase runs: Bundles all phase outputs.
+    *   *(Intermediate outputs are held in memory by the API/workflow runner during this sequence)*.
+5.  API receives final bundled AI response data from Yield.
+6.  API **persists** the new AI message (with embedded `phase_outputs`, scores, citations) to the `choir` collection in Qdrant.
+7.  API triggers the Sui Service with relevant data (message ID, author ID, prior IDs, scores) from the persisted Qdrant entry.
+8.  API streams phase outputs (potentially fetched back from the newly saved Qdrant entry or held from step 4) back to the Client via SSE.
+9.  Client updates UI state based on SSE stream.
 
-The Host application (Python API) plays a central role in managing the **"conversation state resource"**:
+## Conclusion (MVP Focus)
 
-*   **Authoritative Source of Truth:** The Host application is the **single source of truth** for the global conversation state. It maintains the canonical version of the conversation history, user messages, AI responses, and other relevant data.
-*   **Dynamic Resource Updates:** The Host application is responsible for **dynamically updating the "conversation state resource"** as the conversation progresses. This includes:
-    *   Adding new user messages.
-    *   Adding AI responses from each PostChain phase.
-    *   Updating conversation metadata (e.g., timestamps, user intents, annotations).
-*   **Exposing the Resource via URI:** The Host application exposes the "conversation state resource" via a well-defined URI (e.g., `conversation://current-history`) that MCP servers can use to access it.
-*   **Potential Persistence of "Conversation State Resource" (Host-Side):**  For persistence of the *global conversation history* across client sessions, the Host application *can* choose to persist the "conversation state resource" data in a client-side database (like libSQL/Turso embedded in the Host application) or in a separate centralized database.  However, for the MVP, in-memory management of the "conversation state resource" might be sufficient.
-
-### Concurrency Control and Thread Safety (Brief Overview)
-
-In a concurrent MCP system, both the Host application and MCP servers need to consider concurrency control and thread safety:
-
-*   **Host Application (Concurrent Workflow Orchestration):** The Host application, as the orchestrator of concurrent PostChain workflows, needs to be thread-safe when managing the "conversation state resource" and handling concurrent requests from users and servers.  Python's `asyncio` and appropriate locking mechanisms can be used for concurrency control in the Host application.
-*   **MCP Servers (Concurrent Request Handling):** MCP servers, when handling concurrent requests from the Host, need to ensure thread safety in their internal state management and tool implementations.  Asynchronous programming and thread-safe data structures are key for building concurrent MCP servers.
-
-## (Optional) Code Examples (Conceptual Python)
-
-**(Conceptual Example - Server-Side Caching in Python MCP Server):**
-
-```python
-class ExperienceServer(Server):
-    def __init__(self, ...):
-        super().__init__(...)
-        self.context_cache = {}  # In-memory cache for conversation context
-
-    @app.call_tool("get_enriched_context")
-    async def get_enriched_context(self, exchange: ServerExchange, arguments: dict):
-        conversation_history_uri = arguments.get("conversation_history_uri")
-
-        # Check if context is in cache
-        if conversation_history_uri in self.context_cache:
-            conversation_history = self.context_cache[conversation_history_uri]
-            print("Using cached context for:", conversation_history_uri)
-        else:
-            # Fetch context resource from Host
-            read_resource_request = mcp_types.ReadResourceRequest(uri=conversation_history_uri)
-            read_resource_result = await exchange.read_resource(read_resource_request)
-            conversation_history = read_resource_result.contents[0].text
-            # Cache the fetched context
-            self.context_cache[conversation_history_uri] = conversation_history
-            print("Fetched and cached context for:", conversation_history_uri)
-
-        # ... (rest of tool logic using conversation_history) ...
-Use code with caution.
-Markdown
-(Conceptual Example - Host-Side "Conversation State Resource" Update in Python MCP Client):
-
-class ChoirHostClient(Client):
-    def __init__(self, ...):
-        super().__init__(...)
-        self.conversation_history = [] # In-memory list for conversation history
-
-    async def handle_user_prompt(self, user_prompt):
-        self.conversation_history.append({"role": "user", "content": user_prompt})
-        await self.update_conversation_resource() # Update the resource
-
-        # ... (call PostChain phases) ...
-
-    async def update_conversation_resource(self):
-        # Update the "conversation history resource" content
-        self.setResourceContent(
-            "conversation://current-history",
-            mimeType="application/json",
-            text=json.dumps(self.conversation_history) # Serialize to JSON
-        )
+The Qdrant-Sui MVP employs a pragmatic state management strategy. Persistent state critical for the AI workflow and reward system resides centrally in Qdrant, managed by the Python API. The API handles transient state during request processing. The client manages UI state and the user's private key. This approach minimizes complexity for the MVP, allowing focus on validating the core Qdrant-Sui data flow and reward mechanism.

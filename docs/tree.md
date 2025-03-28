@@ -171,14 +171,12 @@
 ├── docker-compose.yml
 ├── docs
 │   ├── CHANGELOG.md
-│   ├── architecture_reorganization_plan_mcp.md
 │   ├── blockchain_integration.md
 │   ├── comp_provider_info.md
 │   ├── core_core.md
 │   ├── core_economics.md
 │   ├── core_state_transitions.md
 │   ├── data_engine_model.md
-│   ├── developer_quickstart.md
 │   ├── e_business.md
 │   ├── e_concept.md
 │   ├── evolution_naming.md
@@ -186,7 +184,6 @@
 │   ├── fqaho_simulation.md
 │   ├── fqaho_visualization.md
 │   ├── index.md
-│   ├── langchain_postchain_checklist.md
 │   ├── levels
 │   │   ├── all.txt
 │   │   ├── level0.md
@@ -195,11 +192,8 @@
 │   │   ├── level3.md
 │   │   ├── level4.md
 │   │   └── level5.md
-│   ├── libsql_integration.md
 │   ├── plan_anonymity_by_default.md
-│   ├── plan_cadcad_modeling.md
 │   ├── plan_chip_materialization.md
-│   ├── plan_libsql.md
 │   ├── postchain_temporal_logic.md
 │   ├── require_action_phase.md
 │   ├── require_experience_phase.md
@@ -213,7 +207,6 @@
 │   │   └── update_tree.sh
 │   ├── security_considerations.md
 │   ├── stack_argument.md
-│   ├── stack_pivot_summary.md
 │   ├── state_management_patterns.md
 │   └── tree.md
 ├── notebooks
@@ -229,4 +222,4 @@
     ├── sources_displaying.sh
     └── test_postchain_multiturn.sh
 
-59 directories, 168 files
+59 directories, 161 files

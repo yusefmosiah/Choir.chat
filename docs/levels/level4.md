@@ -394,7 +394,7 @@ These visualizations are essential for understanding how value and influence pro
     *   **Visualization Components:**
         *   Nodes as Economic Entities: Represent different entities in the token economy as nodes in a Sankey diagram:
             *   User Groups: Different categories of users (Content Creators, Curators, etc.).
-            *   AI Agents (Phase Servers): Represent the aggregate economic activity of all MCP servers.
+            *   AI Agents (Phase Servers): Represent the aggregate economic activity of all phases.
             *   Treasury: Represent the Choir treasury or reserve fund.
             *   Token Holders: Represent CHIP token holders as a whole.
         *   Edges as Value Flows: Represent flows of CHIP tokens between entities as directed edges in the Sankey diagram.

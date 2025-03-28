@@ -1,182 +1,88 @@
-# Security Considerations for MCP-Based Choir Architecture
+# Security Considerations for Choir (Qdrant-Sui MVP)
+
+VERSION security_considerations: 8.0 (Qdrant-Sui MVP Focus)
 
 ## Introduction
 
-This document outlines the security considerations for Choir's MCP-based architecture, emphasizing the security benefits inherent in the Model Context Protocol and the integration with Phala Network's Trusted Execution Environment (TEE) for secure and confidential AI operations.
+This document outlines the security considerations for Choir's Qdrant-Sui Minimum Viable Product (MVP) architecture. This architecture centralizes AI workflow execution, data management (Qdrant), and blockchain interactions (Sui via `sui_service.py`) within a single Python API backend. Security focuses on protecting this central API, its data interactions, and the user's keys on the client side.
 
-## Threat Model (No Significant Changes, Review and Confirm)
+## Threat Model
 
-The system addresses the same categories of potential threats as previously defined.  *(Review the existing threat model in the document and confirm if it still accurately reflects the threat landscape for the MCP architecture.  No major changes are expected here, but a quick review is recommended.)*
+The system addresses the following potential threats:
 
-1.  **Blockchain Key Compromise**: Theft or unauthorized use of private keys used for Sui blockchain operations
-2.  **Contract Manipulation**: Unauthorized modification of contract parameters or execution
-3.  **Token Theft**: Unauthorized transfer or access to CHIP tokens
-4.  **Data Exfiltration**: Unauthorized access to or extraction of sensitive user data
-5.  **System Manipulation**: Unauthorized alterations to system behavior or state
-6.  **Model Attacks**: Prompt injection, jailbreaking, or other attacks on underlying AI models
-7.  **Resource Exhaustion**: Denial of service through excessive resource consumption
-8.  **Identity Spoofing**: Impersonation of legitimate users or system components
-9.  **Infrastructure Compromise**: Attacks on the underlying infrastructure components
+1.  **Blockchain Key Compromise**: Theft or unauthorized use of the API backend's private key used for Sui blockchain operations.
+2.  **Contract Manipulation**: Unauthorized modification of the basic CHIP token contract parameters or execution (less likely with MVP's simple contract).
+3.  **Token Theft**: Unauthorized triggering of reward distributions or transfers via the API.
+4.  **Data Exfiltration**: Unauthorized access to or extraction of sensitive user or conversation data stored in Qdrant.
+5.  **System Manipulation**: Unauthorized alterations to the API's behavior, PostChain workflow logic, or state stored in Qdrant.
+6.  **Model Attacks**: Prompt injection, jailbreaking, or other attacks targeting the LLMs used within the PostChain workflow.
+7.  **Resource Exhaustion**: Denial of service against the API backend or Qdrant through excessive requests.
+8.  **Identity Spoofing**: Impersonation of legitimate users via compromised Sui keys or authentication bypass.
+9.  **Infrastructure Compromise**: Attacks on the underlying infrastructure hosting the API backend and Qdrant (e.g., Render).
 
-## Secure Blockchain Operations using TEEs (Updated for MCP Context)
+## Secure Blockchain Operations (MVP Context)
 
-### Core Blockchain Security Goals (No Changes)
+### Core Blockchain Security Goals
 
-The core blockchain security goals remain the same. *(No changes needed here unless you want to rephrase for clarity)*
+1.  **Secure Key Management**: Securely store and manage the private key used by the API backend's `sui_service.py` for Sui blockchain operations.
+2.  **Protected Contract Interaction**: Ensure interactions with the Sui smart contract (basic CHIP token) are executed correctly.
+3.  **Tamper-Proof Token Management**: Handle CHIP token reward distributions (simplified for MVP) in a way that prevents unauthorized manipulation.
+4.  **Transaction Integrity**: Ensure that blockchain transactions initiated by the API are properly authorized and accurately reflect the intended action.
 
-1.  **Secure Key Management**: Store and manage private keys for Sui blockchain operations within TEEs
-2.  **Protected Contract Execution**: Execute Sui smart contracts in a secure, isolated environment
-3.  **Tamper-Proof Token Management**: Handle CHIP token distribution and management in a way that prevents unauthorized manipulation
-4.  **Transaction Integrity**: Ensure that all blockchain transactions are properly authorized and accurately executed
+### Security Architecture (Centralized API Service)
 
-### TEE-Based Security Architecture (Updated for MCP Servers)
+1.  **API Backend Key Management:** The Sui private key used by `sui_service.py` is the most critical secret. It **must** be managed securely:
+    *   **No Hardcoding:** Never hardcode the private key in the source code.
+    *   **Environment Variables/Secrets:** Store the key securely using environment variables injected during deployment (e.g., Render's secret management).
+    *   **Limited Access:** Restrict access to the production environment and secret management tools.
+2.  **Controlled Interaction:** All blockchain interactions are funneled through the `sui_service.py` module within the API backend. This centralizes the logic and reduces the points where the key is directly used.
+3.  **Input Validation:** The API must rigorously validate all parameters (recipient addresses, amounts) passed to `sui_service.py` functions before constructing blockchain transactions.
 
-The system continues to leverage Phala Network's TEEs, and this section is updated to reflect how TEEs secure **MCP servers**:
+## Data Security Measures (Qdrant & API)
 
-1.  **Private Key Isolation (TEE-Secured MCP Servers):** Blockchain private keys are managed and used by **MCP servers** and are isolated within the TEEs provided by Phala Network.  Keys never leave the secure enclave, protecting them from exposure on the host system.
-2.  **Secure Execution Environment (TEE-Secured MCP Servers):**  **MCP servers** execute blockchain-related code entirely within the TEE, ensuring a secure and isolated execution environment.
-3.  **Attestation and Verification (TEE-Secured MCP Servers):** The state and code of **MCP servers running within TEEs** can be cryptographically verified through remote attestation, ensuring they haven't been tampered with.
-4.  **End-to-End Protection (MCP Client -> MCP Server -> Blockchain):** The entire pipeline, from transaction requests initiated by the MCP client (Host application) to transaction creation and submission by **MCP servers**, is protected within the TEE environment.
+1.  **Data Classification:** Identify sensitive data stored in Qdrant (e.g., `intention_memory` content, user-Sui address mappings in `users`).
+2.  **Encryption Architecture:**
+    *   **Transit:** Use HTTPS for all communication between the client, API, and Qdrant (if Qdrant is hosted externally).
+    *   **At Rest (Qdrant):** Rely on Qdrant's underlying storage mechanisms and the hosting provider's infrastructure for at-rest encryption. Consider Qdrant's specific encryption features if available and necessary.
+    *   **At Rest (API Secrets):** Ensure the Sui private key and any other API secrets are stored encrypted at rest by the deployment platform (e.g., Render).
+3.  **Qdrant Access Control:**
+    *   Use API keys or other authentication mechanisms provided by Qdrant to restrict access to authorized services (only the Python API backend).
+    *   Implement logical access control within the API backend to ensure, for example, that `intention_memory` is only queried for the currently authenticated user.
 
-### Advantages Over Traditional Approaches (No Changes Needed)
+## Docker Container Security (API Backend)
 
-The advantages of TEE-based security remain the same. *(No changes needed here)*
+1.  **Minimal Images:** Use minimal base images (like `python:3.12-slim`) for the API backend container to reduce the attack surface.
+2.  **No Privileged Containers:** Run containers without unnecessary privileges.
+3.  **Immutable Infrastructure:** Treat containers as immutable; rebuild and redeploy rather than modifying running containers.
+4.  **Vulnerability Scanning:** Integrate vulnerability scanning into the CI/CD pipeline for the Docker image.
+5.  **Secret Management:** Inject secrets (like the Sui private key, Qdrant API key) securely into the container environment at runtime, not during the build process.
 
-1. **Elimination of Server-Side Key Storage**
-2. **Hardware-Level Protection**
-3. **Reduced Attack Surface**
-4. **Decentralized Security Model**
+## Model Security (PostChain Workflow)
 
-## MCP Architecture Security Benefits (New Section - Key Improvement)
+1.  **Input Validation/Sanitization:** Sanitize user input passed to the PostChain workflow and subsequently to LLMs to mitigate prompt injection risks.
+2.  **Output Filtering:** Filter or sanitize outputs from LLMs, especially if they might be displayed directly or used in sensitive contexts (though less critical if outputs primarily feed other phases or are stored).
+3.  **Prompt Security:** Be mindful of prompt engineering techniques to make models less susceptible to jailbreaking or instruction hijacking, particularly for phases that might execute tools based on LLM output (deferred post-MVP).
+4.  **Rate Limiting:** Implement rate limiting at the API gateway or within FastAPI to prevent abuse of LLM resources.
+5.  **Model Usage Monitoring:** Monitor LLM usage for anomalies that might indicate attacks or misuse.
 
-The shift to the MCP architecture itself provides significant security enhancements:
+## Security Logging and Monitoring
 
-1.  **Modular and Isolated Phase Servers:**  The MCP architecture enforces **strong modularity and isolation** by implementing each PostChain phase as a separate MCP server. This significantly limits the potential impact of security vulnerabilities:
-    *   **Fault Isolation:** A security breach or vulnerability in one MCP server (e.g., the Experience Server) is **contained within that server** and is less likely to compromise other phases or the entire system.
-    *   **Reduced Attack Surface per Server:** Each MCP server has a *smaller and more focused attack surface* compared to a monolithic application.  Security audits and vulnerability assessments become more manageable for individual servers.
-    *   **Principle of Least Privilege:** Each MCP server can be granted *only the necessary tools and resources* required for its specific phase, following the principle of least privilege and reducing the potential for misuse of broader system capabilities.
+1.  **Comprehensive Logging:** Log key security events within the API backend: authentication attempts (success/failure), significant state changes, calls to `sui_service.py`, errors, and potential security anomalies.
+2.  **Qdrant Auditing:** If Qdrant provides audit logging features, enable them to monitor database access and operations.
+3.  **Infrastructure Monitoring:** Utilize monitoring tools provided by the hosting platform (e.g., Render) to track resource usage, network traffic, and potential infrastructure-level threats.
+4.  **Anomaly Detection:** Implement basic anomaly detection rules based on logs and metrics (e.g., sudden spike in failed authentications, unusual Qdrant query patterns, high rate of reward triggers).
+5.  **Incident Response Plan:** Have a basic plan for responding to security incidents, including identifying the issue, containing the impact, remediating the vulnerability, and communicating appropriately.
 
-2.  **Explicit Tool and Resource Control:**  The Model Context Protocol provides **explicit control over tools and resources** that are exposed by each MCP server and accessible to clients (including other MCP servers acting as clients). This allows for fine-grained security policies:
-    *   **Tool Whitelisting and Sandboxing:**  Each MCP server can explicitly define and whitelist the tools it exposes, limiting the potential for malicious or unintended tool invocations.  Tools themselves can be sandboxed or restricted in their capabilities to further enhance security.
-    *   **Resource Access Control:**  Access to MCP resources (like the "conversation state resource") can be controlled and limited to authorized MCP servers, preventing unauthorized data access or exfiltration.
+## Future Security Enhancements (Post-MVP)
 
-3.  **Standardized Communication Protocol (MCP):**  The use of the Model Context Protocol (MCP) itself enhances security by:
-    *   **Well-Defined Message Schemas:** MCP's use of JSON-RPC and well-defined message schemas (requests, responses, notifications) enables **robust message validation and type checking**, reducing the risk of malformed or malicious messages being processed.
-    *   **Clear Communication Boundaries:** MCP enforces clear communication boundaries between clients and servers, making it easier to monitor and audit inter-component communication and to detect anomalies.
-    *   **Simplified Security Auditing:**  The standardized MCP protocol simplifies security auditing and analysis of communication flows within the system.
+While the MVP focuses on core security, future enhancements could include:
 
-## Actor Model Security Benefits (Largely Unchanged, Still Relevant)
+1.  **Formal Verification:** For critical smart contracts (like a more complex FQAHO or governance contract).
+2.  **Quantum-Resistant Cryptography:** For long-term key and signature security (relevant if Sui adopts it).
+3.  **Web Application Firewall (WAF):** Protect the API endpoint from common web attacks.
+4.  **Enhanced Authentication:** Implement more robust authentication mechanisms beyond simple signature verification if needed.
+5.  **Dedicated Secrets Management:** Integrate a dedicated secrets management solution (e.g., HashiCorp Vault) instead of relying solely on platform environment variables.
 
-The actor model's inherent security benefits remain relevant within the MCP architecture, as each MCP server internally can be built using actor-model principles:
+## Conclusion (MVP Focus)
 
-1.  **Isolation and Containment**
-2.  **Message Validation**
-3.  **Explicit Communication**
-4.  **Controlled Access**
-
-*(No changes needed in this section unless you want to rephrase for clarity in the context of MCP servers)*
-
-## Phala Network Security Integration (No Significant Changes)
-
-The section on Phala Network security integration remains largely unchanged, as the core benefits of TEEs for confidential computing and blockchain security are still the same. *(Review this section and make minor updates for clarity if needed, but no major changes are expected)*
-
-1.  **Confidential Computing**
-2.  **Isolated Execution**
-3.  **Remote Attestation**
-4.  **Blockchain Security**
-5.  **Key Protection**
-
-### Secure Key Management Architecture (No Significant Changes)
-
-The key management architecture within TEEs remains the same. *(Review and make minor updates for clarity if needed)*
-
-1.  **TEE-Only Keys**
-2.  **No Key Export**
-3.  **Key Usage Monitoring**
-4.  **Key Rotation Policies**
-5.  **Threshold Signatures**
-
-### Secure Contract Execution (No Significant Changes)
-
-The principles of secure contract execution within TEEs remain the same. *(Review and make minor updates for clarity if needed)*
-
-1.  **Isolated Execution**
-2.  **Parameter Validation**
-3.  **Transaction Review**
-4.  **Deterministic Execution**
-
-## Data Security Measures (Review and Update as Needed)
-
-Review and update this section to ensure it is still comprehensive and aligned with the MCP architecture and your current data handling practices.  Consider if any aspects need to be added or modified.
-
-1.  **Data Classification**
-2.  **Encryption Architecture**
-
-## Docker Container Security (Review and Update as Needed)
-
-Review and update this section to ensure it is still relevant and reflects your current Docker container security practices for MCP servers.
-
-1.  **Minimal Images**
-2.  **No Privileged Containers**
-3.  **Immutable Infrastructure**
-4.  **Vulnerability Scanning**
-5.  **Secret Management**
-
-## libSQL/Turso Security (New Section - Important Addition)
-
-Add a **new section specifically addressing the security considerations for libSQL/Turso integration**, as this is a new component in the MCP architecture:
-
-1.  **Connection Security**:
-    *   **TLS Encryption:**  Enforce TLS encryption for all connections to Turso cloud databases and for local connections where appropriate.
-    *   **Secure Connection Strings:**  Manage database connection strings securely, avoiding hardcoding credentials in code and using environment variables or secret management systems.
-
-2.  **Authentication and Authorization**:
-    *   **Authentication Mechanisms:**  Utilize strong authentication mechanisms provided by libSQL/Turso (API tokens, database-level authentication) to control access to databases.
-    *   **Authorization Policies:**  Implement fine-grained authorization policies to restrict database access to only authorized MCP servers and components, following the principle of least privilege.
-
-3.  **Query Parameterization**:
-    *   **Always Use Parameterized Queries:**  Enforce the use of parameterized queries (prepared statements) in all database interactions to **prevent SQL injection vulnerabilities.**  Avoid constructing SQL queries by directly concatenating user inputs or external data.
-    *   **Input Validation:**  Validate all inputs to database queries to further mitigate the risk of injection attacks.
-
-4.  **Data Encryption**:
-    *   **At-Rest Encryption (Turso Cloud):**  Leverage Turso's built-in at-rest encryption features for cloud databases to protect data stored in Turso's infrastructure.
-    *   **Consider Encryption for Local libSQL Databases (If Needed):**  For sensitive server-specific state stored in local libSQL databases, consider implementing encryption at rest (e.g., using SQLCipher or similar encryption extensions for SQLite/libSQL) if required by your security policies.
-
-5.  **Access Controls and Network Security**:
-    *   **Firewall Rules:**  Implement firewall rules to restrict network access to libSQL/Turso databases to only authorized components and networks.
-    *   **Database Access Auditing:**  Enable database access auditing (if provided by Turso or through custom logging) to monitor database operations and detect suspicious activity.
-    *   **Regular Security Audits:**  Include libSQL/Turso databases in regular security audits and vulnerability assessments of the Choir platform.
-
-## Model Security (Review and Update as Needed)
-
-Review and update this section to ensure it is still relevant and comprehensive in the context of the MCP architecture and your current AI model integration practices.
-
-1.  **Input Validation**
-2.  **Output Filtering**
-3.  **Prompt Security**
-4.  **Rate Limiting**
-5.  **Model Isolation**
-
-## Debugging Transport (Should this be Debugging and Monitoring?)
-
-This section seems mislabeled as "Debugging Transport." It should likely be renamed to "Security Monitoring and Response" (as it is in the next section) or "Security Logging and Monitoring" to better reflect its content.
-
-1.  **Monitoring Metrics**
-2.  **Anomaly Detection**
-3.  **Incident Response**
-
-*(Rename this section and review/update its content as needed)*
-
-## Future Security Enhancements (Review and Update as Needed)
-
-Review and update this section to include any new security enhancements that are relevant to the MCP architecture, TEE integration, and your evolving security roadmap.
-
-1.  **Formal Verification**
-2.  **Quantum-Resistant Cryptography**
-3.  **Enhanced Attestation**
-4.  **Federated Security**
-5.  **Advanced Threat Detection**
-
-## Conclusion (Update to Emphasize MCP and TEE Security Benefits)
-
-Update the conclusion to strongly emphasize the **security benefits of the MCP architecture** and the **robust security foundation provided by Phala Network TEE integration.** Reiterate that the layered security approach and proactive security measures are essential for building a trustworthy and secure AI platform like Choir.
+Securing the Choir Qdrant-Sui MVP relies heavily on securing the central Python API backend and its interactions. Key priorities include: **secure management of the API's Sui private key**, robust input validation for both API endpoints and LLM prompts, proper access control for Qdrant collections, and standard web application security practices for the API itself. While simpler than a distributed TEE-based architecture, this centralized model requires diligent protection of the API backend as the primary trusted component for data access and blockchain interactions in the MVP.

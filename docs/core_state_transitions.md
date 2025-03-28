@@ -16,7 +16,7 @@ Frequency Management reflects collective organization through coupled oscillator
 
 **Reward System and Token Distribution (Clarified Phase-Specific Rewards):**
 
-The reward system operates through precisely defined state transitions with memory effects. MCP servers, specifically AI models within the **Experience and Yield phases**, algorithmically distribute CHIP tokens based on contribution quality and network effects:
+The reward system operates through precisely defined state transitions with memory effects. AI models within the **Experience and Yield phases**, algorithmically distribute CHIP tokens based on contribution quality and network effects:
 
 1.  **Novelty Rewards (Issued in the Experience Phase):**
     *   **Purpose:** To incentivize the creation of *novel and original prompts and messages* that expand the knowledge space of the Choir ecosystem.
