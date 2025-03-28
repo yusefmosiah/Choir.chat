@@ -83,6 +83,7 @@ tree.md
 ├── ChoirUITests
 │   ├── ChoirUITests.swift
 │   └── ChoirUITestsLaunchTests.swift
+├── README.md
 ├── api
 │   ├── Dockerfile
 │   ├── __init__.py
@@ -198,7 +199,6 @@ tree.md
 │   ├── evolution_token.md
 │   ├── fqaho_simulation.md
 │   ├── fqaho_visualization.md
-│   ├── index.md
 │   ├── levels
 │   │   ├── all.txt
 │   │   ├── level0.md
