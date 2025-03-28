@@ -104,7 +104,7 @@ struct PostchainView: View {
                     }
                 }
             }
-            .frame(height: geometry.size.height * 0.99) // Back to using full height
+            .frame(maxWidth: .infinity, maxHeight: .infinity) // Use maximum available space
             .gesture(
                 DragGesture()
                     .onChanged { value in
@@ -138,7 +138,6 @@ struct PostchainView: View {
                         }
                     }
             )
-            .padding(.bottom, 16) // Add padding at the bottom of the carousel
         }
         .onAppear {
             // Log available phases on appear for debugging
@@ -185,6 +184,7 @@ struct PostchainView: View {
         // The selection is stored in the message object, so it persists
         // even when the view is recreated
         .id("postchain_view_\(message.id)_\(viewId)") // Stable ID to prevent recreation
+        .frame(maxHeight: .infinity) // Ensure the entire PostchainView takes up the maximum height
     }
 
     private func calculateOffset(for phase: Phase, cardWidth: CGFloat, totalWidth: CGFloat) -> CGFloat {

@@ -73,7 +73,7 @@ struct MessageRow: View {
                 .onChange(of: viewModel.responses) { _, newResponses in
                     // No-op
                 }
-                .frame(height: 400)
+                .frame(minHeight: 600, maxHeight: .infinity) // Use a taller minimum height with ability to grow
                 .padding(.top, 4)
                 .padding(.trailing, 40)
             }
