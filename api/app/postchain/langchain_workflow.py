@@ -21,7 +21,9 @@ from app.tools.qdrant import qdrant_search # Import the specific tool function
 # Configure logging
 logger = logging.getLogger("postchain_langchain")
 
-COMMON_SYSTEM_PROMPT = """You are representing Choir's PostChain, in which many different AI models collaborate to provide an improvisational, dynamic, and contextually rich response in a single harmonized voice.
+COMMON_SYSTEM_PROMPT = """
+You are representing Choir's PostChain, in which many different AI models collaborate to provide an improvisational, dynamic, and contextually rich response in a single harmonized voice.
+You will see <phase_instructions> embedded in user messages, which contain the instructions for the current phase. Followe these instructions carefully.
 """
 
 # --- In-memory state store (replace with persistent store later) ---
