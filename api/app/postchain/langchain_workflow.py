@@ -9,7 +9,7 @@ import json # Added for parsing tool results
 
 # Local imports
 from app.config import Config
-from app.langchain_utils import post_llm, ModelConfig, initialize_tool_compatible_model_list
+from app.langchain_utils import post_llm, ModelConfig
 from app.postchain.schemas.state import PostChainState, ExperiencePhaseOutput, SearchResult, VectorSearchResult # Import new schemas
 from app.postchain.utils import format_stream_event #, save_state, recover_state # Removed state management utils
 
@@ -504,12 +504,12 @@ async def run_langchain_postchain_workflow(
     # --- Model Configuration (Prioritize Overrides) ---
     try:
         # Use override if provided, otherwise use default
-        action_model_config = action_mc_override if action_mc_override else ModelConfig("groq", "llama-3.1-8b-instant")
-        experience_model_config = experience_mc_override if experience_mc_override else ModelConfig("google", "gemini-2.0-flash")
-        intention_model_config = intention_mc_override if intention_mc_override else ModelConfig("anthropic", "claude-3-5-haiku-latest")
-        observation_model_config = observation_mc_override if observation_mc_override else ModelConfig("mistral", "mistral-small-latest")
+        action_model_config = action_mc_override if action_mc_override else ModelConfig("openrouter", "google/gemini-2.0-flash-lite-001")
+        experience_model_config = experience_mc_override if experience_mc_override else  ModelConfig("groq", "llama-3.1-8b-instant")
+        intention_model_config = intention_mc_override if intention_mc_override else ModelConfig("google", "gemini-2.0-flash")
+        observation_model_config = observation_mc_override if observation_mc_override else ModelConfig("openrouter", "deepseek/deepseek-r1-distill-llama-70b")
         understanding_model_config = understanding_mc_override if understanding_mc_override else ModelConfig("groq", "qwen-qwq-32b")
-        yield_model_config = yield_mc_override if yield_mc_override else ModelConfig("openai", "o3-mini")
+        yield_model_config = yield_mc_override if yield_mc_override else ModelConfig("openrouter", "deepseek/deepseek-chat-v3-0324")
 
         # Log the final model configuration being used for this run
         logger.info(f"Workflow Models - Action: {action_model_config}, Experience: {experience_model_config}, Intention: {intention_model_config}, Observation: {observation_model_config}, Understanding: {understanding_model_config}, Yield: {yield_model_config}")

@@ -93,97 +93,24 @@ def get_cohere_models(config: Config) -> List[str]:
     ]
 
 def get_groq_models(config: Config) -> List[str]:
-    """Get available Groq models"""
+    """Get available Groq models that support tool calling"""
     return [
-        config.GROQ_LLAMA3_3_70B_VERSATILE,
         config.GROQ_QWEN_QWQ_32B,
-        config.GROQ_DEEPSEEK_R1_DISTILL_QWEN_32B,
-        config.GROQ_DEEPSEEK_R1_DISTILL_LLAMA_70B_SPECDEC,
-        config.GROQ_DEEPSEEK_R1_DISTILL_LLAMA_70B
+        config.GROQ_LLAMA3_3_70B_VERSATILE,
+        config.GROQ_LLAMA_3_1_8B_INSTANT
     ]
 
-def get_tool_compatible_models(config: Config) -> Dict[str, List[str]]:
-    """
-    Get a dictionary of models known to work with tool use, organized by provider.
-
-    Based on comprehensive testing results from plan_tools_checklist.md.
-
-    Args:
-        config: Application configuration with model names
-
-    Returns:
-        Dictionary with provider keys and lists of compatible model names
-    """
-    return {
-        "openai": [
-            # config.OPENAI_O1,
-            config.OPENAI_O3_MINI,
-            config.OPENAI_GPT_4O_MINI,
-            config.OPENAI_GPT_4O,
-        ],
-        "anthropic": [
-            config.ANTHROPIC_CLAUDE_37_SONNET,
-            config.ANTHROPIC_CLAUDE_35_HAIKU,
-        ],
-        "google": [
-            config.GOOGLE_GEMINI_20_FLASH,
-        ],
-        "mistral": [
-            config.MISTRAL_SMALL_LATEST,
-            config.MISTRAL_LARGE_LATEST,
-            config.MISTRAL_PIXTRAL_12B,
-            config.MISTRAL_PIXTRAL_LARGE,
-            config.MISTRAL_CODESTRAL,
-        ],
-        "groq": [
-            config.GROQ_QWEN_QWQ_32B,
-            config.GROQ_DEEPSEEK_R1_DISTILL_LLAMA_70B,
-            config.GROQ_LLAMA_3_1_8B_INSTANT
-        ]
-    }
-
-def initialize_tool_compatible_model_list(config: Config, disabled_providers: set = None) -> List[ModelConfig]:
-    """
-    Initialize the list of models verified to work with tool calls.
-
-    Args:
-        config: Application configuration with API keys
-        disabled_providers: Set of provider names to exclude (e.g., {"openai", "anthropic"})
-
-    Returns:
-        List of models verified to support tool use
-    """
-    models = []
-    disabled_providers = disabled_providers or set()
-    tool_models = get_tool_compatible_models(config)
-
-    # Add models from each provider if API key is available and provider not disabled
-    if config.OPENAI_API_KEY and "openai" not in disabled_providers:
-        models.extend([ModelConfig("openai", m) for m in tool_models.get("openai", [])])
-
-    if config.ANTHROPIC_API_KEY and "anthropic" not in disabled_providers:
-        models.extend([ModelConfig("anthropic", m) for m in tool_models.get("anthropic", [])])
-
-    if config.GOOGLE_API_KEY and "google" not in disabled_providers:
-        models.extend([ModelConfig("google", m) for m in tool_models.get("google", [])])
-
-    if config.MISTRAL_API_KEY and "mistral" not in disabled_providers:
-        models.extend([ModelConfig("mistral", m) for m in tool_models.get("mistral", [])])
-
-    if config.GROQ_API_KEY and "groq" not in disabled_providers:
-        models.extend([ModelConfig("groq", m) for m in tool_models.get("groq", [])])
-
-    return models
-
 def initialize_model_list(config: Config, disabled_providers: set = None) -> List[ModelConfig]:
-    """Initialize the list of available models from all providers.
+    """
+    Initialize the list of available models from all providers.
+    Only includes models that support tool calling.
 
     Args:
         config: Application configuration with API keys
         disabled_providers: Set of provider names to exclude (e.g., {"openai", "anthropic"})
 
     Returns:
-        List of available models
+        List of available models that support tool calling
     """
     models = []
     disabled_providers = disabled_providers or set()
@@ -201,16 +128,10 @@ def initialize_model_list(config: Config, disabled_providers: set = None) -> Lis
     if config.MISTRAL_API_KEY and "mistral" not in disabled_providers:
         models.extend([ModelConfig("mistral", m) for m in get_mistral_models(config)])
 
-    if config.FIREWORKS_API_KEY and "fireworks" not in disabled_providers:
-        models.extend([ModelConfig("fireworks", m) for m in get_fireworks_models(config)])
-
-    if config.COHERE_API_KEY and "cohere" not in disabled_providers:
-        models.extend([ModelConfig("cohere", m) for m in get_cohere_models(config)])
-
     if config.GROQ_API_KEY and "groq" not in disabled_providers:
         models.extend([ModelConfig("groq", m) for m in get_groq_models(config)])
 
-    logger.info(f"Initialized {len(models)} models for model selection")
+    logger.info(f"Initialized {len(models)} tool-capable models")
     return models
 
 
@@ -446,25 +367,6 @@ def convert_tools_to_pydantic(tools: List[Any]) -> List[Type[BaseModel]]:
     return pydantic_tools
 
 
-def is_tool_compatible(model_name: str, config: Config) -> bool:
-    """
-    Check if a model is compatible with tool binding.
-
-    Args:
-        model_name: The model identifier string
-        config: Configuration object
-
-    Returns:
-        Boolean indicating if the model supports tool binding
-    """
-    provider, model_id = get_model_provider(model_name)
-
-    # Get list of tool-compatible models
-    tool_models = get_tool_compatible_models(config)
-
-    # Check if this provider/model combination is in the tool-compatible list
-    return provider in tool_models and model_id in tool_models.get(provider, [])
-
 def is_temperature_compatible(model_name: str) -> bool:
     """
     Check if a model supports temperature parameter.
@@ -621,18 +523,15 @@ async def post_llm(
 
     # Bind tools if provided
     if tools:
-        # Check if this model is compatible with tool binding
-        if is_tool_compatible(model_name, config):
-            logger.info(f"Binding {len(tools)} tools to {model_name}")
-            try:
-                # Convert pydantic schema if needed
-                pydantic_tools = convert_tools_to_pydantic(tools)
-                model = model.bind_tools(pydantic_tools)
-                logger.info(f"Successfully bound tools to {model_name}")
-            except Exception as e:
-                logger.error(f"Error binding tools to {model_name}: {str(e)}")
-        else:
-            logger.warning(f"Model {model_name} is not known to be compatible with tools - skipping tool binding")
+        logger.info(f"Binding {len(tools)} tools to {model_name}")
+        try:
+            # Convert pydantic schema if needed
+            pydantic_tools = convert_tools_to_pydantic(tools)
+            model = model.bind_tools(pydantic_tools)
+            logger.info(f"Successfully bound tools to {model_name}")
+        except Exception as e:
+            logger.error(f"Error binding tools to {model_name}: {str(e)}")
+
 
     # Add structured output if provided
     if response_model:

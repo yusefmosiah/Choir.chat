@@ -13,9 +13,12 @@ MODEL_CONFIGS = [
     # ModelConfig("groq", "qwen-qwq-32b"),
     # ModelConfig("openai", "o3-mini"),
     # New OpenRouter models
-    ModelConfig("openrouter", "deepseek/deepseek-chat-v3-0324"),
-    ModelConfig("openrouter", "google/gemini-flash"),
-    ModelConfig("openrouter", "mistralai/mistral-small"),
+    ModelConfig("openrouter", "meta-llama/llama-3.1-8b-instruct"),
+    ModelConfig("openrouter", "deepseek/deepseek-r1-distill-llama-70b"),
+    # ModelConfig("openrouter", "cohere/command-r7b-12-2024"),
+    ModelConfig("openrouter", "google/gemini-2.0-flash-lite-001"),
+    # ModelConfig("openrouter", "qwen/qwq-32b"),
+    ModelConfig("openrouter", "microsoft/phi-4-multimodal-instruct"),
 ]
 
 @pytest.mark.asyncio

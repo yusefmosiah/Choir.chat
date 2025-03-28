@@ -11,7 +11,6 @@ from langchain_core.tools import tool
 
 from app.config import Config
 from app.database import DatabaseClient
-from app.langchain_utils import initialize_tool_compatible_model_list
 
 # Get database client
 config = Config()

@@ -97,7 +97,7 @@ class Config:
     GROQ_LLAMA_3_1_8B_INSTANT: str = "llama-3.1-8b-instant"
 
 
-    TEMPERATURE: float = 0.7
+    TEMPERATURE: float = 0.333
 
     # Chunking configuration
     CHUNK_SIZE: int = 10000
