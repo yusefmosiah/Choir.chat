@@ -99,6 +99,11 @@ struct PostchainView: View {
                         withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
                             message.selectedPhase = phase
                             print("PostchainView: User tapped to select phase: \(phase)")
+                            
+                            // Update the view model's current phase if this is the active message
+                            if let messageId = message.id.uuidString, messageId == viewModel.activeMessageId {
+                                viewModel.selectPhase(phase, for: messageId)
+                            }
                         }
                     }
                 }
@@ -124,6 +129,11 @@ struct PostchainView: View {
                                 withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
                                     message.selectedPhase = availablePhases[targetIndex]
                                     dragOffset = 0
+                                }
+                                
+                                // Update the view model's current phase if this is the active message
+                                if let messageId = message.id.uuidString, messageId == viewModel.activeMessageId {
+                                    viewModel.selectPhase(availablePhases[targetIndex], for: messageId)
                                 }
                             } else {
                                 withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
@@ -269,7 +279,36 @@ struct PhaseCard: View {
     var priors: [Prior]? = nil
     @ObservedObject var viewModel: PostchainViewModel
     var messageId: String? // Add messageId parameter
-
+    
+    // Get the message from the messageId
+    private var message: Message? {
+        if let messageId = messageId, let uuid = UUID(uuidString: messageId) {
+            // Try to find the message in the view model
+            // This is a simplified approach - in a real app, you'd have a more direct way to access the message
+            return viewModel.coordinator.messages.first(where: { $0.id == uuid })
+        }
+        return nil
+    }
+    
+    // Computed properties for page state that use the message's state
+    private var currentPage: Int {
+        get { message?.getCurrentPage(for: phase) ?? 0 }
+        set {
+            if let message = message {
+                message.setCurrentPage(newValue, for: phase)
+            }
+        }
+    }
+    
+    private var totalPages: Int {
+        get { message?.getTotalPages(for: phase) ?? 1 }
+        set {
+            if let message = message {
+                message.setTotalPages(newValue, for: phase)
+            }
+        }
+    }
+    
     // --- Computed Properties for Styling ---
 
     private var cardBackgroundColor: Color {
@@ -339,19 +378,28 @@ struct PhaseCard: View {
 
             // Content Area
             if let content = content, !content.isEmpty {
-                ScrollView {
+                ZStack {
                     if phase == .experience {
                         // Pass viewModel and messageId to ensure each experience phase has independent state
                         ExperienceSourcesView(viewModel: viewModel, messageId: messageId)
+                            .transition(.asymmetric(
+                                insertion: .move(edge: currentPage == 0 ? .trailing : .leading),
+                                removal: .move(edge: currentPage == 0 ? .leading : .trailing)
+                            ))
                     } else {
-                        Text(content)
-                            .font(.body)
-                            .lineSpacing(5)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .foregroundColor(primaryTextColor)
+                        PageView(
+                            content: content,
+                            currentPage: $currentPage,
+                            totalPages: $totalPages,
+                            textColor: primaryTextColor
+                        )
+                        .transition(.asymmetric(
+                            insertion: .move(edge: currentPage == 0 ? .trailing : .leading),
+                            removal: .move(edge: currentPage == 0 ? .leading : .trailing)
+                        ))
                     }
                 }
-                // .frame(minHeight: 300) // Reduced height
+                .frame(maxHeight: .infinity)
             } else if isLoading {
                 // Loading State
                 VStack(spacing: 12) {
@@ -374,6 +422,80 @@ struct PhaseCard: View {
                     .frame(maxWidth: .infinity, alignment: .center)
                     .padding(.vertical, 20)
             }
+            
+            // Page navigation controls
+            if let content = content, !content.isEmpty, phase != .experience {
+                HStack {
+                    Spacer()
+                    
+                    // Previous page or previous phase
+                    Button(action: {
+                        if currentPage > 0 {
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                                currentPage -= 1
+                            }
+                        } else if let previousPhaseIndex = Phase.allCases.firstIndex(of: phase), 
+                                  previousPhaseIndex > 0 {
+                            let previousPhase = Phase.allCases[previousPhaseIndex - 1]
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                                // Update the message's selected phase
+                                if let message = message {
+                                    message.selectedPhase = previousPhase
+                                }
+                                
+                                // Also update the view model if this is the active message
+                                if let messageId = messageId, messageId == viewModel.activeMessageId {
+                                    viewModel.selectPhase(previousPhase, for: messageId)
+                                }
+                            }
+                        }
+                    }) {
+                        Image(systemName: "chevron.left")
+                            .foregroundColor(primaryTextColor.opacity(currentPage > 0 ? 1.0 : 0.5))
+                            .padding(8)
+                            .background(Circle().fill(primaryTextColor.opacity(0.1)))
+                    }
+                    .disabled(currentPage == 0 && Phase.allCases.firstIndex(of: phase) == 0)
+                    
+                    // Page indicator
+                    Text("\(currentPage + 1) / \(max(totalPages, 1))")
+                        .font(.caption)
+                        .foregroundColor(primaryTextColor)
+                        .padding(.horizontal, 8)
+                    
+                    // Next page or next phase
+                    Button(action: {
+                        if currentPage < totalPages - 1 {
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                                currentPage += 1
+                            }
+                        } else if let nextPhaseIndex = Phase.allCases.firstIndex(of: phase), 
+                                  nextPhaseIndex < Phase.allCases.count - 1 {
+                            let nextPhase = Phase.allCases[nextPhaseIndex + 1]
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                                // Update the message's selected phase
+                                if let message = message {
+                                    message.selectedPhase = nextPhase
+                                }
+                                
+                                // Also update the view model if this is the active message
+                                if let messageId = messageId, messageId == viewModel.activeMessageId {
+                                    viewModel.selectPhase(nextPhase, for: messageId)
+                                }
+                            }
+                        }
+                    }) {
+                        Image(systemName: "chevron.right")
+                            .foregroundColor(primaryTextColor.opacity(currentPage < totalPages - 1 ? 1.0 : 0.5))
+                            .padding(8)
+                            .background(Circle().fill(primaryTextColor.opacity(0.1)))
+                    }
+                    .disabled(currentPage == totalPages - 1 && Phase.allCases.firstIndex(of: phase) == Phase.allCases.count - 1)
+                    
+                    Spacer()
+                }
+                .padding(.top, 8)
+            }
         }
         .padding(12)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -390,6 +512,13 @@ struct PhaseCard: View {
                 .stroke(overlayStrokeColor, lineWidth: overlayLineWidth)
         )
         .padding(.horizontal, 4)
+        .onAppear {
+            // Only reset to first page when the card first appears
+            // This ensures we maintain page state during re-renders
+            if let message = message, message.getCurrentPage(for: phase) == 0 {
+                currentPage = 0
+            }
+        }
     }
 }
 

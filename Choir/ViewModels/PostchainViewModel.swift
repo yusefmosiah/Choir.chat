@@ -257,4 +257,17 @@ class PostchainViewModel: ObservableObject {
             webResultsByMessage[messageId] ?? []
         )
     }
+    
+    // Method to select a phase for a specific message
+    func selectPhase(_ phase: Phase, for messageId: String) {
+        // This method will be used by the UI to navigate between phases
+        // The actual implementation will depend on how the Message class is accessed
+        // For now, we'll just update the current phase in the view model
+        if messageId == activeMessageId {
+            setCurrentPhase(phase)
+        }
+        
+        // Notify any observers that might need to update their UI
+        objectWillChange.send()
+    }
 }

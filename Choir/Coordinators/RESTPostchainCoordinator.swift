@@ -24,6 +24,11 @@ class RESTPostchainCoordinator: PostchainCoordinator, ObservableObject {
 
     // Active message identifier to track which message is currently being processed
     var activeMessageId: UUID?
+    
+    // Implementation of the messages property
+    var messages: [Message] {
+        return currentChoirThread?.messages ?? []
+    }
 
     // ViewModel reference for updates
     weak var viewModel: PostchainViewModel?

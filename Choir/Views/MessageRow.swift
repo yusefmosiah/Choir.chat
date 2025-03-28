@@ -73,7 +73,7 @@ struct MessageRow: View {
                 .onChange(of: viewModel.responses) { _, newResponses in
                     // No-op
                 }
-                .frame(height: 400)
+                .frame(height: 600) // Increased height to make cards taller
                 .padding(.top, 4)
                 .padding(.trailing, 40)
             }

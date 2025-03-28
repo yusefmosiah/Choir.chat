@@ -117,6 +117,12 @@ class Message: ObservableObject, Identifiable, Equatable {
     // Store the currently selected phase for this message
     // This ensures the selection persists even if the view is recreated
     @Published var selectedPhase: Phase = .action
+    
+    // Store the current page for each phase
+    @Published var phasePages: [Phase: Int] = [:]
+    
+    // Store the total pages for each phase
+    @Published var phaseTotalPages: [Phase: Int] = [:]
 
     // Each message has its own dedicated phase content dictionary
     // This ensures complete isolation between messages
@@ -157,12 +163,38 @@ class Message: ObservableObject, Identifiable, Equatable {
         // Initialize with all provided phases
         self.phaseContent = phases
 
-        // Pre-initialize all phases with empty strings
+        // Pre-initialize all phases with empty strings and page state
         for phase in Phase.allCases {
             if self.phaseContent[phase] == nil {
                 self.phaseContent[phase] = ""
             }
+            
+            // Initialize page state for each phase
+            self.phasePages[phase] = 0
+            self.phaseTotalPages[phase] = 1
         }
+    }
+    
+    // Method to get the current page for a phase
+    func getCurrentPage(for phase: Phase) -> Int {
+        return phasePages[phase] ?? 0
+    }
+    
+    // Method to set the current page for a phase
+    func setCurrentPage(_ page: Int, for phase: Phase) {
+        objectWillChange.send()
+        phasePages[phase] = page
+    }
+    
+    // Method to get the total pages for a phase
+    func getTotalPages(for phase: Phase) -> Int {
+        return phaseTotalPages[phase] ?? 1
+    }
+    
+    // Method to set the total pages for a phase
+    func setTotalPages(_ total: Int, for phase: Phase) {
+        objectWillChange.send()
+        phaseTotalPages[phase] = total
     }
 
     // Equatable conformance

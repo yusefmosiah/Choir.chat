@@ -11,6 +11,9 @@ protocol PostchainCoordinator {
 
     // Message tracking
     var activeMessageId: UUID? { get set }
+    
+    // Access to messages
+    var messages: [Message] { get }
 
     // Core processing
     func process(_ input: String) async throws
@@ -34,6 +37,11 @@ class TestPostchainCoordinator: PostchainCoordinator {
     var isStreaming = false
     var activeMessageId: UUID?
     var currentChoirThread: ChoirThread?
+    
+    // Implementation of the messages property
+    var messages: [Message] {
+        return currentChoirThread?.messages ?? []
+    }
 
     required init() {}
 
