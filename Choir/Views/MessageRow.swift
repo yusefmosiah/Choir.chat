@@ -19,7 +19,10 @@ struct MessageRow: View {
                     // Determine the text view content conditionally
                     let textView: Text = {
                         if message.content.count > 4000 {
-                            return Text("<long_text>").italic()
+                            let first100 = message.content.prefix(100)
+                            let last100 = message.content.suffix(100)
+                            let collapsedText = "<long_text>\(first100)...\(last100)</long_text>"
+                            return Text(collapsedText).italic()
                         } else {
                             return Text(LocalizedStringKey(message.content))
                         }
