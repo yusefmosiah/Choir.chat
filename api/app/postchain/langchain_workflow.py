@@ -446,7 +446,7 @@ async def run_langchain_postchain_workflow(
         intention_model_config = intention_mc_override if intention_mc_override else ModelConfig("google", "gemini-2.0-flash")
         observation_model_config = observation_mc_override if observation_mc_override else ModelConfig("openrouter", "deepseek/deepseek-r1-distill-llama-70b")
         understanding_model_config = understanding_mc_override if understanding_mc_override else ModelConfig("groq", "qwen-qwq-32b")
-        yield_model_config = yield_mc_override if yield_mc_override else ModelConfig("openrouter", "google/gemini-2.5-pro-exp-03-25")
+        yield_model_config = yield_mc_override if yield_mc_override else ModelConfig("google", "gemini-2.5-pro-exp-03-25")
 
         # Log the final model configuration being used for this run
         logger.info(f"Workflow Models - Action: {action_model_config}, Experience: {experience_model_config}, Intention: {intention_model_config}, Observation: {observation_model_config}, Understanding: {understanding_model_config}, Yield: {yield_model_config}")

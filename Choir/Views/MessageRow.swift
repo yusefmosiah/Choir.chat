@@ -1,5 +1,5 @@
 import SwiftUI
-
+import Foundation
 struct MessageRow: View {
     @ObservedObject var message: Message
     let isProcessing: Bool
@@ -16,7 +16,17 @@ struct MessageRow: View {
             // User messages
             if message.isUser {
                 HStack(alignment: .top, spacing: 8) {
-                    Text(LocalizedStringKey(message.content))
+                    // Determine the text view content conditionally
+                    let textView: Text = {
+                        if message.content.count > 4000 {
+                            return Text("<long_text>").italic()
+                        } else {
+                            return Text(LocalizedStringKey(message.content))
+                        }
+                    }() // Immediately execute the closure
+
+                    // Apply modifiers to the resulting Text view
+                    textView
                         .multilineTextAlignment(.trailing)
                         .fixedSize(horizontal: false, vertical: true)
 
@@ -112,7 +122,7 @@ struct MessageRow: View {
         ]
     )
 
-    return ScrollView { // Wrap in ScrollView for context
+    ScrollView { // Wrap in ScrollView for context // Removed explicit return
         VStack {
             MessageRow(message: userMessage, viewModel: previewViewModel)
             MessageRow(message: aiMessage, isProcessing: true, viewModel: previewViewModel)
