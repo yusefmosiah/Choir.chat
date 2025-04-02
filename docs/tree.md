@@ -2,6 +2,7 @@
 ## Output of $ tree -I 'venv|archive|__pycache__|iOS_Example|dependencies' | pbcopy
 
 .
+├── CLAUDE.md
 ├── Choir
 │   ├── App
 │   │   └── ChoirApp.swift
@@ -226,4 +227,4 @@
     ├── sources_displaying.sh
     └── test_postchain_multiturn.sh
 
-59 directories, 165 files
+59 directories, 166 files
