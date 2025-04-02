@@ -441,11 +441,11 @@ async def run_langchain_postchain_workflow(
     # --- Model Configuration (Prioritize Overrides) ---
     try:
         # Use override if provided, otherwise use default
-        action_model_config = action_mc_override if action_mc_override else ModelConfig("openrouter", "openai/gpt-4o-mini-search-preview")
+        action_model_config = action_mc_override if action_mc_override else ModelConfig("groq", "llama-3.1-8b-instant")
         experience_model_config = experience_mc_override if experience_mc_override else  ModelConfig("openrouter", "google/gemini-2.0-flash-lite-001")
-        intention_model_config = intention_mc_override if intention_mc_override else ModelConfig("groq", "llama-3.1-8b-instant")
+        intention_model_config = intention_mc_override if intention_mc_override else ModelConfig("google", "gemini-2.0-flash")
         observation_model_config = observation_mc_override if observation_mc_override else ModelConfig("openrouter", "deepseek/deepseek-r1-distill-llama-70b")
-        understanding_model_config = understanding_mc_override if understanding_mc_override else ModelConfig("google", "gemini-2.0-flash")
+        understanding_model_config = understanding_mc_override if understanding_mc_override else ModelConfig("openrouter", "deepseek/deepseek-chat-v3-0324")
         yield_model_config = yield_mc_override if yield_mc_override else ModelConfig("google", "gemini-2.5-pro-exp-03-25")
 
         # Log the final model configuration being used for this run
