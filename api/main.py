@@ -37,8 +37,8 @@ async def health_check():
 async def blog_index():
     """Render blog index page with links to all blog posts."""
     # Get the project root directory
-    root_dir = Path(__file__).parent.parent
-    blog_dir = root_dir / "docs" / "blog"
+    root_dir = Path(__file__).parent
+    blog_dir = root_dir / "blog"
     md_files = sorted(blog_dir.glob("*.md"))
     
     content = "<h1>Choir Blog</h1>\n<ul>"
@@ -71,8 +71,8 @@ async def blog_index():
 async def blog_post(post_id: str):
     """Render a specific blog post as HTML."""
     # Get the project root directory
-    root_dir = Path(__file__).parent.parent
-    blog_dir = root_dir / "docs" / "blog"
+    root_dir = Path(__file__).parent
+    blog_dir = root_dir / "blog"
     md_file = blog_dir / f"{post_id}.md"
     
     if not md_file.exists():
