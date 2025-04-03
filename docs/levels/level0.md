@@ -131,6 +131,7 @@ tree.md
 │   │   └── utils.py
 │   ├── blog
 │   │   ├── business_model.md
+│   │   ├── inverse_scaling_law.md
 │   │   └── loop_of_thought.md
 │   ├── main.py
 │   ├── pyproject.toml
@@ -242,7 +243,7 @@ tree.md
     ├── sources_displaying.sh
     └── test_postchain_multiturn.sh
 
-61 directories, 166 files
+61 directories, 167 files
 
 === File: docs/CHANGELOG.md ===
 
