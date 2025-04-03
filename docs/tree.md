@@ -178,6 +178,9 @@
 ├── docs
 │   ├── CHANGELOG.md
 │   ├── blockchain_integration.md
+│   ├── blog
+│   │   ├── business_model.md
+│   │   └── loop_of_thought.md
 │   ├── comp_provider_info.md
 │   ├── core_core.md
 │   ├── core_economics.md
@@ -227,4 +230,4 @@
     ├── sources_displaying.sh
     └── test_postchain_multiturn.sh
 
-59 directories, 166 files
+60 directories, 168 files
