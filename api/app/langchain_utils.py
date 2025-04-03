@@ -10,6 +10,7 @@ import copy
 from typing import Dict, Any, List, Optional, Tuple, AsyncGenerator, AsyncIterator, Type, Union
 from pydantic import BaseModel, Field, create_model
 from dataclasses import dataclass
+from app.config import Config  # Explicitly import Config
 import re
 
 from langchain_core.language_models import BaseChatModel
@@ -30,11 +31,23 @@ from .config import Config
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-@dataclass
-class ModelConfig:
-    """Configuration for a model"""
-    provider: str
-    model_name: str
+from pydantic import BaseModel, Field
+
+class ModelConfig(BaseModel):
+    """Configuration for a model, including optional API keys - used for API validation and internal model setup"""
+    provider: str = Field(..., description="LLM Provider (google, openrouter, etc.)")
+    model_name: str = Field(..., description="Model name/identifier")
+    temperature: Optional[float] = Field(None, ge=0.0, le=2.0, description="Optional temperature override (0.0-2.0)")
+    max_tokens: Optional[int] = Field(None, ge=1, description="Optional max tokens override")
+    # Optional API Keys - passed from client
+    openai_api_key: Optional[str] = Field(None, description="OpenAI API Key")
+    anthropic_api_key: Optional[str] = Field(None, description="Anthropic API Key")
+    google_api_key: Optional[str] = Field(None, description="Google API Key")
+    mistral_api_key: Optional[str] = Field(None, description="Mistral API Key")
+    fireworks_api_key: Optional[str] = Field(None, description="Fireworks API Key")
+    cohere_api_key: Optional[str] = Field(None, description="Cohere API Key")
+    openrouter_api_key: Optional[str] = Field(None, description="OpenRouter API Key")
+    groq_api_key: Optional[str] = Field(None, description="Groq API Key")
 
     def __str__(self) -> str:
         """Return the full model identifier"""
@@ -159,13 +172,12 @@ def get_model_provider(model_name: str) -> Tuple[str, str]:
     # Default to "default" if no prefix is provided
     return "default", model_name
 
-def get_base_model(model_name: str, config: Config) -> BaseChatModel:
+def get_base_model(model_config: ModelConfig) -> BaseChatModel:
     """
-    Initialize the appropriate LangChain model based on model name.
+    Initialize the appropriate LangChain model based on the provided ModelConfig.
 
     Args:
-        model_name: The model identifier string
-        config: Application configuration object
+        model_config: Configuration object containing provider, model name, temp, tokens, and API keys.
 
     Returns:
         Initialized LangChain model
@@ -173,61 +185,70 @@ def get_base_model(model_name: str, config: Config) -> BaseChatModel:
     Raises:
         ValueError: If the provider is not supported
     """
-    provider, clean_name = get_model_provider(model_name)
+    # Extract parameters from model_config
+    provider = model_config.provider
+    model_name = model_config.model_name
+    temp = model_config.temperature if model_config.temperature is not None else 0.333
+    max_tokens = model_config.max_tokens # Keep as None if not provided
+
+    # Check temperature compatibility (using the full model name from config)
+    full_model_name = f"{provider}/{model_name}"
+    if temp is not None and not is_temperature_compatible(full_model_name):
+         logger.info(f"Model {model_name} doesn't support temperature - ignoring temperature setting")
+         temp = None
 
     if provider == "openai":
-        if clean_name in [config.OPENAI_O1, config.OPENAI_O3_MINI]:
-            return ChatOpenAI(api_key=config.OPENAI_API_KEY, model=clean_name)
         return ChatOpenAI(
-            api_key=config.OPENAI_API_KEY,
-            model=clean_name,
-            temperature=config.TEMPERATURE
+            api_key=model_config.openai_api_key,
+            model=model_name,
+            temperature=temp
         )
     elif provider == "anthropic":
         return ChatAnthropic(
-            api_key=config.ANTHROPIC_API_KEY,
-            model=clean_name,
-            temperature=config.TEMPERATURE,
-            max_tokens=8192 # todo: config 64000 for thinking model
+            api_key=model_config.anthropic_api_key,
+            model=model_name,
+            temperature=temp,
+            max_tokens=max_tokens or 8192 # Use max_tokens extracted earlier
         )
     elif provider == "google":
+        if not model_config.google_api_key:
+            raise ValueError("Google API key is required when using Google models")
         return ChatGoogleGenerativeAI(
-            api_key=config.GOOGLE_API_KEY,
-            model=clean_name,
-            temperature=config.TEMPERATURE
+            google_api_key=model_config.google_api_key,  # Use correct parameter name
+            model=model_name,
+            temperature=temp
         )
     elif provider == "mistral":
         return ChatMistralAI(
-            api_key=config.MISTRAL_API_KEY,
-            model=clean_name,
-            temperature=config.TEMPERATURE
+            api_key=model_config.mistral_api_key,
+            model=model_name,
+            temperature=temp
         )
     elif provider == "fireworks":
-        model_id = f"accounts/fireworks/models/{clean_name}"
+        model_id = f"accounts/fireworks/models/{model_name}"
         return ChatFireworks(
-            api_key=config.FIREWORKS_API_KEY,
+            api_key=model_config.fireworks_api_key,
             model=model_id,
-            temperature=config.TEMPERATURE
+            temperature=temp
         )
     elif provider == "cohere":
         return ChatCohere(
-            api_key=config.COHERE_API_KEY,
-            model=clean_name,
-            temperature=config.TEMPERATURE
+            api_key=model_config.cohere_api_key,
+            model=model_name,
+            temperature=temp
         )
-
     elif provider == "openrouter":
         return ChatOpenAI(
-            api_key=config.OPENROUTER_API_KEY,
+            api_key=model_config.openrouter_api_key,
             base_url="https://openrouter.ai/api/v1",
-            model=clean_name,
-            temperature=config.TEMPERATURE
+            model=model_name,
+            temperature=temp
         )
     elif provider == "groq":
         return ChatGroq(
-            api_key=config.GROQ_API_KEY,
-            model=clean_name,
-            temperature=config.TEMPERATURE
+            api_key=model_config.groq_api_key,
+            model=model_name,
+            temperature=temp
         )
     raise ValueError(f"Unsupported provider: {provider}")
 
@@ -467,35 +488,68 @@ def _convert_serialized_messages(messages):
 
 
 async def post_llm(
-    model_name: str,
     messages: List[BaseMessage],
-    config: Config,
+    model_config: ModelConfig,
     response_model: Optional[Type[BaseModel]] = None,
-    stream: bool = False,  # We'll use this to determine whether to return complete messages or phase chunks
-    temperature: Optional[float] = None,
-    max_tokens: Optional[int] = None,
+    stream: bool = False,
     tools: Optional[List[Any]] = None
 ) -> Union[BaseMessage, AsyncIterator[AIMessageChunk]]:
     """
-    Enhanced LLM completion function with structured output support.
-    Modified to support phase-by-phase streaming without token-by-token streaming.
+    Unified LLM completion function using a ModelConfig object.
 
     Args:
-        model_name: The model to use
         messages: The conversation messages in LangChain format
-        config: Configuration object
+        model_config: Fully configured ModelConfig object including:
+          - provider: LLM provider (e.g. "google", "openai")
+          - model_name: Specific model identifier
+          - temperature: Optional temperature setting
+          - max_tokens: Optional max tokens setting
+          - API keys: Provider-specific API key field must be set
         response_model: Optional Pydantic model for structured output
-        stream: Whether to enable phase-based streaming (not token-by-token)
-        temperature: Optional temperature override
-        max_tokens: Optional max tokens override
+        stream: Whether to stream the response
         tools: Optional list of LangChain tools to bind to the model
 
     Returns:
-        Either a complete message or an async iterator for phase chunks
+        Union[BaseMessage, AsyncIterator[AIMessageChunk]]:
+          Either a single AIMessage or an async iterator of message chunks
     """
-    # Extract provider from model name
-    provider, provider_model = get_model_provider(model_name)
-    logger.debug(f"Using {provider}/{provider_model} for completion")
+    # Extract provider and model name from the string
+    # Removed old extraction of provider/model_name; info is now in model_config
+
+    # Create a ModelConfig object from the input parameters.
+    # Note: API keys are expected to be part of the 'messages' or implicitly handled
+    # if they were added to the ModelConfig definition and passed in the request.
+    # We need to ensure the ModelConfig object passed *to* this function contains the keys.
+    # Let's assume for now the keys are added to the ModelConfig definition and passed in the request.
+    # The caller (workflow) will need to construct this ModelConfig appropriately.
+
+    # *** We need to adjust how ModelConfig is created or passed here. ***
+    # For now, let's assume the caller constructs a full ModelConfig including keys.
+    # We will modify the caller later.
+    # Let's redefine the function signature slightly to expect a ModelConfig object directly.
+    # This is a bigger change, let's revert the parameter removal for now and adjust the call first.
+
+    # Reverting parameter removal - let's just adjust the get_base_model call first.
+    # The ModelConfig object created here *doesn't* have the keys yet.
+    # The keys are in the 'api_key_config' parameter passed to post_llm.
+    # We need to pass the *correct* config object to get_base_model.
+
+    # --- Let's rethink this step ---
+    # get_base_model now expects a single ModelConfig object.
+    # post_llm receives model_name, messages, api_key_config, temp, tokens, etc.
+    # post_llm needs to *construct* the ModelConfig object expected by get_base_model,
+    # including the API keys from api_key_config.
+
+    # 1. Create the ModelConfig instance inside post_llm
+    # 2. Populate it with provider, model_name, temp, tokens
+    # 3. Add the relevant API key from the api_key_config object based on the provider.
+    # 4. Pass this *complete* ModelConfig object to get_base_model.
+
+    # Create the base ModelConfig
+    # Removed obsolete creation of model_config_for_call and API key assignment
+
+
+    logger.debug(f"Using {model_config} for completion")
 
     # Convert any serialized messages to proper LangChain message objects
     try:
@@ -504,21 +558,11 @@ async def post_llm(
         logger.error(f"Error converting messages: {e}")
         # If conversion fails, try to proceed with original messages
 
-    # Check temperature compatibility
-    if temperature is not None and not is_temperature_compatible(model_name):
-        logger.info(f"Model {provider_model} doesn't support temperature parameter - ignoring temperature setting")
-        temperature = None
+    # Get the initialized model
+    model = get_base_model(model_config=model_config)
 
-    # Always use non-streaming mode for the model itself
-    # We'll handle the phase-based streaming in the LangGraph implementation
-    model = get_base_model(model_name, config)
-
-    # Apply overrides
-    if temperature is not None and hasattr(model, "temperature"):
-        model.temperature = temperature
-
-    # Handle special cases for different models
-    if provider == "google" and provider_model.startswith("gemini"):
+    # Handle special cases for Google Gemini models
+    if model_config.provider == "google" and model_config.model_name.startswith("gemini"):
         messages = _prepare_messages_for_gemini(messages)
 
     # Bind tools if provided

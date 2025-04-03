@@ -39,6 +39,7 @@
 │       ├── ChoirThreadDetailView.swift
 │       ├── ExperienceSourcesView.swift
 │       ├── MessageRow.swift
+│       ├── ModelConfigView.swift
 │       ├── PaginatedTextView.swift
 │       ├── PhaseCard.swift
 │       ├── PostchainView.swift
@@ -91,6 +92,7 @@
 │   │   │   ├── __init__.py
 │   │   │   ├── langchain_workflow.py
 │   │   │   ├── nodes
+│   │   │   ├── postchain_llm.py
 │   │   │   ├── prompts
 │   │   │   │   └── prompts.py
 │   │   │   ├── schemas
@@ -183,6 +185,7 @@
 │   ├── core_economics.md
 │   ├── core_state_transitions.md
 │   ├── data_engine_model.md
+│   ├── debug_description.md
 │   ├── e_business.md
 │   ├── e_concept.md
 │   ├── evolution_naming.md
@@ -227,4 +230,4 @@
     ├── sources_displaying.sh
     └── test_postchain_multiturn.sh
 
-60 directories, 165 files
+60 directories, 168 files

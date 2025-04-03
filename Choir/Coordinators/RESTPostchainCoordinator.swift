@@ -79,6 +79,7 @@ class RESTPostchainCoordinator: PostchainCoordinator, ObservableObject {
                 self.api.streamLangchain(
                     query: input,
                     threadId: thread?.id.uuidString ?? UUID().uuidString,
+                    modelConfigs: thread?.modelConfigs, // Pass the thread's model configs
                     onPhaseUpdate: { [weak self] phase, status, content, webResults, vectorResults in
                         guard let self = self else { return }
 

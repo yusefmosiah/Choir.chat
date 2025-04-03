@@ -7,7 +7,8 @@ struct ChoirThreadDetailView: View {
    @Namespace private var scrollSpace
    @State private var lastMessageId: String? = nil
    @State private var scrollToBottom = false
-
+   @State private var showModelConfig = false
+   
    var body: some View {
        VStack {
            ScrollViewReader { scrollProxy in
@@ -68,6 +69,18 @@ struct ChoirThreadDetailView: View {
            .padding()
        }
        .navigationTitle(thread.title)
+       .toolbar {
+           ToolbarItem(placement: .topBarTrailing) {
+               Button(action: {
+                   showModelConfig = true
+               }) {
+                   Label("Configure Models", systemImage: "gear")
+               }
+           }
+       }
+       .sheet(isPresented: $showModelConfig) {
+           ModelConfigView(thread: thread)
+       }
        .onDisappear {
            cleanup()
        }

@@ -9,7 +9,8 @@ import json # Added for parsing tool results
 
 # Local imports
 from app.config import Config
-from app.langchain_utils import post_llm, ModelConfig
+from app.postchain.postchain_llm import post_llm
+from app.langchain_utils import ModelConfig
 from app.postchain.schemas.state import PostChainState, ExperiencePhaseOutput, SearchResult, VectorSearchResult # Import new schemas
 from app.postchain.utils import format_stream_event #, save_state, recover_state # Removed state management utils
 from app.postchain.prompts.prompts import action_instruction, experience_instruction, intention_instruction, understanding_instruction, observation_instruction, yield_instruction
@@ -34,8 +35,8 @@ conversation_history_store: Dict[str, List[BaseMessage]] = {}
 
 async def run_action_phase(
     messages: List[BaseMessage],
-    config: Config,
-    model_config: ModelConfig
+    # config: Config, # REMOVED - Keys are in model_config
+    model_config: ModelConfig # This should now contain API keys
 ) -> Dict[str, Any]:
     """Runs the Action phase using LCEL."""
     logger.info(f"Running Action phase with model: {model_config.provider}/{model_config.model_name}")
@@ -52,18 +53,16 @@ async def run_action_phase(
         logger.warning("Last message was not HumanMessage, running action phase without specific instruction injection.")
         action_messages = [SystemMessage(content=COMMON_SYSTEM_PROMPT)] + messages
 
-    # Define the runnable chain for the action phase
-    async def _get_action_response(msgs):
-        return await post_llm(
-            f"{model_config.provider}/{model_config.model_name}",
-            msgs,
-            config
-        )
-    action_chain = RunnableLambda(_get_action_response)
-
     try:
         # Invoke the chain and await the result from post_llm
-        response = await action_chain.ainvoke(action_messages)
+        # --- Direct call to post_llm for debugging ---
+        logger.info(f"Directly calling post_llm with model: {model_config}")
+        # Pass the complete ModelConfig object which includes keys
+        response = await post_llm(
+            model_config=model_config,
+            messages=action_messages
+        )
+        # --- End Direct call ---
 
         # Ensure response is an AIMessage before accessing .content
         if isinstance(response, AIMessage):
@@ -81,8 +80,8 @@ async def run_action_phase(
 
 async def run_experience_phase(
     messages: List[BaseMessage],
-    config: Config,
-    model_config: ModelConfig
+    # config: Config, # REMOVED - Keys are in model_config
+    model_config: ModelConfig # This should now contain API keys
 ) -> ExperiencePhaseOutput: # Updated return type
     """Runs the Experience phase using LCEL, including tool handling."""
     logger.info(f"Running Experience phase with model: {model_config.provider}/{model_config.model_name}")
@@ -90,7 +89,13 @@ async def run_experience_phase(
     # --- Instantiate Tools ---
     # Note: qdrant_search is already decorated with @tool, so we just pass the function.
     # Langchain handles the instantiation and schema generation.
-    tools = [BraveSearchTool(config=config), qdrant_search] # Add Qdrant tool
+    # TODO: How should tools requiring config (like BraveSearchTool) be handled now?
+    # Option 1: Pass keys via model_config to the tool constructor if possible.
+    # Option 2: Re-evaluate if these tools *need* server-side config.
+    # For now, let's assume BraveSearchTool can work without server config or gets keys differently.
+    # If BraveSearchTool needs a key, it must be added to ModelConfig and accessed here.
+    # Assuming BraveSearchTool is modified or doesn't strictly need the key from server Config for now.
+    tools = [BraveSearchTool(), qdrant_search] # Add Qdrant tool
 
     # Prepare prompt - find last user query and last AI (Action) response
     last_user_msg = next((m for m in reversed(messages) if isinstance(m, HumanMessage)), None)
@@ -113,11 +118,13 @@ Your task: Provide a reflective analysis adding deeper context.
 
     # Define the runnable chain for the experience phase, passing tools
     async def _get_experience_response(msgs):
+        logger.info(f"Calling post_llm with model: {model_config}")
+
+        # Pass the complete ModelConfig object
         return await post_llm(
-            f"{model_config.provider}/{model_config.model_name}",
-            msgs,
-            config,
-            tools=tools # Pass tools to post_llm
+            model_config=model_config,
+            messages=msgs,
+            tools=tools
         )
     experience_chain = RunnableLambda(_get_experience_response)
 
@@ -236,10 +243,12 @@ Your task: Provide a reflective analysis adding deeper context.
             # --- Second LLM Call (with tool results) ---
             logger.info("Calling LLM again with tool results.")
             # Need to await the result of post_llm here
+            logger.info(f"Calling post_llm with model: {model_config}")
+
+            # Pass the complete ModelConfig object
             response = await post_llm(
-                f"{model_config.provider}/{model_config.model_name}",
-                experience_messages, # Pass messages including tool results
-                config
+                model_config=model_config,
+                messages=experience_messages # Pass messages including tool results
             )
 
             # Check response type after second call
@@ -267,8 +276,8 @@ Your task: Provide a reflective analysis adding deeper context.
 
 async def run_intention_phase(
     messages: List[BaseMessage],
-    config: Config,
-    model_config: ModelConfig
+    # config: Config, # REMOVED
+    model_config: ModelConfig # This should now contain API keys
 ) -> Dict[str, Any]:
     """Runs the Intention phase using LCEL."""
     logger.info(f"Running Intention phase with model: {model_config.provider}/{model_config.model_name}")
@@ -280,10 +289,12 @@ async def run_intention_phase(
 
     # Define the runnable chain for the intention phase
     async def _get_intention_response(msgs):
+        logger.info(f"Calling post_llm with model: {model_config}")
+
+        # Pass the complete ModelConfig object
         return await post_llm(
-            f"{model_config.provider}/{model_config.model_name}",
-            msgs,
-            config
+            model_config=model_config,
+            messages=msgs
         )
     intention_chain = RunnableLambda(_get_intention_response)
 
@@ -306,8 +317,8 @@ async def run_intention_phase(
 
 async def run_observation_phase(
     messages: List[BaseMessage],
-    config: Config,
-    model_config: ModelConfig
+    # config: Config, # REMOVED
+    model_config: ModelConfig # This should now contain API keys
 ) -> Dict[str, Any]:
     """Runs the Observation phase using LCEL."""
     logger.info(f"Running Observation phase with model: {model_config.provider}/{model_config.model_name}")
@@ -318,10 +329,12 @@ async def run_observation_phase(
     observation_messages = [SystemMessage(content=COMMON_SYSTEM_PROMPT)] + messages + [HumanMessage(content=observation_query)]
     # Define the runnable chain for the observation phase
     async def observation_wrapper(msgs):
+        logger.info(f"Calling post_llm with model: {model_config}")
+
+        # Pass the complete ModelConfig object
         return await post_llm(
-            f"{model_config.provider}/{model_config.model_name}",
-            msgs,
-            config
+            model_config=model_config,
+            messages=msgs
         )
     observation_chain = RunnableLambda(observation_wrapper)
 
@@ -345,8 +358,8 @@ async def run_observation_phase(
 
 async def run_understanding_phase(
     messages: List[BaseMessage],
-    config: Config,
-    model_config: ModelConfig
+    # config: Config, # REMOVED
+    model_config: ModelConfig # This should now contain API keys
 ) -> Dict[str, Any]:
     """Runs the Understanding phase using LCEL."""
     logger.info(f"Running Understanding phase with model: {model_config.provider}/{model_config.model_name}")
@@ -358,10 +371,12 @@ async def run_understanding_phase(
 
     # Define the runnable chain for the understanding phase
     async def understanding_wrapper(msgs):
+        logger.info(f"Calling post_llm with model: {model_config}")
+
+        # Pass the complete ModelConfig object
         return await post_llm(
-            f"{model_config.provider}/{model_config.model_name}",
-            msgs,
-            config
+            model_config=model_config,
+            messages=msgs
         )
     understanding_chain = RunnableLambda(understanding_wrapper)
 
@@ -385,8 +400,8 @@ async def run_understanding_phase(
 
 async def run_yield_phase(
     messages: List[BaseMessage],
-    config: Config,
-    model_config: ModelConfig
+    # config: Config, # REMOVED
+    model_config: ModelConfig # This should now contain API keys
 ) -> Dict[str, Any]:
     """Runs the Yield phase using LCEL."""
     logger.info(f"Running Yield phase with model: {model_config.provider}/{model_config.model_name}")
@@ -400,10 +415,12 @@ async def run_yield_phase(
 
     # Define the runnable chain for the yield phase
     async def yield_wrapper(msgs):
+        logger.info(f"Calling post_llm with model: {model_config}")
+
+        # Pass the complete ModelConfig object
         return await post_llm(
-            f"{model_config.provider}/{model_config.model_name}",
-            msgs,
-            config
+            model_config=model_config,
+            messages=msgs
         )
     yield_chain = RunnableLambda(yield_wrapper)
 
@@ -423,7 +440,7 @@ async def run_langchain_postchain_workflow(
     query: str,
     thread_id: str,
     message_history: List[BaseMessage],
-    config: Config,
+    # config: Config, # REMOVED - Keys are now expected within the model_config overrides
     # Allow overriding models per phase for testing
     action_mc_override: Optional[ModelConfig] = None,
     experience_mc_override: Optional[ModelConfig] = None,
@@ -435,18 +452,20 @@ async def run_langchain_postchain_workflow(
     """
     Runs the full PostChain workflow using Langchain LCEL.
     Allows overriding model selection per phase for testing.
+    The provided override ModelConfig objects MUST contain the necessary API keys.
     """
     logger.info(f"Starting Langchain PostChain workflow for thread {thread_id}")
 
     # --- Model Configuration (Prioritize Overrides) ---
     try:
-        # Use override if provided, otherwise use default
-        action_model_config = action_mc_override if action_mc_override else ModelConfig("google", "gemini-2.0-flash-lite")
-        experience_model_config = experience_mc_override if experience_mc_override else  ModelConfig("openrouter", "ai21/jamba-1.6-mini")
-        intention_model_config = intention_mc_override if intention_mc_override else ModelConfig("google", "gemini-2.0-flash")
-        observation_model_config = observation_mc_override if observation_mc_override else ModelConfig("groq", "qwen-qwq-32b")
-        understanding_model_config = understanding_mc_override if understanding_mc_override else ModelConfig("openrouter", "openrouter/quasar-alpha")
-        yield_model_config = yield_mc_override if yield_mc_override else ModelConfig("google", "gemini-2.5-pro-exp-03-25")
+        # Use override if provided, otherwise use default with temperature set
+        default_temp = 0.333  # Default temperature for all models
+        action_model_config = action_mc_override if action_mc_override else ModelConfig(provider="google", model_name="gemini-2.0-flash-lite", temperature=default_temp)
+        experience_model_config = experience_mc_override if experience_mc_override else ModelConfig(provider="openrouter", model_name="ai21/jamba-1.6-mini", temperature=default_temp)
+        intention_model_config = intention_mc_override if intention_mc_override else ModelConfig(provider="google", model_name="gemini-2.0-flash", temperature=default_temp)
+        observation_model_config = observation_mc_override if observation_mc_override else ModelConfig(provider="groq", model_name="qwen-qwq-32b", temperature=default_temp)
+        understanding_model_config = understanding_mc_override if understanding_mc_override else ModelConfig(provider="openrouter", model_name="openrouter/quasar-alpha", temperature=default_temp)
+        yield_model_config = yield_mc_override if yield_mc_override else ModelConfig(provider="google", model_name="gemini-2.5-pro-exp-03-25", temperature=default_temp)
 
         # Log the final model configuration being used for this run
         logger.info(f"Workflow Models - Action: {action_model_config}, Experience: {experience_model_config}, Intention: {intention_model_config}, Observation: {observation_model_config}, Understanding: {understanding_model_config}, Yield: {yield_model_config}")
@@ -467,7 +486,7 @@ async def run_langchain_postchain_workflow(
 
     # 1. Action Phase
     yield {"phase": "action", "status": "running"}
-    action_result = await run_action_phase(current_messages, config, action_model_config)
+    action_result = await run_action_phase(current_messages, action_model_config)
 
     if "error" in action_result:
         yield {"phase": "action", "status": "error", "content": action_result["error"]}
@@ -483,7 +502,7 @@ async def run_langchain_postchain_workflow(
 
     # 2. Experience Phase
     yield {"phase": "experience", "status": "running"}
-    experience_output: ExperiencePhaseOutput = await run_experience_phase(current_messages, config, experience_model_config)
+    experience_output: ExperiencePhaseOutput = await run_experience_phase(current_messages, experience_model_config)
 
     if experience_output.error:
         yield {
@@ -512,7 +531,7 @@ async def run_langchain_postchain_workflow(
 
     # 3. Intention Phase
     yield {"phase": "intention", "status": "running"}
-    intention_result = await run_intention_phase(current_messages, config, intention_model_config)
+    intention_result = await run_intention_phase(current_messages, intention_model_config)
 
     if "error" in intention_result:
         yield {"phase": "intention", "status": "error", "content": intention_result["error"]}
@@ -528,7 +547,7 @@ async def run_langchain_postchain_workflow(
 
     # 4. Observation Phase
     yield {"phase": "observation", "status": "running"}
-    observation_result = await run_observation_phase(current_messages, config, observation_model_config)
+    observation_result = await run_observation_phase(current_messages, observation_model_config)
 
     if "error" in observation_result:
         yield {"phase": "observation", "status": "error", "content": observation_result["error"]}
@@ -545,7 +564,7 @@ async def run_langchain_postchain_workflow(
 
     # 5. Understanding Phase
     yield {"phase": "understanding", "status": "running"}
-    understanding_result = await run_understanding_phase(current_messages, config, understanding_model_config)
+    understanding_result = await run_understanding_phase(current_messages, understanding_model_config)
 
     if "error" in understanding_result:
         yield {"phase": "understanding", "status": "error", "content": understanding_result["error"]}
@@ -562,7 +581,7 @@ async def run_langchain_postchain_workflow(
 
     # 6. Yield Phase
     yield {"phase": "yield", "status": "running"}
-    yield_result = await run_yield_phase(current_messages, config, yield_model_config)
+    yield_result = await run_yield_phase(current_messages, yield_model_config)
 
     if "error" in yield_result:
         yield {"phase": "yield", "status": "error", "content": yield_result["error"]}
@@ -577,12 +596,30 @@ async def run_langchain_postchain_workflow(
 
 # --- Example Usage (for testing) ---
 async def main():
-    config = Config()
+    # config = Config() # REMOVED - Config object no longer needed here
     thread_id = "test-thread-lc"
     message_history = [] # Start with empty history
-    query = "What is the capital of France? Search the web if you don't know." # Added instruction to encourage tool use
+    query = "What is the capital of France? Search the web if you don't know."
 
-    async for event in run_langchain_postchain_workflow(query, thread_id, config):
+    # --- IMPORTANT: For this test main function to work, ---
+    # --- the default ModelConfigs created in run_langchain_postchain_workflow ---
+    # --- MUST now include hardcoded API keys, or this test will fail. ---
+    # --- Alternatively, pass ModelConfig overrides with keys here. ---
+
+    # Example passing overrides (replace with actual keys or load from env for testing)
+    test_action_mc = ModelConfig(provider="google", model_name="gemini-2.0-flash-lite", google_api_key="YOUR_GOOGLE_KEY")
+    test_experience_mc = ModelConfig(provider="openrouter", model_name="ai21/jamba-1.6-mini", openrouter_api_key="YOUR_OPENROUTER_KEY")
+    # ... add other phase configs with keys ...
+
+    async for event in run_langchain_postchain_workflow(
+        query=query,
+        thread_id=thread_id,
+        message_history=message_history,
+        # Pass overrides if needed for testing:
+        # action_mc_override=test_action_mc,
+        # experience_mc_override=test_experience_mc,
+        # ...
+    ):
         print(json.dumps(event, indent=2))
         # Add AI responses to history for subsequent phases/turns (simplified)
         if event.get("status") == "complete" and "content" in event and event.get("phase") != "yield":

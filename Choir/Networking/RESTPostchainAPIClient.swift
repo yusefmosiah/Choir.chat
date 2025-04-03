@@ -92,12 +92,16 @@ class RESTPostchainAPIClient {
     func streamLangchain(
         query: String,
         threadId: String,
+        modelConfigs: [Phase: ModelConfig]? = nil,
         onPhaseUpdate: @escaping (String, String, String, [SearchResult]?, [VectorSearchResult]?) -> Void,
         onComplete: @escaping () -> Void,
         onError: @escaping (Error) -> Void
     ) {
         #if DEBUG
         print("📱 RESTPostchainAPIClient.streamLangchain called with query: \(query.prefix(20))..., threadId: \(threadId)")
+        if let configs = modelConfigs {
+            print("📱 Using custom model configs: \(configs.count) phases configured")
+        }
         #endif
 
         guard let url = URL(string: "\(baseURL)/langchain") else {
@@ -106,10 +110,20 @@ class RESTPostchainAPIClient {
             return
         }
 
+        // Convert model configs if provided
+        var modelConfigsDict: [String: ModelConfigRequest]?
+        if let configs = modelConfigs {
+            modelConfigsDict = [:]
+            for (phase, config) in configs {
+                modelConfigsDict![phase.rawValue] = ModelConfigRequest(from: config)
+            }
+        }
+
         // Create request body
         let requestBody = LangchainRequestBody(
             userQuery: query,
-            threadId: threadId
+            threadId: threadId,
+            modelConfigs: modelConfigsDict
         )
 
         var request = URLRequest(url: url)
@@ -220,11 +234,11 @@ class RESTPostchainAPIClient {
                         // Debug logging for received JSON
                         if phase == "experience" {
                             print("🔍 Experience phase JSON keys: \(json.keys.joined(separator: ", "))")
-                            
+
                             // Check for alternative field names that might contain sources
-                            let possibleSourceFields = ["web_results", "webResults", "vector_results", "vectorResults", 
+                            let possibleSourceFields = ["web_results", "webResults", "vector_results", "vectorResults",
                                                       "sources", "references", "webSources", "vectorSources"]
-                            
+
                             for field in possibleSourceFields {
                                 if let value = json[field] {
                                     print("✅ Found source field: \(field) with type: \(type(of: value))")
@@ -254,7 +268,7 @@ class RESTPostchainAPIClient {
                                     provider: resultJson["provider"] as? String
                                 )
                             }
-                            
+
                             if webResults?.count != webResultsJson.count {
                                 print("⚠️ Lost some web results during parsing: \(webResultsJson.count) → \(webResults?.count ?? 0)")
                             }
@@ -283,7 +297,7 @@ class RESTPostchainAPIClient {
                                     provider: resultJson["provider"] as? String
                                 )
                             }
-                            
+
                             if vectorResults?.count != vectorResultsJson.count {
                                 print("⚠️ Lost some vector results during parsing: \(vectorResultsJson.count) → \(vectorResults?.count ?? 0)")
                             }
@@ -361,10 +375,57 @@ class RESTPostchainAPIClient {
 struct LangchainRequestBody: Codable {
     let userQuery: String
     let threadId: String
+    let modelConfigs: [String: ModelConfigRequest]?
 
     enum CodingKeys: String, CodingKey {
         case userQuery = "user_query"
         case threadId = "thread_id"
+        case modelConfigs = "model_configs"
+    }
+}
+
+struct ModelConfigRequest: Codable {
+    let provider: String
+    let model_name: String
+    let temperature: Double?
+    // API Keys
+    let openaiApiKey: String?
+    let anthropicApiKey: String?
+    let googleApiKey: String?
+    let mistralApiKey: String?
+    let fireworksApiKey: String?
+    let cohereApiKey: String?
+    let openrouterApiKey: String?
+    let groqApiKey: String?
+
+    init(from modelConfig: ModelConfig) {
+        self.provider = modelConfig.provider
+        self.model_name = modelConfig.model
+        self.temperature = modelConfig.temperature
+        // Copy API keys
+        self.openaiApiKey = modelConfig.openaiApiKey
+        self.anthropicApiKey = modelConfig.anthropicApiKey
+        self.googleApiKey = modelConfig.googleApiKey
+        self.mistralApiKey = modelConfig.mistralApiKey
+        self.fireworksApiKey = modelConfig.fireworksApiKey
+        self.cohereApiKey = modelConfig.cohereApiKey
+        self.openrouterApiKey = modelConfig.openrouterApiKey
+        self.groqApiKey = modelConfig.groqApiKey
+    }
+
+    // Add CodingKeys for snake_case mapping with backend
+    enum CodingKeys: String, CodingKey {
+        case provider
+        case model_name // Keep snake_case for backend compatibility
+        case temperature
+        case openaiApiKey = "openai_api_key"
+        case anthropicApiKey = "anthropic_api_key"
+        case googleApiKey = "google_api_key"
+        case mistralApiKey = "mistral_api_key"
+        case fireworksApiKey = "fireworks_api_key"
+        case cohereApiKey = "cohere_api_key"
+        case openrouterApiKey = "openrouter_api_key"
+        case groqApiKey = "groq_api_key"
     }
 }
 

@@ -86,15 +86,85 @@ extension Phase {
     }
 }
 
+// MARK: - Model Configuration
+struct ModelConfig: Codable, Equatable, Hashable {
+    let provider: String
+    let model: String
+    let temperature: Double?
+    // Optional API Keys - passed from client
+    let openaiApiKey: String?
+    let anthropicApiKey: String?
+    let googleApiKey: String?
+    let mistralApiKey: String?
+    let fireworksApiKey: String?
+    let cohereApiKey: String?
+    let openrouterApiKey: String?
+    let groqApiKey: String?
+
+    init(provider: String,
+         model: String,
+         temperature: Double? = nil,
+         openaiApiKey: String? = nil,
+         anthropicApiKey: String? = nil,
+         googleApiKey: String? = nil,
+         mistralApiKey: String? = nil,
+         fireworksApiKey: String? = nil,
+         cohereApiKey: String? = nil,
+         openrouterApiKey: String? = nil,
+         groqApiKey: String? = nil) {
+        self.provider = provider
+        self.model = model
+        self.temperature = temperature
+        self.openaiApiKey = openaiApiKey
+        self.anthropicApiKey = anthropicApiKey
+        self.googleApiKey = googleApiKey
+        self.mistralApiKey = mistralApiKey
+        self.fireworksApiKey = fireworksApiKey
+        self.cohereApiKey = cohereApiKey
+        self.openrouterApiKey = openrouterApiKey
+        self.groqApiKey = groqApiKey
+    }
+
+    // Add CodingKeys for snake_case mapping with backend
+    enum CodingKeys: String, CodingKey {
+        case provider
+        case model
+        case temperature
+        case openaiApiKey = "openai_api_key"
+        case anthropicApiKey = "anthropic_api_key"
+        case googleApiKey = "google_api_key"
+        case mistralApiKey = "mistral_api_key"
+        case fireworksApiKey = "fireworks_api_key"
+        case cohereApiKey = "cohere_api_key"
+        case openrouterApiKey = "openrouter_api_key"
+        case groqApiKey = "groq_api_key"
+    }
+}
+
 // MARK: - Thread and Message Models
 class ChoirThread: ObservableObject, Identifiable, Hashable {
     let id: UUID
     let title: String
     @Published var messages: [Message] = []
 
-    init(id: UUID = UUID(), title: String? = nil) {
+    // Model configurations for each phase
+    @Published var modelConfigs: [Phase: ModelConfig] = [
+        .action: ModelConfig(provider: "google", model: "gemini-2.0-flash-lite"),
+        .experience: ModelConfig(provider: "openrouter", model: "ai21/jamba-1.6-mini"),
+        .intention: ModelConfig(provider: "google", model: "gemini-2.0-flash"),
+        .observation: ModelConfig(provider: "groq", model: "qwen-qwq-32b"),
+        .understanding: ModelConfig(provider: "openrouter", model: "openrouter/quasar-alpha"),
+        .yield: ModelConfig(provider: "google", model: "gemini-2.5-pro-exp-03-25")
+    ]
+
+    init(id: UUID = UUID(), title: String? = nil, modelConfigs: [Phase: ModelConfig]? = nil) {
         self.id = id
         self.title = title ?? "ChoirThread \(DateFormatter.localizedString(from: Date(), dateStyle: .short, timeStyle: .short))"
+
+        // Use provided model configs or keep defaults
+        if let configs = modelConfigs {
+            self.modelConfigs = configs
+        }
     }
 
     // Hashable conformance
@@ -104,6 +174,11 @@ class ChoirThread: ObservableObject, Identifiable, Hashable {
 
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
+    }
+
+    // Update a specific model configuration
+    func updateModelConfig(for phase: Phase, provider: String, model: String, temperature: Double? = nil) {
+        modelConfigs[phase] = ModelConfig(provider: provider, model: model, temperature: temperature)
     }
 }
 
@@ -117,7 +192,7 @@ class Message: ObservableObject, Identifiable, Equatable {
     // Store the currently selected phase for this message
     // This ensures the selection persists even if the view is recreated
     @Published var selectedPhase: Phase = .action
-    
+
     // Store the current page index (0-based) for each Phase
     @Published var phaseCurrentPage: [Phase: Int] = [:]
 
@@ -200,13 +275,13 @@ class Message: ObservableObject, Identifiable, Equatable {
     func getPhaseContent(_ phase: Phase) -> String {
         return phaseContent[phase] ?? ""
     }
-    
+
     // Get the current page for a given phase
     func currentPage(for phase: Phase) -> Int {
         // Return stored page or default to 0
         return phaseCurrentPage[phase, default: 0]
     }
-    
+
     // Set the current page for a given phase
     func setCurrentPage(for phase: Phase, page: Int) {
         let newPage = max(0, page) // Ensure page index is not negative
@@ -216,7 +291,7 @@ class Message: ObservableObject, Identifiable, Equatable {
             phaseCurrentPage[phase] = newPage
         }
     }
-    
+
     // Clear all phases (for debugging/testing)
     func clearPhases() {
         objectWillChange.send()
