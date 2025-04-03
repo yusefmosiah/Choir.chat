@@ -198,7 +198,6 @@ tree.md
 │   ├── core_economics.md
 │   ├── core_state_transitions.md
 │   ├── data_engine_model.md
-│   ├── debug_description.md
 │   ├── e_business.md
 │   ├── e_concept.md
 │   ├── evolution_naming.md
@@ -243,7 +242,7 @@ tree.md
     ├── sources_displaying.sh
     └── test_postchain_multiturn.sh
 
-60 directories, 168 files
+60 directories, 167 files
 
 === File: docs/CHANGELOG.md ===
 
