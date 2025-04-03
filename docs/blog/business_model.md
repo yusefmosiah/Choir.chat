@@ -1,5 +1,3 @@
-# File: docs/blog/business_model.md
-
 # Choir's Blueprint: Powering a Self-Sustaining AI Ecosystem with Loop of Thought, CHIP, and the Lush Box
 
 ## The AI Revolution Needs a New Engine: Choir's Blueprint for a Sustainable Future
