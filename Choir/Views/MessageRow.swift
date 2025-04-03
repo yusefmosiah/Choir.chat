@@ -2,11 +2,13 @@ import SwiftUI
 import Foundation
 struct MessageRow: View {
     @ObservedObject var message: Message
+    @ObservedObject var thread: ChoirThread // Add thread reference
     let isProcessing: Bool
     @ObservedObject var viewModel: PostchainViewModel
 
-    init(message: Message, isProcessing: Bool = false, viewModel: PostchainViewModel) {
+    init(message: Message, thread: ChoirThread, isProcessing: Bool = false, viewModel: PostchainViewModel) {
         self.message = message
+        self.thread = thread // Initialize thread
         self.isProcessing = isProcessing
         self.viewModel = viewModel
     }
@@ -66,6 +68,7 @@ struct MessageRow: View {
                 // Use the message directly with the new PostchainView
                 PostchainView(
                     message: message,
+                    thread: thread, // Pass the thread down
                     isProcessing: isProcessing,
                     viewModel: viewModel, // Pass viewModel
                     forceShowAllPhases: true,
@@ -125,11 +128,13 @@ struct MessageRow: View {
         ]
     )
 
+    let previewThread = ChoirThread() // Create a mock thread
+
     ScrollView { // Wrap in ScrollView for context // Removed explicit return
         VStack {
-            MessageRow(message: userMessage, viewModel: previewViewModel)
-            MessageRow(message: aiMessage, isProcessing: true, viewModel: previewViewModel)
-            MessageRow(message: aiMessage, isProcessing: false, viewModel: previewViewModel)
+            MessageRow(message: userMessage, thread: previewThread, viewModel: previewViewModel)
+            MessageRow(message: aiMessage, thread: previewThread, isProcessing: true, viewModel: previewViewModel)
+            MessageRow(message: aiMessage, thread: previewThread, isProcessing: false, viewModel: previewViewModel)
         }
         .padding()
     }

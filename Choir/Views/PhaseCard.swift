@@ -4,42 +4,43 @@ import Foundation
 struct PhaseCard: View {
     let phase: Phase
     @ObservedObject var message: Message
+    @ObservedObject var thread: ChoirThread // Add thread reference
     let isSelected: Bool
     var isLoading: Bool = false
     var priors: [Prior]? = nil
-    @ObservedObject var viewModel: PostchainViewModel
+    @ObservedObject var viewModel: PostchainViewModel // Keep viewModel for ExperienceSourcesView
     var messageId: String? // Message ID parameter
-    
+
     // --- Computed Properties for Styling ---
-    
+
     private var cardBackgroundColor: Color {
         phase == .yield ? Color.accentColor : Color(.systemBackground) // Use semantic color
     }
-    
+
     private var primaryTextColor: Color {
         phase == .yield ? .white : .primary
     }
-    
+
     private var secondaryTextColor: Color {
         phase == .yield ? .white.opacity(0.8) : .secondary
     }
-    
+
     private var headerIconColor: Color {
         phase == .yield ? .white : .accentColor
     }
-    
+
     private var shadowOpacity: Double {
         isSelected ? 0.2 : 0.1
     }
-    
+
     private var shadowRadius: CGFloat {
         isSelected ? 8 : 3
     }
-    
+
     private var shadowYOffset: CGFloat {
         isSelected ? 3 : 1
     }
-    
+
     private var overlayStrokeColor: Color {
         if isSelected {
             return phase == .yield ? Color.white : Color.accentColor
@@ -47,11 +48,11 @@ struct PhaseCard: View {
             return Color.gray.opacity(0.2)
         }
     }
-    
+
     private var overlayLineWidth: CGFloat {
         isSelected ? 2 : 1
     }
-    
+
     // Binding for current page in the phase
     private var pageBinding: Binding<Int> {
         Binding<Int>(
@@ -59,9 +60,9 @@ struct PhaseCard: View {
             set: { message.phaseCurrentPage[phase] = $0 }
         )
     }
-    
+
     // --- Body ---
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             // Header
@@ -69,14 +70,23 @@ struct PhaseCard: View {
                 Image(systemName: phase.symbol)
                     .imageScale(.medium)
                     .foregroundColor(headerIconColor)
-                
-                Text(phase.rawValue.capitalized)
-                    .font(.headline)
-                    .fontWeight(.semibold)
-                    .foregroundColor(primaryTextColor)
-                
+
+                // Display model name using the thread property
+                if let modelName = thread.modelConfigs[phase]?.model {
+                    Text(modelName)
+                        .font(.headline)
+                        .fontWeight(.semibold)
+                        .foregroundColor(primaryTextColor)
+                } else {
+                    // Fallback to phase name if model config not found
+                    Text(phase.rawValue.capitalized)
+                        .font(.headline)
+                        .fontWeight(.semibold)
+                        .foregroundColor(primaryTextColor)
+                }
+
                 Spacer()
-                
+
                 if isLoading {
                     ProgressView()
                         .scaleEffect(0.7)
@@ -84,7 +94,7 @@ struct PhaseCard: View {
                 }
             }
             .padding(.bottom, 4)
-            
+
             // Content Area
             let content = message.getPhaseContent(phase)
             if !content.isEmpty {
@@ -92,12 +102,12 @@ struct PhaseCard: View {
                     if phase == .experience {
                         // Pass viewModel, messageId, and pagination properties to ExperienceSourcesView
                         ExperienceSourcesView(
-                            viewModel: viewModel, 
+                            viewModel: viewModel,
                             messageId: messageId,
                             currentPage: pageBinding,
                             onNavigateToPreviousPhase: {
                                 // Find previous available phase and select it
-                                if let phaseIndex = Phase.allCases.firstIndex(of: phase), 
+                                if let phaseIndex = Phase.allCases.firstIndex(of: phase),
                                    phaseIndex > 0 {
                                     let previousPhase = Phase.allCases[phaseIndex - 1]
                                     // Set the last page of the previous phase
@@ -110,7 +120,7 @@ struct PhaseCard: View {
                             },
                             onNavigateToNextPhase: {
                                 // Find next available phase and select it
-                                if let phaseIndex = Phase.allCases.firstIndex(of: phase), 
+                                if let phaseIndex = Phase.allCases.firstIndex(of: phase),
                                    phaseIndex < Phase.allCases.count - 1 {
                                     let nextPhase = Phase.allCases[phaseIndex + 1]
                                     // Set the first page of the next phase
@@ -129,7 +139,7 @@ struct PhaseCard: View {
                             currentPage: pageBinding,
                             onNavigateToPreviousPhase: {
                                 // Find previous available phase and select it
-                                if let phaseIndex = Phase.allCases.firstIndex(of: phase), 
+                                if let phaseIndex = Phase.allCases.firstIndex(of: phase),
                                    phaseIndex > 0 {
                                     let previousPhase = Phase.allCases[phaseIndex - 1]
                                     // Set the last page of the previous phase
@@ -142,7 +152,7 @@ struct PhaseCard: View {
                             },
                             onNavigateToNextPhase: {
                                 // Find next available phase and select it
-                                if let phaseIndex = Phase.allCases.firstIndex(of: phase), 
+                                if let phaseIndex = Phase.allCases.firstIndex(of: phase),
                                    phaseIndex < Phase.allCases.count - 1 {
                                     let nextPhase = Phase.allCases[phaseIndex + 1]
                                     // Set the first page of the next phase
@@ -210,10 +220,13 @@ struct PhaseCard: View {
             .yield: "Here's my response..."
         ]
     )
-    
+
+    let testThread = ChoirThread() // Create a mock thread for preview
+
     return PhaseCard(
         phase: .action,
         message: testMessage,
+        thread: testThread, // Pass the mock thread
         isSelected: true,
         isLoading: false,
         viewModel: previewViewModel,

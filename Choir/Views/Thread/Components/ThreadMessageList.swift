@@ -2,6 +2,7 @@ import SwiftUI
 
 struct ThreadMessageList: View {
     let messages: [Message]
+    let thread: ChoirThread // Add thread reference
     let isProcessing: Bool
     let viewModel: PostchainViewModel
 
@@ -11,6 +12,7 @@ struct ThreadMessageList: View {
                 ForEach(messages) { message in
                     MessageRow(
                         message: message,
+                        thread: thread, // Pass the thread down
                         isProcessing: message == messages.last && isProcessing,
                         viewModel: viewModel
                     )

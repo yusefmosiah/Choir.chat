@@ -7,6 +7,8 @@ struct PostchainView: View {
 
     // Reference to the specific message this view is displaying
     @ObservedObject var message: Message
+    // Reference to the thread this message belongs to
+    @ObservedObject var thread: ChoirThread
 
     // Processing state
     let isProcessing: Bool
@@ -37,9 +39,10 @@ struct PostchainView: View {
         return message.phases
     }
 
-    // Updated initializer to accept viewModel
-    init(message: Message, isProcessing: Bool, viewModel: PostchainViewModel, forceShowAllPhases: Bool = false, coordinator: RESTPostchainCoordinator? = nil, viewId: UUID = UUID()) {
+    // Updated initializer to accept viewModel and thread
+    init(message: Message, thread: ChoirThread, isProcessing: Bool, viewModel: PostchainViewModel, forceShowAllPhases: Bool = false, coordinator: RESTPostchainCoordinator? = nil, viewId: UUID = UUID()) {
         self.message = message
+        self.thread = thread // Initialize thread
         self.isProcessing = isProcessing
         self.viewModel = viewModel // Initialize viewModel
         self.forceShowAllPhases = forceShowAllPhases
@@ -47,7 +50,7 @@ struct PostchainView: View {
         self.viewId = viewId
 
         // Print debug info
-        print("PostchainView initialized for message \(message.id) with \(message.phases.count) phases")
+        print("PostchainView initialized for message \(message.id) in thread \(thread.id) with \(message.phases.count) phases")
     }
 
     // Computed property to get available phases in order
@@ -85,6 +88,7 @@ struct PostchainView: View {
                     PhaseCard(
                         phase: phase,
                         message: message,
+                        thread: thread, // Pass the thread down
                         isSelected: phase == selectedPhase,
                         isLoading: (phases[phase]?.isEmpty ?? true) && isProcessing,
                         viewModel: viewModel,
@@ -279,10 +283,12 @@ struct PostchainView: View {
             .intention: "Your intention seems to be...",
             .yield: "Here's my response..."
         ]
-    )
+        )
+    let testThread = ChoirThread() // Create a mock thread
 
     return PostchainView(
         message: testMessage,
+        thread: testThread, // Pass the mock thread
         isProcessing: true,
         viewModel: previewViewModel, // Pass the mock viewModel
         forceShowAllPhases: true,

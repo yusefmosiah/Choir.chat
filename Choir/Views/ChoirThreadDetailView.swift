@@ -8,7 +8,7 @@ struct ChoirThreadDetailView: View {
    @State private var lastMessageId: String? = nil
    @State private var scrollToBottom = false
    @State private var showModelConfig = false
-   
+
    var body: some View {
        VStack {
            ScrollViewReader { scrollProxy in
@@ -17,6 +17,7 @@ struct ChoirThreadDetailView: View {
                        ForEach(thread.messages) { message in
                            MessageRow(
                                message: message,
+                               thread: thread, // Pass the thread down
                                isProcessing: message == thread.messages.last && viewModel.isProcessing,
                                viewModel: viewModel
                            )
@@ -57,7 +58,7 @@ struct ChoirThreadDetailView: View {
                    Button("Send") {
                        guard !input.isEmpty else { return }
                        let messageContent = input
-                       input = "" 
+                       input = ""
 
                        Task {
                            await sendMessage(messageContent)
@@ -99,31 +100,31 @@ struct ChoirThreadDetailView: View {
            thread.messages.append(userMessage)
 
            var emptyPhases: [Phase: String] = [:]
-           
+
            for phase in Phase.allCases {
                emptyPhases[phase] = ""
            }
-           
+
            var placeholderMessage = Message(
                content: "...",
                isUser: false,
                phases: emptyPhases,
                isStreaming: true
            )
-           
+
            thread.messages.append(placeholderMessage)
-           
+
            try await viewModel.process(content)
-           
+
            if let lastIndex = thread.messages.indices.last {
                let message = thread.messages[lastIndex]
-               
+
                let allPhases = viewModel.responses
-               
+
                message.isStreaming = false
-               
+
                message.phases = allPhases
-               
+
                if let experienceContent = allPhases[.experience], !experienceContent.isEmpty {
                    message.content = experienceContent
                } else if let actionContent = allPhases[.action], !actionContent.isEmpty {
@@ -134,7 +135,7 @@ struct ChoirThreadDetailView: View {
            print("Error processing message: \(error)")
        }
    }
-   
+
    private func cleanup() {
        // No more timers to cleanup
    }
