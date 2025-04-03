@@ -132,11 +132,7 @@ tree.md
 │   ├── blog
 │   │   ├── business_model.md
 │   │   └── loop_of_thought.md
-│   ├── custom_state_manager_test.log
-│   ├── debug_stream_content.log
 │   ├── main.py
-│   ├── postchain_memory_debug.log
-│   ├── postchain_tests.log
 │   ├── pyproject.toml
 │   ├── pytest.ini
 │   ├── requirements.txt
@@ -246,7 +242,7 @@ tree.md
     ├── sources_displaying.sh
     └── test_postchain_multiturn.sh
 
-61 directories, 170 files
+61 directories, 166 files
 
 === File: docs/CHANGELOG.md ===
 
