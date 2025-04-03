@@ -1,8 +1,6 @@
-# File: docs/blog/loop_of_thought.md
-
 # Loop of Thought: Architecting Truly Adaptive AI Agents
 
-**(Subtitle):** Moving Beyond Linear Chains to Continuous Observation, Orientation, and Decision
+## Moving Beyond Linear Chains to Continuous Observation, Orientation, and Decision
 
 **(Target Audience):** AI Engineers, Developers building with LLMs/Agents, Researchers in AI Agency, Product Managers designing AI systems.
 
@@ -10,7 +8,7 @@
 
 The current generation of AI agents showcases impressive abilities, particularly in using tools – calling APIs, running code, querying databases. Powered by models like GPT-4o, Claude 3.5, and Gemini 2.0, the "Act" phase of agency has taken a giant leap forward. Yet, many developers find these agents brittle. They excel at executing pre-defined plans but struggle to adapt when the environment changes, when tools fail, or when tasks require long-term memory and context.
 
-Indeed, we now possess incredibly powerful reasoning engines – models like OpenAI's o1 and o3 series, Anthropic's Claude 3.7 family, Google's Gemini 2.5, and others – that excel as the "Decide" component, capable of complex planning and tool selection when given the right context. We also see the emergence of specialized systems, akin to "Deep Research Agents," tackling parts of the "Observe" function by gathering vast amounts of information. However, the critical bottleneck, the phase often underdeveloped in current agent architectures, is **"Orient."** This crucial step involves making sense of observations, integrating them with memory and goals, and building true situational awareness. As John Boyd emphasized with the OODA loop, winning isn't just about acting faster; it's about *orienting* better – bringing the most salient context to bear on the decision at hand. This orientation capability is what the Loop of Thought aims to systematically address.
+Indeed, we now possess incredibly powerful reasoning engines – models like OpenAI's o1 and o3 series, Deepseek R1, Anthropic's Claude 3.7 Thinking, Google's Gemini 2.5, and others – that excel as the "Decide" component, capable of complex planning and tool selection when given the right context. We also see the emergence of specialized systems, akin to "Deep Research Agents," tackling parts of the "Observe" function by gathering vast amounts of information. However, the critical bottleneck, the phase often underdeveloped in current agent architectures, is **"Orient."** This crucial step involves making sense of observations, integrating them with memory and goals, and building true situational awareness. As John Boyd emphasized with the OODA loop, winning isn't just about acting faster; it's about *orienting* better – bringing the most salient context to bear on the decision at hand. This orientation capability is what the Loop of Thought aims to systematically address.
 
 The limitation often lies in relying on a linear "Chain of Thought" (CoT) that primarily focuses on planning *before* acting. To build truly robust, adaptable agents, we need to embrace a cyclical process: the **Loop of Thought (LoT)**. Inspired by John Boyd's OODA loop (Observe, Orient, Decide, Act), LoT integrates continuous perception, contextual understanding, and adaptive decision-making into the core of agent architecture.
 
