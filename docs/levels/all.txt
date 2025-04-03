@@ -191,9 +191,6 @@ tree.md
 ├── docs
 │   ├── CHANGELOG.md
 │   ├── blockchain_integration.md
-│   ├── blog
-│   │   ├── business_model.md
-│   │   └── loop_of_thought.md
 │   ├── comp_provider_info.md
 │   ├── core_core.md
 │   ├── core_economics.md
@@ -243,7 +240,7 @@ tree.md
     ├── sources_displaying.sh
     └── test_postchain_multiturn.sh
 
-61 directories, 167 files
+60 directories, 165 files
 
 === File: docs/CHANGELOG.md ===
 
