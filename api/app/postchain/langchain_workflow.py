@@ -27,8 +27,7 @@ You are representing Choir's PostChain, in which many different AI models collab
 You will see <phase_instructions> embedded in user messages, which contain the instructions for the current phase. Followe these instructions carefully.
 """
 
-# --- In-memory state store (replace with persistent store later) ---
-conversation_history_store: Dict[str, List[BaseMessage]] = {}
+# --- Conversation history is now persisted in Qdrant ---
 
 
 # --- Phase Implementations using LCEL ---
@@ -475,12 +474,39 @@ async def run_langchain_postchain_workflow(
         yield {"error": f"Model initialization failed: {e}"}
         return
 
-    # --- State Management ---
-    # Load history from in-memory store and merge with passed history
-    global conversation_history_store
-    stored_history = conversation_history_store.get(thread_id, [])
-    merged_history = stored_history + message_history
-    current_messages = merged_history + [HumanMessage(content=query)]
+    # --- State Management with Qdrant ---
+    from app.database import DatabaseClient
+    from datetime import datetime, UTC
+
+    db_client = DatabaseClient(Config())
+
+    # Load message history from Qdrant
+    qdrant_history = await db_client.get_message_history(thread_id)
+    # Convert dicts to Langchain messages
+    loaded_history = []
+    for msg in qdrant_history:
+        role = msg.get("role")
+        content = msg.get("content", "")
+        if role == "user":
+            loaded_history.append(HumanMessage(content=content))
+        elif role == "assistant":
+            loaded_history.append(AIMessage(content=content))
+        else:
+            # Default fallback
+            loaded_history.append(HumanMessage(content=content))
+
+    # Save the new user message immediately
+    user_message = {
+        "thread_id": thread_id,
+        "role": "user",
+        "content": query,
+        "timestamp": datetime.now(UTC).isoformat(),
+        "vector": [0.0] * 1536  # Placeholder vector, replace with embedding if available
+    }
+    await db_client.save_message(user_message)
+
+    # Compose current messages for workflow
+    current_messages = loaded_history + [HumanMessage(content=query)]
 
     # --- Workflow Definition using LCEL (Simplified) ---
 
@@ -495,8 +521,7 @@ async def run_langchain_postchain_workflow(
     action_response: AIMessage = action_result["action_response"]
     current_messages.append(action_response)
 
-    # Update in-memory history store after each phase
-    conversation_history_store[thread_id] = current_messages
+    
 
     yield {
         "phase": "action",
@@ -525,8 +550,6 @@ async def run_langchain_postchain_workflow(
     # Add the AI's response message to the history
     current_messages.append(experience_output.experience_response)
 
-    # Update in-memory history store
-    conversation_history_store[thread_id] = current_messages
 
     # Yield the completion event including search results
     yield {
@@ -556,8 +579,6 @@ async def run_langchain_postchain_workflow(
     intention_response: AIMessage = intention_result["intention_response"]
     current_messages.append(intention_response)
 
-    # Update in-memory history store
-    conversation_history_store[thread_id] = current_messages
 
     yield {
         "phase": "intention",
@@ -585,8 +606,6 @@ async def run_langchain_postchain_workflow(
     current_messages.append(observation_response)
     # Note: Observation output is usually internal, but we yield it here for visibility during development
 
-    # Update in-memory history store
-    conversation_history_store[thread_id] = current_messages
 
     yield {
         "phase": "observation",
@@ -614,8 +633,6 @@ async def run_langchain_postchain_workflow(
     current_messages.append(understanding_response)
     # Note: Understanding output is usually internal, but we yield it here for visibility
 
-    # Update in-memory history store
-    conversation_history_store[thread_id] = current_messages
 
     yield {
         "phase": "understanding",
@@ -640,6 +657,20 @@ async def run_langchain_postchain_workflow(
         return # Stop workflow on error
 
     yield_response: AIMessage = yield_result["yield_response"]
+# Save the final AI message after Yield phase
+    ai_message_data = {
+        "thread_id": thread_id,
+        "role": "assistant",
+        "content": yield_response.content,
+        "timestamp": datetime.now(UTC).isoformat(),
+        "vector": [0.0] * 1536,  # Placeholder vector, replace with embedding if available
+        "phase_outputs": yield_result.get("phase_outputs"),
+        "novelty_score": yield_result.get("novelty_score"),
+        "similarity_scores": yield_result.get("similarity_scores"),
+        "cited_prior_ids": yield_result.get("cited_prior_ids"),
+        "metadata": {}
+    }
+    await db_client.save_message(ai_message_data)
     # Don't add Yield response to message history unless needed for recursion logic (omitted here)
     yield {
         "phase": "yield",

@@ -12,7 +12,7 @@ import uuid
 
 from app.config import Config
 from app.postchain.langchain_workflow import run_langchain_postchain_workflow # Import the new workflow
-from app.postchain.utils import validate_thread_id, recover_state
+from app.postchain.utils import validate_thread_id
 
 # Import ModelConfig from langchain_utils
 from app.langchain_utils import ModelConfig
@@ -53,9 +53,7 @@ async def process_simple_postchain(
     try:
         # Client-side streaming (SSE format)
         async def stream_generator():
-            # Recover message history using thread_id
-            state = recover_state(thread_id)
-            message_history = state.messages if state else []
+            message_history = []  # History will be loaded inside workflow from Qdrant
 
             # Build model config overrides from request if provided
             model_overrides = {}
@@ -91,38 +89,3 @@ async def process_simple_postchain(
 
 @router.post("/recover")
 async def recover_thread(
-    request: RecoverThreadRequest,
-    # config: Config = Depends(get_config) # REMOVED
-):
-    """
-    Recover a thread from an interrupted conversation.
-
-    This endpoint attempts to recover the state of a conversation that
-    may have been interrupted or left in an inconsistent state.
-    """
-    try:
-        # Validate thread ID
-        thread_id = validate_thread_id(request.thread_id)
-
-        # Attempt to recover state
-        state = recover_state(thread_id)
-
-        if state:
-            # Return recovered state information
-            return {
-                "status": "recovered",
-                "thread_id": thread_id,
-                "phase_states": state.phase_state,
-                "current_phase": state.current_phase,
-                "error": state.error,
-                "message_count": len(state.messages)
-            }
-        else:
-            # No state found
-            return {
-                "status": "not_found",
-                "thread_id": thread_id,
-                "message": "No state found for the specified thread ID"
-            }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error recovering thread: {str(e)}")
