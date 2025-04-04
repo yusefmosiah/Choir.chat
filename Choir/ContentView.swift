@@ -86,9 +86,10 @@ struct ContentView: View {
                 do {
                     let threadResponses = try await ChoirAPIClient.shared.fetchUserThreads(userId: userId)
                     let loadedThreads = threadResponses.map { response in
-                        let thread = ChoirThread()
-                        thread.id = UUID(uuidString: response.id) ?? UUID()
-                        thread.title = response.name
+                        let thread = ChoirThread(
+                            id: UUID(uuidString: response.id) ?? UUID(),
+                            title: response.name
+                        )
                         return thread
                     }
                     threads = loadedThreads
