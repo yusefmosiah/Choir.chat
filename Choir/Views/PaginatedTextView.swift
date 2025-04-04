@@ -14,8 +14,8 @@ struct PaginatedTextView: View {
     @State private var totalPages: Int = 1
     @Environment(\.sizeCategory) private var sizeCategory
     
-    // Use monospace font for predictable text layout
-    private let textFont = Font.system(.body, design: .monospaced)
+    // Use standard variable width font for better readability
+    private let textFont = Font.body
     
     var body: some View {
         GeometryReader { geometry in
@@ -162,11 +162,10 @@ class TextMeasurer {
         self.sizeCategory = sizeCategory
     }
     
-    // Monospace font for consistent measurement
+    // Standard variable width font that respects accessibility settings
     private var font: UIFont {
         let style = UIFont.TextStyle.body
         let descriptor = UIFontDescriptor.preferredFontDescriptor(withTextStyle: style)
-            .withDesign(.monospaced) ?? UIFontDescriptor()
         
         return UIFont(descriptor: descriptor, size: 0) // 0 means use the size from the descriptor
     }
