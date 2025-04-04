@@ -7,8 +7,7 @@ struct PostchainView: View {
 
     // Reference to the specific message this view is displaying
     @ObservedObject var message: Message
-    // Reference to the thread this message belongs to
-    @ObservedObject var thread: ChoirThread
+    // Removed thread reference
 
     // Processing state
     let isProcessing: Bool
@@ -39,10 +38,10 @@ struct PostchainView: View {
         return message.phases
     }
 
-    // Updated initializer to accept viewModel and thread
-    init(message: Message, thread: ChoirThread, isProcessing: Bool, viewModel: PostchainViewModel, forceShowAllPhases: Bool = false, coordinator: RESTPostchainCoordinator? = nil, viewId: UUID = UUID()) {
+    // Updated initializer (removed thread)
+    init(message: Message, isProcessing: Bool, viewModel: PostchainViewModel, forceShowAllPhases: Bool = false, coordinator: RESTPostchainCoordinator? = nil, viewId: UUID = UUID()) {
         self.message = message
-        self.thread = thread // Initialize thread
+        // Removed thread initialization
         self.isProcessing = isProcessing
         self.viewModel = viewModel // Initialize viewModel
         self.forceShowAllPhases = forceShowAllPhases
@@ -50,7 +49,7 @@ struct PostchainView: View {
         self.viewId = viewId
 
         // Print debug info
-        print("PostchainView initialized for message \(message.id) in thread \(thread.id) with \(message.phases.count) phases")
+        print("PostchainView initialized for message \(message.id) with \(message.phases.count) phases")
     }
 
     // Computed property to get available phases in order
@@ -78,7 +77,7 @@ struct PostchainView: View {
 
         GeometryReader { geometry in
             let cardWidth = geometry.size.width * 0.98
-            let sideCardWidth = geometry.size.width * 0.1
+            // Removed unused sideCardWidth
             let totalWidth = geometry.size.width
 
             // Simplified to just the carousel without indicators
@@ -88,7 +87,7 @@ struct PostchainView: View {
                     PhaseCard(
                         phase: phase,
                         message: message,
-                        thread: thread, // Pass the thread down
+                        // Removed thread argument
                         isSelected: phase == selectedPhase,
                         isLoading: (phases[phase]?.isEmpty ?? true) && isProcessing,
                         viewModel: viewModel,
@@ -276,19 +275,12 @@ struct PostchainView: View {
 
     let testMessage = Message(
         content: "Test message content",
-        isUser: false,
-        phases: [
-            .action: "I understand you said...",
-            .experience: "Based on my experience...", // Content for experience phase
-            .intention: "Your intention seems to be...",
-            .yield: "Here's my response..."
-        ]
-        )
-    let testThread = ChoirThread() // Create a mock thread
+        isUser: false
+    )
+    // Removed testThread
 
-    return PostchainView(
+    PostchainView(
         message: testMessage,
-        thread: testThread, // Pass the mock thread
         isProcessing: true,
         viewModel: previewViewModel, // Pass the mock viewModel
         forceShowAllPhases: true,

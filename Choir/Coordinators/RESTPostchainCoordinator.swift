@@ -80,7 +80,8 @@ class RESTPostchainCoordinator: PostchainCoordinator, ObservableObject {
                     query: input,
                     threadId: thread?.id.uuidString ?? UUID().uuidString,
                     modelConfigs: thread?.modelConfigs, // Pass the thread's model configs
-                    onPhaseUpdate: { [weak self] phase, status, content, webResults, vectorResults in
+                    // Update closure signature to accept provider and modelName
+                    onPhaseUpdate: { [weak self] phase, status, content, provider, modelName, webResults, vectorResults in
                         guard let self = self else { return }
 
                         Task { @MainActor in
@@ -120,24 +121,41 @@ class RESTPostchainCoordinator: PostchainCoordinator, ObservableObject {
                             if !content.isEmpty {
                                 print("🔄 Processing output for phase: \(phase) with content length: \(content.count)")
 
-                                // Update the view model directly with phase content AND results
-                                // SwiftUI reactivity will handle the rest
+                                // Find the message being updated
+                                if let messageId = self.activeMessageId,
+                                   let thread = self.currentChoirThread,
+                                   let messageIndex = thread.messages.firstIndex(where: { $0.id == messageId }) {
+
+                                    let message = thread.messages[messageIndex]
+                                    // Update the message object directly with all info
+                                    message.updatePhase(phaseEnum, content: content, provider: provider, modelName: modelName)
+
+                                    // Explicitly notify observers for the message and thread
+                                    message.objectWillChange.send()
+                                    thread.objectWillChange.send()
+                                } else {
+                                     print("⚠️ Coordinator could not find message \(String(describing: self.activeMessageId)) to update phase \(phase)")
+                                }
+
+                                // Update the view model's state (which triggers UI updates)
+                                // Pass all received data, including model info
                                 self.viewModel?.updatePhaseData(
                                     phase: phaseEnum,
                                     status: status,
                                     content: content,
+                                    provider: provider, // Pass provider
+                                    modelName: modelName, // Pass modelName
                                     webResults: self.webResults, // Pass stored results
                                     vectorResults: self.vectorResults // Pass stored results
                                 )
 
-                                // Update our local responses dictionary (only text content)
+                                // Update our local coordinator responses dictionary (only text content for now)
                                 self.responses[phaseEnum] = content
 
                                 // Update processing state
                                 self.processingPhases.insert(phaseEnum)
 
-                                // Update the message in the thread directly
-                                self.updateMessageInThread(phaseEnum, content: content)
+                                // Removed call to self.updateMessageInThread as update is done above
                             }
 
                             // If phase is complete, remove it from processing phases
@@ -203,43 +221,8 @@ class RESTPostchainCoordinator: PostchainCoordinator, ObservableObject {
     }
 
     // Helper to update the current message in the thread
-    private func updateMessageInThread(_ phase: Phase, content: String) {
-        Task { @MainActor in
-            guard !content.isEmpty,
-                  let messageId = self.activeMessageId,
-                  let thread = self.currentChoirThread,
-                  let messageIndex = thread.messages.firstIndex(where: { $0.id == messageId }) else {
-                return
-            }
-
-            // Get reference to the message (now an ObservableObject)
-            let message = thread.messages[messageIndex]
-
-            // IMPORTANT: Only update the message that's currently being processed
-            // This ensures each message maintains its own independent phases
-            if message.id == activeMessageId {
-                // Set streaming flag
-                message.isStreaming = true
-
-                // Use the helper method to update the phase
-                // This will automatically trigger SwiftUI updates through @Published
-                message.updatePhase(phase, content: content)
-
-                // Log update for debugging
-                if phase == .experience {
-                    print("✅ Updated experience phase in message \(message.id): \(content.prefix(20))...")
-                }
-
-                // Add explicit notification
-                message.objectWillChange.send()
-
-                // Force SwiftUI to recognize changes in parent thread
-                self.currentChoirThread?.objectWillChange.send()
-            } else {
-                print("⚠️ Attempted to update message \(message.id) but active message is \(String(describing: activeMessageId))")
-            }
-        }
-    }
+    // Deprecated: updatePhase now requires provider and modelName, so this is obsolete.
+    // Calls to this function have been removed.
 
     // Helper to recover thread state
     func recoverThread(threadId: String) async throws -> ThreadRecoveryResponse {

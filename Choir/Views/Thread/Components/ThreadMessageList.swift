@@ -12,7 +12,6 @@ struct ThreadMessageList: View {
                 ForEach(messages) { message in
                     MessageRow(
                         message: message,
-                        thread: thread, // Pass the thread down
                         isProcessing: message == messages.last && isProcessing,
                         viewModel: viewModel
                     )

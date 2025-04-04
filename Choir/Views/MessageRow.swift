@@ -2,13 +2,12 @@ import SwiftUI
 import Foundation
 struct MessageRow: View {
     @ObservedObject var message: Message
-    @ObservedObject var thread: ChoirThread // Add thread reference
+    // Removed thread reference
     let isProcessing: Bool
     @ObservedObject var viewModel: PostchainViewModel
 
-    init(message: Message, thread: ChoirThread, isProcessing: Bool = false, viewModel: PostchainViewModel) {
+    init(message: Message, isProcessing: Bool = false, viewModel: PostchainViewModel) {
         self.message = message
-        self.thread = thread // Initialize thread
         self.isProcessing = isProcessing
         self.viewModel = viewModel
     }
@@ -68,7 +67,6 @@ struct MessageRow: View {
                 // Use the message directly with the new PostchainView
                 PostchainView(
                     message: message,
-                    thread: thread, // Pass the thread down
                     isProcessing: isProcessing,
                     viewModel: viewModel, // Pass viewModel
                     forceShowAllPhases: true,
@@ -120,21 +118,16 @@ struct MessageRow: View {
     // Mock AI Message with phases
     let aiMessage = Message(
         content: "This is the initial AI response.",
-        isUser: false,
-        phases: [
-            .action: "Action phase content.",
-            .experience: "Experience phase content.",
-            .yield: "Final yield content."
-        ]
+        isUser: false
     )
 
-    let previewThread = ChoirThread() // Create a mock thread
+    // let previewThread = ChoirThread() // No longer needed
 
     ScrollView { // Wrap in ScrollView for context // Removed explicit return
         VStack {
-            MessageRow(message: userMessage, thread: previewThread, viewModel: previewViewModel)
-            MessageRow(message: aiMessage, thread: previewThread, isProcessing: true, viewModel: previewViewModel)
-            MessageRow(message: aiMessage, thread: previewThread, isProcessing: false, viewModel: previewViewModel)
+            MessageRow(message: userMessage, isProcessing: false, viewModel: previewViewModel) // Removed isProcessing=true from aiMessage
+            MessageRow(message: aiMessage, isProcessing: false, viewModel: previewViewModel) // Removed isProcessing=true from aiMessage
+            MessageRow(message: aiMessage, isProcessing: false, viewModel: previewViewModel)
         }
         .padding()
     }

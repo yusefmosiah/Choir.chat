@@ -141,13 +141,27 @@ struct ModelConfig: Codable, Equatable, Hashable {
     }
 }
 
+// MARK: - Phase Result
+struct PhaseResult: Codable, Equatable, Hashable {
+    var content: String
+    var provider: String?
+    var modelName: String?
+
+    // Add CodingKeys for snake_case mapping if needed, assuming backend sends model_name
+    enum CodingKeys: String, CodingKey {
+        case content
+        case provider
+        case modelName = "model_name"
+    }
+}
+
 // MARK: - Thread and Message Models
 class ChoirThread: ObservableObject, Identifiable, Hashable {
     let id: UUID
     let title: String
     @Published var messages: [Message] = []
 
-    // Model configurations for each phase
+    // Global model configurations (used for *new* messages)
     @Published var modelConfigs: [Phase: ModelConfig] = [
         .action: ModelConfig(provider: "google", model: "gemini-2.0-flash-lite"),
         .experience: ModelConfig(provider: "openrouter", model: "ai21/jamba-1.6-mini"),
@@ -196,27 +210,25 @@ class Message: ObservableObject, Identifiable, Equatable {
     // Store the current page index (0-based) for each Phase
     @Published var phaseCurrentPage: [Phase: Int] = [:]
 
-    // Each message has its own dedicated phase content dictionary
-    // This ensures complete isolation between messages
-    @Published private var phaseContent: [Phase: String] = [:]
+    // Each message stores results for each phase
+    @Published private var phaseResults: [Phase: PhaseResult] = [:]
 
-    // Public interface that always returns all phases (with empty strings for missing ones)
+    // Public interface for compatibility (returns only content strings)
+    // TODO: Update views to use phaseResults directly where possible
     var phases: [Phase: String] {
         get {
-            // Start with empty phases for all possible values
-            var result = Phase.allCases.reduce(into: [Phase: String]()) { result, phase in
-                result[phase] = ""
-            }
-
-            // Overlay with any actual content we have
-            result.merge(phaseContent) { _, new in new }
-
-            return result
+            phaseResults.mapValues { $0.content }
         }
+        // Setter might need adjustment or removal depending on usage
         set {
-            // Using @Published means we don't need to manually notify observers
             objectWillChange.send()
-            phaseContent = newValue
+            for (phase, content) in newValue {
+                // Update existing or create new PhaseResult, keeping existing provider/model if possible
+                let existingResult = phaseResults[phase]
+                phaseResults[phase] = PhaseResult(content: content,
+                                                  provider: existingResult?.provider,
+                                                  modelName: existingResult?.modelName)
+            }
         }
     }
 
@@ -224,21 +236,19 @@ class Message: ObservableObject, Identifiable, Equatable {
          content: String,
          isUser: Bool,
          timestamp: Date = Date(),
-         phases: [Phase: String] = [:],
+         phaseResults: [Phase: PhaseResult] = [:], // Initialize with PhaseResult
          isStreaming: Bool = false) {
         self.id = id
         self.content = content
         self.isUser = isUser
         self.timestamp = timestamp
         self.isStreaming = isStreaming
+        self.phaseResults = phaseResults
 
-        // Initialize with all provided phases
-        self.phaseContent = phases
-
-        // Pre-initialize all phases with empty strings
+        // Pre-initialize all phases with empty PhaseResult if not provided
         for phase in Phase.allCases {
-            if self.phaseContent[phase] == nil {
-                self.phaseContent[phase] = ""
+            if self.phaseResults[phase] == nil {
+                self.phaseResults[phase] = PhaseResult(content: "", provider: nil, modelName: nil)
             }
         }
     }
@@ -248,15 +258,15 @@ class Message: ObservableObject, Identifiable, Equatable {
         lhs.id == rhs.id
     }
 
-    // Add explicit objectWillChange notifications for phase updates
-    func updatePhase(_ phase: Phase, content: String) {
-        // Explicitly notify observers
-        objectWillChange.send()
+    // Update phase with content, provider, and model name
+    func updatePhase(_ phase: Phase, content: String, provider: String?, modelName: String?) {
+        objectWillChange.send() // Notify observers
 
-        // Store the phase content in this message's dedicated dictionary
-        phaseContent[phase] = content
+        // Create or update the PhaseResult
+        phaseResults[phase] = PhaseResult(content: content, provider: provider, modelName: modelName)
 
-        // Only update the main content if it's empty or a placeholder
+        // Update main content based on priority (Yield > Experience > Action)
+        // Only update if current main content is empty or placeholder
         if self.content.isEmpty || self.content == "..." {
             // For initial content, prioritize yield > experience > action
             if phase == .yield && !content.isEmpty {
@@ -271,9 +281,14 @@ class Message: ObservableObject, Identifiable, Equatable {
         print("Message \(id): Updated phase \(phase.rawValue) with content length: \(content.count)")
     }
 
-    // Get phase content for this specific message
+    // Get phase content string for this specific message
     func getPhaseContent(_ phase: Phase) -> String {
-        return phaseContent[phase] ?? ""
+        return phaseResults[phase]?.content ?? ""
+    }
+
+    // Get the full PhaseResult for a phase
+    func getPhaseResult(_ phase: Phase) -> PhaseResult? {
+        return phaseResults[phase]
     }
 
     // Get the current page for a given phase
@@ -295,11 +310,11 @@ class Message: ObservableObject, Identifiable, Equatable {
     // Clear all phases (for debugging/testing)
     func clearPhases() {
         objectWillChange.send()
-        phaseContent.removeAll()
+        phaseResults.removeAll() // Use phaseResults
 
-        // Pre-initialize all phases with empty strings
+        // Pre-initialize all phases with empty PhaseResult
         for phase in Phase.allCases {
-            phaseContent[phase] = ""
+            phaseResults[phase] = PhaseResult(content: "", provider: nil, modelName: nil)
         }
     }
 }

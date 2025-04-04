@@ -93,7 +93,8 @@ class RESTPostchainAPIClient {
         query: String,
         threadId: String,
         modelConfigs: [Phase: ModelConfig]? = nil,
-        onPhaseUpdate: @escaping (String, String, String, [SearchResult]?, [VectorSearchResult]?) -> Void,
+        // Updated callback signature to include provider and modelName
+        onPhaseUpdate: @escaping (String, String, String, String?, String?, [SearchResult]?, [VectorSearchResult]?) -> Void,
         onComplete: @escaping () -> Void,
         onError: @escaping (Error) -> Void
     ) {
@@ -230,6 +231,8 @@ class RESTPostchainAPIClient {
                         let phase = json["phase"] as? String ?? ""
                         let status = json["status"] as? String ?? ""
                         let content = json["content"] as? String ?? ""
+                        let provider = json["provider"] as? String // Extract provider
+                        let modelName = json["model_name"] as? String // Extract model name
 
                         // Debug logging for received JSON
                         if phase == "experience" {
@@ -308,15 +311,17 @@ class RESTPostchainAPIClient {
                             let finalContent = json["final_content"] as? String ?? content
 
                             Task { @MainActor in
-                                onPhaseUpdate(phase, status, finalContent, webResults, vectorResults)
+                                // Pass provider and modelName to the callback
+                                onPhaseUpdate(phase, status, finalContent, provider, modelName, webResults, vectorResults)
                             }
                         } else {
                             Task { @MainActor in
-                                onPhaseUpdate(phase, status, content, webResults, vectorResults)
+                                // Pass provider and modelName to the callback
+                                onPhaseUpdate(phase, status, content, provider, modelName, webResults, vectorResults)
                             }
                         }
                     } else {
-                        // Fallback to original decoder if the manual approach fails
+                        // Fallback to original decoder if the manual approach fails (will lack provider/modelName)
                         let event = try self.decoder.decode(PostchainLangchainEvent.self, from: jsonData)
 
                         Task { @MainActor in
@@ -324,6 +329,8 @@ class RESTPostchainAPIClient {
                                 event.phase,
                                 event.status,
                                 event.content ?? event.finalContent ?? "",
+                                event.provider,
+                                event.modelName,
                                 event.webResults,
                                 event.vectorResults
                             )
@@ -468,6 +475,8 @@ struct PostchainLangchainEvent: Codable {
     let status: String
     let content: String?
     let finalContent: String?
+    let provider: String? // Added provider
+    let modelName: String? // Added model name
     let webResults: [SearchResult]?
     let vectorResults: [VectorSearchResult]?
     let error: String?
@@ -477,6 +486,8 @@ struct PostchainLangchainEvent: Codable {
         case status
         case content
         case finalContent = "final_content"
+        case provider // Added provider key
+        case modelName = "model_name" // Added model_name key
         case webResults = "web_results"
         case vectorResults = "vector_results"
         case error

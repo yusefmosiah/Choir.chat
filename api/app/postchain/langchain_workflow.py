@@ -498,7 +498,13 @@ async def run_langchain_postchain_workflow(
     # Update in-memory history store after each phase
     conversation_history_store[thread_id] = current_messages
 
-    yield {"phase": "action", "status": "complete", "content": action_response.content}
+    yield {
+        "phase": "action",
+        "status": "complete",
+        "content": action_response.content,
+        "provider": action_model_config.provider, # Add provider
+        "model_name": action_model_config.model_name # Add model name
+    }
 
     # 2. Experience Phase
     yield {"phase": "experience", "status": "running"}
@@ -509,6 +515,8 @@ async def run_langchain_postchain_workflow(
             "phase": "experience",
             "status": "error",
             "content": experience_output.error,
+            "provider": experience_model_config.provider, # Add provider
+            "model_name": experience_model_config.model_name, # Add model name
             "web_results": [], # Ensure lists are present even on error
             "vector_results": []
         }
@@ -525,6 +533,8 @@ async def run_langchain_postchain_workflow(
         "phase": "experience",
         "status": "complete",
         "content": experience_output.experience_response.content,
+        "provider": experience_model_config.provider, # Add provider
+        "model_name": experience_model_config.model_name, # Add model name
         "web_results": [res.dict() for res in experience_output.web_results], # Convert Pydantic models to dicts for JSON serialization
         "vector_results": [res.dict() for res in experience_output.vector_results]
     }
@@ -534,7 +544,13 @@ async def run_langchain_postchain_workflow(
     intention_result = await run_intention_phase(current_messages, intention_model_config)
 
     if "error" in intention_result:
-        yield {"phase": "intention", "status": "error", "content": intention_result["error"]}
+        yield {
+            "phase": "intention",
+            "status": "error",
+            "content": intention_result["error"],
+            "provider": intention_model_config.provider, # Add provider
+            "model_name": intention_model_config.model_name # Add model name
+        }
         return # Stop workflow on error
 
     intention_response: AIMessage = intention_result["intention_response"]
@@ -543,14 +559,26 @@ async def run_langchain_postchain_workflow(
     # Update in-memory history store
     conversation_history_store[thread_id] = current_messages
 
-    yield {"phase": "intention", "status": "complete", "content": intention_response.content}
+    yield {
+        "phase": "intention",
+        "status": "complete",
+        "content": intention_response.content,
+        "provider": intention_model_config.provider, # Add provider
+        "model_name": intention_model_config.model_name # Add model name
+    }
 
     # 4. Observation Phase
     yield {"phase": "observation", "status": "running"}
     observation_result = await run_observation_phase(current_messages, observation_model_config)
 
     if "error" in observation_result:
-        yield {"phase": "observation", "status": "error", "content": observation_result["error"]}
+        yield {
+            "phase": "observation",
+            "status": "error",
+            "content": observation_result["error"],
+            "provider": observation_model_config.provider, # Add provider
+            "model_name": observation_model_config.model_name # Add model name
+        }
         return # Stop workflow on error
 
     observation_response: AIMessage = observation_result["observation_response"]
@@ -560,14 +588,26 @@ async def run_langchain_postchain_workflow(
     # Update in-memory history store
     conversation_history_store[thread_id] = current_messages
 
-    yield {"phase": "observation", "status": "complete", "content": observation_response.content}
+    yield {
+        "phase": "observation",
+        "status": "complete",
+        "content": observation_response.content,
+        "provider": observation_model_config.provider, # Add provider
+        "model_name": observation_model_config.model_name # Add model name
+    }
 
     # 5. Understanding Phase
     yield {"phase": "understanding", "status": "running"}
     understanding_result = await run_understanding_phase(current_messages, understanding_model_config)
 
     if "error" in understanding_result:
-        yield {"phase": "understanding", "status": "error", "content": understanding_result["error"]}
+        yield {
+            "phase": "understanding",
+            "status": "error",
+            "content": understanding_result["error"],
+            "provider": understanding_model_config.provider, # Add provider
+            "model_name": understanding_model_config.model_name # Add model name
+        }
         return # Stop workflow on error
 
     understanding_response: AIMessage = understanding_result["understanding_response"]
@@ -577,19 +617,37 @@ async def run_langchain_postchain_workflow(
     # Update in-memory history store
     conversation_history_store[thread_id] = current_messages
 
-    yield {"phase": "understanding", "status": "complete", "content": understanding_response.content}
+    yield {
+        "phase": "understanding",
+        "status": "complete",
+        "content": understanding_response.content,
+        "provider": understanding_model_config.provider, # Add provider
+        "model_name": understanding_model_config.model_name # Add model name
+    }
 
     # 6. Yield Phase
     yield {"phase": "yield", "status": "running"}
     yield_result = await run_yield_phase(current_messages, yield_model_config)
 
     if "error" in yield_result:
-        yield {"phase": "yield", "status": "error", "content": yield_result["error"]}
+        yield {
+            "phase": "yield",
+            "status": "error",
+            "content": yield_result["error"],
+            "provider": yield_model_config.provider, # Add provider
+            "model_name": yield_model_config.model_name # Add model name
+        }
         return # Stop workflow on error
 
     yield_response: AIMessage = yield_result["yield_response"]
     # Don't add Yield response to message history unless needed for recursion logic (omitted here)
-    yield {"phase": "yield", "status": "complete", "final_content": yield_response.content}
+    yield {
+        "phase": "yield",
+        "status": "complete",
+        "final_content": yield_response.content, # Use final_content key for yield
+        "provider": yield_model_config.provider, # Add provider
+        "model_name": yield_model_config.model_name # Add model name
+    }
 
 
     logger.info(f"Langchain PostChain workflow completed for thread {thread_id}")

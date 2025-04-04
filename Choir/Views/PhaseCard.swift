@@ -4,7 +4,7 @@ import Foundation
 struct PhaseCard: View {
     let phase: Phase
     @ObservedObject var message: Message
-    @ObservedObject var thread: ChoirThread // Add thread reference
+    // Removed thread reference
     let isSelected: Bool
     var isLoading: Bool = false
     var priors: [Prior]? = nil
@@ -71,14 +71,14 @@ struct PhaseCard: View {
                     .imageScale(.medium)
                     .foregroundColor(headerIconColor)
 
-                // Display model name using the thread property
-                if let modelName = thread.modelConfigs[phase]?.model {
+                // Display model name using the message's phase result
+                if let modelName = message.getPhaseResult(phase)?.modelName, !modelName.isEmpty {
                     Text(modelName)
                         .font(.headline)
                         .fontWeight(.semibold)
                         .foregroundColor(primaryTextColor)
                 } else {
-                    // Fallback to phase name if model config not found
+                    // Fallback to phase name if model name not stored in message
                     Text(phase.rawValue.capitalized)
                         .font(.headline)
                         .fontWeight(.semibold)
@@ -212,21 +212,14 @@ struct PhaseCard: View {
     let previewViewModel = PostchainViewModel(coordinator: RESTPostchainCoordinator())
     let testMessage = Message(
         content: "Test message content",
-        isUser: false,
-        phases: [
-            .action: "I understand you said...",
-            .experience: "Based on my experience...",
-            .intention: "Your intention seems to be...",
-            .yield: "Here's my response..."
-        ]
+        isUser: false
     )
 
-    let testThread = ChoirThread() // Create a mock thread for preview
+    // Removed testThread
 
-    return PhaseCard(
+    PhaseCard(
         phase: .action,
         message: testMessage,
-        thread: testThread, // Pass the mock thread
         isSelected: true,
         isLoading: false,
         viewModel: previewViewModel,

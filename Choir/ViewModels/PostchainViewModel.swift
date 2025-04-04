@@ -123,7 +123,8 @@ class PostchainViewModel: ObservableObject {
     }
 
     // Called by the coordinator to update the view model with new phase content AND results
-    func updatePhaseData(phase: Phase, status: String, content: String, webResults: [SearchResult]? = nil, vectorResults: [VectorSearchResult]? = nil, messageId: String? = nil) {
+    // Updated signature to include provider and modelName
+    func updatePhaseData(phase: Phase, status: String, content: String, provider: String?, modelName: String?, webResults: [SearchResult]? = nil, vectorResults: [VectorSearchResult]? = nil, messageId: String? = nil) {
         DispatchQueue.main.async { [weak self] in
              guard let self else { return }
 

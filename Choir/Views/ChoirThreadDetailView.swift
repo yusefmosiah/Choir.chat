@@ -17,7 +17,6 @@ struct ChoirThreadDetailView: View {
                        ForEach(thread.messages) { message in
                            MessageRow(
                                message: message,
-                               thread: thread, // Pass the thread down
                                isProcessing: message == thread.messages.last && viewModel.isProcessing,
                                viewModel: viewModel
                            )
@@ -108,7 +107,6 @@ struct ChoirThreadDetailView: View {
            var placeholderMessage = Message(
                content: "...",
                isUser: false,
-               phases: emptyPhases,
                isStreaming: true
            )
 
