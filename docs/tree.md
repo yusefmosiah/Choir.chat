@@ -202,7 +202,6 @@
 │   ├── plan_anonymity_by_default.md
 │   ├── plan_chip_materialization.md
 │   ├── postchain_temporal_logic.md
-│   ├── qdrant_postchain_checklist.md
 │   ├── require_action_phase.md
 │   ├── require_experience_phase.md
 │   ├── require_intention_phase.md
@@ -230,4 +229,4 @@
     ├── sources_displaying.sh
     └── test_postchain_multiturn.sh
 
-60 directories, 168 files
+60 directories, 167 files
