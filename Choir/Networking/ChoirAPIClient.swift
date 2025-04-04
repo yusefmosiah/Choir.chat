@@ -4,7 +4,7 @@ import Foundation
 
 struct ChoirAPIClient {
     static let shared = ChoirAPIClient()
-    private let baseURL = URL(string: "http://localhost:57121")!  // Update with your backend URL and port
+    private let baseURL = URL(string: "http://localhost:8000/api/postchain")!  // Match RESTPostchainAPIClient base URL
 
     func fetchUserThreads(userId: String) async throws -> [ThreadResponse] {
         let url = baseURL.appendingPathComponent("/users/\(userId)/threads")
