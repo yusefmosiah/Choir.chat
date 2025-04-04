@@ -1,5 +1,7 @@
 import Foundation
 
+
+
 struct ChoirAPIClient {
     static let shared = ChoirAPIClient()
     private let baseURL = URL(string: "http://localhost:57121")!  // Update with your backend URL and port
@@ -16,11 +18,9 @@ struct ChoirAPIClient {
         }
 
         let apiResponse = try JSONDecoder().decode(APIResponse<[ThreadResponse]>.self, from: data)
-        return apiResponse.data?["threads"].map(Array.init) ?? []
+        return apiResponse.data ?? []
     }
 }
-
-import Foundation
 
 struct ThreadResponse: Identifiable, Codable {
     let id: String

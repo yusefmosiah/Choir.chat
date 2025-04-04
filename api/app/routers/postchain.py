@@ -87,5 +87,4 @@ async def process_simple_postchain(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error processing PostChain: {str(e)}")
 
-@router.post("/recover")
-async def recover_thread(
+
