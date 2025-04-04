@@ -20,13 +20,9 @@ struct ChoirAPIClient {
     }
 }
 
-struct APIResponse<T: Decodable>: Decodable {
-    let success: Bool
-    let message: String?
-    let data: [String: T]?
-}
+import Foundation
 
-struct ThreadResponse: Identifiable, Decodable {
+struct ThreadResponse: Identifiable, Codable {
     let id: String
     let name: String
     let created_at: String
