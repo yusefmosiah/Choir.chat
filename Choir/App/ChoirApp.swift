@@ -11,7 +11,9 @@ import SwiftUI
 struct ChoirApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            TextSelectionSheetProvider {
+                ContentView()
+            }
         }
     }
 }

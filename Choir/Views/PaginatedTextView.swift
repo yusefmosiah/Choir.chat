@@ -1,5 +1,48 @@
 import SwiftUI
 
+// TextSelectionManager to maintain sheet state across redraws
+// This is a global object that persists across view redraws
+class TextSelectionManager: ObservableObject {
+    static let shared = TextSelectionManager()
+    
+    @Published var showingSheet = false
+    @Published var selectedText = ""
+    
+    // Store active menu content
+    @Published var activeText: String? = nil
+    @Published var isShowingMenu = false
+    
+    // Flag to prevent interaction during redraws
+    @Published var isInteractionDisabled = false
+    
+    func showSheet(withText text: String) {
+        self.selectedText = text
+        self.showingSheet = true
+    }
+    
+    // Set active text for context menu
+    func setActiveText(_ text: String) {
+        self.activeText = text
+        self.isShowingMenu = true
+    }
+    
+    // Clear active text when menu closes
+    func clearActiveText() {
+        self.activeText = nil
+        self.isShowingMenu = false
+    }
+    
+    // Temporarily disable interactions when content is being redrawn
+    func temporarilyDisableInteractions() {
+        isInteractionDisabled = true
+        
+        // Re-enable after a short delay
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+            self?.isInteractionDisabled = false
+        }
+    }
+}
+
 struct PaginatedTextView: View {
     let text: String
     let availableSize: CGSize
@@ -12,7 +55,13 @@ struct PaginatedTextView: View {
     // Internal state
     @State private var pages: [String] = [""]
     @State private var totalPages: Int = 1
+    @State private var showingActionSheet = false
+    // Use shared TextSelectionManager to maintain sheet state
+    @StateObject private var textSelectionManager = TextSelectionManager.shared
     @Environment(\.sizeCategory) private var sizeCategory
+    
+    // Unique ID for this view instance to maintain stability during redraw
+    private let viewId = UUID()
     
     // Use standard variable width font for better readability
     private let textFont = Font.body
@@ -26,9 +75,10 @@ struct PaginatedTextView: View {
                     Rectangle()
                         .fill(Color.clear)
                     
-                    // The actual text content
+                    // The actual text content (with fixed id to maintain identity)
                     if pages.indices.contains(currentPage) {
                         Text(pages[currentPage])
+                            .id("page_text_\(viewId)") // Add stable ID to maintain identity
                             .font(textFont)
                             .lineSpacing(4)
                             .padding([.horizontal, .top], 4)
@@ -39,6 +89,41 @@ struct PaginatedTextView: View {
                     width: geometry.size.width,
                     height: geometry.size.height - 40 // Reserve space for controls
                 )
+                .id("text_container_\(viewId)") // Add stable ID to the container
+                .contentShape(Rectangle()) // Make the entire area tappable
+                .onLongPressGesture {
+                    showingActionSheet = true
+                }
+                // Add onAppear and onDisappear to track menu display
+                .contextMenu(menuItems: {
+                    Group {
+                        Button("Copy Content") {
+                            DispatchQueue.main.async {
+                                // Use the stored active text if menu is showing
+                                let contentToCopy = textSelectionManager.isShowingMenu ? 
+                                    (textSelectionManager.activeText ?? text) : text
+                                UIPasteboard.general.string = contentToCopy
+                            }
+                        }
+                        
+                        Button("Select Text...") {
+                            DispatchQueue.main.async {
+                                // Use the stored active text if menu is showing
+                                let contentToSelect = textSelectionManager.isShowingMenu ? 
+                                    (textSelectionManager.activeText ?? text) : text
+                                textSelectionManager.showSheet(withText: contentToSelect)
+                            }
+                        }
+                    }
+                    .onAppear {
+                        // Store text when menu appears
+                        textSelectionManager.setActiveText(text)
+                    }
+                    .onDisappear {
+                        // Clear when menu disappears
+                        textSelectionManager.clearActiveText()
+                    }
+                })
                 
                 Spacer(minLength: 0)
                 
@@ -99,12 +184,36 @@ struct PaginatedTextView: View {
             .onChange(of: sizeCategory) { _, _ in
                 splitTextIntoPages(size: geometry.size)
             }
+            // Add action sheet for copy options
+            .confirmationDialog("Text Options", isPresented: $showingActionSheet) {
+                Button("Copy All Content") {
+                    DispatchQueue.main.async {
+                        UIPasteboard.general.string = text
+                        // Also store the text in case user immediately opens context menu
+                        textSelectionManager.setActiveText(text)
+                    }
+                }
+                
+                Button("Select Content...") {
+                    DispatchQueue.main.async {
+                        textSelectionManager.showSheet(withText: text)
+                        // Also store the text in case user immediately opens context menu
+                        textSelectionManager.setActiveText(text)
+                    }
+                }
+                
+                Button("Cancel", role: .cancel) {}
+            }
+            // We don't need a sheet here because the sheet is now managed globally
         }
     }
     
     // This is a completely new approach that creates a temporary view 
     // to measure text and find the optimal page breaks
     private func splitTextIntoPages(size: CGSize) {
+        // Signal that content is being redrawn
+        textSelectionManager.temporarilyDisableInteractions()
+        
         guard !text.isEmpty else {
             pages = [""]
             totalPages = 1
@@ -241,41 +350,126 @@ class TextMeasurer {
     }
 }
 
+// TextSelectionView for full-text selection
+struct TextSelectionView: View {
+    let text: String
+    @Environment(\.dismiss) private var dismiss
+    @State private var editableText: String
+    // Create a persistence ID to maintain state
+    private let id = UUID()
+    
+    init(text: String) {
+        self.text = text
+        // Initialize the state property
+        _editableText = State(initialValue: text)
+    }
+    
+    var body: some View {
+        NavigationView {
+            ScrollView {
+                // Use read-only text view that allows selection but no editing
+                Text(editableText)
+                    .textSelection(.enabled)
+                    .font(.body)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding()
+            }
+            .background(Color(UIColor.systemBackground))
+            .navigationTitle("Select Text")
+            .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        Button("Done") {
+                            dismiss()
+                        }
+                    }
+                    
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Menu {
+                            Button("Copy Selected Text") {
+                                // Copy the current selection from TextEditor
+                                // First, user must manually copy the text using the standard iOS selection
+                                // Then this will close the sheet
+                                dismiss()
+                            }
+                            
+                            Button("Copy All") {
+                                UIPasteboard.general.string = text
+                                dismiss()
+                            }
+                        } label: {
+                            Text("Copy")
+                            Image(systemName: "doc.on.doc")
+                        }
+                    }
+                }
+                .id(id) // Add id to ensure view is preserved
+        }
+        .presentationDetents([.large])
+        .interactiveDismissDisabled(true) // Prevent accidental dismissal
+    }
+}
+
+// Global sheet provider that wraps the app content and provides the text selection sheet
+struct TextSelectionSheetProvider<Content: View>: View {
+    @StateObject private var textSelectionManager = TextSelectionManager.shared
+    let content: Content
+    
+    init(@ViewBuilder content: () -> Content) {
+        self.content = content()
+    }
+    
+    var body: some View {
+        ZStack {
+            content
+            
+            // This is a dummy view that always exists to host the sheet
+            Color.clear
+                .frame(width: 0, height: 0)
+                .sheet(isPresented: $textSelectionManager.showingSheet) {
+                    TextSelectionView(text: textSelectionManager.selectedText)
+                }
+        }
+    }
+}
+
 #Preview {
     struct PreviewWrapper: View {
         @State private var currentPage = 0
         @State private var selectedSize: ContentSizeCategory = .medium
 
         var body: some View {
-            VStack {
-                Picker("Text Size", selection: $selectedSize) {
-                    Text("XS").tag(ContentSizeCategory.extraSmall)
-                    Text("S").tag(ContentSizeCategory.small)
-                    Text("M").tag(ContentSizeCategory.medium)
-                    Text("L").tag(ContentSizeCategory.large)
-                    Text("XL").tag(ContentSizeCategory.extraLarge)
-                    Text("XXL").tag(ContentSizeCategory.accessibilityMedium)
-                    Text("XXXL").tag(ContentSizeCategory.accessibilityLarge)
-                }
-                .pickerStyle(SegmentedPickerStyle())
-                .padding()
-                
-                Text("Page size adapts to text size")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                
-                PaginatedTextView(
-                    text: """
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec a diam lectus. Sed sit amet ipsum mauris. Maecenas congue ligula ac quam viverra nec consectetur ante hendrerit. Donec et mollis dolor. Praesent et diam eget libero egestas mattis sit amet vitae augue. Nam tincidunt congue enim, ut porta lorem lacinia consectetur. Donec ut libero sed arcu vehicula ultricies a non tortor. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean ut gravida lorem. Ut turpis felis, pulvinar a semper sed, adipiscing id dolor. Pellentesque auctor nisi id magna consequat sagittis. Curabitur dapibus enim sit amet elit pharetra tincidunt feugiat nisl imperdiet. Ut convallis libero in urna ultrices accumsan. Donec sed odio eros. Donec viverra mi quis quam pulvinar at malesuada arcu rhoncus. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. In rutrum accumsan ultricies. Mauris vitae nisi at sem facilisis semper ac in est.
+            TextSelectionSheetProvider {
+                VStack {
+                    Picker("Text Size", selection: $selectedSize) {
+                        Text("XS").tag(ContentSizeCategory.extraSmall)
+                        Text("S").tag(ContentSizeCategory.small)
+                        Text("M").tag(ContentSizeCategory.medium)
+                        Text("L").tag(ContentSizeCategory.large)
+                        Text("XL").tag(ContentSizeCategory.extraLarge)
+                        Text("XXL").tag(ContentSizeCategory.accessibilityMedium)
+                        Text("XXXL").tag(ContentSizeCategory.accessibilityLarge)
+                    }
+                    .pickerStyle(SegmentedPickerStyle())
+                    .padding()
+                    
+                    Text("Long-press or right-click text to copy or select")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    
+                    PaginatedTextView(
+                        text: """
+                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec a diam lectus. Sed sit amet ipsum mauris. Maecenas congue ligula ac quam viverra nec consectetur ante hendrerit. Donec et mollis dolor. Praesent et diam eget libero egestas mattis sit amet vitae augue. Nam tincidunt congue enim, ut porta lorem lacinia consectetur. Donec ut libero sed arcu vehicula ultricies a non tortor. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean ut gravida lorem. Ut turpis felis, pulvinar a semper sed, adipiscing id dolor. Pellentesque auctor nisi id magna consequat sagittis. Curabitur dapibus enim sit amet elit pharetra tincidunt feugiat nisl imperdiet. Ut convallis libero in urna ultrices accumsan. Donec sed odio eros. Donec viverra mi quis quam pulvinar at malesuada arcu rhoncus. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. In rutrum accumsan ultricies. Mauris vitae nisi at sem facilisis semper ac in est.
 
-                    Vivamus fermentum semper porta. Nunc diam velit, adipiscing ut tristique vitae, sagittis vel odio. Maecenas convallis ullamcorper ultricies. Curabitur ornare, ligula semper consectetur sagittis, nisi diam iaculis velit, id fringilla sem nunc vel mi. Nam dictum, odio nec pretium volutpat, arcu ante placerat erat, non tristique elit urna et turpis. Quisque mi metus, ornare sit amet fermentum et, tincidunt et orci. Fusce eget orci a orci congue vestibulum. Ut dolor diam, elementum et vestibulum eu, porttitor vel elit. Curabitur venenatis pulvinar tellus gravida ornare.
-                    """,
-                    availableSize: CGSize(width: 300, height: 400),
-                    currentPage: $currentPage
-                )
-                .frame(width: 300, height: 400)
-                .border(Color.gray.opacity(0.5), width: 1)
-                .environment(\.sizeCategory, selectedSize)
+                        Vivamus fermentum semper porta. Nunc diam velit, adipiscing ut tristique vitae, sagittis vel odio. Maecenas convallis ullamcorper ultricies. Curabitur ornare, ligula semper consectetur sagittis, nisi diam iaculis velit, id fringilla sem nunc vel mi. Nam dictum, odio nec pretium volutpat, arcu ante placerat erat, non tristique elit urna et turpis. Quisque mi metus, ornare sit amet fermentum et, tincidunt et orci. Fusce eget orci a orci congue vestibulum. Ut dolor diam, elementum et vestibulum eu, porttitor vel elit. Curabitur venenatis pulvinar tellus gravida ornare.
+                        """,
+                        availableSize: CGSize(width: 300, height: 400),
+                        currentPage: $currentPage
+                    )
+                    .frame(width: 300, height: 400)
+                    .border(Color.gray.opacity(0.5), width: 1)
+                    .environment(\.sizeCategory, selectedSize)
+                }
             }
         }
     }
