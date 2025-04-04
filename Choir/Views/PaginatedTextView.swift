@@ -15,9 +15,13 @@ class TextSelectionManager: ObservableObject {
     // Flag to prevent interaction during redraws
     @Published var isInteractionDisabled = false
     
+    // Flag to prevent background UI updates while sheet is open
+    @Published var preventBackgroundUpdates = false
+    
     func showSheet(withText text: String) {
         self.selectedText = text
         self.showingSheet = true
+        self.preventBackgroundUpdates = true
     }
     
     // Set active text for context menu
@@ -32,8 +36,17 @@ class TextSelectionManager: ObservableObject {
         self.isShowingMenu = false
     }
     
+    // Called when sheet is dismissed
+    func sheetDismissed() {
+        self.showingSheet = false
+        self.preventBackgroundUpdates = false
+    }
+    
     // Temporarily disable interactions when content is being redrawn
     func temporarilyDisableInteractions() {
+        // Skip if sheet is open
+        if preventBackgroundUpdates { return }
+        
         isInteractionDisabled = true
         
         // Re-enable after a short delay
@@ -211,6 +224,11 @@ struct PaginatedTextView: View {
     // This is a completely new approach that creates a temporary view 
     // to measure text and find the optimal page breaks
     private func splitTextIntoPages(size: CGSize) {
+        // Skip if text selection sheet is open
+        if textSelectionManager.preventBackgroundUpdates {
+            return
+        }
+        
         // Signal that content is being redrawn
         textSelectionManager.temporarilyDisableInteractions()
         
@@ -248,8 +266,8 @@ struct PaginatedTextView: View {
             }
         }
         
-        // Update state 
-        if self.pages != resultPages {
+        // Update state - only if not prevented and the sheet isn't open
+        if !textSelectionManager.preventBackgroundUpdates && self.pages != resultPages {
             self.pages = resultPages
             self.totalPages = resultPages.count
             
@@ -354,59 +372,95 @@ class TextMeasurer {
 struct TextSelectionView: View {
     let text: String
     @Environment(\.dismiss) private var dismiss
-    @State private var editableText: String
+    @StateObject private var textSelectionManager = TextSelectionManager.shared
     // Create a persistence ID to maintain state
     private let id = UUID()
     
-    init(text: String) {
-        self.text = text
-        // Initialize the state property
-        _editableText = State(initialValue: text)
-    }
-    
     var body: some View {
         NavigationView {
-            ScrollView {
-                // Use read-only text view that allows selection but no editing
-                Text(editableText)
-                    .textSelection(.enabled)
-                    .font(.body)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding()
+            GeometryReader { geometry in
+                // Use full container size with the UITextView wrapper
+                TextViewWrapper(text: text)
+                    .frame(width: geometry.size.width, height: geometry.size.height)
             }
             .background(Color(UIColor.systemBackground))
             .navigationTitle("Select Text")
             .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    ToolbarItem(placement: .navigationBarLeading) {
-                        Button("Done") {
-                            dismiss()
-                        }
-                    }
-                    
-                    ToolbarItem(placement: .navigationBarTrailing) {
-                        Menu {
-                            Button("Copy Selected Text") {
-                                // Copy the current selection from TextEditor
-                                // First, user must manually copy the text using the standard iOS selection
-                                // Then this will close the sheet
-                                dismiss()
-                            }
-                            
-                            Button("Copy All") {
-                                UIPasteboard.general.string = text
-                                dismiss()
-                            }
-                        } label: {
-                            Text("Copy")
-                            Image(systemName: "doc.on.doc")
-                        }
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Done") {
+                        textSelectionManager.sheetDismissed()
+                        dismiss()
                     }
                 }
-                .id(id) // Add id to ensure view is preserved
+                
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Copy All") {
+                        UIPasteboard.general.string = text
+                        textSelectionManager.sheetDismissed()
+                        dismiss()
+                    }
+                }
+            }
+            .id(id) // Add id to ensure view is preserved
         }
         .presentationDetents([.large])
         .interactiveDismissDisabled(true) // Prevent accidental dismissal
+        .onDisappear {
+            // Ensure the flag is reset when sheet is dismissed without using buttons
+            textSelectionManager.sheetDismissed()
+        }
+    }
+}
+
+// UITextView wrapper for better text selection support
+struct TextViewWrapper: UIViewRepresentable {
+    let text: String
+    
+    func makeUIView(context: Context) -> UITextView {
+        let textView = UITextView()
+        
+        // Configure the text view properties
+        textView.isEditable = false
+        textView.isSelectable = true
+        textView.isScrollEnabled = true
+        textView.showsVerticalScrollIndicator = true
+        textView.font = UIFont.preferredFont(forTextStyle: .body)
+        textView.backgroundColor = .clear
+        textView.textContainerInset = UIEdgeInsets(top: 8, left: 8, bottom: 8, right: 8)
+        textView.dataDetectorTypes = .link
+        textView.delegate = context.coordinator
+        
+        // Set the text
+        textView.text = text
+        textView.layoutIfNeeded()
+        
+        return textView
+    }
+    
+    func updateUIView(_ uiView: UITextView, context: Context) {
+        // Update the text if needed
+        if uiView.text != text {
+            uiView.text = text
+            uiView.layoutIfNeeded()
+        }
+    }
+    
+    // Create a coordinator to handle the delegate methods
+    func makeCoordinator() -> Coordinator {
+        Coordinator(self)
+    }
+    
+    class Coordinator: NSObject, UITextViewDelegate {
+        var parent: TextViewWrapper
+        
+        init(_ parent: TextViewWrapper) {
+            self.parent = parent
+        }
+        
+        func textViewDidChange(_ textView: UITextView) {
+            // Handle any changes if needed in the future
+        }
     }
 }
 
@@ -426,7 +480,10 @@ struct TextSelectionSheetProvider<Content: View>: View {
             // This is a dummy view that always exists to host the sheet
             Color.clear
                 .frame(width: 0, height: 0)
-                .sheet(isPresented: $textSelectionManager.showingSheet) {
+                .sheet(isPresented: $textSelectionManager.showingSheet, onDismiss: {
+                    // Make sure flag is reset when sheet is dismissed
+                    textSelectionManager.sheetDismissed()
+                }) {
                     TextSelectionView(text: textSelectionManager.selectedText)
                 }
         }
