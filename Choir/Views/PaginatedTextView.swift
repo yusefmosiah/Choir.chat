@@ -12,7 +12,35 @@ struct PaginatedTextView: View {
     // Internal state
     @State private var pages: [String] = [""]
     @State private var totalPages: Int = 1
-    @State private var estimatedCharsPerPage: Int = 500
+    @Environment(\.sizeCategory) private var sizeCategory
+    
+    // Dynamic character count based on accessibility text size
+    private var estimatedCharsPerPage: Int {
+        let baseCount = 500
+        
+        switch sizeCategory {
+        case .accessibilityExtraExtraExtraLarge:
+            return baseCount / 4 // 125
+        case .accessibilityExtraExtraLarge:
+            return baseCount / 3 // ~167
+        case .accessibilityExtraLarge:
+            return baseCount / 2 // 250
+        case .accessibilityLarge, .accessibilityMedium:
+            return (baseCount * 2) / 3 // ~333
+        case .extraLarge:
+            return (baseCount * 3) / 4 // 375
+        case .large:
+            return baseCount - 50 // 450
+        case .medium:
+            return baseCount // 500
+        case .small:
+            return baseCount + 100 // 600
+        case .extraSmall:
+            return baseCount + 200 // 700
+        default:
+            return baseCount
+        }
+    }
 
     var body: some View {
         VStack {
@@ -82,6 +110,9 @@ struct PaginatedTextView: View {
         .onChange(of: availableSize) { _, _ in
             recalculatePages()
         }
+        .onChange(of: sizeCategory) { _, _ in
+            recalculatePages()
+        }
     }
 
     // Recalculate pages based on content and estimated characters per page
@@ -112,26 +143,42 @@ struct PaginatedTextView: View {
             currentPage = max(0, totalPages - 1)
         }
 
-        print("PaginatedTextView: Recalculated \(totalPages) pages (estimated)")
+        print("PaginatedTextView: Recalculated \(totalPages) pages with \(estimatedCharsPerPage) chars per page for \(sizeCategory) size")
     }
 }
 
 #Preview {
     struct PreviewWrapper: View {
         @State private var currentPage = 0
+        @State private var selectedSize: ContentSizeCategory = .medium
 
         var body: some View {
-            PaginatedTextView(
-                text: """
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec a diam lectus. Sed sit amet ipsum mauris. Maecenas congue ligula ac quam viverra nec consectetur ante hendrerit. Donec et mollis dolor. Praesent et diam eget libero egestas mattis sit amet vitae augue. Nam tincidunt congue enim, ut porta lorem lacinia consectetur. Donec ut libero sed arcu vehicula ultricies a non tortor. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean ut gravida lorem. Ut turpis felis, pulvinar a semper sed, adipiscing id dolor. Pellentesque auctor nisi id magna consequat sagittis. Curabitur dapibus enim sit amet elit pharetra tincidunt feugiat nisl imperdiet. Ut convallis libero in urna ultrices accumsan. Donec sed odio eros. Donec viverra mi quis quam pulvinar at malesuada arcu rhoncus. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. In rutrum accumsan ultricies. Mauris vitae nisi at sem facilisis semper ac in est.
+            VStack {
+                Picker("Text Size", selection: $selectedSize) {
+                    Text("XS").tag(ContentSizeCategory.extraSmall)
+                    Text("S").tag(ContentSizeCategory.small)
+                    Text("M").tag(ContentSizeCategory.medium)
+                    Text("L").tag(ContentSizeCategory.large)
+                    Text("XL").tag(ContentSizeCategory.extraLarge)
+                    Text("XXL").tag(ContentSizeCategory.accessibilityMedium)
+                    Text("XXXL").tag(ContentSizeCategory.accessibilityLarge)
+                }
+                .pickerStyle(SegmentedPickerStyle())
+                .padding()
+                
+                PaginatedTextView(
+                    text: """
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec a diam lectus. Sed sit amet ipsum mauris. Maecenas congue ligula ac quam viverra nec consectetur ante hendrerit. Donec et mollis dolor. Praesent et diam eget libero egestas mattis sit amet vitae augue. Nam tincidunt congue enim, ut porta lorem lacinia consectetur. Donec ut libero sed arcu vehicula ultricies a non tortor. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean ut gravida lorem. Ut turpis felis, pulvinar a semper sed, adipiscing id dolor. Pellentesque auctor nisi id magna consequat sagittis. Curabitur dapibus enim sit amet elit pharetra tincidunt feugiat nisl imperdiet. Ut convallis libero in urna ultrices accumsan. Donec sed odio eros. Donec viverra mi quis quam pulvinar at malesuada arcu rhoncus. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. In rutrum accumsan ultricies. Mauris vitae nisi at sem facilisis semper ac in est.
 
-                Vivamus fermentum semper porta. Nunc diam velit, adipiscing ut tristique vitae, sagittis vel odio. Maecenas convallis ullamcorper ultricies. Curabitur ornare, ligula semper consectetur sagittis, nisi diam iaculis velit, id fringilla sem nunc vel mi. Nam dictum, odio nec pretium volutpat, arcu ante placerat erat, non tristique elit urna et turpis. Quisque mi metus, ornare sit amet fermentum et, tincidunt et orci. Fusce eget orci a orci congue vestibulum. Ut dolor diam, elementum et vestibulum eu, porttitor vel elit. Curabitur venenatis pulvinar tellus gravida ornare.
-                """,
-                availableSize: CGSize(width: 300, height: 400),
-                currentPage: $currentPage
-            )
-            .frame(width: 300, height: 400)
-            .border(Color.gray.opacity(0.5), width: 1)
+                    Vivamus fermentum semper porta. Nunc diam velit, adipiscing ut tristique vitae, sagittis vel odio. Maecenas convallis ullamcorper ultricies. Curabitur ornare, ligula semper consectetur sagittis, nisi diam iaculis velit, id fringilla sem nunc vel mi. Nam dictum, odio nec pretium volutpat, arcu ante placerat erat, non tristique elit urna et turpis. Quisque mi metus, ornare sit amet fermentum et, tincidunt et orci. Fusce eget orci a orci congue vestibulum. Ut dolor diam, elementum et vestibulum eu, porttitor vel elit. Curabitur venenatis pulvinar tellus gravida ornare.
+                    """,
+                    availableSize: CGSize(width: 300, height: 400),
+                    currentPage: $currentPage
+                )
+                .frame(width: 300, height: 400)
+                .border(Color.gray.opacity(0.5), width: 1)
+                .environment(\.sizeCategory, selectedSize)
+            }
         }
     }
 
