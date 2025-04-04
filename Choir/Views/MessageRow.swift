@@ -11,6 +11,7 @@ struct MessageRow: View {
         self.isProcessing = isProcessing
         self.viewModel = viewModel
     }
+@StateObject private var textSelectionManager = TextSelectionManager.shared
 
     var body: some View {
         VStack(alignment: message.isUser ? .trailing : .leading, spacing: 8) {
@@ -43,6 +44,14 @@ struct MessageRow: View {
                 .background(Color.accentColor)
                 .foregroundColor(.white)
                 .cornerRadius(16) // Use standard cornerRadius
+.contextMenu {
+    Button("Copy Text") {
+        UIPasteboard.general.string = message.content
+    }
+    Button("Select Text...") {
+        textSelectionManager.showSheet(withText: message.content)
+    }
+}
                 .padding(.leading, 40)
             }
             // AI messages - directly show the chorus cycle

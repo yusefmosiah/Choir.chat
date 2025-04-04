@@ -62,10 +62,22 @@ struct PhaseCard: View {
     }
 
     // --- Body ---
+@StateObject private var textSelectionManager = TextSelectionManager.shared
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             // Header
+        }
+        .contextMenu {
+            Button("Copy Text") {
+                let content = message.getPhaseContent(phase)
+                UIPasteboard.general.string = content
+            }
+            Button("Select Text...") {
+                let content = message.getPhaseContent(phase)
+                textSelectionManager.showSheet(withText: content)
+            }
+        }
             HStack {
                 Image(systemName: phase.symbol)
                     .imageScale(.medium)
@@ -204,6 +216,16 @@ struct PhaseCard: View {
                 .stroke(overlayStrokeColor, lineWidth: overlayLineWidth)
         )
         .padding(.horizontal, 4)
+.contextMenu {
+    Button("Copy Text") {
+        let content = message.getPhaseContent(phase)
+        UIPasteboard.general.string = content
+    }
+    Button("Select Text...") {
+        let content = message.getPhaseContent(phase)
+        textSelectionManager.showSheet(withText: content)
+    }
+}
     }
 }
 
