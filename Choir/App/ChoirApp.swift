@@ -9,10 +9,13 @@ import SwiftUI
 
 @main
 struct ChoirApp: App {
+    @StateObject var walletManager = WalletManager()
+
     var body: some Scene {
         WindowGroup {
             TextSelectionSheetProvider {
                 ContentView()
+                    .environmentObject(walletManager)
             }
         }
     }
