@@ -23,8 +23,8 @@ protocol SSEDelegate: AnyObject {
 import Foundation
 import SwiftUI
 
-// MARK: - Phase Enum
-enum Phase: String, CaseIterable, Identifiable {
+ // MARK: - Phase Enum
+enum Phase: String, CaseIterable, Identifiable, Codable {
     case action
     case experience
     case intention

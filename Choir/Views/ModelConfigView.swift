@@ -8,8 +8,8 @@ struct ModelConfigView: View {
     // List of available providers and models
     private let providers = ["google", "openrouter", "anthropic", "groq", "openai"]
 
-    // Available models by provider
-    private let modelsByProvider: [String: [String]] = [
+    // Available models by provider - now a @State variable to include custom models
+    @State private var dynamicModelsByProvider: [String: [String]] = [
         "google": ["gemini-2.0-flash-lite", "gemini-2.0-flash", "gemini-2.5-pro-exp-03-25"],
         "openrouter": ["ai21/jamba-1.6-mini", "openrouter/quasar-alpha", "mistralai/mixtral-8x7b"],
         "anthropic": ["claude-3-haiku-20240307", "claude-3-sonnet-20240229", "claude-3-opus-20240229"],
@@ -22,6 +22,10 @@ struct ModelConfigView: View {
     @State private var selectedModels: [Phase: String] = [:]
     @State private var selectedTemperatures: [Phase: Double] = [:]
     @State private var apiKeys: [String: String] = [:] // Store API keys by provider name
+
+    // State for adding new custom model
+    @State private var newModelProvider: String = "google" // Default provider selection
+    @State private var newModelName: String = ""
 
     // Reset flag
     @State private var showResetAlert = false
@@ -46,10 +50,10 @@ struct ModelConfigView: View {
                         }
                         .pickerStyle(.menu)
 
-                        // Model Picker (dependent on selected provider)
+                        // Model Picker (dependent on selected provider, uses dynamic list)
                         Picker("Model", selection: modelBinding(for: phase)) {
                             if let provider = selectedProviders[phase],
-                               let models = modelsByProvider[provider] {
+                               let models = dynamicModelsByProvider[provider] { // Use dynamic list
                                 ForEach(models, id: \.self) { model in
                                     Text(model).tag(model)
                                 }
@@ -69,6 +73,22 @@ struct ModelConfigView: View {
                             Slider(value: temperatureBinding(for: phase), in: 0...1, step: 0.01)
                         }
                     }
+                }
+
+                // Section for Adding Custom Models
+                Section("Add Custom Model") {
+                    Picker("Provider", selection: $newModelProvider) {
+                        ForEach(providers, id: \.self) { provider in
+                            Text(provider.capitalized).tag(provider)
+                        }
+                    }
+                    TextField("Custom Model Name", text: $newModelName)
+                        .autocapitalization(.none)
+                        .disableAutocorrection(true)
+                    Button("Save Custom Model") {
+                        saveCustomModel()
+                    }
+                    .disabled(newModelName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 }
 
                 // Section for API Keys
@@ -113,21 +133,44 @@ struct ModelConfigView: View {
                 }
             }
             .onAppear {
-                // Initialize state with current thread configuration
+                // Load custom models first
+                loadCustomModels()
+
+                // Load saved API keys from UserDefaults first
+                for provider in providers {
+                    if let savedKey = UserDefaults.standard.string(forKey: "apiKey_\(provider)") {
+                        apiKeys[provider] = savedKey
+                    }
+                }
+
+                // Load globally saved active configuration
+                let globalConfigKey = "globalActiveModelConfig"
+                if let savedConfigData = UserDefaults.standard.data(forKey: globalConfigKey),
+                   let savedConfigs = try? JSONDecoder().decode([Phase: ModelConfig].self, from: savedConfigData) {
+                    print("Loaded global active configuration")
+                    // Apply the loaded global config to the current thread object
+                    // This might overwrite thread-specific settings if they existed before,
+                    // but aligns with the request to have one config for the whole user.
+                    thread.modelConfigs = savedConfigs
+                } else {
+                    print("No global active configuration found, using thread defaults.")
+                }
+
+                // Initialize view state from the (potentially loaded or default) thread configuration
                 for phase in Phase.allCases {
                     if let config = thread.modelConfigs[phase] {
                         selectedProviders[phase] = config.provider
                         selectedModels[phase] = config.model
                         selectedTemperatures[phase] = config.temperature ?? 0.33
-                        // Load existing API keys from the thread's config (if they exist)
-                        apiKeys["google"] = config.googleApiKey ?? ""
-                        apiKeys["openai"] = config.openaiApiKey ?? ""
-                        apiKeys["anthropic"] = config.anthropicApiKey ?? ""
-                        apiKeys["mistral"] = config.mistralApiKey ?? ""
-                        apiKeys["fireworks"] = config.fireworksApiKey ?? ""
-                        apiKeys["cohere"] = config.cohereApiKey ?? ""
-                        apiKeys["openrouter"] = config.openrouterApiKey ?? ""
-                        apiKeys["groq"] = config.groqApiKey ?? ""
+                        // Only load API keys from config if not already loaded from UserDefaults
+                        if apiKeys["google"] == nil || apiKeys["google"]!.isEmpty { apiKeys["google"] = config.googleApiKey ?? "" }
+                        if apiKeys["openai"] == nil || apiKeys["openai"]!.isEmpty { apiKeys["openai"] = config.openaiApiKey ?? "" }
+                        if apiKeys["anthropic"] == nil || apiKeys["anthropic"]!.isEmpty { apiKeys["anthropic"] = config.anthropicApiKey ?? "" }
+                        if apiKeys["mistral"] == nil || apiKeys["mistral"]!.isEmpty { apiKeys["mistral"] = config.mistralApiKey ?? "" }
+                        if apiKeys["fireworks"] == nil || apiKeys["fireworks"]!.isEmpty { apiKeys["fireworks"] = config.fireworksApiKey ?? "" }
+                        if apiKeys["cohere"] == nil || apiKeys["cohere"]!.isEmpty { apiKeys["cohere"] = config.cohereApiKey ?? "" }
+                        if apiKeys["openrouter"] == nil || apiKeys["openrouter"]!.isEmpty { apiKeys["openrouter"] = config.openrouterApiKey ?? "" }
+                        if apiKeys["groq"] == nil || apiKeys["groq"]!.isEmpty { apiKeys["groq"] = config.groqApiKey ?? "" }
                     }
                 }
             }
@@ -139,6 +182,16 @@ struct ModelConfigView: View {
             } message: {
                 Text("This will reset all model configurations to their default values.")
             }
+            // Autosave on any change to provider, model, or temperature selections
+            .onChange(of: selectedProviders) { _, _ in
+                saveChanges()
+            }
+            .onChange(of: selectedModels) { _, _ in
+                saveChanges()
+            }
+            .onChange(of: selectedTemperatures) { _, _ in
+                saveChanges()
+            }
         }
     }
 
@@ -149,8 +202,8 @@ struct ModelConfigView: View {
             set: { newValue in
                 selectedProviders[phase] = newValue
 
-                // When provider changes, set default model for that provider
-                if let models = modelsByProvider[newValue], !models.isEmpty {
+                // When provider changes, set default model for that provider using dynamic list
+                if let models = dynamicModelsByProvider[newValue], !models.isEmpty {
                     selectedModels[phase] = models[0]
                 }
             }
@@ -185,6 +238,59 @@ struct ModelConfigView: View {
         )
     }
 
+    // Load custom models from UserDefaults and merge with defaults
+    private func loadCustomModels() {
+        // Start with the default models
+        var updatedModels = [
+            "google": ["gemini-2.0-flash-lite", "gemini-2.0-flash", "gemini-2.5-pro-exp-03-25"],
+            "openrouter": ["ai21/jamba-1.6-mini", "openrouter/quasar-alpha", "mistralai/mixtral-8x7b"],
+            "anthropic": ["claude-3-haiku-20240307", "claude-3-sonnet-20240229", "claude-3-opus-20240229"],
+            "groq": ["qwen-qwq-32b", "llama3-70b-8192", "mixtral-8x7b-32768"],
+            "openai": ["gpt-4o-mini", "gpt-4o", "o3-mini"]
+        ]
+
+        for provider in providers {
+            let key = "customModels_\(provider)"
+            if let customModels = UserDefaults.standard.stringArray(forKey: key) {
+                // Ensure provider exists in the dictionary
+                if updatedModels[provider] == nil {
+                    updatedModels[provider] = []
+                }
+                // Add custom models, avoiding duplicates
+                for model in customModels {
+                    if !(updatedModels[provider]?.contains(model) ?? false) {
+                        updatedModels[provider]?.append(model)
+                    }
+                }
+            }
+        }
+        // Update the state variable
+        dynamicModelsByProvider = updatedModels
+    }
+
+    // Save custom model name to UserDefaults
+    private func saveCustomModel() {
+        let trimmedModelName = newModelName.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedModelName.isEmpty else { return }
+
+        let key = "customModels_\(newModelProvider)"
+        var currentCustomModels = UserDefaults.standard.stringArray(forKey: key) ?? []
+
+        if !currentCustomModels.contains(trimmedModelName) {
+            currentCustomModels.append(trimmedModelName)
+            UserDefaults.standard.set(currentCustomModels, forKey: key)
+            print("Saved custom model '\(trimmedModelName)' for provider \(newModelProvider)")
+
+            // Update the state to reflect the new model immediately
+            loadCustomModels()
+
+            // Clear the input field
+            newModelName = ""
+        } else {
+            print("Custom model '\(trimmedModelName)' already exists for provider \(newModelProvider)")
+        }
+    }
+
     // Save changes to thread
     private func saveChanges() {
         for phase in Phase.allCases {
@@ -209,6 +315,28 @@ struct ModelConfigView: View {
 
                 // Update the thread's model config for this phase
                 thread.modelConfigs[phase] = newConfig
+                // Update the thread's model config for this phase
+                thread.modelConfigs[phase] = newConfig
+            }
+        }
+
+        // Save the entire active configuration globally to UserDefaults
+        let globalConfigKey = "globalActiveModelConfig"
+        if let encodedConfig = try? JSONEncoder().encode(thread.modelConfigs) {
+            UserDefaults.standard.set(encodedConfig, forKey: globalConfigKey)
+            print("Saved global active configuration")
+        } else {
+            print("Error encoding global active configuration")
+        }
+
+        // Save entered API keys to UserDefaults for testing
+        for (provider, key) in apiKeys {
+            if !key.isEmpty {
+                UserDefaults.standard.set(key, forKey: "apiKey_\(provider)")
+                print("Saved API key for \(provider) to UserDefaults")
+            } else {
+                // Remove key from UserDefaults if it's empty
+                UserDefaults.standard.removeObject(forKey: "apiKey_\(provider)")
             }
         }
     }
