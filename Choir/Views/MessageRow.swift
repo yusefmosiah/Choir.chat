@@ -1,5 +1,6 @@
 import SwiftUI
 import Foundation
+
 struct MessageRow: View {
     @ObservedObject var message: Message
     // Removed thread reference
@@ -44,6 +45,19 @@ struct MessageRow: View {
                 .foregroundColor(.white)
                 .cornerRadius(16) // Use standard cornerRadius
                 .padding(.leading, 40)
+                .onLongPressGesture {
+                    // On long press, use the shared TextSelectionManager to show the text selection options
+                    TextSelectionManager.shared.showSheet(withText: message.content)
+                }
+                .contextMenu {
+                    Button("Copy Content") {
+                        UIPasteboard.general.string = message.content
+                    }
+                    
+                    Button("Select Text...") {
+                        TextSelectionManager.shared.showSheet(withText: message.content)
+                    }
+                }
             }
             // AI messages - directly show the chorus cycle
             else {
