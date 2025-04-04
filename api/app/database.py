@@ -65,20 +65,40 @@ class DatabaseClient:
             return []
 
     async def save_message(self, data: Dict[str, Any]) -> Dict[str, str]:
-        """Save a message with its vector."""
+        """
+        Save a message with its vector and metadata to Qdrant.
+        Expected fields in data:
+            - content (str)
+            - vector (List[float])
+            - thread_id (str)
+            - role (str)
+            - timestamp (str, ISO format)
+            - phase_outputs (dict, optional)
+            - novelty_score (float, optional)
+            - similarity_scores (dict or list, optional)
+            - cited_prior_ids (list, optional)
+            - metadata (dict, optional)
+        """
         try:
             point_id = str(uuid.uuid4())
+            payload = {
+                "content": data["content"],
+                "thread_id": data.get("thread_id"),
+                "role": data.get("role"),
+                "timestamp": data.get("timestamp", datetime.now(UTC).isoformat()),
+                "phase_outputs": data.get("phase_outputs"),
+                "novelty_score": data.get("novelty_score"),
+                "similarity_scores": data.get("similarity_scores"),
+                "cited_prior_ids": data.get("cited_prior_ids"),
+                "metadata": data.get("metadata", {})
+            }
             self.client.upsert(
                 collection_name=self.config.MESSAGES_COLLECTION,
                 points=[
                     models.PointStruct(
                         id=point_id,
                         vector=data["vector"],
-                        payload={
-                            "content": data["content"],
-                            "metadata": data.get("metadata", {}),
-                            "created_at": datetime.now(UTC).isoformat()
-                        }
+                        payload=payload
                     )
                 ]
             )
@@ -86,6 +106,19 @@ class DatabaseClient:
         except Exception as e:
             logger.error(f"Error saving message: {e}")
             raise
+
+    async def get_message_history(self, thread_id: str, limit: int = 50) -> List[Dict[str, Any]]:
+        """
+        Fetch message history for a thread, sorted by timestamp ascending.
+        """
+        try:
+            points = await self.get_thread_messages(thread_id=thread_id, limit=limit)
+            # Sort by timestamp ascending
+            sorted_points = sorted(points, key=lambda p: p.get("timestamp", ""))
+            return sorted_points
+        except Exception as e:
+            logger.error(f"Error fetching message history: {e}")
+            return []
 
     async def search_vectors(self, query_vector: List[float], limit: int = 10) -> List[Dict[str, Any]]:
         """REST endpoint specific vector search."""

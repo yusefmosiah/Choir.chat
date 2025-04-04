@@ -18,68 +18,6 @@ from app.postchain.schemas.state import PostChainState
 # Configure logging
 logger = logging.getLogger("postchain_utils")
 
-STATE_STORAGE_DIR = "thread_state" # Define directory for thread state storage
-
-def save_state(state: PostChainState) -> bool:
-    """Save PostChainState to a JSON file."""
-    thread_id = state.thread_id
-    if not thread_id:
-        logger.warning("Attempted to save state with no thread_id")
-        return False
-
-    # Ensure storage directory exists
-    if not os.path.exists(STATE_STORAGE_DIR):
-        os.makedirs(STATE_STORAGE_DIR, exist_ok=True)
-
-    filepath = os.path.join(STATE_STORAGE_DIR, f"{thread_id}.json")
-    try:
-        with open(filepath, 'w') as f:
-            json.dump(state.dict(), f, indent=2)
-        logger.debug(f"Saved state for thread {thread_id} to disk")
-        return True
-    except Exception as e:
-        logger.error(f"Error saving state to disk for thread {thread_id}: {e}", exc_info=True)
-        return False
-
-def recover_state(thread_id: str) -> Optional[PostChainState]:
-    """Recover PostChainState from a JSON file."""
-    thread_id = validate_thread_id(thread_id)
-    filepath = os.path.join(STATE_STORAGE_DIR, f"{thread_id}.json")
-
-    if not os.path.exists(filepath):
-        logger.debug(f"No state file found on disk for thread {thread_id}")
-        return None
-
-    try:
-        with open(filepath, 'r') as f:
-            state_dict = json.load(f)
-            loaded_state = PostChainState.parse_obj(state_dict) # Load state directly from dict
-            logger.info(f"Recovered state from disk for thread {thread_id} with {len(loaded_state.messages)} messages")
-            return loaded_state
-    except FileNotFoundError:
-        logger.debug(f"No state file found on disk for thread {thread_id}")
-        return None
-    except json.JSONDecodeError:
-        logger.error(f"JSONDecodeError while loading state for thread {thread_id}, state file possibly corrupted. Returning None.", exc_info=True)
-    except Exception as e:
-        logger.error(f"Error loading state from disk for thread {thread_id}: {e}", exc_info=True)
-    return None
-
-def delete_state(thread_id: str) -> bool: # Add delete_state function
-    """Delete state file for a thread."""
-    thread_id = validate_thread_id(thread_id)
-    filepath = os.path.join(STATE_STORAGE_DIR, f"{thread_id}.json")
-    try:
-        if os.path.exists(filepath):
-            os.remove(filepath)
-            logger.info(f"Deleted state file for thread {thread_id} from disk")
-            return True
-        logger.info(f"No state file found to delete for thread {thread_id}")
-        return False
-    except Exception as e:
-        logger.error(f"Error deleting state file for thread {thread_id}: {e}", exc_info=True)
-        return False
-
 
 def validate_thread_id(thread_id: str) -> str:
     """Validate and return a thread_id string.
