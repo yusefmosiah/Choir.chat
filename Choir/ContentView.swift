@@ -76,14 +76,20 @@ struct ContentView: View {
             WalletView()
         }
         .onAppear {
-            guard let wallet = walletManager.wallet else {
-                print("Wallet not loaded yet")
-                return
-            }
-            let userId = (try? wallet.accounts[0].publicKey.toSuiAddress()) ?? ""
-
             Task {
                 do {
+                    if walletManager.wallet == nil {
+                        try await walletManager.createOrLoadWallet()
+                        print("Wallet loaded successfully")
+                    }
+
+                    guard let wallet = walletManager.wallet else {
+                        print("Failed to load wallet")
+                        return
+                    }
+
+                    let userId = (try? wallet.accounts[0].publicKey.toSuiAddress()) ?? ""
+
                     let threadResponses = try await ChoirAPIClient.shared.fetchUserThreads(userId: userId)
                     let loadedThreads = threadResponses.map { response in
                         let thread = ChoirThread(
@@ -97,7 +103,7 @@ struct ContentView: View {
                         selectedChoirThread = first
                     }
                 } catch {
-                    print("Error fetching threads: \\(error)")
+                    print("Error loading wallet or fetching threads: \\(error)")
                 }
             }
         }
