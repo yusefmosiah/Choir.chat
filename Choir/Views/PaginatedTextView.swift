@@ -379,11 +379,17 @@ struct TextSelectionView: View {
     var body: some View {
         NavigationView {
             GeometryReader { geometry in
-                // Use full container size with the UITextView wrapper
-                TextViewWrapper(text: text)
-                    .frame(width: geometry.size.width, height: geometry.size.height)
+                ZStack {
+                    // Semi-transparent background
+                    Color(UIColor.systemBackground)
+                        .opacity(0.85)
+                        .edgesIgnoringSafeArea(.all)
+                    
+                    // Use full container size with the UITextView wrapper
+                    TextViewWrapper(text: text)
+                        .frame(width: geometry.size.width, height: geometry.size.height)
+                }
             }
-            .background(Color(UIColor.systemBackground))
             .navigationTitle("Select Text")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -395,8 +401,10 @@ struct TextSelectionView: View {
                 }
                 
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Copy All") {
-                        UIPasteboard.general.string = text
+                    Button("Copy") {
+                        // This is just a copy button - users should select text first
+                        // if they have a selection, iOS will copy it, otherwise copy all
+                        UIPasteboard.general.string = UIPasteboard.general.string ?? text
                         textSelectionManager.sheetDismissed()
                         dismiss()
                     }
@@ -426,10 +434,15 @@ struct TextViewWrapper: UIViewRepresentable {
         textView.isScrollEnabled = true
         textView.showsVerticalScrollIndicator = true
         textView.font = UIFont.preferredFont(forTextStyle: .body)
+        
+        // Make it transparent to let the background show through
         textView.backgroundColor = .clear
-        textView.textContainerInset = UIEdgeInsets(top: 8, left: 8, bottom: 8, right: 8)
+        textView.textContainerInset = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
         textView.dataDetectorTypes = .link
         textView.delegate = context.coordinator
+        
+        // Configure for transparency and blur
+        textView.isOpaque = false
         
         // Set the text
         textView.text = text
@@ -485,6 +498,7 @@ struct TextSelectionSheetProvider<Content: View>: View {
                     textSelectionManager.sheetDismissed()
                 }) {
                     TextSelectionView(text: textSelectionManager.selectedText)
+                        .background(.ultraThinMaterial) // Add blur material to the sheet
                 }
         }
     }
