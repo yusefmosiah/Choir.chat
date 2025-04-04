@@ -16,7 +16,7 @@ struct ChoirAPIClient {
         }
 
         let apiResponse = try JSONDecoder().decode(APIResponse<[ThreadResponse]>.self, from: data)
-        return apiResponse.data?["threads"] ?? []
+        return apiResponse.data?["threads"].map(Array.init) ?? []
     }
 }
 
