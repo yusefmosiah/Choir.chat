@@ -143,18 +143,9 @@ struct ModelConfigView: View {
                     }
                 }
 
-                // Load globally saved active configuration
-                let globalConfigKey = "globalActiveModelConfig"
-                if let savedConfigData = UserDefaults.standard.data(forKey: globalConfigKey),
-                   let savedConfigs = try? JSONDecoder().decode([Phase: ModelConfig].self, from: savedConfigData) {
-                    print("Loaded global active configuration")
-                    // Apply the loaded global config to the current thread object
-                    // This might overwrite thread-specific settings if they existed before,
-                    // but aligns with the request to have one config for the whole user.
-                    thread.modelConfigs = savedConfigs
-                } else {
-                    print("No global active configuration found, using thread defaults.")
-                }
+                // The thread should already have the correct configuration loaded
+                // since we now load it in the ChoirThread initializer
+                print("Using thread's existing model configuration")
 
                 // Initialize view state from the (potentially loaded or default) thread configuration
                 for phase in Phase.allCases {

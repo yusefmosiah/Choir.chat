@@ -175,10 +175,18 @@ class ChoirThread: ObservableObject, Identifiable, Hashable {
         self.id = id
         self.title = title ?? "ChoirThread \(DateFormatter.localizedString(from: Date(), dateStyle: .short, timeStyle: .short))"
 
-        // Use provided model configs or keep defaults
-        if let configs = modelConfigs {
+        // First check if there's a saved global configuration in UserDefaults
+        let globalConfigKey = "globalActiveModelConfig"
+        if let savedConfigData = UserDefaults.standard.data(forKey: globalConfigKey),
+           let savedConfigs = try? JSONDecoder().decode([Phase: ModelConfig].self, from: savedConfigData) {
+            self.modelConfigs = savedConfigs
+            print("Loaded global model configuration during thread initialization")
+        }
+        // If configs were directly provided, use those (overrides UserDefaults)
+        else if let configs = modelConfigs {
             self.modelConfigs = configs
         }
+        // Otherwise use defaults (already set)
     }
 
     // Hashable conformance
