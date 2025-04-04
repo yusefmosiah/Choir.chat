@@ -80,7 +80,7 @@ struct ContentView: View {
                 print("Wallet not loaded yet")
                 return
             }
-            let userId = wallet.accounts[0].publicKey
+            let userId = (try? wallet.accounts[0].publicKey.toSuiAddress()) ?? ""
 
             Task {
                 do {
