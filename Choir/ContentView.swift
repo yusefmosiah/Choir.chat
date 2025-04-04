@@ -7,6 +7,7 @@
 import SwiftUI
 
 struct ContentView: View {
+    @EnvironmentObject var walletManager: WalletManager
     @StateObject private var viewModel: PostchainViewModel
     @State private var threads: [ChoirThread] = []
     @State private var selectedChoirThread: ChoirThread?
@@ -75,9 +76,28 @@ struct ContentView: View {
             WalletView()
         }
         .onAppear {
-            // Create a default thread if none exists
-            if threads.isEmpty {
-                createNewChoirThread()
+            guard let wallet = walletManager.wallet else {
+                print("Wallet not loaded yet")
+                return
+            }
+            let userId = wallet.accounts[0].publicKey
+
+            Task {
+                do {
+                    let threadResponses = try await ChoirAPIClient.shared.fetchUserThreads(userId: userId)
+                    let loadedThreads = threadResponses.map { response in
+                        let thread = ChoirThread()
+                        thread.id = UUID(uuidString: response.id) ?? UUID()
+                        thread.title = response.name
+                        return thread
+                    }
+                    threads = loadedThreads
+                    if selectedChoirThread == nil, let first = loadedThreads.first {
+                        selectedChoirThread = first
+                    }
+                } catch {
+                    print("Error fetching threads: \\(error)")
+                }
             }
         }
     }
