@@ -26,19 +26,19 @@ class VerifyRequest(BaseModel):
 class VerifyResponse(BaseModel):
     user_id: str
 
-@router.post("/auth/request_challenge", response_model=ChallengeResponse)
+@router.post("/request_challenge", response_model=ChallengeResponse)
 async def request_challenge(req: ChallengeRequest):
     challenge = secrets.token_hex(16)
     challenge_store[req.address] = (challenge, time.time())
     return ChallengeResponse(challenge=challenge)
 
-@router.post("/auth/verify", response_model=VerifyResponse)
+@router.post("/verify", response_model=VerifyResponse)
 async def verify_signature(req: VerifyRequest):
     import base64
     import uuid, hashlib
     from app.database import DatabaseClient
     from app.config import Config
-    from pysui.sui.sui_crypto import verify_signature
+    # from pysui.sui.sui_crypto import verify_signature
 
     # Check challenge exists and is fresh
     entry = challenge_store.get(req.address)
