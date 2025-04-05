@@ -180,7 +180,7 @@ Each point in the `choir` collection representing a message turn should include 
 - [x] Thread persistence by UUID
 - [x] User fetch by UUID works (confirmed)
 - [ ] Message persistence per thread
-- [ ] Autosave new messages
+- [x] Autosave new messages (handled server-side in workflow)
 - [ ] Tests
 
 ### iOS Client
@@ -188,8 +188,7 @@ Each point in the `choir` collection representing a message turn should include 
 - [x] Authenticate user, get UUID
 - [x] Fetch threads using UUID (confirmed working)
 - [ ] Fetch messages per thread
-- [ ] Save new threads/messages
-- [ ] Autosave new messages
+- [x] Autosave new messages (handled server-side)
 - [ ] Error handling, loading states
 *   **Unit Tests:** Mock the `DatabaseClient` in `langchain_workflow.py` tests to verify history loading/saving calls are made correctly. Test the new `database.py` functions by mocking the `QdrantClient`.
 *   **Integration Tests:** Set up a test Qdrant instance (can be local Docker). Write tests that call the `/langchain` API endpoint multiple times for the same `thread_id` and assert that the conversation context is correctly maintained by verifying the history loaded/passed in subsequent calls. Check the Qdrant database directly to confirm messages are saved correctly.

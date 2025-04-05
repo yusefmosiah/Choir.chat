@@ -55,3 +55,4 @@ extension ChoirAPIClient {
         return verifyResponse.user_id
     }
 }
+
