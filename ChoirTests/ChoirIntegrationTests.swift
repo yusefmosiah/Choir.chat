@@ -37,16 +37,6 @@ final class ChoirIntegrationTests: XCTestCase {
         // 4. Fetch threads
         let threadsURL = baseURL.appendingPathComponent("users/\(userUUID)/threads")
         let (threadsData, _) = try await URLSession.shared.data(from: threadsURL)
-        struct ThreadsAPIResponse: Decodable {
-            let success: Bool
-            let message: String?
-            let data: ThreadsData?
-        }
-
-        struct ThreadsData: Decodable {
-            let threads: [ThreadResponse]?
-        }
-
         let threadsAPIResponse = try JSONDecoder().decode(ThreadsAPIResponse.self, from: threadsData)
         XCTAssertTrue(threadsAPIResponse.success)
         XCTAssertNotNil(threadsAPIResponse.data?.threads)
