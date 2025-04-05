@@ -103,44 +103,67 @@ Each point in the `choir` collection representing a message turn should include 
 2.  **`api/app/models/api.py`:** Ensure API request/response models align with the changes (e.g., the `/recover` endpoint response).
 3.  **Internal Message Structure:** Define clearly (perhaps using Pydantic) the structure of the message dictionary saved to Qdrant, especially for AI messages containing phase outputs and scores.
 
-## 6. Implementation Checklist
+# Qdrant Persistence Migration Progress (as of 2025-04-04)
 
-**Phase 1: Database Layer (`database.py`)**
+## Phase 1: Database Layer (`database.py`)
+- [x] Implemented `get_message_history(thread_id, limit)`
+- [x] Enhanced `save_message` to handle all required fields
+- [x] Qdrant indexing assumed, **not explicitly verified**
+- [ ] Unit tests for database functions **(missing)**
 
-*   [ ] Implement `get_message_history(thread_id, limit)` function to fetch ordered messages from Qdrant.
-*   [ ] Ensure `save_message` (or new `save_message_turn`) handles all required fields (`thread_id`, `role`, `timestamp`, `content`, AI-specific fields).
-*   [ ] Verify Qdrant indexing on `thread_id` and `timestamp`.
-*   [ ] Add unit tests for new/modified database functions (mocking Qdrant client).
+## Phase 2: Workflow Integration (`langchain_workflow.py`)
+- [x] Removed `conversation_history_store`
+- [x] Loads history from Qdrant at start
+- [x] Saves user message immediately
+- [x] Saves final AI message after Yield phase
+- [x] Passes loaded history through workflow
+- [ ] Unit tests for workflow changes **(missing)**
 
-**Phase 2: Workflow Integration (`langchain_workflow.py`)**
+## Phase 3: Utilities & API (`utils.py`, `routers/postchain.py`)
+- [x] Removed file-based persistence
+- [x] Updated `/langchain` endpoint
+- [x] Removed `/recover` endpoint
+- [ ] Tests for API changes **(missing)**
 
-*   [ ] Remove `conversation_history_store` global dictionary and related logic.
-*   [ ] Add code to call `db.get_message_history` at the start of `run_langchain_postchain_workflow`.
-*   [ ] Implement conversion from Qdrant dictionary results to Langchain `BaseMessage` objects.
-*   [ ] Add code to call `db.save_message_turn` for the incoming user message.
-*   [ ] Add code to call `db.save_message_turn` for the final AI message after Yield phase.
-*   [ ] Ensure loaded `message_history` is correctly passed through the workflow.
-*   [ ] Add unit tests for workflow logic changes (mocking `database.py` functions).
+## Phase 4: Data Models & Testing
+- [x] Reviewed Pydantic models
+- [ ] Documented message schema in Qdrant **(partial)**
+- [ ] Integration testing of `/langchain` endpoint with Qdrant **(missing)**
+- [ ] Verify persistence across requests **(partial)**
+- [ ] Test edge cases (new thread, empty history, limits) **(missing)**
 
-**Phase 3: Utilities & API (`utils.py`, `routers/postchain.py`)**
-
-*   [ ] Remove `save_state`, `recover_state`, `delete_state` from `utils.py`.
-*   [ ] Remove `STATE_STORAGE_DIR` constant from `utils.py`.
-*   [ ] Update `/langchain` endpoint to remove `recover_state` call.
-*   [ ] Decide fate of `/recover` endpoint (remove or repurpose to query Qdrant).
-*   [ ] Update `/recover` implementation and response model if repurposed.
-*   [ ] Add/update tests for API endpoint changes.
-
-**Phase 4: Data Models & Testing**
-
-*   [ ] Review and update Pydantic models (`schemas/state.py`, `models/api.py`) if necessary.
-*   [ ] Define and document the structure of message points stored in Qdrant.
-*   [ ] Perform integration testing: Run the `/langchain` endpoint against a real (or test instance) Qdrant database.
-*   [ ] Verify that conversation history is correctly loaded across multiple requests to the same `thread_id`.
-*   [ ] Verify that user and AI messages are correctly persisted in Qdrant.
-*   [ ] Test edge cases (new thread, empty history, history limit).
+## iOS Client Integration
+- [x] Created `ChoirAPIClient` with `fetchUserThreads`
+- [x] Fetches threads on app launch using wallet Sui address
+- [ ] **Wallet async loading on app launch** **(missing)**
+- [ ] **Fetch threads *after* wallet loads** **(missing)**
+- [ ] **Fetch messages for each thread** **(missing)**
+- [ ] **Display fetched messages in UI** **(missing)**
+- [ ] **Save new threads/messages via API** **(missing)**
+- [ ] **Autosave new messages during chat** **(missing)**
+- [ ] **Handle empty state, errors, loading indicators** **(missing)**
 
 ## 7. Testing Strategy
+## User Authentication & Initialization
+
+- [ ] Implement challenge-response authentication:
+  - Backend generates a random challenge string.
+  - User signs the challenge with their Sui private key.
+  - User sends signature + public key (Sui address).
+  - Backend verifies the signature.
+- [ ] Map Sui address to a UUID for Qdrant:
+  - Hash the Sui address or generate a UUID.
+  - Use UUID as Qdrant point ID.
+- [ ] Create user record in Qdrant if new.
+- [ ] Add `/auth` or `/login` endpoint:
+  - Accepts public key + signature.
+  - Verifies ownership.
+  - Returns user UUID.
+- [ ] Update iOS app:
+  - Request challenge.
+  - Sign challenge.
+  - Send signature + public key.
+  - Receive user UUID for API calls.
 
 *   **Unit Tests:** Mock the `DatabaseClient` in `langchain_workflow.py` tests to verify history loading/saving calls are made correctly. Test the new `database.py` functions by mocking the `QdrantClient`.
 *   **Integration Tests:** Set up a test Qdrant instance (can be local Docker). Write tests that call the `/langchain` API endpoint multiple times for the same `thread_id` and assert that the conversation context is correctly maintained by verifying the history loaded/passed in subsequent calls. Check the Qdrant database directly to confirm messages are saved correctly.
