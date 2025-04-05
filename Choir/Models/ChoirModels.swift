@@ -32,6 +32,24 @@ enum Phase: String, CaseIterable, Identifiable, Codable {
     case understanding
     case yield
 
+struct ThreadsAPIResponse: Codable {
+    let success: Bool
+    let message: String?
+    let data: ThreadsData?
+}
+
+struct ThreadsData: Codable {
+    let threads: [ThreadResponse]?
+}
+struct ThreadResponse: Codable, Identifiable {
+    let id: String
+    let name: String
+    let created_at: String
+    let user_id: String
+    let co_authors: [String]
+    let message_count: Int
+    let last_activity: String
+}
     var id: String { rawValue }
 
     var description: String {
