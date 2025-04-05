@@ -40,11 +40,11 @@ Each point in the `choir` collection representing a message turn should include 
 *   `content`: The primary text content of the message.
 *   `timestamp`: ISO 8601 timestamp for ordering.
 *   `vector`: Embedding of the `content` (handled by `database.py`).
-*   **(For AI messages) phase_outputs`: Dictionary containing the outputs from each AEIOU-Y phase.
-*   **(For AI messages) novelty_score`: Float score from Experience phase.
-*   **(For AI messages) similarity_scores`: Dictionary or list of scores for priors.
-*   **(For AI messages) cited_prior_ids`: List of IDs of messages cited as priors.
-*   **(Optional) metadata`: Any other relevant metadata.
+*   **(For AI messages) phase_outputs**: Dictionary containing the outputs from each AEIOU-Y phase.
+*   **(For AI messages) novelty_score**: Float score from Experience phase.
+*   **(For AI messages) similarity_scores**: Dictionary or list of scores for priors.
+*   **(For AI messages) cited_prior_ids**: List of IDs of messages cited as priors.
+*   **(Optional) metadata**: Any other relevant metadata.
 
 **Indexing:** Ensure `thread_id` and `timestamp` are indexed in Qdrant for efficient filtering and sorting.
 
@@ -135,11 +135,11 @@ Each point in the `choir` collection representing a message turn should include 
 ## iOS Client Integration
 - [x] Created `ChoirAPIClient` with `fetchUserThreads`
 - [x] Fetches threads on app launch using wallet Sui address
-- [ ] **Wallet async loading on app launch** **(missing)**
-- [ ] **Fetch threads *after* wallet loads** **(missing)**
-- [ ] **Fetch messages for each thread** **(missing)**
+- [x] **Wallet async loading on app launch**
+- [x] **Fetch threads *after* wallet loads**
+- [ ] **Fetch messages for each thread** **(in progress)**
 - [ ] **Display fetched messages in UI** **(missing)**
-- [ ] **Save new threads/messages via API** **(missing)**
+- [ ] **Save new threads/messages via API** **(partial - thread creation works)**
 - [ ] **Autosave new messages during chat** **(missing)**
 - [ ] **Handle empty state, errors, loading indicators** **(missing)**
 
