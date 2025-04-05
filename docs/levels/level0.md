@@ -154,6 +154,7 @@ tree.md
 │       │   ├── test_simple_multimodel_stream.py
 │       │   ├── test_structured_output.py
 │       │   └── test_utils.py
+│       ├── test_database.py
 │       ├── test_main.py
 │       ├── test_sui_service.py
 │       ├── test_user_thread_endpoints.py
@@ -244,7 +245,7 @@ tree.md
     ├── sources_displaying.sh
     └── test_postchain_multiturn.sh
 
-60 directories, 169 files
+60 directories, 170 files
 
 === File: docs/CHANGELOG.md ===
 

@@ -30,6 +30,29 @@ class DatabaseClient:
             if not self.client.collection_exists(collection):
                 raise RuntimeError(f"Required collection {collection} does not exist")
 
+        # Ensure payload indexes on thread_id and timestamp in messages collection
+        try:
+            # Index on thread_id (keyword)
+            self.client.create_payload_index(
+                collection_name=self.config.MESSAGES_COLLECTION,
+                field_name="thread_id",
+                field_schema=models.PayloadSchemaType.KEYWORD,
+            )
+        except Exception as e:
+            # Ignore if already exists or error
+            pass
+
+        try:
+            # Index on timestamp (integer or keyword depending on storage format)
+            self.client.create_payload_index(
+                collection_name=self.config.MESSAGES_COLLECTION,
+                field_name="timestamp",
+                field_schema=models.PayloadSchemaType.KEYWORD,
+            )
+        except Exception as e:
+            # Ignore if already exists or error
+            pass
+
     async def search_similar(self, collection: str, query_vector: List[float], limit: int = 10) -> List[Dict[str, Any]]:
         try:
             # Validate vector size

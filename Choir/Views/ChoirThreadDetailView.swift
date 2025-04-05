@@ -1,13 +1,15 @@
 import SwiftUI
 
 struct ChoirThreadDetailView: View {
-   let thread: ChoirThread
+   @ObservedObject var thread: ChoirThread
    @ObservedObject var viewModel: PostchainViewModel
    @State private var input = ""
    @Namespace private var scrollSpace
    @State private var lastMessageId: String? = nil
    @State private var scrollToBottom = false
    @State private var showModelConfig = false
+   @State private var isLoadingMessages = false
+   @State private var errorMessage: String? = nil
 
    var body: some View {
        VStack {
@@ -83,6 +85,30 @@ struct ChoirThreadDetailView: View {
        }
        .onDisappear {
            cleanup()
+       }
+       .task {
+           isLoadingMessages = true
+           errorMessage = nil
+           do {
+               let fetchedMessages = try await ChoirAPIClient.shared.fetchMessages(threadId: thread.id.uuidString)
+               let newMessages = fetchedMessages.map { response in
+                   Message(
+                       id: UUID(uuidString: response.id) ?? UUID(),
+                       content: response.content,
+                       isUser: response.role == "user",
+                       timestamp: ISO8601DateFormatter().date(from: response.timestamp) ?? Date()
+                   )
+               }
+               await MainActor.run {
+                   thread.messages = newMessages
+                   isLoadingMessages = false
+               }
+           } catch {
+               await MainActor.run {
+                   errorMessage = error.localizedDescription
+                   isLoadingMessages = false
+               }
+           }
        }
    }
 

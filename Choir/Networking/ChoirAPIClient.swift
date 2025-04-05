@@ -31,6 +31,14 @@ struct ThreadResponse: Identifiable, Codable {
     let message_count: Int
     let last_activity: String
 }
+struct MessageResponse: Identifiable, Codable {
+    let id: String
+    let thread_id: String
+    let role: String
+    let content: String
+    let timestamp: String
+    // Add other fields as needed matching backend
+}
 struct VerifyResponse: Codable {
     let user_id: String
 }
@@ -54,5 +62,23 @@ extension ChoirAPIClient {
         let verifyResponse = try JSONDecoder().decode(VerifyResponse.self, from: data)
         return verifyResponse.user_id
     }
-}
 
+    func fetchMessages(threadId: String, limit: Int = 50, before: String? = nil) async throws -> [MessageResponse] {
+        var urlString = "https://your-api-url/api/threads/\(threadId)/messages?limit=\(limit)"
+        if let before = before {
+            urlString += "&before=\(before)"
+        }
+        guard let url = URL(string: urlString) else {
+            throw URLError(.badURL)
+        }
+
+        let (data, response) = try await URLSession.shared.data(from: url)
+        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+            throw URLError(.badServerResponse)
+        }
+
+        let decoder = JSONDecoder()
+        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        return try decoder.decode([MessageResponse].self, from: data)
+    }
+}

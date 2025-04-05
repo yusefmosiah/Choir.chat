@@ -1,6 +1,7 @@
 import asyncio
 import logging
 from typing import List, Dict, Any, AsyncIterator, Optional
+from langchain_openai import OpenAIEmbeddings
 
 from langchain_core.messages import HumanMessage, AIMessage, SystemMessage, BaseMessage, ToolMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
@@ -455,6 +456,9 @@ async def run_langchain_postchain_workflow(
     """
     logger.info(f"Starting Langchain PostChain workflow for thread {thread_id}")
 
+    # Initialize embedding model
+    embeddings = OpenAIEmbeddings(model=Config().EMBEDDING_MODEL)
+
     # --- Model Configuration (Prioritize Overrides) ---
     try:
         # Use override if provided, otherwise use default with temperature set
@@ -501,7 +505,7 @@ async def run_langchain_postchain_workflow(
         "role": "user",
         "content": query,
         "timestamp": datetime.now(UTC).isoformat(),
-        "vector": [0.0] * 1536  # Placeholder vector, replace with embedding if available
+        "vector": await embeddings.aembed_query(query)
     }
     await db_client.save_message(user_message)
 
@@ -521,7 +525,7 @@ async def run_langchain_postchain_workflow(
     action_response: AIMessage = action_result["action_response"]
     current_messages.append(action_response)
 
-    
+
 
     yield {
         "phase": "action",
@@ -663,7 +667,7 @@ async def run_langchain_postchain_workflow(
         "role": "assistant",
         "content": yield_response.content,
         "timestamp": datetime.now(UTC).isoformat(),
-        "vector": [0.0] * 1536,  # Placeholder vector, replace with embedding if available
+        "vector": await embeddings.aembed_query(yield_response.content),
         "phase_outputs": yield_result.get("phase_outputs"),
         "novelty_score": yield_result.get("novelty_score"),
         "similarity_scores": yield_result.get("similarity_scores"),
