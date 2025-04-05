@@ -1,4 +1,5 @@
 import XCTest
+import Choir
 
 final class ChoirIntegrationTests: XCTestCase {
 
