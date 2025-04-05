@@ -5,7 +5,7 @@ from fastapi.responses import HTMLResponse
 from pathlib import Path
 import markdown
 import os
-from app.routers import  threads, users, balance, postchain
+from app.routers import threads, users, balance, postchain, auth
 from app.config import Config
 
 app = FastAPI(title="Choir API", version="1.0.0")
@@ -26,6 +26,7 @@ app.add_middleware(
 app.include_router(threads.router, prefix="/api/threads", tags=["threads"])
 app.include_router(users.router, prefix="/api/users", tags=["users"])
 app.include_router(balance.router, prefix="/api/balance", tags=["balance"])
+app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
 app.include_router(postchain.router, prefix="/api/postchain", tags=["postchain"])
 
 @app.get("/health")

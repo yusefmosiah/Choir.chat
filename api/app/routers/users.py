@@ -33,10 +33,13 @@ async def get_user(user_id: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+from uuid import UUID
+from fastapi import Path
+
 @router.get("/{user_id}/threads", response_model=APIResponse)
-async def get_user_threads(user_id: str):
+async def get_user_threads(user_id: UUID = Path(..., description="User UUID")):
     try:
-        threads = await db.get_user_threads(user_id)
+        threads = await db.get_user_threads(str(user_id))
         return APIResponse(
             success=True,
             data={"threads": threads}
