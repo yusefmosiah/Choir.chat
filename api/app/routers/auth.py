@@ -7,7 +7,9 @@ import time
 router = APIRouter()
 
 # Temporary in-memory challenge store: {address: (challenge, timestamp)}
-challenge_store: Dict[str, (str, float)] = {}
+from typing import Tuple
+
+challenge_store: Dict[str, Tuple[str, float]] = {}
 
 CHALLENGE_EXPIRY_SECONDS = 300  # 5 minutes
 
