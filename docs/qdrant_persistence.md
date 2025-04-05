@@ -178,6 +178,7 @@ Each point in the `choir` collection representing a message turn should include 
 
 ### Backend Persistence
 - [x] Thread persistence by UUID
+- [x] User fetch by UUID works (confirmed)
 - [ ] Message persistence per thread
 - [ ] Autosave new messages
 - [ ] Tests
@@ -185,7 +186,7 @@ Each point in the `choir` collection representing a message turn should include 
 ### iOS Client
 - [x] Async wallet loading
 - [x] Authenticate user, get UUID
-- [x] Fetch threads using UUID
+- [x] Fetch threads using UUID (confirmed working)
 - [ ] Fetch messages per thread
 - [ ] Save new threads/messages
 - [ ] Autosave new messages
