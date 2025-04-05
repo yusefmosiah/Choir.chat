@@ -165,6 +165,31 @@ Each point in the `choir` collection representing a message turn should include 
   - Send signature + public key.
   - Receive user UUID for API calls.
 
+## Updated Progress (as of 2025-04-04)
+
+### User Authentication & Initialization
+- [x] Challenge-response endpoints implemented
+- [x] UUID mapping and user creation in Qdrant
+- [x] UUID returned to client
+- [x] Backend expects UUIDs for user endpoints
+- [x] iOS app uses UUID for API calls
+- [ ] Real signature verification (mocked for now)
+- [ ] Full login flow in iOS (partial, mocked)
+
+### Backend Persistence
+- [x] Thread persistence by UUID
+- [ ] Message persistence per thread
+- [ ] Autosave new messages
+- [ ] Tests
+
+### iOS Client
+- [x] Async wallet loading
+- [x] Authenticate user, get UUID
+- [x] Fetch threads using UUID
+- [ ] Fetch messages per thread
+- [ ] Save new threads/messages
+- [ ] Autosave new messages
+- [ ] Error handling, loading states
 *   **Unit Tests:** Mock the `DatabaseClient` in `langchain_workflow.py` tests to verify history loading/saving calls are made correctly. Test the new `database.py` functions by mocking the `QdrantClient`.
 *   **Integration Tests:** Set up a test Qdrant instance (can be local Docker). Write tests that call the `/langchain` API endpoint multiple times for the same `thread_id` and assert that the conversation context is correctly maintained by verifying the history loaded/passed in subsequent calls. Check the Qdrant database directly to confirm messages are saved correctly.
 
