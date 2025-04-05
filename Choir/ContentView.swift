@@ -13,6 +13,9 @@ struct ContentView: View {
     @State private var selectedChoirThread: ChoirThread?
     @State private var showingWallet = false
 
+@State private var userUUID: String? = nil
+@AppStorage("userUUID") private var storedUserUUID: String = ""
+
     init() {
         _viewModel = StateObject(wrappedValue: PostchainViewModel(coordinator: RESTPostchainCoordinator()))
     }
@@ -88,9 +91,35 @@ struct ContentView: View {
                         return
                     }
 
-                    let userId = (try? wallet.accounts[0].publicKey.toSuiAddress()) ?? ""
+                    if !storedUserUUID.isEmpty {
+                        print("Using stored user UUID: \\(storedUserUUID)")
+                        userUUID = storedUserUUID
+                    } else {
+                        let suiAddress = (try? wallet.accounts[0].publicKey.toSuiAddress()) ?? ""
 
-                    let threadResponses = try await ChoirAPIClient.shared.fetchUserThreads(userId: userId)
+                        // 1. Request challenge
+                        let challengeURL = ChoirAPIClient.shared.baseURL.appendingPathComponent("/auth/request_challenge")
+                        var challengeRequest = URLRequest(url: challengeURL)
+                        challengeRequest.httpMethod = "POST"
+                        challengeRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
+                        let challengeBody = ["address": suiAddress]
+                        challengeRequest.httpBody = try JSONEncoder().encode(challengeBody)
+
+                        let (challengeData, _) = try await URLSession.shared.data(for: challengeRequest)
+                        let challengeResponse = try JSONDecoder().decode([String: String].self, from: challengeData)
+                        let challenge = challengeResponse["challenge"] ?? ""
+
+                        // 2. Sign challenge (mocked)
+                        let signature = "MOCK_SIGNATURE_BASE64"
+
+                        // 3. Verify user, get UUID
+                        let uuid = try await ChoirAPIClient.shared.verifyUser(address: suiAddress, signature: signature)
+                        userUUID = uuid
+                        storedUserUUID = uuid
+                    }
+
+                    // 4. Fetch threads using UUID
+                    let threadResponses = try await ChoirAPIClient.shared.fetchUserThreads(userId: userUUID ?? storedUserUUID)
                     let loadedThreads = threadResponses.map { response in
                         let thread = ChoirThread(
                             id: UUID(uuidString: response.id) ?? UUID(),
@@ -103,7 +132,7 @@ struct ContentView: View {
                         selectedChoirThread = first
                     }
                 } catch {
-                    print("Error loading wallet or fetching threads: \\(error)")
+                    print("Error during auth or fetching threads: \\(error)")
                 }
             }
         }
