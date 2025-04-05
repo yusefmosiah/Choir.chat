@@ -181,6 +181,7 @@
 ├── docker-compose.yml
 ├── docs
 │   ├── CHANGELOG.md
+│   ├── authentication_flow.md
 │   ├── blockchain_integration.md
 │   ├── comp_provider_info.md
 │   ├── core_core.md
@@ -232,4 +233,4 @@
     ├── sources_displaying.sh
     └── test_postchain_multiturn.sh
 
-60 directories, 170 files
+60 directories, 171 files

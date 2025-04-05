@@ -92,12 +92,11 @@ struct ContentView: View {
                     }
 
                     if !storedUserUUID.isEmpty {
-                        print("Using stored user UUID: \\(storedUserUUID)")
+                        print("Using stored user UUID: \(storedUserUUID)")
                         userUUID = storedUserUUID
                     } else {
                         let suiAddress = (try? wallet.accounts[0].publicKey.toSuiAddress()) ?? ""
 
-                        // 1. Request challenge
                         let challengeURL = ChoirAPIClient.shared.baseURL.appendingPathComponent("/auth/request_challenge")
                         var challengeRequest = URLRequest(url: challengeURL)
                         challengeRequest.httpMethod = "POST"
@@ -109,13 +108,22 @@ struct ContentView: View {
                         let challengeResponse = try JSONDecoder().decode([String: String].self, from: challengeData)
                         let challenge = challengeResponse["challenge"] ?? ""
 
-                        // 2. Sign challenge (mocked)
-                        let signature = "MOCK_SIGNATURE_BASE64"
+                        // Check if we already have a UUID for this address to avoid unnecessary verification
+                        if let cachedUUID = ChoirAPIClient.shared.getCachedUserId(for: suiAddress) {
+                            print("Using cached UUID for Sui address: \(suiAddress)")
+                            userUUID = cachedUUID
+                            storedUserUUID = cachedUUID
+                        } else {
+                            // 2. Sign challenge (mocked)
+                            let signature = "MOCK_SIGNATURE_BASE64"
 
-                        // 3. Verify user, get UUID
-                        let uuid = try await ChoirAPIClient.shared.verifyUser(address: suiAddress, signature: signature)
-                        userUUID = uuid
-                        storedUserUUID = uuid
+                            // 3. Verify user, get UUID
+                            let uuid = try await ChoirAPIClient.shared.verifyUser(address: suiAddress, signature: signature)
+                            userUUID = uuid
+                            storedUserUUID = uuid
+                            
+                            print("Generated new UUID for Sui address: \(suiAddress) -> \(uuid)")
+                        }
                     }
 
                     // 4. Fetch threads using UUID
@@ -132,7 +140,7 @@ struct ContentView: View {
                         selectedChoirThread = first
                     }
                 } catch {
-                    print("Error during auth or fetching threads: \\(error)")
+                    print("Error during auth or fetching threads: \(error)")
                 }
             }
         }

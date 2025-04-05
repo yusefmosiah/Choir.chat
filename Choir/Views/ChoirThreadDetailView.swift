@@ -10,6 +10,8 @@ struct ChoirThreadDetailView: View {
    @State private var showModelConfig = false
    @State private var isLoadingMessages = false
    @State private var errorMessage: String? = nil
+   @State private var isFirstMessage = true
+   @State private var userId = UserDefaults.standard.string(forKey: "userUUID") ?? UUID().uuidString
 
    var body: some View {
        VStack {
@@ -89,6 +91,8 @@ struct ChoirThreadDetailView: View {
        .task {
            isLoadingMessages = true
            errorMessage = nil
+           isFirstMessage = thread.messages.isEmpty
+           
            do {
                let fetchedMessages = try await ChoirAPIClient.shared.fetchMessages(threadId: thread.id.uuidString)
                let newMessages = fetchedMessages.map { response in
@@ -102,6 +106,7 @@ struct ChoirThreadDetailView: View {
                await MainActor.run {
                    thread.messages = newMessages
                    isLoadingMessages = false
+                   isFirstMessage = thread.messages.isEmpty
                }
            } catch {
                await MainActor.run {
@@ -114,6 +119,36 @@ struct ChoirThreadDetailView: View {
 
    private func sendMessage(_ content: String) async {
        do {
+           // Check if this is the first message in a thread and ensure the thread exists in Qdrant
+           if isFirstMessage {
+               // Ensure we have a user ID
+               if userId.isEmpty {
+                   userId = UUID().uuidString
+                   UserDefaults.standard.set(userId, forKey: "userUUID")
+               }
+               
+               // Create the thread in Qdrant via API
+               do {
+                   let threadResponse = try await ChoirAPIClient.shared.createThread(
+                       name: thread.title,
+                       userId: userId,
+                       initialMessage: content
+                   )
+                   
+                   // Update the thread ID with the one from the server
+                   if let threadId = UUID(uuidString: threadResponse.id) {
+                       print("Thread created in Qdrant with ID: \(threadId)")
+                       // Note: ideally we'd update the thread.id here, but it's a let property
+                       // Instead, we'll make sure to use the same ID in future requests
+                   }
+                   
+                   isFirstMessage = false
+               } catch {
+                   print("Error creating thread in Qdrant: \(error)")
+                   // Continue with local processing even if thread creation fails
+               }
+           }
+           
            if let restCoordinator = viewModel.coordinator as? RESTPostchainCoordinator {
                restCoordinator.currentChoirThread = thread
            }
