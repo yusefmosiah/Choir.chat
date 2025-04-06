@@ -10,16 +10,15 @@ struct ChoirThreadDetailView: View {
    @State private var showModelConfig = false
    @State private var isLoadingMessages = false
    @State private var errorMessage: String? = nil
-   // @State private var isFirstMessage = true // Removed as per instructions
-   @State private var userId = UserDefaults.standard.string(forKey: "userUUID") ?? UUID().uuidString // Keep for sending for now
+   @State private var userId = UserDefaults.standard.string(forKey: "userUUID") ?? UUID().uuidString
 
    // Helper for date parsing
    let isoDateFormatter: ISO8601DateFormatter = {
        let formatter = ISO8601DateFormatter()
-       // Allow for optional fractional seconds
        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
        return formatter
    }()
+
    var body: some View {
        VStack {
            // Display loading indicator or error message
@@ -35,13 +34,10 @@ struct ChoirThreadDetailView: View {
            ScrollViewReader { scrollProxy in
                ScrollView {
                    LazyVStack(alignment: .leading, spacing: 12) {
-                       // Only show messages if not loading and no error prevented loading
-                       // Or show messages even if there was an error but some were loaded before?
-                       // Current approach: Show messages unless actively loading. Error text is separate.
                        ForEach(thread.messages) { message in
                            MessageRow(
                                message: message,
-                               isProcessing: message.id == viewModel.coordinator.activeMessageId && viewModel.isProcessing, // Check activeMessageId
+                               isProcessing: message.id == viewModel.coordinator.activeMessageId && viewModel.isProcessing,
                                viewModel: viewModel
                            )
                            .id(message.id)
@@ -67,10 +63,10 @@ struct ChoirThreadDetailView: View {
            }
 
            HStack {
-               TextField("Message", text: $input, axis: .vertical) // Allow vertical expansion
+               TextField("Message", text: $input, axis: .vertical)
                    .textFieldStyle(.roundedBorder)
-                   .lineLimit(1...5) // Allow up to 5 lines
-                   .disabled(viewModel.isProcessing || isLoadingMessages) // Disable during message loading too
+                   .lineLimit(1...5)
+                   .disabled(viewModel.isProcessing || isLoadingMessages)
 
                if viewModel.isProcessing {
                    Button("Cancel") {
@@ -83,17 +79,16 @@ struct ChoirThreadDetailView: View {
                        guard !input.isEmpty else { return }
                        let messageContent = input
                        input = ""
-
                        Task {
                            await sendMessage(messageContent)
                        }
                    } label: {
                         Image(systemName: "arrow.up.circle.fill")
-                            .font(.title2) // Make icon slightly larger
+                            .font(.title2)
                    }
-                   .buttonStyle(.plain) // Use plain style for icon button
-                   .disabled(input.isEmpty || viewModel.isProcessing || isLoadingMessages) // Disable during message loading too
-                   .keyboardShortcut(.return, modifiers: .command) // Cmd+Enter shortcut
+                   .buttonStyle(.plain)
+                   .disabled(input.isEmpty || viewModel.isProcessing || isLoadingMessages)
+                   .keyboardShortcut(.return, modifiers: .command)
                }
            }
            .padding()
@@ -101,9 +96,7 @@ struct ChoirThreadDetailView: View {
        .navigationTitle(thread.title)
        .toolbar {
            ToolbarItem(placement: .topBarTrailing) {
-               Button(action: {
-                   showModelConfig = true
-               }) {
+               Button(action: { showModelConfig = true }) {
                    Label("Configure Models", systemImage: "gear")
                }
            }
@@ -114,7 +107,7 @@ struct ChoirThreadDetailView: View {
        .onDisappear {
            cleanup()
        }
-       .task(id: thread.id) { // Rerun task when thread.id changes
+       .task(id: thread.id) {
             await loadMessages()
        }
    }
@@ -125,78 +118,84 @@ struct ChoirThreadDetailView: View {
            return
        }
 
-       let currentThreadId = self.thread.id // Capture the ID at the start
-
+       let currentThreadId = self.thread.id
        print("🔄 Loading messages for thread \(currentThreadId)...")
        isLoadingMessages = true
        errorMessage = nil
-       // isFirstMessage = thread.messages.isEmpty // Removed as per instructions
 
        do {
-           // Fetch messages using the updated API client which returns [MessageResponse]
-           let fetchedMessages: [MessageResponse] = try await ChoirAPIClient.shared.fetchMessages(threadId: currentThreadId.uuidString)
-           print("✅ Fetched \(fetchedMessages.count) messages for thread \(currentThreadId)")
+           // Fetch turn records using the updated API client which returns [TurnResponse]
+           let fetchedTurns: [TurnResponse] = try await ChoirAPIClient.shared.fetchMessages(threadId: currentThreadId.uuidString)
+           print("✅ Fetched \(fetchedTurns.count) turns for thread \(currentThreadId)")
 
-           // Map results carefully
-           var newMessages: [Message] = []
-           for response in fetchedMessages {
-                // Directly access properties from the MessageResponse struct
-                let respId = response.id
-                let respContent = response.content
-                let respRole = response.role
-                let respTimestamp = response.timestamp
-                let respPhaseOutputs = response.phaseOutputs
+           var reconstructedMessages: [Message] = [] // This will store the reconstructed User/AI messages for UI
+           for turn in fetchedTurns {
+               // Attempt to parse the timestamp for the turn
+               let turnTimestamp = isoDateFormatter.date(from: turn.timestamp ?? "") ?? Date()
 
-               let messageId = UUID(uuidString: respId ?? "") ?? UUID() // Default UUID if parsing fails
-               let messageContent = respContent ?? ""
-               let messageIsUser = respRole == "user" // Default to false if role is nil or different
-               let messageTimestamp = isoDateFormatter.date(from: respTimestamp ?? "") ?? Date() // Default to now if parsing fails
+               // 1. Create User Message from turn.userQuery (if present)
+               if let userQuery = turn.userQuery, !userQuery.isEmpty {
+                   let userMessageId = UUID(uuidString: turn.id + "-user") ?? UUID()
+                   let userTimestamp = turnTimestamp.addingTimeInterval(-0.001) // Offset user msg slightly earlier
 
-               var messagePhaseResults: [Phase: PhaseResult] = [:]
+                   let userMessage = Message(
+                       id: userMessageId,
+                       content: userQuery,
+                       isUser: true,
+                       timestamp: userTimestamp
+                   )
+                   reconstructedMessages.append(userMessage)
+               }
 
-               // Pre-initialize all phases with empty PhaseResult
+               // 2. Create AI Message from turn.content and turn.phaseOutputs
+               let aiMessageId = UUID(uuidString: turn.id) ?? UUID()
+               let aiContent = turn.content ?? ""
+               var aiPhaseResults: [Phase: PhaseResult] = [:]
+
+               // Pre-initialize all phases
                for phase in Phase.allCases {
-                   messagePhaseResults[phase] = PhaseResult(content: "", provider: nil, modelName: nil)
+                   aiPhaseResults[phase] = PhaseResult(content: "", provider: nil, modelName: nil)
                }
 
-               // Map phaseOutputs for AI messages
-               if !messageIsUser {
-                   if let phaseOutputs = respPhaseOutputs { // Check if phaseOutputs exists and is not nil
-                       for (phaseString, phaseContent) in phaseOutputs {
-                           if let phase = Phase.from(phaseString) {
-                               messagePhaseResults[phase] = PhaseResult(content: phaseContent, provider: nil, modelName: nil)
-                               // print("   Mapped phase '\(phaseString)' to \(phase.rawValue) for message \(messageId)")
-                           } else {
-                               print("   ⚠️ Could not map phase string '\(phaseString)' to Phase enum for message \(messageId)")
-                           }
+               // Map phaseOutputs
+               if let phaseOutputs = turn.phaseOutputs {
+                   for (phaseString, phaseContent) in phaseOutputs {
+                       if let phase = Phase.from(phaseString) {
+                           aiPhaseResults[phase] = PhaseResult(content: phaseContent, provider: nil, modelName: nil)
+                       } else {
+                           print("   ⚠️ Could not map phase string '\(phaseString)' to Phase enum for turn \(turn.id)")
                        }
-                   } else {
-                        print("   ℹ️ No phaseOutputs found for AI message \(messageId)")
                    }
-
-                   // Yield Fallback: If .yield is still empty, use main content
-                   if messagePhaseResults[.yield]?.content.isEmpty ?? true {
-                       messagePhaseResults[.yield] = PhaseResult(content: messageContent, provider: nil, modelName: nil)
-                       // print("   Applied yield fallback using main content for message \(messageId)")
-                   }
+               } else {
+                    print("   ℹ️ No phaseOutputs dictionary found for turn \(turn.id), attempting yield fallback.")
                }
 
+                // Yield Fallback
+                if aiPhaseResults[.yield]?.content.isEmpty ?? true {
+                    if !aiContent.isEmpty {
+                        aiPhaseResults[.yield] = PhaseResult(content: aiContent, provider: nil, modelName: nil)
+                    } else if turn.phaseOutputs == nil {
+                        print("   ⚠️ Both phaseOutputs and main content are empty/null for turn \(turn.id). Yield phase will be empty.")
+                    }
+                }
 
-               let message = Message(
-                   id: messageId,
-                   content: messageContent, // Keep original content here, MessageRow/PostchainView handles display logic
-                   isUser: messageIsUser,
-                   timestamp: messageTimestamp,
-                   phaseResults: messagePhaseResults // Pass the mapped results
+               let aiMessage = Message(
+                   id: aiMessageId,
+                   content: aiContent,
+                   isUser: false,
+                   timestamp: turnTimestamp, // Use original turn timestamp
+                   phaseResults: aiPhaseResults
                )
-               newMessages.append(message)
+               reconstructedMessages.append(aiMessage)
            }
 
+           // Sort the combined user/AI messages strictly by timestamp
+           reconstructedMessages.sort { $0.timestamp < $1.timestamp }
+
            // --- Mapped Messages Check ---
-           print("--- Mapped Messages Check (Thread: \(currentThreadId)) ---")
-           for msg in newMessages {
-               let phaseYieldContent = msg.getPhaseResult(.yield)?.content ?? "nil"
-               print("  - ID: \(msg.id), User: \(msg.isUser), Content: \(msg.content.prefix(30))..., Yield: \(phaseYieldContent.prefix(30))...")
+           print("--- Reconstructed Messages Check (Thread: \(currentThreadId)) ---")
+           for msg in reconstructedMessages {
+                print("  - ID: \(msg.id), User: \(msg.isUser), Timestamp: \(msg.timestamp), Content: \(msg.content.prefix(30))...")
            }
            print("-------------------------------------")
 
@@ -204,41 +203,41 @@ struct ChoirThreadDetailView: View {
            // Update UI on main thread, ensuring the thread context hasn't changed
            await MainActor.run {
                if currentThreadId == self.thread.id {
-                   self.thread.messages = newMessages.sorted { $0.timestamp < $1.timestamp }
+                   self.thread.messages = reconstructedMessages // Assign the reconstructed list
                    self.isLoadingMessages = false
-                   // self.isFirstMessage = self.thread.messages.isEmpty // Update based on fetched - REMOVED as per instructions
                    print("✅ Updated thread.messages count: \(self.thread.messages.count) for thread \(currentThreadId)")
                } else {
                    print("⚠️ Thread changed (\(self.thread.id)) while loading messages for \(currentThreadId). Discarding results.")
-                   self.isLoadingMessages = false // Still need to reset loading state
+                   self.isLoadingMessages = false
                }
            }
 
        } catch {
            print("❌ Error loading messages for thread \(currentThreadId): \(error)")
+           // Handle decoding errors specifically if needed
+           if let decodingError = error as? DecodingError {
+                print("   Decoding Error Details: \(decodingError)")
+           }
+
            // Check specifically for cancellation errors
            if (error as? URLError)?.code == .cancelled {
                 print("ℹ️ Message loading cancelled for thread \(currentThreadId).")
-                // Don't show cancellation error in the UI
                 await MainActor.run {
-                    // Only reset loading state if the thread context is still the same
                     if currentThreadId == self.thread.id {
                         self.isLoadingMessages = false
-                        self.errorMessage = nil // Ensure no error message is shown for cancellation
+                        self.errorMessage = nil
                     } else {
-                        print("⚠️ Thread changed during cancellation handling for \(currentThreadId). State already reset potentially.")
+                        print("⚠️ Thread changed during cancellation handling for \(currentThreadId).")
                     }
                 }
            } else {
                // Show other errors in the UI
                await MainActor.run {
-                    // Only update UI if the thread context is still the same
                     if currentThreadId == self.thread.id {
                        self.errorMessage = "Error loading messages: \(error.localizedDescription)"
                        self.isLoadingMessages = false
                     } else {
                         print("⚠️ Thread changed before error could be displayed for \(currentThreadId).")
-                        // We might still want to reset the loading state if it somehow wasn't reset
                         self.isLoadingMessages = false
                     }
                }
@@ -250,23 +249,20 @@ struct ChoirThreadDetailView: View {
    private func sendMessage(_ content: String) async {
        guard !isLoadingMessages else {
            print("⚠️ Attempted to send while loading messages. Aborting.")
-           return // Prevent sending if messages are loading
+           return
        }
-       // isFirstMessage logic removed entirely
 
        do {
-           // User ID handling remains, assuming it's needed for sending
            if userId.isEmpty {
                userId = UUID().uuidString
                UserDefaults.standard.set(userId, forKey: "userUUID")
            }
 
-           // Update coordinator reference
            if let restCoordinator = viewModel.coordinator as? RESTPostchainCoordinator {
                restCoordinator.currentChoirThread = thread
            }
 
-           // Create and append user message locally
+           // Create and append user message locally (UI update)
            let userMessage = Message(
                content: content,
                isUser: true
@@ -276,7 +272,7 @@ struct ChoirThreadDetailView: View {
             }
 
 
-           // Create and append placeholder AI message locally
+           // Create and append placeholder AI message locally (UI update)
            var placeholderMessage = Message(
                content: "...",
                isUser: false,
@@ -287,20 +283,19 @@ struct ChoirThreadDetailView: View {
             }
 
 
-           // Call backend processing (this now handles thread creation implicitly if needed)
-           try await viewModel.process(content) // Assumes viewModel.process sends the message
+           // Call backend processing
+           try await viewModel.process(content) // This should trigger the backend workflow
 
-           // Update placeholder message with results (existing logic seems okay)
+           // Update placeholder message with results from viewModel
             await MainActor.run {
                 if let lastIndex = thread.messages.indices.last, thread.messages[lastIndex].id == placeholderMessage.id {
                     let message = thread.messages[lastIndex]
-
-                    let allPhases = viewModel.responses // Assuming this holds the final results after process()
+                    let allPhases = viewModel.responses // Get final phase results from ViewModel
 
                     message.isStreaming = false
                     message.phases = allPhases // Update using the public setter
 
-                    // Update main content based on priority (Yield > Experience > Action) - Keep this logic
+                    // Update main content based on priority
                     if let yieldContent = allPhases[.yield], !yieldContent.isEmpty {
                         message.content = yieldContent
                     } else if let experienceContent = allPhases[.experience], !experienceContent.isEmpty {
@@ -308,12 +303,9 @@ struct ChoirThreadDetailView: View {
                    } else if let actionContent = allPhases[.action], !actionContent.isEmpty {
                        message.content = actionContent
                    } else {
-                       // Fallback if no prioritized phase has content
                        message.content = allPhases.values.first(where: { !$0.isEmpty }) ?? "..."
                    }
-
                     print("Updated placeholder message \(message.id) with final content.")
-
                 } else {
                     print("⚠️ Could not find placeholder message to update after processing.")
                 }
@@ -321,24 +313,18 @@ struct ChoirThreadDetailView: View {
 
        } catch {
            print("❌ Error processing message: \(error)")
-           // Optionally remove the placeholder on error or display an error message
             await MainActor.run {
                 if let lastMessage = thread.messages.last, !lastMessage.isUser, lastMessage.isStreaming {
                     thread.messages.removeLast()
-                    // You could add a specific error message object here instead
-                    // let errorMessage = Message(content: "Error: \(error.localizedDescription)", isUser: false)
-                    // thread.messages.append(errorMessage)
                 }
-                // Display error to user?
+                // Optionally display error to user
                 // self.errorMessage = "Error sending message: \(error.localizedDescription)"
             }
        }
    }
 
-// Removed dummy MessageResponse struct placeholder
-
    private func cleanup() {
-       // No more timers to cleanup
+       // No-op for now
    }
 }
 

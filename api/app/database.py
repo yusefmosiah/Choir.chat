@@ -89,12 +89,12 @@ class DatabaseClient:
 
     async def save_message(self, data: Dict[str, Any]) -> Dict[str, str]:
         """
-        Save a message with its vector and metadata to Qdrant.
+        Save a turn record with its vector and metadata to Qdrant.
         Expected fields in data:
-            - content (str)
-            - vector (List[float])
+            - content (str): The final AI response content for the turn.
+            - user_query (str): The user input that initiated the turn.
+            - vector (List[float]): Embedding of the AI response content.
             - thread_id (str)
-            - role (str)
             - timestamp (str, ISO format)
             - phase_outputs (dict, optional)
             - novelty_score (float, optional)
@@ -105,9 +105,10 @@ class DatabaseClient:
         try:
             point_id = str(uuid.uuid4())
             payload = {
-                "content": data["content"],
+                "content": data.get("content"), # AI response
+                "user_query": data.get("user_query"), # User input
                 "thread_id": data.get("thread_id"),
-                "role": data.get("role"),
+                # "role": data.get("role"), # Role removed
                 "timestamp": data.get("timestamp", datetime.now(UTC).isoformat()),
                 "phase_outputs": data.get("phase_outputs"),
                 "novelty_score": data.get("novelty_score"),
@@ -328,7 +329,7 @@ class DatabaseClient:
             raise
 
     async def get_thread(self, thread_id: str) -> Optional[Dict[str, Any]]:
-        """Get thread by ID."""
+        """Get thread metadata by ID."""
         try:
             result = self.client.retrieve(
                 collection_name=self.config.CHAT_THREADS_COLLECTION,
@@ -347,7 +348,7 @@ class DatabaseClient:
             raise
 
     async def get_thread_messages(self, thread_id: str, limit: int = 50, before: Optional[str] = None) -> List[Dict[str, Any]]:
-        """Get messages for a thread."""
+        """Get turn records for a thread, sorted by timestamp."""
         try:
             # Build filter
             must_conditions = [
@@ -376,10 +377,20 @@ class DatabaseClient:
             )
 
             points, _ = search_result
+            # Ensure all necessary fields for a 'turn' are returned
             return [
                 {
                     "id": str(point.id),
-                    **point.payload
+                    "content": point.payload.get("content"),
+                    "user_query": point.payload.get("user_query"),
+                    "thread_id": point.payload.get("thread_id"),
+                    "timestamp": point.payload.get("timestamp"),
+                    "phase_outputs": point.payload.get("phase_outputs"),
+                    "metadata": point.payload.get("metadata"),
+                    "novelty_score": point.payload.get("novelty_score"),
+                    "similarity_scores": point.payload.get("similarity_scores"),
+                    "cited_prior_ids": point.payload.get("cited_prior_ids"),
+                    # Add any other fields stored in the payload
                 }
                 for point in points
             ]

@@ -35,6 +35,8 @@ tree.md
 │   │   └── RESTPostchainCoordinator.swift
 │   ├── Info.plist
 │   ├── Models
+│   │   ├── ChoirAPIModels.swift
+│   │   ├── ChoirAppModels.swift
 │   │   └── ChoirModels.swift
 │   ├── Networking
 │   │   ├── ChoirAPIClient.swift
@@ -246,7 +248,7 @@ tree.md
     ├── sources_displaying.sh
     └── test_postchain_multiturn.sh
 
-60 directories, 171 files
+60 directories, 173 files
 
 === File: docs/CHANGELOG.md ===
 

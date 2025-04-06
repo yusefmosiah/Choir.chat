@@ -194,7 +194,7 @@ struct ChoirAPIClient {
         return UserDefaults.standard.string(forKey: "userUUID_\(address)")
     }
 
-    func fetchMessages(threadId: String, limit: Int = 50, before: String? = nil) async throws -> [MessageResponse] {
+    func fetchMessages(threadId: String, limit: Int = 50, before: String? = nil) async throws -> [TurnResponse] { // Update return type
         var urlComponents = URLComponents(string: "\(baseURL.absoluteString)/threads/\(threadId)/messages")!
         var queryItems = [URLQueryItem(name: "limit", value: "\(limit)")]
         if let before = before {
@@ -213,29 +213,15 @@ struct ChoirAPIClient {
 
         let decoder = JSONDecoder()
         decoder.keyDecodingStrategy = .convertFromSnakeCase
-        // Use the newly defined MessagesAPIResponse struct from ChoirModels.swift
-        let apiResponse = try decoder.decode(MessagesAPIResponse.self, from: data)
-        // Access the nested messages array
-        return apiResponse.data?.messages ?? []
+        // Use the renamed TurnsAPIResponse struct from ChoirModels.swift
+        let apiResponse = try decoder.decode(TurnsAPIResponse.self, from: data)
+        // Access the nested turns array
+        return apiResponse.data?.turns ?? []
     }
 }
 
-// MARK: - Response Models
-struct ThreadResponse: Identifiable, Codable {
-    let id: String
-    let name: String
-    let created_at: String
-    let user_id: String
-    let co_authors: [String]
-    let message_count: Int
-    let last_activity: String
-}
 
-// Removed redundant MessageResponse definition. It's now defined in ChoirModels.swift
 
-struct VerifyResponse: Codable {
-    let user_id: String
-}
 
 // MARK: - Authentication Extension
 extension ChoirAPIClient {

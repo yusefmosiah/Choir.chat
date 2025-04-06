@@ -15,7 +15,8 @@ class RESTPostchainAPIClient {
     private let decoder: JSONDecoder
     private let encoder: JSONEncoder
 
-    var viewModel: PostchainViewModel?
+    // Removed viewModel property to simplify scope issues for now
+    // var viewModel: PostchainViewModel?
 
     init(timeout: TimeInterval = 120) {
         let config = URLSessionConfiguration.default

@@ -1,26 +1,26 @@
 import asyncio
 import logging
-from typing import List, Dict, Any, AsyncIterator, Optional
+from typing import List, Dict, Any, AsyncIterator, Optional, Callable, Union
 from langchain_openai import OpenAIEmbeddings
-import uuid # Import uuid
-from datetime import datetime, UTC # Import datetime
+import uuid
+from datetime import datetime, UTC
 
 from langchain_core.messages import HumanMessage, AIMessage, SystemMessage, BaseMessage, ToolMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.runnables import RunnablePassthrough, RunnableLambda
-import json # Added for parsing tool results
+import json
 
 # Local imports
 from app.config import Config
 from app.postchain.postchain_llm import post_llm
 from app.langchain_utils import ModelConfig
-from app.postchain.schemas.state import PostChainState, ExperiencePhaseOutput, SearchResult, VectorSearchResult # Import new schemas
-# from app.postchain.utils import format_stream_event # REMOVE import - no longer using this function
+from app.postchain.schemas.state import PostChainState, ExperiencePhaseOutput, SearchResult, VectorSearchResult
+# from app.postchain.utils import format_stream_event # REMOVE import
 from app.postchain.prompts.prompts import action_instruction, experience_instruction, intention_instruction, understanding_instruction, observation_instruction, yield_instruction
 
 # Langchain Tool Imports (Example)
 from app.tools.brave_search import BraveSearchTool
-from app.tools.qdrant import qdrant_search # Import the specific tool function
+from app.tools.qdrant import qdrant_search
 
 # Configure logging
 logger = logging.getLogger("postchain_langchain")
@@ -30,414 +30,143 @@ You are representing Choir's PostChain, in which many different AI models collab
 You will see <phase_instructions> embedded in user messages, which contain the instructions for the current phase. Followe these instructions carefully.
 """
 
-# --- Conversation history is now persisted in Qdrant ---
+# --- Refactored Phase Runner ---
 
+async def _run_single_phase(
+    phase_name: str,
+    messages: List[BaseMessage], # History up to the point *before* this phase runs
+    model_config: ModelConfig,
+    prompt_instruction_func: Callable[[ModelConfig], str],
+    tools: Optional[List[Any]] = None # Only used for experience phase
+) -> Union[Dict[str, Any], ExperiencePhaseOutput]:
+    """
+    Helper function to run a single Postchain phase.
+    Receives the message history *up to this point*.
+    Constructs the specific prompt/query for the current phase.
+    Calls the LLM.
+    Returns a dictionary with 'response' (AIMessage) or 'error' (str),
+    or ExperiencePhaseOutput for the experience phase.
+    """
+    logger.info(f"Running {phase_name} phase with model: {model_config.provider}/{model_config.model_name}")
 
-# --- Phase Implementations using LCEL ---
+    # Prepare prompt instruction tag
+    instruction = prompt_instruction_func(model_config)
+    phase_instruction_tag = f"<{phase_name}_instruction>{instruction}</{phase_name}_instruction>"
 
-async def run_action_phase(
-    messages: List[BaseMessage],
-    # config: Config, # REMOVED - Keys are in model_config
-    model_config: ModelConfig # This should now contain API keys
-) -> Dict[str, Any]:
-    """Runs the Action phase using LCEL."""
-    logger.info(f"Running Action phase with model: {model_config.provider}/{model_config.model_name}")
+    # Default query content is just the instruction tag
+    phase_query_content = phase_instruction_tag
 
-    # Prepare prompt
-    # Note: Injecting instructions directly into the human message for simplicity here.
-    # A more robust approach might use specific prompt templates or message roles.
-    last_message = messages[-1]
-    if isinstance(last_message, HumanMessage):
-        action_query = f"<action_instruction>{action_instruction(model_config)}</action_instruction>\n\n{last_message.content}"
-        action_messages = [SystemMessage(content=COMMON_SYSTEM_PROMPT)] + messages[:-1] + [HumanMessage(content=action_query)]
-    else:
-        # Fallback if the last message isn't HumanMessage (shouldn't happen in normal flow)
-        logger.warning("Last message was not HumanMessage, running action phase without specific instruction injection.")
-        action_messages = [SystemMessage(content=COMMON_SYSTEM_PROMPT)] + messages
+    # Special handling for Experience phase prompt structure
+    if phase_name == "experience":
+        # Find the most recent HumanMessage (the user query for the *current* turn)
+        last_user_msg = next((m for m in reversed(messages) if isinstance(m, HumanMessage)), None)
+        # Find the most recent AIMessage (the output of the *previous* phase, Action)
+        last_ai_msg = next((m for m in reversed(messages) if isinstance(m, AIMessage)), None)
 
-    try:
-        # Invoke the chain and await the result from post_llm
-        # --- Direct call to post_llm for debugging ---
-        logger.info(f"Directly calling post_llm with model: {model_config}")
-        # Pass the complete ModelConfig object which includes keys
-        response = await post_llm(
-            model_config=model_config,
-            messages=action_messages
-        )
-        # --- End Direct call ---
+        if not last_user_msg or not last_ai_msg:
+            err_msg = f"Could not find previous user query or action response for {phase_name} phase context."
+            logger.error(err_msg)
+            # Return specific type for Experience phase error
+            return ExperiencePhaseOutput(experience_response=AIMessage(content=f"Error: {err_msg}"), error=err_msg)
 
-        # Ensure response is an AIMessage before accessing .content
-        if isinstance(response, AIMessage):
-            logger.info(f"Action phase completed. Response: {response.content[:100]}...")
-            return {"action_response": response}
-        else:
-            # Handle cases where post_llm might return something else on error
-            error_msg = f"Unexpected response type from action model: {type(response)}. Content: {response}"
-            logger.error(error_msg)
-            return {"error": error_msg}
-
-    except Exception as e:
-        logger.error(f"Error during Action phase: {e}", exc_info=True)
-        return {"error": f"Action phase failed: {e}"}
-
-async def run_experience_phase(
-    messages: List[BaseMessage],
-    # config: Config, # REMOVED - Keys are in model_config
-    model_config: ModelConfig # This should now contain API keys
-) -> ExperiencePhaseOutput: # Updated return type
-    """Runs the Experience phase using LCEL, including tool handling."""
-    logger.info(f"Running Experience phase with model: {model_config.provider}/{model_config.model_name}")
-
-    # --- Instantiate Tools ---
-    # Note: qdrant_search is already decorated with @tool, so we just pass the function.
-    # Langchain handles the instantiation and schema generation.
-    # TODO: How should tools requiring config (like BraveSearchTool) be handled now?
-    # Option 1: Pass keys via model_config to the tool constructor if possible.
-    # Option 2: Re-evaluate if these tools *need* server-side config.
-    # For now, let's assume BraveSearchTool can work without server config or gets keys differently.
-    # If BraveSearchTool needs a key, it must be added to ModelConfig and accessed here.
-    # Assuming BraveSearchTool is modified or doesn't strictly need the key from server Config for now.
-    tools = [BraveSearchTool(), qdrant_search] # Add Qdrant tool
-
-    # Prepare prompt - find last user query and last AI (Action) response
-    last_user_msg = next((m for m in reversed(messages) if isinstance(m, HumanMessage)), None)
-    last_ai_msg = next((m for m in reversed(messages) if isinstance(m, AIMessage)), None)
-
-    if not last_user_msg or not last_ai_msg:
-        logger.error("Could not find previous user query or action response for Experience phase.")
-        # Return ExperiencePhaseOutput with error
-        return ExperiencePhaseOutput(experience_response=AIMessage(content="Error: Missing context"), error="Experience phase failed: Missing context.")
-
-
-    experience_query = f"""<experience_instruction>{experience_instruction(model_config)}</experience_instruction>
+        # Construct the specific query content for the experience phase
+        phase_query_content = f"""{phase_instruction_tag}
 
 Original Query: {last_user_msg.content}
-
 Initial Action Response: {last_ai_msg.content}
+Your task: Provide a reflective analysis adding deeper context."""
 
-Your task: Provide a reflective analysis adding deeper context.
-"""
-    # Include system prompt and all messages for context, add specific instruction
-    experience_messages = [SystemMessage(content=COMMON_SYSTEM_PROMPT)] + messages + [HumanMessage(content=experience_query)]
-
-    # Define the runnable chain for the experience phase, passing tools
-    async def _get_experience_response(msgs):
-        logger.info(f"Calling post_llm with model: {model_config}")
-
-        # Pass the complete ModelConfig object
-        return await post_llm(
-            model_config=model_config,
-            messages=msgs,
-            tools=tools
-        )
-    experience_chain = RunnableLambda(_get_experience_response)
+    # Construct messages for the LLM call: History + New Instruction Query
+    phase_messages = [SystemMessage(content=COMMON_SYSTEM_PROMPT)] + messages + [HumanMessage(content=phase_query_content)]
 
     try:
         # --- Initial LLM Call ---
-        response = await experience_chain.ainvoke(experience_messages) # AWAIT HERE
+        response = await post_llm(
+            model_config=model_config,
+            messages=phase_messages,
+            tools=tools # Pass tools if provided (for experience phase)
+        )
 
-        # Check response type after initial call
         if not isinstance(response, AIMessage):
-            error_msg = f"Unexpected response type from experience model (initial call): {type(response)}. Content: {response}"
+            error_msg = f"Unexpected response type from {phase_name} model (initial call): {type(response)}. Content: {response}"
             logger.error(error_msg)
-            # Return ExperiencePhaseOutput with error
-            return ExperiencePhaseOutput(experience_response=AIMessage(content=f"Error: {error_msg}"), error=error_msg)
+            if phase_name == "experience":
+                return ExperiencePhaseOutput(experience_response=AIMessage(content=f"Error: {error_msg}"), error=error_msg)
+            else:
+                 return {"error": error_msg}
 
+        logger.info(f"{phase_name} phase initial call completed. Response: {response.content[:100]}...")
 
-        logger.info(f"Experience phase initial call completed. Response: {response.content[:100]}...")
-
-        # --- Tool Call Handling ---
-        tool_messages: List[ToolMessage] = []
-        web_results_list: List[SearchResult] = []
-        vector_results_list: List[VectorSearchResult] = []
-
-        if hasattr(response, 'tool_calls') and response.tool_calls:
-            logger.info(f"Detected {len(response.tool_calls)} tool calls.")
-            experience_messages.append(response) # Add the AI message with tool_calls
+        # --- Tool Call Handling (Specific to Experience Phase) ---
+        if phase_name == "experience" and hasattr(response, 'tool_calls') and response.tool_calls:
+            logger.info(f"Detected {len(response.tool_calls)} tool calls for Experience phase.")
+            phase_messages.append(response) # Add the AI message with tool_calls
+            tool_messages: List[ToolMessage] = []
+            web_results_list: List[SearchResult] = []
+            vector_results_list: List[VectorSearchResult] = []
 
             for tool_call in response.tool_calls:
-                tool_name = tool_call.get("name")
-                tool_args = tool_call.get("args")
-                tool_id = tool_call.get("id")
+                tool_name, tool_args, tool_id = tool_call.get("name"), tool_call.get("args"), tool_call.get("id")
                 logger.info(f"Executing tool: {tool_name} with args: {tool_args}")
-
-                # Find and execute the corresponding tool
-                # Note: We match by name. BraveSearchTool has name 'brave_search', qdrant_search has name 'qdrant_search'.
                 tool_to_execute = next((t for t in tools if hasattr(t, 'name') and t.name == tool_name), None)
-                tool_output_str = "" # Raw string output from the tool
-                parsed_results = [] # Parsed results for structured storage
-
+                tool_output_str = ""
                 if tool_to_execute:
                     try:
-                        # Adapt based on tool's expected input (dict vs string)
-                        # Use asyncio.to_thread for synchronous run method if arun is not available
                         input_arg_val = None
-                        if isinstance(tool_args, dict):
-                            # Qdrant expects dict, Brave expects query string within dict
-                            input_arg_val = tool_args.get('query', tool_args)
-                            if not isinstance(input_arg_val, str): input_arg_val = str(input_arg_val) # Ensure string for run/arun
-                        elif isinstance(tool_args, str):
-                            input_arg_val = tool_args
-
+                        if isinstance(tool_args, dict): input_arg_val = tool_args.get('query', tool_args)
+                        elif isinstance(tool_args, str): input_arg_val = tool_args
                         if input_arg_val is not None:
-                            if hasattr(tool_to_execute, 'arun'):
-                                tool_output_str = await tool_to_execute.arun(input_arg_val)
+                            if not isinstance(input_arg_val, str): input_arg_val = str(input_arg_val)
+                            if hasattr(tool_to_execute, 'arun'): tool_output_str = await tool_to_execute.arun(input_arg_val)
                             elif hasattr(tool_to_execute, 'run'):
-                                # Check if 'run' is async or sync
-                                if asyncio.iscoroutinefunction(tool_to_execute.run):
-                                    # Await async 'run' method directly
-                                    tool_output_str = await tool_to_execute.run(input_arg_val)
-                                else:
-                                    # Run synchronous 'run' method in a separate thread
-                                    tool_output_str = await asyncio.to_thread(tool_to_execute.run, input_arg_val)
-                            else:
-                                tool_output_str = f"Error: Tool {tool_name} has neither 'run' nor 'arun' method."
-                                logger.error(tool_output_str)
-                        else:
-                            tool_output_str = f"Error: Unsupported tool args format for {tool_name}: {type(tool_args)}"
-                            logger.error(tool_output_str) # Log error here as well
-
-                        # --- Parse Tool Output ---
-                        # Ensure tool_output_str is actually a string before parsing
+                                if asyncio.iscoroutinefunction(tool_to_execute.run): tool_output_str = await tool_to_execute.run(input_arg_val)
+                                else: tool_output_str = await asyncio.to_thread(tool_to_execute.run, input_arg_val)
+                            else: tool_output_str = f"Error: Tool {tool_name} has neither 'run' nor 'arun' method."; logger.error(tool_output_str)
+                        else: tool_output_str = f"Error: Unsupported tool args format for {tool_name}: {type(tool_args)}"; logger.error(tool_output_str)
                         if isinstance(tool_output_str, str):
                             try:
-                                # Attempt to parse JSON for structured results (Brave, potentially others)
                                 parsed_output = json.loads(tool_output_str)
                                 if isinstance(parsed_output, dict) and "results" in parsed_output:
                                     raw_results = parsed_output["results"]
                                     if tool_name == "brave_search":
-                                        for res in raw_results:
-                                            web_results_list.append(SearchResult(
-                                                title=res.get("title", ""),
-                                                url=res.get("url", ""),
-                                                content=res.get("content", res.get("description", "")), # Use description as fallback
-                                                provider=tool_name
-                                            ))
-                                    # Add parsing logic for other tools if needed
-
+                                        for res in raw_results: web_results_list.append(SearchResult(title=res.get("title", ""), url=res.get("url", ""), content=res.get("content", res.get("description", "")), provider=tool_name))
                             except json.JSONDecodeError:
-                                # If not JSON, assume it's a string summary (like qdrant_search)
                                 logger.debug(f"Tool {tool_name} output is not JSON, treating as string summary.")
-                                if tool_name == "qdrant_search":
-                                    # Qdrant tool returns a string summary. Create a single VectorSearchResult.
-                                    vector_results_list.append(VectorSearchResult(
-                                        content=tool_output_str,
-                                        score=0.0, # Add required score field (placeholder)
-                                        provider=tool_name,
-                                        # Add other fields like score, metadata if parseable or available
-                                    ))
-                            # Keep tool_output_str as is for the LLM ToolMessage
+                                if tool_name == "qdrant_search": vector_results_list.append(VectorSearchResult(content=tool_output_str, score=0.0, provider=tool_name))
+                    except Exception as tool_err: tool_output_str = f"Error executing tool {tool_name}: {tool_err}"; logger.error(tool_output_str, exc_info=True)
+                else: tool_output_str = f"Error: Tool '{tool_name}' not found."; logger.error(tool_output_str)
+                tool_messages.append(ToolMessage(content=tool_output_str, tool_call_id=tool_id, name=tool_name))
 
-                    except Exception as tool_err:
-                        tool_output_str = f"Error executing tool {tool_name}: {tool_err}"
-                        logger.error(tool_output_str, exc_info=True)
-                else:
-                    tool_output_str = f"Error: Tool '{tool_name}' not found."
-                    logger.error(tool_output_str)
-
-                # Append the raw tool output string to the message for the LLM
-                tool_messages.append(
-                    ToolMessage(
-                        content=tool_output_str, # Pass the raw string output
-                        tool_call_id=tool_id,
-                        name=tool_name
-                    )
-                )
-
-            experience_messages.extend(tool_messages)
-
-            # --- Second LLM Call (with tool results) ---
-            logger.info("Calling LLM again with tool results.")
-            # Need to await the result of post_llm here
-            logger.info(f"Calling post_llm with model: {model_config}")
-
-            # Pass the complete ModelConfig object
-            response = await post_llm(
-                model_config=model_config,
-                messages=experience_messages # Pass messages including tool results
-            )
-
-            # Check response type after second call
+            phase_messages.extend(tool_messages)
+            logger.info("Calling LLM again with tool results for Experience phase.")
+            response = await post_llm(model_config=model_config, messages=phase_messages) # No tools needed for second call
             if not isinstance(response, AIMessage):
                 error_msg = f"Unexpected response type from experience model (second call): {type(response)}. Content: {response}"
                 logger.error(error_msg)
                 return ExperiencePhaseOutput(experience_response=AIMessage(content="Error processing tool results."), error=error_msg)
-
             logger.info(f"Experience phase second call completed. Response: {response.content[:100]}...")
 
-        # Return the structured output
-        return ExperiencePhaseOutput(
-            experience_response=response,
-            web_results=web_results_list,
-            vector_results=vector_results_list # Will be empty if qdrant tool wasn't called or parsing failed
-        )
+            # Return the structured output for Experience phase
+            return ExperiencePhaseOutput(
+                experience_response=response,
+                web_results=web_results_list,
+                vector_results=vector_results_list
+            )
 
-    except Exception as e:
-        logger.error(f"Error during Experience phase: {e}", exc_info=True)
-        # Return structured error
-        return ExperiencePhaseOutput(
-            experience_response=AIMessage(content=f"Experience phase failed: {e}"),
-            error=f"Experience phase failed: {e}"
-        )
-
-async def run_intention_phase(
-    messages: List[BaseMessage],
-    # config: Config, # REMOVED
-    model_config: ModelConfig # This should now contain API keys
-) -> Dict[str, Any]:
-    """Runs the Intention phase using LCEL."""
-    logger.info(f"Running Intention phase with model: {model_config.provider}/{model_config.model_name}")
-
-    # Prepare prompt - include full history
-    intention_query = f"<intention_instruction>{intention_instruction(model_config)}</intention_instruction>"
-
-    intention_messages = [SystemMessage(content=COMMON_SYSTEM_PROMPT)] + messages + [HumanMessage(content=intention_query)]
-
-    # Define the runnable chain for the intention phase
-    async def _get_intention_response(msgs):
-        logger.info(f"Calling post_llm with model: {model_config}")
-
-        # Pass the complete ModelConfig object
-        return await post_llm(
-            model_config=model_config,
-            messages=msgs
-        )
-    intention_chain = RunnableLambda(_get_intention_response)
-
-    try:
-        # Invoke the chain and await the result
-        response = await intention_chain.ainvoke(intention_messages)
-
-        # Ensure response is an AIMessage before accessing .content
-        if isinstance(response, AIMessage):
-            logger.info(f"Intention phase completed. Response: {response.content[:100]}...")
-            return {"intention_response": response}
+        # For non-experience phases or experience without tool calls
+        if phase_name == "experience":
+             return ExperiencePhaseOutput(experience_response=response, web_results=[], vector_results=[])
         else:
-            error_msg = f"Unexpected response type from intention model: {type(response)}. Content: {response}"
-            logger.error(error_msg)
-            return {"error": error_msg}
+            # Return standard dictionary for other phases
+            return {"response": response}
 
     except Exception as e:
-        logger.error(f"Error during Intention phase: {e}", exc_info=True)
-        return {"error": f"Intention phase failed: {e}"}
-
-async def run_observation_phase(
-    messages: List[BaseMessage],
-    # config: Config, # REMOVED
-    model_config: ModelConfig # This should now contain API keys
-) -> Dict[str, Any]:
-    """Runs the Observation phase using LCEL."""
-    logger.info(f"Running Observation phase with model: {model_config.provider}/{model_config.model_name}")
-
-    # Prepare prompt - include full history
-    observation_query = f"<observation_instruction>{observation_instruction(model_config)}</observation_instruction>"
-
-    observation_messages = [SystemMessage(content=COMMON_SYSTEM_PROMPT)] + messages + [HumanMessage(content=observation_query)]
-    # Define the runnable chain for the observation phase
-    async def observation_wrapper(msgs):
-        logger.info(f"Calling post_llm with model: {model_config}")
-
-        # Pass the complete ModelConfig object
-        return await post_llm(
-            model_config=model_config,
-            messages=msgs
-        )
-    observation_chain = RunnableLambda(observation_wrapper)
-
-    try:
-        # Invoke the chain and await the result
-        response = await observation_chain.ainvoke(observation_messages)
-
-        # Ensure response is an AIMessage before accessing .content
-        if isinstance(response, AIMessage):
-            logger.info(f"Observation phase completed. Response: {response.content[:100]}...")
-            # Note: This phase's output is primarily for internal state/logging.
-            return {"observation_response": response}
+        logger.error(f"Error during {phase_name} phase: {e}", exc_info=True)
+        error_msg = f"{phase_name} phase failed: {e}"
+        if phase_name == "experience":
+             return ExperiencePhaseOutput(experience_response=AIMessage(content=f"Error: {error_msg}"), error=error_msg)
         else:
-            error_msg = f"Unexpected response type from observation model: {type(response)}. Content: {response}"
-            logger.error(error_msg)
             return {"error": error_msg}
-
-    except Exception as e:
-        logger.error(f"Error during Observation phase: {e}", exc_info=True)
-        return {"error": f"Observation phase failed: {e}"}
-
-async def run_understanding_phase(
-    messages: List[BaseMessage],
-    # config: Config, # REMOVED
-    model_config: ModelConfig # This should now contain API keys
-) -> Dict[str, Any]:
-    """Runs the Understanding phase using LCEL."""
-    logger.info(f"Running Understanding phase with model: {model_config.provider}/{model_config.model_name}")
-
-    # Prepare prompt - include full history
-    understanding_query = f"<understanding_instruction>{understanding_instruction(model_config)}</understanding_instruction>"
-
-    understanding_messages = [SystemMessage(content=COMMON_SYSTEM_PROMPT)] + messages + [HumanMessage(content=understanding_query)]
-
-    # Define the runnable chain for the understanding phase
-    async def understanding_wrapper(msgs):
-        logger.info(f"Calling post_llm with model: {model_config}")
-
-        # Pass the complete ModelConfig object
-        return await post_llm(
-            model_config=model_config,
-            messages=msgs
-        )
-    understanding_chain = RunnableLambda(understanding_wrapper)
-
-    try:
-        # Invoke the chain and await the result
-        response = await understanding_chain.ainvoke(understanding_messages)
-
-        # Ensure response is an AIMessage before accessing .content
-        if isinstance(response, AIMessage):
-            logger.info(f"Understanding phase completed. Response: {response.content[:100]}...")
-            # Note: This phase's output is primarily for internal state/filtering.
-            return {"understanding_response": response}
-        else:
-            error_msg = f"Unexpected response type from understanding model: {type(response)}. Content: {response}"
-            logger.error(error_msg)
-            return {"error": error_msg}
-
-    except Exception as e:
-        logger.error(f"Error during Understanding phase: {e}", exc_info=True)
-        return {"error": f"Understanding phase failed: {e}"}
-
-async def run_yield_phase(
-    messages: List[BaseMessage],
-    # config: Config, # REMOVED
-    model_config: ModelConfig # This should now contain API keys
-) -> Dict[str, Any]:
-    """Runs the Yield phase using LCEL."""
-    logger.info(f"Running Yield phase with model: {model_config.provider}/{model_config.model_name}")
-
-    yield_query = f"<yield_instruction>{yield_instruction(model_config)}</yield_instruction>"
-
-    # Include system prompt and relevant history (maybe just understanding?) for final response generation
-    # For simplicity, using full history here, but could be optimized
-    yield_messages = [SystemMessage(content=COMMON_SYSTEM_PROMPT)] + messages + [HumanMessage(content=yield_query)]
-
-
-    # Define the runnable chain for the yield phase
-    async def yield_wrapper(msgs):
-        logger.info(f"Calling post_llm with model: {model_config}")
-
-        # Pass the complete ModelConfig object
-        return await post_llm(
-            model_config=model_config,
-            messages=msgs
-        )
-    yield_chain = RunnableLambda(yield_wrapper)
-
-    try:
-        # Invoke the chain
-        response: AIMessage = await yield_chain.ainvoke(yield_messages)
-        logger.info(f"Yield phase completed. Final Response: {response.content[:100]}...")
-        return {"yield_response": response, "final_content": response.content} # Include final_content in yield phase output
-    except Exception as e:
-        logger.error(f"Error during Yield phase: {e}", exc_info=True)
-        return {"error": f"Yield phase failed: {e}"}
 
 
 # --- Main Workflow ---
@@ -445,9 +174,7 @@ async def run_yield_phase(
 async def run_langchain_postchain_workflow(
     query: str,
     thread_id: str,
-    message_history: List[BaseMessage],
-    # config: Config, # REMOVED - Keys are now expected within the model_config overrides
-    # Allow overriding models per phase for testing
+    message_history: List[BaseMessage], # This is likely unused now as history is loaded from DB
     action_mc_override: Optional[ModelConfig] = None,
     experience_mc_override: Optional[ModelConfig] = None,
     intention_mc_override: Optional[ModelConfig] = None,
@@ -457,8 +184,8 @@ async def run_langchain_postchain_workflow(
 ) -> AsyncIterator[Dict[str, Any]]:
     """
     Runs the full PostChain workflow using Langchain LCEL.
-    Allows overriding model selection per phase for testing.
-    The provided override ModelConfig objects MUST contain the necessary API keys.
+    Saves ONE record per turn containing user query and AI response + phase outputs.
+    Yields events for each phase status update.
     """
     logger.info(f"Starting Langchain PostChain workflow for thread {thread_id}")
 
@@ -467,271 +194,120 @@ async def run_langchain_postchain_workflow(
 
     # --- Model Configuration (Prioritize Overrides) ---
     try:
-        # Use override if provided, otherwise use default with temperature set
-        default_temp = 0.333  # Default temperature for all models
+        default_temp = 0.333
         action_model_config = action_mc_override if action_mc_override else ModelConfig(provider="google", model_name="gemini-2.0-flash-lite", temperature=default_temp)
         experience_model_config = experience_mc_override if experience_mc_override else ModelConfig(provider="openrouter", model_name="ai21/jamba-1.6-mini", temperature=default_temp)
         intention_model_config = intention_mc_override if intention_mc_override else ModelConfig(provider="google", model_name="gemini-2.0-flash", temperature=default_temp)
         observation_model_config = observation_mc_override if observation_mc_override else ModelConfig(provider="groq", model_name="qwen-qwq-32b", temperature=default_temp)
         understanding_model_config = understanding_mc_override if understanding_mc_override else ModelConfig(provider="openrouter", model_name="openrouter/quasar-alpha", temperature=default_temp)
         yield_model_config = yield_mc_override if yield_mc_override else ModelConfig(provider="google", model_name="gemini-2.5-pro-exp-03-25", temperature=default_temp)
-
-        # Log the final model configuration being used for this run
         logger.info(f"Workflow Models - Action: {action_model_config}, Experience: {experience_model_config}, Intention: {intention_model_config}, Observation: {observation_model_config}, Understanding: {understanding_model_config}, Yield: {yield_model_config}")
-
     except Exception as e:
         logger.error(f"Failed to initialize models: {e}")
-        yield {"error": f"Model initialization failed: {e}"}
+        yield {"phase": "system", "status": "error", "error": f"Model initialization failed: {e}"}
         return
 
     # --- State Management & Accumulation ---
     accumulated_phase_outputs: Dict[str, str] = {} # Dictionary to store phase results
     from app.database import DatabaseClient
-    from datetime import datetime, UTC
-
     db_client = DatabaseClient(Config())
 
     # Load message history from Qdrant
-    qdrant_history = await db_client.get_message_history(thread_id)
-    # Convert dicts to Langchain messages
-    loaded_history = []
-    for msg in qdrant_history:
-        role = msg.get("role")
-        content = msg.get("content", "")
-        if role == "user":
-            loaded_history.append(HumanMessage(content=content))
-        elif role == "assistant":
-            # TODO: Decide if we need to load phase_outputs for history? Probably not for LLM context.
-            loaded_history.append(AIMessage(content=content))
-        else:
-            # Default fallback
-            loaded_history.append(HumanMessage(content=content))
-
-    # Combine loaded history with any passed-in history (e.g., from current session)
-    # Ensure no duplicates if message_history is derived from loaded_history
-    # For simplicity, assuming message_history is empty or contains only new messages for this turn
-    current_messages: List[BaseMessage] = loaded_history + message_history
-
-    # Add the current user query
-    user_message = HumanMessage(content=query)
-    current_messages.append(user_message)
-
-    # Save the user message to DB
     try:
-        user_vector = await embeddings.aembed_query(query)
-        user_message_payload = {
-            "content": query,
-            "vector": user_vector,
-            "thread_id": thread_id,
-            "role": "user",
-            "timestamp": datetime.now(UTC).isoformat(),
-            "metadata": {} # Add any relevant user metadata
-        }
-        await db_client.save_message(user_message_payload)
-        logger.info(f"Saved user message for thread {thread_id}")
-    except Exception as save_err:
-        logger.error(f"Failed to save user message for thread {thread_id}: {save_err}", exc_info=True)
-        # Yield dictionary directly
-        yield {
-            "phase": "system", # Use a generic phase for system errors
-            "status": "error",
-            "error": f"Failed to save user message: {save_err}"
-        }
-        return
+        qdrant_history = await db_client.get_message_history(thread_id)
+        loaded_history = []
+        for msg in qdrant_history:
+            # role = msg.get("role") # Role no longer used in this way
+            content = msg.get("content", "") # This is the AI response content
+            user_query_from_history = msg.get("user_query") # Get the user query for this turn
+
+            # Reconstruct conversation flow for model context
+            if user_query_from_history:
+                 loaded_history.append(HumanMessage(content=user_query_from_history))
+            # Assistant content always follows user query (if available)
+            loaded_history.append(AIMessage(content=content)) # Add AI content
+
+    except Exception as db_err:
+         logger.error(f"Failed to load history for thread {thread_id}: {db_err}", exc_info=True)
+         yield {"phase": "system", "status": "error", "error": f"Failed to load history: {db_err}"}
+         return
+
+    # Start with loaded history and add the current user query for this turn's context
+    current_messages: List[BaseMessage] = loaded_history + [HumanMessage(content=query)]
+
+    # --- Run Phases Sequentially using Helper ---
+    phases_to_run = [
+        ("action", action_model_config, action_instruction, None),
+        ("experience", experience_model_config, experience_instruction, [BraveSearchTool(), qdrant_search]), # Pass tools here
+        ("intention", intention_model_config, intention_instruction, None),
+        ("observation", observation_model_config, observation_instruction, None),
+        ("understanding", understanding_model_config, understanding_instruction, None),
+        ("yield", yield_model_config, yield_instruction, None),
+    ]
+
+    final_yield_response: Optional[AIMessage] = None
+
+    for phase_name, model_config, instruction_func, tools in phases_to_run:
+        # Yield running status
+        yield {"phase": phase_name, "status": "running", "content": f"Running {phase_name} phase..."}
+
+        # Call the helper function
+        # Pass the *current* message list including the latest user query and previous AI phase outputs
+        phase_result = await _run_single_phase(
+            phase_name=phase_name,
+            messages=current_messages, # Pass the updated list
+            model_config=model_config,
+            prompt_instruction_func=instruction_func,
+            tools=tools
+        )
+
+        # Process result
+        error_message = None
+        phase_response = None
+        metadata = {} # Default empty metadata
+
+        # Special handling for Experience phase output structure
+        if phase_name == "experience":
+            if isinstance(phase_result, ExperiencePhaseOutput):
+                error_message = phase_result.error
+                phase_response = phase_result.experience_response
+                metadata = {"web_results_count": len(phase_result.web_results or []), "vector_results_count": len(phase_result.vector_results or [])}
+            else: # Handle potential error dict return from helper
+                 error_message = phase_result.get("error", f"Unknown error structure in {phase_name} phase")
+        else: # Other phases return Dict
+             if isinstance(phase_result, dict):
+                 error_message = phase_result.get("error")
+                 phase_response = phase_result.get("response")
+             else: # Should not happen if helper returns correctly
+                 error_message = f"Unexpected return type from {phase_name} phase: {type(phase_result)}"
+
+        # Handle errors
+        if error_message:
+            yield {"phase": phase_name, "status": "error", "error": error_message, "provider": model_config.provider, "model_name": model_config.model_name}
+            return # Stop workflow on error
+
+        # Check for valid AI response
+        if not phase_response or not isinstance(phase_response, AIMessage):
+             yield {"phase": phase_name, "status": "error", "error": f"Invalid or missing AI response from {phase_name} phase.", "provider": model_config.provider, "model_name": model_config.model_name}
+             return # Stop workflow
+
+        # Success: Update history, accumulate output, yield completion
+        current_messages.append(phase_response) # Add successful AI response to context for the *next* phase
+        accumulated_phase_outputs[phase_name] = phase_response.content
+        yield {"phase": phase_name, "status": "complete", "content": phase_response.content, "provider": model_config.provider, "model_name": model_config.model_name, "metadata": metadata}
+
+        # Store the final yield response separately
+        if phase_name == "yield":
+            final_yield_response = phase_response
 
 
-    # --- Run Phases Sequentially ---
+    # --- Save the Single Turn Record ---
+    if not final_yield_response:
+         logger.error(f"Yield phase did not produce a final response for thread {thread_id}.")
+         yield {"phase": "system", "status": "error", "error": "Workflow completed without a final yield response."}
+         return
 
-    # 1. Action Phase
-    # Yield dictionary directly
-    yield {
-        "phase": "action",
-        "status": "running",
-        "content": "Running action phase..."
-    }
-    action_result = await run_action_phase(current_messages, action_model_config)
-    if "error" in action_result:
-        # Yield dictionary directly
-        yield {
-            "phase": "action",
-            "status": "error",
-            "error": action_result["error"],
-            "provider": action_model_config.provider,
-            "model_name": action_model_config.model_name
-        }
-        return # Stop workflow on error
-
-    action_response: AIMessage = action_result["action_response"]
-    current_messages.append(action_response) # Add AI response to history for next phase
-    accumulated_phase_outputs["action"] = action_response.content # Store result
-    # Yield dictionary directly
-    yield {
-        "phase": "action",
-        "status": "complete",
-        "content": action_response.content,
-        "provider": action_model_config.provider,
-        "model_name": action_model_config.model_name
-    }
-
-    # 2. Experience Phase
-    # Yield dictionary directly
-    yield {
-        "phase": "experience",
-        "status": "running",
-        "content": "Running experience phase..."
-    }
-    experience_result: ExperiencePhaseOutput = await run_experience_phase(current_messages, experience_model_config)
-    if experience_result.error:
-        # Yield dictionary directly
-        yield {
-            "phase": "experience",
-            "status": "error",
-            "error": experience_result.error,
-            "provider": experience_model_config.provider,
-            "model_name": experience_model_config.model_name
-        }
-        return # Stop workflow on error
-
-    experience_response: AIMessage = experience_result.experience_response
-    current_messages.append(experience_response) # Add AI response to history
-    accumulated_phase_outputs["experience"] = experience_response.content # Store result
-    # TODO: Handle/yield web_results and vector_results if needed for streaming
-    # Yield dictionary directly
-    yield {
-        "phase": "experience",
-        "status": "complete",
-        "content": experience_response.content,
-        "provider": experience_model_config.provider,
-        "model_name": experience_model_config.model_name,
-        "metadata": {"web_results_count": len(experience_result.web_results or []), "vector_results_count": len(experience_result.vector_results or [])} # Example metadata
-    }
-
-    # 3. Intention Phase
-    # Yield dictionary directly
-    yield {
-        "phase": "intention",
-        "status": "running",
-        "content": "Running intention phase..."
-    }
-    intention_result = await run_intention_phase(current_messages, intention_model_config)
-    if "error" in intention_result:
-        # Yield dictionary directly
-        yield {
-            "phase": "intention",
-            "status": "error",
-            "error": intention_result["error"],
-            "provider": intention_model_config.provider,
-            "model_name": intention_model_config.model_name
-        }
-        return # Stop workflow on error
-
-    intention_response: AIMessage = intention_result["intention_response"]
-    current_messages.append(intention_response) # Add AI response to history
-    accumulated_phase_outputs["intention"] = intention_response.content # Store result
-    # Yield dictionary directly
-    yield {
-        "phase": "intention",
-        "status": "complete",
-        "content": intention_response.content,
-        "provider": intention_model_config.provider,
-        "model_name": intention_model_config.model_name
-    }
-
-    # 4. Observation Phase
-    # Yield dictionary directly
-    yield {
-        "phase": "observation",
-        "status": "running",
-        "content": "Running observation phase..."
-    }
-    observation_result = await run_observation_phase(current_messages, observation_model_config)
-    if "error" in observation_result:
-        # Yield dictionary directly
-        yield {
-            "phase": "observation",
-            "status": "error",
-            "error": observation_result["error"],
-            "provider": observation_model_config.provider,
-            "model_name": observation_model_config.model_name
-        }
-        return # Stop workflow on error
-
-    observation_response: AIMessage = observation_result["observation_response"]
-    current_messages.append(observation_response) # Add AI response to history
-    accumulated_phase_outputs["observation"] = observation_response.content # Store result
-    # Yield dictionary directly
-    yield {
-        "phase": "observation",
-        "status": "complete",
-        "content": observation_response.content,
-        "provider": observation_model_config.provider,
-        "model_name": observation_model_config.model_name
-    }
-
-    # 5. Understanding Phase
-    # Yield dictionary directly
-    yield {
-        "phase": "understanding",
-        "status": "running",
-        "content": "Running understanding phase..."
-    }
-    understanding_result = await run_understanding_phase(current_messages, understanding_model_config)
-    if "error" in understanding_result:
-        # Yield dictionary directly
-        yield {
-            "phase": "understanding",
-            "status": "error",
-            "error": understanding_result["error"],
-            "provider": understanding_model_config.provider,
-            "model_name": understanding_model_config.model_name
-        }
-        return # Stop workflow on error
-
-    understanding_response: AIMessage = understanding_result["understanding_response"]
-    current_messages.append(understanding_response) # Add AI response to history
-    accumulated_phase_outputs["understanding"] = understanding_response.content # Store result
-    # Yield dictionary directly
-    yield {
-        "phase": "understanding",
-        "status": "complete",
-        "content": understanding_response.content,
-        "provider": understanding_model_config.provider,
-        "model_name": understanding_model_config.model_name
-    }
-
-    # 6. Yield Phase
-    # Yield dictionary directly
-    yield {
-        "phase": "yield",
-        "status": "running",
-        "content": "Running yield phase..."
-    }
-    yield_result = await run_yield_phase(current_messages, yield_model_config)
-    if "error" in yield_result:
-        # Yield dictionary directly
-        yield {
-            "phase": "yield",
-            "status": "error",
-            "error": yield_result["error"],
-            "provider": yield_model_config.provider,
-            "model_name": yield_model_config.model_name
-        }
-        return # Stop workflow on error
-
-    yield_response: AIMessage = yield_result["yield_response"]
-    accumulated_phase_outputs["yield"] = yield_response.content # Store result
-    # Don't add Yield response to message history unless needed for recursion logic
-    # Yield dictionary directly
-    yield {
-        "phase": "yield",
-        "status": "complete",
-        "content": yield_response.content, # Use 'content' for consistency
-        "provider": yield_model_config.provider,
-        "model_name": yield_model_config.model_name
-    }
-
-# Save the final AI message after Yield phase
-    final_content = yield_response.content
+    final_content = final_yield_response.content
     try:
         final_vector = await embeddings.aembed_query(final_content)
         logger.info(f"Generated embedding for final AI message (length: {len(final_vector)})")
@@ -739,43 +315,37 @@ async def run_langchain_postchain_workflow(
         logger.error(f"Failed to generate embedding for AI message: {embed_err}", exc_info=True)
         final_vector = [0.0] * Config().VECTOR_SIZE # Use zero vector as fallback
 
-    # Construct the payload for save_message
-    ai_message_payload = {
-        "content": final_content,
-        "vector": final_vector,
+    # Construct the single payload for this turn
+    turn_payload = {
+        "content": final_content, # AI's final response
+        "vector": final_vector, # Embedding of AI's final response
         "thread_id": thread_id,
-        "role": "assistant",
+        # "role": "assistant", # REMOVED role
+        "user_query": query, # Store the original user query
         "timestamp": datetime.now(UTC).isoformat(),
-        "phase_outputs": accumulated_phase_outputs, # Use the accumulated dictionary
-        "metadata": { # Populate metadata with model info
-            "action_model": action_model_config.identifier(),
-            "experience_model": experience_model_config.identifier(),
-            "intention_model": intention_model_config.identifier(),
-            "observation_model": observation_model_config.identifier(),
-            "understanding_model": understanding_model_config.identifier(),
-            "yield_model": yield_model_config.identifier(),
+        "phase_outputs": accumulated_phase_outputs, # Include all phase outputs
+        "metadata": { # Populate metadata with model info using __str__
+            "action_model": str(action_model_config),
+            "experience_model": str(experience_model_config),
+            "intention_model": str(intention_model_config),
+            "observation_model": str(observation_model_config),
+            "understanding_model": str(understanding_model_config),
+            "yield_model": str(yield_model_config),
         },
         # TODO: Add novelty_score, similarity_scores, cited_prior_ids if available
-        # These would need to be calculated/extracted during the workflow, perhaps in Experience phase
         "novelty_score": None, # Placeholder
         "similarity_scores": None, # Placeholder
         "cited_prior_ids": None, # Placeholder
     }
 
     try:
-        await db_client.save_message(ai_message_payload)
-        logger.info(f"Successfully saved AI message with phase_outputs for thread {thread_id}. Payload keys: {list(ai_message_payload.keys())}")
+        # Save the single turn record
+        await db_client.save_message(turn_payload)
+        logger.info(f"Successfully saved turn record with phase_outputs for thread {thread_id}. Payload keys: {list(turn_payload.keys())}")
     except Exception as save_err:
-        logger.error(f"Failed to save AI message for thread {thread_id}: {save_err}", exc_info=True)
-        # Yield dictionary directly
-        yield {
-            "phase": "system", # Use a generic phase for system errors
-            "status": "error",
-            "error": f"Failed to save AI response: {save_err}"
-        }
-    # Note: The yield event for the 'yield' phase was already sent before this save block.
-    # We don't need to yield it again here. The workflow concludes after this.
-
+        logger.error(f"Failed to save turn record for thread {thread_id}: {save_err}", exc_info=True)
+        yield {"phase": "system", "status": "error", "error": f"Failed to save turn record: {save_err}"}
+        # Don't return here, let the workflow complete normally if possible
 
     logger.info(f"Langchain PostChain workflow completed for thread {thread_id}")
     # Yield final completion event
@@ -786,36 +356,26 @@ async def run_langchain_postchain_workflow(
     }
 
 # --- Example Usage (for testing) ---
+# (main function remains largely the same, but history building might need adjustment)
 async def main():
-    # config = Config() # REMOVED - Config object no longer needed here
-    thread_id = "test-thread-lc"
-    message_history = [] # Start with empty history
-    query = "What is the capital of France? Search the web if you don't know."
+    thread_id = "test-thread-lc-turn"
+    message_history = []
+    query = "What was the score of the last Lakers game? Search the web."
 
-    # --- IMPORTANT: For this test main function to work, ---
-    # --- the default ModelConfigs created in run_langchain_postchain_workflow ---
-    # --- MUST now include hardcoded API keys, or this test will fail. ---
-    # --- Alternatively, pass ModelConfig overrides with keys here. ---
-
-    # Example passing overrides (replace with actual keys or load from env for testing)
-    test_action_mc = ModelConfig(provider="google", model_name="gemini-2.0-flash-lite", google_api_key="YOUR_GOOGLE_KEY")
-    test_experience_mc = ModelConfig(provider="openrouter", model_name="ai21/jamba-1.6-mini", openrouter_api_key="YOUR_OPENROUTER_KEY")
-    # ... add other phase configs with keys ...
+    test_action_mc = ModelConfig(provider="google", model_name="gemini-2.0-flash-lite") # Add keys if needed locally
+    test_experience_mc = ModelConfig(provider="openrouter", model_name="ai21/jamba-1.6-mini") # Add keys if needed locally
 
     async for event in run_langchain_postchain_workflow(
         query=query,
         thread_id=thread_id,
-        message_history=message_history,
-        # Pass overrides if needed for testing:
+        message_history=message_history, # Pass empty history for first turn
         # action_mc_override=test_action_mc,
         # experience_mc_override=test_experience_mc,
-        # ...
     ):
         print(json.dumps(event, indent=2))
-        # Add AI responses to history for subsequent phases/turns (simplified)
-        if event.get("status") == "complete" and "content" in event and event.get("phase") != "yield":
-             message_history.append(AIMessage(content=event["content"], additional_kwargs={"phase": event.get("phase")}))
-        elif event.get("phase") == "yield" and event.get("status") == "complete":
+        # History reconstruction for multi-turn tests would need updating
+        # based on the new single-record model if running subsequent turns here.
+        if event.get("phase") == "yield" and event.get("status") == "complete":
              print("\n--- FINAL RESPONSE ---")
              print(event.get("content")) # Use 'content' key now
              print("----------------------")
@@ -825,4 +385,12 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     # Example of running the main function for testing
     # asyncio.run(main())
-    pass # Keep pass here if not running main directly
+    pass
+
+# REMOVE OLD PHASE FUNCTIONS (as they are replaced by the helper)
+# async def run_action_phase(...): ...
+# async def run_experience_phase(...): ...
+# async def run_intention_phase(...): ...
+# async def run_observation_phase(...): ...
+# async def run_understanding_phase(...): ...
+# async def run_yield_phase(...): ...

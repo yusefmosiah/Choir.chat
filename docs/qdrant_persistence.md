@@ -34,17 +34,18 @@ Leverage the existing Qdrant integration (`api/app/database.py`) as the **single
 
 Each point in the `choir` collection representing a message turn should include fields like:
 
-*   `id`: Unique UUID for the message point (can be generated on save).
-*   `thread_id`: UUID linking the message to a specific conversation thread. (Crucial for retrieval).
-*   `role`: String indicating 'user' or 'assistant'.
-*   `content`: The primary text content of the message.
-*   `timestamp`: ISO 8601 timestamp for ordering.
-*   `vector`: Embedding of the `content` (handled by `database.py`).
-*   **(For AI messages) phase_outputs**: Dictionary containing the outputs from each AEIOU-Y phase.
-*   **(For AI messages) novelty_score**: Float score from Experience phase.
-*   **(For AI messages) similarity_scores**: Dictionary or list of scores for priors.
-*   **(For AI messages) cited_prior_ids**: List of IDs of messages cited as priors.
-*   **(Optional) metadata**: Any other relevant metadata.
+*   `id`: Unique UUID for the turn record (generated on save).
+*   `thread_id`: UUID linking the turn to a specific conversation thread.
+*   `user_query`: The original text input from the user for this turn.
+*   `content`: The final AI response content (e.g., from Yield phase).
+*   `timestamp`: ISO 8601 timestamp for ordering the turn.
+*   `vector`: Embedding of the AI `content`.
+*   `phase_outputs`: Dictionary containing the outputs from each AEIOU-Y phase.
+*   `novelty_score`: Float score (placeholder for now).
+*   `similarity_scores`: Dictionary or list of scores (placeholder for now).
+*   `cited_prior_ids`: List of IDs of messages cited as priors (placeholder for now).
+*   `metadata`: Dictionary containing model info, etc.
+*   **(Removed)** `role`: No longer needed as the record represents a full turn.
 
 **Indexing:** Ensure `thread_id` and `timestamp` are indexed in Qdrant for efficient filtering and sorting.
 
@@ -59,39 +60,38 @@ Each point in the `choir` collection representing a message turn should include 
     *   Limit the number of messages retrieved (e.g., last 50 turns).
     *   Return the list of message payloads (dictionaries).
     *   *Consider adding pagination (`before` timestamp) for very long histories.*
-2.  **Modify/Enhance `save_message(data: Dict[str, Any])` (or create `save_message_turn`)**:
-    *   Ensure the function accepts and saves all necessary fields: `thread_id`, `role`, `timestamp`, `content`, and potentially `phase_outputs`, scores, `cited_prior_ids` for AI messages.
-    *   Generate embedding for `content` if not provided.
-    *   Upsert the point into the `choir` collection.
+2.  **Modify/Enhance `save_message(data: Dict[str, Any])`**:
+    *   [x] Accepts and saves all necessary fields for a turn: `thread_id`, `timestamp`, AI `content`, `user_query`, `vector`, `phase_outputs`, `metadata`, placeholders for scores/citations.
+    *   [x] Handles missing `vector` by requiring it in the input `data`.
+    *   [x] Upserts the single turn point into the `choir` (or `messages`) collection.
 
 ### 5.2. Modify `api/app/postchain/langchain_workflow.py`
 
 1.  **Remove `conversation_history_store`:** Delete the global dictionary and all logic that reads from or writes to it.
 2.  **Load History at Start:**
-    *   Inside `run_langchain_postchain_workflow`, before the workflow starts:
-        *   Instantiate `DatabaseClient`.
-        *   Call `db.get_message_history(thread_id)` to fetch the history from Qdrant.
-        *   Convert the retrieved dictionaries into Langchain `BaseMessage` objects (`HumanMessage`, `AIMessage`). Handle potential errors if history is empty. Assign this list to `message_history`.
-3.  **Save User Message:**
-    *   Immediately after receiving the `query` and before starting the phase loop:
-        *   Construct a user message dictionary containing `thread_id`, `role='user'`, `content=query`, `timestamp`.
-        *   Call `db.save_message_turn()` (or adapted `save_message`) to persist the user message.
-4.  **Save AI Message:**
-    *   After the Yield phase completes and returns the final AI message structure (including `content`, `phase_outputs`, scores, citations):
-        *   Construct the AI message dictionary containing `thread_id`, `role='assistant'`, `timestamp`, and all relevant data from the Yield output.
-        *   Call `db.save_message_turn()` (or adapted `save_message`) to persist the complete AI message turn.
-5.  **Context Passing:** Ensure the `message_history` loaded from Qdrant is correctly passed into the phase functions (`run_action_phase`, etc.).
+    *   [x] Inside `run_langchain_postchain_workflow`, before the workflow starts:
+        *   [x] Instantiates `DatabaseClient`.
+        *   [x] Calls `db.get_message_history(thread_id)` to fetch turn history.
+        *   [x] Converts retrieved turn dictionaries into alternating Langchain `HumanMessage` (from `user_query`) and `AIMessage` (from `content`) for context.
+3.  **Save Turn Record:**
+    *   [x] **Removed** separate user message saving.
+    *   [x] After the Yield phase completes:
+        *   [x] Constructs a **single turn payload** dictionary containing `thread_id`, `timestamp`, `user_query`, AI `content`, `phase_outputs`, `vector`, `metadata`.
+        *   [x] Calls `db.save_message()` **once** to persist the complete turn record.
+4.  **Context Passing:**
+    *   [x] Passes the reconstructed `current_messages` (history + current query) into the `_run_single_phase` helper.
+    *   [x] Appends the AI response from each phase to `current_messages` to provide context for the *next* phase.
 
 ### 5.3. Modify/Remove `api/app/postchain/utils.py`
 
 1.  **Remove File-Based Functions:** Delete `save_state`, `recover_state`, `delete_state`, and the `STATE_STORAGE_DIR` constant.
-2.  **Update `format_stream_event` (If Necessary):** Review if this function relies on the old state structure; adapt if needed, though it primarily uses `current_phase` and `phase_state` which might still be managed transiently within the workflow runner.
+2.  **`format_stream_event`:** [x] Removed usage; workflow now yields simple dictionaries directly.
 
 ### 5.4. Modify API Endpoints (`api/app/routers/postchain.py`)
 
 1.  **`/langchain` Endpoint:**
-    *   Remove the call to `recover_state`.
-    *   The loading of `message_history` will now happen inside `run_langchain_postchain_workflow` as described in step 5.2.
+    *   [x] Removed call to `recover_state`.
+    *   [x] History loading happens inside `run_langchain_postchain_workflow`.
 2.  **`/recover` Endpoint:**
     *   This endpoint's purpose needs re-evaluation. It no longer recovers state from files.
     *   **Option A (Remove):** If its only purpose was file recovery, remove it.
@@ -100,36 +100,36 @@ Each point in the `choir` collection representing a message turn should include 
 ### 5.5. Review Data Models
 
 1.  **`api/app/postchain/schemas/state.py`:** The `PostChainState` model might become less relevant if state is primarily managed via Qdrant message history. Review its usage. The `SearchResult` models remain relevant.
-2.  **`api/app/models/api.py`:** Ensure API request/response models align with the changes (e.g., the `/recover` endpoint response).
-3.  **Internal Message Structure:** Define clearly (perhaps using Pydantic) the structure of the message dictionary saved to Qdrant, especially for AI messages containing phase outputs and scores.
+2.  **`api/app/models/api.py`:** [x] Updated/Renamed Pydantic models (`TurnResponseModel`, `TurnsDataModel`, `TurnsAPIResponseModel`) to reflect the turn-based structure (added `user_query`, removed `role`).
+3.  **Turn Record Structure:** [x] Defined clearly in `TurnResponseModel` and handled in `database.py` and `langchain_workflow.py`.
 
-# Qdrant Persistence Migration Progress (as of 2025-04-04)
+# Qdrant Persistence Migration Progress (as of 2025-04-06 - Turn-Based Model)
 
 ## Phase 1: Database Layer (`database.py`)
 - [x] Implemented `get_message_history(thread_id, limit)`
-- [x] Enhanced `save_message` to handle all required fields
-- [x] Qdrant indexing assumed, **not explicitly verified**
+- [x] Enhanced `save_message` to handle turn record fields (`user_query`, no `role`).
+- [x] Qdrant indexing assumed for `thread_id`, `timestamp`.
 - [ ] Unit tests for database functions **(missing)**
 
 ## Phase 2: Workflow Integration (`langchain_workflow.py`)
 - [x] Removed `conversation_history_store`
 - [x] Loads history from Qdrant at start
-- [x] Saves user message immediately
-- [x] Saves final AI message after Yield phase
-- [x] Passes loaded history through workflow
+- [x] Saves **single turn record** after Yield phase (includes user query, AI content, phases).
+- [x] Passes reconstructed history + current query to phases.
+- [x] Refactored workflow using `_run_single_phase` helper.
 - [ ] Unit tests for workflow changes **(missing)**
 
 ## Phase 3: Utilities & API (`utils.py`, `routers/postchain.py`)
 - [x] Removed file-based persistence
 - [x] Updated `/langchain` endpoint
-- [x] Removed `/recover` endpoint
+- [x] `/recover` endpoint removed.
 - [ ] Tests for API changes **(missing)**
 
 ## Phase 4: Data Models & Testing
-- [x] Reviewed Pydantic models
-- [ ] Documented message schema in Qdrant **(partial)**
+- [x] Updated Pydantic models for turn-based structure.
+- [x] Documented turn schema in Qdrant (via Pydantic model and DB function docstring).
 - [ ] Integration testing of `/langchain` endpoint with Qdrant **(missing)**
-- [ ] Verify persistence across requests **(partial)**
+- [x] Verified persistence across requests (implicitly via successful history loading).
 - [ ] Test edge cases (new thread, empty history, limits) **(missing)**
 
 ## iOS Client Integration
@@ -137,11 +137,11 @@ Each point in the `choir` collection representing a message turn should include 
 - [x] Fetches threads on app launch using wallet Sui address
 - [x] **Wallet async loading on app launch**
 - [x] **Fetch threads *after* wallet loads**
-- [ ] **Fetch messages for each thread** **(in progress)**
-- [ ] **Display fetched messages in UI** **(missing)**
-- [ ] **Save new threads/messages via API** **(partial - thread creation works)**
-- [ ] **Autosave new messages during chat** **(missing)**
-- [ ] **Handle empty state, errors, loading indicators** **(missing)**
+- [x] **Fetch turns for selected thread**
+- [x] **Reconstruct and display user/AI messages in UI from turns**
+- [x] **Save new threads via API**
+- [x] **Autosave new turns during chat** (handled by workflow)
+- [x] **Handle empty state, errors, loading indicators** (implemented in `ChoirThreadDetailView`)
 
 ## 7. Testing Strategy
 ## User Authentication & Initialization
@@ -179,17 +179,17 @@ Each point in the `choir` collection representing a message turn should include 
 ### Backend Persistence
 - [x] Thread persistence by UUID
 - [x] User fetch by UUID works (confirmed)
-- [ ] Message persistence per thread
-- [x] Autosave new messages (handled server-side in workflow)
+- [x] Turn persistence per thread
+- [x] Autosave new turns (handled server-side in workflow)
 - [ ] Tests
 
 ### iOS Client
 - [x] Async wallet loading
 - [x] Authenticate user, get UUID
 - [x] Fetch threads using UUID (confirmed working)
-- [ ] Fetch messages per thread
-- [x] Autosave new messages (handled server-side)
-- [ ] Error handling, loading states
+- [x] Fetch turns per thread
+- [x] Autosave new turns (handled server-side)
+- [x] Error handling, loading states (implemented)
 *   **Unit Tests:** Mock the `DatabaseClient` in `langchain_workflow.py` tests to verify history loading/saving calls are made correctly. Test the new `database.py` functions by mocking the `QdrantClient`.
 *   **Integration Tests:** Set up a test Qdrant instance (can be local Docker). Write tests that call the `/langchain` API endpoint multiple times for the same `thread_id` and assert that the conversation context is correctly maintained by verifying the history loaded/passed in subsequent calls. Check the Qdrant database directly to confirm messages are saved correctly.
 
