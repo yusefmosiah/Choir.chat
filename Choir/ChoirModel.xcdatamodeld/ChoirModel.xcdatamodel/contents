@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="23788" systemVersion="24D81" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithSwiftData="YES" userDefinedModelVersionIdentifier="">
+    <entity name="CDThread" representedClassName="CDThread" syncable="YES" codeGenerationType="class">
+        <attribute name="createdAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="id" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="lastActivity" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="title" optional="YES" attributeType="String"/>
+        <relationship name="turns" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="CDTurn" inverseName="thread" inverseEntity="CDTurn"/>
+    </entity>
+    <entity name="CDTurn" representedClassName="CDTurn" syncable="YES" codeGenerationType="class">
+        <attribute name="aiResponseContent" optional="YES" attributeType="String"/>
+        <attribute name="id" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="metadataJSON" optional="YES" attributeType="String"/>
+        <attribute name="phaseOutputsJSON" optional="YES" attributeType="String"/>
+        <attribute name="timestamp" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="userQuery" optional="YES" attributeType="String"/>
+        <relationship name="thread" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="CDThread" inverseName="turns" inverseEntity="CDThread"/>
+    </entity>
+</model>

@@ -5,35 +5,45 @@
 //  Created by Yusef Mosiah Nathanson on 11/9/24.
 //
 import SwiftUI
-
+import CoreData
 struct ContentView: View {
+    // Core Data Fetch Request for Threads, sorted by last activity descending
+    @FetchRequest(
+        sortDescriptors: [NSSortDescriptor(keyPath: \CDThread.lastActivity, ascending: false)],
+        animation: .default)
+    private var threads: FetchedResults<CDThread>
+
+    @Environment(\.managedObjectContext) private var viewContext // Get context from environment
     @EnvironmentObject var walletManager: WalletManager
-    @StateObject private var viewModel: PostchainViewModel
-    @State private var threads: [ChoirThread] = []
-    @State private var selectedChoirThread: ChoirThread?
+    // @StateObject private var viewModel: PostchainViewModel // Commented out for now
+    @State private var selectedChoirThreadID: CDThread.ID? // Use ID for selection
     @State private var showingWallet = false
 
 @State private var userUUID: String? = nil
 @AppStorage("userUUID") private var storedUserUUID: String = ""
 
-    init() {
-        _viewModel = StateObject(wrappedValue: PostchainViewModel(coordinator: RESTPostchainCoordinator()))
-    }
+    // init() { // Commented out viewModel initialization
+    //     _viewModel = StateObject(wrappedValue: PostchainViewModel(coordinator: RESTPostchainCoordinator()))
+    // }
 
     var body: some View {
         NavigationSplitView {
-            List(threads, selection: $selectedChoirThread) { thread in
-                NavigationLink(value: thread) {
-                    ChoirThreadRow(thread: thread)
+            List(selection: $selectedChoirThreadID) { // Use ID for selection binding
+                ForEach(threads) { thread in
+                    // Use thread.id as the value for navigation
+                    NavigationLink(value: thread.id) {
+                        ChoirThreadRow(thread: thread) // Pass CDThread to the row view
+                    }
                 }
+                // Optional: Add onDelete modifier if needed later
+                // .onDelete(perform: deleteThreads)
             }
             .navigationTitle("ChoirThreads")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) { // Explicit placement for the primary action
                     Button { // Change to async task execution
-                        Task {
-                            await createNewChoirThread()
-                        }
+                        // No longer async
+                        createNewChoirThread()
                     } label: {
                         Label("New ChoirThread", systemImage: "plus")
                     }
@@ -46,8 +56,15 @@ struct ContentView: View {
                 }
             }
         } detail: {
-            if let thread = selectedChoirThread {
-                ChoirThreadDetailView(thread: thread, viewModel: viewModel)
+            // --- Detail View Refactoring Needed ---
+            // Find the selected thread using the ID
+            if let selectedThread = findSelectedThread() {
+                 // TODO: Refactor ChoirThreadDetailView to accept CDThread
+                 // For now, show a placeholder
+                 Text("Detail View for Thread: \(selectedThread.title ?? "Untitled")")
+                 // ChoirThreadDetailView(thread: selectedThread, viewModel: viewModel) // Needs refactoring
+            } else {
+                // Placeholder view when no thread is selected
             } else {
                 VStack(spacing: 20) {
                     Text("Choir")
@@ -66,9 +83,8 @@ struct ContentView: View {
                         .padding(.top, 20)
 
                     Button { // Change to async task execution
-                        Task {
-                            await createNewChoirThread()
-                        }
+                        // No longer async
+                        createNewChoirThread()
                     } label: {
                         Label("Create New Thread", systemImage: "plus.circle.fill")
                             .font(.headline)
@@ -87,124 +103,94 @@ struct ContentView: View {
             WalletView()
         }
         .onAppear {
-            Task {
-                do {
-                    if walletManager.wallet == nil {
-                        try await walletManager.createOrLoadWallet()
-                        print("Wallet loaded successfully")
-                    }
+             // Removed API fetching logic. Core Data handles loading via @FetchRequest.
+             // Wallet loading and authentication might need to be handled differently,
+             // perhaps triggered explicitly or moved elsewhere if still needed.
+             Task {
+                 if walletManager.wallet == nil {
+                     try? await walletManager.createOrLoadWallet()
+                     print("Wallet loaded on appear (if needed)")
+                 }
+                 // Authentication logic (fetching userUUID) is removed from here.
+                 // It's no longer directly tied to fetching threads.
+                 // If userUUID is needed for *other* purposes, that logic needs a new home.
+             }
+             print("ContentView appeared. Threads loaded by @FetchRequest: \(threads.count)")
+             // Select the first thread if none is selected and list is not empty
+             if selectedChoirThreadID == nil, let firstThread = threads.first {
+                 selectedChoirThreadID = firstThread.id
+             }
+         }
+         // Add onChange listener to auto-select first thread if selection becomes nil
+         // and the list is not empty (e.g., after deleting the selected thread)
+         .onChange(of: selectedChoirThreadID) { _, newValue in
+             if newValue == nil, let firstThread = threads.first {
+                 selectedChoirThreadID = firstThread.id
+             }
+         }
+         // Also handle the case where the threads array changes (e.g., first load, deletion)
+         .onChange(of: threads) { _, newThreads in
+              if selectedChoirThreadID == nil, let firstThread = newThreads.first {
+                 selectedChoirThreadID = firstThread.id
+             }
+             // Ensure selection is still valid
+             if let currentSelection = selectedChoirThreadID, !newThreads.contains(where: { $0.id == currentSelection }) {
+                 selectedChoirThreadID = newThreads.first?.id // Select first or nil
+             }
+         }
+    }
 
-                    guard let wallet = walletManager.wallet else {
-                        print("Failed to load wallet")
-                        return
-                    }
+    // Updated to use PersistenceManager
+    private func createNewChoirThread() {
+        print("🚀 Creating new thread locally...")
+        let defaultName = defaultThreadTitle()
 
-                    if !storedUserUUID.isEmpty {
-                        print("Using stored user UUID: \(storedUserUUID)")
-                        userUUID = storedUserUUID
-                    } else {
-                        let suiAddress = (try? wallet.accounts[0].publicKey.toSuiAddress()) ?? ""
-
-                        let challengeURL = ChoirAPIClient.shared.baseURL.appendingPathComponent("/auth/request_challenge")
-                        var challengeRequest = URLRequest(url: challengeURL)
-                        challengeRequest.httpMethod = "POST"
-                        challengeRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
-                        let challengeBody = ["address": suiAddress]
-                        challengeRequest.httpBody = try JSONEncoder().encode(challengeBody)
-
-                        let (challengeData, _) = try await URLSession.shared.data(for: challengeRequest)
-                        let challengeResponse = try JSONDecoder().decode([String: String].self, from: challengeData)
-                        let challenge = challengeResponse["challenge"] ?? ""
-
-                        // Check if we already have a UUID for this address to avoid unnecessary verification
-                        if let cachedUUID = ChoirAPIClient.shared.getCachedUserId(for: suiAddress) {
-                            print("Using cached UUID for Sui address: \(suiAddress)")
-                            userUUID = cachedUUID
-                            storedUserUUID = cachedUUID
-                        } else {
-                            // 2. Sign challenge (mocked)
-                            let signature = "MOCK_SIGNATURE_BASE64"
-
-                            // 3. Verify user, get UUID
-                            let uuid = try await ChoirAPIClient.shared.verifyUser(address: suiAddress, signature: signature)
-                            userUUID = uuid
-                            storedUserUUID = uuid
-
-                            print("Generated new UUID for Sui address: \(suiAddress) -> \(uuid)")
-                        }
-                    }
-
-                    // 4. Fetch threads using UUID
-                    let threadResponses = try await ChoirAPIClient.shared.fetchUserThreads(userId: userUUID ?? storedUserUUID)
-                    let loadedThreads = threadResponses.map { response in
-                        let thread = ChoirThread(
-                            id: UUID(uuidString: response.id) ?? UUID(),
-                            title: response.name
-                        )
-                        return thread
-                    }
-                    threads = loadedThreads
-                    if selectedChoirThread == nil, let first = loadedThreads.first {
-                        selectedChoirThread = first
-                    }
-                } catch {
-                    print("Error during auth or fetching threads: \(error)")
-                }
+        // Use PersistenceManager to create the thread
+        if let newThread = PersistenceManager.shared.createThread(title: defaultName) {
+            // Select the newly created thread
+            // Needs to run on main actor if PersistenceManager save happens on background
+            // (though our current implementation saves synchronously)
+            DispatchQueue.main.async {
+                 selectedChoirThreadID = newThread.id
+                 print("✅ Local thread object created and selected: \(newThread.id?.uuidString ?? "N/A")")
             }
+        } else {
+             print("❌ Error creating thread locally.")
+             // Optionally show an error alert
         }
     }
 
-    private func createNewChoirThread() async {
-        // Assign the result of nil-coalescing first, then check if it's empty
-        let potentialUserId = userUUID ?? storedUserUUID
-        guard !potentialUserId.isEmpty else {
-            print("❌ Error: Cannot create thread without a user UUID.")
-            // Optionally show an alert to the user
-            return
-        }
-
-        // Generate a default name
-        let defaultName = "ChoirThread \(DateFormatter.localizedString(from: Date(), dateStyle: .short, timeStyle: .short))"
-
-        // We know potentialUserId is non-empty here from the guard statement. Use it directly.
-        print("🚀 Creating new thread on backend for user \(potentialUserId)...")
-        do {
-            let createdThreadResponse = try await ChoirAPIClient.shared.createThread(
-                name: defaultName,
-                userId: potentialUserId // Use potentialUserId directly
-                // initialMessage: nil // No initial message when creating from list view
-            )
-
-            print("✅ Backend thread created with ID: \(createdThreadResponse.id)")
-
-            // Create the local ChoirThread object using data from the backend response
-            let newThread = ChoirThread(
-                id: UUID(uuidString: createdThreadResponse.id) ?? UUID(), // Use ID from backend
-                title: createdThreadResponse.name // Use name from backend
-            )
-
-            // Update UI on main thread
-            await MainActor.run {
-                threads.append(newThread)
-                selectedChoirThread = newThread
-                print("✅ Local thread object created and selected.")
-            }
-
-        } catch {
-            print("❌ Error creating thread via API: \(error)")
-            // Optionally show an error alert to the user
-        }
+    // Helper function to find the selected thread
+    private func findSelectedThread() -> CDThread? {
+        guard let selectedID = selectedChoirThreadID else { return nil }
+        // Access threads directly from the @FetchRequest result
+        return threads.first { $0.id == selectedID }
     }
+
+     // Helper function for creating default thread title
+    private func defaultThreadTitle() -> String {
+        "ChoirThread \(DateFormatter.localizedString(from: Date(), dateStyle: .short, timeStyle: .short))"
+    }
+
+    // Optional: Add delete functionality
+    // private func deleteThreads(offsets: IndexSet) {
+    //     withAnimation {
+    //         offsets.map { threads[$0] }.forEach(viewContext.delete)
+    //         PersistenceManager.shared.saveContext() // Save after deletion
+    //     }
+    // }
 }
 
+// Updated to use CDThread
 struct ChoirThreadRow: View {
-    @ObservedObject var thread: ChoirThread
+    @ObservedObject var thread: CDThread // Changed to CDThread
 
     var body: some View {
         VStack(alignment: .leading) {
-            Text(thread.title)
+            Text(thread.title ?? "Untitled Thread") // Use CDThread property
                 .font(.headline)
-            Text("\(thread.messages.count) messages")
+            // Access turns relationship count
+            Text("\(thread.turns?.count ?? 0) turns")
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
@@ -213,4 +199,5 @@ struct ChoirThreadRow: View {
 
 #Preview {
     ContentView()
+        .environment(\.managedObjectContext, PersistenceController.preview.container.viewContext) // Add preview context
 }

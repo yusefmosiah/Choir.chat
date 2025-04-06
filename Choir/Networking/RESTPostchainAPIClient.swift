@@ -93,10 +93,11 @@ class RESTPostchainAPIClient {
     func streamLangchain(
         query: String,
         threadId: String,
+        recentHistory: [MessageHistoryItem], // Added recent history parameter
         modelConfigs: [Phase: ModelConfig]? = nil,
-        // Updated callback signature to include provider and modelName
-        onPhaseUpdate: @escaping (String, String, String, String?, String?, [SearchResult]?, [VectorSearchResult]?) -> Void,
-        onComplete: @escaping () -> Void,
+        onPhaseUpdate: @escaping (String, String, String, String?, String?) -> Void, // Simplified: phase, status, content, provider, modelName
+        onTurnComplete: @escaping (TurnData) -> Void, // NEW: Callback for final turn data
+        onComplete: @escaping () -> Void, // Keep for stream end signal
         onError: @escaping (Error) -> Void
     ) {
         #if DEBUG
@@ -125,6 +126,7 @@ class RESTPostchainAPIClient {
         let requestBody = LangchainRequestBody(
             userQuery: query,
             threadId: threadId,
+            recentHistory: recentHistory, // Pass recent history
             modelConfigs: modelConfigsDict
         )
 
@@ -211,10 +213,11 @@ class RESTPostchainAPIClient {
 
         let sseDelegate = CustomSSEDelegate(
             onEventReceived: { eventData in
+                // Check for stream end marker first
                 if eventData == "[DONE]" {
-                    DispatchQueue.main.async {
-                        onComplete()
-                    }
+                     DispatchQueue.main.async {
+                         onComplete() // Signal stream finished
+                     }
                     return
                 }
 
@@ -228,115 +231,28 @@ class RESTPostchainAPIClient {
                     }
 
                     // Parse the event data
-                    if let json = try? JSONSerialization.jsonObject(with: jsonData) as? [String: Any] {
-                        let phase = json["phase"] as? String ?? ""
-                        let status = json["status"] as? String ?? ""
-                        let content = json["content"] as? String ?? ""
-                        let provider = json["provider"] as? String // Extract provider
-                        let modelName = json["model_name"] as? String // Extract model name
+                    // Decode the generic JSON event
+                    let event = try self.decoder.decode(PostchainLangchainEvent.self, from: jsonData)
 
-                        // Debug logging for received JSON
-                        if phase == "experience" {
-                            print("🔍 Experience phase JSON keys: \(json.keys.joined(separator: ", "))")
-
-                            // Check for alternative field names that might contain sources
-                            let possibleSourceFields = ["web_results", "webResults", "vector_results", "vectorResults",
-                                                      "sources", "references", "webSources", "vectorSources"]
-
-                            for field in possibleSourceFields {
-                                if let value = json[field] {
-                                    print("✅ Found source field: \(field) with type: \(type(of: value))")
-                                    if let arrayValue = value as? [Any] {
-                                        print("   - Contains \(arrayValue.count) items")
-                                    }
-                                }
-                            }
-                        }
-
-                        // Parse web results if available
-                        var webResults: [SearchResult]? = nil
-                        if let webResultsJson = json["web_results"] as? [[String: Any]] {
-                            print("📊 Found \(webResultsJson.count) web results")
-                            webResults = webResultsJson.compactMap { resultJson in
-                                guard let title = resultJson["title"] as? String,
-                                      let url = resultJson["url"] as? String,
-                                      let content = resultJson["content"] as? String else {
-                                    print("❌ Web result missing required fields: \(resultJson.keys.joined(separator: ", "))")
-                                    return nil
-                                }
-
-                                return SearchResult(
-                                    title: title,
-                                    url: url,
-                                    content: content,
-                                    provider: resultJson["provider"] as? String
-                                )
-                            }
-
-                            if webResults?.count != webResultsJson.count {
-                                print("⚠️ Lost some web results during parsing: \(webResultsJson.count) → \(webResults?.count ?? 0)")
-                            }
-                        }
-
-                        // Parse vector results if available
-                        var vectorResults: [VectorSearchResult]? = nil
-                        if let vectorResultsJson = json["vector_results"] as? [[String: Any]] {
-                            print("📊 Found \(vectorResultsJson.count) vector results")
-                            vectorResults = vectorResultsJson.compactMap { resultJson in
-                                guard let content = resultJson["content"] as? String,
-                                      let score = resultJson["score"] as? Double else {
-                                    print("❌ Vector result missing required fields: \(resultJson.keys.joined(separator: ", "))")
-                                    return nil
-                                }
-
-                                var metadata: [String: Any] = [:]
-                                if let metadataJson = resultJson["metadata"] as? [String: Any] {
-                                    metadata = metadataJson
-                                }
-
-                                return VectorSearchResult(
-                                    content: content,
-                                    score: score,
-                                    metadata: metadata,
-                                    provider: resultJson["provider"] as? String
-                                )
-                            }
-
-                            if vectorResults?.count != vectorResultsJson.count {
-                                print("⚠️ Lost some vector results during parsing: \(vectorResultsJson.count) → \(vectorResults?.count ?? 0)")
-                            }
-                        }
-
-                        // Handle final content for yield phase
-                        if phase == "yield" && status == "complete" {
-                            let finalContent = json["final_content"] as? String ?? content
-
-                            Task { @MainActor in
-                                // Pass provider and modelName to the callback
-                                onPhaseUpdate(phase, status, finalContent, provider, modelName, webResults, vectorResults)
-                            }
-                        } else {
-                            Task { @MainActor in
-                                // Pass provider and modelName to the callback
-                                onPhaseUpdate(phase, status, content, provider, modelName, webResults, vectorResults)
-                            }
-                        }
-                    } else {
-                        // Fallback to original decoder if the manual approach fails (will lack provider/modelName)
-                        let event = try self.decoder.decode(PostchainLangchainEvent.self, from: jsonData)
-
-                        Task { @MainActor in
-                            onPhaseUpdate(
-                                event.phase,
-                                event.status,
-                                event.content ?? event.finalContent ?? "",
-                                event.provider,
-                                event.modelName,
-                                event.webResults,
-                                event.vectorResults
-                            )
-                        }
+                    // Check if this is the final completion event containing turn_data
+                    if event.phase == "complete" && event.status == "complete", let turnData = event.turnData {
+                         Task { @MainActor in
+                             onTurnComplete(turnData) // Call the new callback
+                         }
+                    } else if event.phase != "complete" { // Process regular phase updates
+                         Task { @MainActor in
+                             // Call the simplified onPhaseUpdate
+                             onPhaseUpdate(
+                                 event.phase,
+                                 event.status,
+                                 event.content ?? "", // Use content, ignore finalContent here
+                                 event.provider,
+                                 event.modelName
+                                 // Removed webResults, vectorResults from this callback
+                             )
+                         }
                     }
+                    // Ignore the "complete" event if it doesn't have turn_data (shouldn't happen with new backend)
                 } catch {
                     Task { @MainActor in
                         onError(APIError.decodingError)
@@ -383,11 +299,13 @@ class RESTPostchainAPIClient {
 struct LangchainRequestBody: Codable {
     let userQuery: String
     let threadId: String
+    let recentHistory: [MessageHistoryItem] // Added
     let modelConfigs: [String: ModelConfigRequest]?
 
     enum CodingKeys: String, CodingKey {
         case userQuery = "user_query"
         case threadId = "thread_id"
+        case recentHistory = "recent_history" // Added
         case modelConfigs = "model_configs"
     }
 }
@@ -474,23 +392,25 @@ struct ThreadRecoveryResponse: Codable {
 struct PostchainLangchainEvent: Codable {
     let phase: String
     let status: String
-    let content: String?
-    let finalContent: String?
-    let provider: String? // Added provider
-    let modelName: String? // Added model name
-    let webResults: [SearchResult]?
-    let vectorResults: [VectorSearchResult]?
+    let content: String? // For phase updates
+    // let finalContent: String? // Replaced by turnData
+    let provider: String?
+    let modelName: String?
+    // let webResults: [SearchResult]? // Included within TurnData now
+    // let vectorResults: [VectorSearchResult]? // Included within TurnData now
+    let turnData: TurnData? // NEW: For the final completion event
     let error: String?
 
     enum CodingKeys: String, CodingKey {
         case phase
         case status
         case content
-        case finalContent = "final_content"
-        case provider // Added provider key
-        case modelName = "model_name" // Added model_name key
-        case webResults = "web_results"
-        case vectorResults = "vector_results"
+        // case finalContent = "final_content" // Replaced by turnData
+        case provider
+        case modelName = "model_name"
+        // case webResults = "web_results"
+        // case vectorResults = "vector_results"
+        case turnData = "turn_data" // NEW: Key for final turn data
         case error
     }
 }

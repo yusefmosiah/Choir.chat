@@ -104,6 +104,29 @@ struct PhaseResult: Codable, Equatable, Hashable {
     }
 }
 
+/// Simplified Prior model for display purposes only
+struct Prior: Codable, Hashable {
+    let id: String
+    let content: String
+    let similarity: Double
+    let createdAt: String?
+    let threadID: String?
+    let role: String?
+    let step: String?
+
+    // For transition purposes only - this will be replaced with a better implementation
+    // once the codebase is cleaned up
+    init(content: String, similarity: Double = 1.0, id: String = UUID().uuidString) {
+        self.id = id
+        self.content = content
+        self.similarity = similarity
+        self.createdAt = nil
+        self.threadID = nil
+        self.role = nil
+        self.step = nil
+    }
+}
+
 // MARK: - Thread and Message Models (UI Layer)
 class ChoirThread: ObservableObject, Identifiable, Hashable {
     let id: UUID

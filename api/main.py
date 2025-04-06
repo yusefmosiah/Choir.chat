@@ -5,7 +5,7 @@ from fastapi.responses import HTMLResponse
 from pathlib import Path
 import markdown
 import os
-from app.routers import threads, users, balance, postchain, auth
+from app.routers import balance, postchain, auth # Removed threads, users
 from app.config import Config
 
 app = FastAPI(title="Choir API", version="1.0.0")
@@ -23,8 +23,7 @@ app.add_middleware(
 
 # Include routers
 
-app.include_router(threads.router, prefix="/api/threads", tags=["threads"])
-app.include_router(users.router, prefix="/api/users", tags=["users"])
+# Routers for threads and users removed as per client-side persistence refactor
 app.include_router(balance.router, prefix="/api/balance", tags=["balance"])
 app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
 app.include_router(postchain.router, prefix="/api/postchain", tags=["postchain"])
@@ -41,13 +40,13 @@ async def blog_index():
     root_dir = Path(__file__).parent
     blog_dir = root_dir / "blog"
     md_files = sorted(blog_dir.glob("*.md"))
-    
+
     content = "<h1>Choir Blog</h1>\n<ul>"
     for md_file in md_files:
         post_name = md_file.stem.replace("_", " ").title()
         content += f'<li><a href="/blog/{md_file.stem}">{post_name}</a></li>'
     content += "</ul>"
-    
+
     return f"""
     <!DOCTYPE html>
     <html>
@@ -75,14 +74,14 @@ async def blog_post(post_id: str):
     root_dir = Path(__file__).parent
     blog_dir = root_dir / "blog"
     md_file = blog_dir / f"{post_id}.md"
-    
+
     if not md_file.exists():
         return HTMLResponse(content=f"<h1>Post not found: {post_id}</h1>", status_code=404)
-    
+
     md_content = md_file.read_text()
     html_content = markdown.markdown(md_content, extensions=['fenced_code', 'tables'])
     post_title = post_id.replace("_", " ").title()
-    
+
     return f"""
     <!DOCTYPE html>
     <html>

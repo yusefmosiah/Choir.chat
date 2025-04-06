@@ -1,8 +1,15 @@
 import Foundation
 import SwiftUI
-
+import CoreData // Import CoreData
 @MainActor
 class RESTPostchainCoordinator: PostchainCoordinator, ObservableObject {
+    var activeMessageId: UUID?
+    
+    func process(_ input: String) async throws {
+    }
+    
+    var currentChoirThread: ChoirThread?
+    
     private let api: RESTPostchainAPIClient
     private var streamTask: Task<Void, Error>?
 
@@ -12,18 +19,13 @@ class RESTPostchainCoordinator: PostchainCoordinator, ObservableObject {
     @Published private(set) var isProcessing = false
     @Published private(set) var processingPhases: Set<Phase> = []
 
-    // Search results
-    @Published private(set) var webResults: [SearchResult] = []
-    @Published private(set) var vectorResults: [VectorSearchResult] = []
+    // Removed webResults, vectorResults properties
 
     // Always use streaming
     var isStreaming = true
 
     // Thread state
-    var currentChoirThread: ChoirThread?
-
-    // Active message identifier to track which message is currently being processed
-    var activeMessageId: UUID?
+    // Removed currentChoirThread and activeMessageId
 
     // ViewModel reference for updates
     weak var viewModel: PostchainViewModel?
@@ -38,25 +40,21 @@ class RESTPostchainCoordinator: PostchainCoordinator, ObservableObject {
         }
     }
 
-    func process(_ input: String) async throws {
-        // Remove thread parameter to match protocol
-        try await processPost(input)
+    // Updated process signature to accept CDThread
+    func process(_ input: String, thread: CDThread) async throws {
+        try await processPost(input: input, thread: thread)
     }
 
-    private func processPost(_ input: String) async throws {
-        // Set active thread
-        let thread = currentChoirThread
-
-        // Set the active message ID to the latest message in the thread
-        activeMessageId = thread?.messages.last?.id
+    // Updated processPost signature
+    private func processPost(input: String, thread: CDThread) async throws {
+        // Removed active thread/message ID setting logic
 
         // Reset all state
         responses = [:]
         isProcessing = true
         currentPhase = .action
         processingPhases = []
-        webResults = []
-        vectorResults = []
+        // Removed webResults/vectorResults reset
 
         // Pre-initialize phases with empty content to ensure cards are always displayed
         for phase in Phase.allCases {
@@ -76,12 +74,28 @@ class RESTPostchainCoordinator: PostchainCoordinator, ObservableObject {
             // Store a reference to the task to enable cancellation
             self.streamTask = Task {
                 // Set up streaming with the langchain endpoint
+                // --- Fetch and Format History ---
+                let recentTurns = PersistenceManager.shared.fetchTurns(for: thread).suffix(10) // Example: Fetch last 10 turns
+                let recentHistory: [MessageHistoryItem] = recentTurns.flatMap { turn -> [MessageHistoryItem] in
+                    var items: [MessageHistoryItem] = []
+                    if let userQuery = turn.userQuery {
+                        items.append(MessageHistoryItem(role: "user", content: userQuery))
+                    }
+                    if let aiResponse = turn.aiResponseContent {
+                         items.append(MessageHistoryItem(role: "assistant", content: aiResponse))
+                    }
+                    return items
+                }
+                print("📚 Sending \(recentHistory.count) history items to API.")
+
+                // --- Call API Client ---
                 self.api.streamLangchain(
                     query: input,
-                    threadId: thread?.id.uuidString ?? UUID().uuidString,
-                    modelConfigs: thread?.modelConfigs, // Pass the thread's model configs
-                    // Update closure signature to accept provider and modelName
-                    onPhaseUpdate: { [weak self] phase, status, content, provider, modelName, webResults, vectorResults in
+                    threadId: thread.id?.uuidString ?? UUID().uuidString, // Use passed thread's ID
+                    recentHistory: recentHistory, // Pass formatted history
+                    modelConfigs: nil, // TODO: Adapt model config logic if needed (e.g., fetch from thread?)
+                    // Updated onPhaseUpdate signature (no search results)
+                    onPhaseUpdate: { [weak self] phase, status, content, provider, modelName in
                         guard let self = self else { return }
 
                         Task { @MainActor in
@@ -108,34 +122,13 @@ class RESTPostchainCoordinator: PostchainCoordinator, ObservableObject {
                             // Always update the current phase
                             self.currentPhase = phaseEnum
 
-                            // Store search results if available
-                            if let webResults = webResults {
-                                self.webResults = webResults
-                            }
-
-                            if let vectorResults = vectorResults {
-                                self.vectorResults = vectorResults
-                            }
+                            // Removed search result handling from onPhaseUpdate
 
                             // Only update if we have actual content
                             if !content.isEmpty {
                                 print("🔄 Processing output for phase: \(phase) with content length: \(content.count)")
 
-                                // Find the message being updated
-                                if let messageId = self.activeMessageId,
-                                   let thread = self.currentChoirThread,
-                                   let messageIndex = thread.messages.firstIndex(where: { $0.id == messageId }) {
-
-                                    let message = thread.messages[messageIndex]
-                                    // Update the message object directly with all info
-                                    message.updatePhase(phaseEnum, content: content, provider: provider, modelName: modelName)
-
-                                    // Explicitly notify observers for the message and thread
-                                    message.objectWillChange.send()
-                                    thread.objectWillChange.send()
-                                } else {
-                                     print("⚠️ Coordinator could not find message \(String(describing: self.activeMessageId)) to update phase \(phase)")
-                                }
+                                // Removed logic updating activeMessage - UI updates via Core Data changes
 
                                 // Update the view model's state (which triggers UI updates)
                                 // Pass all received data, including model info
@@ -145,8 +138,7 @@ class RESTPostchainCoordinator: PostchainCoordinator, ObservableObject {
                                     content: content,
                                     provider: provider, // Pass provider
                                     modelName: modelName, // Pass modelName
-                                    webResults: self.webResults, // Pass stored results
-                                    vectorResults: self.vectorResults // Pass stored results
+                                    // Removed webResults/vectorResults from viewModel update call
                                 )
 
                                 // Update our local coordinator responses dictionary (only text content for now)
@@ -155,7 +147,7 @@ class RESTPostchainCoordinator: PostchainCoordinator, ObservableObject {
                                 // Update processing state
                                 self.processingPhases.insert(phaseEnum)
 
-                                // Removed call to self.updateMessageInThread as update is done above
+                                // Removed call to self.updateMessageInThread
                             }
 
                             // If phase is complete, remove it from processing phases
@@ -164,21 +156,42 @@ class RESTPostchainCoordinator: PostchainCoordinator, ObservableObject {
                             }
                         }
                     },
-                    onComplete: {
+                    // NEW: Handle final turn data
+                    onTurnComplete: { [weak self] turnData in
+                         guard let self = self else { return }
+                         print("✅ Coordinator received final turn data: \(turnData.turnId)")
+                         Task { @MainActor in
+                             // Save the completed turn to Core Data
+                             let phaseOutputsJSON = self.encodeToJSON(turnData.phaseOutputs)
+                             let metadataJSON = self.encodeToJSON(turnData.metadata) // Encode the metadata struct
+
+                             PersistenceManager.shared.createTurn(
+                                 userQuery: turnData.userQuery,
+                                 aiResponseContent: turnData.aiResponseContent,
+                                 phaseOutputsJSON: phaseOutputsJSON,
+                                 metadataJSON: metadataJSON,
+                                 for: thread // Use the thread passed to processPost
+                             )
+                             // UI should update automatically via @FetchRequest
+                         }
+                    },
+                    onComplete: { [weak self] in // Add weak self capture list
                         Task { @MainActor in
-                            // Mark processing as complete
+                            // Remove invalid conditional binding
+                            guard let self = self else { return } // This properly unwraps optional self from capture
+                            // Mark processing as complete AFTER stream ends
                             self.processingPhases.removeAll()
                             self.isProcessing = false
-                            self.activeMessageId = nil
+                            // self.activeMessageId = nil // Removed
                             self.isStreaming = false
 
-                            // Force UI refresh
+                            // Force UI refresh if needed (though Core Data should handle it)
                             self.viewModel?.updateState()
 
                             // Only resume the continuation once
                             if !didResume {
                                 didResume = true
-                                continuation.resume()
+                                continuation.resume() // Resume the original async call
                             }
                         }
                     },
@@ -186,7 +199,7 @@ class RESTPostchainCoordinator: PostchainCoordinator, ObservableObject {
                         Task { @MainActor in
                             self.processingPhases.removeAll()
                             self.isProcessing = false
-                            self.activeMessageId = nil
+                            // self.activeMessageId = nil // Removed
                             self.viewModel?.updateState()
 
                             // Only resume the continuation once
@@ -208,8 +221,7 @@ class RESTPostchainCoordinator: PostchainCoordinator, ObservableObject {
         isStreaming = false
         processingPhases.removeAll()
 
-        // Clear active message ID when cancelling
-        activeMessageId = nil
+        // Removed activeMessageId reset
 
         // Notify view model of the canceled state
         viewModel?.updateState()
@@ -221,8 +233,18 @@ class RESTPostchainCoordinator: PostchainCoordinator, ObservableObject {
     }
 
     // Helper to update the current message in the thread
-    // Deprecated: updatePhase now requires provider and modelName, so this is obsolete.
-    // Calls to this function have been removed.
+    // Removed deprecated updateMessageInThread helper
+
+    // Helper to encode Encodable types to JSON String
+    private func encodeToJSON<T: Encodable>(_ data: T) -> String? {
+        let encoder = JSONEncoder()
+        // encoder.outputFormatting = .prettyPrinted // Optional
+        guard let jsonData = try? encoder.encode(data) else {
+            print("Error encoding data to JSON: \(T.self)")
+            return nil
+        }
+        return String(data: jsonData, encoding: .utf8)
+    }
 
     // Helper to recover thread state
     func recoverThread(threadId: String) async throws -> ThreadRecoveryResponse {

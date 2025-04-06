@@ -13,7 +13,7 @@ protocol PostchainCoordinator {
     var activeMessageId: UUID? { get set }
 
     // Core processing
-    func process(_ input: String) async throws
+    func process(_ input: String, thread: CDThread) async throws
     func cancel()
 
     // Thread state
@@ -28,6 +28,10 @@ protocol PostchainCoordinator {
 // Simple test implementation for previews and tests
 @MainActor
 class TestPostchainCoordinator: PostchainCoordinator {
+    func process(_ input: String, thread: CDThread) async throws {
+        
+    }
+    
     var currentPhase: Phase = .action
     var responses: [Phase: String] = [:]
     var isProcessing = false

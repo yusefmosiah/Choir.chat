@@ -50,13 +50,7 @@ class PostchainViewModel: ObservableObject {
             self.activeMessageId = activeId
 
             // Update structured results for this message if they exist in coordinator
-            if !restCoordinator.vectorResults.isEmpty {
-                self.vectorResultsByMessage[activeId] = restCoordinator.vectorResults
-            }
-
-            if !restCoordinator.webResults.isEmpty {
-                self.webResultsByMessage[activeId] = restCoordinator.webResults
-            }
+        
 
             // Update string arrays as well
             updateSourceStrings()

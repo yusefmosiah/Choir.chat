@@ -4,13 +4,12 @@ from typing import List, Dict, Any, Optional
 from datetime import datetime, UTC
 import uuid
 from .config import Config
-from .models.api import VectorStoreRequest, UserCreate, ThreadCreate
+from .models.api import VectorStoreRequest # Removed UserCreate, ThreadCreate
 import logging
 
 logger = logging.getLogger(__name__)
 
-__all__ = ['DatabaseClient', 'search_vectors']
-
+__all__ = ['DatabaseClient'] # Removed 'search_vectors'
 class DatabaseClient:
     def __init__(self, config: Config):
         self.config = config
@@ -22,36 +21,44 @@ class DatabaseClient:
             https=True
         )
         # Verify collections exist
-        for collection in [
-            self.config.MESSAGES_COLLECTION,
-            self.config.USERS_COLLECTION,
-            self.config.CHAT_THREADS_COLLECTION
-        ]:
-            if not self.client.collection_exists(collection):
-                raise RuntimeError(f"Required collection {collection} does not exist")
+        # Ensure the prompt index collection exists
+        # TODO: Replace "prompt_index" with self.config.PROMPT_INDEX_COLLECTION when added to Config
+        self.prompt_index_collection_name = "prompt_index"
+        try:
+            if not self.client.collection_exists(self.prompt_index_collection_name):
+                logger.info(f"Collection '{self.prompt_index_collection_name}' not found. Creating...")
+                self.client.recreate_collection(
+                    collection_name=self.prompt_index_collection_name,
+                    vectors_config=models.VectorParams(
+                        size=self.config.VECTOR_SIZE, # Ensure VECTOR_SIZE is defined in Config
+                        distance=models.Distance.COSINE # Or adjust as needed
+                    )
+                )
+                logger.info(f"Collection '{self.prompt_index_collection_name}' created successfully.")
+            else:
+                 logger.info(f"Collection '{self.prompt_index_collection_name}' already exists.")
+        except Exception as e:
+             logger.error(f"Failed to verify or create collection '{self.prompt_index_collection_name}': {e}", exc_info=True)
+             # Depending on requirements, might want to raise error here
 
-        # Ensure payload indexes on thread_id and timestamp in messages collection
+        # Ensure payload indexes for the prompt index collection
         try:
             # Index on thread_id (keyword)
             self.client.create_payload_index(
-                collection_name=self.config.MESSAGES_COLLECTION,
+                collection_name=self.prompt_index_collection_name,
                 field_name="thread_id",
                 field_schema=models.PayloadSchemaType.KEYWORD,
             )
-        except Exception as e:
-            # Ignore if already exists or error
-            pass
-
-        try:
-            # Index on timestamp (integer or keyword depending on storage format)
+            # Index on timestamp (keyword for ISO strings)
             self.client.create_payload_index(
-                collection_name=self.config.MESSAGES_COLLECTION,
+                collection_name=self.prompt_index_collection_name,
                 field_name="timestamp",
                 field_schema=models.PayloadSchemaType.KEYWORD,
             )
+            logger.info(f"Ensured payload indexes exist for '{self.prompt_index_collection_name}'.")
         except Exception as e:
-            # Ignore if already exists or error
-            pass
+            # Log warning but don't fail initialization if indexes already exist or minor error occurs
+            logger.warning(f"Could not ensure payload indexes for '{self.prompt_index_collection_name}': {e}")
 
     async def search_similar(self, collection: str, query_vector: List[float], limit: int = 10) -> List[Dict[str, Any]]:
         try:
@@ -87,104 +94,18 @@ class DatabaseClient:
             logger.error(f"Error during search operation: {e}", exc_info=True)
             return []
 
-    async def save_message(self, data: Dict[str, Any]) -> Dict[str, str]:
-        """
-        Save a turn record with its vector and metadata to Qdrant.
-        Expected fields in data:
-            - content (str): The final AI response content for the turn.
-            - user_query (str): The user input that initiated the turn.
-            - vector (List[float]): Embedding of the AI response content.
-            - thread_id (str)
-            - timestamp (str, ISO format)
-            - phase_outputs (dict, optional)
-            - novelty_score (float, optional)
-            - similarity_scores (dict or list, optional)
-            - cited_prior_ids (list, optional)
-            - metadata (dict, optional)
-        """
-        try:
-            point_id = str(uuid.uuid4())
-            payload = {
-                "content": data.get("content"), # AI response
-                "user_query": data.get("user_query"), # User input
-                "thread_id": data.get("thread_id"),
-                # "role": data.get("role"), # Role removed
-                "timestamp": data.get("timestamp", datetime.now(UTC).isoformat()),
-                "phase_outputs": data.get("phase_outputs"),
-                "novelty_score": data.get("novelty_score"),
-                "similarity_scores": data.get("similarity_scores"),
-                "cited_prior_ids": data.get("cited_prior_ids"),
-                "metadata": data.get("metadata", {})
-            }
-            # --- DEBUG LOGGING ---
-            logger.info(f"Attempting to save message with ID: {point_id}")
-            logger.info(f"Payload keys: {list(payload.keys())}")
-            logger.info(f"Payload content snippet: {str(payload.get('content'))[:100]}...")
-            # Explicitly log phase_outputs type and content
-            phase_outputs_data = payload.get("phase_outputs")
-            logger.info(f"Payload phase_outputs type: {type(phase_outputs_data)}")
-            if isinstance(phase_outputs_data, dict):
-                 logger.info(f"Payload phase_outputs keys: {list(phase_outputs_data.keys())}")
-                 # Log snippet of each phase output
-                 for phase, content in phase_outputs_data.items():
-                     logger.info(f"  Phase '{phase}' content snippet: {str(content)[:50]}...")
-            else:
-                 logger.info(f"Payload phase_outputs data: {phase_outputs_data}")
-            # --- END DEBUG LOGGING ---
-
-            self.client.upsert(
-                collection_name=self.config.MESSAGES_COLLECTION,
-                points=[
-                    models.PointStruct(
-                        id=point_id,
-                        vector=data["vector"],
-                        payload=payload # Ensure this payload is correctly structured
-                    )
-                ],
-                wait=True # Wait for operation to complete for more reliable testing
-            )
-            logger.info(f"Successfully upserted message {point_id}")
-            return {"id": point_id}
-        except Exception as e:
-            logger.error(f"Error saving message: {e}")
-            raise
-
-    async def get_message_history(self, thread_id: str, limit: int = 50) -> List[Dict[str, Any]]:
-        """
-        Fetch message history for a thread, sorted by timestamp ascending.
-        """
-        try:
-            points = await self.get_thread_messages(thread_id=thread_id, limit=limit)
-            # Sort by timestamp ascending
-            sorted_points = sorted(points, key=lambda p: p.get("timestamp", ""))
-            return sorted_points
-        except Exception as e:
-            logger.error(f"Error fetching message history: {e}")
-            return []
-
-    async def search_vectors(self, query_vector: List[float], limit: int = 10) -> List[Dict[str, Any]]:
-        """REST endpoint specific vector search."""
-        return await self.search_similar(
-            collection=self.config.MESSAGES_COLLECTION,
-            query_vector=query_vector,
-            limit=limit
-        )
-
-    async def store_vector(self, content: str, vector: List[float], metadata: Optional[Dict[str, Any]] = None) -> Dict[str, str]:
-        """REST endpoint specific vector storage."""
-        message = {
-            "content": content,
-            "vector": vector,
-            "metadata": metadata or {}
-        }
-        return await self.save_message(message)
+    # --- Functions removed as per refactoring plan (Client-Side Persistence) ---
+    # save_message, get_message_history, search_vectors (wrapper), store_vector (wrapper)
+    # create_user, get_user, create_thread, get_thread, get_thread_messages, get_user_threads
+    # _add_thread_to_user
+    # Standalone search_vectors function
 
     async def delete_vector(self, vector_id: str, collection: Optional[str] = None) -> Dict[str, str]:
         """Delete a vector from the vector database.
 
         Args:
             vector_id: The ID of the vector to delete
-            collection: Optional collection name (defaults to Config.MESSAGES_COLLECTION)
+            collection: Optional collection name (defaults to Config.PROMPT_INDEX_COLLECTION) # TODO: Update config
 
         Returns:
             Status message with the ID of the deleted vector
@@ -192,7 +113,7 @@ class DatabaseClient:
         try:
             # Use default collection if not specified
             if collection is None:
-                collection = self.config.MESSAGES_COLLECTION
+                collection = self.prompt_index_collection_name
 
             # Delete the vector
             result = self.client.delete(
@@ -211,253 +132,65 @@ class DatabaseClient:
             logger.error(f"Error deleting vector: {e}")
             return {"status": "error", "message": str(e)}
 
-    async def get_vector(self, vector_id: str) -> Optional[Dict[str, Any]]:
+    async def get_vector(self, vector_id: str, collection: Optional[str] = None) -> Optional[Dict[str, Any]]:
         """Get a vector by ID."""
         try:
+            # Use default collection if not specified
+            if collection is None:
+                collection = self.prompt_index_collection_name
+
             result = self.client.retrieve(
-                collection_name=self.config.MESSAGES_COLLECTION,
+                collection_name=collection,
                 ids=[vector_id],
                 with_payload=True,
                 with_vectors=True
             )
             if result and len(result) > 0:
                 point = result[0]
+                # Adapt payload based on what's stored in the prompt index
                 return {
                     "id": str(point.id),
-                    "content": point.payload.get('content', ''),
                     "vector": point.vector,
-                    "metadata": point.payload.get('metadata', {}),
-                    "created_at": point.payload.get('created_at', '')
+                    "payload": point.payload, # Return the raw payload
+                    # Example specific fields if known:
+                    # "user_query": point.payload.get('user_query', ''),
+                    # "thread_id": point.payload.get('thread_id', ''),
+                    # "timestamp": point.payload.get('timestamp', '')
                 }
             return None
         except Exception as e:
             logger.error(f"Error retrieving vector: {e}")
             raise
 
-    async def create_user(self, user_data: UserCreate) -> Dict[str, Any]:
-        """Create a new user."""
+    async def index_prompt(self, turn_id: str, thread_id: str, user_query: str, vector: List[float], timestamp: str) -> Dict[str, str]:
+        """Indexes a user prompt into the dedicated Qdrant collection."""
         try:
-            user_id = str(uuid.uuid4())
-            point = models.PointStruct(
-                id=user_id,
-                vector=[0.0] * self.config.VECTOR_SIZE,  # Placeholder vector
-                payload={
-                    "public_key": user_data.public_key,
-                    "created_at": datetime.now(UTC).isoformat(),
-                    "thread_ids": [],
-                }
-            )
+            # Validate vector size
+            if len(vector) != self.config.VECTOR_SIZE:
+                logger.error(f"Invalid vector size for indexing prompt {turn_id}: got {len(vector)}, expected {self.config.VECTOR_SIZE}")
+                # Decide how to handle: raise error, return error status, or log and skip?
+                # For background task, returning error status might be best.
+                return {"status": "error", "message": "Invalid vector size"}
 
-            self.client.upsert(
-                collection_name=self.config.USERS_COLLECTION,
-                points=[point]
-            )
-
-            return {
-                "id": user_id,
-                "public_key": user_data.public_key,
-                "created_at": point.payload["created_at"],
-                "thread_ids": []
+            payload = {
+                "thread_id": thread_id,
+                "user_query": user_query,
+                "timestamp": timestamp
             }
-        except Exception as e:
-            logger.error(f"Error creating user: {e}")
-            raise
-
-    async def get_user(self, user_id: str) -> Optional[Dict[str, Any]]:
-        """Get user by ID."""
-        try:
-            result = self.client.retrieve(
-                collection_name=self.config.USERS_COLLECTION,
-                ids=[user_id],
-                with_payload=True
-            )
-            if result and len(result) > 0:
-                point = result[0]
-                return {
-                    "id": str(point.id),
-                    "public_key": point.payload["public_key"],
-                    "created_at": point.payload["created_at"],
-                    "thread_ids": point.payload["thread_ids"]
-                }
-            return None
-        except Exception as e:
-            logger.error(f"Error getting user: {e}")
-            raise
-
-    async def create_thread(self, thread_data: ThreadCreate) -> Dict[str, Any]:
-        """Create a new thread."""
-        try:
-            thread_id = str(uuid.uuid4())
-            point = models.PointStruct(
-                id=thread_id,
-                vector=[0.0] * self.config.VECTOR_SIZE,  # Placeholder vector
-                payload={
-                    "name": thread_data.name,
-                    "user_id": thread_data.user_id,
-                    "created_at": datetime.now(UTC).isoformat(),
-                    "co_authors": [thread_data.user_id],
-                    "message_count": 0,
-                    "last_activity": datetime.now(UTC).isoformat()
-                }
-            )
-
-            # Create thread
             self.client.upsert(
-                collection_name=self.config.CHAT_THREADS_COLLECTION,
-                points=[point]
-            )
-
-            # Update user's thread_ids
-            await self._add_thread_to_user(thread_data.user_id, thread_id)
-
-            # If initial message provided, create it
-            if thread_data.initial_message:
-                await self.save_message({
-                    "content": thread_data.initial_message,
-                    "thread_id": thread_id,
-                    "user_id": thread_data.user_id,
-                    "vector": [0.0] * self.config.VECTOR_SIZE,  # We'll need to generate proper embeddings
-                    "created_at": datetime.now(UTC).isoformat()
-                })
-
-            return {
-                "id": thread_id,
-                **point.payload
-            }
-        except Exception as e:
-            logger.error(f"Error creating thread: {e}")
-            raise
-
-    async def get_thread(self, thread_id: str) -> Optional[Dict[str, Any]]:
-        """Get thread metadata by ID."""
-        try:
-            result = self.client.retrieve(
-                collection_name=self.config.CHAT_THREADS_COLLECTION,
-                ids=[thread_id],
-                with_payload=True
-            )
-            if result and len(result) > 0:
-                point = result[0]
-                return {
-                    "id": str(point.id),
-                    **point.payload
-                }
-            return None
-        except Exception as e:
-            logger.error(f"Error getting thread: {e}")
-            raise
-
-    async def get_thread_messages(self, thread_id: str, limit: int = 50, before: Optional[str] = None) -> List[Dict[str, Any]]:
-        """Get turn records for a thread, sorted by timestamp."""
-        try:
-            # Build filter
-            must_conditions = [
-                models.FieldCondition(
-                    key="thread_id",
-                    match=models.MatchValue(value=thread_id)
-                )
-            ]
-
-            if before:
-                must_conditions.append(
-                    models.FieldCondition(
-                        key="created_at",
-                        range=models.Range(lt=before)
+                collection_name=self.prompt_index_collection_name,
+                points=[
+                    models.PointStruct(
+                        id=turn_id, # Use turn_id as the point ID
+                        vector=vector,
+                        payload=payload
                     )
-                )
-
-            search_result = self.client.scroll(
-                collection_name=self.config.MESSAGES_COLLECTION,
-                scroll_filter=models.Filter(
-                    must=must_conditions
-                ),
-                limit=limit,
-                with_payload=True,
-                with_vectors=False
+                ],
+                wait=False # Allow async operation for background tasks
             )
-
-            points, _ = search_result
-            # Ensure all necessary fields for a 'turn' are returned
-            return [
-                {
-                    "id": str(point.id),
-                    "content": point.payload.get("content"),
-                    "user_query": point.payload.get("user_query"),
-                    "thread_id": point.payload.get("thread_id"),
-                    "timestamp": point.payload.get("timestamp"),
-                    "phase_outputs": point.payload.get("phase_outputs"),
-                    "metadata": point.payload.get("metadata"),
-                    "novelty_score": point.payload.get("novelty_score"),
-                    "similarity_scores": point.payload.get("similarity_scores"),
-                    "cited_prior_ids": point.payload.get("cited_prior_ids"),
-                    # Add any other fields stored in the payload
-                }
-                for point in points
-            ]
+            logger.info(f"Successfully submitted prompt for indexing (turn_id: {turn_id})")
+            return {"status": "submitted", "id": turn_id} # Indicate submission, not completion
         except Exception as e:
-            logger.error(f"Error getting thread messages: {e}")
-            raise
-
-    async def get_user_threads(self, user_id: str) -> List[Dict[str, Any]]:
-        """Get all threads for a user."""
-        try:
-            user = await self.get_user(user_id)
-            if not user:
-                return []
-
-            thread_ids = user["thread_ids"]
-            if not thread_ids:
-                return []
-
-            results = self.client.retrieve(
-                collection_name=self.config.CHAT_THREADS_COLLECTION,
-                ids=thread_ids,
-                with_payload=True
-            )
-
-            return [
-                {
-                    "id": str(point.id),
-                    **point.payload
-                }
-                for point in results
-            ]
-        except Exception as e:
-            logger.error(f"Error getting user threads: {e}")
-            raise
-
-    async def _add_thread_to_user(self, user_id: str, thread_id: str):
-        """Helper method to add thread ID to user's thread list."""
-        try:
-            user = await self.get_user(user_id)
-            if not user:
-                raise ValueError(f"User {user_id} not found")
-
-            thread_ids = user["thread_ids"]
-            if thread_id not in thread_ids:
-                thread_ids.append(thread_id)
-
-                # Use upsert instead of update_payload
-                self.client.upsert(
-                    collection_name=self.config.USERS_COLLECTION,
-                    points=[
-                        models.PointStruct(
-                            id=user_id,
-                            vector=[0.0] * self.config.VECTOR_SIZE,  # Keep existing vector
-                            payload={
-                                "public_key": user["public_key"],
-                                "created_at": user["created_at"],
-                                "thread_ids": thread_ids
-                            }
-                        )
-                    ],
-                    wait=True
-                )
-        except Exception as e:
-            logger.error(f"Error adding thread to user: {e}")
-            raise
-
-async def search_vectors(query_vector: List[float], limit: int = 10) -> List[Dict[str, Any]]:
-    """Standalone vector search function for direct use."""
-    db = DatabaseClient(Config.from_env())
-    return await db.search_vectors(query_vector, limit)
+            logger.error(f"Error indexing prompt for turn {turn_id}: {e}", exc_info=True)
+            # Raise the exception so the background task runner can potentially log it
+            raise e

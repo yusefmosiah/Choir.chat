@@ -30,6 +30,9 @@ tree.md
 │   │       ├── Contents.json
 │   │       └── Icon-App-1024x1024@2x.png
 │   ├── Choir.entitlements
+│   ├── ChoirModel.xcdatamodeld
+│   │   └── ChoirModel.xcdatamodel
+│   │       └── contents
 │   ├── ContentView.swift
 │   ├── Coordinators
 │   │   └── RESTPostchainCoordinator.swift
@@ -40,7 +43,8 @@ tree.md
 │   │   └── ChoirModels.swift
 │   ├── Networking
 │   │   ├── ChoirAPIClient.swift
-│   │   └── RESTPostchainAPIClient.swift
+│   │   ├── RESTPostchainAPIClient.swift
+│   │   └── SSEModels.swift
 │   ├── Preview Content
 │   │   └── Preview Assets.xcassets
 │   │       └── Contents.json
@@ -48,6 +52,8 @@ tree.md
 │   │   └── PostchainCoordinator.swift
 │   ├── Services
 │   │   ├── KeychainService.swift
+│   │   ├── PersistenceController.swift
+│   │   ├── PersistenceManager.swift
 │   │   └── WalletManager.swift
 │   ├── ViewModels
 │   │   └── PostchainViewModel.swift
@@ -221,6 +227,7 @@ tree.md
 │   ├── plan_chip_materialization.md
 │   ├── postchain_temporal_logic.md
 │   ├── qdrant_persistence.md
+│   ├── refactoring_plan_client_persistence.md
 │   ├── require_action_phase.md
 │   ├── require_experience_phase.md
 │   ├── require_intention_phase.md
@@ -248,7 +255,7 @@ tree.md
     ├── sources_displaying.sh
     └── test_postchain_multiturn.sh
 
-60 directories, 173 files
+62 directories, 178 files
 
 === File: docs/CHANGELOG.md ===
 

@@ -1,6 +1,7 @@
 import asyncio
 import logging
 from typing import List, Dict, Any, AsyncIterator, Optional, Callable, Union
+from fastapi import BackgroundTasks # Import BackgroundTasks
 from langchain_openai import OpenAIEmbeddings
 import uuid
 from datetime import datetime, UTC
@@ -174,7 +175,8 @@ Your task: Provide a reflective analysis adding deeper context."""
 async def run_langchain_postchain_workflow(
     query: str,
     thread_id: str,
-    message_history: List[BaseMessage], # This is likely unused now as history is loaded from DB
+    recent_history: List[Dict[str, str]], # Renamed and type changed
+    background_tasks: BackgroundTasks, # Added background tasks
     action_mc_override: Optional[ModelConfig] = None,
     experience_mc_override: Optional[ModelConfig] = None,
     intention_mc_override: Optional[ModelConfig] = None,
@@ -209,28 +211,22 @@ async def run_langchain_postchain_workflow(
 
     # --- State Management & Accumulation ---
     accumulated_phase_outputs: Dict[str, str] = {} # Dictionary to store phase results
-    from app.database import DatabaseClient
-    db_client = DatabaseClient(Config())
-
-    # Load message history from Qdrant
+    # Process recent_history passed from the client
+    loaded_history: List[BaseMessage] = []
     try:
-        qdrant_history = await db_client.get_message_history(thread_id)
-        loaded_history = []
-        for msg in qdrant_history:
-            # role = msg.get("role") # Role no longer used in this way
-            content = msg.get("content", "") # This is the AI response content
-            user_query_from_history = msg.get("user_query") # Get the user query for this turn
-
-            # Reconstruct conversation flow for model context
-            if user_query_from_history:
-                 loaded_history.append(HumanMessage(content=user_query_from_history))
-            # Assistant content always follows user query (if available)
-            loaded_history.append(AIMessage(content=content)) # Add AI content
-
-    except Exception as db_err:
-         logger.error(f"Failed to load history for thread {thread_id}: {db_err}", exc_info=True)
-         yield {"phase": "system", "status": "error", "error": f"Failed to load history: {db_err}"}
-         return
+        for msg_data in recent_history:
+            role = msg_data.get("role")
+            content = msg_data.get("content", "")
+            if role == "user":
+                loaded_history.append(HumanMessage(content=content))
+            elif role == "assistant":
+                loaded_history.append(AIMessage(content=content))
+            # Add handling for other roles if necessary (SystemMessage, ToolMessage)
+        logger.info(f"Processed {len(loaded_history)} messages from recent_history for thread {thread_id}")
+    except Exception as history_err:
+        logger.error(f"Failed to process recent_history for thread {thread_id}: {history_err}", exc_info=True)
+        yield {"phase": "system", "status": "error", "error": f"Failed to process history: {history_err}"}
+        return
 
     # Start with loaded history and add the current user query for this turn's context
     current_messages: List[BaseMessage] = loaded_history + [HumanMessage(content=query)]
@@ -315,76 +311,100 @@ async def run_langchain_postchain_workflow(
         logger.error(f"Failed to generate embedding for AI message: {embed_err}", exc_info=True)
         final_vector = [0.0] * Config().VECTOR_SIZE # Use zero vector as fallback
 
-    # Construct the single payload for this turn
-    turn_payload = {
-        "content": final_content, # AI's final response
-        "vector": final_vector, # Embedding of AI's final response
-        "thread_id": thread_id,
-        # "role": "assistant", # REMOVED role
-        "user_query": query, # Store the original user query
-        "timestamp": datetime.now(UTC).isoformat(),
-        "phase_outputs": accumulated_phase_outputs, # Include all phase outputs
-        "metadata": { # Populate metadata with model info using __str__
+    # Construct the turn data to be returned to the client
+    turn_id = str(uuid.uuid4()) # Generate UUID for this turn
+    timestamp_now = datetime.now(UTC).isoformat()
+    turn_data_for_client = {
+        "turn_id": turn_id,
+        "timestamp": timestamp_now,
+        "user_query": query,
+        "ai_response_content": final_content,
+        "phase_outputs": accumulated_phase_outputs,
+        "metadata": {
             "action_model": str(action_model_config),
             "experience_model": str(experience_model_config),
             "intention_model": str(intention_model_config),
             "observation_model": str(observation_model_config),
             "understanding_model": str(understanding_model_config),
             "yield_model": str(yield_model_config),
-        },
-        # TODO: Add novelty_score, similarity_scores, cited_prior_ids if available
-        "novelty_score": None, # Placeholder
-        "similarity_scores": None, # Placeholder
-        "cited_prior_ids": None, # Placeholder
+            # TODO: Add scores/citations if available
+            "novelty_score": None,
+            "similarity_scores": None,
+            "cited_prior_ids": None,
+        }
     }
 
+    # --- Add background task for indexing the user prompt ---
     try:
-        # Save the single turn record
-        await db_client.save_message(turn_payload)
-        logger.info(f"Successfully saved turn record with phase_outputs for thread {thread_id}. Payload keys: {list(turn_payload.keys())}")
-    except Exception as save_err:
-        logger.error(f"Failed to save turn record for thread {thread_id}: {save_err}", exc_info=True)
-        yield {"phase": "system", "status": "error", "error": f"Failed to save turn record: {save_err}"}
-        # Don't return here, let the workflow complete normally if possible
+        # TODO: We need the embedding of the *user query*, not the final response
+        # This might require another embedding call or adjusting the indexing strategy
+        user_query_vector = await embeddings.aembed_query(query) # Embed user query
+        background_tasks.add_task(
+            _index_prompt_task,
+            turn_id=turn_id,
+            thread_id=thread_id,
+            user_query=query,
+            vector=user_query_vector, # Pass user query embedding
+            timestamp=timestamp_now
+        )
+        logger.info(f"Added background task to index prompt for turn {turn_id}")
+    except Exception as task_err:
+        # Log error but don't fail the main workflow
+        logger.error(f"Failed to add background indexing task for turn {turn_id}: {task_err}", exc_info=True)
+
+    # --- Persistence is now handled by the client ---
+    # Removed: await db_client.save_message(turn_payload)
 
     logger.info(f"Langchain PostChain workflow completed for thread {thread_id}")
     # Yield final completion event
+    # Yield final turn data structure for the client
     yield {
         "phase": "complete",
         "status": "complete",
-        "content": "Workflow finished."
+        "turn_data": turn_data_for_client # Include the full turn data
     }
 
-# --- Example Usage (for testing) ---
-# (main function remains largely the same, but history building might need adjustment)
+# --- Background Task Definition ---
+async def _index_prompt_task(
+    turn_id: str,
+    thread_id: str,
+    user_query: str,
+    vector: List[float],
+    timestamp: str
+):
+    """Background task to index a user prompt."""
+    try:
+        # Need to instantiate DB client within the task
+        from app.database import DatabaseClient
+        from app.config import Config
+        db_client = DatabaseClient(Config.from_env())
+        # TODO: Replace with actual call to db_client.index_prompt once implemented in database.py
+        # Ensure index_prompt exists and accepts these arguments
+        logger.info(f"Background task: Indexing prompt for turn {turn_id} (DB call pending implementation)")
+        # await db_client.index_prompt(
+        #     turn_id=turn_id,
+        #     thread_id=thread_id,
+        #     user_query=user_query,
+        #     vector=vector,
+        #     timestamp=timestamp
+        # )
+        pass # Placeholder until index_prompt is implemented
+    except Exception as e:
+        logger.error(f"Background task error indexing prompt for turn {turn_id}: {e}", exc_info=True)
+
+
+# --- Example Usage (for testing - needs update) ---
 async def main():
-    thread_id = "test-thread-lc-turn"
-    message_history = []
-    query = "What was the score of the last Lakers game? Search the web."
-
-    test_action_mc = ModelConfig(provider="google", model_name="gemini-2.0-flash-lite") # Add keys if needed locally
-    test_experience_mc = ModelConfig(provider="openrouter", model_name="ai21/jamba-1.6-mini") # Add keys if needed locally
-
-    async for event in run_langchain_postchain_workflow(
-        query=query,
-        thread_id=thread_id,
-        message_history=message_history, # Pass empty history for first turn
-        # action_mc_override=test_action_mc,
-        # experience_mc_override=test_experience_mc,
-    ):
-        print(json.dumps(event, indent=2))
-        # History reconstruction for multi-turn tests would need updating
-        # based on the new single-record model if running subsequent turns here.
-        if event.get("phase") == "yield" and event.get("status") == "complete":
-             print("\n--- FINAL RESPONSE ---")
-             print(event.get("content")) # Use 'content' key now
-             print("----------------------")
-
+    # This main function needs significant updates to work with the new flow
+    # - It needs to simulate receiving recent_history
+    # - It needs a mock BackgroundTasks object
+    # - It needs to handle the new final event structure
+    logger.warning("Main test function needs updating for the new workflow structure.")
+    pass
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-    # Example of running the main function for testing
-    # asyncio.run(main())
+    # asyncio.run(main()) # Disabled until updated
     pass
 
 # REMOVE OLD PHASE FUNCTIONS (as they are replaced by the helper)
