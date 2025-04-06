@@ -115,16 +115,34 @@ class DatabaseClient:
                 "cited_prior_ids": data.get("cited_prior_ids"),
                 "metadata": data.get("metadata", {})
             }
+            # --- DEBUG LOGGING ---
+            logger.info(f"Attempting to save message with ID: {point_id}")
+            logger.info(f"Payload keys: {list(payload.keys())}")
+            logger.info(f"Payload content snippet: {str(payload.get('content'))[:100]}...")
+            # Explicitly log phase_outputs type and content
+            phase_outputs_data = payload.get("phase_outputs")
+            logger.info(f"Payload phase_outputs type: {type(phase_outputs_data)}")
+            if isinstance(phase_outputs_data, dict):
+                 logger.info(f"Payload phase_outputs keys: {list(phase_outputs_data.keys())}")
+                 # Log snippet of each phase output
+                 for phase, content in phase_outputs_data.items():
+                     logger.info(f"  Phase '{phase}' content snippet: {str(content)[:50]}...")
+            else:
+                 logger.info(f"Payload phase_outputs data: {phase_outputs_data}")
+            # --- END DEBUG LOGGING ---
+
             self.client.upsert(
                 collection_name=self.config.MESSAGES_COLLECTION,
                 points=[
                     models.PointStruct(
                         id=point_id,
                         vector=data["vector"],
-                        payload=payload
+                        payload=payload # Ensure this payload is correctly structured
                     )
-                ]
+                ],
+                wait=True # Wait for operation to complete for more reliable testing
             )
+            logger.info(f"Successfully upserted message {point_id}")
             return {"id": point_id}
         except Exception as e:
             logger.error(f"Error saving message: {e}")

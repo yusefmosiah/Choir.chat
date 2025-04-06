@@ -38,6 +38,31 @@ class ThreadResponse(BaseModel):
     message_count: int
     last_activity: datetime
 
+
+# Message models for API response
+class MessageResponseModel(BaseModel):
+    id: str
+    content: Optional[str] = None
+    thread_id: str
+    role: Optional[str] = None
+    timestamp: Optional[datetime] = None
+    phase_outputs: Optional[Dict[str, str]] = None
+    novelty_score: Optional[float] = None
+    similarity_scores: Optional[List[float]] = None
+    cited_prior_ids: Optional[List[str]] = None
+    metadata: Optional[Dict[str, Any]] = None
+
+    class Config:
+        orm_mode = True # Enable ORM mode for potential future use with ORMs
+
+class MessagesDataModel(BaseModel):
+    messages: List[MessageResponseModel]
+
+class MessagesAPIResponseModel(BaseModel):
+    success: bool
+    message: Optional[str] = None
+    data: Optional[MessagesDataModel] = None
+
 # User models
 class UserCreate(BaseModel):
     public_key: str

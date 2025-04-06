@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from app.models.api import ThreadCreate, ThreadUpdate, ThreadResponse, APIResponse
+from app.models.api import ThreadCreate, ThreadUpdate, ThreadResponse, APIResponse, MessagesAPIResponseModel, MessagesDataModel, MessageResponseModel
 from app.database import DatabaseClient
 from app.config import Config
 from typing import Optional
@@ -34,13 +34,18 @@ async def get_thread(thread_id: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/{thread_id}/messages", response_model=APIResponse)
+@router.get("/{thread_id}/messages", response_model=MessagesAPIResponseModel) # Use the specific response model
 async def get_thread_messages(thread_id: str, limit: int = 50, before: Optional[str] = None):
     try:
-        messages = await db.get_thread_messages(thread_id, limit, before)
-        return APIResponse(
+        # db.get_thread_messages returns List[Dict[str, Any]]
+        messages_data = await db.get_thread_messages(thread_id, limit, before)
+        # Convert the list of dictionaries to a list of MessageResponseModel objects
+        # Pydantic will handle validation and conversion based on the model definition
+        message_models = [MessageResponseModel.parse_obj(msg) for msg in messages_data]
+
+        return MessagesAPIResponseModel(
             success=True,
-            data={"messages": messages}
+            data=MessagesDataModel(messages=message_models) # Structure the data correctly
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

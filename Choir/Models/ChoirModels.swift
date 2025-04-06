@@ -344,6 +344,45 @@ class Message: ObservableObject, Identifiable, Equatable {
         }
     }
 }
+
+// MARK: - Messages API Models
+struct MessagesAPIResponse: Codable {
+    let success: Bool
+    let message: String?
+    let data: MessagesData?
+}
+
+struct MessagesData: Codable {
+    let messages: [MessageResponse]?
+}
+
+struct MessageResponse: Codable, Identifiable {
+    let id: String
+    let content: String?
+    let threadId: String // Non-optional as per guide assumption
+    let role: String? // Optional based on curl output
+    let timestamp: String?
+    let phaseOutputs: [String: String]? // Optional based on curl output
+    // Include other fields if needed for future use, mark as optional
+    let noveltyScore: Double?
+    let similarityScores: [Double]? // Assuming array of doubles
+    let citedPriorIds: [String]? // Assuming array of strings
+    let metadata: [String: String]? // Assuming simple dictionary
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case content
+        case threadId = "thread_id"
+        case role
+        case timestamp
+        case phaseOutputs = "phase_outputs"
+        case noveltyScore = "novelty_score"
+        case similarityScores = "similarity_scores"
+        case citedPriorIds = "cited_prior_ids"
+        case metadata
+    }
+}
+
 // MARK: - API Models
 /// Simplified Prior model for display purposes only
 struct Prior: Codable, Hashable {

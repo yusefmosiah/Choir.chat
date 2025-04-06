@@ -30,7 +30,11 @@ struct ContentView: View {
             .navigationTitle("ChoirThreads")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) { // Explicit placement for the primary action
-                    Button(action: createNewChoirThread) {
+                    Button { // Change to async task execution
+                        Task {
+                            await createNewChoirThread()
+                        }
+                    } label: {
                         Label("New ChoirThread", systemImage: "plus")
                     }
                 }
@@ -61,7 +65,11 @@ struct ContentView: View {
                         .foregroundStyle(.secondary)
                         .padding(.top, 20)
 
-                    Button(action: createNewChoirThread) {
+                    Button { // Change to async task execution
+                        Task {
+                            await createNewChoirThread()
+                        }
+                    } label: {
                         Label("Create New Thread", systemImage: "plus.circle.fill")
                             .font(.headline)
                             .padding()
@@ -121,7 +129,7 @@ struct ContentView: View {
                             let uuid = try await ChoirAPIClient.shared.verifyUser(address: suiAddress, signature: signature)
                             userUUID = uuid
                             storedUserUUID = uuid
-                            
+
                             print("Generated new UUID for Sui address: \(suiAddress) -> \(uuid)")
                         }
                     }
@@ -146,10 +154,46 @@ struct ContentView: View {
         }
     }
 
-    private func createNewChoirThread() {
-        let thread = ChoirThread() // Uses auto-generated title
-        threads.append(thread)
-        selectedChoirThread = thread
+    private func createNewChoirThread() async {
+        // Assign the result of nil-coalescing first, then check if it's empty
+        let potentialUserId = userUUID ?? storedUserUUID
+        guard !potentialUserId.isEmpty else {
+            print("❌ Error: Cannot create thread without a user UUID.")
+            // Optionally show an alert to the user
+            return
+        }
+
+        // Generate a default name
+        let defaultName = "ChoirThread \(DateFormatter.localizedString(from: Date(), dateStyle: .short, timeStyle: .short))"
+
+        // We know potentialUserId is non-empty here from the guard statement. Use it directly.
+        print("🚀 Creating new thread on backend for user \(potentialUserId)...")
+        do {
+            let createdThreadResponse = try await ChoirAPIClient.shared.createThread(
+                name: defaultName,
+                userId: potentialUserId // Use potentialUserId directly
+                // initialMessage: nil // No initial message when creating from list view
+            )
+
+            print("✅ Backend thread created with ID: \(createdThreadResponse.id)")
+
+            // Create the local ChoirThread object using data from the backend response
+            let newThread = ChoirThread(
+                id: UUID(uuidString: createdThreadResponse.id) ?? UUID(), // Use ID from backend
+                title: createdThreadResponse.name // Use name from backend
+            )
+
+            // Update UI on main thread
+            await MainActor.run {
+                threads.append(newThread)
+                selectedChoirThread = newThread
+                print("✅ Local thread object created and selected.")
+            }
+
+        } catch {
+            print("❌ Error creating thread via API: \(error)")
+            // Optionally show an error alert to the user
+        }
     }
 }
 

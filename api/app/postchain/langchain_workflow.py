@@ -2,6 +2,8 @@ import asyncio
 import logging
 from typing import List, Dict, Any, AsyncIterator, Optional
 from langchain_openai import OpenAIEmbeddings
+import uuid # Import uuid
+from datetime import datetime, UTC # Import datetime
 
 from langchain_core.messages import HumanMessage, AIMessage, SystemMessage, BaseMessage, ToolMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
@@ -13,7 +15,7 @@ from app.config import Config
 from app.postchain.postchain_llm import post_llm
 from app.langchain_utils import ModelConfig
 from app.postchain.schemas.state import PostChainState, ExperiencePhaseOutput, SearchResult, VectorSearchResult # Import new schemas
-from app.postchain.utils import format_stream_event #, save_state, recover_state # Removed state management utils
+# from app.postchain.utils import format_stream_event # REMOVE import - no longer using this function
 from app.postchain.prompts.prompts import action_instruction, experience_instruction, intention_instruction, understanding_instruction, observation_instruction, yield_instruction
 
 # Langchain Tool Imports (Example)
@@ -103,7 +105,9 @@ async def run_experience_phase(
 
     if not last_user_msg or not last_ai_msg:
         logger.error("Could not find previous user query or action response for Experience phase.")
-        return {"error": "Experience phase failed: Missing context."}
+        # Return ExperiencePhaseOutput with error
+        return ExperiencePhaseOutput(experience_response=AIMessage(content="Error: Missing context"), error="Experience phase failed: Missing context.")
+
 
     experience_query = f"""<experience_instruction>{experience_instruction(model_config)}</experience_instruction>
 
@@ -136,7 +140,9 @@ Your task: Provide a reflective analysis adding deeper context.
         if not isinstance(response, AIMessage):
             error_msg = f"Unexpected response type from experience model (initial call): {type(response)}. Content: {response}"
             logger.error(error_msg)
-            return {"error": error_msg}
+            # Return ExperiencePhaseOutput with error
+            return ExperiencePhaseOutput(experience_response=AIMessage(content=f"Error: {error_msg}"), error=error_msg)
+
 
         logger.info(f"Experience phase initial call completed. Response: {response.content[:100]}...")
 
@@ -217,9 +223,9 @@ Your task: Provide a reflective analysis adding deeper context.
                                     vector_results_list.append(VectorSearchResult(
                                         content=tool_output_str,
                                         score=0.0, # Add required score field (placeholder)
-                                    provider=tool_name,
-                                    # Add other fields like score, metadata if parseable or available
-                                ))
+                                        provider=tool_name,
+                                        # Add other fields like score, metadata if parseable or available
+                                    ))
                             # Keep tool_output_str as is for the LLM ToolMessage
 
                     except Exception as tool_err:
@@ -478,7 +484,8 @@ async def run_langchain_postchain_workflow(
         yield {"error": f"Model initialization failed: {e}"}
         return
 
-    # --- State Management with Qdrant ---
+    # --- State Management & Accumulation ---
+    accumulated_phase_outputs: Dict[str, str] = {} # Dictionary to store phase results
     from app.database import DatabaseClient
     from datetime import datetime, UTC
 
@@ -494,198 +501,289 @@ async def run_langchain_postchain_workflow(
         if role == "user":
             loaded_history.append(HumanMessage(content=content))
         elif role == "assistant":
+            # TODO: Decide if we need to load phase_outputs for history? Probably not for LLM context.
             loaded_history.append(AIMessage(content=content))
         else:
             # Default fallback
             loaded_history.append(HumanMessage(content=content))
 
-    # Save the new user message immediately
-    user_message = {
-        "thread_id": thread_id,
-        "role": "user",
-        "content": query,
-        "timestamp": datetime.now(UTC).isoformat(),
-        "vector": await embeddings.aembed_query(query)
-    }
-    await db_client.save_message(user_message)
+    # Combine loaded history with any passed-in history (e.g., from current session)
+    # Ensure no duplicates if message_history is derived from loaded_history
+    # For simplicity, assuming message_history is empty or contains only new messages for this turn
+    current_messages: List[BaseMessage] = loaded_history + message_history
 
-    # Compose current messages for workflow
-    current_messages = loaded_history + [HumanMessage(content=query)]
+    # Add the current user query
+    user_message = HumanMessage(content=query)
+    current_messages.append(user_message)
 
-    # --- Workflow Definition using LCEL (Simplified) ---
+    # Save the user message to DB
+    try:
+        user_vector = await embeddings.aembed_query(query)
+        user_message_payload = {
+            "content": query,
+            "vector": user_vector,
+            "thread_id": thread_id,
+            "role": "user",
+            "timestamp": datetime.now(UTC).isoformat(),
+            "metadata": {} # Add any relevant user metadata
+        }
+        await db_client.save_message(user_message_payload)
+        logger.info(f"Saved user message for thread {thread_id}")
+    except Exception as save_err:
+        logger.error(f"Failed to save user message for thread {thread_id}: {save_err}", exc_info=True)
+        # Yield dictionary directly
+        yield {
+            "phase": "system", # Use a generic phase for system errors
+            "status": "error",
+            "error": f"Failed to save user message: {save_err}"
+        }
+        return
+
+
+    # --- Run Phases Sequentially ---
 
     # 1. Action Phase
-    yield {"phase": "action", "status": "running"}
+    # Yield dictionary directly
+    yield {
+        "phase": "action",
+        "status": "running",
+        "content": "Running action phase..."
+    }
     action_result = await run_action_phase(current_messages, action_model_config)
-
     if "error" in action_result:
-        yield {"phase": "action", "status": "error", "content": action_result["error"]}
+        # Yield dictionary directly
+        yield {
+            "phase": "action",
+            "status": "error",
+            "error": action_result["error"],
+            "provider": action_model_config.provider,
+            "model_name": action_model_config.model_name
+        }
         return # Stop workflow on error
 
     action_response: AIMessage = action_result["action_response"]
-    current_messages.append(action_response)
-
-
-
+    current_messages.append(action_response) # Add AI response to history for next phase
+    accumulated_phase_outputs["action"] = action_response.content # Store result
+    # Yield dictionary directly
     yield {
         "phase": "action",
         "status": "complete",
         "content": action_response.content,
-        "provider": action_model_config.provider, # Add provider
-        "model_name": action_model_config.model_name # Add model name
+        "provider": action_model_config.provider,
+        "model_name": action_model_config.model_name
     }
 
     # 2. Experience Phase
-    yield {"phase": "experience", "status": "running"}
-    experience_output: ExperiencePhaseOutput = await run_experience_phase(current_messages, experience_model_config)
-
-    if experience_output.error:
+    # Yield dictionary directly
+    yield {
+        "phase": "experience",
+        "status": "running",
+        "content": "Running experience phase..."
+    }
+    experience_result: ExperiencePhaseOutput = await run_experience_phase(current_messages, experience_model_config)
+    if experience_result.error:
+        # Yield dictionary directly
         yield {
             "phase": "experience",
             "status": "error",
-            "content": experience_output.error,
-            "provider": experience_model_config.provider, # Add provider
-            "model_name": experience_model_config.model_name, # Add model name
-            "web_results": [], # Ensure lists are present even on error
-            "vector_results": []
+            "error": experience_result.error,
+            "provider": experience_model_config.provider,
+            "model_name": experience_model_config.model_name
         }
         return # Stop workflow on error
 
-    # Add the AI's response message to the history
-    current_messages.append(experience_output.experience_response)
-
-
-    # Yield the completion event including search results
+    experience_response: AIMessage = experience_result.experience_response
+    current_messages.append(experience_response) # Add AI response to history
+    accumulated_phase_outputs["experience"] = experience_response.content # Store result
+    # TODO: Handle/yield web_results and vector_results if needed for streaming
+    # Yield dictionary directly
     yield {
         "phase": "experience",
         "status": "complete",
-        "content": experience_output.experience_response.content,
-        "provider": experience_model_config.provider, # Add provider
-        "model_name": experience_model_config.model_name, # Add model name
-        "web_results": [res.dict() for res in experience_output.web_results], # Convert Pydantic models to dicts for JSON serialization
-        "vector_results": [res.dict() for res in experience_output.vector_results]
+        "content": experience_response.content,
+        "provider": experience_model_config.provider,
+        "model_name": experience_model_config.model_name,
+        "metadata": {"web_results_count": len(experience_result.web_results or []), "vector_results_count": len(experience_result.vector_results or [])} # Example metadata
     }
 
     # 3. Intention Phase
-    yield {"phase": "intention", "status": "running"}
+    # Yield dictionary directly
+    yield {
+        "phase": "intention",
+        "status": "running",
+        "content": "Running intention phase..."
+    }
     intention_result = await run_intention_phase(current_messages, intention_model_config)
-
     if "error" in intention_result:
+        # Yield dictionary directly
         yield {
             "phase": "intention",
             "status": "error",
-            "content": intention_result["error"],
-            "provider": intention_model_config.provider, # Add provider
-            "model_name": intention_model_config.model_name # Add model name
+            "error": intention_result["error"],
+            "provider": intention_model_config.provider,
+            "model_name": intention_model_config.model_name
         }
         return # Stop workflow on error
 
     intention_response: AIMessage = intention_result["intention_response"]
-    current_messages.append(intention_response)
-
-
+    current_messages.append(intention_response) # Add AI response to history
+    accumulated_phase_outputs["intention"] = intention_response.content # Store result
+    # Yield dictionary directly
     yield {
         "phase": "intention",
         "status": "complete",
         "content": intention_response.content,
-        "provider": intention_model_config.provider, # Add provider
-        "model_name": intention_model_config.model_name # Add model name
+        "provider": intention_model_config.provider,
+        "model_name": intention_model_config.model_name
     }
 
     # 4. Observation Phase
-    yield {"phase": "observation", "status": "running"}
+    # Yield dictionary directly
+    yield {
+        "phase": "observation",
+        "status": "running",
+        "content": "Running observation phase..."
+    }
     observation_result = await run_observation_phase(current_messages, observation_model_config)
-
     if "error" in observation_result:
+        # Yield dictionary directly
         yield {
             "phase": "observation",
             "status": "error",
-            "content": observation_result["error"],
-            "provider": observation_model_config.provider, # Add provider
-            "model_name": observation_model_config.model_name # Add model name
+            "error": observation_result["error"],
+            "provider": observation_model_config.provider,
+            "model_name": observation_model_config.model_name
         }
         return # Stop workflow on error
 
     observation_response: AIMessage = observation_result["observation_response"]
-    current_messages.append(observation_response)
-    # Note: Observation output is usually internal, but we yield it here for visibility during development
-
-
+    current_messages.append(observation_response) # Add AI response to history
+    accumulated_phase_outputs["observation"] = observation_response.content # Store result
+    # Yield dictionary directly
     yield {
         "phase": "observation",
         "status": "complete",
         "content": observation_response.content,
-        "provider": observation_model_config.provider, # Add provider
-        "model_name": observation_model_config.model_name # Add model name
+        "provider": observation_model_config.provider,
+        "model_name": observation_model_config.model_name
     }
 
     # 5. Understanding Phase
-    yield {"phase": "understanding", "status": "running"}
+    # Yield dictionary directly
+    yield {
+        "phase": "understanding",
+        "status": "running",
+        "content": "Running understanding phase..."
+    }
     understanding_result = await run_understanding_phase(current_messages, understanding_model_config)
-
     if "error" in understanding_result:
+        # Yield dictionary directly
         yield {
             "phase": "understanding",
             "status": "error",
-            "content": understanding_result["error"],
-            "provider": understanding_model_config.provider, # Add provider
-            "model_name": understanding_model_config.model_name # Add model name
+            "error": understanding_result["error"],
+            "provider": understanding_model_config.provider,
+            "model_name": understanding_model_config.model_name
         }
         return # Stop workflow on error
 
     understanding_response: AIMessage = understanding_result["understanding_response"]
-    current_messages.append(understanding_response)
-    # Note: Understanding output is usually internal, but we yield it here for visibility
-
-
+    current_messages.append(understanding_response) # Add AI response to history
+    accumulated_phase_outputs["understanding"] = understanding_response.content # Store result
+    # Yield dictionary directly
     yield {
         "phase": "understanding",
         "status": "complete",
         "content": understanding_response.content,
-        "provider": understanding_model_config.provider, # Add provider
-        "model_name": understanding_model_config.model_name # Add model name
+        "provider": understanding_model_config.provider,
+        "model_name": understanding_model_config.model_name
     }
 
     # 6. Yield Phase
-    yield {"phase": "yield", "status": "running"}
+    # Yield dictionary directly
+    yield {
+        "phase": "yield",
+        "status": "running",
+        "content": "Running yield phase..."
+    }
     yield_result = await run_yield_phase(current_messages, yield_model_config)
-
     if "error" in yield_result:
+        # Yield dictionary directly
         yield {
             "phase": "yield",
             "status": "error",
-            "content": yield_result["error"],
-            "provider": yield_model_config.provider, # Add provider
-            "model_name": yield_model_config.model_name # Add model name
+            "error": yield_result["error"],
+            "provider": yield_model_config.provider,
+            "model_name": yield_model_config.model_name
         }
         return # Stop workflow on error
 
     yield_response: AIMessage = yield_result["yield_response"]
-# Save the final AI message after Yield phase
-    ai_message_data = {
-        "thread_id": thread_id,
-        "role": "assistant",
-        "content": yield_response.content,
-        "timestamp": datetime.now(UTC).isoformat(),
-        "vector": await embeddings.aembed_query(yield_response.content),
-        "phase_outputs": yield_result.get("phase_outputs"),
-        "novelty_score": yield_result.get("novelty_score"),
-        "similarity_scores": yield_result.get("similarity_scores"),
-        "cited_prior_ids": yield_result.get("cited_prior_ids"),
-        "metadata": {}
-    }
-    await db_client.save_message(ai_message_data)
-    # Don't add Yield response to message history unless needed for recursion logic (omitted here)
+    accumulated_phase_outputs["yield"] = yield_response.content # Store result
+    # Don't add Yield response to message history unless needed for recursion logic
+    # Yield dictionary directly
     yield {
         "phase": "yield",
         "status": "complete",
-        "final_content": yield_response.content, # Use final_content key for yield
-        "provider": yield_model_config.provider, # Add provider
-        "model_name": yield_model_config.model_name # Add model name
+        "content": yield_response.content, # Use 'content' for consistency
+        "provider": yield_model_config.provider,
+        "model_name": yield_model_config.model_name
     }
+
+# Save the final AI message after Yield phase
+    final_content = yield_response.content
+    try:
+        final_vector = await embeddings.aembed_query(final_content)
+        logger.info(f"Generated embedding for final AI message (length: {len(final_vector)})")
+    except Exception as embed_err:
+        logger.error(f"Failed to generate embedding for AI message: {embed_err}", exc_info=True)
+        final_vector = [0.0] * Config().VECTOR_SIZE # Use zero vector as fallback
+
+    # Construct the payload for save_message
+    ai_message_payload = {
+        "content": final_content,
+        "vector": final_vector,
+        "thread_id": thread_id,
+        "role": "assistant",
+        "timestamp": datetime.now(UTC).isoformat(),
+        "phase_outputs": accumulated_phase_outputs, # Use the accumulated dictionary
+        "metadata": { # Populate metadata with model info
+            "action_model": action_model_config.identifier(),
+            "experience_model": experience_model_config.identifier(),
+            "intention_model": intention_model_config.identifier(),
+            "observation_model": observation_model_config.identifier(),
+            "understanding_model": understanding_model_config.identifier(),
+            "yield_model": yield_model_config.identifier(),
+        },
+        # TODO: Add novelty_score, similarity_scores, cited_prior_ids if available
+        # These would need to be calculated/extracted during the workflow, perhaps in Experience phase
+        "novelty_score": None, # Placeholder
+        "similarity_scores": None, # Placeholder
+        "cited_prior_ids": None, # Placeholder
+    }
+
+    try:
+        await db_client.save_message(ai_message_payload)
+        logger.info(f"Successfully saved AI message with phase_outputs for thread {thread_id}. Payload keys: {list(ai_message_payload.keys())}")
+    except Exception as save_err:
+        logger.error(f"Failed to save AI message for thread {thread_id}: {save_err}", exc_info=True)
+        # Yield dictionary directly
+        yield {
+            "phase": "system", # Use a generic phase for system errors
+            "status": "error",
+            "error": f"Failed to save AI response: {save_err}"
+        }
+    # Note: The yield event for the 'yield' phase was already sent before this save block.
+    # We don't need to yield it again here. The workflow concludes after this.
 
 
     logger.info(f"Langchain PostChain workflow completed for thread {thread_id}")
+    # Yield final completion event
+    yield {
+        "phase": "complete",
+        "status": "complete",
+        "content": "Workflow finished."
+    }
 
 # --- Example Usage (for testing) ---
 async def main():
@@ -719,12 +817,12 @@ async def main():
              message_history.append(AIMessage(content=event["content"], additional_kwargs={"phase": event.get("phase")}))
         elif event.get("phase") == "yield" and event.get("status") == "complete":
              print("\n--- FINAL RESPONSE ---")
-             print(event.get("final_content"))
+             print(event.get("content")) # Use 'content' key now
              print("----------------------")
 
 
 if __name__ == "__main__":
-    import asyncio
-    import json
     logging.basicConfig(level=logging.INFO)
-    asyncio.run(main())
+    # Example of running the main function for testing
+    # asyncio.run(main())
+    pass # Keep pass here if not running main directly
