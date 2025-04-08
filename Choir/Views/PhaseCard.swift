@@ -103,9 +103,9 @@ struct PhaseCard: View {
                     // Determine which view to show based on the phase
                     switch phase {
                     case .experienceVectors, .experienceWeb:
-                        let results = phase == .experienceVectors ? 
-                            message.vectorSearchResults.map { .vector($0) } :
-                            message.webSearchResults.map { .web($0) }
+                        let results: [UnifiedSearchResult] = phase == .experienceVectors ? 
+                            message.vectorSearchResults.map { UnifiedSearchResult.vector($0) } :
+                            message.webSearchResults.map { UnifiedSearchResult.web($0) }
                         
                         UnifiedPaginatedView(
                             textContent: content,
