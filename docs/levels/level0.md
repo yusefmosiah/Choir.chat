@@ -49,13 +49,13 @@ tree.md
 │   │   └── PostchainViewModel.swift
 │   └── Views
 │       ├── ChoirThreadDetailView.swift
-│       ├── ExperienceSourcesView.swift
 │       ├── MessageRow.swift
 │       ├── ModelConfigView.swift
 │       ├── PaginatedTextView.swift
 │       ├── PhaseCard.swift
 │       ├── PostchainView.swift
 │       ├── PriorCard.swift
+│       ├── SearchResultListView.swift
 │       ├── Thread
 │       │   └── Components
 │       │       ├── ThreadInputBar.swift

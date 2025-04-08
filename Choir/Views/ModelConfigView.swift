@@ -336,7 +336,8 @@ struct ModelConfigView: View {
     private func resetToDefaults() {
         let defaultConfigs: [Phase: ModelConfig] = [
             .action: ModelConfig(provider: "google", model: "gemini-2.0-flash-lite", temperature: 0.33),
-            .experience: ModelConfig(provider: "openrouter", model: "ai21/jamba-1.6-mini", temperature: 0.33),
+            .experienceVectors: ModelConfig(provider: "openrouter", model: "ai21/jamba-1.6-mini", temperature: 0.33),
+            .experienceWeb: ModelConfig(provider: "openrouter", model: "openrouter/quasar-alpha", temperature: 0.33),
             .intention: ModelConfig(provider: "google", model: "gemini-2.0-flash", temperature: 0.33),
             .observation: ModelConfig(provider: "groq", model: "qwen-qwq-32b", temperature: 0.33),
             .understanding: ModelConfig(provider: "openrouter", model: "openrouter/quasar-alpha", temperature: 0.33),

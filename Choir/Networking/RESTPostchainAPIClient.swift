@@ -288,16 +288,21 @@ class RESTPostchainAPIClient {
                                     return nil
                                 }
 
-                                var metadata: [String: Any] = [:]
+                                var metadata: [String: String]? = nil
                                 if let metadataJson = resultJson["metadata"] as? [String: Any] {
-                                    metadata = metadataJson
+                                    // Convert any metadata to String values for Codable compatibility
+                                    var stringMetadata: [String: String] = [:]
+                                    for (key, value) in metadataJson {
+                                        stringMetadata[key] = String(describing: value)
+                                    }
+                                    metadata = stringMetadata
                                 }
 
                                 return VectorSearchResult(
                                     content: content,
                                     score: score,
-                                    metadata: metadata,
-                                    provider: resultJson["provider"] as? String
+                                    provider: resultJson["provider"] as? String,
+                                    metadata: metadata
                                 )
                             }
 
@@ -491,84 +496,5 @@ struct PostchainLangchainEvent: Codable {
         case webResults = "web_results"
         case vectorResults = "vector_results"
         case error
-    }
-}
-
-// MARK: - Search Result Models
-struct SearchResult: Codable, Equatable {
-    let title: String
-    let url: String
-    let content: String
-    let provider: String?
-
-    static func == (lhs: SearchResult, rhs: SearchResult) -> Bool {
-        return lhs.title == rhs.title &&
-               lhs.url == rhs.url &&
-               lhs.content == rhs.content &&
-               lhs.provider == rhs.provider
-    }
-}
-
-struct VectorSearchResult: Codable, Equatable {
-    let content: String
-    let score: Double
-    let metadata: [String: Any]
-    let provider: String?
-
-    enum CodingKeys: String, CodingKey {
-        case content
-        case score
-        case metadata
-        case provider
-    }
-
-    init(content: String, score: Double, metadata: [String: Any], provider: String?) {
-        self.content = content
-        self.score = score
-        self.metadata = metadata
-        self.provider = provider
-    }
-
-    init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-
-        content = try container.decode(String.self, forKey: .content)
-        score = try container.decode(Double.self, forKey: .score)
-        provider = try container.decodeIfPresent(String.self, forKey: .provider)
-
-        // Handle metadata as a dynamic dictionary
-        if let metadataContainer = try? container.decode([String: AnyCodable].self, forKey: .metadata) {
-            var convertedMetadata: [String: Any] = [:]
-            for (key, value) in metadataContainer {
-                convertedMetadata[key] = value.value
-            }
-            metadata = convertedMetadata
-        } else {
-            metadata = [:]
-        }
-    }
-
-    static func == (lhs: VectorSearchResult, rhs: VectorSearchResult) -> Bool {
-        // Note: metadata is of type [String: Any] which doesn't conform to Equatable
-        // Only comparing content, score and provider for equality
-        return lhs.content == rhs.content &&
-               lhs.score == rhs.score &&
-               lhs.provider == rhs.provider
-        // metadata is excluded from comparison as [String: Any] doesn't conform to Equatable
-    }
-
-    func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-
-        try container.encode(content, forKey: .content)
-        try container.encode(score, forKey: .score)
-        try container.encodeIfPresent(provider, forKey: .provider)
-
-        // Handle metadata encoding
-        var encodableMetadata: [String: AnyCodable] = [:]
-        for (key, value) in metadata {
-            encodableMetadata[key] = AnyCodable(value)
-        }
-        try container.encode(encodableMetadata, forKey: .metadata)
     }
 }

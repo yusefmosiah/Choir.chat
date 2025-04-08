@@ -123,8 +123,10 @@ struct ChoirThreadDetailView: View {
 
                message.phases = allPhases
 
-               if let experienceContent = allPhases[.experience], !experienceContent.isEmpty {
-                   message.content = experienceContent
+               if let experienceContent = allPhases[.experienceWeb], !experienceContent.isEmpty {
+                    message.content = experienceContent
+                } else if let vectorContent = allPhases[.experienceVectors], !vectorContent.isEmpty {
+                    message.content = vectorContent
                } else if let actionContent = allPhases[.action], !actionContent.isEmpty {
                    message.content = actionContent
                }

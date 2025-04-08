@@ -23,10 +23,11 @@ protocol SSEDelegate: AnyObject {
 import Foundation
 import SwiftUI
 
- // MARK: - Phase Enum
+// MARK: - Phase Enum
 enum Phase: String, CaseIterable, Identifiable, Codable {
     case action
-    case experience
+    case experienceVectors = "experience_vectors" // Match backend string
+    case experienceWeb = "experience_web"         // Match backend string
     case intention
     case observation
     case understanding
@@ -37,7 +38,8 @@ enum Phase: String, CaseIterable, Identifiable, Codable {
     var description: String {
         switch self {
         case .action: return "Initial Response"
-        case .experience: return "Finding Context"
+        case .experienceVectors: return "Finding Docs" // Shorter
+        case .experienceWeb: return "Searching Web"
         case .intention: return "Analyzing Intent"
         case .observation: return "Observing Patterns"
         case .understanding: return "Checking Understanding"
@@ -48,7 +50,8 @@ enum Phase: String, CaseIterable, Identifiable, Codable {
     var symbol: String {
         switch self {
         case .action: return "bolt.fill"
-        case .experience: return "brain.head.profile"
+        case .experienceVectors: return "doc.text.magnifyingglass"
+        case .experienceWeb: return "network"
         case .intention: return "target"
         case .observation: return "eye.fill"
         case .understanding: return "checkmark.circle.fill"
@@ -58,21 +61,12 @@ enum Phase: String, CaseIterable, Identifiable, Codable {
 
     // Smart mapping from any string to a Phase enum
     static func from(_ string: String) -> Phase? {
-        // Exact match by rawValue
-        if let exact = Phase.allCases.first(where: { $0.rawValue == string }) {
+        // Exact match by rawValue (should handle snake_case from backend)
+        if let exact = Phase(rawValue: string) {
             return exact
         }
-
-        // Description match
-        if let byDescription = Phase.allCases.first(where: { $0.description == string }) {
-            return byDescription
-        }
-
-        // Partial/fuzzy match (case insensitive)
-        let lowercased = string.lowercased()
-        return Phase.allCases.first { phase in
-            lowercased.contains(phase.rawValue.lowercased())
-        }
+        // Fallback for potentially non-raw value strings (e.g., description)
+        return Phase.allCases.first { $0.description == string }
     }
 }
 
@@ -141,6 +135,87 @@ struct ModelConfig: Codable, Equatable, Hashable {
     }
 }
 
+// MARK: - Search Result Models
+struct SearchResult: Codable, Equatable, Hashable {
+    let title: String
+    let url: String
+    let content: String
+    let provider: String?
+
+    // Add a unique ID for Hashable and Identifiable conformance
+    var id: String {
+        return url // URL is a good natural ID for web search results
+    }
+
+    static func == (lhs: SearchResult, rhs: SearchResult) -> Bool {
+        return lhs.title == rhs.title &&
+               lhs.url == rhs.url &&
+               lhs.content == rhs.content &&
+               lhs.provider == rhs.provider
+    }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(url)
+        hasher.combine(title)
+    }
+}
+
+/// Simplified Prior model for display purposes only
+struct Prior: Codable, Hashable {
+    let id: String
+    let content: String
+    let similarity: Double
+    let createdAt: String?
+    let threadID: String?
+    let role: String?
+    let step: String?
+
+    // For transition purposes only - this will be replaced with a better implementation
+    // once the codebase is cleaned up
+    init(content: String, similarity: Double = 1.0, id: String = UUID().uuidString) {
+        self.id = id
+        self.content = content
+        self.similarity = similarity
+        self.createdAt = nil
+        self.threadID = nil
+        self.role = nil
+        self.step = nil
+    }
+}
+
+struct VectorSearchResult: Codable, Equatable, Hashable {
+    let content: String
+    let score: Double
+    let metadata: [String: String]?
+    let provider: String?
+
+    // Add a unique ID property
+    var uniqueId: String {
+        // Create a stable ID from content and score
+        return "\(content.prefix(50))-\(score)"
+    }
+
+    enum CodingKeys: String, CodingKey {
+        case content
+        case score
+        case metadata
+        case provider
+    }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(content)
+        hasher.combine(score)
+        hasher.combine(provider)
+    }
+
+    init(content: String, score: Double, provider: String?, metadata: [String: String]? = nil) {
+        self.content = content
+        self.score = score
+        self.metadata = metadata
+        self.provider = provider
+    }
+}
+
 // MARK: - Phase Result
 struct PhaseResult: Codable, Equatable, Hashable {
     var content: String
@@ -153,6 +228,12 @@ struct PhaseResult: Codable, Equatable, Hashable {
         case provider
         case modelName = "model_name"
     }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(content)
+        hasher.combine(provider)
+        hasher.combine(modelName)
+    }
 }
 
 // MARK: - Thread and Message Models
@@ -164,7 +245,8 @@ class ChoirThread: ObservableObject, Identifiable, Hashable {
     // Global model configurations (used for *new* messages)
     @Published var modelConfigs: [Phase: ModelConfig] = [
         .action: ModelConfig(provider: "google", model: "gemini-2.0-flash-lite"),
-        .experience: ModelConfig(provider: "openrouter", model: "ai21/jamba-1.6-mini"),
+        .experienceVectors: ModelConfig(provider: "openrouter", model: "ai21/jamba-1.6-mini"),
+        .experienceWeb: ModelConfig(provider: "openrouter", model: "openrouter/quasar-alpha"),
         .intention: ModelConfig(provider: "google", model: "gemini-2.0-flash"),
         .observation: ModelConfig(provider: "groq", model: "qwen-qwq-32b"),
         .understanding: ModelConfig(provider: "openrouter", model: "openrouter/quasar-alpha"),
@@ -221,6 +303,9 @@ class Message: ObservableObject, Identifiable, Equatable {
     // Each message stores results for each phase
     @Published private var phaseResults: [Phase: PhaseResult] = [:]
 
+    // Store parsed search results for the new Experience phases
+    @Published var vectorSearchResults: [VectorSearchResult] = []
+    @Published var webSearchResults: [SearchResult] = []
     // Public interface for compatibility (returns only content strings)
     // TODO: Update views to use phaseResults directly where possible
     var phases: [Phase: String] {
@@ -266,25 +351,39 @@ class Message: ObservableObject, Identifiable, Equatable {
         lhs.id == rhs.id
     }
 
-    // Update phase with content, provider, and model name
-    func updatePhase(_ phase: Phase, content: String, provider: String?, modelName: String?) {
+    // Update phase with content, provider, and model name, plus the event for search results
+    func updatePhase(_ phase: Phase, content: String, provider: String?, modelName: String?, event: PostchainStreamEvent) {
         objectWillChange.send() // Notify observers
 
         // Create or update the PhaseResult
         phaseResults[phase] = PhaseResult(content: content, provider: provider, modelName: modelName)
 
-        // Update main content based on priority (Yield > Experience > Action)
-        // Only update if current main content is empty or placeholder
-        if self.content.isEmpty || self.content == "..." {
-            // For initial content, prioritize yield > experience > action
+        // Update main content based on priority (Yield > ExpWeb > ExpVec > Action)
+        // Only update if current main content is empty or placeholder, or we are streaming
+        if self.content.isEmpty || self.content == "..." || self.isStreaming {
             if phase == .yield && !content.isEmpty {
                 self.content = content
-            } else if phase == .experience && !content.isEmpty && (self.content.isEmpty || self.content == "...") {
+            } else if phase == .experienceWeb && !content.isEmpty {
                 self.content = content
-            } else if phase == .action && !content.isEmpty && (self.content.isEmpty || self.content == "...") {
+            } else if phase == .experienceVectors && !content.isEmpty {
+                self.content = content
+            } else if phase == .action && !content.isEmpty {
                 self.content = content
             }
         }
+
+        // Check for search results in the event and update message properties
+        if phase == .experienceVectors {
+             if let results = event.vectorResults, !results.isEmpty {
+                 self.vectorSearchResults = results
+                 print("Message \(id): Updated vectorSearchResults with \(results.count) items")
+             }
+         } else if phase == .experienceWeb {
+              if let results = event.webResults, !results.isEmpty {
+                  self.webSearchResults = results
+                  print("Message \(id): Updated webSearchResults with \(results.count) items")
+              }
+          }
 
         print("Message \(id): Updated phase \(phase.rawValue) with content length: \(content.count)")
     }
@@ -326,27 +425,24 @@ class Message: ObservableObject, Identifiable, Equatable {
         }
     }
 }
-// MARK: - API Models
-/// Simplified Prior model for display purposes only
-struct Prior: Codable, Hashable {
-    let id: String
-    let content: String
-    let similarity: Double
-    let createdAt: String?
-    let threadID: String?
-    let role: String?
-    let step: String?
 
-    // For transition purposes only - this will be replaced with a better implementation
-    // once the codebase is cleaned up
-    init(content: String, similarity: Double = 1.0, id: String = UUID().uuidString) {
-        self.id = id
-        self.content = content
-        self.similarity = similarity
-        self.createdAt = nil
-        self.threadID = nil
-        self.role = nil
-        self.step = nil
+// MARK: - Phase Output Payloads (Parsed from PostchainStreamEvent metadata)
+
+/// Represents the structured output specific to the Experience Vectors phase.
+struct ExperienceVectorsOutput: Codable {
+    let vectorResults: [VectorSearchResult]? // Matches backend "vector_results"
+
+    enum CodingKeys: String, CodingKey {
+        case vectorResults = "vector_results"
+    }
+}
+
+/// Represents the structured output specific to the Experience Web phase.
+struct ExperienceWebOutput: Codable {
+    let webResults: [SearchResult]? // Matches backend "web_results"
+
+    enum CodingKeys: String, CodingKey {
+        case webResults = "web_results"
     }
 }
 
@@ -357,81 +453,70 @@ struct APIResponse<T: Codable>: Codable {
     let data: T?
 }
 
-/// Simple request body for the streaming PostChain API
-struct SimplePostchainRequestBody: Codable {
+// MARK: - API Models
+/// Simple request body for the PostChain API
+struct PostchainRequestBody: Codable {
     let userQuery: String
     let threadID: String?
-    var stream: Bool = true
+    let modelConfigs: [String: ModelConfig]? // Maps phase rawValue to config
+    var stream: Bool = true // Default to true for streaming
 
     enum CodingKeys: String, CodingKey {
         case userQuery = "user_query"
         case threadID = "thread_id"
+        case modelConfigs = "model_configs"
         case stream
     }
 }
 
-/// Represents a streaming event from the PostChain API with consistent structure
+/// Represents a streaming event from the PostChain API (SSE data field)
 struct PostchainStreamEvent: Codable {
-    // Core fields for all events
-    let currentPhase: String
-    let phaseState: String
-    let content: String
-
-    // Optional fields
+    let phase: String
+    let status: String // "running", "complete", "error"
+    let content: String? // LLM response content for the phase
+    let finalContent: String? // Only present in the final "yield" event
     let error: String?
-    let metadata: [String: Any]?
-    let threadId: String?
+    let provider: String?
+    let modelName: String?
 
-    // Use custom keys to accommodate snake_case from Python API
+    // Dynamic payload for search results based on phase
+    let vectorResults: [VectorSearchResult]?
+    let webResults: [SearchResult]?
+
     enum CodingKeys: String, CodingKey {
-        case currentPhase = "current_phase"
-        case phaseState = "phase_state"
+        case phase
+        case status
         case content
+        case finalContent = "final_content"
         case error
-        case metadata
-        case threadId = "thread_id"
+        case provider
+        case modelName = "model_name"
+        case vectorResults = "vector_results" // Match backend key
+        case webResults = "web_results"     // Match backend key
+    }
+
+    // Convenience initializer for creating an event with minimal information
+    init(phase: String, status: String = "complete", content: String? = nil, provider: String? = nil, modelName: String? = nil) {
+        self.phase = phase
+        self.status = status
+        self.content = content
+        self.finalContent = nil
+        self.error = nil
+        self.provider = provider
+        self.modelName = modelName
+        self.vectorResults = nil
+        self.webResults = nil
     }
 }
 
-extension PostchainStreamEvent {
-    init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
+/// Represents the structure of the non-streaming API response
+struct PostchainSyncResponse: Codable {
+    let threadId: String
+    let phases: [String: PostchainStreamEvent] // Maps phase rawValue to its result
 
-        currentPhase = try container.decode(String.self, forKey: .currentPhase)
-        phaseState = try container.decode(String.self, forKey: .phaseState)
-        content = try container.decode(String.self, forKey: .content)
-        error = try container.decodeIfPresent(String.self, forKey: .error)
-        threadId = try container.decodeIfPresent(String.self, forKey: .threadId)
-
-        // Handle metadata as a dynamic dictionary
-        if let metadataContainer = try? container.decodeIfPresent([String: AnyCodable].self, forKey: .metadata) {
-            var convertedMetadata: [String: Any] = [:]
-            for (key, value) in metadataContainer {
-                convertedMetadata[key] = value.value
-            }
-            metadata = convertedMetadata
-        } else {
-            metadata = nil
-        }
-    }
-
-    func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-
-        try container.encode(currentPhase, forKey: .currentPhase)
-        try container.encode(phaseState, forKey: .phaseState)
-        try container.encode(content, forKey: .content)
-        try container.encodeIfPresent(error, forKey: .error)
-        try container.encodeIfPresent(threadId, forKey: .threadId)
-
-        // Handle metadata encoding
-        if let metadata = metadata {
-            var encodableMetadata: [String: AnyCodable] = [:]
-            for (key, value) in metadata {
-                encodableMetadata[key] = AnyCodable(value)
-            }
-            try container.encode(encodableMetadata, forKey: .metadata)
-        }
+    enum CodingKeys: String, CodingKey {
+        case threadId = "thread_id"
+        case phases
     }
 }
 

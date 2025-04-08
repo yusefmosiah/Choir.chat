@@ -91,8 +91,19 @@ class RESTPostchainCoordinator: PostchainCoordinator, ObservableObject {
                             case "action":
                                 phaseEnum = .action
                             case "experience":
-                                phaseEnum = .experience
-                                print("🔄 RESTCoordinator received experience phase update")
+                                // Legacy case - choose either experienceVectors or experienceWeb based on content
+                                if content.contains("vector") {
+                                    phaseEnum = .experienceVectors
+                                } else {
+                                    phaseEnum = .experienceWeb
+                                }
+                                print("🔄 RESTCoordinator received legacy experience phase update")
+                            case "experience_vectors":
+                                phaseEnum = .experienceVectors
+                                print("🔄 RESTCoordinator received experience_vectors phase update")
+                            case "experience_web":
+                                phaseEnum = .experienceWeb
+                                print("🔄 RESTCoordinator received experience_web phase update")
                             case "intention":
                                 phaseEnum = .intention
                             case "observation":
@@ -128,7 +139,10 @@ class RESTPostchainCoordinator: PostchainCoordinator, ObservableObject {
 
                                     let message = thread.messages[messageIndex]
                                     // Update the message object directly with all info
-                                    message.updatePhase(phaseEnum, content: content, provider: provider, modelName: modelName)
+                                    let streamEvent = PostchainStreamEvent(phase: phase, status: "complete", 
+                                                                           content: content, provider: provider, 
+                                                                           modelName: modelName)
+                                    message.updatePhase(phaseEnum, content: content, provider: provider, modelName: modelName, event: streamEvent)
 
                                     // Explicitly notify observers for the message and thread
                                     message.objectWillChange.send()

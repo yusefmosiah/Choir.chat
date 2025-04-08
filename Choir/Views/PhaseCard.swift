@@ -7,8 +7,8 @@ struct PhaseCard: View {
     // Removed thread reference
     let isSelected: Bool
     var isLoading: Bool = false
-    var priors: [Prior]? = nil
-    @ObservedObject var viewModel: PostchainViewModel // Keep viewModel for ExperienceSourcesView
+    // var priors: [Prior]? = nil // REMOVE: Prior struct is removed
+    @ObservedObject var viewModel: PostchainViewModel // Keep viewModel for SearchResultListView
     var messageId: String? // Message ID parameter
 
     // --- Computed Properties for Styling ---
@@ -65,7 +65,7 @@ struct PhaseCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            // Header
+            // Header (Keep existing header)
             HStack {
                 Image(systemName: phase.symbol)
                     .imageScale(.medium)
@@ -79,7 +79,7 @@ struct PhaseCard: View {
                         .foregroundColor(primaryTextColor)
                 } else {
                     // Fallback to phase name if model name not stored in message
-                    Text(phase.rawValue.capitalized)
+                    Text(phase.description) // Use description for better readability
                         .font(.headline)
                         .fontWeight(.semibold)
                         .foregroundColor(primaryTextColor)
@@ -90,103 +90,62 @@ struct PhaseCard: View {
                 if isLoading {
                     ProgressView()
                         .scaleEffect(0.7)
-                        .tint(secondaryTextColor) // Ensure progress view matches text color
+                        .tint(secondaryTextColor)
                 }
             }
             .padding(.bottom, 4)
 
             // Content Area
             let content = message.getPhaseContent(phase)
-            if !content.isEmpty {
+
+            if !content.isEmpty || (phase == .experienceVectors && !message.vectorSearchResults.isEmpty) || (phase == .experienceWeb && !message.webSearchResults.isEmpty) {
                 GeometryReader { geometry in
-                    if phase == .experience {
-                        // Pass viewModel, messageId, and pagination properties to ExperienceSourcesView
-                        ExperienceSourcesView(
-                            viewModel: viewModel,
-                            messageId: messageId,
-                            currentPage: pageBinding,
-                            onNavigateToPreviousPhase: {
-                                // Find previous available phase and select it
-                                if let phaseIndex = Phase.allCases.firstIndex(of: phase),
-                                   phaseIndex > 0 {
-                                    let previousPhase = Phase.allCases[phaseIndex - 1]
-                                    // Set the last page of the previous phase
-                                    withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                                        message.selectedPhase = previousPhase
-                                        // Reset the current page to the last page of the previous phase
-                                        message.phaseCurrentPage[previousPhase] = 999 // Will be adjusted to max available
-                                    }
-                                }
-                            },
-                            onNavigateToNextPhase: {
-                                // Find next available phase and select it
-                                if let phaseIndex = Phase.allCases.firstIndex(of: phase),
-                                   phaseIndex < Phase.allCases.count - 1 {
-                                    let nextPhase = Phase.allCases[phaseIndex + 1]
-                                    // Set the first page of the next phase
-                                    withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                                        message.selectedPhase = nextPhase
-                                        // Reset the current page to the first page of the next phase
-                                        message.phaseCurrentPage[nextPhase] = 0
-                                    }
-                                }
-                            }
-                        )
-                    } else {
-                        PaginatedTextView(
-                            text: content,
+                    // Determine which view to show based on the phase
+                    switch phase {
+                    case .experienceVectors:
+                         // Show Vector Search Results
+                         SearchResultListView(
+                             title: "Vector Documents",
+                             icon: "doc.text.magnifyingglass",
+                             results: message.vectorSearchResults.map { .vector($0) }, // Convert to enum case
+                             currentPage: pageBinding,
+                             availableSize: geometry.size,
+                             onNavigateToPreviousPhase: createNavigationHandler(direction: .previous),
+                             onNavigateToNextPhase: createNavigationHandler(direction: .next)
+                         )
+
+                    case .experienceWeb:
+                         // Show Web Search Results
+                         SearchResultListView(
+                            title: "Web Search Results",
+                             icon: "network",
+                            results: message.webSearchResults.map { .web($0) }, // Convert to enum case
+                             currentPage: pageBinding,
                             availableSize: geometry.size,
-                            currentPage: pageBinding,
-                            onNavigateToPreviousPhase: {
-                                // Find previous available phase and select it
-                                if let phaseIndex = Phase.allCases.firstIndex(of: phase),
-                                   phaseIndex > 0 {
-                                    let previousPhase = Phase.allCases[phaseIndex - 1]
-                                    // Set the last page of the previous phase
-                                    withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                                        message.selectedPhase = previousPhase
-                                        // Reset the current page to the last page of the previous phase
-                                        message.phaseCurrentPage[previousPhase] = 999 // Will be adjusted to max available
-                                    }
-                                }
-                            },
-                            onNavigateToNextPhase: {
-                                // Find next available phase and select it
-                                if let phaseIndex = Phase.allCases.firstIndex(of: phase),
-                                   phaseIndex < Phase.allCases.count - 1 {
-                                    let nextPhase = Phase.allCases[phaseIndex + 1]
-                                    // Set the first page of the next phase
-                                    withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                                        message.selectedPhase = nextPhase
-                                        // Reset the current page to the first page of the next phase
-                                        message.phaseCurrentPage[nextPhase] = 0
-                                    }
-                                }
-                            }
-                        )
+                             onNavigateToPreviousPhase: createNavigationHandler(direction: .previous),
+                             onNavigateToNextPhase: createNavigationHandler(direction: .next)
+                         )
+
+                    default:
+                         // Show Paginated Text for all other phases with content
+                        if !content.isEmpty {
+                             PaginatedTextView(
+                                 text: content,
+                                 availableSize: geometry.size,
+                                 currentPage: pageBinding,
+                                 onNavigateToPreviousPhase: createNavigationHandler(direction: .previous),
+                                 onNavigateToNextPhase: createNavigationHandler(direction: .next)
+                             )
+                         } else {
+                             // Should not happen often due to outer check, but safety fallback
+                             emptyContentView
+                         }
                     }
                 }
             } else if isLoading {
-                // Loading State
-                VStack(spacing: 12) {
-                    Spacer()
-                    HStack {
-                        Spacer()
-                        ProgressView()
-                            .tint(secondaryTextColor) // Match text color
-                        Text("Loading...")
-                            .foregroundColor(secondaryTextColor)
-                        Spacer()
-                    }
-                    Spacer()
-                }
-                .padding(.vertical, 20)
+                loadingContentView
             } else {
-                // Empty State
-                Text("No content available")
-                    .foregroundColor(.secondary) // Use standard secondary for empty state
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .padding(.vertical, 20)
+                emptyContentView
             }
         }
         .padding(12)
@@ -205,6 +164,50 @@ struct PhaseCard: View {
         )
         .padding(.horizontal, 4)
     }
+
+    // --- Helper Views for Content Area ---
+    private var loadingContentView: some View {
+        VStack(spacing: 12) {
+            Spacer()
+            HStack {
+                Spacer()
+                ProgressView()
+                    .tint(secondaryTextColor)
+                Text("Loading...")
+                    .foregroundColor(secondaryTextColor)
+                Spacer()
+            }
+            Spacer()
+        }
+        .padding(.vertical, 20)
+    }
+
+    private var emptyContentView: some View {
+        Text("No content available")
+            .foregroundColor(.secondary)
+            .frame(maxWidth: .infinity, alignment: .center)
+            .padding(.vertical, 20)
+    }
+
+    // --- Helper Function for Navigation Callbacks ---
+    enum NavigationDirection { case previous, next }
+
+    private func createNavigationHandler(direction: NavigationDirection) -> () -> Void {
+        return {
+            guard let currentPhaseIndex = Phase.allCases.firstIndex(of: phase) else { return }
+            let targetPhaseIndex = direction == .previous ? currentPhaseIndex - 1 : currentPhaseIndex + 1
+
+            guard targetPhaseIndex >= 0 && targetPhaseIndex < Phase.allCases.count else { return }
+
+            let targetPhase = Phase.allCases[targetPhaseIndex]
+            let targetPage = direction == .previous ? 999 : 0 // Set to max for previous, 0 for next
+
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                message.selectedPhase = targetPhase
+                message.phaseCurrentPage[targetPhase] = targetPage
+            }
+        }
+    }
 }
 
 #Preview {
@@ -215,10 +218,8 @@ struct PhaseCard: View {
         isUser: false
     )
 
-    // Removed testThread
-
     PhaseCard(
-        phase: .action,
+        phase: Phase.action, // Explicitly use Phase enum
         message: testMessage,
         isSelected: true,
         isLoading: false,
