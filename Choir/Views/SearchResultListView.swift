@@ -67,22 +67,19 @@ struct SearchResultListView: View {
              .padding(.bottom, 5)
              .padding(.horizontal, 5) // Add slight horizontal padding
 
-            // Scrollable list of results for the current page
-            ScrollView {
-                LazyVStack(alignment: .leading, spacing: 10) { // Use LazyVStack for performance
-                    ForEach(pagedResults) { result in
-                        switch result {
-                        case .vector(let vectorResult):
-                            VectorResultCard(result: vectorResult)
-                        case .web(let webResult):
-                            WebResultCard(result: webResult, openURL: openURL)
-                        }
+            VStack(alignment: .leading, spacing: 10) {
+                ForEach(pagedResults) { result in
+                    switch result {
+                    case .vector(let vectorResult):
+                        VectorResultCard(result: vectorResult)
+                    case .web(let webResult):
+                        WebResultCard(result: webResult, openURL: openURL)
                     }
                 }
-                .padding(.horizontal, 5) // Match header padding
-                .padding(.bottom, 5) // Add padding at the bottom
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity) // Take available space
+            .padding(.horizontal, 5)
+            .padding(.bottom, 5)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
 
             // Pagination Controls (similar to PaginatedTextView)
             PaginationControls(
