@@ -31,6 +31,7 @@
 │   │   └── PostchainCoordinator.swift
 │   ├── Services
 │   │   ├── KeychainService.swift
+│   │   ├── ThreadPersistenceService.swift
 │   │   └── WalletManager.swift
 │   ├── ViewModels
 │   │   └── PostchainViewModel.swift
@@ -230,4 +231,4 @@
     ├── test_api.sh
     └── test_postchain_multiturn.sh
 
-60 directories, 168 files
+60 directories, 169 files

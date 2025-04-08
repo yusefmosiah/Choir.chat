@@ -317,14 +317,4 @@ struct ModelConfigData: Codable {
     }
 }
 
-// MARK: - Helper for Stream Events
-struct PostchainStreamEvent {
-    let phase: String
-    let status: String
-    let content: String?
-    let provider: String? = nil
-    let modelName: String? = nil
-    let webResults: [SearchResult]? = nil
-    let vectorResults: [VectorSearchResult]? = nil
-    let error: String? = nil
-}
+
