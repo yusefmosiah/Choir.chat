@@ -186,13 +186,13 @@ struct PaginationControls: View {
             Button(action: {
                 if currentPage > 0 {
                     currentPage -= 1
-                } else {
-                    onNavigateToPreviousPhase?()
+                } else if let navigateToPrevious = onNavigateToPreviousPhase {
+                    navigateToPrevious()
                 }
             }) {
                 Image(systemName: "chevron.left")
                     .imageScale(.small)
-                    .padding(4) // Add padding for larger tap area
+                    .padding(4)
             }
             .disabled(currentPage <= 0 && onNavigateToPreviousPhase == nil)
             .foregroundColor(currentPage <= 0 && onNavigateToPreviousPhase == nil ? .gray : .accentColor)
@@ -208,24 +208,23 @@ struct PaginationControls: View {
             Button(action: {
                 if currentPage < totalPages - 1 {
                     currentPage += 1
-                } else {
-                    onNavigateToNextPhase?()
+                } else if let navigateToNext = onNavigateToNextPhase {
+                    navigateToNext()
                 }
             }) {
                 Image(systemName: "chevron.right")
                     .imageScale(.small)
-                    .padding(4) // Add padding for larger tap area
+                    .padding(4)
             }
             .disabled(currentPage >= totalPages - 1 && onNavigateToNextPhase == nil)
             .foregroundColor(currentPage >= totalPages - 1 && onNavigateToNextPhase == nil ? .gray : .accentColor)
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 4)
-        .background(Color(.tertiarySystemBackground).opacity(0.7)) // Use tertiary for distinction
+        .background(Color(.secondarySystemBackground).opacity(0.6))
         .cornerRadius(8)
-        .padding(.horizontal, 5) // Match list padding
-        .padding(.bottom, 5)
-        .padding(.top, 2) // Less top padding
+        .padding(.bottom, 2)
+        .frame(height: 36)
     }
 }
 
