@@ -26,7 +26,7 @@ struct UnifiedPaginatedView: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            if !allPages.isEmpty && currentPage &lt; allPages.count {
+            if !allPages.isEmpty && currentPage < allPages.count {
                 switch allPages[currentPage] {
                 case .text(let textPage):
                     Text(textPage)
@@ -71,7 +71,7 @@ struct UnifiedPaginatedView: View {
         
         // Calculate result pages
         let resultPages = stride(from: 0, to: searchResults.count, by: itemsPerPage).map {
-            Array(searchResults[$0..&lt;min($0 + itemsPerPage, searchResults.count)])
+            Array(searchResults[$0..<min($0 + itemsPerPage, searchResults.count)])
         }
         
         // Combine sequences
@@ -99,7 +99,7 @@ struct UnifiedPaginatedView: View {
             )
             pages.append(pageText)
             
-            if pageText.count &lt; remainingText.count {
+            if pageText.count < remainingText.count {
                 let index = remainingText.index(
                     remainingText.startIndex, 
                     offsetBy: pageText.count

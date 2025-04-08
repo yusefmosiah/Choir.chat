@@ -48,6 +48,7 @@
 │       │   └── Components
 │       │       ├── ThreadInputBar.swift
 │       │       └── ThreadMessageList.swift
+│       ├── UnifiedPaginatedView.swift
 │       └── WalletView.swift
 ├── Choir.xcodeproj
 │   ├── project.pbxproj
@@ -231,4 +232,4 @@
     ├── test_api.sh
     └── test_postchain_multiturn.sh
 
-60 directories, 169 files
+60 directories, 170 files
