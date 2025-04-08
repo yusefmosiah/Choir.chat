@@ -22,6 +22,13 @@ struct ContentView: View {
                 NavigationLink(value: thread) {
                     ChoirThreadRow(thread: thread)
                 }
+                .contextMenu {
+                    Button(role: .destructive, action: {
+                        deleteThread(thread)
+                    }) {
+                        Label("Delete", systemImage: "trash")
+                    }
+                }
             }
             .navigationTitle("ChoirThreads")
             .toolbar {
@@ -75,30 +82,85 @@ struct ContentView: View {
             WalletView()
         }
         .onAppear {
+            // Load saved threads
+            loadThreads()
+            
             // Create a default thread if none exists
             if threads.isEmpty {
                 createNewChoirThread()
             }
         }
     }
+    
+    /// Load all threads from persistent storage
+    private func loadThreads() {
+        let loadedThreads = ThreadPersistenceService.shared.loadAllThreads()
+        if !loadedThreads.isEmpty {
+            threads = loadedThreads
+            selectedChoirThread = threads.first
+        }
+    }
 
+    /// Create a new thread and save it
     private func createNewChoirThread() {
         let thread = ChoirThread() // Uses auto-generated title
         threads.append(thread)
         selectedChoirThread = thread
+        
+        // Save the new thread
+        ThreadPersistenceService.shared.saveThread(thread)
+    }
+    
+    /// Delete a thread
+    private func deleteThread(_ thread: ChoirThread) {
+        // Remove from UI
+        if selectedChoirThread?.id == thread.id {
+            selectedChoirThread = threads.first(where: { $0.id != thread.id })
+        }
+        threads.removeAll(where: { $0.id == thread.id })
+        
+        // Delete from storage
+        ThreadPersistenceService.shared.deleteThread(threadId: thread.id)
     }
 }
 
 struct ChoirThreadRow: View {
     @ObservedObject var thread: ChoirThread
+    @State private var isEditingTitle = false
+    @State private var editedTitle = ""
 
     var body: some View {
         VStack(alignment: .leading) {
-            Text(thread.title)
-                .font(.headline)
+            if isEditingTitle {
+                TextField("Thread Title", text: $editedTitle, onCommit: {
+                    if !editedTitle.isEmpty {
+                        thread.updateTitle(editedTitle)
+                    }
+                    isEditingTitle = false
+                })
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .padding(.vertical, 2)
+                .onAppear {
+                    editedTitle = thread.title
+                }
+            } else {
+                Text(thread.title)
+                    .font(.headline)
+                    .onTapGesture(count: 2) {
+                        isEditingTitle = true
+                    }
+            }
+            
             Text("\(thread.messages.count) messages")
                 .font(.caption)
                 .foregroundStyle(.secondary)
+        }
+        .contextMenu {
+            Button(action: {
+                isEditingTitle = true
+            }) {
+                Label("Rename", systemImage: "pencil")
+            }
         }
     }
 }

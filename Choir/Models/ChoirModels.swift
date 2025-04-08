@@ -239,7 +239,7 @@ struct PhaseResult: Codable, Equatable, Hashable {
 // MARK: - Thread and Message Models
 class ChoirThread: ObservableObject, Identifiable, Hashable {
     let id: UUID
-    let title: String
+    @Published var title: String
     @Published var messages: [Message] = []
 
     // Global model configurations (used for *new* messages)
@@ -283,6 +283,29 @@ class ChoirThread: ObservableObject, Identifiable, Hashable {
     // Update a specific model configuration
     func updateModelConfig(for phase: Phase, provider: String, model: String, temperature: Double? = nil) {
         modelConfigs[phase] = ModelConfig(provider: provider, model: model, temperature: temperature)
+        
+        // Save thread after updating model config
+        saveThread()
+    }
+    
+    // Update the thread title
+    func updateTitle(_ newTitle: String) {
+        guard !newTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
+        
+        objectWillChange.send()
+        title = newTitle
+        
+        // Save thread after updating title
+        saveThread()
+    }
+    
+    // Save thread to persistent storage
+    private func saveThread() {
+        Task {
+            await Task.detached {
+                ThreadPersistenceService.shared.saveThread(self)
+            }.value
+        }
     }
 }
 

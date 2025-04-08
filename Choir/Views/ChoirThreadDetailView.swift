@@ -8,6 +8,8 @@ struct ChoirThreadDetailView: View {
    @State private var lastMessageId: String? = nil
    @State private var scrollToBottom = false
    @State private var showModelConfig = false
+   @State private var showingTitleAlert = false
+   @State private var newTitle = ""
 
    var body: some View {
        VStack {
@@ -21,6 +23,10 @@ struct ChoirThreadDetailView: View {
                                viewModel: viewModel
                            )
                            .id(message.id)
+                           .onChange(of: message.content) { _, _ in
+                               // Save thread when message content changes
+                               saveThread()
+                           }
                        }
                        Color.clear
                            .frame(height: 1)
@@ -32,12 +38,16 @@ struct ChoirThreadDetailView: View {
                    withAnimation(.easeOut(duration: 0.3)) {
                        scrollProxy.scrollTo("bottomScrollAnchor", anchor: .bottom)
                    }
+                   // Save thread when messages are added or removed
+                   saveThread()
                }
                .onChange(of: viewModel.responses) { _, _ in
                    if let lastMessage = thread.messages.last, !lastMessage.isUser {
                        withAnimation(.easeOut(duration: 0.3)) {
                            scrollProxy.scrollTo("bottomScrollAnchor", anchor: .bottom)
                        }
+                       // Save thread when responses change
+                       saveThread()
                    }
                }
            }
@@ -70,7 +80,15 @@ struct ChoirThreadDetailView: View {
        }
        .navigationTitle(thread.title)
        .toolbar {
-           ToolbarItem(placement: .topBarTrailing) {
+           ToolbarItem(placement: .navigationBarTrailing) {
+               Button(action: {
+                   showEditTitleAlert()
+               }) {
+                   Label("Edit Title", systemImage: "pencil")
+               }
+           }
+           
+           ToolbarItem(placement: .navigationBarTrailing) {
                Button(action: {
                    showModelConfig = true
                }) {
@@ -78,10 +96,27 @@ struct ChoirThreadDetailView: View {
                }
            }
        }
+       .alert("Edit Thread Title", isPresented: $showingTitleAlert) {
+           TextField("Thread Title", text: $newTitle)
+           Button("Cancel", role: .cancel) { }
+           Button("Save") {
+               if !newTitle.isEmpty {
+                   thread.updateTitle(newTitle)
+               }
+           }
+       } message: {
+           Text("Enter a new title for this thread")
+       }
        .sheet(isPresented: $showModelConfig) {
            ModelConfigView(thread: thread)
        }
+       .onChange(of: thread.modelConfigs) { _, _ in
+           // Save thread when model configs change
+           saveThread()
+       }
        .onDisappear {
+           // Save thread when view disappears
+           saveThread()
            cleanup()
        }
    }
@@ -97,6 +132,9 @@ struct ChoirThreadDetailView: View {
                isUser: true
            )
            thread.messages.append(userMessage)
+           
+           // Save after adding user message
+           saveThread()
 
            var emptyPhases: [Phase: String] = [:]
 
@@ -111,6 +149,9 @@ struct ChoirThreadDetailView: View {
            )
 
            thread.messages.append(placeholderMessage)
+           
+           // Save after adding placeholder message
+           saveThread()
 
            try await viewModel.process(content)
 
@@ -130,14 +171,32 @@ struct ChoirThreadDetailView: View {
                } else if let actionContent = allPhases[.action], !actionContent.isEmpty {
                    message.content = actionContent
                }
+               
+               // Save after updating AI message
+               saveThread()
            }
        } catch {
            print("Error processing message: \(error)")
        }
    }
+   
+   /// Save the thread to persistent storage
+   private func saveThread() {
+       Task {
+           // Run on a background thread to avoid UI blocking
+           await Task.detached {
+               ThreadPersistenceService.shared.saveThread(thread)
+           }.value
+       }
+   }
 
    private func cleanup() {
        // No more timers to cleanup
+   }
+   
+   private func showEditTitleAlert() {
+       newTitle = thread.title
+       showingTitleAlert = true
    }
 }
 
