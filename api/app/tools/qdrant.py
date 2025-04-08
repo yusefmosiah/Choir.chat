@@ -47,22 +47,28 @@ async def qdrant_search(query: str, collection: str = None, limit: int = 5) -> s
     results = await db_client.search_vectors(query_vector, limit=limit)
 
 
-    #deduplicate results by content using comprehension
-    unique_results = [r for i, r in enumerate(results) if i == 0 or r["content"] != results[i - 1]["content"]]
 
-    if not unique_results:
-        return f"No semantically similar information found for: '{query}'"
+    unique_results_list = []
+    seen_content = set()
+    for r in results:
+        content = r.get("content")
+        if content is not None and content not in seen_content:
+            unique_results_list.append({
+                "content": content,
+                "score": r.get("score", 0.0),
+                "metadata": r.get("metadata", {}),
+                "provider": "qdrant" # Add provider field
+            })
+            seen_content.add(content)
 
-    # Format results
-    formatted_results = "Found semantically similar information:\n\n"
-
-    for i, result in enumerate(unique_results, 1):
-        content = result.get("content", "No content")
-        score = result.get("score", 0)
-        formatted_results += f"{i}. (Score: {score:.2f}) {content}\n\n"
-
-    logger.info(f"FFFFormatted results: {formatted_results}")
-    return formatted_results
+    # Return results as a JSON string, even if empty
+    json_output = json.dumps(unique_results_list)
+    if unique_results_list:
+        logger.info(f"Qdrant search returning {len(unique_results_list)} results as JSON.")
+    else:
+        logger.info(f"Qdrant search returning no unique results for query: '{query}'")
+    # logger.debug(f"Qdrant JSON output: {json_output[:500]}...") # Optional: Log output snippet
+    return json_output
 
 
 @tool

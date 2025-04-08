@@ -45,15 +45,6 @@ class Config:
 
     # Model configuration
     EMBEDDING_MODEL: str = "text-embedding-ada-002"
-    CHAT_MODEL: str = "anthropic/claude-3-5-haiku-20241022"
-    SUMMARY_MODEL: str = "anthropic/claude-3-5-sonnet-20241022"
-
-    # OpenRouter models
-    OPENROUTER_CLAUDE_3_5_HAIKU: str = "openrouter/anthropic/claude-3.5-haiku"
-    OPENROUTER_CLAUDE_3_5_SONNET: str = "openrouter/anthropic/claude-3.5-sonnet"
-
-    # Azure models
-    AZURE_CHAT_MODEL: str = "azure/gpt-4o-2024-08-06"
 
     # OpenAI models
     # OPENAI_GPT_45_PREVIEW: str = "gpt-4.5-preview"

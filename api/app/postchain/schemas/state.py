@@ -72,5 +72,21 @@ class ExperiencePhaseOutput(BaseModel):
     vector_results: List[VectorSearchResult] = Field(default_factory=list, description="List of vector search results used")
     error: Optional[str] = Field(None, description="Error message if the phase failed")
 
+
+class ExperienceVectorsPhaseOutput(BaseModel):
+    """Structured output for the Experience Vectors phase."""
+    experience_vectors_response: AIMessage = Field(..., description="The AI's message potentially triggering or summarizing the vector search")
+    vector_results: List[VectorSearchResult] = Field(default_factory=list, description="List of vector search results found")
+    error: Optional[str] = Field(None, description="Error message if the phase failed")
+
     class Config:
-        arbitrary_types_allowed = True # Allow AIMessage
+        arbitrary_types_allowed = True
+
+class ExperienceWebPhaseOutput(BaseModel):
+    """Structured output for the Experience Web phase."""
+    experience_web_response: AIMessage = Field(..., description="The AI's message potentially triggering or summarizing the web search")
+    web_results: List[SearchResult] = Field(default_factory=list, description="List of web search results found")
+    error: Optional[str] = Field(None, description="Error message if the phase failed")
+
+    class Config:
+        arbitrary_types_allowed = True

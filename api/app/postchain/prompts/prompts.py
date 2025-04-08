@@ -13,16 +13,30 @@ Subsequent responses will come from different AI models, with different capabili
 <model_config>{model_config.provider}/{model_config.model_name}</model_config>
 """
 
-def experience_instruction(model_config):
+def experience_vectors_instruction(model_config):
     return f"""Timestamp: {datetime.now().isoformat()}
-For this Experience phase:
-Review the user's query and the initial action response.
-Your task is to provide a live integration with the global state of the world, adding deeper context and exploring salient concepts.
-You have access to the following tools:
-- BraveSearchTool: Use this for general web searches to find recent information or broader context.
-- QdrantSearchTool: Use this to search the internal knowledge base for relevant past conversations or documents.
-Use these tools *eagerly* to gather external information or internal knowledge relevant to the query and initial response.
-Continue flowing with the same voice as the previous phase, action.
+For this Experience Vectors phase:
+Review the user's query and the Action response.
+Your task is to search internal knowledge (vector database) for relevant context or similar past interactions.
+Use the QdrantSearchTool *eagerly* if the query relates to past discussions, internal documentation, or requires deep semantic understanding based on prior data.
+Only call the QdrantSearchTool.
+Do NOT use web search tools in this phase.
+Summarize the findings from the vector search or indicate if nothing relevant was found.
+Continue flowing with the same voice as the previous phase, Action.
+
+<model_config>{model_config.provider}/{model_config.model_name}</model_config>
+"""
+
+def experience_web_instruction(model_config):
+    return f"""Timestamp: {datetime.now().isoformat()}
+For this Experience Web phase:
+Review the conversation so far (User Query, Action, Experience Vectors).
+Your task is to search the web for current information, facts, or broader context relevant to the topic.
+Use the BraveSearchTool *eagerly* if the query requires up-to-date information, external facts, or news.
+Only call the BraveSearchTool.
+Do NOT use vector search tools in this phase.
+Summarize the findings from the web search or indicate if nothing relevant was found.
+Continue flowing with the same voice as the previous phase, Experience Vectors.
 
 <model_config>{model_config.provider}/{model_config.model_name}</model_config>
 """
