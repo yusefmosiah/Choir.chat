@@ -306,8 +306,6 @@ struct ModelConfigView: View {
 
                 // Update the thread's model config for this phase
                 thread.modelConfigs[phase] = newConfig
-                // Update the thread's model config for this phase
-                thread.modelConfigs[phase] = newConfig
             }
         }
 
@@ -329,6 +327,15 @@ struct ModelConfigView: View {
                 // Remove key from UserDefaults if it's empty
                 UserDefaults.standard.removeObject(forKey: "apiKey_\(provider)")
             }
+        }
+        
+        // Save thread to persistent storage
+        Task {
+            // Run on a background thread to avoid UI blocking
+            await Task.detached {
+                ThreadPersistenceService.shared.saveThread(thread)
+                print("Saved thread to persistent storage after model config update")
+            }.value
         }
     }
 
