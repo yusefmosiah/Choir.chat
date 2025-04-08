@@ -15,7 +15,6 @@ tree.md
 ## Output of $ tree -I 'venv|archive|__pycache__|iOS_Example|dependencies' | pbcopy
 
 .
-├── CLAUDE.md
 ├── Choir
 │   ├── App
 │   │   └── ChoirApp.swift
@@ -88,6 +87,7 @@ tree.md
 ├── ChoirUITests
 │   ├── ChoirUITests.swift
 │   └── ChoirUITestsLaunchTests.swift
+├── KODING.md
 ├── README.md
 ├── api
 │   ├── Dockerfile
