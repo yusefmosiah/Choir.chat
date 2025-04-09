@@ -206,6 +206,8 @@ tree.md
 │   ├── evolution_token.md
 │   ├── fqaho_simulation.md
 │   ├── fqaho_visualization.md
+│   ├── issues
+│   │   └── long-text-external-storage.md
 │   ├── levels
 │   │   ├── all.txt
 │   │   ├── level0.md
@@ -245,7 +247,7 @@ tree.md
     ├── test_api.sh
     └── test_postchain_multiturn.sh
 
-60 directories, 170 files
+61 directories, 171 files
 
 === File: docs/CHANGELOG.md ===
 
