@@ -22,8 +22,8 @@ This file provides guidelines for agentic coding agents working in the Choir rep
 
 **Swift iOS App (in root directory):**
 
-- **Build:** `xcodebuild build -project Choir.xcodeproj -scheme Choir -destination 'platform=iOS Simulator,name=iPhone 15 Pro'`
-- **Test:** `xcodebuild test -project Choir.xcodeproj -scheme ChoirTests -destination 'platform=iOS Simulator,name=iPhone 15 Pro'`
+- **Build:** The developer uses Xcode to build the app manually.
+- **Test:** the developer uses Xcode to run tests manually.
 - **Lint/Format:** (Not specified, assume SwiftLint might be used, check project settings or ask)
 
 ## Code Style
