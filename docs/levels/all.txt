@@ -61,6 +61,7 @@ tree.md
 │       │   └── Components
 │       │       ├── ThreadInputBar.swift
 │       │       └── ThreadMessageList.swift
+│       ├── UnifiedPaginatedView.swift
 │       └── WalletView.swift
 ├── Choir.xcodeproj
 │   ├── project.pbxproj
@@ -244,7 +245,7 @@ tree.md
     ├── test_api.sh
     └── test_postchain_multiturn.sh
 
-60 directories, 169 files
+60 directories, 170 files
 
 === File: docs/CHANGELOG.md ===
 

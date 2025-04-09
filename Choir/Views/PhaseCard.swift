@@ -102,44 +102,34 @@ struct PhaseCard: View {
                 GeometryReader { geometry in
                     // Determine which view to show based on the phase
                     switch phase {
-                    case .experienceVectors:
-                         // Show Vector Search Results
-                         SearchResultListView(
-                             title: "Vector Documents",
-                             icon: "doc.text.magnifyingglass",
-                             results: message.vectorSearchResults.map { .vector($0) }, // Convert to enum case
-                             currentPage: pageBinding,
-                             availableSize: geometry.size,
-                             onNavigateToPreviousPhase: createNavigationHandler(direction: .previous),
-                             onNavigateToNextPhase: createNavigationHandler(direction: .next)
-                         )
-
-                    case .experienceWeb:
-                         // Show Web Search Results
-                         SearchResultListView(
-                            title: "Web Search Results",
-                             icon: "network",
-                            results: message.webSearchResults.map { .web($0) }, // Convert to enum case
-                             currentPage: pageBinding,
+                    case .experienceVectors, .experienceWeb:
+                        let results: [UnifiedSearchResult] = phase == .experienceVectors ? 
+                            message.vectorSearchResults.map { UnifiedSearchResult.vector($0) } :
+                            message.webSearchResults.map { UnifiedSearchResult.web($0) }
+                        
+                        UnifiedPaginatedView(
+                            textContent: content,
+                            searchResults: results,
+                            currentPage: pageBinding,
                             availableSize: geometry.size,
-                             onNavigateToPreviousPhase: createNavigationHandler(direction: .previous),
-                             onNavigateToNextPhase: createNavigationHandler(direction: .next)
-                         )
+                            onNavigateToPreviousPhase: createNavigationHandler(direction: .previous),
+                            onNavigateToNextPhase: createNavigationHandler(direction: .next)
+                        )
 
                     default:
-                         // Show Paginated Text for all other phases with content
+                        // Show Paginated Text for all other phases with content
                         if !content.isEmpty {
-                             PaginatedTextView(
-                                 text: content,
-                                 availableSize: geometry.size,
-                                 currentPage: pageBinding,
-                                 onNavigateToPreviousPhase: createNavigationHandler(direction: .previous),
-                                 onNavigateToNextPhase: createNavigationHandler(direction: .next)
-                             )
-                         } else {
-                             // Should not happen often due to outer check, but safety fallback
-                             emptyContentView
-                         }
+                            PaginatedTextView(
+                                text: content,
+                                availableSize: geometry.size,
+                                currentPage: pageBinding,
+                                onNavigateToPreviousPhase: createNavigationHandler(direction: .previous),
+                                onNavigateToNextPhase: createNavigationHandler(direction: .next)
+                            )
+                        } else {
+                            // Should not happen often due to outer check, but safety fallback
+                            emptyContentView
+                        }
                     }
                 }
             } else if isLoading {
