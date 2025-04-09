@@ -124,13 +124,23 @@ async def run_experience_vectors_phase(
         embeddings = OpenAIEmbeddings(model=app_config.EMBEDDING_MODEL, api_key=app_config.OPENAI_API_KEY) # Pass key if needed
         query_vector = await embeddings.aembed_query(query_text)
 
-        # --- 2. Search Qdrant --- #
+        # --- 2. Save Query Vector --- #
+        save_result = await db_client.store_vector(
+            content=query_text,
+            vector=query_vector,
+            metadata={
+                "role": "user_query",
+                "phase": "experience_vectors"
+            }
+        )
+        logger.info(f"Saved query vector with ID: {save_result.get('id')}")
+
+        # --- 3. Search Qdrant --- #
         logger.info(f"Searching Qdrant collection '{app_config.MESSAGES_COLLECTION}' with embedded query.")
-        search_limit = app_config.SEARCH_LIMIT # Use configured limit
-        qdrant_raw_results = await db_client.search_vectors(query_vector, limit=search_limit)
+        qdrant_raw_results = await db_client.search_vectors(query_vector, limit=app_config.SEARCH_LIMIT)
         logger.info(f"Qdrant returned {len(qdrant_raw_results)} results.")
 
-        # --- 3. Format Qdrant Results --- #
+        # --- 4. Format Qdrant Results --- #
         seen_content = set()
         for res_dict in qdrant_raw_results:
             content = res_dict.get("content")
@@ -698,4 +708,3 @@ if __name__ == "__main__":
     logging.getLogger("httpx").setLevel(logging.WARNING)
     logging.getLogger("httpcore").setLevel(logging.WARNING)
     asyncio.run(main())
-
