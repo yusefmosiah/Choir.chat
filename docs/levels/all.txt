@@ -734,7 +734,7 @@ The Qdrant-Sui MVP operates as follows:
 6.  API triggers the **Sui Service** for rewards based on Qdrant data.
 7.  API streams results back to the **SwiftUI Client**.
 
-This architecture validates the core loop: **User Input -> API Orchestration -> PostChain (Qdrant Interaction) -> Qdrant Persistence -> Reward Trigger (Sui Service)**.
+This architecture validates the core loop: **User Input -> API Orchestration -> PostChain (Qdrant Interaction) -> Reward Trigger (Sui Service)**.
 
 ## Strategic Focus for MVP
 
