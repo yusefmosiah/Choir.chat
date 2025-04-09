@@ -1,4 +1,5 @@
 import SwiftUI
+import MarkdownUI
 
 enum PageContent: Identifiable {
     case text(String)
@@ -30,9 +31,7 @@ struct UnifiedPaginatedView: View {
             if !allPages.isEmpty && currentPage < allPages.count {
                 switch allPages[currentPage] {
                 case .text(let textPage):
-                    Text(textPage)
-                        .font(.body)
-                        .lineSpacing(4)
+                    Markdown(textPage)
                         .padding([.horizontal, .top], 4)
                         .frame(maxWidth: .infinity,
                                maxHeight: .infinity,

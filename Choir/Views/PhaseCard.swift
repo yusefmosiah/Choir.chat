@@ -67,34 +67,6 @@ struct PhaseCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             // Header (Keep existing header)
-            HStack {
-                Image(systemName: phase.symbol)
-                    .imageScale(.medium)
-                    .foregroundColor(headerIconColor)
-
-                // Display model name using the message's phase result
-                if let modelName = message.getPhaseResult(phase)?.modelName, !modelName.isEmpty {
-                    Text(modelName)
-                        .font(.headline)
-                        .fontWeight(.semibold)
-                        .foregroundColor(primaryTextColor)
-                } else {
-                    // Fallback to phase name if model name not stored in message
-                    Text(phase.description) // Use description for better readability
-                        .font(.headline)
-                        .fontWeight(.semibold)
-                        .foregroundColor(primaryTextColor)
-                }
-
-                Spacer()
-
-                if isLoading {
-                    ProgressView()
-                        .scaleEffect(0.7)
-                        .tint(secondaryTextColor)
-                }
-            }
-            .padding(.bottom, 4)
 
             // Content Area
             let content = message.getPhaseContent(phase)
@@ -155,6 +127,11 @@ struct PhaseCard: View {
                 .stroke(overlayStrokeColor, lineWidth: overlayLineWidth)
         )
         .padding(.horizontal, 4)
+        .contextMenu {
+            let modelName = message.getPhaseResult(phase)?.modelName
+            Text("Model: \(modelName?.isEmpty == false ? modelName! : phase.description)")
+            Text("Page: \(pageBinding.wrappedValue + 1)")
+        }
     }
 
     // --- Helper Views for Content Area ---

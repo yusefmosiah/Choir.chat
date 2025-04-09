@@ -1,54 +1,55 @@
 import SwiftUI
+import MarkdownUI
 
 // TextSelectionManager to maintain sheet state across redraws
 // This is a global object that persists across view redraws
 class TextSelectionManager: ObservableObject {
     static let shared = TextSelectionManager()
-    
+
     @Published var showingSheet = false
     @Published var selectedText = ""
-    
+
     // Store active menu content
     @Published var activeText: String? = nil
     @Published var isShowingMenu = false
-    
+
     // Flag to prevent interaction during redraws
     @Published var isInteractionDisabled = false
-    
+
     // Flag to prevent background UI updates while sheet is open
     @Published var preventBackgroundUpdates = false
-    
+
     func showSheet(withText text: String) {
         self.selectedText = text
         self.showingSheet = true
         self.preventBackgroundUpdates = true
     }
-    
+
     // Set active text for context menu
     func setActiveText(_ text: String) {
         self.activeText = text
         self.isShowingMenu = true
     }
-    
+
     // Clear active text when menu closes
     func clearActiveText() {
         self.activeText = nil
         self.isShowingMenu = false
     }
-    
+
     // Called when sheet is dismissed
     func sheetDismissed() {
         self.showingSheet = false
         self.preventBackgroundUpdates = false
     }
-    
+
     // Temporarily disable interactions when content is being redrawn
     func temporarilyDisableInteractions() {
         // Skip if sheet is open
         if preventBackgroundUpdates { return }
-        
+
         isInteractionDisabled = true
-        
+
         // Re-enable after a short delay
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
             self?.isInteractionDisabled = false
@@ -72,13 +73,13 @@ struct PaginatedTextView: View {
     // Use shared TextSelectionManager to maintain sheet state
     @StateObject private var textSelectionManager = TextSelectionManager.shared
     @Environment(\.sizeCategory) private var sizeCategory
-    
+
     // Unique ID for this view instance to maintain stability during redraw
     private let viewId = UUID()
-    
+
     // Use standard variable width font for better readability
     private let textFont = Font.body
-    
+
     var body: some View {
         GeometryReader { geometry in
             VStack(spacing: 0) {
@@ -87,13 +88,11 @@ struct PaginatedTextView: View {
                     // Background for the text area
                     Rectangle()
                         .fill(Color.clear)
-                    
+
                     // The actual text content (with fixed id to maintain identity)
                     if pages.indices.contains(currentPage) {
-                        Text(pages[currentPage])
+                        Markdown(pages[currentPage])
                             .id("page_text_\(viewId)") // Add stable ID to maintain identity
-                            .font(textFont)
-                            .lineSpacing(4)
                             .padding([.horizontal, .top], 4)
                             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                     }
@@ -113,16 +112,16 @@ struct PaginatedTextView: View {
                         Button("Copy Content") {
                             DispatchQueue.main.async {
                                 // Use the stored active text if menu is showing
-                                let contentToCopy = textSelectionManager.isShowingMenu ? 
+                                let contentToCopy = textSelectionManager.isShowingMenu ?
                                     (textSelectionManager.activeText ?? text) : text
                                 UIPasteboard.general.string = contentToCopy
                             }
                         }
-                        
+
                         Button("Select Text...") {
                             DispatchQueue.main.async {
                                 // Use the stored active text if menu is showing
-                                let contentToSelect = textSelectionManager.isShowingMenu ? 
+                                let contentToSelect = textSelectionManager.isShowingMenu ?
                                     (textSelectionManager.activeText ?? text) : text
                                 textSelectionManager.showSheet(withText: contentToSelect)
                             }
@@ -137,9 +136,9 @@ struct PaginatedTextView: View {
                         textSelectionManager.clearActiveText()
                     }
                 })
-                
+
                 Spacer(minLength: 0)
-                
+
                 // Page controls
                 HStack {
                     Button(action: {
@@ -158,9 +157,6 @@ struct PaginatedTextView: View {
 
                     Spacer()
 
-                    Text("Page \(currentPage + 1) of \(totalPages)")
-                        .font(.caption2)
-                        .foregroundColor(.secondary)
 
                     Spacer()
 
@@ -206,7 +202,7 @@ struct PaginatedTextView: View {
                         textSelectionManager.setActiveText(text)
                     }
                 }
-                
+
                 Button("Select Content...") {
                     DispatchQueue.main.async {
                         textSelectionManager.showSheet(withText: text)
@@ -214,49 +210,49 @@ struct PaginatedTextView: View {
                         textSelectionManager.setActiveText(text)
                     }
                 }
-                
+
                 Button("Cancel", role: .cancel) {}
             }
             // We don't need a sheet here because the sheet is now managed globally
         }
     }
-    
-    // This is a completely new approach that creates a temporary view 
+
+    // This is a completely new approach that creates a temporary view
     // to measure text and find the optimal page breaks
     private func splitTextIntoPages(size: CGSize) {
         // Skip if text selection sheet is open
         if textSelectionManager.preventBackgroundUpdates {
             return
         }
-        
+
         // Signal that content is being redrawn
         textSelectionManager.temporarilyDisableInteractions()
-        
+
         guard !text.isEmpty else {
             pages = [""]
             totalPages = 1
             currentPage = 0
             return
         }
-        
+
         // Create a TextMeasurer to help us split text
         let measurer = TextMeasurer(sizeCategory: sizeCategory)
-        
+
         // Reserve space for the pagination controls
         let textHeight = size.height - 40
-        
+
         // Start with conservative estimates - we'll refine with actual measurement
         var resultPages: [String] = []
         var workingText = text
-        
+
         // Process text until we've gone through it all
         while !workingText.isEmpty {
             // Try to fit as much text as possible in the current page
             let pageText = measurer.fitTextToHeight(text: workingText, width: size.width - 8, height: textHeight)
-            
+
             // Add this chunk as a page
             resultPages.append(pageText)
-            
+
             // Remove the used portion from our working text
             if pageText.count < workingText.count {
                 let index = workingText.index(workingText.startIndex, offsetBy: pageText.count)
@@ -265,18 +261,18 @@ struct PaginatedTextView: View {
                 workingText = ""
             }
         }
-        
+
         // Update state - only if not prevented and the sheet isn't open
         if !textSelectionManager.preventBackgroundUpdates && self.pages != resultPages {
             self.pages = resultPages
             self.totalPages = resultPages.count
-            
+
             // Keep the current page valid
             if currentPage >= totalPages {
                 currentPage = max(0, totalPages - 1)
             }
         }
-        
+
         print("PaginatedTextView: Created \(totalPages) pages for \(sizeCategory) size")
     }
 }
@@ -284,71 +280,71 @@ struct PaginatedTextView: View {
 // Helper class to measure text
 class TextMeasurer {
     let sizeCategory: ContentSizeCategory
-    
+
     init(sizeCategory: ContentSizeCategory) {
         self.sizeCategory = sizeCategory
     }
-    
+
     // Standard variable width font that respects accessibility settings
     private var font: UIFont {
         let style = UIFont.TextStyle.body
         let descriptor = UIFontDescriptor.preferredFontDescriptor(withTextStyle: style)
-        
+
         return UIFont(descriptor: descriptor, size: 0) // 0 means use the size from the descriptor
     }
-    
+
     // Find how much text fits within a given height constraint
     func fitTextToHeight(text: String, width: CGFloat, height: CGFloat) -> String {
         // If text is empty, return empty string
         if text.isEmpty { return "" }
-        
+
         // Start with a paragraph that breaks naturally at word boundaries
         let paragraphStyle = NSMutableParagraphStyle()
         paragraphStyle.lineBreakMode = .byWordWrapping
         paragraphStyle.lineSpacing = 4
-        
+
         // Create the attributed string
         let attributes: [NSAttributedString.Key: Any] = [
             .font: font,
             .paragraphStyle: paragraphStyle
         ]
-        
+
         let attributedText = NSAttributedString(string: text, attributes: attributes)
-        
+
         // Create a text container and layout manager
         let textContainer = NSTextContainer(size: CGSize(width: width, height: height))
         textContainer.lineFragmentPadding = 0
-        
+
         let layoutManager = NSLayoutManager()
         layoutManager.addTextContainer(textContainer)
-        
+
         let textStorage = NSTextStorage(attributedString: attributedText)
         textStorage.addLayoutManager(layoutManager)
-        
+
         // Determine how much text fits
         let glyphRange = layoutManager.glyphRange(for: textContainer)
         let characterRange = layoutManager.characterRange(forGlyphRange: glyphRange, actualGlyphRange: nil)
-        
+
         // Safety check - ensure we're not cutting in the middle of a word
         let fittingText = text.prefix(characterRange.length)
-        
+
         // If we're not at the end, try to break at a natural point
         if characterRange.length < text.count {
             let searchRange = max(0, characterRange.length - 30)..<characterRange.length
             let nsText = text as NSString
-            
+
             // Try to find paragraph break
             let paraRange = nsText.range(of: "\n\n", options: .backwards, range: NSRange(searchRange))
             if paraRange.location != NSNotFound {
                 return String(text.prefix(paraRange.location + 2))
             }
-            
+
             // Try to find line break
             let lineRange = nsText.range(of: "\n", options: .backwards, range: NSRange(searchRange))
             if lineRange.location != NSNotFound {
                 return String(text.prefix(lineRange.location + 1))
             }
-            
+
             // Try to find sentence end
             for pattern in [".", "!", "?"] {
                 let sentenceRange = nsText.range(of: pattern + " ", options: .backwards, range: NSRange(searchRange))
@@ -356,14 +352,14 @@ class TextMeasurer {
                     return String(text.prefix(sentenceRange.location + 2))
                 }
             }
-            
+
             // Finally, find the last space
             let spaceRange = nsText.range(of: " ", options: .backwards, range: NSRange(searchRange))
             if spaceRange.location != NSNotFound {
                 return String(text.prefix(spaceRange.location + 1))
             }
         }
-        
+
         return String(fittingText)
     }
 }
@@ -375,7 +371,7 @@ struct TextSelectionView: View {
     @StateObject private var textSelectionManager = TextSelectionManager.shared
     // Create a persistence ID to maintain state
     private let id = UUID()
-    
+
     var body: some View {
         NavigationView {
             GeometryReader { geometry in
@@ -384,7 +380,7 @@ struct TextSelectionView: View {
                     Color(UIColor.systemBackground)
                         .opacity(0.85)
                         .edgesIgnoringSafeArea(.all)
-                    
+
                     // Use full container size with the UITextView wrapper
                     TextViewWrapper(text: text)
                         .frame(width: geometry.size.width, height: geometry.size.height)
@@ -399,7 +395,7 @@ struct TextSelectionView: View {
                         dismiss()
                     }
                 }
-                
+
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Copy") {
                         // This is just a copy button - users should select text first
@@ -424,33 +420,33 @@ struct TextSelectionView: View {
 // UITextView wrapper for better text selection support
 struct TextViewWrapper: UIViewRepresentable {
     let text: String
-    
+
     func makeUIView(context: Context) -> UITextView {
         let textView = UITextView()
-        
+
         // Configure the text view properties
         textView.isEditable = false
         textView.isSelectable = true
         textView.isScrollEnabled = true
         textView.showsVerticalScrollIndicator = true
         textView.font = UIFont.preferredFont(forTextStyle: .body)
-        
+
         // Make it transparent to let the background show through
         textView.backgroundColor = .clear
         textView.textContainerInset = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
         textView.dataDetectorTypes = .link
         textView.delegate = context.coordinator
-        
+
         // Configure for transparency and blur
         textView.isOpaque = false
-        
+
         // Set the text
         textView.text = text
         textView.layoutIfNeeded()
-        
+
         return textView
     }
-    
+
     func updateUIView(_ uiView: UITextView, context: Context) {
         // Update the text if needed
         if uiView.text != text {
@@ -458,19 +454,19 @@ struct TextViewWrapper: UIViewRepresentable {
             uiView.layoutIfNeeded()
         }
     }
-    
+
     // Create a coordinator to handle the delegate methods
     func makeCoordinator() -> Coordinator {
         Coordinator(self)
     }
-    
+
     class Coordinator: NSObject, UITextViewDelegate {
         var parent: TextViewWrapper
-        
+
         init(_ parent: TextViewWrapper) {
             self.parent = parent
         }
-        
+
         func textViewDidChange(_ textView: UITextView) {
             // Handle any changes if needed in the future
         }
@@ -481,15 +477,15 @@ struct TextViewWrapper: UIViewRepresentable {
 struct TextSelectionSheetProvider<Content: View>: View {
     @StateObject private var textSelectionManager = TextSelectionManager.shared
     let content: Content
-    
+
     init(@ViewBuilder content: () -> Content) {
         self.content = content()
     }
-    
+
     var body: some View {
         ZStack {
             content
-            
+
             // This is a dummy view that always exists to host the sheet
             Color.clear
                 .frame(width: 0, height: 0)
@@ -523,11 +519,11 @@ struct TextSelectionSheetProvider<Content: View>: View {
                     }
                     .pickerStyle(SegmentedPickerStyle())
                     .padding()
-                    
+
                     Text("Long-press or right-click text to copy or select")
                         .font(.caption)
                         .foregroundColor(.secondary)
-                    
+
                     PaginatedTextView(
                         text: """
                         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec a diam lectus. Sed sit amet ipsum mauris. Maecenas congue ligula ac quam viverra nec consectetur ante hendrerit. Donec et mollis dolor. Praesent et diam eget libero egestas mattis sit amet vitae augue. Nam tincidunt congue enim, ut porta lorem lacinia consectetur. Donec ut libero sed arcu vehicula ultricies a non tortor. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean ut gravida lorem. Ut turpis felis, pulvinar a semper sed, adipiscing id dolor. Pellentesque auctor nisi id magna consequat sagittis. Curabitur dapibus enim sit amet elit pharetra tincidunt feugiat nisl imperdiet. Ut convallis libero in urna ultrices accumsan. Donec sed odio eros. Donec viverra mi quis quam pulvinar at malesuada arcu rhoncus. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. In rutrum accumsan ultricies. Mauris vitae nisi at sem facilisis semper ac in est.

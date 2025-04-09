@@ -218,9 +218,6 @@ struct PaginationControls: View {
 
             Spacer()
 
-            Text("Page \(currentPage + 1) of \(totalPages)")
-                .font(.caption2)
-                .foregroundColor(.secondary)
 
             Spacer()
 
