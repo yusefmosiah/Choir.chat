@@ -15,9 +15,10 @@ struct PostchainView: View {
     // Drag state
     @State private var dragOffset: CGFloat = 0
 
-
     // ViewModel (passed down for potential subviews, though PhaseCard now handles its own logic)
     @ObservedObject var viewModel: PostchainViewModel
+
+    let localThreadIDs: Set<UUID>
 
     // Computed property to get the selected phase from the message
     private var selectedPhase: Phase {
@@ -56,14 +57,16 @@ struct PostchainView: View {
     }
 
     // Initializer
-    init(message: Message, isProcessing: Bool, viewModel: PostchainViewModel, forceShowAllPhases: Bool = false, coordinator: RESTPostchainCoordinator? = nil, viewId: UUID = UUID()) {
+    init(message: Message, isProcessing: Bool, viewModel: PostchainViewModel, localThreadIDs: Set<UUID>, forceShowAllPhases: Bool = false, coordinator: RESTPostchainCoordinator? = nil, viewId: UUID = UUID()) {
         self.message = message
         self.isProcessing = isProcessing
         self.viewModel = viewModel
+        self.localThreadIDs = localThreadIDs
         self.forceShowAllPhases = forceShowAllPhases
         self.coordinator = coordinator
         self.viewId = viewId
         // print("PostchainView initialized for message \(message.id)") // Reduced logging
+        print("PostchainView localThreadIDs: \(localThreadIDs)")
     }
 
     var body: some View {
@@ -80,7 +83,8 @@ struct PostchainView: View {
                         // Determine loading state based on coordinator or if content/results are missing while processing
                         isLoading: isLoadingPhase(phase),
                         viewModel: viewModel,
-                        messageId: message.id.uuidString
+                        messageId: message.id.uuidString,
+                        localThreadIDs: localThreadIDs
                     )
                     .frame(width: cardWidth)
                     .offset(x: calculateOffset(for: phase, cardWidth: cardWidth, totalWidth: totalWidth))
@@ -210,39 +214,14 @@ struct PostchainView: View {
         // Make selected card fully opaque, fade out others more quickly
         return indexDifference == 0 ? 1.0 : max(0, 0.6 - Double(indexDifference) * 0.3)
     }
-}
-
 #Preview {
-    let previewCoordinator = RESTPostchainCoordinator()
-    let previewViewModel = PostchainViewModel(coordinator: previewCoordinator)
-
-    let testMessage = Message(
-        content: "This is the action phase content.",
-        isUser: false,
-        phaseResults: [
-            .action: PhaseResult(content: "Action content here", provider: "google", modelName: "gemini-flash"),
-            .experienceVectors: PhaseResult(content: "Synthesized vector docs", provider: "openai", modelName: "gpt-4"),
-            .experienceWeb: PhaseResult(content: "Synthesized web results", provider: "anthropic", modelName: "claude-3"),
-            .yield: PhaseResult(content: "Final yield response", provider: "google", modelName: "gemini-pro")
-        ]
-    )
-    testMessage.vectorSearchResults = [
-        VectorSearchResult(content: "Relevant content from vector DB.", score: 0.85, provider: "qdrant", metadata: nil),
-        VectorSearchResult(content: "Another piece of info.", score: 0.81, provider: "qdrant", metadata: nil)
-    ]
-    testMessage.webSearchResults = [
-        SearchResult(title: "Web Result 1", url: "https://example.com/1", content: "Snippet from web result 1...", provider: "brave_search"),
-        SearchResult(title: "Web Result 2", url: "https://example.com/2", content: "Snippet from web result 2...", provider: "brave_search")
-    ]
-
-    return PostchainView(
-        message: testMessage,
+    PostchainView(
+        message: Message(content: "Preview", isUser: false),
         isProcessing: false,
-        viewModel: previewViewModel,
-        forceShowAllPhases: true,
-        coordinator: previewCoordinator,
-        viewId: UUID()
+        viewModel: PostchainViewModel(coordinator: RESTPostchainCoordinator()),
+        localThreadIDs: []
     )
     .frame(height: 400)
     .padding()
+}
 }

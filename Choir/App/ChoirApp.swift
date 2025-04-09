@@ -14,6 +14,12 @@ struct ChoirApp: App {
             TextSelectionSheetProvider {
                 ContentView()
             }
+            .onAppear {
+                let threads = ThreadPersistenceService.shared.loadAllThreads()
+                let threadIDs = Set(threads.map { $0.id })
+                print("Loaded local thread IDs on startup: \(threadIDs)")
+                // TODO: Store threadIDs in a shared model or environment object
+            }
         }
     }
 }

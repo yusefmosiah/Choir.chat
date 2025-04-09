@@ -11,7 +11,7 @@ enum UnifiedSearchResult: Identifiable, Hashable {
         case .web(let result): return result.id
         }
     }
-    
+
     // Implement Hashable ourselves
     func hash(into hasher: inout Hasher) {
         switch self {
@@ -23,7 +23,7 @@ enum UnifiedSearchResult: Identifiable, Hashable {
             hasher.combine(1) // Type discriminator
         }
     }
-    
+
     static func == (lhs: UnifiedSearchResult, rhs: UnifiedSearchResult) -> Bool {
         switch (lhs, rhs) {
         case (.vector(let lhsResult), .vector(let rhsResult)):
@@ -42,6 +42,7 @@ struct SearchResultListView: View {
     let results: [UnifiedSearchResult]
     @Binding var currentPage: Int
     let availableSize: CGSize // Pass available size for pagination calculation
+    let localThreadIDs: Set<UUID>
 
     // Pagination state
     @State private var totalPages: Int = 1
@@ -71,7 +72,7 @@ struct SearchResultListView: View {
                 ForEach(pagedResults) { result in
                     switch result {
                     case .vector(let vectorResult):
-                        VectorResultCard(result: vectorResult)
+                        VectorResultCard(result: vectorResult, localThreadIDs: localThreadIDs)
                     case .web(let webResult):
                         WebResultCard(result: webResult, openURL: openURL)
                     }
@@ -116,13 +117,31 @@ struct SearchResultListView: View {
 
 struct VectorResultCard: View {
     let result: VectorSearchResult
+    let localThreadIDs: Set<UUID>
 
     var body: some View {
         VStack(alignment: .leading, spacing: 5) {
-            Text(result.content)
-                .font(.body)
-                .lineLimit(4) // Show a few lines
-            
+            if let threadIDString = result.metadata?["thread_id"] as? String,
+               let threadUUID = UUID(uuidString: threadIDString),
+               localThreadIDs.contains(threadUUID) {
+                Button(action: {
+                    if let url = URL(string: "choir://thread/\(threadIDString)") {
+                        UIApplication.shared.open(url)
+                    }
+                }) {
+                    Text(result.content)
+                        .font(.body)
+                        .lineLimit(4)
+                        .foregroundColor(.blue)
+                        .underline()
+                }
+                .buttonStyle(.plain)
+            } else {
+                Text(result.content)
+                    .font(.body)
+                    .lineLimit(4)
+            }
+
             HStack {
                 Text("Score: \(String(format: "%.2f", result.score))")
                     .font(.caption)
@@ -134,7 +153,7 @@ struct VectorResultCard: View {
             }
         }
         .padding(10)
-        .background(Color(.secondarySystemBackground).opacity(0.5)) // Slightly different background
+        .background(Color(.secondarySystemBackground).opacity(0.5))
         .cornerRadius(8)
     }
 }
@@ -148,12 +167,12 @@ struct WebResultCard: View {
             Text(result.title)
                 .font(.headline)
                 .lineLimit(1)
-            
+
             Text(result.content)
                 .font(.body)
                 .foregroundColor(.secondary)
                 .lineLimit(2)
-            
+
             if let url = URL(string: result.url) {
                 Button {
                     openURL(url)
@@ -250,6 +269,7 @@ struct SearchResultListPreview: View {
                 ].map { .vector($0) },
                 currentPage: $vectorPage,
                 availableSize: CGSize(width: 300, height: 400),
+                localThreadIDs: [],
                 onNavigateToPreviousPhase: { print("Navigate Prev Phase (Vector)") },
                 onNavigateToNextPhase: { print("Navigate Next Phase (Vector)") }
             )
@@ -268,6 +288,7 @@ struct SearchResultListPreview: View {
                 ].map { .web($0) },
                 currentPage: $webPage,
                 availableSize: CGSize(width: 300, height: 400),
+                localThreadIDs: [],
                 onNavigateToPreviousPhase: { print("Navigate Prev Phase (Web)") },
                 onNavigateToNextPhase: { print("Navigate Next Phase (Web)") }
             )

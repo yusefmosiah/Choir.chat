@@ -53,7 +53,7 @@ struct MessageRow: View {
                     Button("Copy Content") {
                         UIPasteboard.general.string = message.content
                     }
-                    
+
                     Button("Select Text...") {
                         TextSelectionManager.shared.showSheet(withText: message.content)
                     }
@@ -83,6 +83,7 @@ struct MessageRow: View {
                     message: message,
                     isProcessing: isProcessing,
                     viewModel: viewModel, // Pass viewModel
+                    localThreadIDs: [],
                     forceShowAllPhases: true,
                     coordinator: viewModel.coordinator as? RESTPostchainCoordinator,
                     viewId: message.id // Use message ID as the view ID for uniqueness

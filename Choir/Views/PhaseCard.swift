@@ -10,6 +10,7 @@ struct PhaseCard: View {
     // var priors: [Prior]? = nil // REMOVE: Prior struct is removed
     @ObservedObject var viewModel: PostchainViewModel // Keep viewModel for SearchResultListView
     var messageId: String? // Message ID parameter
+    let localThreadIDs: Set<UUID>
 
     // --- Computed Properties for Styling ---
 
@@ -103,13 +104,14 @@ struct PhaseCard: View {
                     // Determine which view to show based on the phase
                     switch phase {
                     case .experienceVectors, .experienceWeb:
-                        let results: [UnifiedSearchResult] = phase == .experienceVectors ? 
+                        let results: [UnifiedSearchResult] = phase == .experienceVectors ?
                             message.vectorSearchResults.map { UnifiedSearchResult.vector($0) } :
                             message.webSearchResults.map { UnifiedSearchResult.web($0) }
-                        
+
                         UnifiedPaginatedView(
                             textContent: content,
                             searchResults: results,
+                            localThreadIDs: localThreadIDs,
                             currentPage: pageBinding,
                             availableSize: geometry.size,
                             onNavigateToPreviousPhase: createNavigationHandler(direction: .previous),
@@ -214,7 +216,8 @@ struct PhaseCard: View {
         isSelected: true,
         isLoading: false,
         viewModel: previewViewModel,
-        messageId: testMessage.id.uuidString
+        messageId: testMessage.id.uuidString,
+        localThreadIDs: []
     )
     .frame(height: 300)
     .padding()

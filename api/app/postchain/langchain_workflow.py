@@ -95,7 +95,8 @@ from app.database import DatabaseClient # Add import for DB client
 
 async def run_experience_vectors_phase(
     messages: List[BaseMessage],
-    model_config: ModelConfig
+    model_config: ModelConfig,
+    thread_id: str
 ) -> ExperienceVectorsPhaseOutput:
     """Runs the Experience Vectors phase: Embeds query, searches Qdrant, calls LLM with results."""
     logger.info(f"Running Experience Vectors phase (manual search) with model: {model_config.provider}/{model_config.model_name}")
@@ -124,21 +125,24 @@ async def run_experience_vectors_phase(
         embeddings = OpenAIEmbeddings(model=app_config.EMBEDDING_MODEL, api_key=app_config.OPENAI_API_KEY) # Pass key if needed
         query_vector = await embeddings.aembed_query(query_text)
 
-        # --- 2. Save Query Vector --- #
-        save_result = await db_client.store_vector(
-            content=query_text,
-            vector=query_vector,
-            metadata={
-                "role": "user_query",
-                "phase": "experience_vectors"
-            }
-        )
-        logger.info(f"Saved query vector with ID: {save_result.get('id')}")
-
-        # --- 3. Search Qdrant --- #
+        # --- 2. Search Qdrant --- #
         logger.info(f"Searching Qdrant collection '{app_config.MESSAGES_COLLECTION}' with embedded query.")
         qdrant_raw_results = await db_client.search_vectors(query_vector, limit=app_config.SEARCH_LIMIT)
         logger.info(f"Qdrant returned {len(qdrant_raw_results)} results.")
+
+        # --- 3. Save Query Vector --- #
+        metadata = {
+            "role": "user_query",
+            "phase": "experience_vectors",
+            "thread_id": thread_id
+        }
+
+        save_result = await db_client.store_vector(
+            content=query_text,
+            vector=query_vector,
+            metadata=metadata
+        )
+        logger.info(f"Saved query vector with ID: {save_result.get('id')}")
 
         # --- 4. Format Qdrant Results --- #
         seen_content = set()
@@ -539,7 +543,7 @@ async def run_langchain_postchain_workflow(
 
     # 2. Experience Vectors Phase
     yield {"phase": "experience_vectors", "status": "running"}
-    exp_vectors_output: ExperienceVectorsPhaseOutput = await run_experience_vectors_phase(current_messages, experience_vectors_model_config)
+    exp_vectors_output: ExperienceVectorsPhaseOutput = await run_experience_vectors_phase(current_messages, experience_vectors_model_config, thread_id=thread_id)
     if exp_vectors_output.error:
         yield {
             "phase": "experience_vectors", "status": "error", "content": exp_vectors_output.error,
