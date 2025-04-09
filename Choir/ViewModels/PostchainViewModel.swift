@@ -1,4 +1,5 @@
 import SwiftUI
+import Dispatch
 
 @MainActor
 class PostchainViewModel: ObservableObject {
@@ -11,6 +12,7 @@ class PostchainViewModel: ObservableObject {
     @Published private(set) var responses: [Phase: String]
     @Published private(set) var isProcessing: Bool
     @Published private(set) var error: Error?
+    private var updateWorkItem: DispatchWorkItem?
 
     // Track current active message ID
     @Published private(set) var activeMessageId: String = UUID().uuidString
@@ -18,10 +20,6 @@ class PostchainViewModel: ObservableObject {
     // Store structured search results per message
     @Published private(set) var vectorResultsByMessage: [String: [VectorSearchResult]] = [:]
     @Published private(set) var webResultsByMessage: [String: [SearchResult]] = [:]
-
-    // Keep string arrays for compatibility, but also per message
-//    @Published private(set) var vectorSourcesByMessage: [String: [String]] = [:] // REMOVE: Prefer structured results
-//    @Published private(set) var webSearchSourcesByMessage: [String: [String]] = [:] // REMOVE: Prefer structured results
 
     // Computed properties for the current message's sources (for backwards compatibility or specific views)
     var vectorResults: [VectorSearchResult] {
@@ -41,14 +39,14 @@ class PostchainViewModel: ObservableObject {
     }
 
     let coordinator: any PostchainCoordinator
-    
+
     // Method to update a message's selected phase
     func updateSelectedPhase(for message: Message, phase: Phase) {
         // Only proceed if the phase is different from the current one
         if message.selectedPhase != phase {
             // Trigger ObjectWillChange notification
             objectWillChange.send()
-            
+
             // Directly update the message's property
             message.objectWillChange.send()
             message.selectedPhase = phase
@@ -139,7 +137,11 @@ class PostchainViewModel: ObservableObject {
     // Called by the coordinator to update the view model with new phase content AND results
     // Updated signature to include provider and modelName
     func updatePhaseData(phase: Phase, status: String, content: String?, provider: String?, modelName: String?, webResults: [SearchResult]? = nil, vectorResults: [VectorSearchResult]? = nil, messageId: String? = nil, finalContent: String? = nil) {
-        DispatchQueue.main.async { [weak self] in
+        // Cancel any pending update
+        updateWorkItem?.cancel()
+
+        // Create a new work item
+        let workItem = DispatchWorkItem { [weak self] in
              guard let self else { return }
 
              // Use provided messageId or fall back to activeMessageId
@@ -192,8 +194,17 @@ class PostchainViewModel: ObservableObject {
             // Consider processing finished only when the final yield phase is complete
             let isLastPhaseComplete = (phase == Phase.allCases.last && status == "complete")
             if isLastPhaseComplete {
-                 self.isProcessing = false
-                 print("🏁 Processing finished.")
+                self.isProcessing = false
+                print("🏁 Processing finished.")
+
+                // Close the loop: auto-select yield if user is on action phase
+                if let message = self.findMessage(by: targetMessageId), message.selectedPhase == .action {
+                    DispatchQueue.main.async {
+                        withAnimation(.spring()) {
+                            self.updateSelectedPhase(for: message, phase: .yield)
+                        }
+                    }
+                }
             } else if status == "error" {
                  self.isProcessing = false // Also stop on error
                  print("🛑 Processing stopped due to error in phase \(phase.rawValue).")
@@ -203,6 +214,12 @@ class PostchainViewModel: ObservableObject {
              // Explicitly notify observers if needed, though @Published should handle it
              self.objectWillChange.send()
         }
+
+        // Store the work item
+        updateWorkItem = workItem
+
+        // Execute the work item on the main queue
+        DispatchQueue.main.async(execute: workItem)
     }
 
     func setCurrentPhase(_ phase: Phase) {

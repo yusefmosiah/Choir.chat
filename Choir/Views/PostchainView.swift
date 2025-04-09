@@ -188,6 +188,14 @@ struct PostchainView: View {
             return totalWidth
         }
 
+        // Wrap-around logic: treat yield as immediately left of action
+        if selectedPhase == .action && phase == .yield {
+            return -cardWidth + dragOffset
+        }
+        if selectedPhase == .yield && phase == .action {
+            return cardWidth + dragOffset
+        }
+
         let indexDifference = phaseIndex - currentIndex
         return CGFloat(indexDifference) * cardWidth + dragOffset
     }
@@ -205,7 +213,6 @@ struct PostchainView: View {
 }
 
 #Preview {
-    // Mock ViewModel and Message for Preview
     let previewCoordinator = RESTPostchainCoordinator()
     let previewViewModel = PostchainViewModel(coordinator: previewCoordinator)
 
@@ -219,7 +226,6 @@ struct PostchainView: View {
             .yield: PhaseResult(content: "Final yield response", provider: "google", modelName: "gemini-pro")
         ]
     )
-    // Add some mock search results to the message
     testMessage.vectorSearchResults = [
         VectorSearchResult(content: "Relevant content from vector DB.", score: 0.85, provider: "qdrant", metadata: nil),
         VectorSearchResult(content: "Another piece of info.", score: 0.81, provider: "qdrant", metadata: nil)
@@ -231,7 +237,7 @@ struct PostchainView: View {
 
     return PostchainView(
         message: testMessage,
-        isProcessing: false, // Set to true to test loading state
+        isProcessing: false,
         viewModel: previewViewModel,
         forceShowAllPhases: true,
         coordinator: previewCoordinator,

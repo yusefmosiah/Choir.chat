@@ -194,7 +194,8 @@
 │   ├── evolution_naming.md
 │   ├── evolution_token.md
 │   ├── features
-│   │   └── automatic_thread_titles.md
+│   │   ├── automatic_thread_titles.md
+│   │   └── close_the_loop.md
 │   ├── fqaho_simulation.md
 │   ├── fqaho_visualization.md
 │   ├── issues
@@ -238,4 +239,4 @@
     ├── test_api.sh
     └── test_postchain_multiturn.sh
 
-63 directories, 173 files
+63 directories, 174 files
