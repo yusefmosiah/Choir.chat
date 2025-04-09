@@ -139,8 +139,8 @@ class RESTPostchainCoordinator: PostchainCoordinator, ObservableObject {
 
                                     let message = thread.messages[messageIndex]
                                     // Update the message object directly with all info
-                                    let streamEvent = PostchainStreamEvent(phase: phase, status: "complete", 
-                                                                           content: content, provider: provider, 
+                                    let streamEvent = PostchainStreamEvent(phase: phase, status: "complete",
+                                                                           content: content, provider: provider,
                                                                            modelName: modelName)
                                     message.updatePhase(phaseEnum, content: content, provider: provider, modelName: modelName, event: streamEvent)
 
@@ -175,6 +175,28 @@ class RESTPostchainCoordinator: PostchainCoordinator, ObservableObject {
                             // If phase is complete, remove it from processing phases
                             if status == "complete" {
                                 self.processingPhases.remove(phaseEnum)
+
+                                // --- Automatic Thread Title Generation ---
+                                // Check if this is the Action phase completing for the first AI message
+                                // and if the title hasn't been manually changed yet.
+                                if phaseEnum == .action,
+                                   let thread = self.currentChoirThread,
+                                   let messageId = self.activeMessageId,
+                                   let messageIndex = thread.messages.firstIndex(where: { $0.id == messageId }),
+                                   thread.messages.count == 2, // User msg (0) + AI msg (1)
+                                   messageIndex == 1, // Ensure we're updating the AI message
+                                   thread.title.hasPrefix("ChoirThread ") // Check if title is still default
+                                {
+                                    let message = thread.messages[messageIndex]
+                                    let actionContent = message.getPhaseContent(.action)
+                                    let generatedTitle = actionContent.prefixWords(10)
+                                    let finalTitle = generatedTitle.isEmpty ? "New Thread" : generatedTitle
+
+                                    // Update the thread title (this also handles persistence)
+                                    print("📝 Auto-generating thread title: '\(finalTitle)'")
+                                    thread.updateTitle(finalTitle)
+                                }
+                                // --- End Automatic Thread Title Generation ---
                             }
                         }
                     },

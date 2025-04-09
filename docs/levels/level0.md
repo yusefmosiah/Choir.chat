@@ -46,6 +46,8 @@ tree.md
 │   │   ├── KeychainService.swift
 │   │   ├── ThreadPersistenceService.swift
 │   │   └── WalletManager.swift
+│   ├── Utils
+│   │   └── String+Extensions.swift
 │   ├── ViewModels
 │   │   └── PostchainViewModel.swift
 │   └── Views
@@ -204,6 +206,8 @@ tree.md
 │   ├── e_concept.md
 │   ├── evolution_naming.md
 │   ├── evolution_token.md
+│   ├── features
+│   │   └── automatic_thread_titles.md
 │   ├── fqaho_simulation.md
 │   ├── fqaho_visualization.md
 │   ├── issues
@@ -247,7 +251,7 @@ tree.md
     ├── test_api.sh
     └── test_postchain_multiturn.sh
 
-61 directories, 171 files
+63 directories, 173 files
 
 === File: docs/CHANGELOG.md ===
 
