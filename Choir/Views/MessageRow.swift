@@ -20,11 +20,8 @@ struct MessageRow: View {
                 HStack(alignment: .top, spacing: 8) {
                     // Determine the text view content conditionally
                     let textView: Text = {
-                        if message.content.count > 4000 {
-                            let first100 = message.content.prefix(100)
-                            let last100 = message.content.suffix(100)
-                            let collapsedText = "<long_text>\(first100)...\(last100)</long_text>"
-                            return Text(collapsedText).italic()
+                        if let _ = message.externalContentRef {
+                            return Text("[Long Text - Tap to View]").italic()
                         } else {
                             return Text(LocalizedStringKey(message.content))
                         }
@@ -56,6 +53,12 @@ struct MessageRow: View {
                     
                     Button("Select Text...") {
                         TextSelectionManager.shared.showSheet(withText: message.content)
+                    }
+                    
+                    if message.externalContentRef != nil {
+                        Button("View Full Text") {
+                            TextSelectionManager.shared.showSheet(withText: message.content)
+                        }
                     }
                 }
             }

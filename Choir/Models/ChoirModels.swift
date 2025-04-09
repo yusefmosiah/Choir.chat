@@ -315,6 +315,7 @@ class Message: ObservableObject, Identifiable, Equatable {
     let isUser: Bool
     let timestamp: Date
     @Published var isStreaming: Bool
+    @Published var externalContentRef: String? // Reference to external file for long messages
 
     // Store the currently selected phase for this message
     // This ensures the selection persists even if the view is recreated
@@ -353,12 +354,14 @@ class Message: ObservableObject, Identifiable, Equatable {
          isUser: Bool,
          timestamp: Date = Date(),
          phaseResults: [Phase: PhaseResult] = [:], // Initialize with PhaseResult
-         isStreaming: Bool = false) {
+         isStreaming: Bool = false,
+         externalContentRef: String? = nil) {
         self.id = id
         self.content = content
         self.isUser = isUser
         self.timestamp = timestamp
         self.isStreaming = isStreaming
+        self.externalContentRef = externalContentRef
         self.phaseResults = phaseResults
 
         // Pre-initialize all phases with empty PhaseResult if not provided

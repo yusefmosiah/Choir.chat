@@ -19,8 +19,12 @@ class ThreadPersistenceService {
         // Create a subdirectory for threads
         threadsDirectory = documentsDirectory.appendingPathComponent("threads", isDirectory: true)
         
-        // Create the directory if it doesn't exist
+        // Create the directories if they don't exist
         try? FileManager.default.createDirectory(at: threadsDirectory, withIntermediateDirectories: true)
+        
+        // Create LongTexts directory for external message storage
+        let longTextsDirectory = documentsDirectory.appendingPathComponent("LongTexts", isDirectory: true)
+        try? FileManager.default.createDirectory(at: longTextsDirectory, withIntermediateDirectories: true)
     }
     
     // MARK: - Public Methods
@@ -31,8 +35,29 @@ class ThreadPersistenceService {
     @discardableResult
     func saveThread(_ thread: ChoirThread) -> Bool {
         do {
+            // Get documents directory
+            let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+            let longTextsDirectory = documentsDirectory.appendingPathComponent("LongTexts", isDirectory: true)
+            
+            // Process messages for external storage
+            let processedThread = thread
+            for message in processedThread.messages {
+                if message.content.count > 4000 && message.externalContentRef == nil {
+                    // Create filename
+                    let filename = "\(message.id.uuidString).txt"
+                    let fileURL = longTextsDirectory.appendingPathComponent(filename)
+                    
+                    // Save content to file
+                    try message.content.write(to: fileURL, atomically: true, encoding: .utf8)
+                    
+                    // Update message references
+                    message.externalContentRef = filename
+                    message.content = "[external]"
+                }
+            }
+            
             // Create a serializable representation of the thread
-            let threadData = ThreadData(from: thread)
+            let threadData = ThreadData(from: processedThread)
             
             // Encode the thread data
             let encoder = JSONEncoder()
@@ -58,6 +83,8 @@ class ThreadPersistenceService {
     /// - Returns: The loaded thread, or nil if loading failed
     func loadThread(threadId: UUID) -> ChoirThread? {
         let fileURL = threadsDirectory.appendingPathComponent("\(threadId.uuidString).json")
+        let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+        let longTextsDirectory = documentsDirectory.appendingPathComponent("LongTexts", isDirectory: true)
         
         do {
             // Read the data from the file
@@ -68,7 +95,23 @@ class ThreadPersistenceService {
             let threadData = try decoder.decode(ThreadData.self, from: data)
             
             // Create a thread from the data
-            return threadData.toChoirThread()
+            let thread = threadData.toChoirThread()
+            
+            // Load external content for messages that have it
+            for message in thread.messages {
+                if let ref = message.externalContentRef {
+                    let fileURL = longTextsDirectory.appendingPathComponent(ref)
+                    do {
+                        let content = try String(contentsOf: fileURL, encoding: .utf8)
+                        message.content = content
+                    } catch {
+                        print("Error loading external content for message \(message.id): \(error)")
+                        message.content = "[Error loading text]"
+                    }
+                }
+            }
+            
+            return thread
         } catch {
             print("Error loading thread: \(error)")
             return nil
@@ -176,12 +219,14 @@ struct MessageData: Codable {
     let phaseCurrentPage: [String: Int]
     let vectorSearchResults: [VectorSearchResult]
     let webSearchResults: [SearchResult]
+    let externalContentRef: String? // Reference to external file for long messages
     
     init(from message: Message) {
         self.id = message.id.uuidString
         self.content = message.content
         self.isUser = message.isUser
         self.timestamp = message.timestamp
+        self.externalContentRef = message.externalContentRef
         self.selectedPhase = message.selectedPhase.rawValue
         
         // Convert phase enum keys to strings
@@ -214,7 +259,8 @@ struct MessageData: Codable {
             id: messageId,
             content: content,
             isUser: isUser,
-            timestamp: timestamp
+            timestamp: timestamp,
+            externalContentRef: externalContentRef
         )
         
         // Set the selected phase
