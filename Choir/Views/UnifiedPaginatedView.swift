@@ -33,8 +33,8 @@ struct UnifiedPaginatedView: View {
                         .font(.body)
                         .lineSpacing(4)
                         .padding([.horizontal, .top], 4)
-                        .frame(maxWidth: .infinity, 
-                               maxHeight: .infinity, 
+                        .frame(maxWidth: .infinity,
+                               maxHeight: .infinity,
                                alignment: .topLeading)
                     
                 case .results(let results):
@@ -50,8 +50,11 @@ struct UnifiedPaginatedView: View {
                         }
                     }
                     .padding(.horizontal, 5)
+                    .frame(maxHeight: .infinity)
                 }
             }
+            
+            Spacer(minLength: 0)
             
             PaginationControls(
                 currentPage: $currentPage,
@@ -60,6 +63,7 @@ struct UnifiedPaginatedView: View {
                 onNavigateToNextPhase: onNavigateToNextPhase
             )
         }
+        .frame(maxHeight: .infinity)
         .onAppear(perform: calculateAllPages)
         .onChange(of: textContent) { _ in calculateAllPages() }
         .onChange(of: searchResults) { _ in calculateAllPages() }
