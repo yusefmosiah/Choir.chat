@@ -1,6 +1,10 @@
+**Status:** Implemented on 2025-04-09
+
 # Feature Plan: Automatic Thread Titles
 
 **Goal:** Implement a mechanism to automatically generate titles for new Choir threads based on the first 10 words of the AI's "Action" phase response in the initial message, without overwriting manually set titles.
+**This feature is now live.** Choir threads automatically receive a generated title based on the first 10 words of the initial AI Action phase response, unless the user manually sets a title.
+
 
 **Implementation Strategy:** Client-Side
 

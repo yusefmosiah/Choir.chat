@@ -38,6 +38,16 @@ The state is primarily managed in two locations:
 *   **State Handled:**
     *   **UI State:** Current view, input field content, display state of messages and phases (fetched from API).
     *   **Sui Private Key:** Securely stored in the device Keychain. Used for signing authentication messages.
+### Update (2025-04-09): iOS Client Local Persistence
+
+As of April 9, 2025, the iOS client **replaced previous persistence methods** (such as SwiftData) with a **local file-based JSON storage** approach:
+
+- Each thread and its associated messages are saved as a **single JSON file** on device storage.
+- This improves transparency, simplifies debugging, and enhances offline access.
+- The files are managed by the app's `ThreadPersistenceService`, which handles reading/writing JSON representations of threads.
+- This approach fully replaces previous CoreData/SwiftData-based persistence.
+
+This change aligns with a simplified, file-centric architecture for local data management on iOS.
 *   **No Persistent App Data (MVP):** For the MVP, the client **does not** maintain its own persistent cache of conversation history. It fetches conversation data from the API as needed for display. Offline access is deferred post-MVP.
 
 ## State Flow Example (Single Turn)

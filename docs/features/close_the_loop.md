@@ -1,4 +1,8 @@
+**Status:** Implemented on 2025-04-09
+
 # Close the Loop: Auto-Select Yield Phase with Wrap-Around Animation
+
+**This feature is now live.** When the yield phase completes downloading, if the user is viewing the action phase, the UI automatically transitions to display the final response with a wrap-around animation.
 
 ## Objective
 When the **yield** phase (final response) finishes downloading, and the user is currently viewing the **action** phase, **auto-select** the yield phase. Animate it sliding **in from the left**, visually looping the phase sequence from end back to start.

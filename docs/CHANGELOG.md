@@ -1,4 +1,12 @@
 # Changelog
+## [2025-04-09] - 2025-04-09
+
+### Added
+
+- **iOS Client Persistence:** Implemented local JSON file storage for thread data.
+- **Automatic Thread Titles:** Threads now get an auto-generated title based on the first 10 words of the initial AI Action phase response.
+- **Close the Loop UI:** When the yield phase finishes downloading, if the user is viewing the action phase, the UI now automatically transitions to display the final response with a smooth wrap-around animation.
+
 
 ## [2025-03-28] - 2025-03-28
 
@@ -152,7 +160,7 @@
 
 -   Development principles with focus on groundedness
 -   Basic chat interface implementation
--   SwiftData message persistence
+-   SwiftData message persistence // this subsequently became a problem. swiftdata is coupled with swiftui and there was interference between view rendering and data persistence
 -   Initial Action step foundation
 
 ### Changed
