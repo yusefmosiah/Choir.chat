@@ -43,7 +43,7 @@ struct MessageRow: View {
                 .cornerRadius(16) // Use standard cornerRadius
                 .padding(.leading, 40)
                 .onLongPressGesture {
-                    // On long press, use the shared TextSelectionManager to show the text selection options
+                    // On long press, show the full content regardless of storage method
                     TextSelectionManager.shared.showSheet(withText: message.content)
                 }
                 .contextMenu {
