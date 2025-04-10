@@ -101,12 +101,12 @@ struct PostchainView: View {
                 .simultaneousGesture( // Drag gesture remains on the card stack
                     DragGesture()
                         .onChanged { value in
-                            withAnimation(.interactiveSpring()) {
-                                dragOffset = value.translation.width
-                            }
+                            dragOffset = value.translation.width
                         }
                         .onEnded { value in
-                            handleDragEnd(value: value, cardWidth: cardWidth)
+                            withAnimation(.interactiveSpring()) {
+                                handleDragEnd(value: value, cardWidth: cardWidth)
+                            }
                         }
                 )
 

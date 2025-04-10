@@ -220,6 +220,8 @@ tree.md
 │   │   ├── deep_links.md
 │   │   ├── deep_links_markdown.md
 │   │   ├── paginated_markdown_view.md
+│   │   ├── performance_refactoring.md
+│   │   ├── performance_refactoring_guide.md
 │   │   ├── phase_selection_sheet_plan.md
 │   │   ├── unified_navigation.md
 │   │   └── unified_navigation_implementation.md
@@ -267,7 +269,7 @@ tree.md
     ├── test_api.sh
     └── test_postchain_multiturn.sh
 
-63 directories, 189 files
+63 directories, 191 files
 
 === File: docs/CHANGELOG.md ===
 
