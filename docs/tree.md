@@ -37,14 +37,17 @@
 │   │   ├── ThreadPersistenceService.swift
 │   │   └── WalletManager.swift
 │   ├── Utils
-│   │   └── String+Extensions.swift
+│   │   ├── MarkdownThemes.swift
+│   │   ├── PaginationUtils.swift
+│   │   ├── String+Extensions.swift
+│   │   └── TextSelectionSheet.swift
 │   ├── ViewModels
 │   │   └── PostchainViewModel.swift
 │   └── Views
 │       ├── ChoirThreadDetailView.swift
 │       ├── MessageRow.swift
 │       ├── ModelConfigView.swift
-│       ├── PaginatedTextView.swift
+│       ├── PaginatedMarkdownView.swift
 │       ├── PhaseCard.swift
 │       ├── PostchainView.swift
 │       ├── PriorCard.swift
@@ -53,7 +56,6 @@
 │       │   └── Components
 │       │       ├── ThreadInputBar.swift
 │       │       └── ThreadMessageList.swift
-│       ├── UnifiedPaginatedView.swift
 │       └── WalletView.swift
 ├── Choir.xcodeproj
 │   ├── project.pbxproj
@@ -248,4 +250,4 @@
     ├── test_api.sh
     └── test_postchain_multiturn.sh
 
-63 directories, 183 files
+63 directories, 185 files

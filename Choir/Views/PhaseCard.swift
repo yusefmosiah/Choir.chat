@@ -74,37 +74,20 @@ struct PhaseCard: View {
             if !content.isEmpty || (phase == .experienceVectors && !message.vectorSearchResults.isEmpty) || (phase == .experienceWeb && !message.webSearchResults.isEmpty) {
                 GeometryReader { geometry in
                     // Determine which view to show based on the phase
-                    switch phase {
-                    case .experienceVectors, .experienceWeb:
-                        let results: [UnifiedSearchResult] = phase == .experienceVectors ?
-                            message.vectorSearchResults.map { UnifiedSearchResult.vector($0) } :
-                            message.webSearchResults.map { UnifiedSearchResult.web($0) }
+                    let vectorResults = message.vectorSearchResults.map { UnifiedSearchResult.vector($0) }
+                    let webResults = message.webSearchResults.map { UnifiedSearchResult.web($0) }
+                    let combinedResults = vectorResults + webResults
 
-                        UnifiedPaginatedView(
-                            textContent: content,
-                            searchResults: results,
-                            localThreadIDs: localThreadIDs,
-                            currentPage: pageBinding,
-                            availableSize: geometry.size,
-                            onNavigateToPreviousPhase: createNavigationHandler(direction: .previous),
-                            onNavigateToNextPhase: createNavigationHandler(direction: .next)
-                        )
+                    let combinedMarkdown = content // Optionally, inject search result markdown here
 
-                    default:
-                        // Show Paginated Text for all other phases with content
-                        if !content.isEmpty {
-                            PaginatedTextView(
-                                text: content,
-                                availableSize: geometry.size,
-                                currentPage: pageBinding,
-                                onNavigateToPreviousPhase: createNavigationHandler(direction: .previous),
-                                onNavigateToNextPhase: createNavigationHandler(direction: .next)
-                            )
-                        } else {
-                            // Should not happen often due to outer check, but safety fallback
-                            emptyContentView
-                        }
-                    }
+                    PaginatedMarkdownView(
+                        markdownText: combinedMarkdown,
+                        searchResults: combinedResults,
+                        availableSize: geometry.size,
+                        currentPage: pageBinding,
+                        onNavigateToPreviousPhase: createNavigationHandler(direction: .previous),
+                        onNavigateToNextPhase: createNavigationHandler(direction: .next)
+                    )
                 }
             } else if isLoading {
                 loadingContentView
