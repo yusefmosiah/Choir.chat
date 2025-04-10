@@ -26,7 +26,7 @@
 - Render with MarkdownUI
 - Customize MarkdownUI theme (normalize headings)
 
-### 🔲 Merge Pagination Views
+### ✅ Merge Pagination Views
 - Replace `PaginatedTextView` and `UnifiedPaginatedView` with one `PaginatedMarkdownView`
 
 ### 🔲 Simplify Navigation
