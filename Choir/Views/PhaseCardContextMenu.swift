@@ -1,6 +1,7 @@
 import SwiftUI
+
 #if canImport(UIKit)
-import UIKit
+    import UIKit
 #endif
 
 struct PhaseCardContextMenu: View {

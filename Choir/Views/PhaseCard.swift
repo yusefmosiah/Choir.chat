@@ -1,6 +1,5 @@
-import SwiftUI
 import Foundation
-
+import SwiftUI
 
 struct PhaseCard: View {
     let phase: Phase
@@ -9,14 +8,14 @@ struct PhaseCard: View {
     let isSelected: Bool
     var isLoading: Bool = false
     // var priors: [Prior]? = nil // REMOVE: Prior struct is removed
-    @ObservedObject var viewModel: PostchainViewModel // Keep viewModel for SearchResultListView
-    var messageId: String? // Message ID parameter
+    @ObservedObject var viewModel: PostchainViewModel  // Keep viewModel for SearchResultListView
+    var messageId: String?  // Message ID parameter
     let localThreadIDs: Set<UUID>
 
     // --- Computed Properties for Styling ---
 
     private var cardBackgroundColor: Color {
-        phase == .yield ? Color.accentColor : Color(.systemBackground) // Use semantic color
+        phase == .yield ? Color.accentColor : Color(.systemBackground)  // Use semantic color
     }
 
     private var primaryTextColor: Color {
@@ -72,14 +71,19 @@ struct PhaseCard: View {
             // Content Area
             let content = message.getPhaseContent(phase)
 
-            if !content.isEmpty || (phase == .experienceVectors && !message.vectorSearchResults.isEmpty) || (phase == .experienceWeb && !message.webSearchResults.isEmpty) {
+            if !content.isEmpty
+                || (phase == .experienceVectors && !message.vectorSearchResults.isEmpty)
+                || (phase == .experienceWeb && !message.webSearchResults.isEmpty)
+            {
                 GeometryReader { geometry in
                     // Determine which view to show based on the phase
-                    let vectorResults = message.vectorSearchResults.map { UnifiedSearchResult.vector($0) }
+                    let vectorResults = message.vectorSearchResults.map {
+                        UnifiedSearchResult.vector($0)
+                    }
                     let webResults = message.webSearchResults.map { UnifiedSearchResult.web($0) }
                     let combinedResults = vectorResults + webResults
 
-                    let combinedMarkdown = content // Optionally, inject search result markdown here
+                    let combinedMarkdown = content  // Optionally, inject search result markdown here
 
                     PaginatedMarkdownView(
                         markdownText: combinedMarkdown,
@@ -101,10 +105,11 @@ struct PhaseCard: View {
         .background(
             RoundedRectangle(cornerRadius: 12)
                 .fill(cardBackgroundColor)
-                .shadow(color: Color.black.opacity(shadowOpacity),
-                        radius: shadowRadius,
-                        x: 0,
-                        y: shadowYOffset)
+                .shadow(
+                    color: Color.black.opacity(shadowOpacity),
+                    radius: shadowRadius,
+                    x: 0,
+                    y: shadowYOffset)
         )
         .overlay(
             RoundedRectangle(cornerRadius: 12)
@@ -115,7 +120,7 @@ struct PhaseCard: View {
                             .init(color: .blue, location: 0.25),
                             .init(color: .purple, location: 0.5),
                             .init(color: .blue, location: 0.75),
-                            .init(color: .green, location: 1.0)
+                            .init(color: .green, location: 1.0),
                         ]),
                         center: .center
                     ),
@@ -163,12 +168,13 @@ struct PhaseCard: View {
     private func createNavigationHandler(direction: NavigationDirection) -> () -> Void {
         return {
             guard let currentPhaseIndex = Phase.allCases.firstIndex(of: phase) else { return }
-            let targetPhaseIndex = direction == .previous ? currentPhaseIndex - 1 : currentPhaseIndex + 1
+            let targetPhaseIndex =
+                direction == .previous ? currentPhaseIndex - 1 : currentPhaseIndex + 1
 
             guard targetPhaseIndex >= 0 && targetPhaseIndex < Phase.allCases.count else { return }
 
             let targetPhase = Phase.allCases[targetPhaseIndex]
-            let targetPage = direction == .previous ? 999 : 0 // Set to max for previous, 0 for next
+            let targetPage = direction == .previous ? 999 : 0  // Set to max for previous, 0 for next
 
             withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
                 message.selectedPhase = targetPhase
@@ -187,7 +193,7 @@ struct PhaseCard: View {
     )
 
     PhaseCard(
-        phase: Phase.action, // Explicitly use Phase enum
+        phase: Phase.action,  // Explicitly use Phase enum
         message: testMessage,
         isSelected: true,
         isLoading: false,
