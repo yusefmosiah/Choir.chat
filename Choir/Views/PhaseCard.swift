@@ -111,11 +111,11 @@ struct PhaseCard: View {
                 .stroke(
                     AngularGradient(
                         gradient: Gradient(stops: [
-                            .init(color: .blue, location: 0.0),
-                            .init(color: .green, location: 0.25),
-                            .init(color: .blue, location: 0.5),
-                            .init(color: .purple, location: 0.75),
-                            .init(color: .blue, location: 1.0)
+                            .init(color: .green, location: 0.0),
+                            .init(color: .blue, location: 0.25),
+                            .init(color: .purple, location: 0.5),
+                            .init(color: .blue, location: 0.75),
+                            .init(color: .green, location: 1.0)
                         ]),
                         center: .center
                     ),
