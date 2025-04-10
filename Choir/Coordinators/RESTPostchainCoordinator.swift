@@ -38,12 +38,11 @@ class RESTPostchainCoordinator: PostchainCoordinator, ObservableObject {
         }
     }
 
-    func process(_ input: String) async throws {
-        // Remove thread parameter to match protocol
-        try await processPost(input)
+    func process(_ input: String, modelConfigs: [Phase: ModelConfig]) async throws {
+        try await processPost(input, modelConfigs: modelConfigs)
     }
 
-    private func processPost(_ input: String) async throws {
+    private func processPost(_ input: String, modelConfigs: [Phase: ModelConfig]) async throws {
         // Set active thread
         let thread = currentChoirThread
 
@@ -79,7 +78,7 @@ class RESTPostchainCoordinator: PostchainCoordinator, ObservableObject {
                 self.api.streamLangchain(
                     query: input,
                     threadId: thread?.id.uuidString ?? UUID().uuidString,
-                    modelConfigs: thread?.modelConfigs, // Pass the thread's model configs
+                    modelConfigs: modelConfigs,
                     // Update closure signature to accept provider and modelName
                     onPhaseUpdate: { [weak self] phase, status, content, provider, modelName, webResults, vectorResults in
                         guard let self = self else { return }

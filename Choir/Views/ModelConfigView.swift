@@ -1,8 +1,8 @@
 import SwiftUI
 
 struct ModelConfigView: View {
-    // Thread reference to modify
-    @ObservedObject var thread: ChoirThread
+    // State to hold the global model configurations
+    @State private var currentConfigs: [Phase: ModelConfig] = [:]
     @Environment(\.dismiss) private var dismiss
 
     // List of available providers and models
@@ -17,10 +17,39 @@ struct ModelConfigView: View {
         "openai": ["gpt-4o-mini", "gpt-4o", "o3-mini"]
     ]
 
-    // State for currently selected provider, model, temperature, and API keys for each phase
-    @State private var selectedProviders: [Phase: String] = [:]
-    @State private var selectedModels: [Phase: String] = [:]
-    @State private var selectedTemperatures: [Phase: Double] = [:]
+    // Computed bindings for provider, model, temperature per phase
+    private func providerBinding(for phase: Phase) -> Binding<String> {
+        Binding<String>(
+            get: { currentConfigs[phase]?.provider ?? "google" },
+            set: { newProvider in
+                var config = currentConfigs[phase] ?? ModelConfig(provider: newProvider, model: "", temperature: 0.33)
+                config.provider = newProvider
+                currentConfigs[phase] = config
+            }
+        )
+    }
+
+    private func modelBinding(for phase: Phase) -> Binding<String> {
+        Binding<String>(
+            get: { currentConfigs[phase]?.model ?? "" },
+            set: { newModel in
+                var config = currentConfigs[phase] ?? ModelConfig(provider: "google", model: newModel, temperature: 0.33)
+                config.model = newModel
+                currentConfigs[phase] = config
+            }
+        )
+    }
+
+    private func temperatureBinding(for phase: Phase) -> Binding<Double> {
+        Binding<Double>(
+            get: { currentConfigs[phase]?.temperature ?? 0.33 },
+            set: { newTemp in
+                var config = currentConfigs[phase] ?? ModelConfig(provider: "google", model: "", temperature: newTemp)
+                config.temperature = newTemp
+                currentConfigs[phase] = config
+            }
+        )
+    }
     @State private var apiKeys: [String: String] = [:] // Store API keys by provider name
 
     // State for adding new custom model
@@ -133,23 +162,20 @@ struct ModelConfigView: View {
                 }
             }
             .onAppear {
-                // Load custom models first
                 loadCustomModels()
 
-                // Load saved API keys from UserDefaults first
                 for provider in providers {
                     if let savedKey = UserDefaults.standard.string(forKey: "apiKey_\(provider)") {
                         apiKeys[provider] = savedKey
                     }
                 }
 
-                // The thread should already have the correct configuration loaded
-                // since we now load it in the ChoirThread initializer
-                print("Using thread's existing model configuration")
+                // Load global configs
+                currentConfigs = ModelConfigManager.shared.loadModelConfigs()
 
-                // Initialize view state from the (potentially loaded or default) thread configuration
+                // Initialize UI state from global configs
                 for phase in Phase.allCases {
-                    if let config = thread.modelConfigs[phase] {
+                    if let config = currentConfigs[phase] {
                         selectedProviders[phase] = config.provider
                         selectedModels[phase] = config.model
                         selectedTemperatures[phase] = config.temperature ?? 0.33
@@ -186,40 +212,6 @@ struct ModelConfigView: View {
         }
     }
 
-    // Create binding for provider selection
-    private func providerBinding(for phase: Phase) -> Binding<String> {
-        Binding<String>(
-            get: { selectedProviders[phase] ?? thread.modelConfigs[phase]?.provider ?? "google" },
-            set: { newValue in
-                selectedProviders[phase] = newValue
-
-                // When provider changes, set default model for that provider using dynamic list
-                if let models = dynamicModelsByProvider[newValue], !models.isEmpty {
-                    selectedModels[phase] = models[0]
-                }
-            }
-        )
-    }
-
-    // Create binding for model selection
-    private func modelBinding(for phase: Phase) -> Binding<String> {
-        Binding<String>(
-            get: { selectedModels[phase] ?? thread.modelConfigs[phase]?.model ?? "" },
-            set: { selectedModels[phase] = $0 }
-        )
-    }
-
-    // Create binding for temperature selection
-    private func temperatureBinding(for phase: Phase) -> Binding<Double> {
-        Binding<Double>(
-            get: {
-                selectedTemperatures[phase] ??
-                thread.modelConfigs[phase]?.temperature ??
-                0.33 // Default temperature
-            },
-            set: { selectedTemperatures[phase] = $0 }
-        )
-    }
 
     // Create binding for API key input
     private func apiKeyBinding(for provider: String) -> Binding<String> {
@@ -328,7 +320,7 @@ struct ModelConfigView: View {
                 UserDefaults.standard.removeObject(forKey: "apiKey_\(provider)")
             }
         }
-        
+
         // Save thread to persistent storage
         Task {
             // Run on a background thread to avoid UI blocking
@@ -370,5 +362,5 @@ struct ModelConfigView: View {
 
 // Preview
 #Preview {
-    ModelConfigView(thread: ChoirThread())
+    ModelConfigView()
 }

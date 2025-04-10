@@ -1,5 +1,4 @@
 import SwiftUI
-import Dispatch
 
 @MainActor
 class PostchainViewModel: ObservableObject {
@@ -114,8 +113,11 @@ class PostchainViewModel: ObservableObject {
 
         isProcessing = true
 
+        // Inject global saved model configs before starting
+        let savedConfigs = ModelConfigManager.shared.loadModelConfigs()
+
         do {
-            try await coordinator.process(input)
+            try await coordinator.process(input, modelConfigs: savedConfigs)
         } catch {
             self.error = error
             isProcessing = false

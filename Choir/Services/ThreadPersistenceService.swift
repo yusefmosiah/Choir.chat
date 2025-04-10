@@ -3,28 +3,28 @@ import Foundation
 /// Service responsible for persisting and loading threads from the file system
 class ThreadPersistenceService {
     // MARK: - Properties
-    
+
     /// Shared instance for singleton access
     static let shared = ThreadPersistenceService()
-    
+
     /// Directory where thread files are stored
     private let threadsDirectory: URL
-    
+
     // MARK: - Initialization
-    
+
     private init() {
         // Get the documents directory
         let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
-        
+
         // Create a subdirectory for threads
         threadsDirectory = documentsDirectory.appendingPathComponent("threads", isDirectory: true)
-        
+
         // Create the directory if it doesn't exist
         try? FileManager.default.createDirectory(at: threadsDirectory, withIntermediateDirectories: true)
     }
-    
+
     // MARK: - Public Methods
-    
+
     /// Save a thread to a file
     /// - Parameter thread: The thread to save
     /// - Returns: Success or failure
@@ -33,18 +33,18 @@ class ThreadPersistenceService {
         do {
             // Create a serializable representation of the thread
             let threadData = ThreadData(from: thread)
-            
+
             // Encode the thread data
             let encoder = JSONEncoder()
             encoder.outputFormatting = .prettyPrinted
             let data = try encoder.encode(threadData)
-            
+
             // Create a file URL for this thread
             let fileURL = threadsDirectory.appendingPathComponent("\(thread.id.uuidString).json")
-            
+
             // Write the data to the file
             try data.write(to: fileURL)
-            
+
             print("Thread saved to: \(fileURL.path)")
             return true
         } catch {
@@ -52,21 +52,21 @@ class ThreadPersistenceService {
             return false
         }
     }
-    
+
     /// Load a thread from a file
     /// - Parameter threadId: The UUID of the thread to load
     /// - Returns: The loaded thread, or nil if loading failed
     func loadThread(threadId: UUID) -> ChoirThread? {
         let fileURL = threadsDirectory.appendingPathComponent("\(threadId.uuidString).json")
-        
+
         do {
             // Read the data from the file
             let data = try Data(contentsOf: fileURL)
-            
+
             // Decode the thread data
             let decoder = JSONDecoder()
             let threadData = try decoder.decode(ThreadData.self, from: data)
-            
+
             // Create a thread from the data
             return threadData.toChoirThread()
         } catch {
@@ -74,7 +74,7 @@ class ThreadPersistenceService {
             return nil
         }
     }
-    
+
     /// Load all threads from the threads directory
     /// - Returns: Array of loaded threads
     func loadAllThreads() -> [ChoirThread] {
@@ -82,7 +82,7 @@ class ThreadPersistenceService {
             // Get all JSON files in the threads directory
             let fileURLs = try FileManager.default.contentsOfDirectory(at: threadsDirectory, includingPropertiesForKeys: nil)
                 .filter { $0.pathExtension == "json" }
-            
+
             // Load each thread
             var threads: [ChoirThread] = []
             for fileURL in fileURLs {
@@ -95,21 +95,21 @@ class ThreadPersistenceService {
                     print("Error loading thread from \(fileURL.lastPathComponent): \(error)")
                 }
             }
-            
+
             return threads
         } catch {
             print("Error loading threads: \(error)")
             return []
         }
     }
-    
+
     /// Delete a thread file
     /// - Parameter threadId: The UUID of the thread to delete
     /// - Returns: Success or failure
     @discardableResult
     func deleteThread(threadId: UUID) -> Bool {
         let fileURL = threadsDirectory.appendingPathComponent("\(threadId.uuidString).json")
-        
+
         do {
             try FileManager.default.removeItem(at: fileURL)
             return true
@@ -127,40 +127,23 @@ struct ThreadData: Codable {
     let id: String
     let title: String
     let messages: [MessageData]
-    let modelConfigs: [String: ModelConfigData]
-    
+
     init(from thread: ChoirThread) {
         self.id = thread.id.uuidString
         self.title = thread.title
         self.messages = thread.messages.map { MessageData(from: $0) }
-        
-        // Convert Phase enum keys to strings for serialization
-        var configsDict: [String: ModelConfigData] = [:]
-        for (phase, config) in thread.modelConfigs {
-            configsDict[phase.rawValue] = ModelConfigData(from: config)
-        }
-        self.modelConfigs = configsDict
     }
-    
+
     func toChoirThread() -> ChoirThread {
         // Create a UUID from the string
         let threadId = UUID(uuidString: id) ?? UUID()
-        
+
         // Create a new thread
         let thread = ChoirThread(id: threadId, title: title)
-        
-        // Convert string keys back to Phase enum
-        var phaseConfigs: [Phase: ModelConfig] = [:]
-        for (phaseString, configData) in modelConfigs {
-            if let phase = Phase(rawValue: phaseString) {
-                phaseConfigs[phase] = configData.toModelConfig()
-            }
-        }
-        thread.modelConfigs = phaseConfigs
-        
+
         // Add messages
         thread.messages = messages.map { $0.toMessage() }
-        
+
         return thread
     }
 }
@@ -176,14 +159,14 @@ struct MessageData: Codable {
     let phaseCurrentPage: [String: Int]
     let vectorSearchResults: [VectorSearchResult]
     let webSearchResults: [SearchResult]
-    
+
     init(from message: Message) {
         self.id = message.id.uuidString
         self.content = message.content
         self.isUser = message.isUser
         self.timestamp = message.timestamp
         self.selectedPhase = message.selectedPhase.rawValue
-        
+
         // Convert phase enum keys to strings
         var resultsDict: [String: PhaseResultData] = [:]
         for phase in Phase.allCases {
@@ -192,23 +175,23 @@ struct MessageData: Codable {
             }
         }
         self.phaseResults = resultsDict
-        
+
         // Convert phase enum keys to strings for current page
         var pagesDict: [String: Int] = [:]
         for phase in Phase.allCases {
             pagesDict[phase.rawValue] = message.currentPage(for: phase)
         }
         self.phaseCurrentPage = pagesDict
-        
+
         // Copy search results
         self.vectorSearchResults = message.vectorSearchResults
         self.webSearchResults = message.webSearchResults
     }
-    
+
     func toMessage() -> Message {
         // Create a UUID from the string
         let messageId = UUID(uuidString: id) ?? UUID()
-        
+
         // Create a new message
         let message = Message(
             id: messageId,
@@ -216,12 +199,12 @@ struct MessageData: Codable {
             isUser: isUser,
             timestamp: timestamp
         )
-        
+
         // Set the selected phase
         if let phase = Phase(rawValue: selectedPhase) {
             message.selectedPhase = phase
         }
-        
+
         // Set phase results
         for (phaseString, resultData) in phaseResults {
             if let phase = Phase(rawValue: phaseString) {
@@ -235,18 +218,18 @@ struct MessageData: Codable {
                 )
             }
         }
-        
+
         // Set current page for each phase
         for (phaseString, page) in phaseCurrentPage {
             if let phase = Phase(rawValue: phaseString) {
                 message.setCurrentPage(for: phase, page: page)
             }
         }
-        
+
         // Set search results
         message.vectorSearchResults = vectorSearchResults
         message.webSearchResults = webSearchResults
-        
+
         return message
     }
 }
@@ -256,13 +239,13 @@ struct PhaseResultData: Codable {
     let content: String
     let provider: String?
     let modelName: String?
-    
+
     init(from phaseResult: PhaseResult) {
         self.content = phaseResult.content
         self.provider = phaseResult.provider
         self.modelName = phaseResult.modelName
     }
-    
+
     func toPhaseResult() -> PhaseResult {
         return PhaseResult(
             content: content,
@@ -285,7 +268,7 @@ struct ModelConfigData: Codable {
     let cohereApiKey: String?
     let openrouterApiKey: String?
     let groqApiKey: String?
-    
+
     init(from modelConfig: ModelConfig) {
         self.provider = modelConfig.provider
         self.model = modelConfig.model
@@ -299,7 +282,7 @@ struct ModelConfigData: Codable {
         self.openrouterApiKey = modelConfig.openrouterApiKey
         self.groqApiKey = modelConfig.groqApiKey
     }
-    
+
     func toModelConfig() -> ModelConfig {
         return ModelConfig(
             provider: provider,
@@ -316,5 +299,3 @@ struct ModelConfigData: Codable {
         )
     }
 }
-
-

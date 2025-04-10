@@ -155,27 +155,10 @@ class ChoirThread: ObservableObject, Identifiable, Hashable {
     @Published var title: String
     @Published var lastOpened: Date = Date()
     @Published var messages: [Message] = []
-    @Published var modelConfigs: [Phase: ModelConfig] = [
-        .action: ModelConfig(provider: "google", model: "gemini-2.0-flash-lite"),
-        .experienceVectors: ModelConfig(provider: "openrouter", model: "ai21/jamba-1.6-mini"),
-        .experienceWeb: ModelConfig(provider: "openrouter", model: "openrouter/quasar-alpha"),
-        .intention: ModelConfig(provider: "google", model: "gemini-2.0-flash"),
-        .observation: ModelConfig(provider: "groq", model: "qwen-qwq-32b"),
-        .understanding: ModelConfig(provider: "openrouter", model: "openrouter/quasar-alpha"),
-        .yield: ModelConfig(provider: "google", model: "gemini-2.5-pro-exp-03-25")
-    ]
 
-    init(id: UUID = UUID(), title: String? = nil, modelConfigs: [Phase: ModelConfig]? = nil) {
+    init(id: UUID = UUID(), title: String? = nil) {
         self.id = id
         self.title = title ?? "ChoirThread \(DateFormatter.localizedString(from: Date(), dateStyle: .short, timeStyle: .short))"
-
-        let globalConfigKey = "globalActiveModelConfig"
-        if let savedConfigData = UserDefaults.standard.data(forKey: globalConfigKey),
-           let savedConfigs = try? JSONDecoder().decode([Phase: ModelConfig].self, from: savedConfigData) {
-            self.modelConfigs = savedConfigs
-        } else if let configs = modelConfigs {
-            self.modelConfigs = configs
-        }
     }
 
     static func == (lhs: ChoirThread, rhs: ChoirThread) -> Bool {
@@ -184,11 +167,6 @@ class ChoirThread: ObservableObject, Identifiable, Hashable {
 
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
-    }
-
-    func updateModelConfig(for phase: Phase, provider: String, model: String, temperature: Double? = nil) {
-        modelConfigs[phase] = ModelConfig(provider: provider, model: model, temperature: temperature)
-        saveThread()
     }
 
     func updateTitle(_ newTitle: String) {

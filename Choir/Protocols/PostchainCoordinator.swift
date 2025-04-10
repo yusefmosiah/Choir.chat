@@ -13,7 +13,7 @@ protocol PostchainCoordinator {
     var activeMessageId: UUID? { get set }
 
     // Core processing
-    func process(_ input: String) async throws
+    func process(_ input: String, modelConfigs: [Phase: ModelConfig]) async throws
     func cancel()
 
     // Thread state
@@ -37,7 +37,7 @@ class TestPostchainCoordinator: PostchainCoordinator {
 
     required init() {}
 
-    func process(_ input: String) async throws {
+    func process(_ input: String, modelConfigs: [Phase: ModelConfig]) async throws {
         isProcessing = true
         responses[.action] = "Processing \(input)..."
         try await Task.sleep(nanoseconds: 1_000_000_000)

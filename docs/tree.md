@@ -34,6 +34,7 @@
 │   │   └── PostchainCoordinator.swift
 │   ├── Services
 │   │   ├── KeychainService.swift
+│   │   ├── ModelConfigManager.swift
 │   │   ├── ThreadPersistenceService.swift
 │   │   └── WalletManager.swift
 │   ├── Utils
@@ -221,6 +222,7 @@
 │   │   ├── level3.md
 │   │   ├── level4.md
 │   │   └── level5.md
+│   ├── phase_model_config_issue_analysis.md
 │   ├── plan_anonymity_by_default.md
 │   ├── plan_chip_materialization.md
 │   ├── postchain_temporal_logic.md
@@ -253,4 +255,4 @@
 │   └── test_postchain_multiturn.sh
 └── tap_area_debugging.md
 
-63 directories, 188 files
+63 directories, 190 files
