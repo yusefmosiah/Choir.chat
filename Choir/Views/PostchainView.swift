@@ -94,6 +94,7 @@ struct PostchainView: View {
                         .zIndex(phase == selectedPhase ? 1 : 0)
                         .opacity(calculateOpacity(for: phase))
                         .id("\(viewId)_\(phase.rawValue)")
+                        .allowsHitTesting(phase == selectedPhase) // Disable taps on non-selected cards
                     }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity) // Ensure card stack uses space
@@ -111,26 +112,28 @@ struct PostchainView: View {
 
             } // End Main ZStack (containing only cards)
             .overlay(alignment: .leading) { // Left Tap Area Overlay
-                // Calculate the width for the tap area (space outside the central non-tappable zone)
-                let tapAreaWidth = max(0, (geometry.size.width - (cardWidth * 0.33)) / 2)
-                Color.red // Use clear for production, Color.red for debugging
+                let tapAreaWidth = max(0, (geometry.size.width - (cardWidth * 0.5)) / 2)
+                Color.clear
                     .frame(width: tapAreaWidth)
+                    .offset(x: -30) // Shift left overlay further left
                     .contentShape(Rectangle())
                     .onTapGesture {
                         print("LEFT TAP AREA TAPPED")
                         handlePageTap(direction: .previous, size: geometry.size)
                     }
+                    .zIndex(2) // Ensure overlay is above phase cards
             }
             .overlay(alignment: .trailing) { // Right Tap Area Overlay
-                // Calculate the width for the tap area
-                let tapAreaWidth = max(0, (geometry.size.width - (cardWidth * 0.33)) / 2)
-                Color.red // Use clear for production, Color.red for debugging
+                let tapAreaWidth = max(0, geometry.size.width * 0.7)
+                Color.clear
                     .frame(width: tapAreaWidth)
+                    .offset(x: 50) // Shift right overlay further right
                     .contentShape(Rectangle())
                     .onTapGesture {
                         print("RIGHT TAP AREA TAPPED")
                         handlePageTap(direction: .next, size: geometry.size)
                     }
+                    .zIndex(2) // Ensure overlay is above phase cards
             }
         } // End GeometryReader
         .onAppear(perform: handleOnAppear) // Apply .onAppear to GeometryReader's content
