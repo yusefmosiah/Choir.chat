@@ -92,6 +92,7 @@ struct PostchainView: View {
                     .opacity(calculateOpacity(for: phase))
                     .id("\(viewId)_\(phase.rawValue)_\(message.content.count)_\(message.vectorSearchResults.count)_\(message.webSearchResults.count)") // Dynamic ID
                     .onTapGesture {
+                        print("TTTTAPPED: selected phase: \(phase); current phase: \(selectedPhase); message: \(message)")
                         withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
                             viewModel.updateSelectedPhase(for: message, phase: phase)
                         }
