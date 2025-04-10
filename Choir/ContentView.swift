@@ -18,17 +18,20 @@ struct ContentView: View {
 
     var body: some View {
         NavigationSplitView {
-            List(threads, selection: $selectedChoirThread) { thread in
-                NavigationLink(value: thread) {
-                    ChoirThreadRow(thread: thread)
-                }
-                .contextMenu {
-                    Button(role: .destructive, action: {
-                        deleteThread(thread)
-                    }) {
-                        Label("Delete", systemImage: "trash")
+            List(selection: $selectedChoirThread) {
+                ForEach(threads, id: \.id) { thread in
+                    NavigationLink(value: thread) {
+                        ChoirThreadRow(thread: thread)
+                    }
+                    .contextMenu {
+                        Button(role: .destructive, action: {
+                            deleteThread(thread)
+                        }) {
+                            Label("Delete", systemImage: "trash")
+                        }
                     }
                 }
+                .onDelete(perform: deleteThreads)
             }
             .navigationTitle("ChoirThreads")
             .toolbar {
@@ -123,6 +126,14 @@ struct ContentView: View {
 
         // Delete from storage
         ThreadPersistenceService.shared.deleteThread(threadId: thread.id)
+    }
+
+    /// Delete threads at offsets (for swipe-to-delete)
+    private func deleteThreads(at offsets: IndexSet) {
+        for index in offsets {
+            let thread = threads[index]
+            deleteThread(thread)
+        }
     }
 }
 
