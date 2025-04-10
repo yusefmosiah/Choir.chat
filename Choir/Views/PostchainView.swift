@@ -112,10 +112,10 @@ struct PostchainView: View {
 
             } // End Main ZStack (containing only cards)
             .overlay(alignment: .leading) { // Left Tap Area Overlay
-                let tapAreaWidth = max(0, (geometry.size.width - (cardWidth * 0.5)) / 2)
+                let tapAreaWidth = max(0, (geometry.size.width - (cardWidth * 0.8)) / 2)
                 Color.clear
                     .frame(width: tapAreaWidth)
-                    .offset(x: -30) // Shift left overlay further left
+                    .padding(.leading, -20) // Expand overlay outward beyond parent bounds
                     .contentShape(Rectangle())
                     .onTapGesture {
                         print("LEFT TAP AREA TAPPED")
@@ -124,10 +124,10 @@ struct PostchainView: View {
                     .zIndex(2) // Ensure overlay is above phase cards
             }
             .overlay(alignment: .trailing) { // Right Tap Area Overlay
-                let tapAreaWidth = max(0, geometry.size.width * 0.7)
+                let tapAreaWidth = max(0, geometry.size.width - (cardWidth * 0.7))
                 Color.clear
                     .frame(width: tapAreaWidth)
-                    .offset(x: 50) // Shift right overlay further right
+                    .padding(.trailing, -60) // Expand overlay outward beyond parent bounds
                     .contentShape(Rectangle())
                     .onTapGesture {
                         print("RIGHT TAP AREA TAPPED")
