@@ -114,7 +114,12 @@ class PostchainViewModel: ObservableObject {
         isProcessing = true
 
         // Inject global saved model configs before starting
+        print("🚀 Model configs being sent to backend:")
         let savedConfigs = ModelConfigManager.shared.loadModelConfigs()
+        for (phase, config) in savedConfigs {
+            print("Phase: \(phase.rawValue), Provider: \(config.provider), Model: \(config.model)")
+            print("API Keys: google=\(config.googleApiKey?.prefix(5) ?? "nil"), openrouter=\(config.openrouterApiKey?.prefix(5) ?? "nil")")
+        }
 
         do {
             try await coordinator.process(input, modelConfigs: savedConfigs)

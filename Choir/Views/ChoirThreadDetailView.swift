@@ -98,7 +98,7 @@ struct ChoirThreadDetailView: View {
             Text("Enter a new title for this thread")
         }
         .sheet(isPresented: $showModelConfig) {
-            ModelConfigView(thread: thread)
+            ModelConfigView()
         }
         .onDisappear {
             saveThread()

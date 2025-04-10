@@ -1,10 +1,6 @@
 import Foundation
 import SwiftUI
 
-
-import Foundation
-import SwiftUI
-
 // MARK: - Phase Enum
 enum Phase: String, CaseIterable, Identifiable, Codable {
     case action
@@ -61,17 +57,17 @@ extension Phase {
 
 // MARK: - ModelConfig
 struct ModelConfig: Codable, Equatable, Hashable {
-    let provider: String
-    let model: String
-    let temperature: Double?
-    let openaiApiKey: String?
-    let anthropicApiKey: String?
-    let googleApiKey: String?
-    let mistralApiKey: String?
-    let fireworksApiKey: String?
-    let cohereApiKey: String?
-    let openrouterApiKey: String?
-    let groqApiKey: String?
+    var provider: String
+    var model: String
+    var temperature: Double?
+    var openaiApiKey: String?
+    var anthropicApiKey: String?
+    var googleApiKey: String?
+    var mistralApiKey: String?
+    var fireworksApiKey: String?
+    var cohereApiKey: String?
+    var openrouterApiKey: String?
+    var groqApiKey: String?
 
     init(provider: String,
          model: String,

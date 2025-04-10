@@ -1,14 +1,16 @@
 import SwiftUI
 
 struct ModelConfigView: View {
-    // State to hold the global model configurations
-    @State private var currentConfigs: [Phase: ModelConfig] = [:]
     @Environment(\.dismiss) private var dismiss
 
-    // List of available providers and models
+    @State private var currentConfigs: [Phase: ModelConfig] = [:]
+    @State private var apiKeys: [String: String] = [:]
+    @State private var newModelProvider: String = "google"
+    @State private var newModelName: String = ""
+    @State private var showResetAlert = false
+
     private let providers = ["google", "openrouter", "anthropic", "groq", "openai"]
 
-    // Available models by provider - now a @State variable to include custom models
     @State private var dynamicModelsByProvider: [String: [String]] = [
         "google": ["gemini-2.0-flash-lite", "gemini-2.0-flash", "gemini-2.5-pro-exp-03-25"],
         "openrouter": ["ai21/jamba-1.6-mini", "openrouter/quasar-alpha", "mistralai/mixtral-8x7b"],
@@ -16,48 +18,6 @@ struct ModelConfigView: View {
         "groq": ["qwen-qwq-32b", "llama3-70b-8192", "mixtral-8x7b-32768"],
         "openai": ["gpt-4o-mini", "gpt-4o", "o3-mini"]
     ]
-
-    // Computed bindings for provider, model, temperature per phase
-    private func providerBinding(for phase: Phase) -> Binding<String> {
-        Binding<String>(
-            get: { currentConfigs[phase]?.provider ?? "google" },
-            set: { newProvider in
-                var config = currentConfigs[phase] ?? ModelConfig(provider: newProvider, model: "", temperature: 0.33)
-                config.provider = newProvider
-                currentConfigs[phase] = config
-            }
-        )
-    }
-
-    private func modelBinding(for phase: Phase) -> Binding<String> {
-        Binding<String>(
-            get: { currentConfigs[phase]?.model ?? "" },
-            set: { newModel in
-                var config = currentConfigs[phase] ?? ModelConfig(provider: "google", model: newModel, temperature: 0.33)
-                config.model = newModel
-                currentConfigs[phase] = config
-            }
-        )
-    }
-
-    private func temperatureBinding(for phase: Phase) -> Binding<Double> {
-        Binding<Double>(
-            get: { currentConfigs[phase]?.temperature ?? 0.33 },
-            set: { newTemp in
-                var config = currentConfigs[phase] ?? ModelConfig(provider: "google", model: "", temperature: newTemp)
-                config.temperature = newTemp
-                currentConfigs[phase] = config
-            }
-        )
-    }
-    @State private var apiKeys: [String: String] = [:] // Store API keys by provider name
-
-    // State for adding new custom model
-    @State private var newModelProvider: String = "google" // Default provider selection
-    @State private var newModelName: String = ""
-
-    // Reset flag
-    @State private var showResetAlert = false
 
     var body: some View {
         NavigationStack {
@@ -71,7 +31,6 @@ struct ModelConfigView: View {
 
                 ForEach(Phase.allCases) { phase in
                     Section(phase.description) {
-                        // Provider Picker
                         Picker("Provider", selection: providerBinding(for: phase)) {
                             ForEach(providers, id: \.self) { provider in
                                 Text(provider.capitalized).tag(provider)
@@ -79,10 +38,9 @@ struct ModelConfigView: View {
                         }
                         .pickerStyle(.menu)
 
-                        // Model Picker (dependent on selected provider, uses dynamic list)
                         Picker("Model", selection: modelBinding(for: phase)) {
-                            if let provider = selectedProviders[phase],
-                               let models = dynamicModelsByProvider[provider] { // Use dynamic list
+                            if let provider = currentConfigs[phase]?.provider,
+                               let models = dynamicModelsByProvider[provider] {
                                 ForEach(models, id: \.self) { model in
                                     Text(model).tag(model)
                                 }
@@ -90,7 +48,6 @@ struct ModelConfigView: View {
                         }
                         .pickerStyle(.menu)
 
-                        // Temperature Slider
                         VStack(alignment: .leading, spacing: 4) {
                             HStack {
                                 Text("Temperature")
@@ -98,13 +55,11 @@ struct ModelConfigView: View {
                                 Text(String(format: "%.2f", temperatureBinding(for: phase).wrappedValue))
                                     .foregroundColor(.secondary)
                             }
-
                             Slider(value: temperatureBinding(for: phase), in: 0...1, step: 0.01)
                         }
                     }
                 }
 
-                // Section for Adding Custom Models
                 Section("Add Custom Model") {
                     Picker("Provider", selection: $newModelProvider) {
                         ForEach(providers, id: \.self) { provider in
@@ -120,7 +75,6 @@ struct ModelConfigView: View {
                     .disabled(newModelName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 }
 
-                // Section for API Keys
                 Section("API Keys") {
                     Text("Enter API keys for the selected providers. Keys are stored locally and sent with each request.")
                         .font(.caption)
@@ -153,7 +107,6 @@ struct ModelConfigView: View {
                         dismiss()
                     }
                 }
-
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
                         saveChanges()
@@ -163,31 +116,11 @@ struct ModelConfigView: View {
             }
             .onAppear {
                 loadCustomModels()
+                currentConfigs = ModelConfigManager.shared.loadModelConfigs()
 
                 for provider in providers {
                     if let savedKey = UserDefaults.standard.string(forKey: "apiKey_\(provider)") {
                         apiKeys[provider] = savedKey
-                    }
-                }
-
-                // Load global configs
-                currentConfigs = ModelConfigManager.shared.loadModelConfigs()
-
-                // Initialize UI state from global configs
-                for phase in Phase.allCases {
-                    if let config = currentConfigs[phase] {
-                        selectedProviders[phase] = config.provider
-                        selectedModels[phase] = config.model
-                        selectedTemperatures[phase] = config.temperature ?? 0.33
-                        // Only load API keys from config if not already loaded from UserDefaults
-                        if apiKeys["google"] == nil || apiKeys["google"]!.isEmpty { apiKeys["google"] = config.googleApiKey ?? "" }
-                        if apiKeys["openai"] == nil || apiKeys["openai"]!.isEmpty { apiKeys["openai"] = config.openaiApiKey ?? "" }
-                        if apiKeys["anthropic"] == nil || apiKeys["anthropic"]!.isEmpty { apiKeys["anthropic"] = config.anthropicApiKey ?? "" }
-                        if apiKeys["mistral"] == nil || apiKeys["mistral"]!.isEmpty { apiKeys["mistral"] = config.mistralApiKey ?? "" }
-                        if apiKeys["fireworks"] == nil || apiKeys["fireworks"]!.isEmpty { apiKeys["fireworks"] = config.fireworksApiKey ?? "" }
-                        if apiKeys["cohere"] == nil || apiKeys["cohere"]!.isEmpty { apiKeys["cohere"] = config.cohereApiKey ?? "" }
-                        if apiKeys["openrouter"] == nil || apiKeys["openrouter"]!.isEmpty { apiKeys["openrouter"] = config.openrouterApiKey ?? "" }
-                        if apiKeys["groq"] == nil || apiKeys["groq"]!.isEmpty { apiKeys["groq"] = config.groqApiKey ?? "" }
                     }
                 }
             }
@@ -199,21 +132,45 @@ struct ModelConfigView: View {
             } message: {
                 Text("This will reset all model configurations to their default values.")
             }
-            // Autosave on any change to provider, model, or temperature selections
-            .onChange(of: selectedProviders) { _, _ in
-                saveChanges()
-            }
-            .onChange(of: selectedModels) { _, _ in
-                saveChanges()
-            }
-            .onChange(of: selectedTemperatures) { _, _ in
+            .onChange(of: currentConfigs) { _, _ in
                 saveChanges()
             }
         }
     }
 
+    private func providerBinding(for phase: Phase) -> Binding<String> {
+        Binding<String>(
+            get: { currentConfigs[phase]?.provider ?? "google" },
+            set: { newProvider in
+                var config = currentConfigs[phase] ?? ModelConfig(provider: newProvider, model: "", temperature: 0.33)
+                config.provider = newProvider
+                currentConfigs[phase] = config
+            }
+        )
+    }
 
-    // Create binding for API key input
+    private func modelBinding(for phase: Phase) -> Binding<String> {
+        Binding<String>(
+            get: { currentConfigs[phase]?.model ?? "" },
+            set: { newModel in
+                var config = currentConfigs[phase] ?? ModelConfig(provider: "google", model: newModel, temperature: 0.33)
+                config.model = newModel
+                currentConfigs[phase] = config
+            }
+        )
+    }
+
+    private func temperatureBinding(for phase: Phase) -> Binding<Double> {
+        Binding<Double>(
+            get: { currentConfigs[phase]?.temperature ?? 0.33 },
+            set: { newTemp in
+                var config = currentConfigs[phase] ?? ModelConfig(provider: "google", model: "", temperature: newTemp)
+                config.temperature = newTemp
+                currentConfigs[phase] = config
+            }
+        )
+    }
+
     private func apiKeyBinding(for provider: String) -> Binding<String> {
         Binding<String>(
             get: { apiKeys[provider] ?? "" },
@@ -221,9 +178,22 @@ struct ModelConfigView: View {
         )
     }
 
-    // Load custom models from UserDefaults and merge with defaults
+    private func saveCustomModel() {
+        let trimmedModelName = newModelName.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedModelName.isEmpty else { return }
+
+        let key = "customModels_\(newModelProvider)"
+        var currentCustomModels = UserDefaults.standard.stringArray(forKey: key) ?? []
+
+        if !currentCustomModels.contains(trimmedModelName) {
+            currentCustomModels.append(trimmedModelName)
+            UserDefaults.standard.set(currentCustomModels, forKey: key)
+            loadCustomModels()
+            newModelName = ""
+        }
+    }
+
     private func loadCustomModels() {
-        // Start with the default models
         var updatedModels = [
             "google": ["gemini-2.0-flash-lite", "gemini-2.0-flash", "gemini-2.5-pro-exp-03-25"],
             "openrouter": ["ai21/jamba-1.6-mini", "openrouter/quasar-alpha", "mistralai/mixtral-8x7b"],
@@ -235,11 +205,9 @@ struct ModelConfigView: View {
         for provider in providers {
             let key = "customModels_\(provider)"
             if let customModels = UserDefaults.standard.stringArray(forKey: key) {
-                // Ensure provider exists in the dictionary
                 if updatedModels[provider] == nil {
                     updatedModels[provider] = []
                 }
-                // Add custom models, avoiding duplicates
                 for model in customModels {
                     if !(updatedModels[provider]?.contains(model) ?? false) {
                         updatedModels[provider]?.append(model)
@@ -247,120 +215,41 @@ struct ModelConfigView: View {
                 }
             }
         }
-        // Update the state variable
         dynamicModelsByProvider = updatedModels
     }
 
-    // Save custom model name to UserDefaults
-    private func saveCustomModel() {
-        let trimmedModelName = newModelName.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmedModelName.isEmpty else { return }
-
-        let key = "customModels_\(newModelProvider)"
-        var currentCustomModels = UserDefaults.standard.stringArray(forKey: key) ?? []
-
-        if !currentCustomModels.contains(trimmedModelName) {
-            currentCustomModels.append(trimmedModelName)
-            UserDefaults.standard.set(currentCustomModels, forKey: key)
-            print("Saved custom model '\(trimmedModelName)' for provider \(newModelProvider)")
-
-            // Update the state to reflect the new model immediately
-            loadCustomModels()
-
-            // Clear the input field
-            newModelName = ""
-        } else {
-            print("Custom model '\(trimmedModelName)' already exists for provider \(newModelProvider)")
-        }
-    }
-
-    // Save changes to thread
     private func saveChanges() {
         for phase in Phase.allCases {
-            if let provider = selectedProviders[phase],
-               let model = selectedModels[phase] {
-                let temperature = selectedTemperatures[phase]
-
-                // Create new ModelConfig including API keys
-                let newConfig = ModelConfig(
-                    provider: provider,
-                    model: model,
-                    temperature: temperature,
-                    openaiApiKey: apiKeys["openai"],
-                    anthropicApiKey: apiKeys["anthropic"],
-                    googleApiKey: apiKeys["google"],
-                    mistralApiKey: apiKeys["mistral"],
-                    fireworksApiKey: apiKeys["fireworks"],
-                    cohereApiKey: apiKeys["cohere"],
-                    openrouterApiKey: apiKeys["openrouter"],
-                    groqApiKey: apiKeys["groq"]
-                )
-
-                // Update the thread's model config for this phase
-                thread.modelConfigs[phase] = newConfig
+            if var config = currentConfigs[phase] {
+                config.openaiApiKey = apiKeys["openai"]
+                config.anthropicApiKey = apiKeys["anthropic"]
+                config.googleApiKey = apiKeys["google"]
+                config.mistralApiKey = apiKeys["mistral"]
+                config.fireworksApiKey = apiKeys["fireworks"]
+                config.cohereApiKey = apiKeys["cohere"]
+                config.openrouterApiKey = apiKeys["openrouter"]
+                config.groqApiKey = apiKeys["groq"]
+                currentConfigs[phase] = config
             }
         }
+        ModelConfigManager.shared.saveModelConfigs(currentConfigs)
 
-        // Save the entire active configuration globally to UserDefaults
-        let globalConfigKey = "globalActiveModelConfig"
-        if let encodedConfig = try? JSONEncoder().encode(thread.modelConfigs) {
-            UserDefaults.standard.set(encodedConfig, forKey: globalConfigKey)
-            print("Saved global active configuration")
-        } else {
-            print("Error encoding global active configuration")
-        }
-
-        // Save entered API keys to UserDefaults for testing
         for (provider, key) in apiKeys {
             if !key.isEmpty {
                 UserDefaults.standard.set(key, forKey: "apiKey_\(provider)")
-                print("Saved API key for \(provider) to UserDefaults")
             } else {
-                // Remove key from UserDefaults if it's empty
                 UserDefaults.standard.removeObject(forKey: "apiKey_\(provider)")
             }
         }
-
-        // Save thread to persistent storage
-        Task {
-            // Run on a background thread to avoid UI blocking
-            await Task.detached {
-                ThreadPersistenceService.shared.saveThread(thread)
-                print("Saved thread to persistent storage after model config update")
-            }.value
-        }
     }
 
-    // Reset to defaults
     private func resetToDefaults() {
-        let defaultConfigs: [Phase: ModelConfig] = [
-            .action: ModelConfig(provider: "google", model: "gemini-2.0-flash-lite", temperature: 0.33),
-            .experienceVectors: ModelConfig(provider: "openrouter", model: "ai21/jamba-1.6-mini", temperature: 0.33),
-            .experienceWeb: ModelConfig(provider: "openrouter", model: "openrouter/quasar-alpha", temperature: 0.33),
-            .intention: ModelConfig(provider: "google", model: "gemini-2.0-flash", temperature: 0.33),
-            .observation: ModelConfig(provider: "groq", model: "qwen-qwq-32b", temperature: 0.33),
-            .understanding: ModelConfig(provider: "openrouter", model: "openrouter/quasar-alpha", temperature: 0.33),
-            .yield: ModelConfig(provider: "google", model: "gemini-2.5-pro-exp-03-25", temperature: 0.33)
-        ]
-
-        // Update selected providers, models, and temperatures
-        for phase in Phase.allCases {
-            if let config = defaultConfigs[phase] {
-                selectedProviders[phase] = config.provider
-                selectedModels[phase] = config.model
-                selectedTemperatures[phase] = config.temperature ?? 0.33
-            }
-        }
-
-        // Clear API keys in the view state
+        currentConfigs = ModelConfigManager.shared.loadModelConfigs()
         apiKeys.removeAll()
-
-        // Update thread with defaults (which now include nil for API keys)
-        thread.modelConfigs = defaultConfigs
+        saveChanges()
     }
 }
 
-// Preview
 #Preview {
     ModelConfigView()
 }
