@@ -75,7 +75,7 @@ struct PostchainView: View {
             let cardWidth = geometry.size.width * 0.98 // Adjust card width slightly
             let totalWidth = geometry.size.width
 
-            ZStack { // Main ZStack filling the GeometryReader
+            ZStack { // Main ZStack containing only the card stack
 
                 // --- Card Stack ---
                 ZStack {
@@ -109,41 +109,31 @@ struct PostchainView: View {
                         }
                 )
 
-                // --- Tap Area Overlay ---
-                // This HStack now sits directly in the main ZStack and fills its bounds
-                HStack(spacing: 0) {
-                    // Left Tap Area (Flexible Width)
-                    Color.clear // Takes up flexible space
-                        .contentShape(Rectangle()) // Make it tappable
-                        .onTapGesture {
-                            print("LEFT TAP AREA TAPPED") // Add specific debug
-                            handlePageTap(direction: .previous, size: geometry.size)
-                        }
-
-                    // Spacer defining the non-tappable central area
-                    // Adjust multiplier (e.g., 0.8) if needed to fine-tune the central zone
-                    Spacer()
-                        .frame(width: cardWidth * 0.8) // 80% of card width is non-tappable for pages
-
-                    // Right Tap Area (Flexible Width)
-                    Color.clear // Takes up flexible space
-                        .contentShape(Rectangle()) // Make it tappable
-                        .onTapGesture {
-                            print("RIGHT TAP AREA TAPPED") // Add specific debug
-                            handlePageTap(direction: .next, size: geometry.size)
-                        }
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity) // Make HStack fill the ZStack
-
-                // Note: No zIndex needed here as it's placed after the card stack
-                // Tap gestures on Color.clear should not interfere with DragGesture
-                // on the ZStack underneath unless the drag starts *exactly* on the tap area.
-                // Content interaction within PhaseCard might be blocked by this overlay.
-                // If that's an issue, more complex gesture handling might be needed.
-
-            } // End Main ZStack
-        }
-        .onAppear(perform: handleOnAppear) // Revert to original onAppear
+            } // End Main ZStack (containing only cards)
+            .overlay(alignment: .leading) { // Left Tap Area Overlay
+                // Calculate the width for the tap area (space outside the central non-tappable zone)
+                let tapAreaWidth = max(0, (geometry.size.width - (cardWidth * 0.33)) / 2)
+                Color.red // Use clear for production, Color.red for debugging
+                    .frame(width: tapAreaWidth)
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        print("LEFT TAP AREA TAPPED")
+                        handlePageTap(direction: .previous, size: geometry.size)
+                    }
+            }
+            .overlay(alignment: .trailing) { // Right Tap Area Overlay
+                // Calculate the width for the tap area
+                let tapAreaWidth = max(0, (geometry.size.width - (cardWidth * 0.33)) / 2)
+                Color.red // Use clear for production, Color.red for debugging
+                    .frame(width: tapAreaWidth)
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        print("RIGHT TAP AREA TAPPED")
+                        handlePageTap(direction: .next, size: geometry.size)
+                    }
+            }
+        } // End GeometryReader
+        .onAppear(perform: handleOnAppear) // Apply .onAppear to GeometryReader's content
         // Removed onChange(of: geometry.size)
         .id("postchain_view_\(message.id)_\(viewId)") // Stable ID for the view itself
         .frame(maxHeight: .infinity)
@@ -158,11 +148,11 @@ struct PostchainView: View {
         }
         // Fallback: If processing globally and this phase has no content/results yet
         if isProcessing {
-             let phaseContent = message.getPhaseContent(phase)
-             let hasTextContent = !phaseContent.isEmpty
-             let hasVectorResults = (phase == .experienceVectors && !message.vectorSearchResults.isEmpty)
-             let hasWebResults = (phase == .experienceWeb && !message.webSearchResults.isEmpty)
-             return !(hasTextContent || hasVectorResults || hasWebResults)
+            let phaseContent = message.getPhaseContent(phase)
+            let hasTextContent = !phaseContent.isEmpty
+            let hasVectorResults = (phase == .experienceVectors && !message.vectorSearchResults.isEmpty)
+            let hasWebResults = (phase == .experienceWeb && !message.webSearchResults.isEmpty)
+            return !(hasTextContent || hasVectorResults || hasWebResults)
         }
         return false
     }
@@ -208,13 +198,13 @@ struct PostchainView: View {
                 } else {
                     viewModel.updateSelectedPhase(for: message, phase: availablePhases.first ?? .action)
                 }
-               // print("PostchainView: Initially selected phase: \(selectedPhase)") // Reduced logging
-             } else {
+                // print("PostchainView: Initially selected phase: \(selectedPhase)") // Reduced logging
+            } else {
                 // print("PostchainView: Keeping current selection on appear: \(selectedPhase)") // Reduced logging
-             }
-         } else {
+            }
+        } else {
             // print("PostchainView: Reappeared, keeping selection: \(selectedPhase)") // Reduced logging
-         }
+        }
     }
 
     private func calculateOffset(for phase: Phase, cardWidth: CGFloat, totalWidth: CGFloat) -> CGFloat {
@@ -247,154 +237,154 @@ struct PostchainView: View {
         // Make selected card fully opaque, fade out others more quickly
         return indexDifference == 0 ? 1.0 : max(0, 0.6 - Double(indexDifference) * 0.3)
     } // Closing brace for calculateOpacity
-// Removed handleTap and calculateTotalPages functions
+    // Removed handleTap and calculateTotalPages functions
 
-private enum PageTapDirection { case previous, next }
-private enum SwipeDirection { case next, previous } // Keep SwipeDirection for switchToPhase
+    private enum PageTapDirection { case previous, next }
+    private enum SwipeDirection { case next, previous } // Keep SwipeDirection for switchToPhase
 
-private func handlePageTap(direction: PageTapDirection, size: CGSize) {
-    guard size != .zero else {
-        print("Error: Size is zero, cannot calculate pages.")
-        return
-    }
-    let phase = selectedPhase // Get currently selected phase
-    let currentPage = message.phaseCurrentPage[phase] ?? 0
+    private func handlePageTap(direction: PageTapDirection, size: CGSize) {
+        guard size != .zero else {
+            print("Error: Size is zero, cannot calculate pages.")
+            return
+        }
+        let phase = selectedPhase // Get currently selected phase
+        let currentPage = message.phaseCurrentPage[phase] ?? 0
 
-    // Calculate totalPages accurately using PaginatedMarkdownView's logic
-    let content = message.getPhaseContent(phase)
-    // Note: Accessing search results directly here. Ensure Message model provides these.
-    // If errors occur, check ConversationModels.swift for VectorSearchResult/SearchResult definitions.
-    let vectorResults = message.vectorSearchResults.map { UnifiedSearchResult.vector($0) }
-    let webResults = message.webSearchResults.map { UnifiedSearchResult.web($0) }
-    let searchResults = vectorResults + webResults
-    let totalPages = calculateAccurateTotalPages(markdownText: content, searchResults: searchResults, size: size)
+        // Calculate totalPages accurately using PaginatedMarkdownView's logic
+        let content = message.getPhaseContent(phase)
+        // Note: Accessing search results directly here. Ensure Message model provides these.
+        // If errors occur, check ConversationModels.swift for VectorSearchResult/SearchResult definitions.
+        let vectorResults = message.vectorSearchResults.map { UnifiedSearchResult.vector($0) }
+        let webResults = message.webSearchResults.map { UnifiedSearchResult.web($0) }
+        let searchResults = vectorResults + webResults
+        let totalPages = calculateAccurateTotalPages(markdownText: content, searchResults: searchResults, size: size)
 
-    print("handlePageTap: Phase=\(phase), CurrentPage=\(currentPage + 1), TotalPages=\(totalPages), Direction=\(direction)") // Debug
+        print("handlePageTap: Phase=\(phase), CurrentPage=\(currentPage + 1), TotalPages=\(totalPages), Direction=\(direction)") // Debug
 
-    withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-        if direction == .previous {
-            if currentPage > 0 {
-                message.phaseCurrentPage[phase] = currentPage - 1
-                print("Tapped Left: Now Page \(currentPage)") // Debug
-            } else {
-                print("Tapped Left: Switching Phase Previous") // Debug
-                switchToPhase(direction: .previous) // Existing function
-            }
-        } else { // .next
-            if currentPage < totalPages - 1 {
-                message.phaseCurrentPage[phase] = currentPage + 1
-                print("Tapped Right: Now Page \(currentPage + 2)") // Debug
-            } else {
-                print("Tapped Right: Switching Phase Next") // Debug
-                switchToPhase(direction: .next) // Existing function
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+            if direction == .previous {
+                if currentPage > 0 {
+                    message.phaseCurrentPage[phase] = currentPage - 1
+                    print("Tapped Left: Now Page \(currentPage)") // Debug
+                } else {
+                    print("Tapped Left: Switching Phase Previous") // Debug
+                    switchToPhase(direction: .previous) // Existing function
+                }
+            } else { // .next
+                if currentPage < totalPages - 1 {
+                    message.phaseCurrentPage[phase] = currentPage + 1
+                    print("Tapped Right: Now Page \(currentPage + 2)") // Debug
+                } else {
+                    print("Tapped Right: Switching Phase Next") // Debug
+                    switchToPhase(direction: .next) // Existing function
+                }
             }
         }
     }
-}
 
-// Keep existing switchToPhase function, it's still needed for phase boundary logic
-private func switchToPhase(direction: SwipeDirection) {
-    guard let currentIndex = availablePhases.firstIndex(of: selectedPhase) else { return }
+    // Keep existing switchToPhase function, it's still needed for phase boundary logic
+    private func switchToPhase(direction: SwipeDirection) {
+        guard let currentIndex = availablePhases.firstIndex(of: selectedPhase) else { return }
 
-    var targetIndex = currentIndex
-    if direction == .next {
-        targetIndex = min(currentIndex + 1, availablePhases.count - 1)
-    } else { // .previous
-        targetIndex = max(currentIndex - 1, 0)
-    }
-
-    if targetIndex != currentIndex {
-        let newPhase = availablePhases[targetIndex]
-        print("switchToPhase: Moving from \(selectedPhase) to \(newPhase)")
-
-        // --- START CRITICAL RESET LOGIC ---
-        // Reset the current page for the NEW phase
+        var targetIndex = currentIndex
         if direction == .next {
-            message.phaseCurrentPage[newPhase] = 0 // Reset to first page
-            print("switchToPhase: Reset page for \(newPhase) to 0")
-        } else { // direction == .previous
-            // Reset to last page - Requires calculating total pages for the *new* phase
-            // We need the size here too! This might be tricky.
-            // Simplification: Always reset to 0 when switching phases? Or pass size?
-            // Let's try resetting to 0 for now for simplicity, can refine later if needed.
-            // TODO: Revisit resetting to last page if required.
-            message.phaseCurrentPage[newPhase] = 0 // Simplified: Reset to first page
-            print("switchToPhase: Reset page for \(newPhase) to 0 (Simplified)")
-
-            // --- Original logic requiring size ---
-            // let phaseContent = message.getPhaseContent(newPhase)
-            // let vectorResults = message.vectorSearchResults.map { UnifiedSearchResult.vector($0) }
-            // let webResults = message.webSearchResults.map { UnifiedSearchResult.web($0) }
-            // let searchResults = vectorResults + webResults
-            // let totalPagesForNewPhase = calculateAccurateTotalPages(markdownText: phaseContent, searchResults: searchResults, size: latestAvailableSize) // Needs size!
-            // message.phaseCurrentPage[newPhase] = max(0, totalPagesForNewPhase - 1)
-            // print("switchToPhase: Reset page for \(newPhase) to \(message.phaseCurrentPage[newPhase] ?? -1)")
-            // --- End Original logic ---
+            targetIndex = min(currentIndex + 1, availablePhases.count - 1)
+        } else { // .previous
+            targetIndex = max(currentIndex - 1, 0)
         }
-        // --- END CRITICAL RESET LOGIC ---
 
-        viewModel.updateSelectedPhase(for: message, phase: newPhase)
+        if targetIndex != currentIndex {
+            let newPhase = availablePhases[targetIndex]
+            print("switchToPhase: Moving from \(selectedPhase) to \(newPhase)")
+
+            // --- START CRITICAL RESET LOGIC ---
+            // Reset the current page for the NEW phase
+            if direction == .next {
+                message.phaseCurrentPage[newPhase] = 0 // Reset to first page
+                print("switchToPhase: Reset page for \(newPhase) to 0")
+            } else { // direction == .previous
+                // Reset to last page - Requires calculating total pages for the *new* phase
+                // We need the size here too! This might be tricky.
+                // Simplification: Always reset to 0 when switching phases? Or pass size?
+                // Let's try resetting to 0 for now for simplicity, can refine later if needed.
+                // TODO: Revisit resetting to last page if required.
+                message.phaseCurrentPage[newPhase] = 0 // Simplified: Reset to first page
+                print("switchToPhase: Reset page for \(newPhase) to 0 (Simplified)")
+
+                // --- Original logic requiring size ---
+                // let phaseContent = message.getPhaseContent(newPhase)
+                // let vectorResults = message.vectorSearchResults.map { UnifiedSearchResult.vector($0) }
+                // let webResults = message.webSearchResults.map { UnifiedSearchResult.web($0) }
+                // let searchResults = vectorResults + webResults
+                // let totalPagesForNewPhase = calculateAccurateTotalPages(markdownText: phaseContent, searchResults: searchResults, size: latestAvailableSize) // Needs size!
+                // message.phaseCurrentPage[newPhase] = max(0, totalPagesForNewPhase - 1)
+                // print("switchToPhase: Reset page for \(newPhase) to \(message.phaseCurrentPage[newPhase] ?? -1)")
+                // --- End Original logic ---
+            }
+            // --- END CRITICAL RESET LOGIC ---
+
+            viewModel.updateSelectedPhase(for: message, phase: newPhase)
+        }
     }
-}
 
 
-// Helper function to calculate total pages accurately (adapting PaginatedMarkdownView logic)
-private func calculateAccurateTotalPages(markdownText: String, searchResults: [UnifiedSearchResult], size: CGSize) -> Int {
-     guard size.height > 0, size.width > 0 else {
-         print("Warning: calculateAccurateTotalPages called with zero size.")
-         return 1
-     }
+    // Helper function to calculate total pages accurately (adapting PaginatedMarkdownView logic)
+    private func calculateAccurateTotalPages(markdownText: String, searchResults: [UnifiedSearchResult], size: CGSize) -> Int {
+        guard size.height > 0, size.width > 0 else {
+            print("Warning: calculateAccurateTotalPages called with zero size.")
+            return 1
+        }
 
-     // Logic adapted from PaginatedMarkdownView
-     // Note: Ensure TextMeasurer is accessible or reimplement its logic if needed.
-     // Assuming TextMeasurer is available globally or via import.
-     let measurer = TextMeasurer(sizeCategory: .medium) // Adjust sizeCategory if needed
-     let textHeight = size.height - 40 // Matches PaginatedMarkdownView padding estimate
-     var textPagesCount = 0
-     var remainingText = markdownText
+        // Logic adapted from PaginatedMarkdownView
+        // Note: Ensure TextMeasurer is accessible or reimplement its logic if needed.
+        // Assuming TextMeasurer is available globally or via import.
+        let measurer = TextMeasurer(sizeCategory: .medium) // Adjust sizeCategory if needed
+        let textHeight = size.height - 40 // Matches PaginatedMarkdownView padding estimate
+        var textPagesCount = 0
+        var remainingText = markdownText
 
-     if !markdownText.isEmpty {
-         while !remainingText.isEmpty {
-             let pageText = measurer.fitTextToHeight(
-                 text: remainingText,
-                 width: size.width - 8, // Matches PaginatedMarkdownView padding estimate
-                 height: textHeight
-             )
-             // Handle potential infinite loop if fitTextToHeight returns empty string for non-empty input
-             if pageText.isEmpty && !remainingText.isEmpty {
-                 print("Warning: TextMeasurer returned empty page for non-empty text. Breaking loop.")
-                 textPagesCount += 1 // Count the remaining text as one page
-                 break
-             }
-             textPagesCount += 1
-             if pageText.count < remainingText.count {
-                 let index = remainingText.index(remainingText.startIndex, offsetBy: pageText.count)
-                 remainingText = String(remainingText[index...])
-             } else {
-                 remainingText = ""
-             }
-         }
-     } else {
-         textPagesCount = 0 // No text pages if markdown is empty
-     }
+        if !markdownText.isEmpty {
+            while !remainingText.isEmpty {
+                let pageText = measurer.fitTextToHeight(
+                    text: remainingText,
+                    width: size.width - 8, // Matches PaginatedMarkdownView padding estimate
+                    height: textHeight
+                )
+                // Handle potential infinite loop if fitTextToHeight returns empty string for non-empty input
+                if pageText.isEmpty && !remainingText.isEmpty {
+                    print("Warning: TextMeasurer returned empty page for non-empty text. Breaking loop.")
+                    textPagesCount += 1 // Count the remaining text as one page
+                    break
+                }
+                textPagesCount += 1
+                if pageText.count < remainingText.count {
+                    let index = remainingText.index(remainingText.startIndex, offsetBy: pageText.count)
+                    remainingText = String(remainingText[index...])
+                } else {
+                    remainingText = ""
+                }
+            }
+        } else {
+            textPagesCount = 0 // No text pages if markdown is empty
+        }
 
 
-     // Chunk results (Matches PaginatedMarkdownView logic)
-     let itemsPerPage = 5 // Assuming 5 results per page, match PaginatedMarkdownView
-     // Use ceil division to potentially fix type inference error
-     let resultPagesCount = searchResults.isEmpty ? 0 : Int(ceil(Double(searchResults.count) / Double(itemsPerPage)))
+        // Chunk results (Matches PaginatedMarkdownView logic)
+        let itemsPerPage = 5 // Assuming 5 results per page, match PaginatedMarkdownView
+        // Use ceil division to potentially fix type inference error
+        let resultPagesCount = searchResults.isEmpty ? 0 : Int(ceil(Double(searchResults.count) / Double(itemsPerPage)))
 
-     let total = textPagesCount + resultPagesCount
-     return max(1, total) // Ensure at least 1 page
- }
-#Preview {
-    PostchainView(
-        message: Message(content: "Preview", isUser: false),
-        isProcessing: false,
-        viewModel: PostchainViewModel(coordinator: RESTPostchainCoordinator()),
-        localThreadIDs: []
-    )
-    .frame(height: 400)
-    .padding()
-}
+        let total = textPagesCount + resultPagesCount
+        return max(1, total) // Ensure at least 1 page
+    }
+    #Preview {
+        PostchainView(
+            message: Message(content: "Preview", isUser: false),
+            isProcessing: false,
+            viewModel: PostchainViewModel(coordinator: RESTPostchainCoordinator()),
+            localThreadIDs: []
+        )
+        .frame(height: 400)
+        .padding()
+    }
 }
