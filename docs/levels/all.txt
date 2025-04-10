@@ -34,7 +34,10 @@ tree.md
 │   │   └── RESTPostchainCoordinator.swift
 │   ├── Info.plist
 │   ├── Models
-│   │   └── ChoirModels.swift
+│   │   ├── APITypes.swift
+│   │   ├── AnyCodable.swift
+│   │   ├── ConversationModels.swift
+│   │   └── SearchModels.swift
 │   ├── Networking
 │   │   └── RESTPostchainAPIClient.swift
 │   ├── Preview Content
@@ -209,7 +212,8 @@ tree.md
 │   ├── features
 │   │   ├── automatic_thread_titles.md
 │   │   ├── close_the_loop.md
-│   │   └── deep_links.md
+│   │   ├── deep_links.md
+│   │   └── deep_links_markdown.md
 │   ├── fqaho_simulation.md
 │   ├── fqaho_visualization.md
 │   ├── issues
@@ -253,7 +257,7 @@ tree.md
     ├── test_api.sh
     └── test_postchain_multiturn.sh
 
-63 directories, 175 files
+63 directories, 179 files
 
 === File: docs/CHANGELOG.md ===
 
