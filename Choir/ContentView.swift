@@ -84,14 +84,19 @@ struct ContentView: View {
         .onAppear {
             // Load saved threads
             loadThreads()
-            
+
             // Create a default thread if none exists
             if threads.isEmpty {
                 createNewChoirThread()
             }
         }
+        .onChange(of: selectedChoirThread) { _, newThread in
+            guard let thread = newThread else { return }
+            thread.lastOpened = Date()
+            threads.sort { $0.lastOpened > $1.lastOpened }
+        }
     }
-    
+
     /// Load all threads from persistent storage
     private func loadThreads() {
         let loadedThreads = ThreadPersistenceService.shared.loadAllThreads()
@@ -106,11 +111,11 @@ struct ContentView: View {
         let thread = ChoirThread() // Uses auto-generated title
         threads.append(thread)
         selectedChoirThread = thread
-        
+
         // Save the new thread
         ThreadPersistenceService.shared.saveThread(thread)
     }
-    
+
     /// Delete a thread
     private func deleteThread(_ thread: ChoirThread) {
         // Remove from UI
@@ -118,7 +123,7 @@ struct ContentView: View {
             selectedChoirThread = threads.first(where: { $0.id != thread.id })
         }
         threads.removeAll(where: { $0.id == thread.id })
-        
+
         // Delete from storage
         ThreadPersistenceService.shared.deleteThread(threadId: thread.id)
     }
@@ -150,7 +155,7 @@ struct ChoirThreadRow: View {
                         isEditingTitle = true
                     }
             }
-            
+
             Text("\(thread.messages.count) messages")
                 .font(.caption)
                 .foregroundStyle(.secondary)

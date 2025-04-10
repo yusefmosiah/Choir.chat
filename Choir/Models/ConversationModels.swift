@@ -153,6 +153,7 @@ struct PhaseResult: Codable, Equatable, Hashable {
 class ChoirThread: ObservableObject, Identifiable, Hashable {
     let id: UUID
     @Published var title: String
+    @Published var lastOpened: Date = Date()
     @Published var messages: [Message] = []
     @Published var modelConfigs: [Phase: ModelConfig] = [
         .action: ModelConfig(provider: "google", model: "gemini-2.0-flash-lite"),
