@@ -212,6 +212,7 @@ tree.md
 │   ├── features
 │   │   ├── automatic_thread_titles.md
 │   │   ├── close_the_loop.md
+│   │   ├── dashboard.md
 │   │   ├── deep_links.md
 │   │   ├── deep_links_markdown.md
 │   │   ├── unified_navigation.md
@@ -259,7 +260,7 @@ tree.md
     ├── test_api.sh
     └── test_postchain_multiturn.sh
 
-63 directories, 181 files
+63 directories, 182 files
 
 === File: docs/CHANGELOG.md ===
 

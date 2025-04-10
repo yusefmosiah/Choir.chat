@@ -2,7 +2,16 @@
 
 ---
 
-## Current Focus: Unified Markdown + Deep Linking + Simplified Navigation
+## Critical Focus
+
+- **Unified Markdown rendering** for all phase content.
+- **Deep links embedded in Markdown**.
+- **Deep links open modal previews**, not raw jumps.
+- **Pagination** for reading flow.
+- **Tap to turn page, swipe to switch phase**.
+- **Remove pagination controls UI**.
+- **Respect privacy and access**.
+- **Prepare for thread contracts, rewards, and sharing**.
 
 ---
 
@@ -12,9 +21,10 @@
 - Split 700+ line `ChoirModels.swift` into smaller files
 
 ### ✅ Unified Markdown Rendering
-- Convert all phase content (text, vectors, web) to Markdown
+- Convert all phase content to Markdown
 - Inject deep links inside Markdown
 - Render with MarkdownUI
+- Customize MarkdownUI theme (normalize headings)
 
 ### 🔲 Merge Pagination Views
 - Replace `PaginatedTextView` and `UnifiedPaginatedView` with one `PaginatedMarkdownView`
@@ -27,8 +37,9 @@
 
 ### 🔲 Deep Linking
 - Use `.onOpenURL` to intercept all links
-- Open internal deep links (e.g., `choir://thread/...`)
-- Open external URLs in Safari
+- Open **modal previews** for deep links
+- Avoid deep linking into arbitrary thread positions
+- Navigate to thread start or summary if permitted
 
 ### 🔲 Rewards & Token Integration
 - Connect to Sui blockchain
@@ -57,7 +68,7 @@
 
 1. Merge pagination views
 2. Finalize tap/drag navigation
-3. Deep linking polish
+3. Implement modal previews for deep links
 4. Shift focus to rewards + tokens
 
 ---
