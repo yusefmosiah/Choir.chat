@@ -53,7 +53,6 @@ struct SearchResultListView: View {
     var onNavigateToNextPhase: (() -> Void)?
 
     // Environment
-    @Environment(\.openURL) var openURL
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) { // No spacing for seamless list
@@ -74,7 +73,7 @@ struct SearchResultListView: View {
                     case .vector(let vectorResult):
                         VectorResultCard(result: vectorResult, localThreadIDs: localThreadIDs)
                     case .web(let webResult):
-                        WebResultCard(result: webResult, openURL: openURL)
+                        WebResultCard(result: webResult)
                     }
                 }
             }
@@ -160,7 +159,6 @@ struct VectorResultCard: View {
 
 struct WebResultCard: View {
     let result: SearchResult
-    let openURL: OpenURLAction // Pass openURL from environment
 
     var body: some View {
         VStack(alignment: .leading, spacing: 5) {
@@ -175,7 +173,7 @@ struct WebResultCard: View {
 
             if let url = URL(string: result.url) {
                 Button {
-                    openURL(url)
+                    UIApplication.shared.open(url)
                 } label: {
                     Text(result.url)
                         .font(.caption)

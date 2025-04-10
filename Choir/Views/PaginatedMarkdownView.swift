@@ -103,7 +103,7 @@ struct PaginatedMarkdownView: View {
         case .vector(let vectorResult):
             VectorResultCard(result: vectorResult, localThreadIDs: [])
         case .web(let webResult):
-            WebResultCard(result: webResult, openURL: OpenURLAction { _ in .systemAction })
+            WebResultCard(result: webResult)
         }
     }
 
