@@ -258,17 +258,16 @@ tree.md
 │   ├── post_chain0.ipynb
 │   └── vowel_loop3.ipynb
 ├── render.yaml
-├── scripts
-│   ├── generate_provider_reports.sh
-│   ├── generate_quick_search_report.sh
-│   ├── generate_search_report.sh
-│   ├── generate_single_provider_report.sh
-│   ├── sources_displaying.sh
-│   ├── test_api.sh
-│   └── test_postchain_multiturn.sh
-└── tap_area_debugging.md
+└── scripts
+    ├── generate_provider_reports.sh
+    ├── generate_quick_search_report.sh
+    ├── generate_search_report.sh
+    ├── generate_single_provider_report.sh
+    ├── sources_displaying.sh
+    ├── test_api.sh
+    └── test_postchain_multiturn.sh
 
-63 directories, 190 files
+63 directories, 189 files
 
 === File: docs/CHANGELOG.md ===
 
