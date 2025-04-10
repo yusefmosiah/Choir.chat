@@ -1,37 +1,30 @@
-# Unified Tap and Drag Navigation — Implementation Plan (Simplified)
+# Unified Navigation Implementation with translucent modal Deep Link Previews
 
 ---
 
 ## Goal
 
-Replace tap-to-select-phase with **tap-to-turn-page**, while keeping drag-to-switch-phase.
+Enable seamless navigation of **paginated Markdown content** with **embedded deep links** that open **translucent modal previews**.
 
 ---
 
-## Current Gesture Summary
+## Key Points
 
-- `.onTapGesture` on each phase card **selects that phase**.
-- `.gesture(DragGesture())` on container **switches phases**.
-
----
-
-## New Gesture Design
-
-| Gesture | When | Action |
-|---------|-------|--------|
-| **Drag Left/Right** | Always | Switch phase |
-| **Tap Right Edge** | Not last page | Next page |
-| **Tap Right Edge** | Last page | Next phase, page 0 |
-| **Tap Left Edge** | Not first page | Previous page |
-| **Tap Left Edge** | First page | Previous phase, last page |
+- **All phase content** is **Markdown**.
+- **Pagination** is applied to this Markdown.
+- **Navigation** is:
+  - **Tap** to turn pages.
+  - **Swipe** to switch phases.
+- **Deep links** open **translucent modal overlays** with previews, not raw jumps.
+- **No inline expansion** inside paginated content.
+- **Remove** separate pagination controls UI.
 
 ---
 
-## Simplified Implementation Steps
+## Implementation Steps
 
-### 1. **Keep** the existing `.onTapGesture` on phase cards.
-
-### 2. **Replace** its body with:
+1. **Keep** the existing `.onTapGesture` on phase cards.
+2. **Replace** its body with:
 
 ```swift
 if currentPage < totalPages - 1 {
@@ -41,7 +34,7 @@ if currentPage < totalPages - 1 {
 }
 ```
 
-### 3. **Add** a `.simultaneousGesture` or separate `.onTapGesture` on the **left edge** of the selected phase card:
+3. **Add** a `.simultaneousGesture` or separate `.onTapGesture` on the **left edge**:
 
 ```swift
 if currentPage > 0 {
@@ -51,42 +44,15 @@ if currentPage > 0 {
 }
 ```
 
-### 4. **Keep drag gesture** for phase switching.
-
-### 5. **Remove page controls UI**
-
-- Remove bottom pagination bar.
-- Navigation is now **only** via taps and drags.
-
----
-
-## Diagram
-
-```mermaid
-flowchart LR
-    subgraph Current Phase Card
-        A[Page 1] -->|tap right| B[Page 2]
-        B -->|tap right| C[Page 3]
-        C -->|tap right on last page| D[Next Phase, Page 1]
-        A -->|tap left on first page| E[Prev Phase, Last Page]
-    end
-
-    A <-->|tap left| B
-    B <-->|tap left| C
-```
-
----
-
-## Benefits
-
-- **Minimal code changes**.
-- **No extra overlay views needed**.
-- **Intuitive**: tap to advance, swipe to switch phase.
-- **Seamless**: tap through all pages and phases without UI clutter.
-- **Simpler UI**: fewer controls, more content space.
+4. **Keep drag gestures** for phase switching.
+5. **Remove** pagination controls at the bottom.
+6. **Render all content** as paginated Markdown.
+7. **Intercept link taps** with `.onOpenURL`:
+   - **Show translucent modal preview** of linked content.
+   - Optionally, allow navigation to thread start or summary if permitted.
 
 ---
 
 ## Summary
 
-This plan **reuses** the existing tap gesture, replacing its logic to turn pages first, then switch phases at page boundaries. It simplifies implementation while improving the user experience.
+Navigation is tap-to-page, swipe-to-phase, with **translucent modal previews** for deep links, respecting privacy and context.

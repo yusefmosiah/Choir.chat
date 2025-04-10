@@ -1,81 +1,45 @@
-# Deep Linking Vector and Web Search Results
+# Deep Linking with Privacy and Context in Mind
+
+---
 
 ## Overview
 
-This document outlines the plan to enable deep linking of vector search results to threads, and inline linking of web search results, within the Choir PostChain workflow.
+- **Deep linking inside phase content** is **embedded as Markdown links**.
+- **Tapping a link** **does not** jump to the middle of a thread.
+- Instead, it **opens a translucent modal preview** of the linked content.
+- **Deep linking to arbitrary thread positions is avoided** for privacy, context, and UX reasons.
 
 ---
 
-## Backend
+## How it works
 
-- The client generates a UUID for each new thread.
-- This `thread_id` is sent to the backend and saved as metadata when storing query vectors.
-- The backend returns vector search results with this `thread_id` metadata.
-- Web results include URLs as usual.
-
----
-
-## Frontend
-
-### Local Thread IDs
-
-- The client maintains a set of local thread UUIDs.
-- These UUIDs are **shared** with the backend, so they match the `thread_id` metadata in vector search results.
-
-### Loading Local Thread IDs (Updated)
-
-- On app startup, **load all existing thread UUIDs** from persistent storage (Core Data, files, etc.).
-- Maintain this set in a shared model or service (e.g., `ThreadPersistenceService`).
-- When a new thread is created, **add its UUID** to this set immediately.
-- Pass this populated set into all `PostchainView`, `PhaseCard`, `SearchResultListView`, and related UI components.
-- If the set is empty (current state), **no deep links will be shown**.
+- Vector search results and citations **inject links** into Markdown.
+- When tapped:
+  - A **translucent modal overlay** appears with a **preview** of the content.
+  - The user can **read the snippet** in context.
+  - Optionally, the user can **navigate to the thread start** or **summary**, if access permits.
+- **No direct linking** to arbitrary message indices in long threads.
 
 ---
 
-## Rendering Logic
+## Privacy and Access
 
-- When displaying vector search results:
-  - Extract `thread_id` from the result metadata.
-  - If this ID **exists in the local thread ID set**, render the snippet as a **deep link button** to `choir://thread/{thread_id}`.
-  - Otherwise, render as plain text.
-- When displaying web search results:
-  - Render the URL as a clickable link as usual.
+- Avoids exposing private or irrelevant parts of threads.
+- Respects ownership and sharing permissions.
+- Supports **gradual disclosure** of thread content.
 
 ---
 
-## Pseudocode
+## Future
 
-```swift
-if localThreadIDs.contains(threadIDFromMetadata) {
-    // Render as deep link button
-    openURL(URL(string: "choir://thread/\(threadIDFromMetadata)")!)
-} else {
-    // Render as plain text
-}
-```
-
----
-
-## Mermaid Diagram
-
-```mermaid
-flowchart TD
-    subgraph Frontend
-        A[Local Thread IDs Set]
-        B[Vector Search Result]
-        A --> C{Does vector.thread_id in local IDs?}
-        B --> C
-        C -- Yes --> D[Render as deep link button]
-        C -- No --> E[Render as plain text]
-    end
-```
+- Use **thread contracts** and **reward systems** to manage:
+  - Access control.
+  - Sharing.
+  - Linking granularity (e.g., summaries, highlights).
 
 ---
 
 ## Summary
 
-- Thread IDs are shared between client and backend.
-- The frontend matches vector result `thread_id` metadata to local thread IDs.
-- Matching results become deep links to open the thread.
-- Web results remain clickable URLs.
-- **Critical:** The local thread UUID set **must be populated** on app startup and kept in sync, or no deep links will appear.
+- Deep links **show previews in modals**, not raw jumps.
+- This respects privacy, improves UX, and prepares for future collaboration features.
