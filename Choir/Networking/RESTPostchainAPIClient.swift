@@ -428,7 +428,7 @@ struct ModelConfigRequest: Codable {
     // Add CodingKeys for snake_case mapping with backend
     enum CodingKeys: String, CodingKey {
         case provider
-        case model_name // Keep snake_case for backend compatibility
+        case model_name
         case temperature
         case openaiApiKey = "openai_api_key"
         case anthropicApiKey = "anthropic_api_key"

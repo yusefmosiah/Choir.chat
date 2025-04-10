@@ -63,7 +63,7 @@ async def process_simple_postchain(
                 for phase, model_config_from_request in request.model_configs.items():
                     # Convert phase name to the override parameter name
                     # IMPORTANT: The model_config_from_request MUST now contain the API keys sent from the client
-                    if phase in ["action", "experience", "intention", "observation", "understanding", "yield"]:
+                    if phase in ["action", "experience_vectors", "experience_web", "intention", "observation", "understanding", "yield"]:
                          # Ensure the received object is actually a ModelConfig instance
                          # (FastAPI should handle validation based on the request model)
                         model_overrides[f"{phase}_mc_override"] = model_config_from_request
