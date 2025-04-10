@@ -84,11 +84,8 @@ struct ContentView: View {
         .onAppear {
             // Load saved threads
             loadThreads()
-
-            // Create a default thread if none exists
-            if threads.isEmpty {
-                createNewChoirThread()
-            }
+            // Do NOT auto-create or select a thread on startup
+            selectedChoirThread = nil
         }
         .onChange(of: selectedChoirThread) { _, newThread in
             guard let thread = newThread else { return }
