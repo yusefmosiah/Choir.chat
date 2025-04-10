@@ -39,14 +39,6 @@ struct PaginatedMarkdownView: View {
                 .onLongPressGesture {
                     showingActionSheet = true
                 }
-                .contextMenu {
-                    Button("Copy Content") {
-                        UIPasteboard.general.string = extractCurrentPageText()
-                    }
-                    Button("Select Text...") {
-                        textSelectionManager.showSheet(withText: extractCurrentPageText())
-                    }
-                }
 
                 Spacer(minLength: 0)
             }
