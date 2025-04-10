@@ -215,6 +215,7 @@ tree.md
 │   │   ├── dashboard.md
 │   │   ├── deep_links.md
 │   │   ├── deep_links_markdown.md
+│   │   ├── paginated_markdown_view.md
 │   │   ├── unified_navigation.md
 │   │   └── unified_navigation_implementation.md
 │   ├── fqaho_simulation.md
@@ -260,7 +261,7 @@ tree.md
     ├── test_api.sh
     └── test_postchain_multiturn.sh
 
-63 directories, 182 files
+63 directories, 183 files
 
 === File: docs/CHANGELOG.md ===
 
