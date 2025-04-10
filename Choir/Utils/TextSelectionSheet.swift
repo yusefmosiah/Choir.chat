@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct TextSelectionSheetProvider<Content: View>: View {
     @StateObject private var textSelectionManager = TextSelectionManager.shared
@@ -17,8 +18,16 @@ struct TextSelectionSheetProvider<Content: View>: View {
                 .sheet(isPresented: $textSelectionManager.showingSheet, onDismiss: {
                     textSelectionManager.sheetDismissed()
                 }) {
-                    TextSelectionView(text: textSelectionManager.selectedText)
+                    if let selection = textSelectionManager.phaseContentSelection {
+                        TextSelectionView(
+                            text: selection.fullContent,
+                            selectedRange: selection.currentPageRange
+                        )
                         .background(.ultraThinMaterial)
+                    } else {
+                        TextSelectionView(text: textSelectionManager.selectedText, selectedRange: nil)
+                            .background(.ultraThinMaterial)
+                    }
                 }
         }
     }
@@ -26,6 +35,7 @@ struct TextSelectionSheetProvider<Content: View>: View {
 
 struct TextSelectionView: View {
     let text: String
+    let selectedRange: NSRange?
     @Environment(\.dismiss) private var dismiss
     @StateObject private var textSelectionManager = TextSelectionManager.shared
 
@@ -37,7 +47,7 @@ struct TextSelectionView: View {
                         .opacity(0.85)
                         .edgesIgnoringSafeArea(.all)
 
-                    TextViewWrapper(text: text)
+                    TextViewWrapper(text: text, selectedRange: selectedRange)
                         .frame(width: geometry.size.width, height: geometry.size.height)
                 }
             }
@@ -70,6 +80,7 @@ struct TextSelectionView: View {
 
 struct TextViewWrapper: UIViewRepresentable {
     let text: String
+    let selectedRange: NSRange?
 
     func makeUIView(context: Context) -> UITextView {
         let textView = UITextView()
@@ -85,6 +96,14 @@ struct TextViewWrapper: UIViewRepresentable {
         textView.isOpaque = false
         textView.text = text
         textView.layoutIfNeeded()
+
+        if let selectedRange = selectedRange {
+            DispatchQueue.main.async {
+                textView.selectedRange = selectedRange
+                textView.scrollRangeToVisible(selectedRange)
+            }
+        }
+
         return textView
     }
 
@@ -92,6 +111,13 @@ struct TextViewWrapper: UIViewRepresentable {
         if uiView.text != text {
             uiView.text = text
             uiView.layoutIfNeeded()
+
+            if let selectedRange = selectedRange {
+                DispatchQueue.main.async {
+                    uiView.selectedRange = selectedRange
+                    uiView.scrollRangeToVisible(selectedRange)
+                }
+            }
         }
     }
 

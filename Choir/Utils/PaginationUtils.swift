@@ -1,4 +1,10 @@
 import SwiftUI
+import UIKit
+
+struct PhaseContentSelection {
+    let fullContent: String
+    let currentPageRange: NSRange
+}
 
 class TextSelectionManager: ObservableObject {
     static let shared = TextSelectionManager()
@@ -9,9 +15,20 @@ class TextSelectionManager: ObservableObject {
     @Published var isShowingMenu = false
     @Published var isInteractionDisabled = false
     @Published var preventBackgroundUpdates = false
+    @Published var phaseContentSelection: PhaseContentSelection? = nil
 
     func showSheet(withText text: String) {
         self.selectedText = text
+        self.phaseContentSelection = nil
+        self.showingSheet = true
+        self.preventBackgroundUpdates = true
+    }
+
+    func showSheet(withPhaseContent content: String, currentPageRange: NSRange) {
+        self.phaseContentSelection = PhaseContentSelection(
+            fullContent: content,
+            currentPageRange: currentPageRange
+        )
         self.showingSheet = true
         self.preventBackgroundUpdates = true
     }
@@ -82,5 +99,28 @@ class TextMeasurer {
         let fittingText = text.prefix(characterRange.length)
 
         return String(fittingText)
+    }
+
+    func splitMarkdownIntoPages(_ text: String, size: CGSize) -> [String] {
+        let textHeight = size.height - 40
+        var pages: [String] = []
+        var remainingText = text
+
+        while !remainingText.isEmpty {
+            let pageText = fitTextToHeight(
+                text: remainingText,
+                width: size.width - 8,
+                height: textHeight
+            )
+            pages.append(pageText)
+
+            if pageText.count < remainingText.count {
+                let index = remainingText.index(remainingText.startIndex, offsetBy: pageText.count)
+                remainingText = String(remainingText[index...])
+            } else {
+                remainingText = ""
+            }
+        }
+        return pages
     }
 }

@@ -111,9 +111,12 @@ struct PhaseCard: View {
         )
         .padding(.horizontal, 4)
         .contextMenu {
-            let modelName = message.getPhaseResult(phase)?.modelName
-            Text("Model: \(modelName?.isEmpty == false ? modelName! : phase.description)")
-            Text("Page: \(pageBinding.wrappedValue + 1)")
+            PhaseCardContextMenu(
+                phase: phase,
+                message: message,
+                currentPage: pageBinding,
+                availableSize: UIScreen.main.bounds.size
+            )
         }
     }
 

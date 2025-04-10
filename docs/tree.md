@@ -49,6 +49,7 @@
 │       ├── ModelConfigView.swift
 │       ├── PaginatedMarkdownView.swift
 │       ├── PhaseCard.swift
+│       ├── PhaseCardContextMenu.swift
 │       ├── PostchainView.swift
 │       ├── PriorCard.swift
 │       ├── SearchResultListView.swift
@@ -205,6 +206,7 @@
 │   │   ├── deep_links.md
 │   │   ├── deep_links_markdown.md
 │   │   ├── paginated_markdown_view.md
+│   │   ├── phase_selection_sheet_plan.md
 │   │   ├── unified_navigation.md
 │   │   └── unified_navigation_implementation.md
 │   ├── fqaho_simulation.md
@@ -251,4 +253,4 @@
 │   └── test_postchain_multiturn.sh
 └── tap_area_debugging.md
 
-63 directories, 186 files
+63 directories, 188 files
