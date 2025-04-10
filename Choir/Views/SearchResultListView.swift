@@ -55,42 +55,45 @@ struct SearchResultListView: View {
     // Environment
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) { // No spacing for seamless list
-             // Header for the list
-             HStack {
-                 Image(systemName: icon)
-                 Text("\(title) (Page \(currentPage + 1) of \(totalPages))")
-                     .font(.caption)
-                     .foregroundColor(.secondary)
-                 Spacer()
-             }
-             .padding(.bottom, 5)
-             .padding(.horizontal, 5) // Add slight horizontal padding
+        TextSelectionSheetProvider {
+            VStack(alignment: .leading, spacing: 0) {
+                VStack(alignment: .leading, spacing: 0) { // No spacing for seamless list
+                     // Header for the list
+                     HStack {
+                         Image(systemName: icon)
+                         Text("\(title) (Page \(currentPage + 1) of \(totalPages))")
+                             .font(.caption)
+                             .foregroundColor(.secondary)
+                         Spacer()
+                     }
+                     .padding(.bottom, 5)
+                     .padding(.horizontal, 5) // Add slight horizontal padding
 
-            VStack(alignment: .leading, spacing: 10) {
-                ForEach(pagedResults) { result in
-                    switch result {
-                    case .vector(let vectorResult):
-                        VectorResultCard(result: vectorResult, localThreadIDs: localThreadIDs)
-                    case .web(let webResult):
-                        WebResultCard(result: webResult)
+                    VStack(alignment: .leading, spacing: 10) {
+                        ForEach(pagedResults) { result in
+                            switch result {
+                            case .vector(let vectorResult):
+                                VectorResultCard(result: vectorResult, localThreadIDs: localThreadIDs)
+                            case .web(let webResult):
+                                WebResultCard(result: webResult)
+                            }
+                        }
                     }
                 }
-            }
-            .padding(.horizontal, 5)
-            .padding(.bottom, 5)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .padding(.bottom, 5)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-            // Pagination Controls (similar to PaginatedTextView)
-            PaginationControls(
-                currentPage: $currentPage,
-                totalPages: $totalPages,
-                onNavigateToPreviousPhase: onNavigateToPreviousPhase,
-                onNavigateToNextPhase: onNavigateToNextPhase
-            )
+                // Pagination Controls (similar to PaginatedTextView)
+                PaginationControls(
+                    currentPage: $currentPage,
+                    totalPages: $totalPages,
+                    onNavigateToPreviousPhase: onNavigateToPreviousPhase,
+                    onNavigateToNextPhase: onNavigateToNextPhase
+                )
+            }
+            .onAppear(perform: calculatePages)
+            .onChange(of: results) { _, _ in calculatePages() } // Recalculate on results change
         }
-        .onAppear(perform: calculatePages)
-        .onChange(of: results) { _, _ in calculatePages() } // Recalculate on results change
     }
 
     // Calculate results for the current page
@@ -110,7 +113,8 @@ struct SearchResultListView: View {
         }
          print("Calculated pages for \(title): \(totalPages), Current: \(currentPage), Results: \(results.count)")
     }
-}
+    }
+
 
 // MARK: - Subviews for Result Cards
 
@@ -154,6 +158,10 @@ struct VectorResultCard: View {
         .padding(10)
         .background(Color(.secondarySystemBackground).opacity(0.5))
         .cornerRadius(8)
+        .onTapGesture {
+            TextSelectionManager.shared.selectedText = result.content
+            TextSelectionManager.shared.showingSheet = true
+        }
     }
 }
 

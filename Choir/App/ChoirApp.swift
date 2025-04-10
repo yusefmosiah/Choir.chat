@@ -4,6 +4,7 @@
 //
 //  Created by Yusef Mosiah Nathanson on 11/9/24.
 //
+import Choir
 
 import SwiftUI
 
