@@ -1,159 +1,149 @@
-# Unified Navigation Implementation Plan (Architectural Overhaul)
+# Unified Navigation Implementation Plan (Revised)
 
 ---
 
 ## Overview
 
-Centralize all tap and swipe gesture handling **outside** of individual phase cards, in a **dedicated container view** that manages:
-
-- **Page turning** within the current phase
-- **Phase switching** when at page boundaries
-- **Deep link modal previews** (handled inside content views)
-- **Clean separation of concerns**
+Implement unified navigation (tap-to-page, swipe-to-phase) by **centralizing gesture handling within `PostchainView`** using transparent overlays, avoiding the need for a new container view.
 
 ---
 
-## Why Centralize Gestures?
+## Why This Approach?
 
-- Avoids gesture conflicts in overlapping ZStack phase cards
-- Simplifies logic: one place controls navigation
-- Easier to maintain, extend, and debug
-- Matches the UX goal: **tap/swipe anywhere** to navigate naturally
+- **Simpler:** Leverages existing `PostchainView` structure.
+- **Avoids Conflicts:** No overlapping gestures on individual phase cards.
+- **Centralized Logic:** Navigation decisions happen in one place.
+- **Clear Separation:**
+    - `PaginatedMarkdownView`: Renders content, handles link taps.
+    - `PhaseCard`: Displays phase content, passes state.
+    - `PostchainView`: Manages phase stack, handles navigation gestures (tap/swipe).
 
 ---
 
 ## High-Level Architecture
 
 ```mermaid
-flowchart TD
-    A[PostchainView]
-    A --> B(PhaseStackView)
-    B --> C1(PhaseCard - Phase 1)
-    B --> C2(PhaseCard - Phase 2)
-    B --> C3(PhaseCard - Phase 3)
-    C1 --> D1(PaginatedMarkdownView)
-    C2 --> D2(PaginatedMarkdownView)
-    C3 --> D3(PaginatedMarkdownView)
+graph TD
+    A[PostchainView] --> B{ZStack of PhaseCards};
+    A --> C[Tap Overlays (Left/Right)];
+    A --> D[Drag Gesture (Swipe)];
 
-    B -. handles .-> E{Tap/Swipe Gestures}
-    E --> F[Update current page or phase]
-    F --> B
+    C -- Tap --> E[handleTap()];
+    D -- Swipe --> F[switchToPhase()];
+
+    E --> G{Update currentPage / Call switchToPhase()};
+    F --> H[Update selectedPhase & currentPage];
+
+    B --> I[PhaseCard];
+    I --> J[PaginatedMarkdownView];
+
+    J -- Updates --> K((Message State: phaseTotalPages));
+    E -- Reads --> L((Message State: currentPage, totalPages));
+    G -- Updates --> M((Message State: currentPage));
+    H -- Updates --> N((Message State: selectedPhase, currentPage));
+
+    style K fill:#lightgrey,stroke:#333,stroke-width:2px;
+    style L fill:#lightgrey,stroke:#333,stroke-width:2px;
+    style M fill:#lightgrey,stroke:#333,stroke-width:2px;
+    style N fill:#lightgrey,stroke:#333,stroke-width:2px;
 ```
 
 ---
 
 ## Step-by-Step Implementation Plan
 
-### 1. **Create `PhaseStackView` Container**
+### 1. **Expose `totalPages` (State Management)**
 
-- Wraps the **ZStack of `PhaseCard`s**
-- Owns:
-  - `@State` or `@Binding` for **current phase**
-  - `@State` or `@Binding` for **current page** per phase
-  - Access to **total pages** per phase (via `Message` or bindings)
+- **`Message` Model (`ConversationModels.swift`):**
+    - Add `@Published var phaseTotalPages: [Phase: Int] = [:]`
 
----
+- **`PaginatedMarkdownView` (`PaginatedMarkdownView.swift`):**
+    - Add `@Binding var totalPages: Int`
+    - In `paginateContent()`, update this binding: `totalPages = pages.count`
 
-### 2. **Remove `.onTapGesture` from `PhaseCard`**
-
-- No tap/swipe gestures on individual cards
-- They only **render content** and **expose page bindings**
-
----
-
-### 3. **Implement Tap Zones in `PhaseStackView`**
-
-- Overlay **two transparent buttons or hit areas**:
-  - **Left edge**: previous page or previous phase
-  - **Right edge**: next page or next phase
-- Alternatively, use `.simultaneousGesture` with tap location detection
+- **`PhaseCard` (`PhaseCard.swift`):**
+    - When creating `PaginatedMarkdownView`, pass the new binding:
+      ```swift
+      PaginatedMarkdownView(
+          // ... other params
+          totalPages: Binding<Int>(
+              get: { message.phaseTotalPages[phase] ?? 1 },
+              set: { message.phaseTotalPages[phase] = $0 }
+          )
+          // ... other params
+      )
+      ```
 
 ---
 
-### 4. **Tap Navigation Logic**
+### 2. **Modify `PostchainView` (`PostchainView.swift`)**
 
-- **Tap Right Edge:**
-  - If **not last page** in current phase: `currentPage += 1`
-  - Else: switch to **next phase**, reset `currentPage = 0`
-- **Tap Left Edge:**
-  - If **not first page**: `currentPage -= 1`
-  - Else: switch to **previous phase**, set `currentPage = lastPage`
+- **Remove `.onTapGesture` from `PhaseCard`:**
+    - Delete the `.onTapGesture` modifier within the `ForEach` loop creating `PhaseCard`s.
 
----
+- **Keep Existing `DragGesture`:**
+    - The swipe gesture attached to the `ZStack` remains.
 
-### 5. **Implement Swipe Gestures**
+- **Add Tap Overlays:**
+    - Inside the `GeometryReader`, overlay the `ZStack` with transparent tap zones:
+      ```swift
+      ZStack {
+          // ... ForEach loop for PhaseCards ...
+      }
+      .gesture(
+          // ... Existing DragGesture ...
+      )
+      .overlay(
+          HStack(spacing: 0) {
+              Color.clear.contentShape(Rectangle()).onTapGesture { handleTap(isRightTap: false) }
+              Color.clear.contentShape(Rectangle()).onTapGesture { handleTap(isRightTap: true) }
+          }
+      )
+      ```
 
-- **Swipe Left:** switch to **next phase**, reset `currentPage = 0`
-- **Swipe Right:** switch to **previous phase**, set `currentPage = lastPage`
+- **Implement `handleTap` Logic:**
+    - Add a private function:
+      ```swift
+      private func handleTap(isRightTap: Bool) {
+          guard let currentPhase = selectedPhase else { return }
+          let currentPage = message.phaseCurrentPage[currentPhase] ?? 0
+          let totalPages = message.phaseTotalPages[currentPhase] ?? 1
 
----
-
-### 6. **Expose Total Pages**
-
-- In `Message` model, add:
-
-```swift
-@Published var phaseTotalPages: [Phase: Int] = [:]
-```
-
-- Update this from inside `PaginatedMarkdownView` whenever pagination recalculates
-- Pass as `@Binding` from `PhaseCard` to `PaginatedMarkdownView`
-
----
-
-### 7. **Update `PaginatedMarkdownView`**
-
-- Add:
-
-```swift
-@Binding var totalPages: Int
-```
-
-- Update this binding in `paginateContent()`
-
----
-
-### 8. **Update `PhaseCard`**
-
-- Pass bindings for:
-  - `currentPage` (already done)
-  - `totalPages` (new)
-- Remove any gesture logic
-
----
-
-### 9. **Update `PostchainView`**
-
-- Replace ZStack of `PhaseCard`s with `PhaseStackView`
-- Pass necessary bindings/state
+          withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+              if isRightTap {
+                  if currentPage < totalPages - 1 {
+                      message.phaseCurrentPage[currentPhase] = currentPage + 1
+                  } else {
+                      switchToPhase(direction: .next) // Assumes helper exists
+                  }
+              } else {
+                  if currentPage > 0 {
+                      message.phaseCurrentPage[currentPhase] = currentPage - 1
+                  } else {
+                      switchToPhase(direction: .previous) // Assumes helper exists
+                  }
+              }
+          }
+      }
+      ```
+- **Verify `switchToPhase` Helper:**
+    - Ensure this function (likely already present for swipe) correctly resets `currentPage` when changing phases (e.g., to 0 for next, `totalPages - 1` for previous).
 
 ---
 
-### 10. **Deep Link Previews**
+### 3. **Deep Link Previews (Orthogonal)**
 
-- Continue to intercept `.onOpenURL` **inside `PaginatedMarkdownView`**
-- Present **translucent modal previews** there
-- This is **orthogonal** to navigation gestures
+- Continue to intercept `.onOpenURL` **inside `PaginatedMarkdownView`**.
+- Implement the **translucent modal preview** logic there. This is separate from the navigation gesture implementation.
 
 ---
 
 ## Summary
 
-- **Centralize navigation gestures** in a new container (`PhaseStackView`)
-- **Remove gestures from phase cards**
-- **Overlay tap zones** or detect tap locations
-- **Use swipe gestures** for phase switching
-- **Track total pages per phase** to decide navigation
-- **Keep deep link modal previews inside content views**
-
----
-
-## Benefits
-
-- Clean, maintainable architecture
-- Intuitive, unified navigation UX
-- Avoids gesture conflicts
-- Prepares for future features (privacy, rewards, speech)
+- State (`totalPages`) flows up from content view to model.
+- Gestures (tap overlays, swipe) handled centrally in `PostchainView`.
+- Tap logic reads state (`currentPage`, `totalPages`) to decide action.
+- `PhaseCard` focuses on rendering.
 
 ---
 
