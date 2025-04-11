@@ -2,7 +2,11 @@ import SwiftUI
 import Foundation
 
 struct PostchainView: View {
+    // MARK: - Properties
+    
+    // State
     @State private var initialSelectionDone = false
+    
     // Unique identifier for this view instance to prevent state sharing
     let viewId: UUID
 
@@ -12,26 +16,25 @@ struct PostchainView: View {
     // Processing state (passed from parent, ChoirThreadDetailView)
     let isProcessing: Bool
 
-    // Drag state
-    @State private var dragOffset: CGFloat = 0
-
-    // ViewModel (passed down for potential subviews, though PhaseCard now handles its own logic)
+    // ViewModel (passed down for potential subviews)
     @ObservedObject var viewModel: PostchainViewModel
 
+    // Thread IDs
     let localThreadIDs: Set<UUID>
-    // Removed @State private var latestAvailableSize
-
-    // Computed property to get the selected phase from the message
-    private var selectedPhase: Phase {
-        get { message.selectedPhase }
-        set { viewModel.updateSelectedPhase(for: message, phase: newValue) }
-    }
-
+    
     // Force showing all phases even when not processing (e.g., for debugging)
     var forceShowAllPhases: Bool = false
 
     // Optional coordinator to check processing status (passed from parent)
     var coordinator: RESTPostchainCoordinator?
+
+    // MARK: - Computed Properties
+    
+    // Computed property to get the selected phase from the message
+    private var selectedPhase: Phase {
+        get { message.selectedPhase }
+        set { viewModel.updateSelectedPhase(for: message, phase: newValue) }
+    }
 
     // Computed property to get available phases based on content or processing status
     private var availablePhases: [Phase] {
@@ -57,7 +60,8 @@ struct PostchainView: View {
         }
     }
 
-    // Initializer
+    // MARK: - Initializer
+    
     init(message: Message, isProcessing: Bool, viewModel: PostchainViewModel, localThreadIDs: Set<UUID>, forceShowAllPhases: Bool = false, coordinator: RESTPostchainCoordinator? = nil, viewId: UUID = UUID()) {
         self.message = message
         self.isProcessing = isProcessing
@@ -66,124 +70,58 @@ struct PostchainView: View {
         self.forceShowAllPhases = forceShowAllPhases
         self.coordinator = coordinator
         self.viewId = viewId
-        // print("PostchainView initialized for message \(message.id)") // Reduced logging
-        // print("PostchainView localThreadIDs: \(localThreadIDs)") // Removed excessive logging
     }
 
+    // MARK: - Body
+    
     var body: some View {
         GeometryReader { geometry in
             let cardWidth = geometry.size.width * 0.98 // Adjust card width slightly
             let totalWidth = geometry.size.width
-
-            ZStack { // Main ZStack containing only the card stack
-
-                // --- Card Stack ---
-                ZStack {
-                    ForEach(availablePhases) { phase in
-                        PhaseCard(
-                            phase: phase,
+            
+            // Main container
+            ZStack {
+                // Create the card stack view with gesture handling
+                PhaseGestureHandlerView(
+                    content: { dragOffset in
+                        PhaseCardStackView(
+                            availablePhases: availablePhases,
                             message: message,
-                            isSelected: phase == selectedPhase,
-                            isLoading: isLoadingPhase(phase),
+                            selectedPhase: selectedPhase,
+                            dragOffset: dragOffset, // Pass the current drag offset
                             viewModel: viewModel,
-                            messageId: message.id.uuidString,
-                            localThreadIDs: localThreadIDs
+                            localThreadIDs: localThreadIDs,
+                            coordinator: coordinator,
+                            viewId: viewId,
+                            cardWidth: cardWidth,
+                            totalWidth: totalWidth
                         )
-                        .frame(width: cardWidth)
-                        .offset(x: calculateOffset(for: phase, cardWidth: cardWidth, totalWidth: totalWidth))
-                        .zIndex(phase == selectedPhase ? 1 : 0)
-                        .opacity(calculateOpacity(for: phase))
-                        .id("\(viewId)_\(phase.rawValue)")
-                        .allowsHitTesting(phase == selectedPhase) // Disable taps on non-selected cards
-                    }
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity) // Ensure card stack uses space
-                .simultaneousGesture( // Drag gesture remains on the card stack
-                    DragGesture()
-                        .onChanged { value in
-                            dragOffset = value.translation.width
-                        }
-                        .onEnded { value in
-                            withAnimation(.interactiveSpring()) {
-                                handleDragEnd(value: value, cardWidth: cardWidth)
-                            }
-                        }
+                    },
+                    message: message,
+                    availablePhases: availablePhases,
+                    viewModel: viewModel,
+                    cardWidth: cardWidth
                 )
-
-            } // End Main ZStack (containing only cards)
-            .overlay(alignment: .leading) { // Left Tap Area Overlay
-                let tapAreaWidth = max(0, (geometry.size.width - (cardWidth * 0.8)) / 2)
-                Color.clear
-                    .frame(width: tapAreaWidth)
-                    .padding(.leading, -20) // Expand overlay outward beyond parent bounds
-                    .contentShape(Rectangle())
-                    .onTapGesture {
-                        print("LEFT TAP AREA TAPPED")
-                        handlePageTap(direction: .previous, size: geometry.size)
-                    }
-                    .zIndex(2) // Ensure overlay is above phase cards
             }
-            .overlay(alignment: .trailing) { // Right Tap Area Overlay
-                let tapAreaWidth = max(0, geometry.size.width - (cardWidth * 0.7))
-                Color.clear
-                    .frame(width: tapAreaWidth)
-                    .padding(.trailing, -60) // Expand overlay outward beyond parent bounds
-                    .contentShape(Rectangle())
-                    .onTapGesture {
-                        print("RIGHT TAP AREA TAPPED")
-                        handlePageTap(direction: .next, size: geometry.size)
+            .overlay {
+                // Add pagination controls
+                PhasePaginationControlView(
+                    message: message,
+                    availablePhases: availablePhases,
+                    size: geometry.size,
+                    onSwitchPhase: { direction in
+                        switchToPhase(direction: direction)
                     }
-                    .zIndex(2) // Ensure overlay is above phase cards
+                )
             }
-        } // End GeometryReader
-        .onAppear(perform: handleOnAppear) // Apply .onAppear to GeometryReader's content
-        // Removed onChange(of: geometry.size)
+        }
+        .onAppear(perform: handleOnAppear)
         .id("postchain_view_\(message.id)_\(viewId)") // Stable ID for the view itself
         .frame(maxHeight: .infinity)
     }
 
-    // --- Helper Functions ---
-
-    private func isLoadingPhase(_ phase: Phase) -> Bool {
-        // If coordinator exists, ask it if the phase is processing
-        if let coordinator = coordinator {
-            return coordinator.isProcessingPhase(phase)
-        }
-        // Fallback: If processing globally and this phase has no content/results yet
-        if isProcessing {
-            let phaseContent = message.getPhaseContent(phase)
-            let hasTextContent = !phaseContent.isEmpty
-            let hasVectorResults = (phase == .experienceVectors && !message.vectorSearchResults.isEmpty)
-            let hasWebResults = (phase == .experienceWeb && !message.webSearchResults.isEmpty)
-            return !(hasTextContent || hasVectorResults || hasWebResults)
-        }
-        return false
-    }
-
-    private func handleDragEnd(value: DragGesture.Value, cardWidth: CGFloat) {
-        let predictedEndOffset = value.predictedEndTranslation.width
-        let threshold = cardWidth / 3
-
-        guard let currentIndex = availablePhases.firstIndex(of: selectedPhase) else { return }
-
-        var targetIndex = currentIndex
-        if predictedEndOffset < -threshold { // Swiped left
-            targetIndex = min(currentIndex + 1, availablePhases.count - 1)
-        } else if predictedEndOffset > threshold { // Swiped right
-            targetIndex = max(currentIndex - 1, 0)
-        }
-
-        if targetIndex != currentIndex {
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                viewModel.updateSelectedPhase(for: message, phase: availablePhases[targetIndex])
-            }
-        }
-        // Always reset drag offset
-        withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-            dragOffset = 0
-        }
-    }
-
+    // MARK: - Helper Functions
+    
     private func handleOnAppear() {
         if !initialSelectionDone {
             initialSelectionDone = true
@@ -201,91 +139,11 @@ struct PostchainView: View {
                 } else {
                     viewModel.updateSelectedPhase(for: message, phase: availablePhases.first ?? .action)
                 }
-                // print("PostchainView: Initially selected phase: \(selectedPhase)") // Reduced logging
-            } else {
-                // print("PostchainView: Keeping current selection on appear: \(selectedPhase)") // Reduced logging
-            }
-        } else {
-            // print("PostchainView: Reappeared, keeping selection: \(selectedPhase)") // Reduced logging
-        }
-    }
-
-    private func calculateOffset(for phase: Phase, cardWidth: CGFloat, totalWidth: CGFloat) -> CGFloat {
-        guard let currentIndex = availablePhases.firstIndex(of: selectedPhase),
-              let phaseIndex = availablePhases.firstIndex(of: phase) else {
-            // If phase isn't available or selected phase isn't found
-            // Place it off-screen
-            return totalWidth
-        }
-
-        // Wrap-around logic: treat yield as immediately left of action
-        if selectedPhase == .action && phase == .yield {
-            return -cardWidth + dragOffset
-        }
-        if selectedPhase == .yield && phase == .action {
-            return cardWidth + dragOffset
-        }
-
-        let indexDifference = phaseIndex - currentIndex
-        return CGFloat(indexDifference) * cardWidth + dragOffset
-    }
-
-    private func calculateOpacity(for phase: Phase) -> Double {
-        guard let currentIndex = availablePhases.firstIndex(of: selectedPhase),
-              let phaseIndex = availablePhases.firstIndex(of: phase) else {
-            return 0 // Not visible if not in available phases
-        }
-
-        let indexDifference = abs(phaseIndex - currentIndex)
-        // Make selected card fully opaque, fade out others more quickly
-        return indexDifference == 0 ? 1.0 : max(0, 0.6 - Double(indexDifference) * 0.3)
-    } // Closing brace for calculateOpacity
-    // Removed handleTap and calculateTotalPages functions
-
-    private enum PageTapDirection { case previous, next }
-    private enum SwipeDirection { case next, previous } // Keep SwipeDirection for switchToPhase
-
-    private func handlePageTap(direction: PageTapDirection, size: CGSize) {
-        guard size != .zero else {
-            print("Error: Size is zero, cannot calculate pages.")
-            return
-        }
-        let phase = selectedPhase // Get currently selected phase
-        let currentPage = message.phaseCurrentPage[phase] ?? 0
-
-        // Calculate totalPages accurately using PaginatedMarkdownView's logic
-        let content = message.getPhaseContent(phase)
-        // Note: Accessing search results directly here. Ensure Message model provides these.
-        // If errors occur, check ConversationModels.swift for VectorSearchResult/SearchResult definitions.
-        let vectorResults = message.vectorSearchResults.map { UnifiedSearchResult.vector($0) }
-        let webResults = message.webSearchResults.map { UnifiedSearchResult.web($0) }
-        let searchResults = vectorResults + webResults
-        let totalPages = calculateAccurateTotalPages(markdownText: content, searchResults: searchResults, size: size)
-
-        print("handlePageTap: Phase=\(phase), CurrentPage=\(currentPage + 1), TotalPages=\(totalPages), Direction=\(direction)") // Debug
-
-        withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-            if direction == .previous {
-                if currentPage > 0 {
-                    message.phaseCurrentPage[phase] = currentPage - 1
-                    print("Tapped Left: Now Page \(currentPage)") // Debug
-                } else {
-                    print("Tapped Left: Switching Phase Previous") // Debug
-                    switchToPhase(direction: .previous) // Existing function
-                }
-            } else { // .next
-                if currentPage < totalPages - 1 {
-                    message.phaseCurrentPage[phase] = currentPage + 1
-                    print("Tapped Right: Now Page \(currentPage + 2)") // Debug
-                } else {
-                    print("Tapped Right: Switching Phase Next") // Debug
-                    switchToPhase(direction: .next) // Existing function
-                }
             }
         }
     }
 
-    // Keep existing switchToPhase function, it's still needed for phase boundary logic
+    // Phase switching logic
     private func switchToPhase(direction: SwipeDirection) {
         guard let currentIndex = availablePhases.firstIndex(of: selectedPhase) else { return }
 
@@ -300,94 +158,20 @@ struct PostchainView: View {
             let newPhase = availablePhases[targetIndex]
             print("switchToPhase: Moving from \(selectedPhase) to \(newPhase)")
 
-            // --- START CRITICAL RESET LOGIC ---
             // Reset the current page for the NEW phase
-            if direction == .next {
-                message.phaseCurrentPage[newPhase] = 0 // Reset to first page
-                print("switchToPhase: Reset page for \(newPhase) to 0")
-            } else { // direction == .previous
-                // Reset to last page - Requires calculating total pages for the *new* phase
-                // We need the size here too! This might be tricky.
-                // Simplification: Always reset to 0 when switching phases? Or pass size?
-                // Let's try resetting to 0 for now for simplicity, can refine later if needed.
-                // TODO: Revisit resetting to last page if required.
-                message.phaseCurrentPage[newPhase] = 0 // Simplified: Reset to first page
-                print("switchToPhase: Reset page for \(newPhase) to 0 (Simplified)")
-
-                // --- Original logic requiring size ---
-                // let phaseContent = message.getPhaseContent(newPhase)
-                // let vectorResults = message.vectorSearchResults.map { UnifiedSearchResult.vector($0) }
-                // let webResults = message.webSearchResults.map { UnifiedSearchResult.web($0) }
-                // let searchResults = vectorResults + webResults
-                // let totalPagesForNewPhase = calculateAccurateTotalPages(markdownText: phaseContent, searchResults: searchResults, size: latestAvailableSize) // Needs size!
-                // message.phaseCurrentPage[newPhase] = max(0, totalPagesForNewPhase - 1)
-                // print("switchToPhase: Reset page for \(newPhase) to \(message.phaseCurrentPage[newPhase] ?? -1)")
-                // --- End Original logic ---
-            }
-            // --- END CRITICAL RESET LOGIC ---
-
+            message.phaseCurrentPage[newPhase] = 0
+            
             viewModel.updateSelectedPhase(for: message, phase: newPhase)
         }
     }
-
-
-    // Helper function to calculate total pages accurately (adapting PaginatedMarkdownView logic)
-    private func calculateAccurateTotalPages(markdownText: String, searchResults: [UnifiedSearchResult], size: CGSize) -> Int {
-        guard size.height > 0, size.width > 0 else {
-            print("Warning: calculateAccurateTotalPages called with zero size.")
-            return 1
-        }
-
-        // Logic adapted from PaginatedMarkdownView
-        // Note: Ensure TextMeasurer is accessible or reimplement its logic if needed.
-        // Assuming TextMeasurer is available globally or via import.
-        let measurer = TextMeasurer(sizeCategory: .medium) // Adjust sizeCategory if needed
-        let textHeight = size.height - 40 // Matches PaginatedMarkdownView padding estimate
-        var textPagesCount = 0
-        var remainingText = markdownText
-
-        if !markdownText.isEmpty {
-            while !remainingText.isEmpty {
-                let pageText = measurer.fitTextToHeight(
-                    text: remainingText,
-                    width: size.width - 8, // Matches PaginatedMarkdownView padding estimate
-                    height: textHeight
-                )
-                // Handle potential infinite loop if fitTextToHeight returns empty string for non-empty input
-                if pageText.isEmpty && !remainingText.isEmpty {
-                    print("Warning: TextMeasurer returned empty page for non-empty text. Breaking loop.")
-                    textPagesCount += 1 // Count the remaining text as one page
-                    break
-                }
-                textPagesCount += 1
-                if pageText.count < remainingText.count {
-                    let index = remainingText.index(remainingText.startIndex, offsetBy: pageText.count)
-                    remainingText = String(remainingText[index...])
-                } else {
-                    remainingText = ""
-                }
-            }
-        } else {
-            textPagesCount = 0 // No text pages if markdown is empty
-        }
-
-
-        // Chunk results (Matches PaginatedMarkdownView logic)
-        let itemsPerPage = 5 // Assuming 5 results per page, match PaginatedMarkdownView
-        // Use ceil division to potentially fix type inference error
-        let resultPagesCount = searchResults.isEmpty ? 0 : Int(ceil(Double(searchResults.count) / Double(itemsPerPage)))
-
-        let total = textPagesCount + resultPagesCount
-        return max(1, total) // Ensure at least 1 page
-    }
-    #Preview {
-        PostchainView(
-            message: Message(content: "Preview", isUser: false),
-            isProcessing: false,
-            viewModel: PostchainViewModel(coordinator: RESTPostchainCoordinator()),
-            localThreadIDs: []
-        )
-        .frame(height: 400)
-        .padding()
-    }
+}
+#Preview {
+    PostchainView(
+        message: Message(content: "Preview", isUser: false),
+        isProcessing: false,
+        viewModel: PostchainViewModel(coordinator: RESTPostchainCoordinator()),
+        localThreadIDs: []
+    )
+    .frame(height: 400)
+    .padding()
 }

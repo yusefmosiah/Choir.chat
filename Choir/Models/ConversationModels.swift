@@ -191,6 +191,7 @@ class Message: ObservableObject, Identifiable, Equatable {
 
     @Published var selectedPhase: Phase = .action
     @Published var phaseCurrentPage: [Phase: Int] = [:]
+    @Published var phaseTotalPages: [Phase: Int] = [:]
     @Published private var phaseResults: [Phase: PhaseResult] = [:]
     @Published var vectorSearchResults: [VectorSearchResult] = []
     @Published var webSearchResults: [SearchResult] = []

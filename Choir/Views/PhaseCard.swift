@@ -85,13 +85,20 @@ struct PhaseCard: View {
 
                     let combinedMarkdown = content  // Optionally, inject search result markdown here
 
+                    // Create a binding for totalPages
+                    let totalPagesBinding = Binding<Int>(
+                        get: { message.phaseTotalPages[phase] ?? 1 },
+                        set: { message.phaseTotalPages[phase] = $0 }
+                    )
+                    
                     PaginatedMarkdownView(
                         markdownText: combinedMarkdown,
                         searchResults: combinedResults,
                         availableSize: geometry.size,
                         currentPage: pageBinding,
                         onNavigateToPreviousPhase: createNavigationHandler(direction: .previous),
-                        onNavigateToNextPhase: createNavigationHandler(direction: .next)
+                        onNavigateToNextPhase: createNavigationHandler(direction: .next),
+                        totalPages: totalPagesBinding
                     )
                 }
             } else if isLoading {
