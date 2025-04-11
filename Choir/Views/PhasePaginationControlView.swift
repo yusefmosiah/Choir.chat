@@ -8,10 +8,18 @@ struct PhasePaginationControlView: View {
     let size: CGSize
     
     // Callback for phase switching
-    let onSwitchPhase: (SwipeDirection) -> Void
+    let onSwitchPhase: ((PostchainView.SwipeDirection) -> Void)?
     
     // Pagination direction enum
     enum PageTapDirection { case previous, next }
+    
+    // Initializer
+    init(message: Message, availablePhases: [Phase], size: CGSize, onSwitchPhase: ((PostchainView.SwipeDirection) -> Void)? = nil) {
+        self.message = message
+        self.availablePhases = availablePhases
+        self.size = size
+        self.onSwitchPhase = onSwitchPhase
+    }
     
     var body: some View {
         HStack(spacing: 0) {
@@ -74,7 +82,7 @@ struct PhasePaginationControlView: View {
                     print("Tapped Left: Now Page \(currentPage)") // Debug
                 } else {
                     print("Tapped Left: Switching Phase Previous") // Debug
-                    onSwitchPhase(.previous)
+                    onSwitchPhase?(.previous)
                 }
             } else { // .next
                 if currentPage < totalPages - 1 {
@@ -82,15 +90,14 @@ struct PhasePaginationControlView: View {
                     print("Tapped Right: Now Page \(currentPage + 2)") // Debug
                 } else {
                     print("Tapped Right: Switching Phase Next") // Debug
-                    onSwitchPhase(.next)
+                    onSwitchPhase?(.next)
                 }
             }
         }
     }
 }
 
-// Direction enum for phase switching
-enum SwipeDirection { case next, previous }
+// Note: Using PostchainView.SwipeDirection instead of local enum
 
 #Preview {
     // Mock data for preview

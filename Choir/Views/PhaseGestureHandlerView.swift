@@ -22,30 +22,8 @@ struct PhaseGestureHandlerView<Content: View>: View {
         self.cardWidth = cardWidth
     }
     
-    // Convenience initializer for PhaseCardStackView
-    init(content: PhaseCardStackView, message: Message, availablePhases: [Phase], viewModel: PostchainViewModel, cardWidth: CGFloat) {
-        self.init(
-            content: { dragOffset in
-                // Create a new PhaseCardStackView with the current dragOffset
-                PhaseCardStackView(
-                    availablePhases: content.availablePhases,
-                    message: content.message,
-                    selectedPhase: content.selectedPhase,
-                    dragOffset: dragOffset,
-                    viewModel: content.viewModel,
-                    localThreadIDs: content.localThreadIDs,
-                    coordinator: content.coordinator,
-                    viewId: content.viewId,
-                    cardWidth: content.cardWidth,
-                    totalWidth: content.totalWidth
-                )
-            },
-            message: message,
-            availablePhases: availablePhases,
-            viewModel: viewModel,
-            cardWidth: cardWidth
-        )
-    }
+    // We'll remove the convenience initializer as it's causing type issues
+    // Instead, we'll use the primary initializer with the closure directly
     
     var body: some View {
         contentBuilder(dragOffset)

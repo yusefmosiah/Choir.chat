@@ -143,6 +143,9 @@ struct PostchainView: View {
         }
     }
 
+    // Define SwipeDirection enum
+    enum SwipeDirection { case next, previous }
+    
     // Phase switching logic
     private func switchToPhase(direction: SwipeDirection) {
         guard let currentIndex = availablePhases.firstIndex(of: selectedPhase) else { return }
