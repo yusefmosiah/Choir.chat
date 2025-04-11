@@ -20,9 +20,31 @@ struct PaginatedMarkdownView: View {
     @Binding var currentPage: Int
     var onNavigateToPreviousPhase: (() -> Void)?
     var onNavigateToNextPhase: (() -> Void)?
+    
+    // Expose totalPages as a binding for external access
+    @Binding var totalPages: Int
+    
+    // Initialize with default binding if not provided
+    init(
+        markdownText: String,
+        searchResults: [UnifiedSearchResult],
+        availableSize: CGSize,
+        currentPage: Binding<Int>,
+        onNavigateToPreviousPhase: (() -> Void)? = nil,
+        onNavigateToNextPhase: (() -> Void)? = nil,
+        totalPages: Binding<Int> = .constant(1)
+    ) {
+        self.markdownText = markdownText
+        self.searchResults = searchResults
+        self.availableSize = availableSize
+        self._currentPage = currentPage
+        self.onNavigateToPreviousPhase = onNavigateToPreviousPhase
+        self.onNavigateToNextPhase = onNavigateToNextPhase
+        self._totalPages = totalPages
+    }
 
     @State private var pages: [PageContent] = []
-    @State private var totalPages: Int = 1
+    @State private var internalTotalPages: Int = 1
     @State private var showingActionSheet = false
     @StateObject private var textSelectionManager = TextSelectionManager.shared
 
@@ -100,14 +122,26 @@ struct PaginatedMarkdownView: View {
     }
 
     private func paginateContent(size: CGSize) {
-        let textPages = splitMarkdownIntoPages(markdownText, size: size)
-        let resultPages = chunkResults(searchResults, itemsPerPage: 5)
-
+        // Use PaginationService for consistent pagination logic
+        let paginationService = PaginationService()
+        let measurer = TextMeasurer(sizeCategory: .medium)
+        
+        // Get text pages using the service
+        let textPages = paginationService.splitMarkdownIntoPages(markdownText, size: size, measurer: measurer)
+        
+        // Get result pages using the service
+        let resultPages = paginationService.chunkResults(searchResults, itemsPerPage: 5)
+        
+        // Combine pages
         pages = textPages.map { .markdown($0) } + resultPages.map { .results($0) }
+        
+        // Update both internal and external total pages
+        internalTotalPages = pages.count
         totalPages = pages.count
-
-        if currentPage >= totalPages {
-            currentPage = max(0, totalPages - 1)
+        
+        // Ensure current page is valid
+        if currentPage >= internalTotalPages {
+            currentPage = max(0, internalTotalPages - 1)
         }
     }
 
