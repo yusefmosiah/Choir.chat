@@ -37,6 +37,12 @@ struct ChoirThreadDetailView: View {
                 ScrollView {
                     messageList
                 }
+                .onAppear {
+                    // Scroll to the bottom when the view appears
+                    withAnimation(.easeOut(duration: 0.3)) {
+                        scrollProxy.scrollTo("bottomScrollAnchor", anchor: .bottom)
+                    }
+                }
                 .onChange(of: thread.messages.count) { _, _ in
                     withAnimation(.easeOut(duration: 0.3)) {
                         scrollProxy.scrollTo("bottomScrollAnchor", anchor: .bottom)
@@ -124,7 +130,7 @@ struct ChoirThreadDetailView: View {
                 emptyPhases[phase] = ""
             }
 
-            var placeholderMessage = Message(
+            let placeholderMessage = Message(
                 content: "...",
                 isUser: false,
                 isStreaming: true
