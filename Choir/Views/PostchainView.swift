@@ -246,14 +246,90 @@ struct PostchainView: View {
     private enum SwipeDirection { case next, previous } // Keep SwipeDirection for switchToPhase
 
     private func handlePageTap(direction: PageTapDirection, size: CGSize) {
-        // The tap overlay now only handles phase switching at boundaries.
+        // Recalculate combined markdown for the current phase
+        let phase = selectedPhase
+        let baseContent = message.getPhaseContent(phase)
+        var combinedMarkdown = baseContent
+        if phase == .experienceVectors && !message.vectorSearchResults.isEmpty {
+            combinedMarkdown += message.formatVectorResultsToMarkdown()
+        } else if phase == .experienceWeb && !message.webSearchResults.isEmpty {
+            combinedMarkdown += message.formatWebResultsToMarkdown()
+        }
+        let pages = splitMarkdownIntoPages(combinedMarkdown, size: size)
+        let totalPages = max(1, pages.count)
+        let currentPage = message.phaseCurrentPage[phase] ?? 0
+
         withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
             if direction == .previous {
-                switchToPhase(direction: .previous)
-            } else {
-                switchToPhase(direction: .next)
+                if currentPage > 0 {
+                    message.phaseCurrentPage[phase] = currentPage - 1
+                } else {
+                    switchToPhase(direction: .previous)
+                }
+            } else { // .next
+                if currentPage < totalPages - 1 {
+                    message.phaseCurrentPage[phase] = currentPage + 1
+                } else {
+                    switchToPhase(direction: .next)
+                }
             }
         }
+    }
+
+    // Helper to match PaginatedMarkdownView pagination logic
+    private func splitMarkdownIntoPages(_ text: String, size: CGSize) -> [String] {
+        guard !text.isEmpty else { return [""] }
+        guard size.width > 8, size.height > 40 else {
+            return [text]
+        }
+
+        let measurer = TextMeasurer(sizeCategory: .medium)
+        let paginationControlsHeight: CGFloat = 35
+        let verticalPadding: CGFloat = 8
+        let availableTextHeight = size.height - verticalPadding - paginationControlsHeight
+
+        guard availableTextHeight > 20 else {
+            return [text]
+        }
+
+        let availableTextWidth = size.width - 8
+
+        var pagesResult: [String] = []
+        var remainingText = Substring(text)
+
+        while !remainingText.isEmpty {
+            let pageText = measurer.fitTextToHeight(
+                text: String(remainingText),
+                width: availableTextWidth,
+                height: availableTextHeight
+            )
+
+            guard !pageText.isEmpty else {
+                if !remainingText.isEmpty {
+                    pagesResult.append(String(remainingText))
+                }
+                remainingText = ""
+                break
+            }
+
+            pagesResult.append(pageText)
+
+            if pageText.count < remainingText.count {
+                let index = remainingText.index(remainingText.startIndex, offsetBy: pageText.count)
+                remainingText = remainingText[index...]
+            } else {
+                remainingText = ""
+            }
+        }
+
+        if pagesResult.isEmpty && !text.isEmpty {
+            return [text]
+        }
+        if pagesResult.isEmpty && text.isEmpty {
+            return [""]
+        }
+
+        return pagesResult
     }
 
     // Keep existing switchToPhase function, it's still needed for phase boundary logic
