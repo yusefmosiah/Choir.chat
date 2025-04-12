@@ -18,8 +18,7 @@ Performance Optimization Checklist (80/20 Focus)
 
 🎯 Target 1: Drag Gesture Spikes (PostchainView)
 
-[x] (Highest Priority) Apply .drawingGroup() to PhaseCard:
-### partially completed. we are putting the markdown in a drawing group, but not the messages
+[ ] (Highest Priority) Apply .drawingGroup() to PhaseCard:
 
 Why: Offloads complex rendering (gradients, shadows, text, subviews) of the moving cards to Metal, drastically reducing main thread CPU load during animation/drag. Often the single biggest win for complex animating views.
 

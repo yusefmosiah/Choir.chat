@@ -80,7 +80,8 @@ struct PostchainView: View {
                 // --- Card Stack ---
                 ZStack {
                     ForEach(availablePhases) { phase in
-                        PhaseCard(
+                        // Apply common modifiers first
+                        let cardView = PhaseCard(
                             phase: phase,
                             message: message,
                             isSelected: phase == selectedPhase,
@@ -94,8 +95,15 @@ struct PostchainView: View {
                         .zIndex(phase == selectedPhase ? 1 : 0)
                         .opacity(calculateOpacity(for: phase))
                         .id("\(viewId)_\(phase.rawValue)")
-                        .allowsHitTesting(phase == selectedPhase) // Disable taps on non-selected cards
-                    }
+                        .allowsHitTesting(phase == selectedPhase)
+
+                        // Conditionally apply drawingGroup
+                        if phase == selectedPhase {
+                            cardView.drawingGroup()
+                        } else {
+                            cardView
+                        }
+                    } // End ForEach
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity) // Ensure card stack uses space
                 .simultaneousGesture( // Drag gesture remains on the card stack
