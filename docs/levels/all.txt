@@ -2033,11 +2033,11 @@ phase_model_config_issue_analysis
 ==
 
 
-# Root Cause Analysis: Experience Phases Always Using `quasar-alpha`
+# Root Cause Analysis: Experience Phases Always Using `optimus-alpha`
 
 ## Summary
 
-Regardless of saved model configurations, the **experiencevectors** and **experienceweb** phases always use the `quasar-alpha` model. This behavior is due to the backend falling back on hardcoded defaults because the iOS app does **not send** per-phase model configs in API requests.
+Regardless of saved model configurations, the **experiencevectors** and **experienceweb** phases always use the `optimus-alpha` model. This behavior is due to the backend falling back on hardcoded defaults because the iOS app does **not send** per-phase model configs in API requests.
 
 ---
 
@@ -2047,10 +2047,10 @@ Regardless of saved model configurations, the **experiencevectors** and **experi
 
 - The backend **assigns default models** for each phase if **no override is provided**:
   ```python
-  experience_vectors_model_config = experience_vectors_mc_override or ModelConfig(provider="openrouter", model_name="openrouter/quasar-alpha", temperature=default_temp)
-  experience_web_model_config = experience_web_mc_override or ModelConfig(provider="openrouter", model_name="openrouter/quasar-alpha", temperature=default_temp)
+  experience_vectors_model_config = experience_vectors_mc_override or ModelConfig(provider="openrouter", model_name="openrouter/optimus-alpha", temperature=default_temp)
+  experience_web_model_config = experience_web_mc_override or ModelConfig(provider="openrouter", model_name="openrouter/optimus-alpha", temperature=default_temp)
   ```
-- So, **without explicit overrides**, these phases **always use `quasar-alpha`**.
+- So, **without explicit overrides**, these phases **always use `optimus-alpha`**.
 
 ---
 
@@ -2076,7 +2076,7 @@ Regardless of saved model configurations, the **experiencevectors** and **experi
 ## Root Cause
 
 - The **absence of per-phase model configs** in the API request payload.
-- Backend defaults are used instead, leading to persistent use of `quasar-alpha` for experience phases.
+- Backend defaults are used instead, leading to persistent use of `optimus-alpha` for experience phases.
 
 ---
 

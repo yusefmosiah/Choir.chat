@@ -505,12 +505,12 @@ async def run_langchain_postchain_workflow(
         default_temp = 0.333
         action_model_config = action_mc_override or ModelConfig(provider="google", model_name="gemini-2.0-flash-lite", temperature=default_temp)
         # Assign defaults for new phases
-        experience_vectors_model_config = experience_vectors_mc_override or ModelConfig(provider="openrouter", model_name="openrouter/quasar-alpha", temperature=default_temp)
-        experience_web_model_config = experience_web_mc_override or ModelConfig(provider="openrouter", model_name="openrouter/quasar-alpha", temperature=default_temp) # Can use same default or different
-        intention_model_config = intention_mc_override or ModelConfig(provider="google", model_name="gemini-2.0-flash", temperature=default_temp)
+        experience_vectors_model_config = experience_vectors_mc_override or ModelConfig(provider="openrouter", model_name="x-ai/grok-3-mini-beta", temperature=default_temp)
+        experience_web_model_config = experience_web_mc_override or ModelConfig(provider="google", model_name="gemini-2.0-flash-lite", temperature=default_temp) # Can use same default or different
+        intention_model_config = intention_mc_override or ModelConfig(provider="openrouter", model_name="x-ai/grok-3-mini-beta", temperature=default_temp)
         observation_model_config = observation_mc_override or ModelConfig(provider="groq", model_name="qwen-qwq-32b", temperature=default_temp)
-        understanding_model_config = understanding_mc_override or ModelConfig(provider="openrouter", model_name="openrouter/quasar-alpha", temperature=default_temp)
-        yield_model_config = yield_mc_override or ModelConfig(provider="google", model_name="gemini-2.5-pro-exp-03-25", temperature=default_temp)
+        understanding_model_config = understanding_mc_override or ModelConfig(provider="openrouter", model_name="openrouter/optimus-alpha", temperature=default_temp)
+        yield_model_config = yield_mc_override or ModelConfig(provider="openrouter", model_name="x-ai/grok-3-mini-beta", temperature=default_temp)
 
         logger.info(f"Workflow Models - Action: {action_model_config}, ExpVectors: {experience_vectors_model_config}, ExpWeb: {experience_web_model_config}, Intention: {intention_model_config}, Observation: {observation_model_config}, Understanding: {understanding_model_config}, Yield: {yield_model_config}")
 

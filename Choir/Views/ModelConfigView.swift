@@ -13,10 +13,14 @@ struct ModelConfigView: View {
 
     @State private var dynamicModelsByProvider: [String: [String]] = [
         "google": ["gemini-2.0-flash-lite", "gemini-2.0-flash", "gemini-2.5-pro-exp-03-25"],
-        "openrouter": ["ai21/jamba-1.6-mini", "openrouter/quasar-alpha", "mistralai/mixtral-8x7b"],
-        "anthropic": ["claude-3-haiku-20240307", "claude-3-sonnet-20240229", "claude-3-opus-20240229"],
-        "groq": ["qwen-qwq-32b", "llama3-70b-8192", "mixtral-8x7b-32768"],
-        "openai": ["gpt-4o-mini", "gpt-4o", "o3-mini"]
+        "openrouter": [
+            "ai21/jamba-1.6-mini", "openrouter/optimus-alpha", "x-ai/grok-3-mini-beta",
+        ],
+        "anthropic": [
+            "claude-3-5-haiku-latest", "claude-3-5-sonnet-latest", "claude-3-7-sonnet-latest",
+        ],
+        "groq": ["qwen-qwq-32b", "meta-llama/llama-4-scout-17b-16e-instruct", "qwen-2.5-coder-32b", "deepseek-r1-distill-qwen-32b", "meta-llama/llama-4-maverick-17b-128e-instruct", "llama-3.1-8b-instant", "mistral-saba-24b"],
+        "openai": ["gpt-4o-mini", "gpt-4o", "o3-mini"],
     ]
 
     var body: some View {
@@ -40,7 +44,8 @@ struct ModelConfigView: View {
 
                         Picker("Model", selection: modelBinding(for: phase)) {
                             if let provider = currentConfigs[phase]?.provider,
-                               let models = dynamicModelsByProvider[provider] {
+                                let models = dynamicModelsByProvider[provider]
+                            {
                                 ForEach(models, id: \.self) { model in
                                     Text(model).tag(model)
                                 }
@@ -52,8 +57,11 @@ struct ModelConfigView: View {
                             HStack {
                                 Text("Temperature")
                                 Spacer()
-                                Text(String(format: "%.2f", temperatureBinding(for: phase).wrappedValue))
-                                    .foregroundColor(.secondary)
+                                Text(
+                                    String(
+                                        format: "%.2f", temperatureBinding(for: phase).wrappedValue)
+                                )
+                                .foregroundColor(.secondary)
                             }
                             Slider(value: temperatureBinding(for: phase), in: 0...1, step: 0.01)
                         }
@@ -76,13 +84,16 @@ struct ModelConfigView: View {
                 }
 
                 Section("API Keys") {
-                    Text("Enter API keys for the selected providers. Keys are stored locally and sent with each request.")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                        .padding(.bottom, 4)
+                    Text(
+                        "Enter API keys for the selected providers. Keys are stored locally and sent with each request."
+                    )
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .padding(.bottom, 4)
 
                     ForEach(providers, id: \.self) { provider in
-                        SecureField("\(provider.capitalized) API Key", text: apiKeyBinding(for: provider))
+                        SecureField(
+                            "\(provider.capitalized) API Key", text: apiKeyBinding(for: provider))
                     }
                 }
 
@@ -125,7 +136,7 @@ struct ModelConfigView: View {
                 }
             }
             .alert("Reset to Defaults", isPresented: $showResetAlert) {
-                Button("Cancel", role: .cancel) { }
+                Button("Cancel", role: .cancel) {}
                 Button("Reset", role: .destructive) {
                     resetToDefaults()
                 }
@@ -142,7 +153,9 @@ struct ModelConfigView: View {
         Binding<String>(
             get: { currentConfigs[phase]?.provider ?? "google" },
             set: { newProvider in
-                var config = currentConfigs[phase] ?? ModelConfig(provider: newProvider, model: "", temperature: 0.33)
+                var config =
+                    currentConfigs[phase]
+                    ?? ModelConfig(provider: newProvider, model: "", temperature: 0.33)
                 config.provider = newProvider
                 currentConfigs[phase] = config
             }
@@ -153,7 +166,9 @@ struct ModelConfigView: View {
         Binding<String>(
             get: { currentConfigs[phase]?.model ?? "" },
             set: { newModel in
-                var config = currentConfigs[phase] ?? ModelConfig(provider: "google", model: newModel, temperature: 0.33)
+                var config =
+                    currentConfigs[phase]
+                    ?? ModelConfig(provider: "google", model: newModel, temperature: 0.33)
                 config.model = newModel
                 currentConfigs[phase] = config
             }
@@ -164,7 +179,9 @@ struct ModelConfigView: View {
         Binding<Double>(
             get: { currentConfigs[phase]?.temperature ?? 0.33 },
             set: { newTemp in
-                var config = currentConfigs[phase] ?? ModelConfig(provider: "google", model: "", temperature: newTemp)
+                var config =
+                    currentConfigs[phase]
+                    ?? ModelConfig(provider: "google", model: "", temperature: newTemp)
                 config.temperature = newTemp
                 currentConfigs[phase] = config
             }
@@ -196,10 +213,14 @@ struct ModelConfigView: View {
     private func loadCustomModels() {
         var updatedModels = [
             "google": ["gemini-2.0-flash-lite", "gemini-2.0-flash", "gemini-2.5-pro-exp-03-25"],
-            "openrouter": ["ai21/jamba-1.6-mini", "openrouter/quasar-alpha", "mistralai/mixtral-8x7b"],
-            "anthropic": ["claude-3-haiku-20240307", "claude-3-sonnet-20240229", "claude-3-opus-20240229"],
-            "groq": ["qwen-qwq-32b", "llama3-70b-8192", "mixtral-8x7b-32768"],
-            "openai": ["gpt-4o-mini", "gpt-4o", "o3-mini"]
+            "openrouter": [
+                "ai21/jamba-1.6-mini", "openrouter/optimus-alpha", "x-ai/grok-3-mini-beta",
+            ],
+            "anthropic": [
+                "claude-3-5-haiku-latest", "claude-3-5-sonnet-latest", "claude-3-7-sonnet-latest",
+            ],
+            "groq": ["qwen-qwq-32b", "meta-llama/llama-4-scout-17b-16e-instruct", "qwen-2.5-coder-32b", "deepseek-r1-distill-qwen-32b", "meta-llama/llama-4-maverick-17b-128e-instruct", "llama-3.1-8b-instant", "mistral-saba-24b"],
+            "openai": ["gpt-4o-mini", "gpt-4o", "o3-mini"],
         ]
 
         for provider in providers {
