@@ -53,7 +53,6 @@
 │       ├── PhaseCardContextMenu.swift
 │       ├── PostchainView.swift
 │       ├── PriorCard.swift
-│       ├── SearchResultListView.swift
 │       ├── Thread
 │       │   └── Components
 │       │       ├── ThreadInputBar.swift
@@ -206,6 +205,7 @@
 │   │   ├── dashboard.md
 │   │   ├── deep_links.md
 │   │   ├── deep_links_markdown.md
+│   │   ├── markdown_results_checklist.md
 │   │   ├── paginated_markdown_view.md
 │   │   ├── perf_work.md
 │   │   ├── performance_refactoring.md

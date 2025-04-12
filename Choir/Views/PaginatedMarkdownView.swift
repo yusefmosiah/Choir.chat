@@ -1,27 +1,14 @@
 import SwiftUI
 import MarkdownUI
 
-enum PageContent: Identifiable, Hashable {
-    case markdown(String)
-    case results([UnifiedSearchResult])
-
-    var id: String {
-        switch self {
-        case .markdown(let text): return "md-\(text.hashValue)"
-        case .results(let results): return "res-\(results.hashValue)"
-        }
-    }
-}
-
 struct PaginatedMarkdownView: View {
     let markdownText: String
-    let searchResults: [UnifiedSearchResult]
     let availableSize: CGSize
     @Binding var currentPage: Int
     var onNavigateToPreviousPhase: (() -> Void)?
     var onNavigateToNextPhase: (() -> Void)?
 
-    @State private var pages: [PageContent] = []
+    @State private var pages: [String] = []
     @State private var totalPages: Int = 1
     @State private var showingActionSheet = false
     @StateObject private var textSelectionManager = TextSelectionManager.shared
@@ -32,35 +19,70 @@ struct PaginatedMarkdownView: View {
                 ZStack(alignment: .topLeading) {
                     Rectangle().fill(Color.clear)
 
-                    pageContentView()
+                    if pages.indices.contains(currentPage) {
+                        markdownPageView(pages[currentPage])
+                    } else if !markdownText.isEmpty {
+                        ProgressView()
+                    } else {
+                        Text("").frame(maxWidth: .infinity, maxHeight: .infinity)
+                    }
                 }
                 .frame(width: geometry.size.width, height: geometry.size.height)
                 .contentShape(Rectangle())
                 .onLongPressGesture {
-                    showingActionSheet = true
+                    let currentText = extractCurrentPageText()
+                    if !currentText.isEmpty {
+                        TextSelectionManager.shared.showSheet(withText: markdownText)
+                    }
                 }
 
                 Spacer(minLength: 0)
+
+                // Pagination Controls
+                HStack {
+                    Button(action: {
+                        if currentPage > 0 {
+                            currentPage -= 1
+                        } else {
+                            onNavigateToPreviousPhase?()
+                        }
+                    }) {
+                        Image(systemName: "chevron.left")
+                    }
+                    .disabled(currentPage <= 0 && onNavigateToPreviousPhase == nil)
+
+                    Spacer()
+                    Text("\(currentPage + 1) / \(totalPages)")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    Spacer()
+
+                    Button(action: {
+                        if currentPage < totalPages - 1 {
+                            currentPage += 1
+                        } else {
+                            onNavigateToNextPhase?()
+                        }
+                    }) {
+                        Image(systemName: "chevron.right")
+                    }
+                    .disabled(currentPage >= totalPages - 1 && onNavigateToNextPhase == nil)
+                }
+                .padding(.horizontal)
+                .padding(.bottom, 5)
+                .frame(height: 30)
             }
             .onAppear {
                 paginateContent(size: geometry.size)
             }
-            .onChange(of: markdownText) { _ in paginateContent(size: geometry.size) }
-            .onChange(of: searchResults) { _ in paginateContent(size: geometry.size) }
-            .onChange(of: geometry.size) { _ in paginateContent(size: geometry.size) }
-        }
-    }
-
-
-    @ViewBuilder
-    private func pageContentView() -> some View {
-        if pages.indices.contains(currentPage) {
-            let page = pages[currentPage]
-            switch page {
-            case .markdown(let textPage):
-                markdownPageView(textPage)
-            case .results(let results):
-                resultsPageView(results)
+            .onChange(of: markdownText) { _, newText in
+                paginateContent(size: geometry.size)
+            }
+            .onChange(of: geometry.size) { _, newSize in
+                paginateContent(size: newSize)
+            }
+            .onChange(of: currentPage) { _, newPage in
+                // Optional: print("PaginatedMarkdownView: currentPage changed to \(newPage + 1)")
             }
         }
     }
@@ -76,83 +98,81 @@ struct PaginatedMarkdownView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 
-    @ViewBuilder
-    private func resultsPageView(_ results: [UnifiedSearchResult]) -> some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 10) {
-                ForEach(results) { result in
-                    resultCardView(result)
-                }
-            }
-            .padding(.horizontal, 5)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-    }
-
-    @ViewBuilder
-    private func resultCardView(_ result: UnifiedSearchResult) -> some View {
-        switch result {
-        case .vector(let vectorResult):
-            VectorResultCard(result: vectorResult, localThreadIDs: [])
-        case .web(let webResult):
-            WebResultCard(result: webResult)
-        }
-    }
-
     private func paginateContent(size: CGSize) {
-        let textPages = splitMarkdownIntoPages(markdownText, size: size)
-        let resultPages = chunkResults(searchResults, itemsPerPage: 5)
-
-        pages = textPages.map { .markdown($0) } + resultPages.map { .results($0) }
-        totalPages = pages.count
+        guard size.width > 0, size.height > 0 else {
+            pages = [markdownText]
+            totalPages = 1
+            currentPage = 0
+            return
+        }
+        pages = splitMarkdownIntoPages(markdownText, size: size)
+        totalPages = max(1, pages.count)
 
         if currentPage >= totalPages {
             currentPage = max(0, totalPages - 1)
+        } else if currentPage < 0 {
+            currentPage = 0
         }
     }
 
     private func splitMarkdownIntoPages(_ text: String, size: CGSize) -> [String] {
+        guard !text.isEmpty else { return [""] }
+        guard size.width > 8, size.height > 40 else {
+            return [text]
+        }
+
         let measurer = TextMeasurer(sizeCategory: .medium)
-        let textHeight = size.height - 40
-        var pages: [String] = []
-        var remainingText = text
+        let paginationControlsHeight: CGFloat = 35
+        let verticalPadding: CGFloat = 8
+        let availableTextHeight = size.height - verticalPadding - paginationControlsHeight
+
+        guard availableTextHeight > 20 else {
+            return [text]
+        }
+
+        let availableTextWidth = size.width - 8
+
+        var pagesResult: [String] = []
+        var remainingText = Substring(text)
 
         while !remainingText.isEmpty {
             let pageText = measurer.fitTextToHeight(
-                text: remainingText,
-                width: size.width - 8,
-                height: textHeight
+                text: String(remainingText),
+                width: availableTextWidth,
+                height: availableTextHeight
             )
-            pages.append(pageText)
+
+            guard !pageText.isEmpty else {
+                if !remainingText.isEmpty {
+                    pagesResult.append(String(remainingText))
+                }
+                remainingText = ""
+                break
+            }
+
+            pagesResult.append(pageText)
 
             if pageText.count < remainingText.count {
                 let index = remainingText.index(remainingText.startIndex, offsetBy: pageText.count)
-                remainingText = String(remainingText[index...])
+                remainingText = remainingText[index...]
             } else {
                 remainingText = ""
             }
         }
-        return pages
-    }
 
-    private func chunkResults(_ results: [UnifiedSearchResult], itemsPerPage: Int) -> [[UnifiedSearchResult]] {
-        stride(from: 0, to: results.count, by: itemsPerPage).map {
-            Array(results[$0..<min($0 + itemsPerPage, results.count)])
+        if pagesResult.isEmpty && !text.isEmpty {
+            return [text]
         }
+        if pagesResult.isEmpty && text.isEmpty {
+            return [""]
+        }
+
+        return pagesResult
     }
 
     private func extractCurrentPageText() -> String {
         guard pages.indices.contains(currentPage) else { return "" }
-        switch pages[currentPage] {
-        case .markdown(let text): return text
-        case .results(let results):
-            return results.map {
-                switch $0 {
-                case .vector(let v): return String(v.content.prefix(80))
-                case .web(let w): return w.title
-                }
-            }.joined(separator: "\n")
-        }
+        return pages[currentPage]
     }
 
     private func handleLinkTap(_ url: URL) {

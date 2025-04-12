@@ -287,3 +287,45 @@ class Message: ObservableObject, Identifiable, Equatable {
         }
     }
 }
+
+
+extension Message {
+    // Function to format Vector Search Results into Markdown
+    func formatVectorResultsToMarkdown() -> String {
+        guard !vectorSearchResults.isEmpty else { return "" }
+
+        var markdown = "\n\n---\n**Vector Search Results:**\n\n" // Separator and title
+        for result in vectorSearchResults {
+            markdown += "*   **Score: \(String(format: "%.2f", result.score))**"
+            // Check for local thread link
+            if let threadIDString = result.metadata?["thread_id"] as? String,
+               let _ = UUID(uuidString: threadIDString) {
+                 markdown += " [Local Thread](choir://thread/\(threadIDString))"
+            }
+            markdown += "\n    > \(result.content.replacingOccurrences(of: "\n", with: "\n    > "))" // Blockquote for content
+            if let provider = result.provider {
+                 markdown += "\n    *Provider: \(provider)*"
+            }
+            markdown += "\n"
+        }
+        markdown += "\n---\n" // Footer separator
+        return markdown
+    }
+
+    // Function to format Web Search Results into Markdown
+    func formatWebResultsToMarkdown() -> String {
+        guard !webSearchResults.isEmpty else { return "" }
+
+        var markdown = "\n\n---\n**Web Search Results:**\n\n" // Separator and title
+        for result in webSearchResults {
+            markdown += "*   **[\(result.title)](\(result.url))**" // Title as link
+            markdown += "\n    > \(result.content.replacingOccurrences(of: "\n", with: "\n    > "))" // Blockquote for content
+            if let provider = result.provider {
+                 markdown += "\n    *Provider: \(provider)*"
+            }
+            markdown += "\n"
+        }
+         markdown += "\n---\n" // Footer separator
+        return markdown
+    }
+}

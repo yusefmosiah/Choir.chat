@@ -65,29 +65,23 @@ struct PhaseCard: View {
     // --- Body ---
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        // Compute markdown content and displayable flag outside ViewBuilder
+        let baseContent = message.getPhaseContent(phase)
+        var combinedMarkdown = baseContent
+        if phase == .experienceVectors && !message.vectorSearchResults.isEmpty {
+            combinedMarkdown += message.formatVectorResultsToMarkdown()
+        } else if phase == .experienceWeb && !message.webSearchResults.isEmpty {
+            combinedMarkdown += message.formatWebResultsToMarkdown()
+        }
+        let hasDisplayableContent = !combinedMarkdown.isEmpty
+
+        return VStack(alignment: .leading, spacing: 12) {
             // Header (Keep existing header)
 
-            // Content Area
-            let content = message.getPhaseContent(phase)
-
-            if !content.isEmpty
-                || (phase == .experienceVectors && !message.vectorSearchResults.isEmpty)
-                || (phase == .experienceWeb && !message.webSearchResults.isEmpty)
-            {
+            if hasDisplayableContent {
                 GeometryReader { geometry in
-                    // Determine which view to show based on the phase
-                    let vectorResults = message.vectorSearchResults.map {
-                        UnifiedSearchResult.vector($0)
-                    }
-                    let webResults = message.webSearchResults.map { UnifiedSearchResult.web($0) }
-                    let combinedResults = vectorResults + webResults
-
-                    let combinedMarkdown = content  // Optionally, inject search result markdown here
-
                     PaginatedMarkdownView(
                         markdownText: combinedMarkdown,
-                        searchResults: combinedResults,
                         availableSize: geometry.size,
                         currentPage: pageBinding,
                         onNavigateToPreviousPhase: createNavigationHandler(direction: .previous),

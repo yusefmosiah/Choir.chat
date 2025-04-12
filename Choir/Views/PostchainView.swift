@@ -246,41 +246,12 @@ struct PostchainView: View {
     private enum SwipeDirection { case next, previous } // Keep SwipeDirection for switchToPhase
 
     private func handlePageTap(direction: PageTapDirection, size: CGSize) {
-        guard size != .zero else {
-            print("Error: Size is zero, cannot calculate pages.")
-            return
-        }
-        let phase = selectedPhase // Get currently selected phase
-        let currentPage = message.phaseCurrentPage[phase] ?? 0
-
-        // Calculate totalPages accurately using PaginatedMarkdownView's logic
-        let content = message.getPhaseContent(phase)
-        // Note: Accessing search results directly here. Ensure Message model provides these.
-        // If errors occur, check ConversationModels.swift for VectorSearchResult/SearchResult definitions.
-        let vectorResults = message.vectorSearchResults.map { UnifiedSearchResult.vector($0) }
-        let webResults = message.webSearchResults.map { UnifiedSearchResult.web($0) }
-        let searchResults = vectorResults + webResults
-        let totalPages = calculateAccurateTotalPages(markdownText: content, searchResults: searchResults, size: size)
-
-        print("handlePageTap: Phase=\(phase), CurrentPage=\(currentPage + 1), TotalPages=\(totalPages), Direction=\(direction)") // Debug
-
+        // The tap overlay now only handles phase switching at boundaries.
         withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
             if direction == .previous {
-                if currentPage > 0 {
-                    message.phaseCurrentPage[phase] = currentPage - 1
-                    print("Tapped Left: Now Page \(currentPage)") // Debug
-                } else {
-                    print("Tapped Left: Switching Phase Previous") // Debug
-                    switchToPhase(direction: .previous) // Existing function
-                }
-            } else { // .next
-                if currentPage < totalPages - 1 {
-                    message.phaseCurrentPage[phase] = currentPage + 1
-                    print("Tapped Right: Now Page \(currentPage + 2)") // Debug
-                } else {
-                    print("Tapped Right: Switching Phase Next") // Debug
-                    switchToPhase(direction: .next) // Existing function
-                }
+                switchToPhase(direction: .previous)
+            } else {
+                switchToPhase(direction: .next)
             }
         }
     }
@@ -331,55 +302,7 @@ struct PostchainView: View {
     }
 
 
-    // Helper function to calculate total pages accurately (adapting PaginatedMarkdownView logic)
-    private func calculateAccurateTotalPages(markdownText: String, searchResults: [UnifiedSearchResult], size: CGSize) -> Int {
-        guard size.height > 0, size.width > 0 else {
-            print("Warning: calculateAccurateTotalPages called with zero size.")
-            return 1
-        }
-
-        // Logic adapted from PaginatedMarkdownView
-        // Note: Ensure TextMeasurer is accessible or reimplement its logic if needed.
-        // Assuming TextMeasurer is available globally or via import.
-        let measurer = TextMeasurer(sizeCategory: .medium) // Adjust sizeCategory if needed
-        let textHeight = size.height - 40 // Matches PaginatedMarkdownView padding estimate
-        var textPagesCount = 0
-        var remainingText = markdownText
-
-        if !markdownText.isEmpty {
-            while !remainingText.isEmpty {
-                let pageText = measurer.fitTextToHeight(
-                    text: remainingText,
-                    width: size.width - 8, // Matches PaginatedMarkdownView padding estimate
-                    height: textHeight
-                )
-                // Handle potential infinite loop if fitTextToHeight returns empty string for non-empty input
-                if pageText.isEmpty && !remainingText.isEmpty {
-                    print("Warning: TextMeasurer returned empty page for non-empty text. Breaking loop.")
-                    textPagesCount += 1 // Count the remaining text as one page
-                    break
-                }
-                textPagesCount += 1
-                if pageText.count < remainingText.count {
-                    let index = remainingText.index(remainingText.startIndex, offsetBy: pageText.count)
-                    remainingText = String(remainingText[index...])
-                } else {
-                    remainingText = ""
-                }
-            }
-        } else {
-            textPagesCount = 0 // No text pages if markdown is empty
-        }
-
-
-        // Chunk results (Matches PaginatedMarkdownView logic)
-        let itemsPerPage = 5 // Assuming 5 results per page, match PaginatedMarkdownView
-        // Use ceil division to potentially fix type inference error
-        let resultPagesCount = searchResults.isEmpty ? 0 : Int(ceil(Double(searchResults.count) / Double(itemsPerPage)))
-
-        let total = textPagesCount + resultPagesCount
-        return max(1, total) // Ensure at least 1 page
-    }
+    // calculateAccurateTotalPages is no longer needed and has been removed.
     #Preview {
         PostchainView(
             message: Message(content: "Preview", isUser: false),
