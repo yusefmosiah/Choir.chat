@@ -415,12 +415,25 @@ extension Message {
         var markdown = "\n\n---\n**Vector Search Results:**\n\n" // Separator and title
         for result in vectorSearchResults {
             markdown += "*   **Score: \(String(format: "%.2f", result.score))**"
+            
             // Check for local thread link
             if let threadIDString = result.metadata?["thread_id"] as? String,
                let _ = UUID(uuidString: threadIDString) {
                  markdown += " [Local Thread](choir://thread/\(threadIDString))"
             }
-            markdown += "\n    > \(result.content.replacingOccurrences(of: "\n", with: "\n    > "))" // Blockquote for content
+            
+            // Handle both content formats - full content or preview content
+            let contentText: String
+            if !result.content.isEmpty {
+                contentText = result.content
+            } else if let id = result.id {
+                contentText = "[Vector Result ID: \(id)]"
+            } else {
+                contentText = "[Vector Result]"
+            }
+            
+            markdown += "\n    > \(contentText.replacingOccurrences(of: "\n", with: "\n    > "))" // Blockquote for content
+            
             if let provider = result.provider {
                  markdown += "\n    *Provider: \(provider)*"
             }
@@ -436,14 +449,23 @@ extension Message {
 
         var markdown = "\n\n---\n**Web Search Results:**\n\n" // Separator and title
         for result in webSearchResults {
-            markdown += "*   **[\(result.title)](\(result.url))**" // Title as link
-            markdown += "\n    > \(result.content.replacingOccurrences(of: "\n", with: "\n    > "))" // Blockquote for content
+            // Make sure we have title and URL
+            let titleText = !result.title.isEmpty ? result.title : "Web Result"
+            let urlText = !result.url.isEmpty ? result.url : "#"
+            
+            // Format title as link
+            markdown += "*   **[\(titleText)](\(urlText))**"
+            
+            // Handle content
+            let contentText = !result.content.isEmpty ? result.content : "[Content not available]"
+            markdown += "\n    > \(contentText.replacingOccurrences(of: "\n", with: "\n    > "))" // Blockquote for content
+            
             if let provider = result.provider {
                  markdown += "\n    *Provider: \(provider)*"
             }
             markdown += "\n"
         }
-         markdown += "\n---\n" // Footer separator
+        markdown += "\n---\n" // Footer separator
         return markdown
     }
 }

@@ -238,16 +238,38 @@ class PostchainViewModel: ObservableObject {
                 print("⚠️ STREAMING UI: Could not find message with ID \(targetMessageId)")
             }
 
-            // Update structured results based on phase
+            // Update structured results based on phase with enhanced logging
             if phase == .experienceVectors {
                 if let newVectorResults = vectorResults {
                     self.vectorResultsByMessage[targetMessageId] = newVectorResults
                     print("📊 STREAMING UI: Updated vector results: \(newVectorResults.count) items")
+                    
+                    // Debug the structure of what we received
+                    for (i, result) in newVectorResults.enumerated() {
+                        print("📊 VECTOR RESULT #\(i+1):")
+                        print("   - Score: \(result.score)")
+                        print("   - ID: \(result.id ?? "nil")")
+                        print("   - Content: \(result.content.isEmpty ? "EMPTY" : "\(result.content.prefix(50))...")")
+                        print("   - Content preview: \(result.content_preview?.prefix(50) ?? "nil")")
+                        
+                        // If we have a content_preview but no content, use the preview
+                        if result.content.isEmpty && result.content_preview != nil {
+                            print("📊 VECTOR RESULT: Using content_preview as content")
+                        }
+                    }
                 }
             } else if phase == .experienceWeb {
                 if let newWebResults = webResults {
                     self.webResultsByMessage[targetMessageId] = newWebResults
                     print("📊 STREAMING UI: Updated web results: \(newWebResults.count) items")
+                    
+                    // Debug the structure of what we received
+                    for (i, result) in newWebResults.enumerated() {
+                        print("📊 WEB RESULT #\(i+1):")
+                        print("   - Title: \(result.title)")
+                        print("   - URL: \(result.url)")
+                        print("   - Content: \(result.content.isEmpty ? "EMPTY" : "\(result.content.prefix(50))...")")
+                    }
                 }
             }
 

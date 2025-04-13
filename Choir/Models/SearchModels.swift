@@ -26,30 +26,59 @@ struct SearchResult: Codable, Equatable, Hashable {
 
 // MARK: - VectorSearchResult
 struct VectorSearchResult: Codable, Equatable, Hashable {
-    let content: String
+    var content: String = ""
     let score: Double
     let metadata: [String: String]?
     let provider: String?
-
+    var id: String?
+    var content_preview: String?
+    
     var uniqueId: String {
-        "\(content.prefix(50))-\(score)"
+        if let id = id {
+            return id
+        }
+        return "\(content.prefix(50))-\(score)"
     }
 
     enum CodingKeys: String, CodingKey {
-        case content, score, metadata, provider
+        case content, score, metadata, provider, id, content_preview
     }
 
     func hash(into hasher: inout Hasher) {
         hasher.combine(content)
         hasher.combine(score)
         hasher.combine(provider)
+        hasher.combine(id)
     }
 
-    init(content: String, score: Double, provider: String?, metadata: [String: String]? = nil) {
+    init(content: String, score: Double, provider: String?, metadata: [String: String]? = nil, id: String? = nil, content_preview: String? = nil) {
         self.content = content
         self.score = score
         self.metadata = metadata
         self.provider = provider
+        self.id = id
+        self.content_preview = content_preview
+    }
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        // Try to decode content, but don't fail if it's missing
+        content = try container.decodeIfPresent(String.self, forKey: .content) ?? ""
+        
+        // These fields are required
+        score = try container.decode(Double.self, forKey: .score)
+        
+        // These fields are optional
+        metadata = try container.decodeIfPresent([String: String].self, forKey: .metadata)
+        provider = try container.decodeIfPresent(String.self, forKey: .provider)
+        id = try container.decodeIfPresent(String.self, forKey: .id)
+        content_preview = try container.decodeIfPresent(String.self, forKey: .content_preview)
+        
+        // Handle the case where content is empty but content_preview is available
+        if content.isEmpty && content_preview != nil {
+            content = content_preview!
+        }
     }
 }
 

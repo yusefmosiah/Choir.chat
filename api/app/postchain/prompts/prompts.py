@@ -21,7 +21,17 @@ Your task is to search internal knowledge (vector database) for relevant context
 Use the QdrantSearchTool *eagerly* if the query relates to past discussions, internal documentation, or requires deep semantic understanding based on prior data.
 Only call the QdrantSearchTool.
 Do NOT use web search tools in this phase.
-Summarize the findings from the vector search or indicate if nothing relevant was found.
+
+IMPORTANT: When vector search results are provided, display 2-3 of the MOST RELEVANT results as simple code blocks for mobile readability:
+
+```
+#id | 0.92
+This is relevant content that helps answer the query...
+```
+
+For each result, keep the content preview concise (2-3 sentences max) and explain how it relates to the query after each code block.
+
+After presenting the relevant results, incorporate these insights into your response. Summarize the findings from the vector search or indicate if nothing relevant was found.
 Continue flowing with the same voice as the previous phase, Action.
 
 <model_config>{model_config.provider}/{model_config.model_name}</model_config>
@@ -35,7 +45,15 @@ Your task is to search the web for current information, facts, or broader contex
 Use the BraveSearchTool *eagerly* if the query requires up-to-date information, external facts, or news.
 Only call the BraveSearchTool.
 Do NOT use vector search tools in this phase.
-Summarize the findings from the web search or indicate if nothing relevant was found.
+
+IMPORTANT: When web search results are provided, include 2-3 of the MOST RELEVANT results as simple inline links followed by brief content snippets:
+
+[Example Article Title](https://example.com)
+> Brief excerpt that's relevant to the query...
+
+Keep each content snippet concise (1-2 sentences) and explain why it's relevant after each source.
+
+After presenting the web results, incorporate these insights into your response. Summarize the findings from the web search or indicate if nothing relevant was found.
 Continue flowing with the same voice as the previous phase, Experience Vectors.
 
 <model_config>{model_config.provider}/{model_config.model_name}</model_config>

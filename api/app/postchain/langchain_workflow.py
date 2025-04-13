@@ -1,6 +1,22 @@
 # Replacement content for /Users/wiz/Choir/api/app/postchain/langchain_workflow.py
+#
+# IMPORTANT OPTIMIZATION NOTES:
+# -----------------------------
+# 1. This file contains performance optimizations to prevent client-side freezing issues:
+#    - MAX_RETRIEVED_CONTENT_LENGTH is set to 2000 chars to prevent large payloads
+#    - MAX_VECTOR_RESULTS limits vector results returned to the client to 10
+#    - Vector content sent to client is truncated to 100 chars for preview
+#    - Qdrant search limit has been reduced from 80 to 20 results
+#
+# 2. Long user inputs (>25k chars) have special handling:
+#    - For large user inputs, we embed the Action response instead of the full prompt
+#    - This avoids truncation issues with embeddings and provides more relevant vectors
+#    - We store a truncated prompt with full Action response for better context retrieval
+#
+# 3. Duplicate prevention is implemented via prompt hash and similarity checking
 
 import asyncio
+import hashlib
 import logging
 from typing import List, Dict, Any, AsyncIterator, Optional
 import json
@@ -39,6 +55,14 @@ from app.tools.qdrant import qdrant_search # Specific tool for vector search pha
 
 # Configure logging
 logger = logging.getLogger("postchain_langchain")
+
+# Constants for content limits
+MAX_RETRIEVED_CONTENT_LENGTH = 2000  # Maximum length for retrieved content from Qdrant (reduced to prevent client-side hanging)
+MAX_INPUT_LENGTH_FOR_EMBEDDING = 25000  # Maximum length for direct embedding (avoid excessive tokens)
+PROMPT_TRUNCATION_LENGTH = 500  # How much of a long prompt to include when storing with Action response
+SIMILARITY_EPSILON = 1e-6  # Small tolerance for floating point comparison
+# Limit vector search results to reduce payload size
+MAX_VECTOR_RESULTS = 10  # Maximum number of vector results to return to client
 
 COMMON_SYSTEM_PROMPT = """
 You are representing Choir's PostChain, in which many different AI models collaborate to provide an improvisational, dynamic, and contextually rich response in a single harmonized voice.
@@ -98,7 +122,23 @@ async def run_experience_vectors_phase(
     model_config: ModelConfig,
     thread_id: str
 ) -> ExperienceVectorsPhaseOutput:
-    """Runs the Experience Vectors phase: Embeds query, searches Qdrant, calls LLM with results."""
+    """Runs the Experience Vectors phase: Embeds query, searches Qdrant, calls LLM with results.
+    
+    This implementation includes several optimizations for handling large amounts of text:
+    
+    1. Content Length Management:
+       - For long user prompts (>MAX_INPUT_LENGTH_FOR_EMBEDDING chars), we embed the Action 
+         response instead of the prompt to avoid truncation issues with the embedding model
+       - When storing long prompts, we save a truncated version of the prompt plus the 
+         full Action response
+       - Retrieved content is truncated to MAX_RETRIEVED_CONTENT_LENGTH chars to prevent 
+         client-side performance issues
+    
+    2. Duplicate Prevention:
+       - Calculates similarity between the current embedding and existing vectors
+       - Skips saving if an exact match (similarity ≈ 1.0) is found
+       - Uses prompt hash in metadata for potential future optimizations
+    """
     logger.info(f"Running Experience Vectors phase (manual search) with model: {model_config.provider}/{model_config.model_name}")
 
     # Get necessary components
@@ -120,29 +160,87 @@ async def run_experience_vectors_phase(
     error_msg: Optional[str] = None
 
     try:
-        # --- 1. Embed the User Query --- #
-        logger.info(f"Embedding query for vector search: '{query_text[:100]}...' using {app_config.EMBEDDING_MODEL}")
-        embeddings = OpenAIEmbeddings(model=app_config.EMBEDDING_MODEL, api_key=app_config.OPENAI_API_KEY) # Pass key if needed
-        query_vector = await embeddings.aembed_query(query_text)
+        # --- 1. Embed the User Query or Action Response --- #
+        query_vector = None
+        content_to_store = query_text  # Default content to store
+        embedded_content_type = "user_prompt"  # Default type
+
+        # Calculate prompt hash regardless of length (used for metadata)
+        normalized_prompt = query_text.strip()  # Basic normalization
+        prompt_hash = hashlib.sha256(normalized_prompt.encode('utf-8')).hexdigest()
+
+        embeddings = OpenAIEmbeddings(model=app_config.EMBEDDING_MODEL, api_key=app_config.OPENAI_API_KEY)
+        
+        if len(query_text) <= MAX_INPUT_LENGTH_FOR_EMBEDDING:
+            logger.info(f"Prompt is short ({len(query_text)} chars). Embedding user prompt.")
+            query_vector = await embeddings.aembed_query(query_text)
+            # content_to_store remains query_text
+            # embedded_content_type remains "user_prompt"
+        else:
+            logger.info(f"Prompt is long ({len(query_text)} chars). Embedding Action response instead.")
+            # Extract Action response content (assuming it's the last AI message in history)
+            action_response_content = "Error: Action response not found."  # Default error message
+            last_ai_msg = next((m for m in reversed(messages) if isinstance(m, AIMessage)), None)
+            if last_ai_msg and hasattr(last_ai_msg, 'content'):
+                action_response_content = last_ai_msg.content
+                logger.info("Found Action response content to embed.")
+            else:
+                logger.error("Could not find Action response in message history to embed for long prompt.")
+                # Decide handling: Proceed with error content? Skip embedding/saving? Let's proceed for now.
+
+            # Embed the Action response
+            query_vector = await embeddings.aembed_query(action_response_content)
+            embedded_content_type = "action_response"
+
+            # Prepare content to store: truncated prompt + action response
+            truncated_prompt = query_text[:PROMPT_TRUNCATION_LENGTH] + "..."
+            content_to_store = f"--- User Prompt (Truncated) ---\n{truncated_prompt}\n\n--- Action Response ---\n{action_response_content}"
+
+        # Ensure query_vector is not None before proceeding
+        if query_vector is None:
+            logger.error("Failed to generate query vector. Skipping search and save.")
+            return ExperienceVectorsPhaseOutput(
+                experience_vectors_response=AIMessage(content="Error: Could not process query embedding."),
+                error="Embedding failed."
+            )
 
         # --- 2. Search Qdrant --- #
         logger.info(f"Searching Qdrant collection '{app_config.MESSAGES_COLLECTION}' with embedded query.")
-        qdrant_raw_results = await db_client.search_vectors(query_vector, limit=app_config.SEARCH_LIMIT)
-        logger.info(f"Qdrant returned {len(qdrant_raw_results)} results.")
+        # Use a smaller limit for search to reduce processing overhead
+        search_limit = min(20, app_config.SEARCH_LIMIT)  # Reduce the search limit from default (80)
+        qdrant_raw_results = await db_client.search_vectors(query_vector, limit=search_limit)
+        logger.info(f"Qdrant returned {len(qdrant_raw_results)} results from limit {search_limit}.")
 
-        # --- 3. Save Query Vector --- #
-        metadata = {
-            "role": "user_query",
-            "phase": "experience_vectors",
-            "thread_id": thread_id
-        }
+        # --- 3. Check for Exact Duplicates --- #
+        max_similarity = 0.0
+        if qdrant_raw_results:
+            # Ensure similarity scores are treated as floats
+            scores = [float(res.get("similarity", 0.0)) for res in qdrant_raw_results]
+            if scores:
+                max_similarity = max(scores)
+                
+        # Skip saving if we find an exact duplicate
+        should_save_query = (max_similarity < (1.0 - SIMILARITY_EPSILON))
+        
+        if not should_save_query:
+            logger.info(f"Max similarity ({max_similarity:.6f}) is effectively 1.0. Skipping save for this vector.")
+        else:
+            # --- Save Query Vector --- #
+            metadata = {
+                "role": "user_query_embedding",
+                "embedded_content_type": embedded_content_type,
+                "phase": "experience_vectors",
+                "thread_id": thread_id,
+                "prompt_hash": prompt_hash,
+                "original_prompt_length": len(query_text),
+            }
 
-        save_result = await db_client.store_vector(
-            content=query_text,
-            vector=query_vector,
-            metadata=metadata
-        )
-        logger.info(f"Saved query vector with ID: {save_result.get('id')}")
+            save_result = await db_client.store_vector(
+                content=content_to_store,
+                vector=query_vector,
+                metadata=metadata
+            )
+            logger.info(f"Saved vector (type: {embedded_content_type}) with ID: {save_result.get('id')}")
 
         # --- 4. Format Qdrant Results --- #
         seen_content = set()
@@ -150,6 +248,12 @@ async def run_experience_vectors_phase(
             content = res_dict.get("content")
             if content is not None and content not in seen_content:
                  try:
+                     # Check if content exceeds maximum length and truncate if needed
+                     if len(content) > MAX_RETRIEVED_CONTENT_LENGTH:
+                         truncated_content = content[:MAX_RETRIEVED_CONTENT_LENGTH] + "..."
+                         logger.warning(f"Truncated retrieved content from point {res_dict.get('id')} due to length ({len(content)} chars -> {MAX_RETRIEVED_CONTENT_LENGTH} chars).")
+                         content = truncated_content
+                         
                      # Adapt raw result keys to VectorSearchResult schema
                      vector_results_list.append(VectorSearchResult(
                          score=res_dict.get("similarity", 0.0), # Qdrant calls it similarity
@@ -165,11 +269,19 @@ async def run_experience_vectors_phase(
         logger.info(f"Formatted {len(vector_results_list)} unique vector search results.")
 
         # --- 4. Call LLM with Search Results --- #
-        # Prepare context string from results
+        # Prepare context string from results in the format specified in the prompt
         search_context = "\n\nRelevant Information from Internal Documents:\n"
         if vector_results_list:
+            # Add results in simplified code block format
             for i, res in enumerate(vector_results_list):
-                 search_context += f"{i+1}. [Score: {res.score:.3f}] {res.content}\n"
+                id_text = getattr(res, "id", f"#{i+1}")
+                search_context += f"""
+```
+{id_text} | {res.score:.2f}
+{res.content}
+```
+
+"""
         else:
             search_context += "No relevant information found in internal documents.\n"
         search_context += "\n"
@@ -208,10 +320,16 @@ Your task: Synthesize the information above and the conversation history to resp
         # Use a generic error message if LLM call failed before assignment
         final_response = final_response or AIMessage(content=f"Error in phase: {e}")
 
-    # Return the structured output
+    # Limit the number of vector results sent to the client to prevent performance issues
+    # We'll still use all results for the LLM synthesis internally, but limit what's sent to the client
+    limited_vector_results = vector_results_list[:MAX_VECTOR_RESULTS] if vector_results_list else []
+    if len(vector_results_list) > MAX_VECTOR_RESULTS:
+        logger.info(f"Limiting vector results returned to client from {len(vector_results_list)} to {MAX_VECTOR_RESULTS}")
+        
+    # Return the structured output with limited results
     return ExperienceVectorsPhaseOutput(
         experience_vectors_response=final_response,
-        vector_results=vector_results_list,
+        vector_results=limited_vector_results,
         error=error_msg
     )
 
@@ -341,7 +459,23 @@ Your task: Decide if web search is needed and call BraveSearchTool if relevant. 
 
             if tool_messages:
                 phase_messages.extend(tool_messages)
+                
+                # Add explicit web search results summary to help the model format results properly
+                if web_results_list:
+                    web_results_summary = "\n\nWeb Search Results:\n"
+                    for i, result in enumerate(web_results_list):
+                        # Format in the simplified way specified in the prompt
+                        web_results_summary += f"[{result.title}]({result.url})\n"
+                        web_results_summary += f"> {result.content}\n\n"
+                    
+                    # Add this as a human message to make it clear these are the results
+                    phase_messages.append(HumanMessage(content=f"""
+The web search returned {len(web_results_list)} results. Please incorporate the most relevant ones into your response 
+using the inline link + blockquote format as instructed, and then synthesize the information to answer the query.
 
+{web_results_summary}
+"""))
+                
                 # --- Second LLM Call (with tool results) ---
                 logger.info("Calling LLM again with Experience Web tool results.")
                 response_after_tool = await chain.ainvoke(phase_messages)
@@ -356,18 +490,29 @@ Your task: Decide if web search is needed and call BraveSearchTool if relevant. 
         if final_response is None:
             final_response = AIMessage(content="Error: Phase failed before generating a response.")
 
+        # Limit the number of web results sent to the client to prevent performance issues
+        # We'll still use all results for the LLM synthesis internally, but limit what's sent to the client
+        limited_web_results = web_results_list[:MAX_VECTOR_RESULTS] if web_results_list else []
+        if len(web_results_list) > MAX_VECTOR_RESULTS:
+            logger.info(f"Limiting web results returned to client from {len(web_results_list)} to {MAX_VECTOR_RESULTS}")
+
         return ExperienceWebPhaseOutput(
             experience_web_response=final_response,
-            web_results=web_results_list
+            web_results=limited_web_results
         )
 
     except Exception as e:
         logger.error(f"Error during Experience Web phase: {e}", exc_info=True)
         error_msg = f"Experience Web phase failed: {e}"
+        # Limit the number of web results sent to the client to prevent performance issues
+        limited_web_results = web_results_list[:MAX_VECTOR_RESULTS] if web_results_list else []
+        if len(web_results_list) > MAX_VECTOR_RESULTS:
+            logger.info(f"Limiting web results on error from {len(web_results_list)} to {MAX_VECTOR_RESULTS}")
+
         # Return structured error
         return ExperienceWebPhaseOutput(
             experience_web_response=final_response or AIMessage(content=f"Error in phase: {e}"),
-            web_results=web_results_list, # Return any results found before error
+            web_results=limited_web_results, # Return limited results found before error
             error=error_msg
         )
 
@@ -546,18 +691,40 @@ async def run_langchain_postchain_workflow(
     yield {"phase": "experience_vectors", "status": "running"}
     exp_vectors_output: ExperienceVectorsPhaseOutput = await run_experience_vectors_phase(current_messages, experience_vectors_model_config, thread_id=thread_id)
     if exp_vectors_output.error:
+        # Use same compact format for error case
+        vector_result_data = []
+        for res in exp_vectors_output.vector_results:
+            compact_result = {
+                "score": round(res.score, 3),
+                "id": getattr(res, "id", None),
+                "content_preview": res.content[:100] + "..." if len(res.content) > 100 else res.content
+            }
+            vector_result_data.append(compact_result)
+            
         yield {
             "phase": "experience_vectors", "status": "error", "content": exp_vectors_output.error,
             "provider": experience_vectors_model_config.provider, "model_name": experience_vectors_model_config.model_name,
-            "vector_results": [res.dict() for res in exp_vectors_output.vector_results] # Include partial results on error
+            "vector_results": vector_result_data # Include compact partial results on error
         }
         return
     current_messages.append(exp_vectors_output.experience_vectors_response)
     conversation_history_store[thread_id] = current_messages
+    # Generate a more compact payload for the client to avoid client-side performance issues
+    vector_result_data = []
+    for res in exp_vectors_output.vector_results:
+        # Create a simplified version of each result
+        compact_result = {
+            "score": round(res.score, 3),  # Round to 3 decimal places to reduce payload size
+            "id": getattr(res, "id", None),
+            # Include only the first 100 chars of content for preview in UI
+            "content_preview": res.content[:100] + "..." if len(res.content) > 100 else res.content
+        }
+        vector_result_data.append(compact_result)
+    
     yield {
         "phase": "experience_vectors", "status": "complete", "content": exp_vectors_output.experience_vectors_response.content,
         "provider": experience_vectors_model_config.provider, "model_name": experience_vectors_model_config.model_name,
-        "vector_results": [res.dict() for res in exp_vectors_output.vector_results] # Key for results
+        "vector_results": vector_result_data  # Simplified vector results for client
     }
 
     # 3. Experience Web Phase

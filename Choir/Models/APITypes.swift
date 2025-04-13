@@ -255,6 +255,32 @@ struct PostchainEvent: Decodable {
         case vectorResults = "vector_results"
         case error
     }
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        phase = try container.decode(String.self, forKey: .phase)
+        status = try container.decode(String.self, forKey: .status)
+        content = try container.decodeIfPresent(String.self, forKey: .content)
+        provider = try container.decodeIfPresent(String.self, forKey: .provider)
+        modelName = try container.decodeIfPresent(String.self, forKey: .modelName)
+        error = try container.decodeIfPresent(String.self, forKey: .error)
+        
+        // Handle the cases where web/vector results might be in a different format
+        do {
+            webResults = try container.decodeIfPresent([SearchResult].self, forKey: .webResults)
+        } catch {
+            print("⚠️ Failed to decode webResults as [SearchResult]: \(error)")
+            webResults = nil
+        }
+        
+        do {
+            vectorResults = try container.decodeIfPresent([VectorSearchResult].self, forKey: .vectorResults)
+        } catch {
+            print("⚠️ Failed to decode vectorResults as [VectorSearchResult]: \(error)")
+            vectorResults = nil
+        }
+    }
 }
 
 /// Event for message update
@@ -282,5 +308,30 @@ struct PostchainStreamEvent: Codable {
         case modelName = "model_name"
         case webResults = "web_results"
         case vectorResults = "vector_results"
+    }
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        phase = try container.decode(String.self, forKey: .phase)
+        status = try container.decode(String.self, forKey: .status)
+        content = try container.decodeIfPresent(String.self, forKey: .content)
+        provider = try container.decodeIfPresent(String.self, forKey: .provider)
+        modelName = try container.decodeIfPresent(String.self, forKey: .modelName)
+        
+        // Handle the cases where web/vector results might be in a different format
+        do {
+            webResults = try container.decodeIfPresent([SearchResult].self, forKey: .webResults)
+        } catch {
+            print("⚠️ Failed to decode webResults as [SearchResult]: \(error)")
+            webResults = nil
+        }
+        
+        do {
+            vectorResults = try container.decodeIfPresent([VectorSearchResult].self, forKey: .vectorResults)
+        } catch {
+            print("⚠️ Failed to decode vectorResults as [VectorSearchResult]: \(error)")
+            vectorResults = nil
+        }
     }
 }
