@@ -140,13 +140,13 @@ struct PhaseResult: Codable, Equatable, Hashable {
         case content, provider
         case modelName = "model_name"
     }
-    
+
     // Add explicit initializer for debugging
     init(content: String, provider: String? = nil, modelName: String? = nil) {
         self.content = content
         self.provider = provider
         self.modelName = modelName
-        
+
         // Add debug output for empty content
         if content.isEmpty {
             print("⚠️ WARNING: Created PhaseResult with empty content")
@@ -238,15 +238,15 @@ class Message: ObservableObject, Identifiable, Equatable {
 
         // Print when a new message is created for debugging
         print("📊 NEW MESSAGE: Created message with ID \(id)")
-        
+
         for phase in Phase.allCases {
             if self.phaseResults[phase] == nil {
                 // For debugging - provide all non-user messages with test content
                 // for all phases to see if the issue is with content rendering
                 if !isUser {
                     self.phaseResults[phase] = PhaseResult(
-                        content: "Test content for \(phase.rawValue) phase", 
-                        provider: "test_provider", 
+                        content: "Test content for \(phase.rawValue) phase",
+                        provider: "test_provider",
                         modelName: "test_model"
                     )
                     print("📊 TEST: Added test content to \(phase.rawValue) phase in new message \(id)")
@@ -255,7 +255,7 @@ class Message: ObservableObject, Identifiable, Equatable {
                 }
             }
         }
-        
+
         // Verify all phases are initialized
         print("📊 NEW MESSAGE: Initialized phases: \(phaseResults.keys.map { $0.rawValue }.joined(separator: ", "))")
     }
@@ -267,22 +267,22 @@ class Message: ObservableObject, Identifiable, Equatable {
     func updatePhase(_ phase: Phase, content: String, provider: String?, modelName: String?, event: PostchainStreamEvent, status: String = "running") {
         // Signal change before any modifications
         objectWillChange.send()
-        
+
         // Debug output for monitoring
         print("📝 MESSAGE: Updating phase \(phase.rawValue) with content length: \(content.count), status: \(status)")
-        
+
         // Always mark as streaming when we receive updates
         // This ensures UI reflects streaming state
         self.isStreaming = true
-        
+
         // Only mark as not streaming when explicitly completed
         if status == "complete" {
             self.isStreaming = false
         }
-        
+
         // Print additional debug info
         print("📝 MESSAGE: Streaming status: \(self.isStreaming ? "active" : "inactive")")
-        
+
         // Detailed logging for ALL phases
         print("📊 PHASE MESSAGE (\(phase.rawValue)) UPDATE - START")
         print("📊 PHASE MESSAGE (\(phase.rawValue)): Content empty: \(content.isEmpty)")
@@ -290,12 +290,12 @@ class Message: ObservableObject, Identifiable, Equatable {
         if !content.isEmpty {
             print("📊 PHASE MESSAGE (\(phase.rawValue)): Content first chars: \(content.prefix(50))")
         }
-        
+
         // Check existing content
         if let existingPhase = phaseResults[phase] {
             print("📊 PHASE MESSAGE (\(phase.rawValue)): Existing content length: \(existingPhase.content.count)")
             print("📊 PHASE MESSAGE (\(phase.rawValue)): Existing content empty: \(existingPhase.content.isEmpty)")
-            
+
             // For debugging, compare yield with action
             if phase == .yield {
                 if let actionPhase = phaseResults[.action] {
@@ -307,44 +307,37 @@ class Message: ObservableObject, Identifiable, Equatable {
             print("📊 PHASE MESSAGE (\(phase.rawValue)): No existing content")
         }
         print("📊 PHASE MESSAGE (\(phase.rawValue)) UPDATE - END")
-        
+
         // Enhanced debug logging for yield phase
         if phase == .yield {
-            print("🔬 YIELD DEBUG: updatePhase called with content length: \(content.count)")
-            print("🔬 YIELD DEBUG: finalContent exists: \(event.finalContent != nil)")
-            print("🔬 YIELD DEBUG: finalContent isEmpty: \(event.finalContent?.isEmpty ?? true)")
+            // DEBUG LOG: Add specific logging for Message update
+            print("🟣 MESSAGE: Updating Yield phase. Incoming content length: \(content.count). Content: '\(content.prefix(50))...'")
             
-            // For yield phase, check for finalContent first (sent by backend)
-            if let finalContent = event.finalContent, !finalContent.isEmpty {
-                print("🔬 YIELD DEBUG: Using finalContent (length: \(finalContent.count))")
-                phaseResults[phase] = PhaseResult(content: finalContent, provider: provider, modelName: modelName)
-                
-                // Always update main content with yield's finalContent
-                self.content = finalContent
-                print("🔬 YIELD DEBUG: Updated main content with finalContent")
-            } 
-            // If content is available (fallback)
-            else if !content.isEmpty {
-                print("🔬 YIELD DEBUG: Using regular content (length: \(content.count))")
+            // Standard handling for yield phase (same as other phases)
+            if !content.isEmpty {
+                print("🔬 YIELD DEBUG: Using content (length: \(content.count))")
                 phaseResults[phase] = PhaseResult(content: content, provider: provider, modelName: modelName)
+                
+                // Update main content with yield content
                 self.content = content
-                print("🔬 YIELD DEBUG: Updated main content with regular content")
-            }
-            // Both are empty
-            else {
-                print("🔬 YIELD DEBUG: Both content and finalContent are empty!")
+                print("🔬 YIELD DEBUG: Updated main content with content")
+            } else {
+                print("🔬 YIELD DEBUG: Content is empty!")
                 phaseResults[phase] = PhaseResult(content: "", provider: provider, modelName: modelName)
             }
+            
+            // DEBUG LOG: Log content after update
+            print("🟣 MESSAGE: After update, phaseResults[.yield]?.content length: \(self.phaseResults[.yield]?.content.count ?? -1)")
         } else {
             // Standard handling for normal content
             phaseResults[phase] = PhaseResult(content: content, provider: provider, modelName: modelName)
-            
+
             // Update main content when we have actual content
             if !content.isEmpty {
                 self.content = content
             }
         }
-        
+
         // Handle search results
         if phase == .experienceVectors {
             if let results = event.vectorResults {
@@ -357,19 +350,19 @@ class Message: ObservableObject, Identifiable, Equatable {
                 self.webSearchResults = results
             }
         }
-        
+
         // Automatically update selected phase to show the user what's happening
         if status == "running" && !content.isEmpty {
-            let shouldSwitch = self.selectedPhase != phase && 
+            let shouldSwitch = self.selectedPhase != phase &&
                               (self.selectedPhase == .action || // Always switch from action
                                phase == .yield) // Always prefer yield when available
-                              
+
             if shouldSwitch {
                 print("📝 MESSAGE: Auto-switching view from \(self.selectedPhase.rawValue) to \(phase.rawValue)")
                 self.selectedPhase = phase
             }
         }
-        
+
         // Signal change again after modifications to ensure UI updates
         objectWillChange.send()
     }
@@ -379,17 +372,12 @@ class Message: ObservableObject, Identifiable, Equatable {
         print("📊 GET CONTENT (\(phase.rawValue)): Looking up phase in phaseResults")
         print("📊 GET CONTENT (\(phase.rawValue)): Keys in phaseResults: \(phaseResults.keys.map { $0.rawValue }.joined(separator: ", "))")
         print("📊 GET CONTENT (\(phase.rawValue)): Phase exists in phaseResults: \(phaseResults[phase] != nil)")
-        
+
         // Get the content and log details
-        var content = phaseResults[phase]?.content ?? ""
+        let content = phaseResults[phase]?.content ?? ""
         print("📊 GET CONTENT (\(phase.rawValue)): Retrieved content length: \(content.count)")
         print("📊 GET CONTENT (\(phase.rawValue)): Retrieved content is empty: \(content.isEmpty)")
-        
-        // Removed fallback mechanism for yield phase to identify the root cause
-        if phase == .yield && content.isEmpty {
-            print("📊 YIELD: Empty content without fallback")
-        }
-        
+
         return content
     }
 

@@ -228,7 +228,7 @@ actor EventSource {
                         // Special case for stream end marker
                         if event.data == "[DONE]" || event.event == "complete" {
                             print("🌐 SSE: Stream end marker received. Disconnecting.")
-                            await Task { self.disconnect() }.value
+                            await Task { await self.disconnect() }.value
                             return
                         }
                     }

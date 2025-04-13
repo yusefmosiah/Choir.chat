@@ -239,7 +239,6 @@ struct PostchainEvent: Decodable {
     let phase: String
     let status: String
     let content: String?
-    let finalContent: String?
     let provider: String?
     let modelName: String?
     let webResults: [SearchResult]?
@@ -250,7 +249,6 @@ struct PostchainEvent: Decodable {
         case phase
         case status
         case content
-        case finalContent = "final_content"
         case provider
         case modelName = "model_name"
         case webResults = "web_results"
@@ -264,13 +262,12 @@ struct PostchainStreamEvent: Codable {
     let phase: String
     let status: String
     let content: String?
-    let finalContent: String?
     let provider: String?
     let modelName: String?
     let webResults: [SearchResult]?
     let vectorResults: [VectorSearchResult]?
     
-    init(phase: String, status: String = "complete", content: String? = nil, provider: String? = nil, modelName: String? = nil, webResults: [SearchResult]? = nil, vectorResults: [VectorSearchResult]? = nil, finalContent: String? = nil) {
+    init(phase: String, status: String = "complete", content: String? = nil, provider: String? = nil, modelName: String? = nil, webResults: [SearchResult]? = nil, vectorResults: [VectorSearchResult]? = nil) {
         self.phase = phase
         self.status = status
         self.content = content
@@ -278,13 +275,11 @@ struct PostchainStreamEvent: Codable {
         self.modelName = modelName
         self.webResults = webResults
         self.vectorResults = vectorResults
-        self.finalContent = finalContent
     }
     
     enum CodingKeys: String, CodingKey {
         case phase, status, content, provider
         case modelName = "model_name"
-        case finalContent = "final_content"
         case webResults = "web_results"
         case vectorResults = "vector_results"
     }

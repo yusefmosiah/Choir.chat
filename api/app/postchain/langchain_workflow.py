@@ -470,8 +470,9 @@ async def run_yield_phase(
 
     try:
         response: AIMessage = await yield_chain.ainvoke(yield_messages)
+        logger.info(f"🐍 YIELD PHASE: Raw response content length: {len(response.content)}. Content snippet: '{response.content[:100]}...'" if hasattr(response, 'content') else "🐍 YIELD PHASE: Raw response has no content attribute") # DEBUG LOG
         logger.info(f"Yield phase completed. Final Response: {response.content[:100]}...")
-        return {"yield_response": response, "final_content": response.content}
+        return {"yield_response": response}
     except Exception as e:
         logger.error(f"Error during Yield phase: {e}", exc_info=True)
         return {"error": f"Yield phase failed: {e}"}
@@ -631,6 +632,7 @@ async def run_langchain_postchain_workflow(
     # 7. Yield Phase
     yield {"phase": "yield", "status": "running"}
     yield_result = await run_yield_phase(current_messages, yield_model_config)
+    logger.info(f"🐍 WORKFLOW: Received yield_result: {yield_result}") # DEBUG LOG
     if "error" in yield_result:
         yield {
             "phase": "yield", "status": "error", "content": yield_result["error"],
@@ -639,8 +641,14 @@ async def run_langchain_postchain_workflow(
         return
     yield_response: AIMessage = yield_result["yield_response"]
     # Don't add Yield to history for now
+    # DEBUG LOG: Log the event payload before yielding
+    event_payload = {
+        "phase": "yield", "status": "complete", "content": yield_response.content,
+        "provider": yield_model_config.provider, "model_name": yield_model_config.model_name
+    }
+    logger.info(f"🐍 WORKFLOW: Yielding event payload: {event_payload}")
     yield {
-        "phase": "yield", "status": "complete", "final_content": yield_response.content,
+        "phase": "yield", "status": "complete", "content": yield_response.content,
         "provider": yield_model_config.provider, "model_name": yield_model_config.model_name
     }
 
