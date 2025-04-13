@@ -76,6 +76,12 @@
 - Added `.drawingGroup()` to markdown views for GPU acceleration
 - Expected impact: Faster rendering of markdown content, reduced CPU usage during scrolling/resizing
 
+### 5. Background Processing for Large Inputs
+- Moved JSON encoding of large inputs to background thread using Task.detached
+- Added input length checks with clear feedback for excessive input sizes
+- Added visual progress indicators for long input processing
+- Expected impact: Prevents UI freezes with long inputs, better user feedback during processing
+
 ## Impact Measurement
 Use the following metrics to evaluate each optimization:
 - CPU usage during drag/scroll operations

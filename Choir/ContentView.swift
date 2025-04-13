@@ -13,7 +13,7 @@ struct ContentView: View {
     @State private var showingWallet = false
 
     init() {
-        _viewModel = StateObject(wrappedValue: PostchainViewModel(coordinator: RESTPostchainCoordinator()))
+        _viewModel = StateObject(wrappedValue: PostchainViewModel(coordinator: PostchainCoordinatorImpl()))
     }
 
     var body: some View {

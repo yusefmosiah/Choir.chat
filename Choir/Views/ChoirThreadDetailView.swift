@@ -50,30 +50,20 @@ struct ChoirThreadDetailView: View {
                 }
             }
 
-            HStack {
-                TextField("Message", text: $input)
-                    .textFieldStyle(.roundedBorder)
-                    .disabled(viewModel.isProcessing)
-
-                if viewModel.isProcessing {
-                    Button("Cancel") {
-                        viewModel.cancel()
+            ThreadInputBar(
+                input: $input,
+                isProcessing: viewModel.isProcessing,
+                onSend: { messageContent in
+                    Task {
+                        await sendMessage(messageContent)
                     }
-                    .buttonStyle(.borderedProminent)
-                    .tint(.red)
-                } else {
-                    Button("Send") {
-                        guard !input.isEmpty else { return }
-                        let messageContent = input
-                        input = ""
-                        Task {
-                            await sendMessage(messageContent)
-                        }
-                    }
-                    .buttonStyle(.borderedProminent)
-                }
-            }
-            .padding()
+                },
+                onCancel: {
+                    viewModel.cancel()
+                },
+                processingStatus: viewModel.processingStatus,
+                isProcessingLargeInput: viewModel.isProcessingLargeInput
+            )
         }
         .navigationTitle(thread.title)
         .toolbar {
@@ -114,8 +104,8 @@ struct ChoirThreadDetailView: View {
 
     private func sendMessage(_ content: String) async {
         do {
-            if let restCoordinator = viewModel.coordinator as? RESTPostchainCoordinator {
-                restCoordinator.currentChoirThread = thread
+            if let coordinator = viewModel.coordinator as? PostchainCoordinatorImpl {
+                coordinator.currentChoirThread = thread
             }
 
             let userMessage = Message(
@@ -181,6 +171,6 @@ struct ChoirThreadDetailView: View {
 #Preview {
     ChoirThreadDetailView(
         thread: ChoirThread(title: "Preview Thread"),
-        viewModel: PostchainViewModel(coordinator: RESTPostchainCoordinator())
+        viewModel: PostchainViewModel(coordinator: PostchainCoordinatorImpl())
     )
 }

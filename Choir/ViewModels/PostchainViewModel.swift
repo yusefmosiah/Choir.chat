@@ -3,7 +3,7 @@ import SwiftUI
 @MainActor
 class PostchainViewModel: ObservableObject {
     func findMessage(by uuidString: String) -> Message? {
-        guard let coordinator = coordinator as? RESTPostchainCoordinator,
+        guard let coordinator = coordinator as? PostchainCoordinatorImpl,
               let thread = coordinator.currentChoirThread else { return nil }
         return thread.messages.first(where: { $0.id.uuidString == uuidString })
     }
@@ -12,6 +12,10 @@ class PostchainViewModel: ObservableObject {
     @Published private(set) var isProcessing: Bool
     @Published private(set) var error: Error?
     private var updateWorkItem: DispatchWorkItem?
+    
+    // Progress tracking for large inputs
+    @Published var processingStatus: String = ""
+    @Published var isProcessingLargeInput: Bool = false
 
     // Track current active message ID
     @Published private(set) var activeMessageId: String = UUID().uuidString
@@ -60,19 +64,18 @@ class PostchainViewModel: ObservableObject {
         self.isProcessing = coordinator.isProcessing
 
         // Update active message ID if changed in coordinator
-        if let restCoordinator = coordinator as? RESTPostchainCoordinator,
-           let activeId = restCoordinator.activeMessageId?.uuidString {
+        if let coordinator = coordinator as? PostchainCoordinatorImpl,
+           let activeId = coordinator.activeMessageId?.uuidString {
             self.activeMessageId = activeId
 
             // Update structured results for this message if they exist in coordinator
-            if !restCoordinator.vectorResults.isEmpty {
-                self.vectorResultsByMessage[activeId] = restCoordinator.vectorResults
+            if !coordinator.vectorResults.isEmpty {
+                self.vectorResultsByMessage[activeId] = coordinator.vectorResults
             }
 
-            if !restCoordinator.webResults.isEmpty {
-                self.webResultsByMessage[activeId] = restCoordinator.webResults
+            if !coordinator.webResults.isEmpty {
+                self.webResultsByMessage[activeId] = coordinator.webResults
             }
-
         }
 
         // Manually trigger objectWillChange to ensure SwiftUI views update
@@ -86,14 +89,14 @@ class PostchainViewModel: ObservableObject {
         self.isProcessing = coordinator.isProcessing
 
         // Initialize sources from coordinator if needed
-        if let restCoordinator = coordinator as? RESTPostchainCoordinator {
+        if let coordinator = coordinator as? PostchainCoordinatorImpl {
             // Store initial results in the dictionary for the current message
-            self.vectorResultsByMessage[activeMessageId] = restCoordinator.vectorResults
-            self.webResultsByMessage[activeMessageId] = restCoordinator.webResults
-            // updateSourceStrings() // REMOVE: No longer using string arrays
-            restCoordinator.viewModel = self
+            self.vectorResultsByMessage[activeMessageId] = coordinator.vectorResults
+            self.webResultsByMessage[activeMessageId] = coordinator.webResults
+            // Set viewModel reference for callbacks
+            coordinator.viewModel = self
         } else {
-             // updateSourcesFromExperienceContent() // REMOVE: Parsing from string is obsolete
+             // Legacy coordinator handling is removed
         }
     }
 
@@ -110,6 +113,10 @@ class PostchainViewModel: ObservableObject {
         // Clear sources only for the new message
         vectorResultsByMessage[activeMessageId] = []
         webResultsByMessage[activeMessageId] = []
+        
+        // Reset progress state
+        processingStatus = ""
+        isProcessingLargeInput = input.count > 10000
 
         isProcessing = true
 
@@ -122,10 +129,27 @@ class PostchainViewModel: ObservableObject {
         }
 
         do {
-            try await coordinator.process(input, modelConfigs: savedConfigs)
+            if let coordinator = coordinator as? PostchainCoordinatorImpl {
+                // Pass progress callback for large inputs
+                try await coordinator.processWithProgress(
+                    input, 
+                    modelConfigs: savedConfigs,
+                    onProgress: { [weak self] status in
+                        guard let self = self else { return }
+                        Task { @MainActor in
+                            self.processingStatus = status
+                        }
+                    }
+                )
+            } else {
+                // Fallback to standard processing
+                try await coordinator.process(input, modelConfigs: savedConfigs)
+            }
         } catch {
             self.error = error
             isProcessing = false
+            isProcessingLargeInput = false
+            processingStatus = ""
         }
     }
 
@@ -146,87 +170,115 @@ class PostchainViewModel: ObservableObject {
     func updatePhaseData(phase: Phase, status: String, content: String?, provider: String?, modelName: String?, webResults: [SearchResult]? = nil, vectorResults: [VectorSearchResult]? = nil, messageId: String? = nil, finalContent: String? = nil) {
         // Cancel any pending update
         updateWorkItem?.cancel()
-
-        // Create a new work item
-        let workItem = DispatchWorkItem { [weak self] in
-             guard let self else { return }
-
-             // Use provided messageId or fall back to activeMessageId
-             let targetMessageId = messageId ?? self.activeMessageId
-
+        
+        // Use provided messageId or fall back to activeMessageId
+        let targetMessageId = messageId ?? self.activeMessageId
+        
+        print("📊 STREAMING UI: Updating phase \(phase.rawValue) (status: \(status)) for message \(targetMessageId)")
+        print("📊 STREAMING UI: Content length: \(content?.count ?? 0), Provider: \(provider ?? "none")")
+        
+        // Crucial to invoke UI updates on main thread
+        DispatchQueue.main.async {
+            // First update the viewModel state to reflect the latest data
+            self.currentPhase = phase
+            
+            // Update text content immediately
+            let contentToUpdate = finalContent ?? content ?? ""
+            if !contentToUpdate.isEmpty {
+                self.responses[phase] = contentToUpdate
+                
+                // Signal UI to update with this change
+                self.objectWillChange.send()
+            }
+        
+            // Update the message object directly (needed for streaming UI)
             if let msg = self.findMessage(by: targetMessageId) {
+                // Make sure we always trigger an update for streaming content
+                msg.objectWillChange.send()
+            
                 if let newVectorResults = vectorResults {
                     msg.vectorSearchResults = newVectorResults
                 }
                 if let newWebResults = webResults {
                     msg.webSearchResults = newWebResults
                 }
+                
+                // Set or update phase content directly in the message
+                // This ensures any streaming updates are reflected immediately
+                // Use finalContent if available (critical for yield phase)
+                let updatedContent = finalContent ?? content ?? ""
+                
+                // Create phase event with all information including finalContent
+                let phaseEvent = PostchainStreamEvent(
+                    phase: phase.rawValue,
+                    status: status,
+                    content: updatedContent,
+                    provider: provider,
+                    modelName: modelName,
+                    webResults: webResults,
+                    vectorResults: vectorResults,
+                    finalContent: finalContent
+                )
+                
+                // Enhanced debug logging for all phases
+                print("📊 PHASE UPDATE (\(phase.rawValue)): Status: \(status)")
+                print("📊 PHASE UPDATE (\(phase.rawValue)): Content length: \(updatedContent.count)")
+                print("📊 PHASE UPDATE (\(phase.rawValue)): Content empty: \(updatedContent.isEmpty)")
+                print("📊 PHASE UPDATE (\(phase.rawValue)): Has finalContent: \(finalContent != nil)")
+                print("📊 PHASE UPDATE (\(phase.rawValue)): Provider: \(provider ?? "nil")")
+                
+                // This is the key call that updates the message content
+                // We always update the phase, even if content is empty
+                msg.updatePhase(phase, content: updatedContent, provider: provider, modelName: modelName, event: phaseEvent, status: status)
+                
+                print("📊 STREAMING UI: Updated message phase content for \(phase.rawValue)")
+            } else {
+                print("⚠️ STREAMING UI: Could not find message with ID \(targetMessageId)")
             }
-
-             print("📊 Updating phase data for message: \(targetMessageId), phase: \(phase.rawValue), status: \(status)")
-
-             // Update text content (use finalContent if available, otherwise regular content)
-             let contentToUpdate = finalContent ?? content ?? ""
-             if self.responses[phase] != contentToUpdate {
-                 self.responses[phase] = contentToUpdate
-             }
-
-             // Update structured results based on phase
-             if phase == .experienceVectors {
-                 if let newVectorResults = vectorResults {
-                     let currentResults = self.vectorResultsByMessage[targetMessageId] ?? []
-                     // Only update if results actually changed
-                     if currentResults != newVectorResults {
-                         self.vectorResultsByMessage[targetMessageId] = newVectorResults
-                         print("📊 Updated vector results for message \(targetMessageId): \(newVectorResults.count) items")
-                     }
-                 }
-             } else if phase == .experienceWeb {
-                 if let newWebResults = webResults {
-                     let currentResults = self.webResultsByMessage[targetMessageId] ?? []
-                     // Only update if results actually changed
-                     if currentResults != newWebResults {
-                         self.webResultsByMessage[targetMessageId] = newWebResults
-                         print("📊 Updated web results for message \(targetMessageId): \(newWebResults.count) items")
-                     }
-                 }
-             }
-
-            // Update the overall current phase being processed
-            if self.currentPhase != phase && status == "running" { // Update only when a new phase starts
-                self.currentPhase = phase
+            
+            // Update structured results based on phase
+            if phase == .experienceVectors {
+                if let newVectorResults = vectorResults {
+                    self.vectorResultsByMessage[targetMessageId] = newVectorResults
+                    print("📊 STREAMING UI: Updated vector results: \(newVectorResults.count) items")
+                }
+            } else if phase == .experienceWeb {
+                if let newWebResults = webResults {
+                    self.webResultsByMessage[targetMessageId] = newWebResults
+                    print("📊 STREAMING UI: Updated web results: \(newWebResults.count) items")
+                }
             }
-
+            
             // Update processing state
             // Consider processing finished only when the final yield phase is complete
             let isLastPhaseComplete = (phase == Phase.allCases.last && status == "complete")
             if isLastPhaseComplete {
                 self.isProcessing = false
-                print("🏁 Processing finished.")
-
+                print("🏁 STREAMING UI: Processing finished with yield phase completion")
+                
                 // Close the loop: auto-select yield if user is on action phase
                 if let message = self.findMessage(by: targetMessageId), message.selectedPhase == .action {
-                    DispatchQueue.main.async {
-                        withAnimation(.spring()) {
-                            self.updateSelectedPhase(for: message, phase: .yield)
-                        }
+                    withAnimation(.spring()) {
+                        self.updateSelectedPhase(for: message, phase: .yield)
                     }
                 }
             } else if status == "error" {
-                 self.isProcessing = false // Also stop on error
-                 print("🛑 Processing stopped due to error in phase \(phase.rawValue).")
-             }
-             // Otherwise, isProcessing remains true while phases are running or completing before yield
-
-             // Explicitly notify observers if needed, though @Published should handle it
-             self.objectWillChange.send()
+                self.isProcessing = false // Also stop on error
+                print("🛑 STREAMING UI: Processing stopped due to error in phase \(phase.rawValue)")
+            }
+            
+            // Force one last UI update to make sure changes are reflected
+            self.objectWillChange.send()
         }
-
-        // Store the work item
-        updateWorkItem = workItem
-
-        // Execute the work item on the main queue
-        DispatchQueue.main.async(execute: workItem)
+        
+        // We've moved all the logic inside the DispatchQueue.main.async block
+        // because all UI updates should happen on the main thread
+        
+        // Clear any pending work items since we're handling updates immediately now
+        updateWorkItem = nil
+        
+        // Add a debug note showing we're done processing this event
+        print("📊 STREAMING UI: Finished processing event for phase \(phase.rawValue)")
     }
 
     func setCurrentPhase(_ phase: Phase) {

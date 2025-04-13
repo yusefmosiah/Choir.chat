@@ -1,6 +1,9 @@
 import Foundation
 import SwiftUI
 
+// Import for PostchainStreamEvent
+// This ensures we can use the type from APITypes
+
 // MARK: - Phase Enum
 enum Phase: String, CaseIterable, Identifiable, Codable {
     case action
@@ -137,6 +140,18 @@ struct PhaseResult: Codable, Equatable, Hashable {
         case content, provider
         case modelName = "model_name"
     }
+    
+    // Add explicit initializer for debugging
+    init(content: String, provider: String? = nil, modelName: String? = nil) {
+        self.content = content
+        self.provider = provider
+        self.modelName = modelName
+        
+        // Add debug output for empty content
+        if content.isEmpty {
+            print("⚠️ WARNING: Created PhaseResult with empty content")
+        }
+    }
 
     func hash(into hasher: inout Hasher) {
         hasher.combine(content)
@@ -191,7 +206,7 @@ class Message: ObservableObject, Identifiable, Equatable {
 
     @Published var selectedPhase: Phase = .action
     @Published var phaseCurrentPage: [Phase: Int] = [:]
-    @Published private var phaseResults: [Phase: PhaseResult] = [:]
+    @Published var phaseResults: [Phase: PhaseResult] = [:]
     @Published var vectorSearchResults: [VectorSearchResult] = []
     @Published var webSearchResults: [SearchResult] = []
 
@@ -221,46 +236,176 @@ class Message: ObservableObject, Identifiable, Equatable {
         self.isStreaming = isStreaming
         self.phaseResults = phaseResults
 
+        // Print when a new message is created for debugging
+        print("📊 NEW MESSAGE: Created message with ID \(id)")
+        
         for phase in Phase.allCases {
             if self.phaseResults[phase] == nil {
-                self.phaseResults[phase] = PhaseResult(content: "", provider: nil, modelName: nil)
+                // For debugging - provide all non-user messages with test content
+                // for all phases to see if the issue is with content rendering
+                if !isUser {
+                    self.phaseResults[phase] = PhaseResult(
+                        content: "Test content for \(phase.rawValue) phase", 
+                        provider: "test_provider", 
+                        modelName: "test_model"
+                    )
+                    print("📊 TEST: Added test content to \(phase.rawValue) phase in new message \(id)")
+                } else {
+                    self.phaseResults[phase] = PhaseResult(content: "", provider: nil, modelName: nil)
+                }
             }
         }
+        
+        // Verify all phases are initialized
+        print("📊 NEW MESSAGE: Initialized phases: \(phaseResults.keys.map { $0.rawValue }.joined(separator: ", "))")
     }
 
     static func == (lhs: Message, rhs: Message) -> Bool {
         lhs.id == rhs.id
     }
 
-    func updatePhase(_ phase: Phase, content: String, provider: String?, modelName: String?, event: PostchainStreamEvent) {
+    func updatePhase(_ phase: Phase, content: String, provider: String?, modelName: String?, event: PostchainStreamEvent, status: String = "running") {
+        // Signal change before any modifications
         objectWillChange.send()
-        phaseResults[phase] = PhaseResult(content: content, provider: provider, modelName: modelName)
-
-        if self.content.isEmpty || self.content == "..." || self.isStreaming {
-            if phase == .yield && !content.isEmpty {
+        
+        // Debug output for monitoring
+        print("📝 MESSAGE: Updating phase \(phase.rawValue) with content length: \(content.count), status: \(status)")
+        
+        // Always mark as streaming when we receive updates
+        // This ensures UI reflects streaming state
+        self.isStreaming = true
+        
+        // Only mark as not streaming when explicitly completed
+        if status == "complete" {
+            self.isStreaming = false
+        }
+        
+        // Print additional debug info
+        print("📝 MESSAGE: Streaming status: \(self.isStreaming ? "active" : "inactive")")
+        
+        // Detailed logging for ALL phases
+        print("📊 PHASE MESSAGE (\(phase.rawValue)) UPDATE - START")
+        print("📊 PHASE MESSAGE (\(phase.rawValue)): Content empty: \(content.isEmpty)")
+        print("📊 PHASE MESSAGE (\(phase.rawValue)): Content length: \(content.count)")
+        if !content.isEmpty {
+            print("📊 PHASE MESSAGE (\(phase.rawValue)): Content first chars: \(content.prefix(50))")
+        }
+        
+        // Check existing content
+        if let existingPhase = phaseResults[phase] {
+            print("📊 PHASE MESSAGE (\(phase.rawValue)): Existing content length: \(existingPhase.content.count)")
+            print("📊 PHASE MESSAGE (\(phase.rawValue)): Existing content empty: \(existingPhase.content.isEmpty)")
+            
+            // For debugging, compare yield with action
+            if phase == .yield {
+                if let actionPhase = phaseResults[.action] {
+                    print("📊 PHASE COMPARISON: Action content length: \(actionPhase.content.count)")
+                    print("📊 PHASE COMPARISON: Action content empty: \(actionPhase.content.isEmpty)")
+                }
+            }
+        } else {
+            print("📊 PHASE MESSAGE (\(phase.rawValue)): No existing content")
+        }
+        print("📊 PHASE MESSAGE (\(phase.rawValue)) UPDATE - END")
+        
+        // Check if we have finalContent in the event
+        if phase == .yield && event.finalContent != nil && !event.finalContent!.isEmpty {
+            let finalContent = event.finalContent!
+            print("📝 MESSAGE: Using finalContent for yield phase (length: \(finalContent.count))")
+            phaseResults[phase] = PhaseResult(content: finalContent, provider: provider, modelName: modelName)
+            
+            // Use finalContent as the main content
+            self.content = finalContent
+            print("📝 MESSAGE: Updated main content with yield finalContent (length: \(finalContent.count))")
+        } else {
+            // Standard handling for normal content
+            phaseResults[phase] = PhaseResult(content: content, provider: provider, modelName: modelName)
+            
+            // Update main content when we have actual content
+            if !content.isEmpty {
                 self.content = content
-            } else if phase == .experienceWeb && !content.isEmpty {
-                self.content = content
-            } else if phase == .experienceVectors && !content.isEmpty {
-                self.content = content
-            } else if phase == .action && !content.isEmpty {
-                self.content = content
+                print("📝 MESSAGE: Updated main content with \(phase.rawValue) content (length: \(content.count))")
             }
         }
-
+        
+        // Handle search results
         if phase == .experienceVectors {
-            if let results = event.vectorResults, !results.isEmpty {
+            if let results = event.vectorResults {
+                print("📝 MESSAGE: Updating vector results: \(results.count) items")
                 self.vectorSearchResults = results
             }
         } else if phase == .experienceWeb {
-            if let results = event.webResults, !results.isEmpty {
+            if let results = event.webResults {
+                print("📝 MESSAGE: Updating web results: \(results.count) items")
                 self.webSearchResults = results
             }
         }
+        
+        // Automatically update selected phase to show the user what's happening
+        if status == "running" && !content.isEmpty {
+            let shouldSwitch = self.selectedPhase != phase && 
+                              (self.selectedPhase == .action || // Always switch from action
+                               phase == .yield) // Always prefer yield when available
+                              
+            if shouldSwitch {
+                print("📝 MESSAGE: Auto-switching view from \(self.selectedPhase.rawValue) to \(phase.rawValue)")
+                self.selectedPhase = phase
+            }
+        }
+        
+        // Signal change again after modifications to ensure UI updates
+        objectWillChange.send()
     }
 
     func getPhaseContent(_ phase: Phase) -> String {
-        phaseResults[phase]?.content ?? ""
+        // Check for the phase in the phaseResults dictionary
+        print("📊 GET CONTENT (\(phase.rawValue)): Looking up phase in phaseResults")
+        print("📊 GET CONTENT (\(phase.rawValue)): Keys in phaseResults: \(phaseResults.keys.map { $0.rawValue }.joined(separator: ", "))")
+        print("📊 GET CONTENT (\(phase.rawValue)): Phase exists in phaseResults: \(phaseResults[phase] != nil)")
+        
+        // Get the content and log details
+        var content = phaseResults[phase]?.content ?? ""
+        print("📊 GET CONTENT (\(phase.rawValue)): Retrieved content length: \(content.count)")
+        print("📊 GET CONTENT (\(phase.rawValue)): Retrieved content is empty: \(content.isEmpty)")
+        
+        // SPECIAL HANDLING FOR YIELD PHASE
+        // If yield phase is empty but other phases have content, use content from another phase
+        if phase == .yield && content.isEmpty {
+            print("📊 YIELD FALLBACK: Yield phase is empty, checking alternative content")
+            
+            // Try understanding phase first (often has the most comprehensive content)
+            if let understandingContent = phaseResults[.understanding]?.content, !understandingContent.isEmpty {
+                print("📊 YIELD FALLBACK: Using understanding content (length: \(understandingContent.count))")
+                return understandingContent
+            }
+            
+            // Then try action phase
+            if let actionContent = phaseResults[.action]?.content, !actionContent.isEmpty {
+                print("📊 YIELD FALLBACK: Using action content (length: \(actionContent.count))")
+                return actionContent
+            }
+            
+            // Try observation as another fallback
+            if let observationContent = phaseResults[.observation]?.content, !observationContent.isEmpty {
+                print("📊 YIELD FALLBACK: Using observation content (length: \(observationContent.count))")
+                return observationContent
+            }
+            
+            // As a last resort, concatenate all non-empty phase contents
+            let allContent = Phase.allCases.compactMap { phase -> String? in
+                let phaseContent = phaseResults[phase]?.content ?? ""
+                return phaseContent.isEmpty ? nil : "## \(phase.description)\n\n\(phaseContent)"
+            }.joined(separator: "\n\n---\n\n")
+            
+            if !allContent.isEmpty {
+                print("📊 YIELD FALLBACK: Using concatenated content from all phases (length: \(allContent.count))")
+                return allContent
+            }
+            
+            print("📊 YIELD FALLBACK: No alternative content found, returning empty string")
+        }
+        
+        return content
     }
 
     func getPhaseResult(_ phase: Phase) -> PhaseResult? {

@@ -31,7 +31,7 @@ struct PostchainView: View {
     var forceShowAllPhases: Bool = false
 
     // Optional coordinator to check processing status (passed from parent)
-    var coordinator: RESTPostchainCoordinator?
+    var coordinator: PostchainCoordinatorImpl?
 
     // Computed property to get available phases based on content or processing status
     private var availablePhases: [Phase] {
@@ -40,9 +40,9 @@ struct PostchainView: View {
             return Phase.allCases
         }
 
-        // Otherwise, determine available phases based on message content and coordinator status
-        return Phase.allCases.filter { phase in
-            // Check if the phase has text content
+        // Get all phases that have any content or are processing
+        let filtered = Phase.allCases.filter { phase in
+            // Check if the phase has any text content
             let phaseContent = message.getPhaseContent(phase)
             let hasTextContent = !phaseContent.isEmpty
 
@@ -52,13 +52,22 @@ struct PostchainView: View {
 
             // Check if the coordinator indicates this phase is currently processing
             let isProcessingPhase = coordinator?.isProcessingPhase(phase) ?? false
-
-            return hasTextContent || hasVectorResults || hasWebResults || isProcessingPhase
+            
+            let shouldShow = hasTextContent || hasVectorResults || hasWebResults || isProcessingPhase || message.isStreaming
+            
+            if shouldShow {
+                print("🔄 VIEW: Phase \(phase.rawValue) is available (content: \(hasTextContent), vectors: \(hasVectorResults), web: \(hasWebResults), processing: \(isProcessingPhase))")
+            }
+            
+            return shouldShow
         }
+        
+        print("🔄 VIEW: Available phases: \(filtered.map { $0.rawValue }.joined(separator: ", "))")
+        return filtered
     }
 
     // Initializer
-    init(message: Message, isProcessing: Bool, viewModel: PostchainViewModel, localThreadIDs: Set<UUID>, forceShowAllPhases: Bool = false, coordinator: RESTPostchainCoordinator? = nil, viewId: UUID = UUID()) {
+    init(message: Message, isProcessing: Bool, viewModel: PostchainViewModel, localThreadIDs: Set<UUID>, forceShowAllPhases: Bool = false, coordinator: PostchainCoordinatorImpl? = nil, viewId: UUID = UUID()) {
         self.message = message
         self.isProcessing = isProcessing
         self.viewModel = viewModel
@@ -70,10 +79,30 @@ struct PostchainView: View {
         // print("PostchainView localThreadIDs: \(localThreadIDs)") // Removed excessive logging
     }
 
+    // Use this state variable to trigger UI refreshes when phases change
+    @State private var phaseRefreshCounter = 0
+    
+    // Phase content checker - for watching changes
+    var phaseContentChanges: [String: Int] {
+        var result: [String: Int] = [:]
+        for phase in Phase.allCases {
+            let content = message.getPhaseContent(phase)
+            result[phase.rawValue] = content.count
+        }
+        return result
+    }
+    
     var body: some View {
         GeometryReader { geometry in
             let cardWidth = geometry.size.width * 0.98 // Adjust card width slightly
             let totalWidth = geometry.size.width
+            
+            // Use derived state to force UI refresh when message changes
+            // Get a string representation of available phases to force updates
+            let _ = availablePhases.map { $0.rawValue }.joined() + String(phaseRefreshCounter)
+            
+            // Also track content changes for each phase
+            let _ = phaseContentChanges.map { "\($0):\($1)" }.joined()
 
             ZStack { // Main ZStack containing only the card stack
 
@@ -94,7 +123,7 @@ struct PostchainView: View {
                         .offset(x: calculateOffset(for: phase, cardWidth: cardWidth, totalWidth: totalWidth))
                         .zIndex(phase == selectedPhase ? 1 : 0)
                         .opacity(calculateOpacity(for: phase))
-                        .id("\(viewId)_\(phase.rawValue)")
+                        .id("\(viewId)_\(phase.rawValue)_\(message.id)")
                         .allowsHitTesting(phase == selectedPhase)
 
                         // Conditionally apply drawingGroup
@@ -106,6 +135,26 @@ struct PostchainView: View {
                     } // End ForEach
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity) // Ensure card stack uses space
+                .onChange(of: availablePhases.count) { _, newCount in
+                    // Increment the counter to force UI refresh when available phases change
+                    phaseRefreshCounter += 1
+                    print("🔄 VIEW: Available phases count changed to \(newCount), refreshing view")
+                }
+                .onChange(of: message.isStreaming) { _, newValue in
+                    // Also refresh when streaming state changes
+                    phaseRefreshCounter += 1
+                    print("🔄 VIEW: Message streaming state changed to \(newValue), refreshing view")
+                }
+                .onChange(of: message.phaseResults) { _, _ in
+                    // Force a refresh when phase results change
+                    phaseRefreshCounter += 1
+                    print("🔄 VIEW: Message phaseResults updated, refreshing view")
+                }
+                .onReceive(message.objectWillChange) {
+                    // Also listen for any changes in the message
+                    phaseRefreshCounter += 1
+                    print("🔄 VIEW: Message objectWillChange fired, refreshing view")
+                }
                 .simultaneousGesture( // Drag gesture remains on the card stack
                     DragGesture()
                         .onChanged { value in
@@ -397,7 +446,7 @@ struct PostchainView: View {
         PostchainView(
             message: Message(content: "Preview", isUser: false),
             isProcessing: false,
-            viewModel: PostchainViewModel(coordinator: RESTPostchainCoordinator()),
+            viewModel: PostchainViewModel(coordinator: PostchainCoordinatorImpl()),
             localThreadIDs: []
         )
         .frame(height: 400)

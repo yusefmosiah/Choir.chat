@@ -105,7 +105,7 @@ struct MessageRow: View {
                             viewModel: viewModel,
                             localThreadIDs: [],
                             forceShowAllPhases: true,
-                            coordinator: viewModel.coordinator as? RESTPostchainCoordinator,
+                            coordinator: viewModel.coordinator as? PostchainCoordinatorImpl,
                             viewId: message.id
                         )
                         .id("postchain_\(message.id)_\(message.phases.hashValue)")
@@ -152,7 +152,7 @@ struct MessageRow: View {
 
 #Preview {
     // Mock ViewModel for Preview
-    let previewViewModel = PostchainViewModel(coordinator: RESTPostchainCoordinator())
+    let previewViewModel = PostchainViewModel(coordinator: PostchainCoordinatorImpl())
     // Add mock data if needed
     // previewViewModel.vectorSources = ["Mock Vector Source"]
     // previewViewModel.webSearchSources = ["https://mock.web.source"]

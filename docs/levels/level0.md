@@ -32,7 +32,9 @@ tree.md
 │   ├── Choir.entitlements
 │   ├── ContentView.swift
 │   ├── Coordinators
-│   │   └── RESTPostchainCoordinator.swift
+│   │   ├── PostchainCoordinator.swift
+│   │   ├── PostchainCoordinatorImpl.swift
+│   │   └── RESTPostchainCoordinator.swift.bak
 │   ├── Info.plist
 │   ├── Models
 │   │   ├── APITypes.swift
@@ -40,12 +42,12 @@ tree.md
 │   │   ├── ConversationModels.swift
 │   │   └── SearchModels.swift
 │   ├── Networking
-│   │   └── RESTPostchainAPIClient.swift
+│   │   ├── EventSource.swift
+│   │   └── PostchainAPIClient.swift
 │   ├── Preview Content
 │   │   └── Preview Assets.xcassets
 │   │       └── Contents.json
 │   ├── Protocols
-│   │   └── PostchainCoordinator.swift
 │   ├── Services
 │   │   ├── KeychainService.swift
 │   │   ├── ModelConfigManager.swift
@@ -270,7 +272,7 @@ tree.md
     ├── test_api.sh
     └── test_postchain_multiturn.sh
 
-63 directories, 192 files
+63 directories, 194 files
 
 === File: docs/CHANGELOG.md ===
 

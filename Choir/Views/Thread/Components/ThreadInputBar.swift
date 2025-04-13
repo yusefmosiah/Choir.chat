@@ -6,6 +6,10 @@ struct ThreadInputBar: View {
     let onSend: (String) async -> Void
     let onCancel: () -> Void
     
+    // Optional processing status for large inputs
+    var processingStatus: String = ""
+    var isProcessingLargeInput: Bool = false
+    
     // State to track input height
     @State private var textEditorHeight: CGFloat = 40
     // State to track character count
@@ -75,6 +79,22 @@ struct ThreadInputBar: View {
                             characterCount > characterWarningThreshold ? .red : .secondary
                         )
                 }
+            }
+            
+            // Processing status for large inputs
+            if isProcessingLargeInput && !processingStatus.isEmpty {
+                HStack {
+                    ProgressView()
+                        .scaleEffect(0.7)
+                        .padding(.trailing, 4)
+                    
+                    Text(processingStatus)
+                        .font(.caption)
+                        .foregroundColor(.orange)
+                    
+                    Spacer()
+                }
+                .padding(.top, 4)
             }
         }
         .padding()
