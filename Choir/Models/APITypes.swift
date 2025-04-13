@@ -282,7 +282,9 @@ struct PostchainStreamEvent: Codable {
     }
     
     enum CodingKeys: String, CodingKey {
-        case phase, status, content, provider, modelName, finalContent
+        case phase, status, content, provider
+        case modelName = "model_name"
+        case finalContent = "final_content"
         case webResults = "web_results"
         case vectorResults = "vector_results"
     }

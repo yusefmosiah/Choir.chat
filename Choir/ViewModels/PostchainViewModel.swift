@@ -183,7 +183,19 @@ class PostchainViewModel: ObservableObject {
             self.currentPhase = phase
             
             // Update text content immediately
-            let contentToUpdate = finalContent ?? content ?? ""
+            var contentToUpdate = ""
+            
+            // For yield phase, the content is ONLY in finalContent field from backend
+            if phase == .yield && finalContent != nil {
+                contentToUpdate = finalContent!
+                print("📊 VIEWMODEL: Yield phase using finalContent: \(finalContent!.prefix(50))")
+            } else {
+                contentToUpdate = content ?? ""
+                if !contentToUpdate.isEmpty {
+                    print("📊 VIEWMODEL: \(phase.rawValue) phase using content: \(contentToUpdate.prefix(50))")
+                }
+            }
+            
             if !contentToUpdate.isEmpty {
                 self.responses[phase] = contentToUpdate
                 

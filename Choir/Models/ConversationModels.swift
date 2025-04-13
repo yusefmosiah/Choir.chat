@@ -308,15 +308,33 @@ class Message: ObservableObject, Identifiable, Equatable {
         }
         print("📊 PHASE MESSAGE (\(phase.rawValue)) UPDATE - END")
         
-        // Check if we have finalContent in the event
-        if phase == .yield && event.finalContent != nil && !event.finalContent!.isEmpty {
-            let finalContent = event.finalContent!
-            print("📝 MESSAGE: Using finalContent for yield phase (length: \(finalContent.count))")
-            phaseResults[phase] = PhaseResult(content: finalContent, provider: provider, modelName: modelName)
+        // Enhanced debug logging for yield phase
+        if phase == .yield {
+            print("🔬 YIELD DEBUG: updatePhase called with content length: \(content.count)")
+            print("🔬 YIELD DEBUG: finalContent exists: \(event.finalContent != nil)")
+            print("🔬 YIELD DEBUG: finalContent isEmpty: \(event.finalContent?.isEmpty ?? true)")
             
-            // Use finalContent as the main content
-            self.content = finalContent
-            print("📝 MESSAGE: Updated main content with yield finalContent (length: \(finalContent.count))")
+            // For yield phase, check for finalContent first (sent by backend)
+            if let finalContent = event.finalContent, !finalContent.isEmpty {
+                print("🔬 YIELD DEBUG: Using finalContent (length: \(finalContent.count))")
+                phaseResults[phase] = PhaseResult(content: finalContent, provider: provider, modelName: modelName)
+                
+                // Always update main content with yield's finalContent
+                self.content = finalContent
+                print("🔬 YIELD DEBUG: Updated main content with finalContent")
+            } 
+            // If content is available (fallback)
+            else if !content.isEmpty {
+                print("🔬 YIELD DEBUG: Using regular content (length: \(content.count))")
+                phaseResults[phase] = PhaseResult(content: content, provider: provider, modelName: modelName)
+                self.content = content
+                print("🔬 YIELD DEBUG: Updated main content with regular content")
+            }
+            // Both are empty
+            else {
+                print("🔬 YIELD DEBUG: Both content and finalContent are empty!")
+                phaseResults[phase] = PhaseResult(content: "", provider: provider, modelName: modelName)
+            }
         } else {
             // Standard handling for normal content
             phaseResults[phase] = PhaseResult(content: content, provider: provider, modelName: modelName)
@@ -324,7 +342,6 @@ class Message: ObservableObject, Identifiable, Equatable {
             // Update main content when we have actual content
             if !content.isEmpty {
                 self.content = content
-                print("📝 MESSAGE: Updated main content with \(phase.rawValue) content (length: \(content.count))")
             }
         }
         
@@ -368,41 +385,9 @@ class Message: ObservableObject, Identifiable, Equatable {
         print("📊 GET CONTENT (\(phase.rawValue)): Retrieved content length: \(content.count)")
         print("📊 GET CONTENT (\(phase.rawValue)): Retrieved content is empty: \(content.isEmpty)")
         
-        // SPECIAL HANDLING FOR YIELD PHASE
-        // If yield phase is empty but other phases have content, use content from another phase
+        // Removed fallback mechanism for yield phase to identify the root cause
         if phase == .yield && content.isEmpty {
-            print("📊 YIELD FALLBACK: Yield phase is empty, checking alternative content")
-            
-            // Try understanding phase first (often has the most comprehensive content)
-            if let understandingContent = phaseResults[.understanding]?.content, !understandingContent.isEmpty {
-                print("📊 YIELD FALLBACK: Using understanding content (length: \(understandingContent.count))")
-                return understandingContent
-            }
-            
-            // Then try action phase
-            if let actionContent = phaseResults[.action]?.content, !actionContent.isEmpty {
-                print("📊 YIELD FALLBACK: Using action content (length: \(actionContent.count))")
-                return actionContent
-            }
-            
-            // Try observation as another fallback
-            if let observationContent = phaseResults[.observation]?.content, !observationContent.isEmpty {
-                print("📊 YIELD FALLBACK: Using observation content (length: \(observationContent.count))")
-                return observationContent
-            }
-            
-            // As a last resort, concatenate all non-empty phase contents
-            let allContent = Phase.allCases.compactMap { phase -> String? in
-                let phaseContent = phaseResults[phase]?.content ?? ""
-                return phaseContent.isEmpty ? nil : "## \(phase.description)\n\n\(phaseContent)"
-            }.joined(separator: "\n\n---\n\n")
-            
-            if !allContent.isEmpty {
-                print("📊 YIELD FALLBACK: Using concatenated content from all phases (length: \(allContent.count))")
-                return allContent
-            }
-            
-            print("📊 YIELD FALLBACK: No alternative content found, returning empty string")
+            print("📊 YIELD: Empty content without fallback")
         }
         
         return content

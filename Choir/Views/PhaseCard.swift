@@ -103,6 +103,13 @@ struct PhaseCard: View {
             }
         }
         
+        // Minimal yield phase debug info
+        if phase == .yield {
+            if let rawYieldContent = message.phaseResults[.yield]?.content {
+                print("🔍 YIELD: Raw content length: \(rawYieldContent.count)")
+            }
+        }
+        
         // For debugging comparing the yield phase with other phases that work
         if phase == .yield || phase == .action || phase == .understanding {
             print("🔍 PHASE COMPARISON: Phases in message.phaseResults: \(message.phaseResults.keys.map { $0.rawValue }.joined(separator: ", "))")

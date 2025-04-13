@@ -229,6 +229,8 @@ actor PostchainAPIClient {
                                     // More detailed logging for raw JSON data
                                     if jsonString.contains("\"phase\":\"yield\"") {
                                         print("📊 YIELD RAW JSON: \(jsonString)")
+                                        print("📊 YIELD: Checking if final_content exists: \(jsonString.contains("\"final_content\""))")
+                                        print("📊 YIELD: Checking if content exists: \(jsonString.contains("\"content\""))")
                                     }
                                     
                                     // Parse JSON
@@ -240,18 +242,15 @@ actor PostchainAPIClient {
                                         print("📡 STREAM: Content length: \(postchainEvent.content?.count ?? 0)")
                                         print("📡 STREAM: Status: \(postchainEvent.status)")
                                         
-                                        // Basic logging for yield phase
+                                        // Enhanced yield phase logging
                                         if postchainEvent.phase == "yield" {
-                                            print("📡 STREAM: YIELD PHASE EVENT DETECTED!")
-                                            print("📡 STREAM: Yield content: \(postchainEvent.content?.prefix(50) ?? "nil")")
-                                            print("📡 STREAM: Yield provider: \(postchainEvent.provider ?? "nil")")
-                                            print("📡 STREAM: Yield model: \(postchainEvent.modelName ?? "nil")")
+                                            print("📡 YIELD: Content length: \(postchainEvent.content?.count ?? 0), finalContent length: \(postchainEvent.finalContent?.count ?? 0)")
+                                            print("📡 YIELD: Content exists: \(postchainEvent.content != nil), finalContent exists: \(postchainEvent.finalContent != nil)")
+                                            print("📡 YIELD: Raw content: '\(postchainEvent.content ?? "nil")'")
+                                            print("📡 YIELD: Raw finalContent: '\(postchainEvent.finalContent ?? "nil")'")
                                             
                                             if postchainEvent.status == "complete" {
-                                                print("📡 STREAM: YIELD PHASE COMPLETE")
-                                                if postchainEvent.content?.isEmpty ?? true {
-                                                    print("📡 STREAM: ⚠️ WARNING: Content is empty for complete yield event")
-                                                }
+                                                print("📡 YIELD: Phase complete")
                                             }
                                         }
                                         

@@ -281,13 +281,14 @@ class PostchainCoordinatorImpl: PostchainCoordinator, ObservableObject {
         // Special handling for yield phase - check both content and finalContent
         var content = event.content ?? ""
         
-        // Yield phase should be treated just like other phases
+        // Yield phase needs special handling for finalContent
         if event.phase == "yield" {
-            print("📲 YIELD EVENT: Content empty: \(content.isEmpty)")
-            print("📲 YIELD EVENT: Content length: \(content.count)")
-            
-            if content.isEmpty {
-                print("📲 ⚠️ WARNING: Yield content is empty")
+            // For yield phase, content comes ONLY in finalContent field from backend
+            if let finalContent = event.finalContent, !finalContent.isEmpty {
+                print("📲 YIELD: Using finalContent (length: \(finalContent.count))")
+                content = finalContent
+            } else {
+                print("📲 YIELD: finalContent is empty, using regular content field as backup")
             }
         }
         
@@ -350,7 +351,9 @@ class PostchainCoordinatorImpl: PostchainCoordinator, ObservableObject {
             provider: event.provider,
             modelName: event.modelName,
             webResults: self.webResults,
-            vectorResults: self.vectorResults
+            vectorResults: self.vectorResults,
+            messageId: activeMessageId?.uuidString,
+            finalContent: event.finalContent
         )
         
         // Update local responses (even if empty, to ensure we track all phases)
