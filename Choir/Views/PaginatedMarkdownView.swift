@@ -8,10 +8,30 @@ struct PaginatedMarkdownView: View {
     var onNavigateToPreviousPhase: (() -> Void)?
     var onNavigateToNextPhase: (() -> Void)?
 
+    // Cache structure to store pagination results
+    private struct PaginationCache: Equatable {
+        let text: String
+        let width: CGFloat
+        let height: CGFloat
+        let pages: [String]
+        
+        static func == (lhs: PaginationCache, rhs: PaginationCache) -> Bool {
+            lhs.text == rhs.text && 
+            abs(lhs.width - rhs.width) < 1.0 &&
+            abs(lhs.height - rhs.height) < 1.0
+        }
+    }
+    
     @State private var pages: [String] = []
     @State private var totalPages: Int = 1
     @State private var showingActionSheet = false
     @StateObject private var textSelectionManager = TextSelectionManager.shared
+    
+    // Cache for pagination results
+    @State private var cache: PaginationCache?
+    
+    // Task for background pagination
+    @State private var paginationTask: Task<Void, Never>?
 
     var body: some View {
         GeometryReader { geometry in
@@ -78,11 +98,20 @@ struct PaginatedMarkdownView: View {
             .onChange(of: markdownText) { _, newText in
                 paginateContent(size: geometry.size)
             }
+            // Debounce size changes to avoid excessive pagination
             .onChange(of: geometry.size) { _, newSize in
-                paginateContent(size: newSize)
-            }
-            .onChange(of: currentPage) { _, newPage in
-                // Optional: print("PaginatedMarkdownView: currentPage changed to \(newPage + 1)")
+                // Cancel any pending pagination task
+                paginationTask?.cancel()
+                
+                // Create a new debounced task after a short delay
+                paginationTask = Task {
+                    try? await Task.sleep(nanoseconds: 100_000_000) // 100ms delay
+                    if !Task.isCancelled {
+                        await MainActor.run {
+                            paginateContent(size: newSize)
+                        }
+                    }
+                }
             }
         }
     }
@@ -96,6 +125,8 @@ struct PaginatedMarkdownView: View {
             }
             .padding([.horizontal, .top], 4)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            // Add drawing group to leverage Metal rendering
+            .drawingGroup(opaque: false)
     }
 
     private func paginateContent(size: CGSize) {
@@ -105,9 +136,35 @@ struct PaginatedMarkdownView: View {
             currentPage = 0
             return
         }
-        pages = splitMarkdownIntoPages(markdownText, size: size)
+        
+        // Check if we have a valid cache that matches current parameters
+        let potentialCache = PaginationCache(
+            text: markdownText,
+            width: size.width,
+            height: size.height,
+            pages: []
+        )
+        
+        if let existingCache = cache, existingCache == potentialCache {
+            // Use cached pages
+            pages = existingCache.pages
+        } else {
+            // Calculate new pages
+            let newPages = splitMarkdownIntoPages(markdownText, size: size)
+            pages = newPages
+            
+            // Store the result in cache
+            cache = PaginationCache(
+                text: markdownText,
+                width: size.width,
+                height: size.height,
+                pages: newPages
+            )
+        }
+        
         totalPages = max(1, pages.count)
 
+        // Ensure currentPage is within bounds
         if currentPage >= totalPages {
             currentPage = max(0, totalPages - 1)
         } else if currentPage < 0 {
@@ -176,7 +233,6 @@ struct PaginatedMarkdownView: View {
     }
 
     private func handleLinkTap(_ url: URL) {
-        // Placeholder: show modal preview or navigate
-        print("Tapped link: \(url)")
+        // Removed print statement to improve performance
     }
 }

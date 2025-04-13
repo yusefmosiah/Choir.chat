@@ -3,16 +3,19 @@ import Foundation
 
 struct MessageRow: View {
     @ObservedObject var message: Message
-    // Removed thread reference
     let isProcessing: Bool
     @ObservedObject var viewModel: PostchainViewModel
-
+    
+    // State for lazy loading
+    @State private var isVisible = false
+    @State private var shouldLoadFullContent = false
+    
     init(message: Message, isProcessing: Bool = false, viewModel: PostchainViewModel) {
         self.message = message
         self.isProcessing = isProcessing
         self.viewModel = viewModel
     }
-
+    
     var body: some View {
         VStack(alignment: message.isUser ? .trailing : .leading, spacing: 8) {
             // User messages
@@ -29,12 +32,12 @@ struct MessageRow: View {
                             return Text(LocalizedStringKey(message.content))
                         }
                     }() // Immediately execute the closure
-
+                    
                     // Apply modifiers to the resulting Text view
                     textView
                         .multilineTextAlignment(.trailing)
                         .fixedSize(horizontal: false, vertical: true)
-
+                    
                     Image(systemName: "person.circle.fill")
                         .foregroundColor(.white)
                         .opacity(0.8)
@@ -53,18 +56,18 @@ struct MessageRow: View {
                     Button("Copy Content") {
                         UIPasteboard.general.string = message.content
                     }
-
+                    
                     Button("Select Text...") {
                         TextSelectionManager.shared.showSheet(withText: message.content)
                     }
                 }
             }
-            // AI messages - directly show the chorus cycle
+            // AI messages - lazily load PostchainView
             else {
                 // Header with AI icon
                 HStack {
                     Spacer()
-
+                    
                     if isProcessing {
                         ProgressView()
                             .scaleEffect(0.7)
@@ -74,48 +77,78 @@ struct MessageRow: View {
                     }
                 }
                 .padding(.horizontal)
-
-                // Postchain view - pass the message directly
-                let isActive = message.id == viewModel.coordinator.activeMessageId
-
-                // Use the message directly with the new PostchainView
-                PostchainView(
-                    message: message,
-                    isProcessing: isProcessing,
-                    viewModel: viewModel, // Pass viewModel
-                    localThreadIDs: [],
-                    forceShowAllPhases: true,
-                    coordinator: viewModel.coordinator as? RESTPostchainCoordinator,
-                    viewId: message.id // Use message ID as the view ID for uniqueness
-                )
-                .id("postchain_\(message.id)_\(message.phases.hashValue)_\(UUID())") // Even more reliable tracking
-                .onAppear {
-                    // Add additional logging about active phases on view appear
-                    print("MessageRow.onAppear: Message \(message.id)")
-                    print("  - isActive: \(isActive), isProcessing: \(isProcessing)")
-                    print("  - Stored phases in message: \(message.phases.filter { !$0.value.isEmpty }.count)")
-                    print("  - View model phases: \(viewModel.responses.count)")
+                
+                // Main content area with lazy loading
+                ZStack {
+                    // Placeholder shown initially or when off-screen
+                    if !shouldLoadFullContent {
+                        placeholderView
+                            .onAppear {
+                                isVisible = true
+                                // Start loading full content after a short delay when view appears
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                    if isVisible {
+                                        shouldLoadFullContent = true
+                                    }
+                                }
+                            }
+                            .onDisappear {
+                                isVisible = false
+                            }
+                    }
+                    
+                    // Full PostchainView loaded lazily
+                    if shouldLoadFullContent {
+                        PostchainView(
+                            message: message,
+                            isProcessing: isProcessing,
+                            viewModel: viewModel,
+                            localThreadIDs: [],
+                            forceShowAllPhases: true,
+                            coordinator: viewModel.coordinator as? RESTPostchainCoordinator,
+                            viewId: message.id
+                        )
+                        .id("postchain_\(message.id)_\(message.phases.hashValue)")
+                    }
                 }
-                .onChange(of: isProcessing) { _, newValue in
-                    // No-op
-                }
-                .onChange(of: viewModel.responses) { _, newResponses in
-                    // No-op
-                }
-                .frame(minHeight: 600, maxHeight: .infinity) // Use a taller minimum height with ability to grow
+                .frame(minHeight: 600, maxHeight: .infinity)
                 .padding(.top, 4)
                 .padding(.trailing, 40)
             }
-
-            // Timestamp removed to save space
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 4)
-        .padding(.bottom, 8) // Reduced from 24 to 8
+        .padding(.bottom, 8)
+    }
+    
+    // Lightweight placeholder view shown before full content loads
+    private var placeholderView: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            // Basic preview of content
+            Text("AI Response")
+                .font(.headline)
+                .padding(.bottom, 4)
+            
+            // Preview content (first part of yield phase if available)
+            let previewContent = message.getPhaseContent(.yield).prefix(200)
+            Text(previewContent.isEmpty ? "Loading..." : previewContent)
+                .lineLimit(5)
+                .padding()
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(Color.gray.opacity(0.1))
+                .cornerRadius(8)
+            
+            Spacer()
+        }
+        .padding()
+        .frame(maxWidth: .infinity)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.white)
+                .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
+        )
     }
 }
-
-
 
 #Preview {
     // Mock ViewModel for Preview

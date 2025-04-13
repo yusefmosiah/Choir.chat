@@ -5,31 +5,86 @@ struct ThreadInputBar: View {
     let isProcessing: Bool
     let onSend: (String) async -> Void
     let onCancel: () -> Void
-
+    
+    // State to track input height
+    @State private var textEditorHeight: CGFloat = 40
+    // State to track character count
+    @State private var characterCount: Int = 0
+    
+    // Maximum input height
+    private let maxHeight: CGFloat = 120
+    // Warning threshold for character count
+    private let characterWarningThreshold: Int = 2000
+    
     var body: some View {
-        HStack {
-            TextField("Message", text: $input)
-                .textFieldStyle(.roundedBorder)
-                .disabled(isProcessing)
-
-            if isProcessing {
-                Button("Cancel", action: onCancel)
-                    .buttonStyle(.borderedProminent)
-                    .tint(.red)
-            } else {
-                Button("Send") {
-                    guard !input.isEmpty else { return }
-                    let messageContent = input
-                    input = "" // Clear input immediately
-
-                    Task {
-                        await onSend(messageContent)
-                    }
+        VStack(spacing: 4) {
+            HStack(alignment: .bottom) {
+                ZStack(alignment: .topLeading) {
+                    // Invisible text view to measure height
+                    Text(input.isEmpty ? "Message" : input)
+                        .padding(6)
+                        .foregroundColor(.clear)
+                        .background(GeometryReader { geometry in
+                            Color.clear.preference(
+                                key: ViewHeightKey.self,
+                                value: geometry.size.height
+                            )
+                        })
+                    
+                    // Actual input editor
+                    TextEditor(text: $input)
+                        .frame(height: min(textEditorHeight, maxHeight))
+                        .scrollContentBackground(.hidden)
+                        .background(Color(UIColor.secondarySystemBackground))
+                        .cornerRadius(8)
+                        .disabled(isProcessing)
+                        .onChange(of: input) { _, newValue in
+                            characterCount = newValue.count
+                        }
                 }
-                .buttonStyle(.borderedProminent)
+                .frame(minHeight: 40, maxHeight: min(textEditorHeight, maxHeight))
+                .onPreferenceChange(ViewHeightKey.self) { height in
+                    textEditorHeight = min(height + 16, maxHeight)
+                }
+                
+                if isProcessing {
+                    Button("Cancel", action: onCancel)
+                        .buttonStyle(.borderedProminent)
+                        .tint(.red)
+                } else {
+                    Button("Send") {
+                        guard !input.isEmpty else { return }
+                        let messageContent = input
+                        input = "" // Clear input immediately
+                        
+                        Task {
+                            await onSend(messageContent)
+                        }
+                    }
+                    .buttonStyle(.borderedProminent)
+                }
+            }
+            
+            // Character counter with warning
+            if characterCount > 0 {
+                HStack {
+                    Spacer()
+                    Text("\(characterCount) characters")
+                        .font(.caption)
+                        .foregroundColor(
+                            characterCount > characterWarningThreshold ? .red : .secondary
+                        )
+                }
             }
         }
         .padding()
     }
 }
-    
+
+// Height preference key for dynamic sizing
+struct ViewHeightKey: PreferenceKey {
+    static var defaultValue: CGFloat = 0
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = nextValue()
+    }
+}

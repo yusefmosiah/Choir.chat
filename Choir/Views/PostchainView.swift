@@ -109,10 +109,16 @@ struct PostchainView: View {
                 .simultaneousGesture( // Drag gesture remains on the card stack
                     DragGesture()
                         .onChanged { value in
-                            dragOffset = value.translation.width
+                            // Directly update drag offset without animation
+                            var transaction = Transaction()
+                            transaction.disablesAnimations = true
+                            withTransaction(transaction) {
+                                dragOffset = value.translation.width
+                            }
                         }
                         .onEnded { value in
-                            withAnimation(.interactiveSpring()) {
+                            // Only animate the final position after drag ends
+                            withAnimation(.interactiveSpring(response: 0.3, dampingFraction: 0.8)) {
                                 handleDragEnd(value: value, cardWidth: cardWidth)
                             }
                         }
