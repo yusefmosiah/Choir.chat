@@ -47,7 +47,6 @@ tree.md
 │   ├── Preview Content
 │   │   └── Preview Assets.xcassets
 │   │       └── Contents.json
-│   ├── Protocols
 │   ├── Services
 │   │   ├── KeychainService.swift
 │   │   ├── ModelConfigManager.swift
@@ -273,7 +272,7 @@ tree.md
     ├── test_api.sh
     └── test_postchain_multiturn.sh
 
-63 directories, 195 files
+62 directories, 195 files
 
 === File: docs/CHANGELOG.md ===
 

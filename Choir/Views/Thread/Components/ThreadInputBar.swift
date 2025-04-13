@@ -10,74 +10,65 @@ struct ThreadInputBar: View {
     var processingStatus: String = ""
     var isProcessingLargeInput: Bool = false
     
-    // State to track input height
-    @State private var textEditorHeight: CGFloat = 40
-    // State to track character count
-    @State private var characterCount: Int = 0
-    
-    // Maximum input height
-    private let maxHeight: CGFloat = 120
-    // Warning threshold for character count
-    private let characterWarningThreshold: Int = 2000
+    // Track text editor focus
+    @FocusState private var isFocused: Bool
     
     var body: some View {
         VStack(spacing: 4) {
             HStack(alignment: .bottom) {
+                // Main input field container
                 ZStack(alignment: .topLeading) {
-                    // Invisible text view to measure height
-                    Text(input.isEmpty ? "Message" : input)
-                        .padding(6)
-                        .foregroundColor(.clear)
-                        .background(GeometryReader { geometry in
-                            Color.clear.preference(
-                                key: ViewHeightKey.self,
-                                value: geometry.size.height
-                            )
-                        })
+                    // Background for the text editor
+                    RoundedRectangle(cornerRadius: 10)
+                        .fill(Color(UIColor.secondarySystemBackground))
                     
-                    // Actual input editor
+                    // Placeholder text when empty
+                    if input.isEmpty {
+                        Text("Type your message here...")
+                            .foregroundColor(.gray)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 10)
+                    }
+                    
+                    // Actual text editor
                     TextEditor(text: $input)
-                        .frame(height: min(textEditorHeight, maxHeight))
+                        .padding(.horizontal, 4)
                         .scrollContentBackground(.hidden)
-                        .background(Color(UIColor.secondarySystemBackground))
-                        .cornerRadius(8)
+                        .background(Color.clear)
+                        .frame(minHeight: 36)
+                        .focused($isFocused)
                         .disabled(isProcessing)
-                        .onChange(of: input) { _, newValue in
-                            characterCount = newValue.count
-                        }
                 }
-                .frame(minHeight: 40, maxHeight: min(textEditorHeight, maxHeight))
-                .onPreferenceChange(ViewHeightKey.self) { height in
-                    textEditorHeight = min(height + 16, maxHeight)
-                }
+                .frame(height: min(max(36, calculateHeight(for: input)), 200))
+                .clipShape(RoundedRectangle(cornerRadius: 10))
                 
+                // Send/Cancel button
                 if isProcessing {
-                    Button("Cancel", action: onCancel)
-                        .buttonStyle(.borderedProminent)
-                        .tint(.red)
+                    Button(action: onCancel) {
+                        Text("Cancel")
+                            .fontWeight(.medium)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(.red)
+                    .padding(.bottom, 2)
                 } else {
-                    Button("Send") {
-                        guard !input.isEmpty else { return }
+                    Button {
+                        guard !input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
                         let messageContent = input
                         input = "" // Clear input immediately
                         
                         Task {
                             await onSend(messageContent)
                         }
+                    } label: {
+                        Image(systemName: "paperplane.fill")
+                            .font(.system(size: 16, weight: .semibold))
+                            .padding(8)
                     }
                     .buttonStyle(.borderedProminent)
-                }
-            }
-            
-            // Character counter with warning
-            if characterCount > 0 {
-                HStack {
-                    Spacer()
-                    Text("\(characterCount) characters")
-                        .font(.caption)
-                        .foregroundColor(
-                            characterCount > characterWarningThreshold ? .red : .secondary
-                        )
+                    .clipShape(Circle())
+                    .padding(.bottom, 2)
+                    .disabled(input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 }
             }
             
@@ -95,16 +86,31 @@ struct ThreadInputBar: View {
                     Spacer()
                 }
                 .padding(.top, 4)
+                .transition(.opacity)
             }
         }
-        .padding()
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .background(Color(UIColor.systemBackground).opacity(0.95))
+        .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: -2)
+    }
+    
+    // Calculate height based on text content
+    private func calculateHeight(for text: String) -> CGFloat {
+        let estimatedHeight = text.isEmpty ? 36 : min(CGFloat(text.filter { $0 == "\n" }.count + 1) * 20 + 16, 200)
+        return estimatedHeight
     }
 }
 
-// Height preference key for dynamic sizing
-struct ViewHeightKey: PreferenceKey {
-    static var defaultValue: CGFloat = 0
-    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
-        value = nextValue()
+#Preview {
+    VStack {
+        Spacer()
+        ThreadInputBar(
+            input: .constant(""),
+            isProcessing: false,
+            onSend: { _ in },
+            onCancel: {}
+        )
     }
+    .background(Color.gray.opacity(0.1))
 }
