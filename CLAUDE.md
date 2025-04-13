@@ -1,4 +1,4 @@
-# KODING.md
+# CLAUDE.md
 
 This file provides guidelines for agentic coding agents working in the Choir repository.
 
