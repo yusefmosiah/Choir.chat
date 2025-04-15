@@ -273,6 +273,14 @@ class PostchainCoordinatorImpl: PostchainCoordinator, ObservableObject {
 
         if let vectorResults = event.vectorResults {
             print("📲 Received vector results: \(vectorResults.count) items")
+            
+            // Enhanced logging for vector results inspection
+            for (i, vector) in vectorResults.enumerated() {
+                print("📲 VECTOR #\(i+1): Score: \(vector.score), Content length: \(vector.content.count)")
+                print("📲 VECTOR #\(i+1): Content sample: \(vector.content.prefix(50))...")
+                print("📲 VECTOR #\(i+1): Has content_preview: \(vector.content_preview != nil)")
+            }
+            
             self.vectorResults = vectorResults
         }
 

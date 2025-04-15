@@ -123,17 +123,17 @@ async def run_experience_vectors_phase(
     thread_id: str
 ) -> ExperienceVectorsPhaseOutput:
     """Runs the Experience Vectors phase: Embeds query, searches Qdrant, calls LLM with results.
-    
+
     This implementation includes several optimizations for handling large amounts of text:
-    
+
     1. Content Length Management:
-       - For long user prompts (>MAX_INPUT_LENGTH_FOR_EMBEDDING chars), we embed the Action 
+       - For long user prompts (>MAX_INPUT_LENGTH_FOR_EMBEDDING chars), we embed the Action
          response instead of the prompt to avoid truncation issues with the embedding model
-       - When storing long prompts, we save a truncated version of the prompt plus the 
+       - When storing long prompts, we save a truncated version of the prompt plus the
          full Action response
-       - Retrieved content is truncated to MAX_RETRIEVED_CONTENT_LENGTH chars to prevent 
+       - Retrieved content is truncated to MAX_RETRIEVED_CONTENT_LENGTH chars to prevent
          client-side performance issues
-    
+
     2. Duplicate Prevention:
        - Calculates similarity between the current embedding and existing vectors
        - Skips saving if an exact match (similarity ≈ 1.0) is found
@@ -170,7 +170,7 @@ async def run_experience_vectors_phase(
         prompt_hash = hashlib.sha256(normalized_prompt.encode('utf-8')).hexdigest()
 
         embeddings = OpenAIEmbeddings(model=app_config.EMBEDDING_MODEL, api_key=app_config.OPENAI_API_KEY)
-        
+
         if len(query_text) <= MAX_INPUT_LENGTH_FOR_EMBEDDING:
             logger.info(f"Prompt is short ({len(query_text)} chars). Embedding user prompt.")
             query_vector = await embeddings.aembed_query(query_text)
@@ -218,10 +218,10 @@ async def run_experience_vectors_phase(
             scores = [float(res.get("similarity", 0.0)) for res in qdrant_raw_results]
             if scores:
                 max_similarity = max(scores)
-                
+
         # Skip saving if we find an exact duplicate
         should_save_query = (max_similarity < (1.0 - SIMILARITY_EPSILON))
-        
+
         if not should_save_query:
             logger.info(f"Max similarity ({max_similarity:.6f}) is effectively 1.0. Skipping save for this vector.")
         else:
@@ -248,17 +248,23 @@ async def run_experience_vectors_phase(
             content = res_dict.get("content")
             if content is not None and content not in seen_content:
                  try:
-                     # Check if content exceeds maximum length and truncate if needed
+                     # Create a preview version for shorter payload
+                     content_preview = content
+                     if len(content) > 100:
+                         content_preview = content[:100] + "..."
+
+                     # For very long content, also create a shorter version for the main content field
+                     stored_content = content
                      if len(content) > MAX_RETRIEVED_CONTENT_LENGTH:
-                         truncated_content = content[:MAX_RETRIEVED_CONTENT_LENGTH] + "..."
+                         stored_content = content[:MAX_RETRIEVED_CONTENT_LENGTH] + "..."
                          logger.warning(f"Truncated retrieved content from point {res_dict.get('id')} due to length ({len(content)} chars -> {MAX_RETRIEVED_CONTENT_LENGTH} chars).")
-                         content = truncated_content
-                         
+
                      # Adapt raw result keys to VectorSearchResult schema
                      vector_results_list.append(VectorSearchResult(
                          score=res_dict.get("similarity", 0.0), # Qdrant calls it similarity
                          provider="qdrant",
-                         content=content,
+                         content=stored_content,
+                         content_preview=content_preview,
                          metadata=res_dict.get("metadata", {}),
                          id=res_dict.get("id")
                      ))
@@ -274,17 +280,30 @@ async def run_experience_vectors_phase(
         if vector_results_list:
             # Add results in simplified code block format
             for i, res in enumerate(vector_results_list):
-                id_text = getattr(res, "id", f"#{i+1}")
+                # Use the position number (1-based) as the reference, not the actual UUID
+                position_number = i + 1
+                # Include the ID in the context for potential future retrieval
+                vector_id = f"ID: {res.id}" if res.id else ""
+
+                # Use content preview if it exists, otherwise a short version of the content
+                display_content = res.content
+                if hasattr(res, 'content_preview') and res.content_preview:
+                    display_content = res.content_preview
+                elif len(res.content) > 200:
+                    display_content = res.content[:200] + "..."
+
                 search_context += f"""
 ```
-{id_text} | {res.score:.2f}
-{res.content}
+#{position_number} | {res.score:.2f} {vector_id}
+{display_content}
 ```
 
 """
         else:
             search_context += "No relevant information found in internal documents.\n"
-        search_context += "\n"
+
+        # Add explicit instruction about the reference syntax
+        search_context += "\nIMPORTANT: When referencing any vector result in your response, use the #ID syntax (e.g., #123). These references will be converted to clickable links in the UI, allowing users to view the full content of each result. You MUST use this syntax whenever referring to specific vector results.\n\n"
 
         # Find last AI message (likely Action response) to include in context
         last_ai_msg = next((m for m in reversed(messages) if isinstance(m, AIMessage)), None)
@@ -320,16 +339,29 @@ Your task: Synthesize the information above and the conversation history to resp
         # Use a generic error message if LLM call failed before assignment
         final_response = final_response or AIMessage(content=f"Error in phase: {e}")
 
-    # Limit the number of vector results sent to the client to prevent performance issues
-    # We'll still use all results for the LLM synthesis internally, but limit what's sent to the client
-    limited_vector_results = vector_results_list[:MAX_VECTOR_RESULTS] if vector_results_list else []
-    if len(vector_results_list) > MAX_VECTOR_RESULTS:
-        logger.info(f"Limiting vector results returned to client from {len(vector_results_list)} to {MAX_VECTOR_RESULTS}")
-        
-    # Return the structured output with limited results
+    # Find vector results that are referenced in the response
+    referenced_vector_results = []
+
+    if final_response and vector_results_list:
+        # Use our helper function to extract referenced vectors
+        referenced_vector_results = get_referenced_vectors(
+            final_response.content,
+            vector_results_list
+        )
+
+        # If no references were found or no valid references exist, include default vectors as fallback
+        if not referenced_vector_results:
+            logger.info(f"No valid vector references found, including up to {MAX_VECTOR_RESULTS} default vectors")
+            referenced_vector_results = vector_results_list[:MAX_VECTOR_RESULTS]
+
+    # Log the final selection of vectors
+    if vector_results_list:
+        logger.info(f"Selected {len(referenced_vector_results)} out of {len(vector_results_list)} total vector results to return to client")
+
+    # Return the structured output with the referenced vectors
     return ExperienceVectorsPhaseOutput(
         experience_vectors_response=final_response,
-        vector_results=limited_vector_results,
+        vector_results=referenced_vector_results,
         error=error_msg
     )
 
@@ -417,6 +449,7 @@ Your task: Decide if web search is needed and call BraveSearchTool if relevant. 
                             if input_arg_val is not None:
                                 # --- Execute Web Search Tool ---
                                 tool_output_json_str = await tool_to_execute.run(input_arg_val)
+                                logger.info(f"Web search tool output: {tool_output_json_str[:200]}...")
                                 tool_output_str = tool_output_json_str # Keep JSON string for ToolMessage
 
                                 # --- Parse Web Search Output ---
@@ -459,7 +492,7 @@ Your task: Decide if web search is needed and call BraveSearchTool if relevant. 
 
             if tool_messages:
                 phase_messages.extend(tool_messages)
-                
+
                 # Add explicit web search results summary to help the model format results properly
                 if web_results_list:
                     web_results_summary = "\n\nWeb Search Results:\n"
@@ -467,15 +500,15 @@ Your task: Decide if web search is needed and call BraveSearchTool if relevant. 
                         # Format in the simplified way specified in the prompt
                         web_results_summary += f"[{result.title}]({result.url})\n"
                         web_results_summary += f"> {result.content}\n\n"
-                    
+
                     # Add this as a human message to make it clear these are the results
                     phase_messages.append(HumanMessage(content=f"""
-The web search returned {len(web_results_list)} results. Please incorporate the most relevant ones into your response 
+The web search returned {len(web_results_list)} results. Please incorporate the most relevant ones into your response
 using the inline link + blockquote format as instructed, and then synthesize the information to answer the query.
 
 {web_results_summary}
 """))
-                
+
                 # --- Second LLM Call (with tool results) ---
                 logger.info("Calling LLM again with Experience Web tool results.")
                 response_after_tool = await chain.ainvoke(phase_messages)
@@ -625,6 +658,41 @@ async def run_yield_phase(
 
 # --- Main Workflow (Updated) ---
 
+# Helper function to extract vector references from text and fetch the corresponding vectors
+def get_referenced_vectors(text, available_vectors):
+    """
+    Extract vector references from text and return the referenced vectors.
+
+    Args:
+        text (str): The text to search for vector references
+        available_vectors (list): List of VectorSearchResult objects
+
+    Returns:
+        list: The vector results that are referenced in the text
+    """
+    import re
+    referenced_vectors = []
+
+    # Extract all #number references
+    vector_refs = re.findall(r'#(\d+)', text)
+    if not vector_refs:
+        return []
+
+    # Convert to integers and get unique values
+    referenced_indices = sorted(set(int(ref) for ref in vector_refs if ref.isdigit()))
+    logger.info(f"Found vector references: {referenced_indices}")
+
+    # Get the referenced vectors
+    for ref_num in referenced_indices:
+        array_idx = ref_num - 1  # Convert 1-based to 0-based
+        if 0 <= array_idx < len(available_vectors):
+            referenced_vectors.append(available_vectors[array_idx])
+            logger.info(f"Including vector #{ref_num}")
+        else:
+            logger.warning(f"Vector reference #{ref_num} is out of range (1-{len(available_vectors)})")
+
+    return referenced_vectors
+
 async def run_langchain_postchain_workflow(
     query: str,
     thread_id: str,
@@ -655,7 +723,7 @@ async def run_langchain_postchain_workflow(
         experience_web_model_config = experience_web_mc_override or ModelConfig(provider="google", model_name="gemini-2.0-flash-lite", temperature=default_temp) # Can use same default or different
         intention_model_config = intention_mc_override or ModelConfig(provider="openrouter", model_name="x-ai/grok-3-mini-beta", temperature=default_temp)
         observation_model_config = observation_mc_override or ModelConfig(provider="groq", model_name="qwen-qwq-32b", temperature=default_temp)
-        understanding_model_config = understanding_mc_override or ModelConfig(provider="openrouter", model_name="openrouter/optimus-alpha", temperature=default_temp)
+        understanding_model_config = understanding_mc_override or ModelConfig(provider="openai", model_name="gpt-4.1-mini", temperature=default_temp)
         yield_model_config = yield_mc_override or ModelConfig(provider="openrouter", model_name="x-ai/grok-3-mini-beta", temperature=default_temp)
 
         logger.info(f"Workflow Models - Action: {action_model_config}, ExpVectors: {experience_vectors_model_config}, ExpWeb: {experience_web_model_config}, Intention: {intention_model_config}, Observation: {observation_model_config}, Understanding: {understanding_model_config}, Yield: {yield_model_config}")
@@ -691,16 +759,17 @@ async def run_langchain_postchain_workflow(
     yield {"phase": "experience_vectors", "status": "running"}
     exp_vectors_output: ExperienceVectorsPhaseOutput = await run_experience_vectors_phase(current_messages, experience_vectors_model_config, thread_id=thread_id)
     if exp_vectors_output.error:
-        # Use same compact format for error case
+        # Use same format for error case, but include full content
         vector_result_data = []
         for res in exp_vectors_output.vector_results:
             compact_result = {
                 "score": round(res.score, 3),
                 "id": getattr(res, "id", None),
+                "content": res.content,  # Include full content
                 "content_preview": res.content[:100] + "..." if len(res.content) > 100 else res.content
             }
             vector_result_data.append(compact_result)
-            
+
         yield {
             "phase": "experience_vectors", "status": "error", "content": exp_vectors_output.error,
             "provider": experience_vectors_model_config.provider, "model_name": experience_vectors_model_config.model_name,
@@ -711,22 +780,78 @@ async def run_langchain_postchain_workflow(
     conversation_history_store[thread_id] = current_messages
     # Generate a more compact payload for the client to avoid client-side performance issues
     vector_result_data = []
-    for res in exp_vectors_output.vector_results:
-        # Create a simplified version of each result
-        compact_result = {
-            "score": round(res.score, 3),  # Round to 3 decimal places to reduce payload size
-            "id": getattr(res, "id", None),
-            # Include only the first 100 chars of content for preview in UI
-            "content_preview": res.content[:100] + "..." if len(res.content) > 100 else res.content
-        }
-        vector_result_data.append(compact_result)
-    
-    yield {
-        "phase": "experience_vectors", "status": "complete", "content": exp_vectors_output.experience_vectors_response.content,
-        "provider": experience_vectors_model_config.provider, "model_name": experience_vectors_model_config.model_name,
-        "vector_results": vector_result_data  # Simplified vector results for client
-    }
 
+    # Log detailed information about the vector results available
+    logger.info(f"Experience Vectors phase has {len(exp_vectors_output.vector_results) if exp_vectors_output.vector_results else 0} vector results available")
+
+    # Add a test vector if none exist to help debug client-side handling
+    if not exp_vectors_output.vector_results or len(exp_vectors_output.vector_results) == 0:
+        logger.warning("No vector results found. Adding a test vector to debug client-side handling.")
+        test_vector = {
+            "score": 0.95,
+            "id": "test-vector-1",  # ID is critical for fetching full content later
+            "content": "This is a test vector content to verify client rendering.",  # Short content for testing
+            "content_preview": "This is a test vector content preview."
+        }
+        vector_result_data.append(test_vector)
+    else:
+        # Process the actual vectors - only include referenced vectors to keep payload small
+        # First identify referenced vectors in the response text
+        references = []
+        if exp_vectors_output.experience_vectors_response and exp_vectors_output.experience_vectors_response.content:
+            import re
+            references = re.findall(r'#(\d+)', exp_vectors_output.experience_vectors_response.content)
+            references = [int(r) for r in references if r.isdigit()]
+            logger.info(f"Found references to vectors: {references}")
+
+        # Include referenced vectors (if any) plus a sample of others up to MAX_VECTOR_RESULTS
+        included_indices = set()
+
+        # First add referenced vectors
+        for ref_num in references:
+            idx = ref_num - 1  # Convert 1-based reference to 0-based index
+            if 0 <= idx < len(exp_vectors_output.vector_results):
+                included_indices.add(idx)
+
+        # Then fill with other vectors up to MAX_VECTOR_RESULTS
+        remaining_slots = MAX_VECTOR_RESULTS - len(included_indices)
+        if remaining_slots > 0:
+            for i in range(len(exp_vectors_output.vector_results)):
+                if i not in included_indices and len(included_indices) < MAX_VECTOR_RESULTS:
+                    included_indices.add(i)
+                    if len(included_indices) >= MAX_VECTOR_RESULTS:
+                        break
+
+        logger.info(f"Including {len(included_indices)} vector results (referenced + sample)")
+
+        # Now create compact results for all included vectors
+        for idx in sorted(included_indices):
+            res = exp_vectors_output.vector_results[idx]
+            # Create optimized version with ID and preview but minimal content
+            compact_result = {
+                "score": round(res.score, 3),
+                "id": getattr(res, "id", None),
+                # Only include first paragraph of content to minimize payload size
+                "content": res.content.split("\n\n")[0] if res.content else "",
+                # Always include preview
+                "content_preview": res.content_preview if hasattr(res, "content_preview") and res.content_preview else (res.content[:100] + "..." if len(res.content) > 100 else res.content)
+            }
+            vector_result_data.append(compact_result)
+
+    # Log what we're sending to the client
+    logger.info(f"Sending {len(vector_result_data)} vector results to client for experience_vectors phase")
+    for i, v in enumerate(vector_result_data):
+        logger.info(f"Vector {i+1}: id={v.get('id', 'None')}, content length={len(v.get('content', ''))}")
+
+    # Create the event payload
+    yield {
+        "phase": "experience_vectors",
+        "status": "complete",
+        "content": exp_vectors_output.experience_vectors_response.content,
+        "provider": experience_vectors_model_config.provider,
+        "model_name": experience_vectors_model_config.model_name,
+        "vector_results": vector_result_data  # Include vector results for client
+    }
     # 3. Experience Web Phase
     yield {"phase": "experience_web", "status": "running"}
     exp_web_output: ExperienceWebPhaseOutput = await run_experience_web_phase(current_messages, experience_web_model_config)
@@ -791,9 +916,53 @@ async def run_langchain_postchain_workflow(
     understanding_response: AIMessage = understanding_result["understanding_response"]
     current_messages.append(understanding_response)
     conversation_history_store[thread_id] = current_messages
+    # Get vector results from experience_vectors phase
+    vector_results_from_exp = exp_vectors_output.vector_results if hasattr(exp_vectors_output, 'vector_results') else []
+
+    # Log what we have available
+    logger.info(f"Understanding phase: Found {len(vector_results_from_exp)} vector results from experience_vectors phase")
+
+    # Find vectors referenced in the understanding phase response
+    vector_results_to_include = get_referenced_vectors(
+        understanding_response.content,
+        vector_results_from_exp
+    )
+
+    logger.info(f"Understanding phase: Found {len(vector_results_to_include)} vector references in response")
+
+    # If no vector references were found, but the text contains patterns like numbers that look like references,
+    # we'll include the first few vector results as a fallback to ensure user has some data
+    if not vector_results_to_include and len(vector_results_from_exp) > 0:
+        # Check for potential unlabeled references
+        import re
+        potential_refs = re.findall(r'\b(\d+)\b', understanding_response.content)
+        if potential_refs:
+            logger.info(f"Understanding phase: No explicit vector references found, but detected {len(potential_refs)} numeric references")
+
+            # Include at least the first few vectors as a fallback
+            max_fallback = min(3, len(vector_results_from_exp))
+            fallback_vectors = vector_results_from_exp[:max_fallback]
+            logger.info(f"Understanding phase: Including {len(fallback_vectors)} fallback vectors for potential references")
+            vector_results_to_include = fallback_vectors
+
+    # Format vector results with optimized payload (ID, preview, first paragraph of content)
+    vector_result_data = []
+    if vector_results_to_include:
+        for res in vector_results_to_include:
+            vector_result_data.append({
+                "score": round(res.score, 3),
+                "id": getattr(res, "id", None),
+                # Only include first paragraph of content to minimize payload size
+                "content": res.content.split("\n\n")[0] if res.content else "",
+                # Always include preview
+                "content_preview": res.content_preview if hasattr(res, "content_preview") and res.content_preview else (res.content[:100] + "..." if len(res.content) > 100 else res.content)
+            })
+
+    # Send the event with properly formatted vector results
     yield {
         "phase": "understanding", "status": "complete", "content": understanding_response.content,
-        "provider": understanding_model_config.provider, "model_name": understanding_model_config.model_name
+        "provider": understanding_model_config.provider, "model_name": understanding_model_config.model_name,
+        "vector_results": vector_result_data if vector_result_data else None
     }
 
     # 7. Yield Phase
@@ -808,16 +977,58 @@ async def run_langchain_postchain_workflow(
         return
     yield_response: AIMessage = yield_result["yield_response"]
     # Don't add Yield to history for now
-    # DEBUG LOG: Log the event payload before yielding
+    # Get any vector results we've saved from experience_vectors phase
+    vector_results_from_exp = exp_vectors_output.vector_results if hasattr(exp_vectors_output, 'vector_results') else []
+
+    # Log what we have available
+    logger.info(f"Yield phase: Found {len(vector_results_from_exp)} vector results from experience_vectors phase")
+
+    # Find vectors referenced in the yield phase response
+    vector_results_to_include = get_referenced_vectors(
+        yield_response.content,
+        vector_results_from_exp
+    )
+
+    logger.info(f"Yield phase: Found {len(vector_results_to_include)} vector references in response")
+
+    # If no vector references were found, but the text contains patterns like numbers that look like references,
+    # we'll include the first few vector results as a fallback to ensure user has some data
+    if not vector_results_to_include and len(vector_results_from_exp) > 0:
+        # Check for potential unlabeled references
+        import re
+        potential_refs = re.findall(r'\b(\d+)\b', yield_response.content)
+        if potential_refs:
+            logger.info(f"Yield phase: No explicit vector references found, but detected {len(potential_refs)} numeric references")
+
+            # Include at least the first few vectors as a fallback
+            max_fallback = min(3, len(vector_results_from_exp))
+            fallback_vectors = vector_results_from_exp[:max_fallback]
+            logger.info(f"Yield phase: Including {len(fallback_vectors)} fallback vectors for potential references")
+            vector_results_to_include = fallback_vectors
+
+    # Format vector results with optimized payload (ID, preview, first paragraph of content)
+    vector_result_data = []
+    if vector_results_to_include:
+        for res in vector_results_to_include:
+            vector_result_data.append({
+                "score": round(res.score, 3),
+                "id": getattr(res, "id", None),
+                # Only include first paragraph of content to minimize payload size
+                "content": res.content.split("\n\n")[0] if res.content else "",
+                # Always include preview
+                "content_preview": res.content_preview if hasattr(res, "content_preview") and res.content_preview else (res.content[:100] + "..." if len(res.content) > 100 else res.content)
+            })
+
+    # Create and log the final event payload with properly formatted vector results
     event_payload = {
         "phase": "yield", "status": "complete", "content": yield_response.content,
-        "provider": yield_model_config.provider, "model_name": yield_model_config.model_name
+        "provider": yield_model_config.provider, "model_name": yield_model_config.model_name,
+        "vector_results": vector_result_data if vector_result_data else None
     }
-    logger.info(f"🐍 WORKFLOW: Yielding event payload: {event_payload}")
-    yield {
-        "phase": "yield", "status": "complete", "content": yield_response.content,
-        "provider": yield_model_config.provider, "model_name": yield_model_config.model_name
-    }
+    logger.info(f"🐍 WORKFLOW: Yielding event payload with {len(vector_results_to_include)} vector results")
+
+    # Send the event to the client
+    yield event_payload
 
 
     logger.info(f"Langchain PostChain workflow completed for thread {thread_id}")

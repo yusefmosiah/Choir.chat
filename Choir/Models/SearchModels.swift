@@ -32,7 +32,7 @@ struct VectorSearchResult: Codable, Equatable, Hashable {
     let provider: String?
     var id: String?
     var content_preview: String?
-    
+
     var uniqueId: String {
         if let id = id {
             return id
@@ -59,22 +59,31 @@ struct VectorSearchResult: Codable, Equatable, Hashable {
         self.id = id
         self.content_preview = content_preview
     }
-    
+
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        
+
         // Try to decode content, but don't fail if it's missing
         content = try container.decodeIfPresent(String.self, forKey: .content) ?? ""
-        
+
         // These fields are required
         score = try container.decode(Double.self, forKey: .score)
-        
+
         // These fields are optional
-        metadata = try container.decodeIfPresent([String: String].self, forKey: .metadata)
+        // Make metadata decoding more robust
+        // Make metadata decoding more robust using AnyCodable
+        if let anyMetadata = try? container.decodeIfPresent([String: AnyCodable].self, forKey: .metadata) {
+            metadata = anyMetadata.compactMapValues { $0.value as? String }
+            if metadata?.count != anyMetadata.count {
+                 print("⚠️ VECTOR METADATA: Some non-string values found in metadata dict for id \(id ?? "unknown")")
+            }
+        } else {
+            metadata = nil // Explicitly nil if decoding fails or key is absent
+        }
         provider = try container.decodeIfPresent(String.self, forKey: .provider)
         id = try container.decodeIfPresent(String.self, forKey: .id)
         content_preview = try container.decodeIfPresent(String.self, forKey: .content_preview)
-        
+
         // Handle the case where content is empty but content_preview is available
         if content.isEmpty && content_preview != nil {
             content = content_preview!

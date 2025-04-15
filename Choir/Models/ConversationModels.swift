@@ -270,6 +270,16 @@ class Message: ObservableObject, Identifiable, Equatable {
 
         // Debug output for monitoring
         print("📝 MESSAGE: Updating phase \(phase.rawValue) with content length: \(content.count), status: \(status)")
+        
+        // Add debugging for vector results - check what we're getting in the event
+        if let vectorResults = event.vectorResults {
+            print("🔍 VECTORS IN EVENT: Phase \(phase.rawValue) received \(vectorResults.count) vector results")
+            if !vectorResults.isEmpty {
+                print("🔍 VECTORS IN EVENT: First result score: \(vectorResults[0].score)")
+            }
+        } else {
+            print("🔍 VECTORS IN EVENT: Phase \(phase.rawValue) received NO vector results")
+        }
 
         // Always mark as streaming when we receive updates
         // This ensures UI reflects streaming state
@@ -342,9 +352,52 @@ class Message: ObservableObject, Identifiable, Equatable {
         if phase == .experienceVectors {
             if let results = event.vectorResults {
                 print("📝 MESSAGE: Updating vector results: \(results.count) items")
+                
+                // Enhanced debug info about incoming vector results
+                print("🔍 VECTOR DEBUG: Received \(results.count) vector results for message \(id)")
+                print("🔍 VECTOR DEBUG: Phase: \(phase.rawValue), Status: \(status)")
+                
+                for (index, result) in results.enumerated() {
+                    print("🔍 VECTOR #\(index+1): Score \(result.score), Content length: \(result.content.count)")
+                    print("🔍 VECTOR #\(index+1): Content sample: \(result.content.prefix(50))...")
+                    print("🔍 VECTOR #\(index+1): Has content_preview: \(result.content_preview != nil)")
+                    print("🔍 VECTOR #\(index+1): Has ID: \(result.id != nil)")
+                }
+                
+                // Actually store the results
                 self.vectorSearchResults = results
+                
+                // IMPORTANT: Since vector results typically come with the Experience Vectors phase,
+                // But might be referenced in ANY phase, we need to store this information more prominently
+                if !results.isEmpty {
+                    print("🔍 VECTOR STORAGE: Vector results will be available for ALL phases in this message")
+                    print("🔍 VECTOR STORAGE: Stored \(self.vectorSearchResults.count) results with message \(id)")
+                } else {
+                    print("🔍 VECTOR WARNING: Experience Vectors phase received EMPTY vector results!")
+                }
+            } else {
+                print("🔍 VECTOR DEBUG: No vector results received for message \(id) in phase \(phase.rawValue)")
             }
-        } else if phase == .experienceWeb {
+        } 
+        // Even if we're in another phase, if we receive vector results, we should store them
+        // This could happen if results from experienceVectors are attached to other phase events
+        else if let results = event.vectorResults, !results.isEmpty {
+            print("🔍 VECTOR DEBUG: Received vector results in non-experienceVectors phase \(phase.rawValue)!")
+            print("🔍 VECTOR DEBUG: Updating vector results: \(results.count) items")
+            
+            // Enhanced debug info for non-experienceVectors phase
+            for (index, result) in results.enumerated() {
+                print("🔍 VECTOR #\(index+1): Score \(result.score), Content length: \(result.content.count)")
+                print("🔍 VECTOR #\(index+1): Content sample: \(result.content.prefix(50))...")
+            }
+            
+            // Store the results
+            self.vectorSearchResults = results
+            print("🔍 VECTOR STORAGE: Stored \(self.vectorSearchResults.count) results with message \(id) in phase \(phase.rawValue)")
+        }
+        
+        // Handle web search results
+        if phase == .experienceWeb {
             if let results = event.webResults {
                 print("📝 MESSAGE: Updating web results: \(results.count) items")
                 self.webSearchResults = results
@@ -377,7 +430,8 @@ class Message: ObservableObject, Identifiable, Equatable {
         let content = phaseResults[phase]?.content ?? ""
         print("📊 GET CONTENT (\(phase.rawValue)): Retrieved content length: \(content.count)")
         print("📊 GET CONTENT (\(phase.rawValue)): Retrieved content is empty: \(content.isEmpty)")
-
+        
+        // NOTE: Vector reference conversion (#123 -> links) is now handled in PaginatedMarkdownView
         return content
     }
 

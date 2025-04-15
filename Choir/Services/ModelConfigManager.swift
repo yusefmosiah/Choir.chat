@@ -26,11 +26,11 @@ class ModelConfigManager {
                     provider: "openrouter", model: "x-ai/grok-3-mini-beta"),
                 .experienceWeb: ModelConfig(
                     provider: "openrouter", model: "ai21/jamba-1.6-mini"),
-                .intention: ModelConfig(provider: "openrouter", model: "openrouter/optimus-alpha"),
+                .intention: ModelConfig(provider: "openai", model: "gpt-4.1-mini"),
                 .observation: ModelConfig(provider: "groq", model: "qwen-qwq-32b"),
                 .understanding: ModelConfig(
-                    provider: "openrouter", model: "openrouter/optimus-alpha"),
-                .yield: ModelConfig(provider: "openrouter", model: "x-ai/grok-3-mini-beta"),
+                    provider: "openrouter", model: "x-ai/grok-3-mini-beta"),
+                .yield: ModelConfig(provider: "openai", model: "gpt-4.1"),
             ]
         }
     }

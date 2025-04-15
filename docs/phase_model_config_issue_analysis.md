@@ -12,8 +12,8 @@ Regardless of saved model configurations, the **experiencevectors** and **experi
 
 - The backend **assigns default models** for each phase if **no override is provided**:
   ```python
-  experience_vectors_model_config = experience_vectors_mc_override or ModelConfig(provider="openrouter", model_name="openrouter/optimus-alpha", temperature=default_temp)
-  experience_web_model_config = experience_web_mc_override or ModelConfig(provider="openrouter", model_name="openrouter/optimus-alpha", temperature=default_temp)
+  experience_vectors_model_config = experience_vectors_mc_override or ModelConfig(provider="openrouter", model_name="gpt-4.1-mini", temperature=default_temp)
+  experience_web_model_config = experience_web_mc_override or ModelConfig(provider="openrouter", model_name="gpt-4.1-mini", temperature=default_temp)
   ```
 - So, **without explicit overrides**, these phases **always use `optimus-alpha`**.
 

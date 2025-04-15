@@ -154,7 +154,8 @@ struct PhaseCard: View {
                         availableSize: geometry.size,
                         currentPage: pageBinding,
                         onNavigateToPreviousPhase: createNavigationHandler(direction: .previous),
-                        onNavigateToNextPhase: createNavigationHandler(direction: .next)
+                        onNavigateToNextPhase: createNavigationHandler(direction: .next),
+                        currentMessage: message
                     )
                 }
             } else if isLoading {

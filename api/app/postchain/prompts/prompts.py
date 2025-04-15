@@ -22,16 +22,19 @@ Use the QdrantSearchTool *eagerly* if the query relates to past discussions, int
 Only call the QdrantSearchTool.
 Do NOT use web search tools in this phase.
 
-IMPORTANT: When vector search results are provided, display 2-3 of the MOST RELEVANT results as simple code blocks for mobile readability:
+IMPORTANT: When vector search results are provided, select up to 10 RELEVANT results and display 2-3 of the most relevant ones as simple code blocks for mobile readability:
 
 ```
 #id | 0.92
 This is relevant content that helps answer the query...
 ```
 
-For each result, keep the content preview concise (2-3 sentences max) and explain how it relates to the query after each code block.
+For each displayed result, keep the content preview concise (2-3 sentences max) and explain how it relates to the query after each code block.
 
-After presenting the relevant results, incorporate these insights into your response. Summarize the findings from the vector search or indicate if nothing relevant was found.
+REQUIRED: Throughout your response, whenever you reference vector results, you MUST use the #id syntax (e.g., #123, #456) to refer to specific vector IDs. These references will become clickable in the UI, allowing users to view the full content of each result. Group related results together when appropriate (e.g., "Results #1, #3, and #5 all discuss...").
+
+After incorporating the search results, create a structured summary section with bullet points linking to the most salient results using the #id syntax.
+
 Continue flowing with the same voice as the previous phase, Action.
 
 <model_config>{model_config.provider}/{model_config.model_name}</model_config>
@@ -102,6 +105,10 @@ For this Yield phase:
 Review the synthesized understanding from the previous phase.
 Your task is to generate the final, user-facing response based on this understanding.
 Ensure the response is coherent, addresses the user's original query and refined intention, and incorporates relevant context gathered throughout the process.
+
+IMPORTANT: If your response references any vector search results from the Experience Vectors phase, you MUST maintain the #id syntax (e.g., #123) when referring to specific vector IDs. These references will become clickable in the UI, allowing users to view the full content of each result.
+
+If appropriate for the response, include a "Sources" or "References" section at the end that lists the most important vector results using the #id syntax (e.g., "For more on this topic, see results #1, #5, and #12").
 
 Your response is the final packet in the wave of ai responses, the Choir's Postchain.
 Continue flowing with the same voice as the previous phase, understanding.

@@ -14,13 +14,13 @@ struct ModelConfigView: View {
     @State private var dynamicModelsByProvider: [String: [String]] = [
         "google": ["gemini-2.0-flash-lite", "gemini-2.0-flash", "gemini-2.5-pro-exp-03-25"],
         "openrouter": [
-            "ai21/jamba-1.6-mini", "openrouter/optimus-alpha", "x-ai/grok-3-mini-beta",
+            "ai21/jamba-1.6-mini", "x-ai/grok-3-mini-beta",
         ],
         "anthropic": [
             "claude-3-5-haiku-latest", "claude-3-5-sonnet-latest", "claude-3-7-sonnet-latest",
         ],
         "groq": ["qwen-qwq-32b", "meta-llama/llama-4-scout-17b-16e-instruct", "qwen-2.5-coder-32b", "deepseek-r1-distill-qwen-32b", "meta-llama/llama-4-maverick-17b-128e-instruct", "llama-3.1-8b-instant", "mistral-saba-24b"],
-        "openai": ["gpt-4o-mini", "gpt-4o", "o3-mini"],
+        "openai": ["gpt-4.1", "gpt-4.1-mini", "gpt-4o", "o3-mini"],
     ]
 
     var body: some View {
@@ -214,13 +214,13 @@ struct ModelConfigView: View {
         var updatedModels = [
             "google": ["gemini-2.0-flash-lite", "gemini-2.0-flash", "gemini-2.5-pro-exp-03-25"],
             "openrouter": [
-                "ai21/jamba-1.6-mini", "openrouter/optimus-alpha", "x-ai/grok-3-mini-beta",
+                "ai21/jamba-1.6-mini", "x-ai/grok-3-mini-beta",
             ],
             "anthropic": [
                 "claude-3-5-haiku-latest", "claude-3-5-sonnet-latest", "claude-3-7-sonnet-latest",
             ],
             "groq": ["qwen-qwq-32b", "meta-llama/llama-4-scout-17b-16e-instruct", "qwen-2.5-coder-32b", "deepseek-r1-distill-qwen-32b", "meta-llama/llama-4-maverick-17b-128e-instruct", "llama-3.1-8b-instant", "mistral-saba-24b"],
-            "openai": ["gpt-4o-mini", "gpt-4o", "o3-mini"],
+            "openai": ["gpt-4.1", "gpt-4.1-mini", "gpt-4o-mini", "gpt-4o", "o3-mini"],
         ]
 
         for provider in providers {

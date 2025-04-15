@@ -1,17 +1,23 @@
 import Foundation
 
+// MARK: - API Configuration
+struct ApiConfig {
+    #if DEBUG && targetEnvironment(simulator)
+    // Use localhost for simulator
+    static let baseURL = "http://localhost:8000"
+    #else
+    // Use production URL for physical devices and release builds
+    static let baseURL = "https://choir-chat.onrender.com"
+    #endif
+}
+
 /// Main client for interacting with the Postchain API
 /// Provides both synchronous endpoints and streaming capabilities
 actor PostchainAPIClient {
     // MARK: - Configuration
 
-    #if DEBUG && targetEnvironment(simulator)
-    // Use localhost for simulator
-    private let baseURL = "http://localhost:8000/api/postchain"
-    #else
-    // Use production URL for physical devices and release builds
-    private let baseURL = "https://choir-chat.onrender.com/api/postchain"
-    #endif
+    // Use ApiConfig for base URL and append the specific API endpoint path
+    private let baseURL = "\(ApiConfig.baseURL)/api/postchain"
 
     // Encoding/decoding
     private let encoder: JSONEncoder
@@ -237,24 +243,69 @@ actor PostchainAPIClient {
                                         print("📊 YIELD: Checking if content exists: \(jsonString.contains("\"content\""))")
                                     }
 
+                                    // Log raw JSON specifically for experience_vectors phase before attempting decode
+                                    if jsonString.contains("\"phase\":\"experience_vectors\"") {
+                                        print("📬 RAW experience_vectors JSON: \(jsonString)")
+                                    }
+
                                     // Parse JSON
                                     do {
-                                        let jsonData = jsonString.data(using: .utf8)!
-                                        let postchainEvent = try decoder.decode(PostchainEvent.self, from: jsonData)
-                                        // DEBUG LOG: Check parsed event data for yield phase
-                                        if postchainEvent.phase == "yield" {
-                                            print("🔵 PARSED YIELD EVENT: Phase=\(postchainEvent.phase), Status=\(postchainEvent.status), Content=\(postchainEvent.content ?? "nil")")
+                                        guard let jsonData = jsonString.data(using: .utf8) else {
+                                            print("🚨 Error: Could not convert JSON string to UTF8 data")
+                                            continue // Skip this event if data conversion fails
                                         }
-
+                                        let postchainEvent = try decoder.decode(PostchainEvent.self, from: jsonData)
+                                        // Enhanced logging for all events, focusing on vector results
                                         print("📡 STREAM: Decoded event for phase: \(postchainEvent.phase)")
                                         print("📡 STREAM: Content length: \(postchainEvent.content?.count ?? 0)")
                                         print("📡 STREAM: Status: \(postchainEvent.status)")
+
+                                        // Log vector results for any phase that includes them
+                                        if let vectorResults = postchainEvent.vectorResults, !vectorResults.isEmpty {
+                                            print("🔍 VECTOR STREAM: Phase \(postchainEvent.phase) contains \(vectorResults.count) vector results")
+                                            print("🔍 VECTOR STREAM: Raw JSON data: \(jsonString.contains("vector_results"))")
+
+                                            let nonEmptyContent = vectorResults.filter { !$0.content.isEmpty }
+                                            let emptyContent = vectorResults.filter { $0.content.isEmpty }
+
+                                            print("🔍 VECTOR STREAM: Vectors with content: \(nonEmptyContent.count), Empty content: \(emptyContent.count)")
+
+                                            for (i, vector) in vectorResults.enumerated() {
+                                                print("🔍 VECTOR STREAM: Vector #\(i+1) - Score: \(vector.score), Content length: \(vector.content.count), ID: \(vector.id ?? "nil")")
+
+                                                if vector.content.isEmpty {
+                                                    if let preview = vector.content_preview {
+                                                        print("🔍 VECTOR STREAM: Vector #\(i+1) has empty content but has preview: \(preview.prefix(30))...")
+                                                    } else {
+                                                        print("🔍 VECTOR STREAM: Vector #\(i+1) has empty content and no preview!")
+                                                    }
+                                                } else {
+                                                    print("🔍 VECTOR STREAM: Vector #\(i+1) content: \(vector.content.prefix(30))...")
+                                                }
+                                            }
+                                        } else if postchainEvent.vectorResults?.isEmpty ?? true {
+                                            print("🔍 VECTOR STREAM: Phase \(postchainEvent.phase) contains NO vector results (empty array)")
+                                            // Check if the raw JSON contains vector_results field
+                                            print("🔍 VECTOR STREAM: Raw JSON contains vector_results? \(jsonString.contains("vector_results"))")
+                                            if jsonString.contains("vector_results") {
+                                                print("🔍 VECTOR STREAM: JSON parsing issue - vector_results exists in raw JSON but not in decoded object")
+                                            }
+                                        } else {
+                                            print("🔍 VECTOR STREAM: Phase \(postchainEvent.phase) contains NO vector results (nil)")
+                                            // Check if the raw JSON contains vector_results field
+                                            print("🔍 VECTOR STREAM: Raw JSON contains vector_results? \(jsonString.contains("vector_results"))")
+                                        }
+
+                                        // Special debug for yield phase
+                                        if postchainEvent.phase == "yield" {
+                                            print("🔵 PARSED YIELD EVENT: Phase=\(postchainEvent.phase), Status=\(postchainEvent.status), Content=\(postchainEvent.content ?? "nil")")
+                                        }
 
                                         // Enhanced yield phase logging
                                         if postchainEvent.phase == "yield" {
                                             print("📡 YIELD: Content exists: \(postchainEvent.content != nil)")
                                             print("📡 YIELD: Raw content: '\(postchainEvent.content ?? "nil")'")
-                                     
+
 
                                             if postchainEvent.status == "complete" {
                                                 print("📡 YIELD: Phase complete")
@@ -263,8 +314,30 @@ actor PostchainAPIClient {
 
                                         print("📡 STREAM: Yielding event to consumer")
                                         continuation.yield(postchainEvent)
+                                    } catch let decodingError as DecodingError {
+                                        print("❌ DECODING ERROR: \(decodingError.localizedDescription)")
+                                        // Print detailed error context
+                                        switch decodingError {
+                                        case .typeMismatch(let type, let context):
+                                            print("   Type '\(type)' mismatch:", context.debugDescription)
+                                            print("   codingPath:", context.codingPath.map { $0.stringValue })
+                                        case .valueNotFound(let type, let context):
+                                            print("   Value '\(type)' not found:", context.debugDescription)
+                                            print("   codingPath:", context.codingPath.map { $0.stringValue })
+                                        case .keyNotFound(let key, let context):
+                                            print("   Key '\(key)' not found:", context.debugDescription)
+                                            print("   codingPath:", context.codingPath.map { $0.stringValue })
+                                        case .dataCorrupted(let context):
+                                            print("   Data corrupted:", context.debugDescription)
+                                            print("   codingPath:", context.codingPath.map { $0.stringValue })
+                                        @unknown default:
+                                            print("   Other decoding error: \(decodingError)")
+                                        }
+                                        // Optionally print the raw JSON string again here for context
+                                        print("   Raw JSON causing error: \(jsonString)")
                                     } catch {
-                                        print("📡 STREAM: Error decoding event: \(error)")
+                                        print("❌ OTHER ERROR during decoding: \(error.localizedDescription)")
+                                        print("   Raw JSON causing error: \(jsonString)")
                                     }
                                 }
                             }

@@ -62,6 +62,8 @@ class VectorSearchResult(BaseModel):
     score: float = Field(..., description="Similarity score")
     metadata: Dict[str, Any] = Field(default_factory=dict, description="Associated metadata")
     provider: Optional[str] = Field("qdrant", description="Vector DB provider")
+    id: Optional[str] = Field(None, description="Unique identifier for this vector result")
+    content_preview: Optional[str] = Field(None, description="Short preview of the content")
 
 # --- Phase Output Models ---
 

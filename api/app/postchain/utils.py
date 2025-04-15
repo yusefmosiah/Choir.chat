@@ -101,7 +101,8 @@ def validate_thread_id(thread_id: str) -> str:
         raise ValueError(f"Invalid thread_id format: {thread_id}")
 
 
-def format_stream_event(state: PostChainState, content: str = None, error: str = None) -> Dict[str, Any]:
+def format_stream_event(state: PostChainState, content: str = None, error: str = None, 
+                  vector_results: List[Dict[str, Any]] = None, web_results: List[Dict[str, Any]] = None) -> Dict[str, Any]:
     """
     Format state for streaming to clients.
 
@@ -109,6 +110,8 @@ def format_stream_event(state: PostChainState, content: str = None, error: str =
         state: The current PostChainState
         content: Optional explicit content for the current phase (overrides message content)
         error: Optional error message
+        vector_results: Optional vector search results to include in the event
+        web_results: Optional web search results to include in the event
 
     Returns:
         A formatted event dictionary for streaming
@@ -129,13 +132,29 @@ def format_stream_event(state: PostChainState, content: str = None, error: str =
     if event_content is None:
         event_content = ""
 
-    return {
-        "current_phase": state.current_phase,
-        "phase_state": state.phase_state.get(state.current_phase, "processing"),
+    # Build the event object
+    event = {
+        "phase": state.current_phase,  # Updated key name for consistency
+        "status": state.phase_state.get(state.current_phase, "running"),  # Updated key name for consistency
         "content": event_content,
         "thread_id": state.thread_id,
-        "error": error or state.error
     }
+    
+    # Add error if present
+    if error or state.error:
+        event["error"] = error or state.error
+    
+    # Add vector results if provided
+    if vector_results:
+        logger.info(f"Adding {len(vector_results)} vector results to stream event for phase {state.current_phase}")
+        event["vector_results"] = vector_results
+    
+    # Add web results if provided
+    if web_results:
+        logger.info(f"Adding {len(web_results)} web results to stream event for phase {state.current_phase}")
+        event["web_results"] = web_results
+    
+    return event
 
 def handle_phase_error(state: PostChainState, phase: str, error: Exception) -> None:
     """

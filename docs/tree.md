@@ -195,6 +195,7 @@
 │   ├── core_economics.md
 │   ├── core_state_transitions.md
 │   ├── data_engine_model.md
+│   ├── debugging_vector_results_swift_client.md
 │   ├── e_business.md
 │   ├── e_concept.md
 │   ├── evolution_naming.md
@@ -243,7 +244,8 @@
 │   ├── security_considerations.md
 │   ├── stack_argument.md
 │   ├── state_management_patterns.md
-│   └── tree.md
+│   ├── tree.md
+│   └── vector_results_data_leak_fix_required.md
 ├── notebooks
 │   ├── fqaho_simulation.ipynb
 │   ├── post_chain0.ipynb
@@ -258,4 +260,4 @@
     ├── test_api.sh
     └── test_postchain_multiturn.sh
 
-62 directories, 194 files
+62 directories, 196 files
