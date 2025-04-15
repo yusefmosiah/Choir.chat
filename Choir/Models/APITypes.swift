@@ -134,7 +134,7 @@ struct PostchainRequest: APIRequest {
 /// Model configuration for requests
 struct ModelConfigRequest: Codable {
     let provider: String
-    let model_name: String
+    let model_name: String // Using snake_case to match backend API expectations
     let temperature: Double?
 
     // API Keys
@@ -149,7 +149,12 @@ struct ModelConfigRequest: Codable {
 
     init(from modelConfig: ModelConfig) {
         self.provider = modelConfig.provider
+        
+        // Store model name in model_name field (mapping from ModelConfig.model to model_name)
         self.model_name = modelConfig.model
+        
+        print("🔧 ModelConfigRequest: Created request with provider: \(modelConfig.provider), model_name: \(modelConfig.model)")
+        
         self.temperature = modelConfig.temperature
         self.openaiApiKey = modelConfig.openaiApiKey
         self.anthropicApiKey = modelConfig.anthropicApiKey
@@ -263,7 +268,23 @@ struct PostchainEvent: Decodable {
         status = try container.decode(String.self, forKey: .status)
         content = try container.decodeIfPresent(String.self, forKey: .content)
         provider = try container.decodeIfPresent(String.self, forKey: .provider)
-        modelName = try container.decodeIfPresent(String.self, forKey: .modelName)
+        
+        // Extra debug for model name decoding
+        do {
+            // Try to decode model_name directly to inspect raw value
+            if let rawModelName = try container.decodeIfPresent(String.self, forKey: .modelName) {
+                print("🧪 RAW API: Found model_name in event: \"\(rawModelName)\"")
+                print("🧪 RAW API: model_name is empty: \(rawModelName.isEmpty)")
+                modelName = rawModelName
+            } else {
+                print("🧪 RAW API: No model_name found in event")
+                modelName = nil
+            }
+        } catch {
+            print("🧪 RAW API: Error decoding model_name: \(error)")
+            modelName = nil
+        }
+        
         error = try container.decodeIfPresent(String.self, forKey: .error)
 
         // Handle the cases where web/vector results might be in a different format
@@ -356,7 +377,16 @@ struct PostchainStreamEvent: Codable {
         status = try container.decode(String.self, forKey: .status)
         content = try container.decodeIfPresent(String.self, forKey: .content)
         provider = try container.decodeIfPresent(String.self, forKey: .provider)
-        modelName = try container.decodeIfPresent(String.self, forKey: .modelName)
+        
+        // Try to decode model_name with enhanced handling to avoid empty strings
+        if let rawModelName = try container.decodeIfPresent(String.self, forKey: .modelName),
+           !rawModelName.isEmpty {
+            modelName = rawModelName
+            print("🔄 STREAM EVENT: Found non-empty model_name: \(rawModelName)")
+        } else {
+            modelName = nil
+            print("🔄 STREAM EVENT: No valid model_name found")
+        }
 
         // Handle the cases where web/vector results might be in a different format
         do {

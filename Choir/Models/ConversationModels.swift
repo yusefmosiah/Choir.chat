@@ -271,6 +271,9 @@ class Message: ObservableObject, Identifiable, Equatable {
         // Debug output for monitoring
         print("📝 MESSAGE: Updating phase \(phase.rawValue) with content length: \(content.count), status: \(status)")
         
+        // Enhanced logging for model information
+        print("📝 MESSAGE: Provider: \(provider ?? "nil"), ModelName: \(modelName ?? "nil") for phase: \(phase.rawValue)")
+        
         // Add debugging for vector results - check what we're getting in the event
         if let vectorResults = event.vectorResults {
             print("🔍 VECTORS IN EVENT: Phase \(phase.rawValue) received \(vectorResults.count) vector results")
@@ -436,7 +439,12 @@ class Message: ObservableObject, Identifiable, Equatable {
     }
 
     func getPhaseResult(_ phase: Phase) -> PhaseResult? {
-        phaseResults[phase]
+        let result = phaseResults[phase]
+        print("📋 GET_PHASE_RESULT: Phase \(phase.rawValue) - Result exists: \(result != nil)")
+        if let result = result {
+            print("📋 GET_PHASE_RESULT: Phase \(phase.rawValue) - Provider: \(result.provider ?? "nil"), ModelName: \(result.modelName ?? "nil")")
+        }
+        return result
     }
 
     func currentPage(for phase: Phase) -> Int {

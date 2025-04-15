@@ -254,6 +254,12 @@ actor PostchainAPIClient {
                                             print("🚨 Error: Could not convert JSON string to UTF8 data")
                                             continue // Skip this event if data conversion fails
                                         }
+                                        
+                                        // For debugging: print the raw JSON if it contains model_name
+                                        if jsonString.contains("model_name") {
+                                            print("🔍 RAW JSON contains model_name: \(jsonString)")
+                                        }
+                                        
                                         let postchainEvent = try decoder.decode(PostchainEvent.self, from: jsonData)
                                         // Enhanced logging for all events, focusing on vector results
                                         print("📡 STREAM: Decoded event for phase: \(postchainEvent.phase)")

@@ -244,7 +244,10 @@ class PostchainCoordinatorImpl: PostchainCoordinator, ObservableObject {
 
         // Debug output
         print("📲 Received event for phase: \(event.phase), status: \(event.status), content length: \(event.content?.count ?? 0)")
-
+        
+        // Enhanced model information logging for all phases
+        print("📲 MODEL INFO: Phase: \(event.phase), Provider: \(event.provider ?? "nil"), ModelName: \(event.modelName ?? "nil")")
+        
         // Special diagnostic for yield phase - log structure of entire event
         if event.phase == "yield" {
             print("📊 YIELD DIAGNOSIS - START")
@@ -259,6 +262,9 @@ class PostchainCoordinatorImpl: PostchainCoordinator, ObservableObject {
             }
             print("📊 YIELD EVENT: Has provider: \(event.provider != nil)")
             print("📊 YIELD EVENT: Has modelName: \(event.modelName != nil)")
+            if let provider = event.provider, let modelName = event.modelName {
+                print("📊 YIELD EVENT: Provider/ModelName values: \(provider)/\(modelName)")
+            }
             print("📊 YIELD DIAGNOSIS - END")
         }
 
@@ -292,6 +298,9 @@ class PostchainCoordinatorImpl: PostchainCoordinator, ObservableObject {
             print("🟡 COORD: Handling Yield Event with content: \(content.prefix(50))...")
         }
         
+        // Log model info for debugging
+        print("📘 MODEL DEBUG: Phase \(phaseEnum.rawValue) - Provider: \(event.provider ?? "nil"), ModelName: \(event.modelName ?? "nil")")
+        
         // Find the message being updated
         if let messageId = activeMessageId,
            let thread = currentChoirThread,
@@ -310,6 +319,16 @@ class PostchainCoordinatorImpl: PostchainCoordinator, ObservableObject {
                 vectorResults: self.vectorResults
             )
 
+            // Add extra debugging specifically for model name issue
+            print("🔧 MODEL DEBUG: About to update Message for phase \(phaseEnum.rawValue)")
+            print("🔧 MODEL DEBUG: - Raw provider from event: \"\(event.provider ?? "nil")\"")
+            print("🔧 MODEL DEBUG: - Raw modelName from event: \"\(event.modelName ?? "nil")\"")
+            
+            // Check if the event.modelName is defined but empty
+            if let modelName = event.modelName {
+                print("🔧 MODEL DEBUG: - modelName is empty: \(modelName.isEmpty), length: \(modelName.count)")
+            }
+            
             // Update the message with the streaming content, even if it's incomplete
             // Note: We want to update even partial content for streaming appearance
             message.updatePhase(
