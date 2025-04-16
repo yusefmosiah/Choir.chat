@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Use a dynamic title passed from the route handler -->
+    <title>{{ title }} - Choir</title>
+    <link rel="stylesheet" href="/static/shared/style.css">
+    <!-- Optional: Add favicon link -->
+    <!-- <link rel="icon" href="/static/shared/images/favicon.png"> -->
+</head>
+<body>
+    <div class="content-wrapper">
+        <!-- Render the converted Markdown HTML here -->
+        {{ content|safe }}
+
+        <!-- Optional: Add a consistent footer -->
+        <footer>
+            <p>© {{ current_year }} Choir Collective. All rights reserved.</p>
+        </footer>
+    </div>
+    <!-- Optional: Add shared JS -->
+    <!-- <script src="/static/shared/script.js"></script> -->
+</body>
+</html>

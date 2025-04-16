@@ -1,0 +1,198 @@
+/* api/static/shared/style.css */
+:root {
+    --background-start: #f0f2f5;
+    --background-end: #e0e4e8;
+    --text-color: #1a1a1a;
+    --primary-color: #0052ff; /* Electric Blue */
+    --primary-text: #ffffff;
+    --border-color: #1a1a1a;
+    --shadow-color: #1a1a1a;
+    --glass-bg: rgba(255, 255, 255, 0.1); /* Subtle glass for code/quotes */
+    --glass-border: rgba(255, 255, 255, 0.2);
+    --card-bg: #ffffff; /* Maybe for blockquotes? */
+
+    --font-primary: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: var(--font-primary);
+    color: var(--text-color);
+    background: linear-gradient(135deg, var(--background-start), var(--background-end));
+    line-height: 1.7; /* Slightly more spacing for readability */
+    padding: 20px;
+    display: flex;
+    justify-content: center; /* Center content block */
+}
+
+/* Main content wrapper */
+.content-wrapper {
+    max-width: 800px; /* Readable width */
+    width: 100%;
+    background: var(--card-bg); /* Give content a white background */
+    padding: 30px 40px;
+    border: 2px solid var(--border-color);
+    box-shadow: 5px 5px 0px var(--shadow-color);
+    margin-top: 20px;
+    margin-bottom: 40px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 700;
+    margin-top: 1.5em;
+    margin-bottom: 0.8em;
+    line-height: 1.3;
+    color: var(--text-color);
+}
+
+h1 { font-size: 2.8rem; border-bottom: 2px solid var(--border-color); padding-bottom: 0.3em; }
+h2 { font-size: 2.2rem; }
+h3 { font-size: 1.8rem; color: var(--primary-color); }
+h4 { font-size: 1.4rem; }
+
+p {
+    margin-bottom: 1.2em;
+}
+
+a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 600;
+    border-bottom: 2px solid transparent;
+    transition: border-color 0.2s ease, color 0.2s ease;
+}
+
+a:hover {
+    border-bottom-color: var(--primary-color);
+    color: #003bb3; /* Darker blue on hover */
+}
+
+/* Styling for the mailto link to look like a button */
+a[href^="mailto:"] {
+    display: inline-block;
+    padding: 10px 20px;
+    font-size: 1rem;
+    font-weight: 700;
+    text-decoration: none;
+    border: 2px solid var(--border-color);
+    box-shadow: 3px 3px 0px var(--shadow-color);
+    transition: all 0.15s ease-out;
+    cursor: pointer;
+    text-align: center;
+    background-color: var(--primary-color);
+    color: var(--primary-text);
+    margin-top: 1em;
+    margin-bottom: 1em;
+}
+
+ a[href^="mailto:"]:hover {
+    transform: translate(-1px, -1px);
+    box-shadow: 4px 4px 0px var(--shadow-color);
+    border-bottom-color: transparent; /* Remove underline hover for button-like links */
+     background-color: #0048e0; /* Slightly darker blue */
+}
+
+ a[href^="mailto:"]:active {
+    transform: translate(1px, 1px);
+    box-shadow: 2px 2px 0px var(--shadow-color);
+}
+
+
+ul, ol {
+    margin-left: 2em;
+    margin-bottom: 1.2em;
+}
+
+li {
+    margin-bottom: 0.5em;
+}
+
+/* Code Blocks - Subtle Glass */
+pre {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 8px; /* Rounded corners for glass */
+    padding: 1em;
+    margin-bottom: 1.5em;
+    overflow-x: auto;
+    backdrop-filter: blur(5px); /* Subtle blur */
+    -webkit-backdrop-filter: blur(5px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); /* Soft shadow */
+    border: 1px solid var(--border-color); /* Keep brutalist border */
+    box-shadow: 3px 3px 0px var(--shadow-color); /* Keep brutalist shadow */
+}
+
+code {
+    font-family: monospace;
+    background-color: rgba(0, 0, 0, 0.05); /* Subtle background for inline code */
+    padding: 0.2em 0.4em;
+    border-radius: 3px;
+    font-size: 0.9em;
+}
+
+pre code {
+    background-color: transparent; /* Code inside pre shouldn't have extra bg */
+    padding: 0;
+    border-radius: 0;
+    font-size: 1em; /* Inherit pre font size */
+}
+
+/* Blockquotes - Optional Card Style */
+blockquote {
+    margin: 1.5em 0;
+    padding: 1em 1.5em;
+    border-left: 4px solid var(--primary-color);
+    background-color: var(--card-bg);
+    border: 2px solid var(--border-color);
+    box-shadow: 3px 3px 0px var(--shadow-color);
+    font-style: italic;
+    color: #444; /* Slightly muted text */
+}
+
+blockquote p {
+    margin-bottom: 0.5em;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+    display: block; /* Prevent extra space below image */
+    margin: 1.5em auto; /* Center images */
+    border: 2px solid var(--border-color);
+    box-shadow: 4px 4px 0px var(--shadow-color);
+}
+
+hr {
+    border: none;
+    border-top: 2px solid var(--border-color);
+    margin: 2em 0;
+}
+
+/* Footer styling (if you add one in base.html) */
+footer {
+    text-align: center;
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    font-size: 0.9rem;
+    color: var(--text-color);
+    opacity: 0.7;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    body { padding: 10px; }
+    .content-wrapper { padding: 20px; }
+    h1 { font-size: 2.2rem; }
+    h2 { font-size: 1.8rem; }
+    h3 { font-size: 1.5rem; }
+}

@@ -145,10 +145,19 @@ tree.md
 │   │   ├── business_model.md
 │   │   ├── inverse_scaling_law.md
 │   │   └── loop_of_thought.md
+│   ├── content
+│   │   └── landing.md
 │   ├── main.py
 │   ├── pyproject.toml
 │   ├── pytest.ini
 │   ├── requirements.txt
+│   ├── static
+│   │   └── shared
+│   │       ├── images
+│   │       ├── script.js
+│   │       └── style.css
+│   ├── templates
+│   │   └── base.html
 │   └── tests
 │       ├── __init__.py
 │       ├── conftest.py
@@ -273,7 +282,7 @@ tree.md
     ├── test_api.sh
     └── test_postchain_multiturn.sh
 
-62 directories, 196 files
+67 directories, 200 files
 
 === File: docs/CHANGELOG.md ===
 
