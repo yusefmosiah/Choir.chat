@@ -221,25 +221,9 @@ tree.md
 │   ├── e_concept.md
 │   ├── evolution_naming.md
 │   ├── evolution_token.md
-│   ├── features
-│   │   ├── automatic_thread_titles.md
-│   │   ├── close_the_loop.md
-│   │   ├── dashboard.md
-│   │   ├── deep_links.md
-│   │   ├── deep_links_markdown.md
-│   │   ├── markdown_results_checklist.md
-│   │   ├── paginated_markdown_view.md
-│   │   ├── perf_work.md
-│   │   ├── performance_refactoring.md
-│   │   ├── performance_refactoring_guide.md
-│   │   ├── phase_selection_sheet_plan.md
-│   │   ├── unified_navigation.md
-│   │   └── unified_navigation_implementation.md
 │   ├── fqaho_simulation.md
 │   ├── fqaho_visualization.md
 │   ├── interim-report-debugging-yield.md
-│   ├── issues
-│   │   └── long-text-external-storage.md
 │   ├── levels
 │   │   ├── all.txt
 │   │   ├── level0.md
@@ -281,7 +265,7 @@ tree.md
     ├── test_api.sh
     └── test_postchain_multiturn.sh
 
-66 directories, 200 files
+64 directories, 186 files
 
 === File: docs/CHANGELOG.md ===
 
