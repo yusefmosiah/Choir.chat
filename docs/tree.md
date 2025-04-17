@@ -198,19 +198,16 @@
 ├── docs
 │   ├── CHANGELOG.md
 │   ├── blockchain_integration.md
-│   ├── comp_provider_info.md
 │   ├── core_core.md
 │   ├── core_economics.md
 │   ├── core_state_transitions.md
 │   ├── data_engine_model.md
-│   ├── debugging_vector_results_swift_client.md
 │   ├── e_business.md
 │   ├── e_concept.md
 │   ├── evolution_naming.md
 │   ├── evolution_token.md
 │   ├── fqaho_simulation.md
 │   ├── fqaho_visualization.md
-│   ├── interim-report-debugging-yield.md
 │   ├── levels
 │   │   ├── all.txt
 │   │   ├── level0.md
@@ -219,7 +216,6 @@
 │   │   ├── level3.md
 │   │   ├── level4.md
 │   │   └── level5.md
-│   ├── phase_model_config_issue_analysis.md
 │   ├── plan_anonymity_by_default.md
 │   ├── plan_chip_materialization.md
 │   ├── postchain_temporal_logic.md
@@ -236,8 +232,7 @@
 │   ├── security_considerations.md
 │   ├── stack_argument.md
 │   ├── state_management_patterns.md
-│   ├── tree.md
-│   └── vector_results_data_leak_fix_required.md
+│   └── tree.md
 ├── notebooks
 │   ├── fqaho_simulation.ipynb
 │   ├── post_chain0.ipynb
@@ -252,4 +247,4 @@
     ├── test_api.sh
     └── test_postchain_multiturn.sh
 
-64 directories, 186 files
+64 directories, 181 files
