@@ -765,8 +765,10 @@ async def run_langchain_postchain_workflow(
             compact_result = {
                 "score": round(res.score, 3),
                 "id": getattr(res, "id", None),
-                "content": res.content,  # Include full content
-                "content_preview": res.content[:100] + "..." if len(res.content) > 100 else res.content
+                # Only include first paragraph of content to minimize payload size
+                "content": res.content.split("\n\n")[0] if res.content else "",
+                # Always include preview
+                "content_preview": res.content_preview if hasattr(res, "content_preview") and res.content_preview else (res.content[:100] + "..." if len(res.content) > 100 else res.content)
             }
             vector_result_data.append(compact_result)
 
@@ -916,53 +918,9 @@ async def run_langchain_postchain_workflow(
     understanding_response: AIMessage = understanding_result["understanding_response"]
     current_messages.append(understanding_response)
     conversation_history_store[thread_id] = current_messages
-    # Get vector results from experience_vectors phase
-    vector_results_from_exp = exp_vectors_output.vector_results if hasattr(exp_vectors_output, 'vector_results') else []
-
-    # Log what we have available
-    logger.info(f"Understanding phase: Found {len(vector_results_from_exp)} vector results from experience_vectors phase")
-
-    # Find vectors referenced in the understanding phase response
-    vector_results_to_include = get_referenced_vectors(
-        understanding_response.content,
-        vector_results_from_exp
-    )
-
-    logger.info(f"Understanding phase: Found {len(vector_results_to_include)} vector references in response")
-
-    # If no vector references were found, but the text contains patterns like numbers that look like references,
-    # we'll include the first few vector results as a fallback to ensure user has some data
-    if not vector_results_to_include and len(vector_results_from_exp) > 0:
-        # Check for potential unlabeled references
-        import re
-        potential_refs = re.findall(r'\b(\d+)\b', understanding_response.content)
-        if potential_refs:
-            logger.info(f"Understanding phase: No explicit vector references found, but detected {len(potential_refs)} numeric references")
-
-            # Include at least the first few vectors as a fallback
-            max_fallback = min(3, len(vector_results_from_exp))
-            fallback_vectors = vector_results_from_exp[:max_fallback]
-            logger.info(f"Understanding phase: Including {len(fallback_vectors)} fallback vectors for potential references")
-            vector_results_to_include = fallback_vectors
-
-    # Format vector results with optimized payload (ID, preview, first paragraph of content)
-    vector_result_data = []
-    if vector_results_to_include:
-        for res in vector_results_to_include:
-            vector_result_data.append({
-                "score": round(res.score, 3),
-                "id": getattr(res, "id", None),
-                # Only include first paragraph of content to minimize payload size
-                "content": res.content.split("\n\n")[0] if res.content else "",
-                # Always include preview
-                "content_preview": res.content_preview if hasattr(res, "content_preview") and res.content_preview else (res.content[:100] + "..." if len(res.content) > 100 else res.content)
-            })
-
-    # Send the event with properly formatted vector results
     yield {
         "phase": "understanding", "status": "complete", "content": understanding_response.content,
         "provider": understanding_model_config.provider, "model_name": understanding_model_config.model_name,
-        "vector_results": vector_result_data if vector_result_data else None
     }
 
     # 7. Yield Phase
@@ -977,59 +935,10 @@ async def run_langchain_postchain_workflow(
         return
     yield_response: AIMessage = yield_result["yield_response"]
     # Don't add Yield to history for now
-    # Get any vector results we've saved from experience_vectors phase
-    vector_results_from_exp = exp_vectors_output.vector_results if hasattr(exp_vectors_output, 'vector_results') else []
-
-    # Log what we have available
-    logger.info(f"Yield phase: Found {len(vector_results_from_exp)} vector results from experience_vectors phase")
-
-    # Find vectors referenced in the yield phase response
-    vector_results_to_include = get_referenced_vectors(
-        yield_response.content,
-        vector_results_from_exp
-    )
-
-    logger.info(f"Yield phase: Found {len(vector_results_to_include)} vector references in response")
-
-    # If no vector references were found, but the text contains patterns like numbers that look like references,
-    # we'll include the first few vector results as a fallback to ensure user has some data
-    if not vector_results_to_include and len(vector_results_from_exp) > 0:
-        # Check for potential unlabeled references
-        import re
-        potential_refs = re.findall(r'\b(\d+)\b', yield_response.content)
-        if potential_refs:
-            logger.info(f"Yield phase: No explicit vector references found, but detected {len(potential_refs)} numeric references")
-
-            # Include at least the first few vectors as a fallback
-            max_fallback = min(3, len(vector_results_from_exp))
-            fallback_vectors = vector_results_from_exp[:max_fallback]
-            logger.info(f"Yield phase: Including {len(fallback_vectors)} fallback vectors for potential references")
-            vector_results_to_include = fallback_vectors
-
-    # Format vector results with optimized payload (ID, preview, first paragraph of content)
-    vector_result_data = []
-    if vector_results_to_include:
-        for res in vector_results_to_include:
-            vector_result_data.append({
-                "score": round(res.score, 3),
-                "id": getattr(res, "id", None),
-                # Only include first paragraph of content to minimize payload size
-                "content": res.content.split("\n\n")[0] if res.content else "",
-                # Always include preview
-                "content_preview": res.content_preview if hasattr(res, "content_preview") and res.content_preview else (res.content[:100] + "..." if len(res.content) > 100 else res.content)
-            })
-
-    # Create and log the final event payload with properly formatted vector results
-    event_payload = {
+    yield {
         "phase": "yield", "status": "complete", "content": yield_response.content,
         "provider": yield_model_config.provider, "model_name": yield_model_config.model_name,
-        "vector_results": vector_result_data if vector_result_data else None
     }
-    logger.info(f"🐍 WORKFLOW: Yielding event payload with {len(vector_results_to_include)} vector results")
-
-    # Send the event to the client
-    yield event_payload
-
 
     logger.info(f"Langchain PostChain workflow completed for thread {thread_id}")
 
