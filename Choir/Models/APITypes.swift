@@ -149,12 +149,11 @@ struct ModelConfigRequest: Codable {
 
     init(from modelConfig: ModelConfig) {
         self.provider = modelConfig.provider
-        
+
         // Store model name in model_name field (mapping from ModelConfig.model to model_name)
         self.model_name = modelConfig.model
-        
-        print("🔧 ModelConfigRequest: Created request with provider: \(modelConfig.provider), model_name: \(modelConfig.model)")
-        
+
+
         self.temperature = modelConfig.temperature
         self.openaiApiKey = modelConfig.openaiApiKey
         self.anthropicApiKey = modelConfig.anthropicApiKey
@@ -268,30 +267,25 @@ struct PostchainEvent: Decodable {
         status = try container.decode(String.self, forKey: .status)
         content = try container.decodeIfPresent(String.self, forKey: .content)
         provider = try container.decodeIfPresent(String.self, forKey: .provider)
-        
+
         // Extra debug for model name decoding
         do {
             // Try to decode model_name directly to inspect raw value
             if let rawModelName = try container.decodeIfPresent(String.self, forKey: .modelName) {
-                print("🧪 RAW API: Found model_name in event: \"\(rawModelName)\"")
-                print("🧪 RAW API: model_name is empty: \(rawModelName.isEmpty)")
                 modelName = rawModelName
             } else {
-                print("🧪 RAW API: No model_name found in event")
                 modelName = nil
             }
         } catch {
-            print("🧪 RAW API: Error decoding model_name: \(error)")
             modelName = nil
         }
-        
+
         error = try container.decodeIfPresent(String.self, forKey: .error)
 
         // Handle the cases where web/vector results might be in a different format
         do {
             webResults = try container.decodeIfPresent([SearchResult].self, forKey: .webResults)
         } catch {
-            print("⚠️ Failed to decode webResults as [SearchResult]: \(error)")
             webResults = nil
         }
 
@@ -299,45 +293,21 @@ struct PostchainEvent: Decodable {
         do {
             vectorResults = try container.decodeIfPresent([VectorSearchResult].self, forKey: .vectorResults)
             if let vectors = vectorResults {
-                 print("🔴 VECTOR: Successfully decoded \(vectors.count) vector results using decodeIfPresent")
                  // Check if any vectors have content
                  let nonEmptyContent = vectors.filter { !$0.content.isEmpty }
                  if nonEmptyContent.isEmpty && vectors.count > 0 {
-                     print("🔴 VECTOR: WARNING - All decoded vectors have empty content!")
                  } else if vectors.count > 0 {
-                     print("🔴 VECTOR: \(nonEmptyContent.count) decoded vectors have non-empty content")
                  }
             } else {
-                 print("🔴 VECTOR: decodeIfPresent returned nil for vector_results (key might be missing or value is null)")
                  // Explicitly check contains for logging comparison
                  if !container.contains(.vectorResults) {
-                     print("🔴 VECTOR: Confirmed: container.contains also returns false.")
                  } else {
-                     print("🔴 VECTOR: Anomaly: container.contains returns true, but decodeIfPresent returned nil. JSON value might be null.")
                  }
             }
         } catch let decodingError as DecodingError {
-             print("🔴 VECTOR: DecodingError while decoding vectorResults: \(decodingError)")
-             // Log detailed context for the decoding error
-             switch decodingError {
-                case .typeMismatch(let type, let context):
-                    print("   Type '\(type)' mismatch:", context.debugDescription)
-                    print("   codingPath:", context.codingPath.map { $0.stringValue })
-                case .valueNotFound(let type, let context):
-                    print("   Value '\(type)' not found:", context.debugDescription)
-                    print("   codingPath:", context.codingPath.map { $0.stringValue })
-                case .keyNotFound(let key, let context):
-                    print("   Key '\(key)' not found:", context.debugDescription)
-                    print("   codingPath:", context.codingPath.map { $0.stringValue })
-                case .dataCorrupted(let context):
-                    print("   Data corrupted:", context.debugDescription)
-                    print("   codingPath:", context.codingPath.map { $0.stringValue })
-                @unknown default:
-                    print("   Other decoding error: \(decodingError)")
-             }
+             print("Decoding error: \(decodingError)")
              vectorResults = nil // Ensure it's nil on error
         } catch {
-            print("🔴 VECTOR: Unexpected error while decoding vectorResults: \(error)")
             vectorResults = nil // Ensure it's nil on error
         }
     }
@@ -377,54 +347,43 @@ struct PostchainStreamEvent: Codable {
         status = try container.decode(String.self, forKey: .status)
         content = try container.decodeIfPresent(String.self, forKey: .content)
         provider = try container.decodeIfPresent(String.self, forKey: .provider)
-        
+
         // Try to decode model_name with enhanced handling to avoid empty strings
         if let rawModelName = try container.decodeIfPresent(String.self, forKey: .modelName),
            !rawModelName.isEmpty {
             modelName = rawModelName
-            print("🔄 STREAM EVENT: Found non-empty model_name: \(rawModelName)")
         } else {
             modelName = nil
-            print("🔄 STREAM EVENT: No valid model_name found")
         }
 
         // Handle the cases where web/vector results might be in a different format
         do {
             webResults = try container.decodeIfPresent([SearchResult].self, forKey: .webResults)
         } catch {
-            print("⚠️ Failed to decode webResults as [SearchResult]: \(error)")
             webResults = nil
         }
 
         do {
             // Add explicit check for vector_results
             if container.contains(.vectorResults) {
-                print("🔴 VECTOR STREAM: Found vector_results key in response")
 
                 // Try to decode as an array of VectorSearchResult
                 vectorResults = try container.decodeIfPresent([VectorSearchResult].self, forKey: .vectorResults)
 
                 // Log success if we get here
                 if let vectors = vectorResults {
-                    print("🔴 VECTOR STREAM: Successfully decoded \(vectors.count) vector results")
 
                     // Check if any vectors have content
                     let nonEmptyContent = vectors.filter { !$0.content.isEmpty }
                     if nonEmptyContent.isEmpty {
-                        print("🔴 VECTOR STREAM: WARNING - All vectors have empty content!")
                     } else {
-                        print("🔴 VECTOR STREAM: \(nonEmptyContent.count) vectors have non-empty content")
                     }
                 } else {
-                    print("🔴 VECTOR STREAM: No vector results after successful decoding")
                 }
             } else {
-                print("🔴 VECTOR STREAM: vector_results key NOT found in response")
                 vectorResults = nil
             }
         } catch {
-            print("⚠️ Failed to decode vectorResults as [VectorSearchResult]: \(error)")
-            print("🔴 VECTOR STREAM: Unable to parse raw vector data")
             vectorResults = nil
         }
     }

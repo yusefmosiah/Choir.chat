@@ -39,7 +39,6 @@ actor PostchainAPIClient {
         decoder.keyDecodingStrategy = .convertFromSnakeCase
 
         #if DEBUG
-        print("📱 PostchainAPIClient initialized with baseURL: \(baseURL)")
         #endif
     }
 
@@ -130,7 +129,6 @@ actor PostchainAPIClient {
 
         // Log if input is large but still processable
         if query.count > warningInputLength {
-            print("⚠️ Processing large input (\(query.count) characters)")
         }
 
         // Get URL for the streaming endpoint
@@ -173,9 +171,6 @@ actor PostchainAPIClient {
         // Create an AsyncStream to return events as they are received
         return AsyncStream { continuation in
             Task {
-                print("📡 STREAM: Starting direct URLSession stream")
-                print("📡 STREAM: URL: \(url.absoluteString)")
-                print("📡 STREAM: Body length: \(encodedData.count) bytes")
 
                 do {
                     // Use URLSession directly for streaming
@@ -183,20 +178,16 @@ actor PostchainAPIClient {
 
                     // Check response
                     guard let httpResponse = response as? HTTPURLResponse else {
-                        print("📡 STREAM: Invalid response type")
                         continuation.finish()
                         return
                     }
 
-                    print("📡 STREAM: Received HTTP response: \(httpResponse.statusCode)")
 
                     guard (200...299).contains(httpResponse.statusCode) else {
-                        print("📡 STREAM: HTTP error: \(httpResponse.statusCode)")
                         continuation.finish()
                         return
                     }
 
-                    print("📡 STREAM: Connection established successfully")
 
                     // Setup buffer for SSE parsing
                     var buffer = ""
@@ -210,7 +201,6 @@ actor PostchainAPIClient {
 
                         // Check for event delimiter (double newline)
                         if buffer.contains("\n\n") {
-                            print("📡 STREAM: Found event delimiter")
 
                             // Split buffer on double newlines
                             let events = buffer.components(separatedBy: "\n\n")
@@ -218,151 +208,88 @@ actor PostchainAPIClient {
                             // Process all complete events
                             for i in 0..<events.count-1 {
                                 let event = events[i]
-                                print("📡 STREAM: Processing event: \(event.prefix(50))...")
                                 // DEBUG LOG: Print raw event string if it's for the yield phase
                                 if event.contains("\"phase\":\"yield\"") {
-                                    print("📬 RAW YIELD EVENT STRING:\n---\n\(event)\n---")
                                 }
 
                                 // SSE format: lines starting with "data: " contain the JSON payload
                                 if let dataLine = event.split(separator: "\n").first(where: { $0.hasPrefix("data:") }) {
                                     // Extract JSON data
                                     let jsonString = String(dataLine.dropFirst(5).trimmingCharacters(in: .whitespaces))
-                                    print("📡 STREAM: Extracted JSON: \(jsonString.prefix(50))...")
 
                                     if jsonString == "[DONE]" {
-                                        print("📡 STREAM: Received [DONE] marker")
                                         continuation.finish()
                                         return
                                     }
 
                                     // More detailed logging for raw JSON data
-                                    if jsonString.contains("\"phase\":\"yield\"") {
-                                        print("📊 YIELD RAW JSON: \(jsonString)")
-                                        print("📊 YIELD: Checking if final_content exists: \(jsonString.contains("\"final_content\""))")
-                                        print("📊 YIELD: Checking if content exists: \(jsonString.contains("\"content\""))")
-                                    }
 
                                     // ---> ADDED DEBUG LOG <---
                                     // Print the raw JSON string for ALL events before specific checks
-                                    print("📬 RRRAW JSON received in client: \(jsonString)")
 
                                     // Log raw JSON specifically for experience_vectors phase before attempting decode
                                     // Check for the phase string, accounting for the space after the colon found in logs
                                     let targetSubstringWithSpace = "\"phase\": \"experience_vectors\""
-                                    if jsonString.contains(targetSubstringWithSpace) {
-                                        print("📬✅ MATCH FOUND: Found '\(targetSubstringWithSpace)' in jsonString.")
-                                        print("📬 RAW experience_vectors JSON: \(jsonString)")
-                                    } else {
-                                        // Log if the specific string isn't found
-                                        print("📬❌ NO MATCH: Did not find '\(targetSubstringWithSpace)' in jsonString.")
-                                        // As a fallback, check without the space in case formatting varies
-                                        let targetSubstringNoSpace = "\"phase\":\"experience_vectors\""
-                                        if jsonString.contains(targetSubstringNoSpace) {
-                                            print("📬⚠️ FALLBACK MATCH: Found '\(targetSubstringNoSpace)' (no space) instead.")
-                                            print("📬 RAW experience_vectors JSON: \(jsonString)")
-                                        }
-                                    }
+                                    _ = jsonString.contains(targetSubstringWithSpace) ||
+                                        jsonString.contains("\"phase\":\"experience_vectors\"")
 
                                     // Parse JSON
                                     do {
                                         guard let jsonData = jsonString.data(using: .utf8) else {
-                                            print("🚨 Error: Could not convert JSON string to UTF8 data")
                                             continue // Skip this event if data conversion fails
                                         }
 
                                         // For debugging: print the raw JSON if it contains model_name
                                         if jsonString.contains("model_name") {
-                                            print("🔍 RAW JSON contains model_name: \(jsonString)")
                                         }
 
                                         // ---> ADDED DEBUG LOG <---
-                                        print("🩺 DECODE PREP: jsonData size: \(jsonData.count) bytes before decoding PostchainEvent")
 
                                         let postchainEvent = try decoder.decode(PostchainEvent.self, from: jsonData)
                                         // Enhanced logging for all events, focusing on vector results
-                                        print("📡 STREAM: Decoded event for phase: \(postchainEvent.phase)")
-                                        print("📡 STREAM: Content length: \(postchainEvent.content?.count ?? 0)")
-                                        print("📡 STREAM: Status: \(postchainEvent.status)")
 
                                         // Log vector results for any phase that includes them
                                         if let vectorResults = postchainEvent.vectorResults, !vectorResults.isEmpty {
-                                            print("🔍 VECTOR STREAM: Phase \(postchainEvent.phase) contains \(vectorResults.count) vector results")
-                                            print("🔍 VECTOR STREAM: Raw JSON data: \(jsonString.contains("vector_results"))")
 
-                                            let nonEmptyContent = vectorResults.filter { !$0.content.isEmpty }
-                                            let emptyContent = vectorResults.filter { $0.content.isEmpty }
+                                            _ = vectorResults.filter { !$0.content.isEmpty }
+                                            _ = vectorResults.filter { $0.content.isEmpty }
 
-                                            print("🔍 VECTOR STREAM: Vectors with content: \(nonEmptyContent.count), Empty content: \(emptyContent.count)")
 
-                                            for (i, vector) in vectorResults.enumerated() {
-                                                print("🔍 VECTOR STREAM: Vector #\(i+1) - Score: \(vector.score), Content length: \(vector.content.count), ID: \(vector.id ?? "nil")")
+                                            for vector in vectorResults {
 
                                                 if vector.content.isEmpty {
-                                                    if let preview = vector.content_preview {
-                                                        print("🔍 VECTOR STREAM: Vector #\(i+1) has empty content but has preview: \(preview.prefix(30))...")
+                                                    if vector.content_preview != nil {
                                                     } else {
-                                                        print("🔍 VECTOR STREAM: Vector #\(i+1) has empty content and no preview!")
                                                     }
                                                 } else {
-                                                    print("🔍 VECTOR STREAM: Vector #\(i+1) content: \(vector.content.prefix(30))...")
                                                 }
                                             }
                                         } else if postchainEvent.vectorResults?.isEmpty ?? true {
-                                            print("🔍 VECTOR STREAM: Phase \(postchainEvent.phase) contains NO vector results (empty array)")
                                             // Check if the raw JSON contains vector_results field
-                                            print("🔍 VECTOR STREAM: Raw JSON contains vector_results? \(jsonString.contains("vector_results"))")
                                             if jsonString.contains("vector_results") {
-                                                print("🔍 VECTOR STREAM: JSON parsing issue - vector_results exists in raw JSON but not in decoded object")
                                             }
                                         } else {
-                                            print("🔍 VECTOR STREAM: Phase \(postchainEvent.phase) contains NO vector results (nil)")
                                             // Check if the raw JSON contains vector_results field
-                                            print("🔍 VECTOR STREAM: Raw JSON contains vector_results? \(jsonString.contains("vector_results"))")
                                         }
 
                                         // Special debug for yield phase
                                         if postchainEvent.phase == "yield" {
-                                            print("🔵 PARSED YIELD EVENT: Phase=\(postchainEvent.phase), Status=\(postchainEvent.status), Content=\(postchainEvent.content ?? "nil")")
                                         }
 
                                         // Enhanced yield phase logging
                                         if postchainEvent.phase == "yield" {
-                                            print("📡 YIELD: Content exists: \(postchainEvent.content != nil)")
-                                            print("📡 YIELD: Raw content: '\(postchainEvent.content ?? "nil")'")
 
 
                                             if postchainEvent.status == "complete" {
-                                                print("📡 YIELD: Phase complete")
                                             }
                                         }
 
-                                        print("📡 STREAM: Yielding event to consumer")
                                         continuation.yield(postchainEvent)
                                     } catch let decodingError as DecodingError {
-                                        print("❌ DECODING ERROR: \(decodingError.localizedDescription)")
                                         // Print detailed error context
-                                        switch decodingError {
-                                        case .typeMismatch(let type, let context):
-                                            print("   Type '\(type)' mismatch:", context.debugDescription)
-                                            print("   codingPath:", context.codingPath.map { $0.stringValue })
-                                        case .valueNotFound(let type, let context):
-                                            print("   Value '\(type)' not found:", context.debugDescription)
-                                            print("   codingPath:", context.codingPath.map { $0.stringValue })
-                                        case .keyNotFound(let key, let context):
-                                            print("   Key '\(key)' not found:", context.debugDescription)
-                                            print("   codingPath:", context.codingPath.map { $0.stringValue })
-                                        case .dataCorrupted(let context):
-                                            print("   Data corrupted:", context.debugDescription)
-                                            print("   codingPath:", context.codingPath.map { $0.stringValue })
-                                        @unknown default:
-                                            print("   Other decoding error: \(decodingError)")
-                                        }
+                                        _ = decodingError // Silence unused variable warning
                                         // Optionally print the raw JSON string again here for context
-                                        print("   Raw JSON causing error: \(jsonString)")
                                     } catch {
-                                        print("❌ OTHER ERROR during decoding: \(error.localizedDescription)")
-                                        print("   Raw JSON causing error: \(jsonString)")
                                     }
                                 }
                             }
@@ -372,10 +299,8 @@ actor PostchainAPIClient {
                         }
                     }
 
-                    print("📡 STREAM: Stream completed")
                     continuation.finish()
                 } catch {
-                    print("📡 STREAM: Error: \(error.localizedDescription)")
                     continuation.finish()
                 }
             }

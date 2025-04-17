@@ -112,11 +112,7 @@ actor EventSource {
         let buffer = SSEBuffer()
         
         // Log the request for debugging
-        print("🌐 SSE: Creating connection to \(url.absoluteString)")
-        print("🌐 SSE: Method: \(request.httpMethod ?? "Unknown")")
-        print("🌐 SSE: Headers: \(request.allHTTPHeaderFields ?? [:])")
         if let body = request.httpBody, let bodyString = String(data: body, encoding: .utf8) {
-            print("🌐 SSE: Body: \(bodyString.prefix(500))...")
         }
         
         // Create a captured copy of the buffer to avoid Sendable issues
@@ -124,39 +120,30 @@ actor EventSource {
         
         task = session.dataTask(with: request) { [weak self] data, response, error in
             // Log the initial response
-            print("🌐 SSE: Received initial response")
             if let error = error {
-                print("🌐 SSE: Error in initial response: \(error.localizedDescription)")
             }
             if let httpResponse = response as? HTTPURLResponse {
-                print("🌐 SSE: Status code: \(httpResponse.statusCode)")
-                print("🌐 SSE: Headers: \(httpResponse.allHeaderFields)")
             }
             if let data = data, let dataString = String(data: data, encoding: .utf8) {
-                print("🌐 SSE: Initial data received: \(dataString.prefix(500))")
             }
             
             // Create a task to handle the response asynchronously
             Task { [weak self] in
                 guard let self = self else { 
-                    print("🌐 SSE: Self reference lost")
                     return 
                 }
                 
                 // Check if this connection is still active
                 guard await self.connectionID == connectionID, await self.isConnected else { 
-                    print("🌐 SSE: Connection not active anymore - ID mismatch or disconnected")
                     return 
                 }
                 
                 if let error = error {
-                    print("🌐 SSE: Processing error: \(error.localizedDescription)")
                     await self.handleError(error)
                     return
                 }
                 
                 guard let httpResponse = response as? HTTPURLResponse else {
-                    print("🌐 SSE: Invalid response type (not HTTP)")
                     await self.handleError(APIError.invalidResponse)
                     return
                 }
@@ -164,7 +151,6 @@ actor EventSource {
                 guard (200...299).contains(httpResponse.statusCode) else {
                     let responseData = data ?? Data()
                     let message = String(data: responseData, encoding: .utf8)
-                    print("🌐 SSE: HTTP error: \(httpResponse.statusCode), message: \(message ?? "none")")
                     await self.handleError(APIError.serverError(
                         statusCode: httpResponse.statusCode, 
                         message: message
@@ -172,74 +158,56 @@ actor EventSource {
                     return
                 }
                 
-                print("🌐 SSE: Connection established successfully")
                 
                 if let data = data {
                     // Print the raw data for debugging
                     if let text = String(data: data, encoding: .utf8) {
-                        print("🌐 SSE: Raw data chunk received: \(text)")
                     } else {
-                        print("🌐 SSE: Raw data received but couldn't be converted to string")
                     }
                     
                     // Add the data to the buffer
-                    print("🌐 SSE: Appending data to buffer")
                     capturedBuffer.append(data)
                     
                     // Log buffer size
-                    print("🌐 SSE: Buffer size after append: \(capturedBuffer.size) bytes")
                     
                     // Process all available events in the buffer
-                    print("🌐 SSE: Checking for complete events in buffer")
                     var eventCount = 0
                     
                     while let event = capturedBuffer.nextEvent() {
                         eventCount += 1
-                        print("🌐 SSE: Found complete event #\(eventCount) in buffer")
                         
                         // Save the event ID for potential reconnection
                         if let id = event.id {
-                            print("🌐 SSE: Event has ID: \(id)")
                             await self.updateLastEventID(id)
                         }
                         
                         // Handle event type
                         if let eventType = event.event {
-                            print("🌐 SSE: Event type: \(eventType)")
                         }
                         
                         // Handle server-specified retry time
                         if let retry = event.retry {
-                            print("🌐 SSE: Server specified retry: \(retry)ms")
                         }
                         
                         // Debug output for the event data
                         if let eventData = event.data {
-                            print("🌐 SSE: Event data (\(eventData.count) chars): \(eventData.prefix(100))...")
                         } else {
-                            print("🌐 SSE: Event has no data")
                         }
                         
                         // Yield the event to the stream immediately
-                        print("🌐 SSE: Yielding event to stream")
                         await self.yieldEvent(event)
-                        print("🌐 SSE: Event yielded successfully")
                         
                         // Special case for stream end marker
                         if event.data == "[DONE]" || event.event == "complete" {
-                            print("🌐 SSE: Stream end marker received. Disconnecting.")
                             await Task { await self.disconnect() }.value
                             return
                         }
                     }
                     
                     if eventCount == 0 {
-                        print("🌐 SSE: No complete events found in buffer yet")
                     } else {
-                        print("🌐 SSE: Processed \(eventCount) events from buffer")
                     }
                 } else {
-                    print("🌐 SSE: Data is nil in this response")
                 }
                 
                 // Attempt reconnection if needed
@@ -340,10 +308,8 @@ private final class SSEBuffer: @unchecked Sendable {
                 buffer += text
                 // Log the buffer size to monitor growth
                 if buffer.count > 5000 {
-                    print("⚠️ SSE buffer size is large: \(buffer.count) characters")
                 }
             } else {
-                print("⚠️ Failed to decode SSE data chunk using UTF-8")
             }
         }
     }
@@ -356,7 +322,6 @@ private final class SSEBuffer: @unchecked Sendable {
             guard let range = buffer.range(of: "\n\n") else {
                 // If we don't have a complete event yet but buffer is getting large, log it
                 if buffer.count > 200 {
-                    print("🔍 Large buffer without complete event: \(buffer.prefix(100))...")
                 }
                 return nil
             }
@@ -365,7 +330,6 @@ private final class SSEBuffer: @unchecked Sendable {
             buffer.removeSubrange(..<range.upperBound)
             
             // Debug log for event parsing
-            print("🔍 Parsing SSE event: \(eventString.prefix(50))...")
             
             return parseEvent(eventString)
         }

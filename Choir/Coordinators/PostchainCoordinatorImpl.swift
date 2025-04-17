@@ -149,7 +149,6 @@ class PostchainCoordinatorImpl: PostchainCoordinator, ObservableObject {
                     }
 
                     // Process the events as they arrive
-                    print("🚀 STREAMING: Beginning to process events from stream")
 
                     // Add this flag to track if we've received any events
                     var receivedEvents = false
@@ -160,15 +159,12 @@ class PostchainCoordinatorImpl: PostchainCoordinator, ObservableObject {
 
                         // Handle cancellation
                         if Task.isCancelled {
-                            print("🚫 STREAMING: Task cancelled")
                             break
                         }
 
                         // Process the event immediately
-                        print("🚀 STREAMING: Received event for phase: \(event.phase), status: \(event.status), content length: \(event.content?.count ?? 0)")
 
                         if let content = event.content, !content.isEmpty {
-                            print("🚀 STREAMING: Content sample: \(content.prefix(50))...")
                         }
 
                         // Process the event and update UI immediately
@@ -201,10 +197,8 @@ class PostchainCoordinatorImpl: PostchainCoordinator, ObservableObject {
                     }
 
                     if !receivedEvents {
-                        print("⚠️ STREAMING: No events were received from the stream")
                     }
 
-                    print("🏁 STREAMING: Event stream completed")
 
                     // Streaming completed successfully
                     isProcessing = false
@@ -243,29 +237,15 @@ class PostchainCoordinatorImpl: PostchainCoordinator, ObservableObject {
         let phaseEnum = mapStringToPhase(event.phase)
 
         // Debug output
-        print("📲 Received event for phase: \(event.phase), status: \(event.status), content length: \(event.content?.count ?? 0)")
 
         // Enhanced model information logging for all phases
-        print("📲 MODEL INFO: Phase: \(event.phase), Provider: \(event.provider ?? "nil"), ModelName: \(event.modelName ?? "nil")")
 
         // Special diagnostic for yield phase - log structure of entire event
         if event.phase == "yield" {
-            print("📊 YIELD DIAGNOSIS - START")
-            print("📊 YIELD EVENT: Phase: \(event.phase)")
-            print("📊 YIELD EVENT: Status: \(event.status)")
-            print("📊 YIELD EVENT: Has content: \(event.content != nil)")
-            print("📊 YIELD EVENT: Content empty: \(event.content?.isEmpty ?? true)")
-            print("📊 YIELD EVENT: Content length: \(event.content?.count ?? 0)")
             if let content = event.content, !content.isEmpty {
-                print("📊 YIELD EVENT: Content first chars: \(content.prefix(50))")
-                print("📊 YIELD EVENT: Content last chars: \(content.suffix(50))")
             }
-            print("📊 YIELD EVENT: Has provider: \(event.provider != nil)")
-            print("📊 YIELD EVENT: Has modelName: \(event.modelName != nil)")
             if let provider = event.provider, let modelName = event.modelName {
-                print("📊 YIELD EVENT: Provider/ModelName values: \(provider)/\(modelName)")
             }
-            print("📊 YIELD DIAGNOSIS - END")
         }
 
         // Update the current phase
@@ -273,29 +253,20 @@ class PostchainCoordinatorImpl: PostchainCoordinator, ObservableObject {
 
         // --- BEGIN VECTOR RESULTS DEBUG ---
         if phaseEnum == .experienceVectors {
-            print("🩺 COORD DEBUG: Handling experience_vectors phase event.")
-            print("🩺 COORD DEBUG: event.vectorResults is nil? \(event.vectorResults == nil)")
             if let results = event.vectorResults {
-                print("🩺 COORD DEBUG: event.vectorResults count: \(results.count)")
-                print("🩺 COORD DEBUG: event.vectorResults is empty? \(results.isEmpty)")
             }
         }
         // --- END VECTOR RESULTS DEBUG ---
 
         // Store search results if available
         if let webResults = event.webResults {
-            print("📲 Received web results: \(webResults.count) items")
             self.webResults = webResults
         }
 
         if let vectorResults = event.vectorResults {
-            print("📲 Received vector results: \(vectorResults.count) items")
 
             // Enhanced logging for vector results inspection
             for (i, vector) in vectorResults.enumerated() {
-                print("📲 VECTOR #\(i+1): Score: \(vector.score), Content length: \(vector.content.count)")
-                print("📲 VECTOR #\(i+1): Content sample: \(vector.content.prefix(50))...")
-                print("📲 VECTOR #\(i+1): Has content_preview: \(vector.content_preview != nil)")
             }
 
             self.vectorResults = vectorResults
@@ -306,11 +277,9 @@ class PostchainCoordinatorImpl: PostchainCoordinator, ObservableObject {
 
         // Debug log content
         if event.phase == "yield" {
-            print("🟡 COORD: Handling Yield Event with content: \(content.prefix(50))...")
         }
 
         // Log model info for debugging
-        print("📘 MODEL DEBUG: Phase \(phaseEnum.rawValue) - Provider: \(event.provider ?? "nil"), ModelName: \(event.modelName ?? "nil")")
 
         // Find the message being updated
         if let messageId = activeMessageId,
@@ -331,13 +300,9 @@ class PostchainCoordinatorImpl: PostchainCoordinator, ObservableObject {
             )
 
             // Add extra debugging specifically for model name issue
-            print("🔧 MODEL DEBUG: About to update Message for phase \(phaseEnum.rawValue)")
-            print("🔧 MODEL DEBUG: - Raw provider from event: \"\(event.provider ?? "nil")\"")
-            print("🔧 MODEL DEBUG: - Raw modelName from event: \"\(event.modelName ?? "nil")\"")
 
             // Check if the event.modelName is defined but empty
             if let modelName = event.modelName {
-                print("🔧 MODEL DEBUG: - modelName is empty: \(modelName.isEmpty), length: \(modelName.count)")
             }
 
             // Update the message with the streaming content, even if it's incomplete
@@ -369,7 +334,6 @@ class PostchainCoordinatorImpl: PostchainCoordinator, ObservableObject {
                 }.value
             }
         } else {
-            print("⚠️ Could not find message for event. Active ID: \(activeMessageId?.uuidString ?? "nil"), Thread: \(currentChoirThread?.id.uuidString ?? "nil")")
         }
 
         // Update the view model (always update even if content is empty to handle status changes)
@@ -392,7 +356,6 @@ class PostchainCoordinatorImpl: PostchainCoordinator, ObservableObject {
 
         // If phase is complete, remove it from processing phases
         if event.status == "complete" {
-            print("📲 Phase \(phaseEnum.rawValue) completed")
             processingPhases.remove(phaseEnum)
 
             // Handle automatic thread title generation

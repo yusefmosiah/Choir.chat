@@ -75,7 +75,6 @@ struct VectorSearchResult: Codable, Equatable, Hashable {
         if let anyMetadata = try? container.decodeIfPresent([String: AnyCodable].self, forKey: .metadata) {
             metadata = anyMetadata.compactMapValues { $0.value as? String }
             if metadata?.count != anyMetadata.count {
-                 print("⚠️ VECTOR METADATA: Some non-string values found in metadata dict for id \(id ?? "unknown")")
             }
         } else {
             metadata = nil // Explicitly nil if decoding fails or key is absent

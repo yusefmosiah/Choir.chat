@@ -253,45 +253,34 @@ struct PaginatedMarkdownView: View {
                 // Extract vector ID from the path
                 let vectorId = url.lastPathComponent
                 if !vectorId.isEmpty {
-                    print("🔗 LINKS: Handling vector deep link: \(url)")
                     handleVectorDeepLink(vectorId: vectorId)
                 } else {
-                    print("🔗 LINKS: Empty vector ID in deep link: \(url)")
                 }
             case "thread":
                 // Handle thread links (already implemented elsewhere)
-                print("🔗 LINKS: Thread deep link tapped: \(url)")
                 break
             default:
-                print("🔗 LINKS: Unknown choir:// host: \(host)")
                 break
             }
         } else {
             // Open external URLs in Safari
-            print("🔗 LINKS: Opening external URL: \(url)")
             UIApplication.shared.open(url)
         }
     }
 
     private func handleVectorDeepLink(vectorId: String) {
         guard let indexNumber = Int(vectorId) else {
-            print("🔗 LINKS: Error: Vector ID must be a number, got: \(vectorId)")
             TextSelectionManager.shared.showSheet(withText: "Invalid vector reference format. Expected #<number> but got #\(vectorId).")
             return
         }
 
         // Use the message passed to this view
         guard let message = currentMessage else {
-            print("🔗 LINKS: Error: No current message available")
             TextSelectionManager.shared.showSheet(withText: "Unable to display vector result #\(indexNumber): No message context available.")
             return
         }
 
         // Enhanced debug logging
-        print("🔍 VECTOR LINK: Processing vector link #\(indexNumber)")
-        print("🔍 VECTOR LINK: Message ID: \(message.id)")
-        print("🔍 VECTOR LINK: Current phase: \(message.selectedPhase.rawValue)")
-        print("🔍 VECTOR LINK: Vector results count: \(message.vectorSearchResults.count)")
 
         // Try to find the vector result with the matching index
         var vectorResult: VectorSearchResult? = nil
@@ -299,12 +288,10 @@ struct PaginatedMarkdownView: View {
         // First try direct index lookup
         if indexNumber > 0 && indexNumber <= message.vectorSearchResults.count {
             vectorResult = message.vectorSearchResults[indexNumber - 1]
-            print("🔍 VECTOR LINK: Found vector #\(indexNumber) via direct index")
         }
 
         // If not found, try to find by ID if available
         if vectorResult == nil {
-            print("🔍 VECTOR LINK: Trying to find vector by ID matching #\(indexNumber)")
             vectorResult = message.vectorSearchResults.first { result in
                 guard let resultId = result.id else { return false }
                 return resultId.contains(vectorId) || resultId.contains("#\(indexNumber)")
@@ -313,7 +300,6 @@ struct PaginatedMarkdownView: View {
 
         // If we found a vector result, display it
         if let vectorResult = vectorResult {
-            print("🔍 VECTOR LINK: Displaying vector result")
             displayVectorResult(vectorResult, index: indexNumber)
             return
         }
@@ -359,16 +345,10 @@ struct PaginatedMarkdownView: View {
 
     private func displayVectorResult(_ vectorResult: VectorSearchResult, index: Int) {
         // Debug the vector content
-        print("🔍 VECTOR DISPLAY: Showing vector #\(index)")
-        print("🔍 VECTOR DISPLAY: Content length: \(vectorResult.content.count)")
-        print("🔍 VECTOR DISPLAY: Content preview: \(vectorResult.content.prefix(50))...")
-        print("🔍 VECTOR DISPLAY: Content preview available: \(vectorResult.content_preview != nil)")
         if let preview = vectorResult.content_preview {
-            print("🔍 VECTOR DISPLAY: Preview length: \(preview.count)")
         }
 
         // Check if vector has an ID and might have fuller content available
-        print("🔍 VECTOR DISPLAY: Has ID: \(vectorResult.id != nil)")
 
         // Format initial content with metadata
         var formattedContent = """
@@ -414,7 +394,6 @@ struct PaginatedMarkdownView: View {
         """
 
         // Show the content in a text selection sheet
-        print("🔗 LINKS: Showing vector result #\(index) with score \(vectorResult.score)")
         TextSelectionManager.shared.showSheet(withText: formattedContent)
     }
 }

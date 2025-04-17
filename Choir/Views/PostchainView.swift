@@ -56,13 +56,11 @@ struct PostchainView: View {
             let shouldShow = hasTextContent || hasVectorResults || hasWebResults || isProcessingPhase || message.isStreaming
             
             if shouldShow {
-                print("🔄 VIEW: Phase \(phase.rawValue) is available (content: \(hasTextContent), vectors: \(hasVectorResults), web: \(hasWebResults), processing: \(isProcessingPhase))")
             }
             
             return shouldShow
         }
         
-        print("🔄 VIEW: Available phases: \(filtered.map { $0.rawValue }.joined(separator: ", "))")
         return filtered
     }
 
@@ -75,8 +73,6 @@ struct PostchainView: View {
         self.forceShowAllPhases = forceShowAllPhases
         self.coordinator = coordinator
         self.viewId = viewId
-        // print("PostchainView initialized for message \(message.id)") // Reduced logging
-        // print("PostchainView localThreadIDs: \(localThreadIDs)") // Removed excessive logging
     }
 
     // Use this state variable to trigger UI refreshes when phases change
@@ -138,22 +134,18 @@ struct PostchainView: View {
                 .onChange(of: availablePhases.count) { _, newCount in
                     // Increment the counter to force UI refresh when available phases change
                     phaseRefreshCounter += 1
-                    print("🔄 VIEW: Available phases count changed to \(newCount), refreshing view")
                 }
                 .onChange(of: message.isStreaming) { _, newValue in
                     // Also refresh when streaming state changes
                     phaseRefreshCounter += 1
-                    print("🔄 VIEW: Message streaming state changed to \(newValue), refreshing view")
                 }
                 .onChange(of: message.phaseResults) { _, _ in
                     // Force a refresh when phase results change
                     phaseRefreshCounter += 1
-                    print("🔄 VIEW: Message phaseResults updated, refreshing view")
                 }
                 .onReceive(message.objectWillChange) {
                     // Also listen for any changes in the message
                     phaseRefreshCounter += 1
-                    print("🔄 VIEW: Message objectWillChange fired, refreshing view")
                 }
                 .simultaneousGesture( // Drag gesture remains on the card stack
                     DragGesture()
@@ -181,7 +173,6 @@ struct PostchainView: View {
                     .padding(.leading, -20) // Expand overlay outward beyond parent bounds
                     .contentShape(Rectangle())
                     .onTapGesture {
-                        print("LEFT TAP AREA TAPPED")
                         handlePageTap(direction: .previous, size: geometry.size)
                     }
                     .zIndex(2) // Ensure overlay is above phase cards
@@ -193,7 +184,6 @@ struct PostchainView: View {
                     .padding(.trailing, -60) // Expand overlay outward beyond parent bounds
                     .contentShape(Rectangle())
                     .onTapGesture {
-                        print("RIGHT TAP AREA TAPPED")
                         handlePageTap(direction: .next, size: geometry.size)
                     }
                     .zIndex(2) // Ensure overlay is above phase cards
@@ -264,12 +254,9 @@ struct PostchainView: View {
                 } else {
                     viewModel.updateSelectedPhase(for: message, phase: availablePhases.first ?? .action)
                 }
-                // print("PostchainView: Initially selected phase: \(selectedPhase)") // Reduced logging
             } else {
-                // print("PostchainView: Keeping current selection on appear: \(selectedPhase)") // Reduced logging
             }
         } else {
-            // print("PostchainView: Reappeared, keeping selection: \(selectedPhase)") // Reduced logging
         }
     }
 
@@ -408,13 +395,11 @@ struct PostchainView: View {
 
         if targetIndex != currentIndex {
             let newPhase = availablePhases[targetIndex]
-            print("switchToPhase: Moving from \(selectedPhase) to \(newPhase)")
 
             // --- START CRITICAL RESET LOGIC ---
             // Reset the current page for the NEW phase
             if direction == .next {
                 message.phaseCurrentPage[newPhase] = 0 // Reset to first page
-                print("switchToPhase: Reset page for \(newPhase) to 0")
             } else { // direction == .previous
                 // Reset to last page - Requires calculating total pages for the *new* phase
                 // We need the size here too! This might be tricky.
@@ -422,7 +407,6 @@ struct PostchainView: View {
                 // Let's try resetting to 0 for now for simplicity, can refine later if needed.
                 // TODO: Revisit resetting to last page if required.
                 message.phaseCurrentPage[newPhase] = 0 // Simplified: Reset to first page
-                print("switchToPhase: Reset page for \(newPhase) to 0 (Simplified)")
 
                 // --- Original logic requiring size ---
                 // let phaseContent = message.getPhaseContent(newPhase)
@@ -431,7 +415,6 @@ struct PostchainView: View {
                 // let searchResults = vectorResults + webResults
                 // let totalPagesForNewPhase = calculateAccurateTotalPages(markdownText: phaseContent, searchResults: searchResults, size: latestAvailableSize) // Needs size!
                 // message.phaseCurrentPage[newPhase] = max(0, totalPagesForNewPhase - 1)
-                // print("switchToPhase: Reset page for \(newPhase) to \(message.phaseCurrentPage[newPhase] ?? -1)")
                 // --- End Original logic ---
             }
             // --- END CRITICAL RESET LOGIC ---

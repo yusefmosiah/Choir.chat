@@ -45,10 +45,8 @@ class ThreadPersistenceService {
             // Write the data to the file
             try data.write(to: fileURL)
 
-            print("Thread saved to: \(fileURL.path)")
             return true
         } catch {
-            print("Error saving thread: \(error)")
             return false
         }
     }
@@ -70,7 +68,6 @@ class ThreadPersistenceService {
             // Create a thread from the data
             return threadData.toChoirThread()
         } catch {
-            print("Error loading thread: \(error)")
             return nil
         }
     }
@@ -92,13 +89,11 @@ class ThreadPersistenceService {
                     let threadData = try decoder.decode(ThreadData.self, from: data)
                     threads.append(threadData.toChoirThread())
                 } catch {
-                    print("Error loading thread from \(fileURL.lastPathComponent): \(error)")
                 }
             }
 
             return threads
         } catch {
-            print("Error loading threads: \(error)")
             return []
         }
     }
@@ -114,7 +109,6 @@ class ThreadPersistenceService {
             try FileManager.default.removeItem(at: fileURL)
             return true
         } catch {
-            print("Error deleting thread: \(error)")
             return false
         }
     }

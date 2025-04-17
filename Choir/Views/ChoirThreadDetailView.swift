@@ -146,7 +146,6 @@ struct ChoirThreadDetailView: View {
                 saveThread()
             }
         } catch {
-            print("Error processing message: \(error)")
         }
     }
 

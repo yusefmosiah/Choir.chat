@@ -80,69 +80,43 @@ struct PhaseCard: View {
         let hasDisplayableContent = !combinedMarkdown.isEmpty
 
         // Debug logging for all phases to compare
-        print("\n🔍 PHASE CARD DIAGNOSIS - \(phase.rawValue.uppercased()) - START")
-        print("🔍 PHASE CARD: Phase: \(phase.rawValue)")
-        print("🔍 PHASE CARD: Message ID: \(message.id)")
-        print("🔍 PHASE CARD: Base content length: \(baseContent.count)")
-        print("🔍 PHASE CARD: Combined markdown length: \(combinedMarkdown.count)")
-        print("🔍 PHASE CARD: Has displayable content: \(hasDisplayableContent)")
-        print("🔍 PHASE CARD: Is loading: \(isLoading)")
 
         // Check raw phase result
         let phaseResult = message.getPhaseResult(phase)
-        print("🔍 PHASE CARD: Raw phase result: \(phaseResult != nil ? "exists" : "nil")")
         if let result = phaseResult {
-            print("🔍 PHASE CARD: Result content length: \(result.content.count)")
-            print("🔍 PHASE CARD: Result content empty: \(result.content.isEmpty)")
-            print("🔍 PHASE CARD: Result provider: \(result.provider ?? "nil")")
-            print("🔍 PHASE CARD: Result model: \(result.modelName ?? "nil")")
             if result.content.isEmpty {
-                print("🔍 PHASE CARD WARNING: Result content is empty!")
             } else {
-                print("🔍 PHASE CARD: Content first 50 chars: \(result.content.prefix(50))")
             }
         }
 
         // Minimal yield phase debug info
         if phase == .yield {
             if let rawYieldContent = message.phaseResults[.yield]?.content {
-                print("🔍 YIELD: Raw content length: \(rawYieldContent.count)")
             }
         }
 
         // For debugging comparing the yield phase with other phases that work
         if phase == .yield || phase == .action || phase == .understanding {
-            print("🔍 PHASE COMPARISON: Phases in message.phaseResults: \(message.phaseResults.keys.map { $0.rawValue }.joined(separator: ", "))")
-            print("🔍 PHASE COMPARISON: Selected phase is: \(message.selectedPhase.rawValue)")
 
             // Compare with a phase that works (action or understanding)
             let comparePhase = phase == .yield ? .action : phase
             let compareContent = message.phaseResults[comparePhase]?.content ?? ""
-            print("🔍 PHASE COMPARISON: \(comparePhase.rawValue) content length: \(compareContent.count)")
-            print("🔍 PHASE COMPARISON: \(comparePhase.rawValue) content empty: \(compareContent.isEmpty)")
         }
 
-        print("🔍 PHASE CARD DIAGNOSIS - \(phase.rawValue.uppercased()) - END\n")
 
         // Force refresh content when message changes
         let _ = cardRefreshCounter
 
         // Debug output for all phases to see why yield is different
-        print("📱 DISPLAY CHECK (\(phase.rawValue)): hasDisplayableContent=\(hasDisplayableContent)")
-        print("📱 DISPLAY CHECK (\(phase.rawValue)): isLoading=\(isLoading)")
-        print("📱 DISPLAY CHECK (\(phase.rawValue)): content length=\(combinedMarkdown.count)")
 
         // In case the problem is with the empty check, double-check it manually
         if !combinedMarkdown.isEmpty {
-            print("📱 DISPLAY CHECK (\(phase.rawValue)): Content is NOT empty - should display content")
         } else {
-            print("📱 DISPLAY CHECK (\(phase.rawValue)): Content IS empty - should show placeholder")
         }
 
         // DEBUG LOG: Add specific logging for PhaseCard display
         if phase == .yield {
             let displayContent = combinedMarkdown // Use the already computed content
-            print("⚪️ PHASECARD (Yield): Displaying content for message ID \(message.id). Content length: \(displayContent.count)")
         }
         return VStack(alignment: .leading, spacing: 12) {
             // Header (Keep existing header)
@@ -217,13 +191,10 @@ struct PhaseCard: View {
         .onReceive(message.objectWillChange) {
             // Update card when message changes
             cardRefreshCounter += 1
-            print("🔄 CARD: Message changed for phase \(phase.rawValue), refreshing view")
 
             // Check all phases to compare
             for checkPhase in Phase.allCases {
                 let checkContent = message.phaseResults[checkPhase]?.content ?? ""
-                print("🔄 REFRESH CHECK (\(checkPhase.rawValue)): Content length \(checkContent.count)")
-                print("🔄 REFRESH CHECK (\(checkPhase.rawValue)): Content empty \(checkContent.isEmpty)")
             }
         }
     }

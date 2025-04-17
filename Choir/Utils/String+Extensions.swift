@@ -34,7 +34,6 @@ extension String {
         let vectorIdRegex = try? NSRegularExpression(pattern: pattern, options: [])
         
         guard let regex = vectorIdRegex else { 
-            print("🔗 LINKS: Failed to create regex for vector references")
             return self 
         }
         
@@ -44,7 +43,6 @@ extension String {
         // Find all matches for vector references
         let matches = regex.matches(in: self, options: [], range: range)
         
-        print("🔗 LINKS: Found \(matches.count) vector references in text")
         
         // If no matches, return original text
         if matches.isEmpty {
@@ -79,7 +77,6 @@ extension String {
         
         // Log all vector IDs we found
         if !foundVectorIds.isEmpty {
-            print("🔗 LINKS: Found vector IDs: \(foundVectorIds.sorted())")
         }
         
         return result

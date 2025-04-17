@@ -149,7 +149,6 @@ struct PhaseResult: Codable, Equatable, Hashable {
 
         // Add debug output for empty content
         if content.isEmpty {
-            print("⚠️ WARNING: Created PhaseResult with empty content")
         }
     }
 
@@ -237,7 +236,6 @@ class Message: ObservableObject, Identifiable, Equatable {
         self.phaseResults = phaseResults
 
         // Print when a new message is created for debugging
-        print("📊 NEW MESSAGE: Created message with ID \(id)")
 
         for phase in Phase.allCases {
             if self.phaseResults[phase] == nil {
@@ -249,7 +247,6 @@ class Message: ObservableObject, Identifiable, Equatable {
                         provider: "test_provider",
                         modelName: "test_model"
                     )
-                    print("📊 TEST: Added test content to \(phase.rawValue) phase in new message \(id)")
                 } else {
                     self.phaseResults[phase] = PhaseResult(content: "", provider: nil, modelName: nil)
                 }
@@ -257,7 +254,6 @@ class Message: ObservableObject, Identifiable, Equatable {
         }
 
         // Verify all phases are initialized
-        print("📊 NEW MESSAGE: Initialized phases: \(phaseResults.keys.map { $0.rawValue }.joined(separator: ", "))")
     }
 
     static func == (lhs: Message, rhs: Message) -> Bool {
@@ -269,19 +265,14 @@ class Message: ObservableObject, Identifiable, Equatable {
         objectWillChange.send()
 
         // Debug output for monitoring
-        print("📝 MESSAGE: Updating phase \(phase.rawValue) with content length: \(content.count), status: \(status)")
         
         // Enhanced logging for model information
-        print("📝 MESSAGE: Provider: \(provider ?? "nil"), ModelName: \(modelName ?? "nil") for phase: \(phase.rawValue)")
         
         // Add debugging for vector results - check what we're getting in the event
         if let vectorResults = event.vectorResults {
-            print("🔍 VECTORS IN EVENT: Phase \(phase.rawValue) received \(vectorResults.count) vector results")
             if !vectorResults.isEmpty {
-                print("🔍 VECTORS IN EVENT: First result score: \(vectorResults[0].score)")
             }
         } else {
-            print("🔍 VECTORS IN EVENT: Phase \(phase.rawValue) received NO vector results")
         }
 
         // Always mark as streaming when we receive updates
@@ -294,53 +285,37 @@ class Message: ObservableObject, Identifiable, Equatable {
         }
 
         // Print additional debug info
-        print("📝 MESSAGE: Streaming status: \(self.isStreaming ? "active" : "inactive")")
 
         // Detailed logging for ALL phases
-        print("📊 PHASE MESSAGE (\(phase.rawValue)) UPDATE - START")
-        print("📊 PHASE MESSAGE (\(phase.rawValue)): Content empty: \(content.isEmpty)")
-        print("📊 PHASE MESSAGE (\(phase.rawValue)): Content length: \(content.count)")
         if !content.isEmpty {
-            print("📊 PHASE MESSAGE (\(phase.rawValue)): Content first chars: \(content.prefix(50))")
         }
 
         // Check existing content
         if let existingPhase = phaseResults[phase] {
-            print("📊 PHASE MESSAGE (\(phase.rawValue)): Existing content length: \(existingPhase.content.count)")
-            print("📊 PHASE MESSAGE (\(phase.rawValue)): Existing content empty: \(existingPhase.content.isEmpty)")
 
             // For debugging, compare yield with action
             if phase == .yield {
                 if let actionPhase = phaseResults[.action] {
-                    print("📊 PHASE COMPARISON: Action content length: \(actionPhase.content.count)")
-                    print("📊 PHASE COMPARISON: Action content empty: \(actionPhase.content.isEmpty)")
                 }
             }
         } else {
-            print("📊 PHASE MESSAGE (\(phase.rawValue)): No existing content")
         }
-        print("📊 PHASE MESSAGE (\(phase.rawValue)) UPDATE - END")
 
         // Enhanced debug logging for yield phase
         if phase == .yield {
             // DEBUG LOG: Add specific logging for Message update
-            print("🟣 MESSAGE: Updating Yield phase. Incoming content length: \(content.count). Content: '\(content.prefix(50))...'")
             
             // Standard handling for yield phase (same as other phases)
             if !content.isEmpty {
-                print("🔬 YIELD DEBUG: Using content (length: \(content.count))")
                 phaseResults[phase] = PhaseResult(content: content, provider: provider, modelName: modelName)
                 
                 // Update main content with yield content
                 self.content = content
-                print("🔬 YIELD DEBUG: Updated main content with content")
             } else {
-                print("🔬 YIELD DEBUG: Content is empty!")
                 phaseResults[phase] = PhaseResult(content: "", provider: provider, modelName: modelName)
             }
             
             // DEBUG LOG: Log content after update
-            print("🟣 MESSAGE: After update, phaseResults[.yield]?.content length: \(self.phaseResults[.yield]?.content.count ?? -1)")
         } else {
             // Standard handling for normal content
             phaseResults[phase] = PhaseResult(content: content, provider: provider, modelName: modelName)
@@ -354,17 +329,10 @@ class Message: ObservableObject, Identifiable, Equatable {
         // Handle search results
         if phase == .experienceVectors {
             if let results = event.vectorResults {
-                print("📝 MESSAGE: Updating vector results: \(results.count) items")
                 
                 // Enhanced debug info about incoming vector results
-                print("🔍 VECTOR DEBUG: Received \(results.count) vector results for message \(id)")
-                print("🔍 VECTOR DEBUG: Phase: \(phase.rawValue), Status: \(status)")
                 
                 for (index, result) in results.enumerated() {
-                    print("🔍 VECTOR #\(index+1): Score \(result.score), Content length: \(result.content.count)")
-                    print("🔍 VECTOR #\(index+1): Content sample: \(result.content.prefix(50))...")
-                    print("🔍 VECTOR #\(index+1): Has content_preview: \(result.content_preview != nil)")
-                    print("🔍 VECTOR #\(index+1): Has ID: \(result.id != nil)")
                 }
                 
                 // Actually store the results
@@ -373,36 +341,26 @@ class Message: ObservableObject, Identifiable, Equatable {
                 // IMPORTANT: Since vector results typically come with the Experience Vectors phase,
                 // But might be referenced in ANY phase, we need to store this information more prominently
                 if !results.isEmpty {
-                    print("🔍 VECTOR STORAGE: Vector results will be available for ALL phases in this message")
-                    print("🔍 VECTOR STORAGE: Stored \(self.vectorSearchResults.count) results with message \(id)")
                 } else {
-                    print("🔍 VECTOR WARNING: Experience Vectors phase received EMPTY vector results!")
                 }
             } else {
-                print("🔍 VECTOR DEBUG: No vector results received for message \(id) in phase \(phase.rawValue)")
             }
         } 
         // Even if we're in another phase, if we receive vector results, we should store them
         // This could happen if results from experienceVectors are attached to other phase events
         else if let results = event.vectorResults, !results.isEmpty {
-            print("🔍 VECTOR DEBUG: Received vector results in non-experienceVectors phase \(phase.rawValue)!")
-            print("🔍 VECTOR DEBUG: Updating vector results: \(results.count) items")
             
             // Enhanced debug info for non-experienceVectors phase
             for (index, result) in results.enumerated() {
-                print("🔍 VECTOR #\(index+1): Score \(result.score), Content length: \(result.content.count)")
-                print("🔍 VECTOR #\(index+1): Content sample: \(result.content.prefix(50))...")
             }
             
             // Store the results
             self.vectorSearchResults = results
-            print("🔍 VECTOR STORAGE: Stored \(self.vectorSearchResults.count) results with message \(id) in phase \(phase.rawValue)")
         }
         
         // Handle web search results
         if phase == .experienceWeb {
             if let results = event.webResults {
-                print("📝 MESSAGE: Updating web results: \(results.count) items")
                 self.webSearchResults = results
             }
         }
@@ -414,7 +372,6 @@ class Message: ObservableObject, Identifiable, Equatable {
                                phase == .yield) // Always prefer yield when available
 
             if shouldSwitch {
-                print("📝 MESSAGE: Auto-switching view from \(self.selectedPhase.rawValue) to \(phase.rawValue)")
                 self.selectedPhase = phase
             }
         }
@@ -425,14 +382,9 @@ class Message: ObservableObject, Identifiable, Equatable {
 
     func getPhaseContent(_ phase: Phase) -> String {
         // Check for the phase in the phaseResults dictionary
-        print("📊 GET CONTENT (\(phase.rawValue)): Looking up phase in phaseResults")
-        print("📊 GET CONTENT (\(phase.rawValue)): Keys in phaseResults: \(phaseResults.keys.map { $0.rawValue }.joined(separator: ", "))")
-        print("📊 GET CONTENT (\(phase.rawValue)): Phase exists in phaseResults: \(phaseResults[phase] != nil)")
 
         // Get the content and log details
         let content = phaseResults[phase]?.content ?? ""
-        print("📊 GET CONTENT (\(phase.rawValue)): Retrieved content length: \(content.count)")
-        print("📊 GET CONTENT (\(phase.rawValue)): Retrieved content is empty: \(content.isEmpty)")
         
         // NOTE: Vector reference conversion (#123 -> links) is now handled in PaginatedMarkdownView
         return content
@@ -440,9 +392,7 @@ class Message: ObservableObject, Identifiable, Equatable {
 
     func getPhaseResult(_ phase: Phase) -> PhaseResult? {
         let result = phaseResults[phase]
-        print("📋 GET_PHASE_RESULT: Phase \(phase.rawValue) - Result exists: \(result != nil)")
         if let result = result {
-            print("📋 GET_PHASE_RESULT: Phase \(phase.rawValue) - Provider: \(result.provider ?? "nil"), ModelName: \(result.modelName ?? "nil")")
         }
         return result
     }

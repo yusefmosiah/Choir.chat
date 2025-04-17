@@ -43,36 +43,23 @@ struct PhaseCardContextMenu: View {
         }
         .onAppear {
             // Detailed debugging for model name issues
-            print("🧩 CONTEXT MENU DEBUG: ========== PHASE \(phase.rawValue) ==========")
-            print("🧩 CONTEXT MENU DEBUG: PhaseResult exists: \(phaseResult != nil)")
             
             if let result = phaseResult {
-                print("🧩 CONTEXT MENU DEBUG: Raw values in PhaseResult:")
-                print("🧩 CONTEXT MENU DEBUG:   - provider: \"\(result.provider ?? "nil")\"")
-                print("🧩 CONTEXT MENU DEBUG:   - modelName: \"\(result.modelName ?? "nil")\"")
                 
                 if let provider = result.provider {
-                    print("🧩 CONTEXT MENU DEBUG:   - provider is empty: \(provider.isEmpty)")
                 }
                 
                 if let modelName = result.modelName {
-                    print("🧩 CONTEXT MENU DEBUG:   - modelName is empty: \(modelName.isEmpty)")
                 }
                 
                 // Which display condition was used
                 if let provider = provider, !provider.isEmpty, let modelName = modelName, !modelName.isEmpty {
-                    print("🧩 CONTEXT MENU DEBUG: DISPLAYED: provider/model: \"\(provider)/\(modelName)\"")
                 } else if let modelName = modelName, !modelName.isEmpty {
-                    print("🧩 CONTEXT MENU DEBUG: DISPLAYED: model only: \"\(modelName)\"")
                 } else if let provider = provider, !provider.isEmpty {
-                    print("🧩 CONTEXT MENU DEBUG: DISPLAYED: provider only: \"\(provider)\"")
                 } else {
-                    print("🧩 CONTEXT MENU DEBUG: DISPLAYED: fallback description: \"\(phase.description)\"")
                 }
             } else {
-                print("🧩 CONTEXT MENU DEBUG: No PhaseResult available")
             }
-            print("🧩 CONTEXT MENU DEBUG: ====================================")
         }
     }
 }

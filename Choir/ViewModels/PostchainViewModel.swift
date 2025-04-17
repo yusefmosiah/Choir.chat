@@ -121,11 +121,8 @@ class PostchainViewModel: ObservableObject {
         isProcessing = true
 
         // Inject global saved model configs before starting
-        print("🚀 Model configs being sent to backend:")
         let savedConfigs = ModelConfigManager.shared.loadModelConfigs()
         for (phase, config) in savedConfigs {
-            print("Phase: \(phase.rawValue), Provider: \(config.provider), Model: \(config.model)")
-            print("API Keys: google=\(config.googleApiKey?.prefix(5) ?? "nil"), openrouter=\(config.openrouterApiKey?.prefix(5) ?? "nil")")
         }
 
         do {
@@ -174,14 +171,10 @@ class PostchainViewModel: ObservableObject {
         // Use provided messageId or fall back to activeMessageId
         let targetMessageId = messageId ?? self.activeMessageId
 
-        print("📊 STREAMING UI: Updating phase \(phase.rawValue) (status: \(status)) for message \(targetMessageId)")
-        print("📊 STREAMING UI: Content length: \(content?.count ?? 0), Provider: \(provider ?? "none")")
 
         // Crucial to invoke UI updates on main thread
         DispatchQueue.main.async {
             // DEBUG LOG: Add specific logging for ViewModel update
-            print("🟢 VIEWMODEL: updatePhaseData called for Phase: \(phase.rawValue), Status: \(status), MsgID: \(targetMessageId)")
-            print("🟢 VIEWMODEL: Incoming Content: \(content ?? "nil")")
             
             // First update the viewModel state to reflect the latest data
             self.currentPhase = phase
@@ -190,7 +183,6 @@ class PostchainViewModel: ObservableObject {
             let contentToUpdate = content ?? ""
             
             if !contentToUpdate.isEmpty {
-                print("📊 VIEWMODEL: \(phase.rawValue) phase using content: \(contentToUpdate.prefix(50))")
                 self.responses[phase] = contentToUpdate
 
                 // Signal UI to update with this change
@@ -198,7 +190,6 @@ class PostchainViewModel: ObservableObject {
             }
 
             // DEBUG LOG: Log final contentToUpdate
-            print("🟢 VIEWMODEL: Final contentToUpdate for \(phase.rawValue): '\(contentToUpdate.prefix(50))...'")
             
             // Update the message object directly (needed for streaming UI)
             if let msg = self.findMessage(by: targetMessageId) {
@@ -224,51 +215,33 @@ class PostchainViewModel: ObservableObject {
                 )
 
                 // Enhanced debug logging for all phases
-                print("📊 PHASE UPDATE (\(phase.rawValue)): Status: \(status)")
-                print("📊 PHASE UPDATE (\(phase.rawValue)): Content length: \(contentToUpdate.count)")
-                print("📊 PHASE UPDATE (\(phase.rawValue)): Content empty: \(contentToUpdate.isEmpty)")
-                print("📊 PHASE UPDATE (\(phase.rawValue)): Provider: \(provider ?? "nil")")
 
                 // This is the key call that updates the message content
                 // We always update the phase, even if content is empty
                 msg.updatePhase(phase, content: contentToUpdate, provider: provider, modelName: modelName, event: phaseEvent, status: status)
 
-                print("📊 STREAMING UI: Updated message phase content for \(phase.rawValue)")
             } else {
-                print("⚠️ STREAMING UI: Could not find message with ID \(targetMessageId)")
             }
 
             // Update structured results based on phase with enhanced logging
             if phase == .experienceVectors {
                 if let newVectorResults = vectorResults {
                     self.vectorResultsByMessage[targetMessageId] = newVectorResults
-                    print("📊 STREAMING UI: Updated vector results: \(newVectorResults.count) items")
                     
                     // Debug the structure of what we received
                     for (i, result) in newVectorResults.enumerated() {
-                        print("📊 VECTOR RESULT #\(i+1):")
-                        print("   - Score: \(result.score)")
-                        print("   - ID: \(result.id ?? "nil")")
-                        print("   - Content: \(result.content.isEmpty ? "EMPTY" : "\(result.content.prefix(50))...")")
-                        print("   - Content preview: \(result.content_preview?.prefix(50) ?? "nil")")
                         
                         // If we have a content_preview but no content, use the preview
                         if result.content.isEmpty && result.content_preview != nil {
-                            print("📊 VECTOR RESULT: Using content_preview as content")
                         }
                     }
                 }
             } else if phase == .experienceWeb {
                 if let newWebResults = webResults {
                     self.webResultsByMessage[targetMessageId] = newWebResults
-                    print("📊 STREAMING UI: Updated web results: \(newWebResults.count) items")
                     
                     // Debug the structure of what we received
                     for (i, result) in newWebResults.enumerated() {
-                        print("📊 WEB RESULT #\(i+1):")
-                        print("   - Title: \(result.title)")
-                        print("   - URL: \(result.url)")
-                        print("   - Content: \(result.content.isEmpty ? "EMPTY" : "\(result.content.prefix(50))...")")
                     }
                 }
             }
@@ -278,7 +251,6 @@ class PostchainViewModel: ObservableObject {
             let isLastPhaseComplete = (phase == Phase.allCases.last && status == "complete")
             if isLastPhaseComplete {
                 self.isProcessing = false
-                print("🏁 STREAMING UI: Processing finished with yield phase completion")
 
                 // Close the loop: auto-select yield if user is on action phase
                 if let message = self.findMessage(by: targetMessageId), message.selectedPhase == .action {
@@ -288,7 +260,6 @@ class PostchainViewModel: ObservableObject {
                 }
             } else if status == "error" {
                 self.isProcessing = false // Also stop on error
-                print("🛑 STREAMING UI: Processing stopped due to error in phase \(phase.rawValue)")
             }
 
             // Force one last UI update to make sure changes are reflected
@@ -302,7 +273,6 @@ class PostchainViewModel: ObservableObject {
         updateWorkItem = nil
 
         // Add a debug note showing we're done processing this event
-        print("📊 STREAMING UI: Finished processing event for phase \(phase.rawValue)")
     }
 
     func setCurrentPhase(_ phase: Phase) {
