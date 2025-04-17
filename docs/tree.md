@@ -140,7 +140,6 @@
 │   ├── requirements.txt
 │   ├── static
 │   │   └── shared
-│   │       ├── images
 │   │       ├── script.js
 │   │       └── style.css
 │   ├── templates
@@ -269,4 +268,4 @@
     ├── test_api.sh
     └── test_postchain_multiturn.sh
 
-67 directories, 200 files
+66 directories, 200 files

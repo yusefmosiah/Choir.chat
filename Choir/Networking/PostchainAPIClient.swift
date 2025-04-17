@@ -243,9 +243,25 @@ actor PostchainAPIClient {
                                         print("📊 YIELD: Checking if content exists: \(jsonString.contains("\"content\""))")
                                     }
 
+                                    // ---> ADDED DEBUG LOG <---
+                                    // Print the raw JSON string for ALL events before specific checks
+                                    print("📬 RRRAW JSON received in client: \(jsonString)")
+
                                     // Log raw JSON specifically for experience_vectors phase before attempting decode
-                                    if jsonString.contains("\"phase\":\"experience_vectors\"") {
+                                    // Check for the phase string, accounting for the space after the colon found in logs
+                                    let targetSubstringWithSpace = "\"phase\": \"experience_vectors\""
+                                    if jsonString.contains(targetSubstringWithSpace) {
+                                        print("📬✅ MATCH FOUND: Found '\(targetSubstringWithSpace)' in jsonString.")
                                         print("📬 RAW experience_vectors JSON: \(jsonString)")
+                                    } else {
+                                        // Log if the specific string isn't found
+                                        print("📬❌ NO MATCH: Did not find '\(targetSubstringWithSpace)' in jsonString.")
+                                        // As a fallback, check without the space in case formatting varies
+                                        let targetSubstringNoSpace = "\"phase\":\"experience_vectors\""
+                                        if jsonString.contains(targetSubstringNoSpace) {
+                                            print("📬⚠️ FALLBACK MATCH: Found '\(targetSubstringNoSpace)' (no space) instead.")
+                                            print("📬 RAW experience_vectors JSON: \(jsonString)")
+                                        }
                                     }
 
                                     // Parse JSON
@@ -254,12 +270,15 @@ actor PostchainAPIClient {
                                             print("🚨 Error: Could not convert JSON string to UTF8 data")
                                             continue // Skip this event if data conversion fails
                                         }
-                                        
+
                                         // For debugging: print the raw JSON if it contains model_name
                                         if jsonString.contains("model_name") {
                                             print("🔍 RAW JSON contains model_name: \(jsonString)")
                                         }
-                                        
+
+                                        // ---> ADDED DEBUG LOG <---
+                                        print("🩺 DECODE PREP: jsonData size: \(jsonData.count) bytes before decoding PostchainEvent")
+
                                         let postchainEvent = try decoder.decode(PostchainEvent.self, from: jsonData)
                                         // Enhanced logging for all events, focusing on vector results
                                         print("📡 STREAM: Decoded event for phase: \(postchainEvent.phase)")

@@ -244,10 +244,10 @@ class PostchainCoordinatorImpl: PostchainCoordinator, ObservableObject {
 
         // Debug output
         print("📲 Received event for phase: \(event.phase), status: \(event.status), content length: \(event.content?.count ?? 0)")
-        
+
         // Enhanced model information logging for all phases
         print("📲 MODEL INFO: Phase: \(event.phase), Provider: \(event.provider ?? "nil"), ModelName: \(event.modelName ?? "nil")")
-        
+
         // Special diagnostic for yield phase - log structure of entire event
         if event.phase == "yield" {
             print("📊 YIELD DIAGNOSIS - START")
@@ -271,6 +271,17 @@ class PostchainCoordinatorImpl: PostchainCoordinator, ObservableObject {
         // Update the current phase
         currentPhase = phaseEnum
 
+        // --- BEGIN VECTOR RESULTS DEBUG ---
+        if phaseEnum == .experienceVectors {
+            print("🩺 COORD DEBUG: Handling experience_vectors phase event.")
+            print("🩺 COORD DEBUG: event.vectorResults is nil? \(event.vectorResults == nil)")
+            if let results = event.vectorResults {
+                print("🩺 COORD DEBUG: event.vectorResults count: \(results.count)")
+                print("🩺 COORD DEBUG: event.vectorResults is empty? \(results.isEmpty)")
+            }
+        }
+        // --- END VECTOR RESULTS DEBUG ---
+
         // Store search results if available
         if let webResults = event.webResults {
             print("📲 Received web results: \(webResults.count) items")
@@ -279,28 +290,28 @@ class PostchainCoordinatorImpl: PostchainCoordinator, ObservableObject {
 
         if let vectorResults = event.vectorResults {
             print("📲 Received vector results: \(vectorResults.count) items")
-            
+
             // Enhanced logging for vector results inspection
             for (i, vector) in vectorResults.enumerated() {
                 print("📲 VECTOR #\(i+1): Score: \(vector.score), Content length: \(vector.content.count)")
                 print("📲 VECTOR #\(i+1): Content sample: \(vector.content.prefix(50))...")
                 print("📲 VECTOR #\(i+1): Has content_preview: \(vector.content_preview != nil)")
             }
-            
+
             self.vectorResults = vectorResults
         }
 
         // Get content (could be empty for some events)
         let content = event.content ?? ""
-        
+
         // Debug log content
         if event.phase == "yield" {
             print("🟡 COORD: Handling Yield Event with content: \(content.prefix(50))...")
         }
-        
+
         // Log model info for debugging
         print("📘 MODEL DEBUG: Phase \(phaseEnum.rawValue) - Provider: \(event.provider ?? "nil"), ModelName: \(event.modelName ?? "nil")")
-        
+
         // Find the message being updated
         if let messageId = activeMessageId,
            let thread = currentChoirThread,
@@ -323,12 +334,12 @@ class PostchainCoordinatorImpl: PostchainCoordinator, ObservableObject {
             print("🔧 MODEL DEBUG: About to update Message for phase \(phaseEnum.rawValue)")
             print("🔧 MODEL DEBUG: - Raw provider from event: \"\(event.provider ?? "nil")\"")
             print("🔧 MODEL DEBUG: - Raw modelName from event: \"\(event.modelName ?? "nil")\"")
-            
+
             // Check if the event.modelName is defined but empty
             if let modelName = event.modelName {
                 print("🔧 MODEL DEBUG: - modelName is empty: \(modelName.isEmpty), length: \(modelName.count)")
             }
-            
+
             // Update the message with the streaming content, even if it's incomplete
             // Note: We want to update even partial content for streaming appearance
             message.updatePhase(
