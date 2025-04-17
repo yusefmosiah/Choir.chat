@@ -765,8 +765,8 @@ async def run_langchain_postchain_workflow(
             compact_result = {
                 "score": round(res.score, 3),
                 "id": getattr(res, "id", None),
-                # Only include first paragraph of content to minimize payload size
-                "content": res.content.split("\n\n")[0] if res.content else "",
+                # Include first 3 paragraphs or up to 500 chars of content
+                "content": "\n\n".join(res.content.split("\n\n")[:3])[:500] if res.content else res.content,
                 # Always include preview
                 "content_preview": res.content_preview if hasattr(res, "content_preview") and res.content_preview else (res.content[:100] + "..." if len(res.content) > 100 else res.content)
             }
@@ -780,7 +780,7 @@ async def run_langchain_postchain_workflow(
         return
     current_messages.append(exp_vectors_output.experience_vectors_response)
     conversation_history_store[thread_id] = current_messages
-    # Generate a more compact payload for the client to avoid client-side performance issues
+    # Generate a compact payload with ALL vector results that were used by the LLM
     vector_result_data = []
 
     # Log detailed information about the vector results available
@@ -797,44 +797,16 @@ async def run_langchain_postchain_workflow(
         }
         vector_result_data.append(test_vector)
     else:
-        # Process the actual vectors - only include referenced vectors to keep payload small
-        # First identify referenced vectors in the response text
-        references = []
-        if exp_vectors_output.experience_vectors_response and exp_vectors_output.experience_vectors_response.content:
-            import re
-            references = re.findall(r'#(\d+)', exp_vectors_output.experience_vectors_response.content)
-            references = [int(r) for r in references if r.isdigit()]
-            logger.info(f"Found references to vectors: {references}")
+        # Include ALL vector results that were available to the LLM
+        logger.info(f"Including all {len(exp_vectors_output.vector_results)} vector results used by LLM")
 
-        # Include referenced vectors (if any) plus a sample of others up to MAX_VECTOR_RESULTS
-        included_indices = set()
-
-        # First add referenced vectors
-        for ref_num in references:
-            idx = ref_num - 1  # Convert 1-based reference to 0-based index
-            if 0 <= idx < len(exp_vectors_output.vector_results):
-                included_indices.add(idx)
-
-        # Then fill with other vectors up to MAX_VECTOR_RESULTS
-        remaining_slots = MAX_VECTOR_RESULTS - len(included_indices)
-        if remaining_slots > 0:
-            for i in range(len(exp_vectors_output.vector_results)):
-                if i not in included_indices and len(included_indices) < MAX_VECTOR_RESULTS:
-                    included_indices.add(i)
-                    if len(included_indices) >= MAX_VECTOR_RESULTS:
-                        break
-
-        logger.info(f"Including {len(included_indices)} vector results (referenced + sample)")
-
-        # Now create compact results for all included vectors
-        for idx in sorted(included_indices):
-            res = exp_vectors_output.vector_results[idx]
-            # Create optimized version with ID and preview but minimal content
+        # Create compact results for all vectors
+        for res in exp_vectors_output.vector_results:
             compact_result = {
                 "score": round(res.score, 3),
                 "id": getattr(res, "id", None),
-                # Only include first paragraph of content to minimize payload size
-                "content": res.content.split("\n\n")[0] if res.content else "",
+                # Include first 3 paragraphs or up to 500 chars of content
+                "content": "\n\n".join(res.content.split("\n\n")[:3])[:500] if res.content else res.content,
                 # Always include preview
                 "content_preview": res.content_preview if hasattr(res, "content_preview") and res.content_preview else (res.content[:100] + "..." if len(res.content) > 100 else res.content)
             }
