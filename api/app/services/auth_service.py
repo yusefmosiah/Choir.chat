@@ -68,22 +68,40 @@ class AuthService:
             return False
 
         try:
-            # The message format should match what the client signed
-            # message = f"Sign this message to authenticate with Choir: {challenge}"
+            # Clean up the signature if it has a 0x prefix
+            clean_signature = signature.replace('0x', '')
 
-            # For now, we'll use a simplified verification approach
-            # In a production environment, you would use proper cryptographic verification
-
-            # Convert the signature from hex
+            # For now, we'll use a temporary verification method
+            # In a production environment, you would implement proper signature verification
+            # using PySUI's cryptographic functions
             try:
-                signature_bytes = bytes.fromhex(signature.replace('0x', ''))
+                # The message that was signed by the client
+                message_text = f"Sign this message to authenticate with Choir: {challenge}"
+
+                # Convert the signature from hex to bytes
+                signature_bytes = bytes.fromhex(clean_signature)
 
                 # For now, we'll assume the signature is valid if it's properly formatted
-                # This is a temporary solution until proper signature verification is implemented
+                # This is a temporary solution until proper verification is implemented
                 is_valid = len(signature_bytes) > 0
 
                 # Log that we're using a temporary verification method
                 logger.warning("Using temporary signature verification - implement proper verification!")
+                logger.warning("For proper verification, see: https://pysui.readthedocs.io/en/latest/pysui.abstracts.html")
+
+                if is_valid:
+                    logger.info(f"Signature format verified for wallet {wallet_address} (temporary verification)")
+                else:
+                    logger.warning(f"Signature format verification failed for wallet {wallet_address}")
+
+                # TODO: Implement proper signature verification using PySUI
+                # The proper implementation would follow these steps:
+                # 1. Format the message with the challenge
+                # 2. Apply ULEB128 length prefixing using PureInput.pure
+                # 3. Add intent prefix [3, 0, 0] for personal messages
+                # 4. Hash using Blake2b-256
+                # 5. Verify the signature against the hash using the public key
+                # Reference: https://pysui.readthedocs.io/en/latest/pysui.abstracts.html
             except Exception as e:
                 logger.error(f"Error processing signature: {e}")
                 is_valid = False
