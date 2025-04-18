@@ -19,12 +19,14 @@
 │   ├── Choir.entitlements
 │   ├── ContentView.swift
 │   ├── Coordinators
+│   │   ├── AppCoordinator.swift
 │   │   ├── PostchainCoordinator.swift
 │   │   └── PostchainCoordinatorImpl.swift
 │   ├── Info.plist
 │   ├── Models
 │   │   ├── APITypes.swift
 │   │   ├── AnyCodable.swift
+│   │   ├── AuthModels.swift
 │   │   ├── ConversationModels.swift
 │   │   └── SearchModels.swift
 │   ├── Networking
@@ -34,6 +36,8 @@
 │   │   └── Preview Assets.xcassets
 │   │       └── Contents.json
 │   ├── Services
+│   │   ├── APIClient.swift
+│   │   ├── AuthService.swift
 │   │   ├── KeychainService.swift
 │   │   ├── ModelConfigManager.swift
 │   │   ├── ThreadPersistenceService.swift
@@ -47,6 +51,7 @@
 │   │   └── PostchainViewModel.swift
 │   └── Views
 │       ├── ChoirThreadDetailView.swift
+│       ├── LoginView.swift
 │       ├── MessageRow.swift
 │       ├── ModelConfigView.swift
 │       ├── PaginatedMarkdownView.swift
@@ -54,6 +59,7 @@
 │       ├── PhaseCardContextMenu.swift
 │       ├── PostchainView.swift
 │       ├── PriorCard.swift
+│       ├── SettingsView.swift
 │       ├── Thread
 │       │   └── Components
 │       │       ├── ThreadInputBar.swift
@@ -94,9 +100,13 @@
 │   │   ├── config.py
 │   │   ├── database.py
 │   │   ├── langchain_utils.py
+│   │   ├── middleware
+│   │   │   ├── __init__.py
+│   │   │   └── auth.py
 │   │   ├── models
 │   │   │   ├── __init__.py
-│   │   │   └── api.py
+│   │   │   ├── api.py
+│   │   │   └── auth.py
 │   │   ├── postchain
 │   │   │   ├── README.md
 │   │   │   ├── __init__.py
@@ -111,6 +121,7 @@
 │   │   │   ├── state
 │   │   │   └── utils.py
 │   │   ├── routers
+│   │   │   ├── auth.py
 │   │   │   ├── balance.py
 │   │   │   ├── postchain.py
 │   │   │   ├── threads.py
@@ -118,6 +129,7 @@
 │   │   │   └── vectors.py
 │   │   ├── services
 │   │   │   ├── __init__.py
+│   │   │   ├── auth_service.py
 │   │   │   └── sui_service.py
 │   │   ├── tools
 │   │   │   ├── __init__.py
@@ -247,4 +259,4 @@
     ├── test_api.sh
     └── test_postchain_multiturn.sh
 
-64 directories, 181 files
+65 directories, 192 files

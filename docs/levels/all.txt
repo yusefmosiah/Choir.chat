@@ -32,12 +32,14 @@ tree.md
 │   ├── Choir.entitlements
 │   ├── ContentView.swift
 │   ├── Coordinators
+│   │   ├── AppCoordinator.swift
 │   │   ├── PostchainCoordinator.swift
 │   │   └── PostchainCoordinatorImpl.swift
 │   ├── Info.plist
 │   ├── Models
 │   │   ├── APITypes.swift
 │   │   ├── AnyCodable.swift
+│   │   ├── AuthModels.swift
 │   │   ├── ConversationModels.swift
 │   │   └── SearchModels.swift
 │   ├── Networking
@@ -47,6 +49,8 @@ tree.md
 │   │   └── Preview Assets.xcassets
 │   │       └── Contents.json
 │   ├── Services
+│   │   ├── APIClient.swift
+│   │   ├── AuthService.swift
 │   │   ├── KeychainService.swift
 │   │   ├── ModelConfigManager.swift
 │   │   ├── ThreadPersistenceService.swift
@@ -60,6 +64,7 @@ tree.md
 │   │   └── PostchainViewModel.swift
 │   └── Views
 │       ├── ChoirThreadDetailView.swift
+│       ├── LoginView.swift
 │       ├── MessageRow.swift
 │       ├── ModelConfigView.swift
 │       ├── PaginatedMarkdownView.swift
@@ -67,6 +72,7 @@ tree.md
 │       ├── PhaseCardContextMenu.swift
 │       ├── PostchainView.swift
 │       ├── PriorCard.swift
+│       ├── SettingsView.swift
 │       ├── Thread
 │       │   └── Components
 │       │       ├── ThreadInputBar.swift
@@ -107,9 +113,13 @@ tree.md
 │   │   ├── config.py
 │   │   ├── database.py
 │   │   ├── langchain_utils.py
+│   │   ├── middleware
+│   │   │   ├── __init__.py
+│   │   │   └── auth.py
 │   │   ├── models
 │   │   │   ├── __init__.py
-│   │   │   └── api.py
+│   │   │   ├── api.py
+│   │   │   └── auth.py
 │   │   ├── postchain
 │   │   │   ├── README.md
 │   │   │   ├── __init__.py
@@ -124,6 +134,7 @@ tree.md
 │   │   │   ├── state
 │   │   │   └── utils.py
 │   │   ├── routers
+│   │   │   ├── auth.py
 │   │   │   ├── balance.py
 │   │   │   ├── postchain.py
 │   │   │   ├── threads.py
@@ -131,6 +142,7 @@ tree.md
 │   │   │   └── vectors.py
 │   │   ├── services
 │   │   │   ├── __init__.py
+│   │   │   ├── auth_service.py
 │   │   │   └── sui_service.py
 │   │   ├── tools
 │   │   │   ├── __init__.py
@@ -260,7 +272,7 @@ tree.md
     ├── test_api.sh
     └── test_postchain_multiturn.sh
 
-64 directories, 181 files
+65 directories, 192 files
 
 === File: docs/CHANGELOG.md ===
 

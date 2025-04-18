@@ -8,7 +8,7 @@ import markdown # Import markdown library
 import os
 from datetime import datetime # For footer year
 
-from app.routers import threads, users, balance, postchain
+from app.routers import threads, users, balance, postchain, auth
 from app.config import Config
 
 app = FastAPI(title="Choir API", version="1.0.0")
@@ -71,6 +71,7 @@ async def health_check():
     return {"status": "healthy"}
 
 # --- API Routers ---
+app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
 app.include_router(threads.router, prefix="/api/threads", tags=["threads"])
 app.include_router(users.router, prefix="/api/users", tags=["users"])
 app.include_router(balance.router, prefix="/api/balance", tags=["balance"])

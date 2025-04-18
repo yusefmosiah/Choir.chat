@@ -209,6 +209,38 @@ class DatabaseClient:
             logger.error(f"Error getting user: {e}")
             raise
 
+    async def search_users_by_public_key(self, public_key: str) -> List[Dict[str, Any]]:
+        """Search for users by public key (wallet address)."""
+        try:
+            search_result = self.client.scroll(
+                collection_name=self.config.USERS_COLLECTION,
+                scroll_filter=models.Filter(
+                    must=[
+                        models.FieldCondition(
+                            key="public_key",
+                            match=models.MatchValue(value=public_key)
+                        )
+                    ]
+                ),
+                limit=10,
+                with_payload=True,
+                with_vectors=False
+            )
+
+            points, _ = search_result
+            return [
+                {
+                    "id": str(point.id),
+                    "public_key": point.payload["public_key"],
+                    "created_at": point.payload["created_at"],
+                    "thread_ids": point.payload["thread_ids"]
+                }
+                for point in points
+            ]
+        except Exception as e:
+            logger.error(f"Error searching users by public key: {e}")
+            raise
+
     async def create_thread(self, thread_data: ThreadCreate) -> Dict[str, Any]:
         """Create a new thread."""
         try:

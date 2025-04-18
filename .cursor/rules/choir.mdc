@@ -12,8 +12,10 @@ Choir is a collaborative platform built around the Post Chain (Chorus Cycle (AEI
 - **Experience**: Enrichment with prior knowledge
 - **Intention**: Alignment with user intent
 - **Observation**: Recording semantic connections
-- **Understanding**: Decision on continuation
+- **Understanding**: Memory pruning
 - **Yield**: Final response production
+
+// notice how i changed the meaning of understanding from decision on continuation to memory pruning.
 
 The platform incorporates a Fractional Quantum Anharmonic Oscillator (FQAHO) model as its economic engine, with vector database storage and blockchain integration.
 
@@ -70,4 +72,3 @@ The platform incorporates a Fractional Quantum Anharmonic Oscillator (FQAHO) mod
 5. What model-specific considerations need to be addressed?
 
 By following these principles, we create a development process that builds shared understanding incrementally while producing maintainable, well-understood code.
-

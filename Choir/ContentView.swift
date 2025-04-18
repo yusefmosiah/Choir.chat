@@ -7,14 +7,10 @@
 import SwiftUI
 
 struct ContentView: View {
-    @StateObject private var viewModel: PostchainViewModel
+    // Use environment objects instead of creating new instances
+    @StateObject private var viewModel = PostchainViewModel(coordinator: PostchainCoordinatorImpl())
     @State private var threads: [ChoirThread] = []
     @State private var selectedChoirThread: ChoirThread?
-    @State private var showingWallet = false
-
-    init() {
-        _viewModel = StateObject(wrappedValue: PostchainViewModel(coordinator: PostchainCoordinatorImpl()))
-    }
 
     var body: some View {
         NavigationSplitView {
@@ -33,23 +29,22 @@ struct ContentView: View {
                 }
                 .onDelete(perform: deleteThreads)
             }
-            .navigationTitle("ChoirThreads")
+            .navigationTitle("Chat")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) { // Explicit placement for the primary action
                     Button(action: createNewChoirThread) {
-                        Label("New ChoirThread", systemImage: "plus")
+                        Label("New Chat", systemImage: "plus")
                     }
                 }
 
                 ToolbarItem(placement: .navigationBarLeading) { // Keep explicit placement for leading item
-                    Button(action: { showingWallet = true }) {
-                        Label("Wallet", systemImage: "wallet.pass")
-                    }
+                    EditButton()
                 }
             }
         } detail: {
             if let thread = selectedChoirThread {
                 ChoirThreadDetailView(thread: thread, viewModel: viewModel)
+                    .toolbar(.hidden, for: .tabBar) // Hide the tab bar when viewing a thread
             } else {
                 VStack(spacing: 20) {
                     Text("Choir")
@@ -81,9 +76,7 @@ struct ContentView: View {
                 .background(Color.secondary.opacity(0.1))
             }
         }
-        .sheet(isPresented: $showingWallet) {
-            WalletView()
-        }
+        // No longer need wallet sheet
         .onAppear {
             // Load saved threads
             loadThreads()

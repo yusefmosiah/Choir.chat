@@ -1,4 +1,5 @@
 import os
+import secrets
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -25,6 +26,11 @@ class Config:
 
     # SUI configuration
     SUI_PRIVATE_KEY: str = os.getenv("SUI_PRIVATE_KEY", "")
+
+    # Authentication configuration
+    JWT_SECRET_KEY: str = os.getenv("JWT_SECRET_KEY", secrets.token_hex(32))
+    JWT_ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 1440  # 24 hours
 
     # AI API configuration
     OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")

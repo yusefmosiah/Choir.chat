@@ -2,13 +2,14 @@ import SwiftUI
 import SuiKit
 
 struct WalletView: View {
-    @StateObject private var walletManager = WalletManager()
+    @EnvironmentObject var walletManager: WalletManager
     @State private var sendAmount: String = ""
     @State private var recipientAddress: String = ""
     @State private var showingSendSheet = false
 
     var body: some View {
-        List {
+        NavigationStack {
+            List {
             Section("Wallet") {
                 if let wallet = walletManager.wallet {
                     HStack {
@@ -71,6 +72,8 @@ struct WalletView: View {
             if let error = walletManager.error {
                 Text(error.localizedDescription)
             }
+        }
+        .navigationTitle("Wallet")
         }
     }
 }
