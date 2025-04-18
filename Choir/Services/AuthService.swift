@@ -1,5 +1,6 @@
 import Foundation
 import SuiKit
+import SwiftUI
 
 @MainActor
 class AuthService: ObservableObject {
@@ -9,7 +10,6 @@ class AuthService: ObservableObject {
 
     private let walletManager: WalletManager
     private let keychain = KeychainService()
-    private let baseURL = URL(string: "http://localhost:8000")!
 
     private var authToken: String? {
         get { try? keychain.load("auth_token") }
@@ -121,7 +121,7 @@ class AuthService: ObservableObject {
     // MARK: - API Methods
 
     private func requestChallenge(walletAddress: String) async throws -> String {
-        let url = baseURL.appendingPathComponent("api/auth/challenge")
+        let url = ApiConfig.url(for: ApiConfig.Endpoints.challenge)
 
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
@@ -160,7 +160,7 @@ class AuthService: ObservableObject {
     }
 
     private func submitSignature(walletAddress: String, challenge: String, signature: String) async throws -> AuthResponse {
-        let url = baseURL.appendingPathComponent("api/auth/login")
+        let url = ApiConfig.url(for: ApiConfig.Endpoints.login)
 
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
@@ -195,7 +195,7 @@ class AuthService: ObservableObject {
 
     private func getUserInfo(token: String) async throws -> UserInfo {
         print("Getting user info with token: \(token.prefix(10))...")
-        let url = baseURL.appendingPathComponent("api/auth/me")
+        let url = ApiConfig.url(for: ApiConfig.Endpoints.me)
 
         var request = URLRequest(url: url)
         request.httpMethod = "GET"

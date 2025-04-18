@@ -1,23 +1,12 @@
 import Foundation
 
-// MARK: - API Configuration
-struct ApiConfig {
-    #if DEBUG && targetEnvironment(simulator)
-    // Use localhost for simulator
-    static let baseURL = "http://localhost:8000"
-    #else
-    // Use production URL for physical devices and release builds
-    static let baseURL = "https://choir-chat.onrender.com"
-    #endif
-}
-
 /// Main client for interacting with the Postchain API
 /// Provides both synchronous endpoints and streaming capabilities
 actor PostchainAPIClient {
     // MARK: - Configuration
 
     // Use ApiConfig for base URL and append the specific API endpoint path
-    private let baseURL = "\(ApiConfig.baseURL)/api/postchain"
+    private let baseURL = "\(ApiConfig.baseURLString)/\(ApiConfig.Endpoints.postchainBase)"
 
     // Encoding/decoding
     private let encoder: JSONEncoder
@@ -132,7 +121,7 @@ actor PostchainAPIClient {
         }
 
         // Get URL for the streaming endpoint
-        guard let url = URL(string: "\(baseURL)/langchain") else {
+        guard let url = URL(string: "\(ApiConfig.baseURLString)/\(ApiConfig.Endpoints.postchainLangchain)") else {
             throw APIError.invalidURL
         }
 

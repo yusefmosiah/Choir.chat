@@ -30,6 +30,8 @@ tree.md
 │   │       ├── Contents.json
 │   │       └── Icon-App-1024x1024@2x.png
 │   ├── Choir.entitlements
+│   ├── Config
+│   │   └── ApiConfig.swift
 │   ├── ContentView.swift
 │   ├── Coordinators
 │   │   ├── AppCoordinator.swift
@@ -272,7 +274,7 @@ tree.md
     ├── test_api.sh
     └── test_postchain_multiturn.sh
 
-65 directories, 192 files
+66 directories, 193 files
 
 === File: docs/CHANGELOG.md ===
 

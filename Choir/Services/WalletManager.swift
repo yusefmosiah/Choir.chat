@@ -15,9 +15,11 @@ class WalletManager: ObservableObject {
 
     init() {
         #if DEBUG
+        print("Using devnet connection")
         restClient = SuiProvider(connection: DevnetConnection())
         faucetClient = FaucetClient(connection: DevnetConnection())
         #else
+        print("Using mainnet connection")
         restClient = SuiProvider(connection: MainnetConnection())
         faucetClient = FaucetClient(connection: MainnetConnection())
         #endif
