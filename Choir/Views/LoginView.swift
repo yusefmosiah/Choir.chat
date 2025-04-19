@@ -1,16 +1,12 @@
 import SwiftUI
 
 struct LoginView: View {
-    @StateObject private var walletManager = WalletManager()
-    @StateObject private var authService: AuthService
+    @EnvironmentObject var walletManager: WalletManager
+    @EnvironmentObject var authService: AuthService
     @State private var isLoading = false
     @State private var errorMessage: String?
 
-    init() {
-        let walletManager = WalletManager()
-        _walletManager = StateObject(wrappedValue: walletManager)
-        _authService = StateObject(wrappedValue: AuthService(walletManager: walletManager))
-    }
+    // No custom initializer needed - using environment objects
 
     var body: some View {
         VStack(spacing: 20) {
@@ -135,5 +131,10 @@ struct LoginView: View {
 }
 
 #Preview {
-    LoginView()
+    let walletManager = WalletManager()
+    let authService = AuthService(walletManager: walletManager)
+
+    return LoginView()
+        .environmentObject(walletManager)
+        .environmentObject(authService)
 }
