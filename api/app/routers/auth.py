@@ -42,7 +42,7 @@ async def login(request: AuthRequest):
     logger.info(f"Signature: {request.signature}")
 
     # Verify the signature
-    is_valid = auth_service.verify_challenge(
+    is_valid = await auth_service.verify_challenge(
         request.wallet_address,
         request.challenge,
         request.signature
@@ -64,6 +64,27 @@ async def login(request: AuthRequest):
     # Create access token
     token, expires_at = auth_service.create_access_token(user_id, request.wallet_address)
     logger.info(f"Access token created, expires at: {expires_at}")
+
+    # Extract the public key from the signature and store it for future verification
+    # In a production environment, you would extract the actual public key from the signature
+    # For now, we'll just use a placeholder
+    try:
+        # Create an instance of AuthService
+        auth_svc = AuthService()
+
+        # Store the public key (placeholder)
+        # In a real implementation, you would extract the public key from the signature
+        # For now, we'll just use the wallet address as a placeholder
+        await auth_svc.store_public_key(
+            user_id=user_id,
+            wallet_address=request.wallet_address,
+            public_key=request.wallet_address,  # Placeholder - would be actual public key
+            key_scheme=0  # Assuming Ed25519
+        )
+
+        logger.info(f"Public key stored for wallet: {request.wallet_address}")
+    except Exception as e:
+        logger.error(f"Error storing public key: {e}")
 
     response = AuthResponse(
         access_token=token,

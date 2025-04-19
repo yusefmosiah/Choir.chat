@@ -108,7 +108,8 @@
 │   │   ├── models
 │   │   │   ├── __init__.py
 │   │   │   ├── api.py
-│   │   │   └── auth.py
+│   │   │   ├── auth.py
+│   │   │   └── user.py
 │   │   ├── postchain
 │   │   │   ├── README.md
 │   │   │   ├── __init__.py
@@ -261,4 +262,4 @@
     ├── test_api.sh
     └── test_postchain_multiturn.sh
 
-66 directories, 193 files
+66 directories, 194 files
