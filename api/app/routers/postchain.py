@@ -9,6 +9,7 @@ from typing import Dict, Any, List, Optional
 import json
 import asyncio
 import uuid
+import logging
 
 from app.config import Config
 from app.postchain.langchain_workflow import run_langchain_postchain_workflow # Import the new workflow
@@ -16,6 +17,10 @@ from app.postchain.utils import validate_thread_id, recover_state
 
 # Import ModelConfig from langchain_utils
 from app.langchain_utils import ModelConfig
+
+# Import authentication dependencies
+from app.services.auth_service import get_current_user
+from app.models.auth import TokenData
 
 class SimplePostChainRequest(BaseModel):
     user_query: str = Field(..., description="The user's input query")
@@ -40,6 +45,7 @@ async def health_check():
 async def process_simple_postchain(
     request: SimplePostChainRequest,
     # config: Config = Depends(get_config) # REMOVED - Config no longer injected
+    current_user: TokenData = Depends(get_current_user)
 ):
     """
     Process a request through the PostChain.
@@ -47,6 +53,12 @@ async def process_simple_postchain(
     This endpoint provides a PostChain response with Action and Experience phases.
     Always streams updates for each phase.
     """
+    # Get logger
+    logger = logging.getLogger(__name__)
+
+    # Log authenticated user
+    logger.info(f"Processing PostChain request for user: {current_user.user_id}, wallet: {current_user.wallet_address}")
+
     # Validate thread ID
     thread_id = validate_thread_id(request.thread_id)
 
@@ -99,6 +111,7 @@ async def process_simple_postchain(
 async def recover_thread(
     request: RecoverThreadRequest,
     # config: Config = Depends(get_config) # REMOVED
+    current_user: TokenData = Depends(get_current_user)
 ):
     """
     Recover a thread from an interrupted conversation.
@@ -106,6 +119,12 @@ async def recover_thread(
     This endpoint attempts to recover the state of a conversation that
     may have been interrupted or left in an inconsistent state.
     """
+    # Get logger
+    logger = logging.getLogger(__name__)
+
+    # Log authenticated user
+    logger.info(f"Recovering thread for user: {current_user.user_id}, wallet: {current_user.wallet_address}")
+
     try:
         # Validate thread ID
         thread_id = validate_thread_id(request.thread_id)

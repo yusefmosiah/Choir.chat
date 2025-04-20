@@ -5,6 +5,11 @@ import LocalAuthentication
 
 @MainActor
 class AuthService: ObservableObject {
+    // MARK: - Shared Instance
+
+    // Temporary shared instance for use with PostchainAPIClient
+    // This will be properly initialized when the app starts
+    static var shared = AuthService(walletManager: WalletManager())
     // MARK: - Properties
 
     @Published private(set) var authState: AuthState = .unauthenticated

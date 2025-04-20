@@ -20,7 +20,7 @@ struct PhaseCardContextMenu: View {
             // Display model name with provider if both are available, otherwise fallback to phase description
             if let provider = provider, !provider.isEmpty {
                 if let modelName = modelName, !modelName.isEmpty {
-                    Text("Model: \(provider), \(modelName)")
+                    Text("\(provider)/\(modelName)")
                 } else {
                     Text("Model: \(provider)")
                 }

@@ -6,6 +6,9 @@ import SwiftUI
 class PostchainCoordinatorImpl: PostchainCoordinator, ObservableObject {
     // MARK: - Properties
 
+    // Auth service for authentication
+    private let authService: AuthService
+
     // API client for making requests
     private let apiClient: PostchainAPIClient
 
@@ -41,7 +44,11 @@ class PostchainCoordinatorImpl: PostchainCoordinator, ObservableObject {
     // MARK: - Initialization
 
     required init() {
-        self.apiClient = PostchainAPIClient()
+        // Get the auth service from the environment
+        self.authService = AuthService.shared
+
+        // Initialize API client with auth service
+        self.apiClient = PostchainAPIClient(authService: self.authService)
 
         // Pre-initialize all phases with empty content to ensure cards are always displayed
         for phase in Phase.allCases {

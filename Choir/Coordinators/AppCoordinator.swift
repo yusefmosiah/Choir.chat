@@ -15,10 +15,17 @@ class AppCoordinator: ObservableObject {
     // MARK: - Initialization
 
     init() {
+        // Initialize properties
         let walletManager = WalletManager()
         self.walletManager = walletManager
-        self.authService = AuthService(walletManager: walletManager)
         self.threadManager = ThreadManager()
+
+        // Create auth service
+        let authService = AuthService(walletManager: walletManager)
+        self.authService = authService
+
+        // Update the shared instance for use with PostchainAPIClient
+        AuthService.shared = authService
 
         // Set up observer for auth state changes
         setupAuthStateObserver()

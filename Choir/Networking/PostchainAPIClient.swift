@@ -1,8 +1,13 @@
 import Foundation
+import SwiftUI
 
 /// Main client for interacting with the Postchain API
 /// Provides both synchronous endpoints and streaming capabilities
 actor PostchainAPIClient {
+    // MARK: - Dependencies
+
+    // Optional auth service for getting authentication headers
+    private let authService: AuthService?
     // MARK: - Configuration
 
     // Use ApiConfig for base URL and append the specific API endpoint path
@@ -18,7 +23,8 @@ actor PostchainAPIClient {
 
     // MARK: - Initialization
 
-    init() {
+    init(authService: AuthService? = nil) {
+        self.authService = authService
         // Initialize encoder with default key encoding strategy
         encoder = JSONEncoder()
         // We're using explicit CodingKeys in our models, so we don't need to use .convertToSnakeCase
@@ -56,6 +62,13 @@ actor PostchainAPIClient {
         urlRequest.timeoutInterval = request.timeoutInterval
         urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
+        // Add authentication header if available
+        if let authService = authService, let authHeader = await authService.getAuthHeader() {
+            for (key, value) in authHeader {
+                urlRequest.addValue(value, forHTTPHeaderField: key)
+            }
+        }
+
         // Encode request body
         do {
             urlRequest.httpBody = try encoder.encode(request)
@@ -74,6 +87,12 @@ actor PostchainAPIClient {
         // Handle HTTP errors
         guard (200...299).contains(httpResponse.statusCode) else {
             let errorMessage = String(data: data, encoding: .utf8)
+
+            // Special handling for authentication errors
+            if httpResponse.statusCode == 401 || httpResponse.statusCode == 403 {
+                throw APIError.unauthorized
+            }
+
             throw APIError.serverError(statusCode: httpResponse.statusCode, message: errorMessage)
         }
 
@@ -163,6 +182,13 @@ actor PostchainAPIClient {
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("text/event-stream", forHTTPHeaderField: "Accept")
 
+        // Add authentication header if available
+        if let authService = authService, let authHeader = await authService.getAuthHeader() {
+            for (key, value) in authHeader {
+                request.addValue(value, forHTTPHeaderField: key)
+            }
+        }
+
         // Create an AsyncStream to return events as they are received
         return AsyncStream { continuation in
             Task {
@@ -179,8 +205,12 @@ actor PostchainAPIClient {
 
 
                     guard (200...299).contains(httpResponse.statusCode) else {
-                        continuation.finish()
-                        return
+                        // Special handling for authentication errors
+                        if httpResponse.statusCode == 401 || httpResponse.statusCode == 403 {
+                            throw APIError.unauthorized
+                        } else {
+                            throw APIError.serverError(statusCode: httpResponse.statusCode, message: nil)
+                        }
                     }
 
 
@@ -316,6 +346,8 @@ actor PostchainAPIClient {
 
                     continuation.finish()
                 } catch {
+                    // Handle errors
+                    print("Error in streaming: \(error)")
                     continuation.finish()
                 }
             }
