@@ -15,6 +15,9 @@ struct PostchainView: View {
     // Drag state
     @State private var dragOffset: CGFloat = 0
 
+    // Animation state for carousel effect
+    @State private var isWrappingAround: Bool = false
+
     // ViewModel (passed down for potential subviews, though PhaseCard now handles its own logic)
     @ObservedObject var viewModel: PostchainViewModel
 
@@ -101,6 +104,34 @@ struct PostchainView: View {
             let _ = phaseContentChanges.map { "\($0):\($1)" }.joined()
 
             ZStack { // Main ZStack containing only the card stack
+
+                // --- Carousel Indicators ---
+                if availablePhases.contains(.action) && availablePhases.contains(.yield) {
+                    VStack {
+                        Spacer()
+
+                        HStack(spacing: 20) {
+                            // Action indicator
+                            Image(systemName: "arrow.left")
+                                .foregroundColor(selectedPhase == .action ? .gray : .accentColor)
+                                .opacity(selectedPhase == .action ? 0.3 : 0.7)
+                                .scaleEffect(selectedPhase == .yield ? 1.2 : 1.0)
+                                .animation(.easeInOut, value: selectedPhase)
+
+                            Spacer()
+
+                            // Yield indicator
+                            Image(systemName: "arrow.right")
+                                .foregroundColor(selectedPhase == .yield ? .gray : .accentColor)
+                                .opacity(selectedPhase == .yield ? 0.3 : 0.7)
+                                .scaleEffect(selectedPhase == .action ? 1.2 : 1.0)
+                                .animation(.easeInOut, value: selectedPhase)
+                        }
+                        .padding(.horizontal, 30)
+                        .padding(.bottom, 10)
+                    }
+                    .zIndex(2)
+                }
 
                 // --- Card Stack ---
                 ZStack {
@@ -220,20 +251,54 @@ struct PostchainView: View {
         guard let currentIndex = availablePhases.firstIndex(of: selectedPhase) else { return }
 
         var targetIndex = currentIndex
-        if predictedEndOffset < -threshold { // Swiped left
+        var isWrapping = false
+
+        // Handle carousel wrap-around for action and yield phases
+        if selectedPhase == .action && predictedEndOffset > threshold {
+            // Swiped right from action - check if yield is available
+            if availablePhases.contains(.yield) {
+                if let yieldIndex = availablePhases.firstIndex(of: .yield) {
+                    targetIndex = yieldIndex
+                    isWrapping = true
+                }
+            }
+        } else if selectedPhase == .yield && predictedEndOffset < -threshold {
+            // Swiped left from yield - check if action is available
+            if availablePhases.contains(.action) {
+                if let actionIndex = availablePhases.firstIndex(of: .action) {
+                    targetIndex = actionIndex
+                    isWrapping = true
+                }
+            }
+        } else if predictedEndOffset < -threshold { // Standard swipe left
             targetIndex = min(currentIndex + 1, availablePhases.count - 1)
-        } else if predictedEndOffset > threshold { // Swiped right
+        } else if predictedEndOffset > threshold { // Standard swipe right
             targetIndex = max(currentIndex - 1, 0)
         }
 
         if targetIndex != currentIndex {
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+            // Set wrapping state for special animation
+            isWrappingAround = isWrapping
+
+            // Use different animation for wrap-around
+            let animation = isWrapping ?
+                Animation.spring(response: 0.5, dampingFraction: 0.7, blendDuration: 0.3) :
+                Animation.spring(response: 0.3, dampingFraction: 0.8)
+
+            withAnimation(animation) {
                 viewModel.updateSelectedPhase(for: message, phase: availablePhases[targetIndex])
+                dragOffset = 0
             }
-        }
-        // Always reset drag offset
-        withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-            dragOffset = 0
+
+            // Reset wrapping state after animation
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                isWrappingAround = false
+            }
+        } else {
+            // Always reset drag offset
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                dragOffset = 0
+            }
         }
     }
 
@@ -268,8 +333,28 @@ struct PostchainView: View {
             return totalWidth
         }
 
-        // No special wrap-around logic for yield phase anymore
+        // Implement carousel wrap-around logic
+        // Special handling for action and yield phases
+        if isWrappingAround {
+            // During wrap-around animation
+            if (selectedPhase == .action && phase == .yield) ||
+               (selectedPhase == .yield && phase == .action) {
+                // Apply special animation for crossing sides
+                let direction = selectedPhase == .action ? -1.0 : 1.0
+                return direction * cardWidth * 0.5 + dragOffset
+            }
+        } else {
+            // Normal carousel behavior
+            if selectedPhase == .action && phase == .yield && availablePhases.contains(.yield) {
+                // Yield is to the right of action
+                return cardWidth + dragOffset
+            } else if selectedPhase == .yield && phase == .action && availablePhases.contains(.action) {
+                // Action is to the left of yield
+                return -cardWidth + dragOffset
+            }
+        }
 
+        // Standard offset calculation for other phases
         let indexDifference = phaseIndex - currentIndex
         return CGFloat(indexDifference) * cardWidth + dragOffset
     }
@@ -280,6 +365,23 @@ struct PostchainView: View {
             return 0 // Not visible if not in available phases
         }
 
+        // Special handling for carousel wrap-around
+        if isWrappingAround {
+            // During wrap-around animation, keep both action and yield visible
+            if (selectedPhase == .action && phase == .yield) ||
+               (selectedPhase == .yield && phase == .action) ||
+               phase == selectedPhase {
+                return 1.0
+            }
+        } else {
+            // Special case for action and yield in carousel
+            if (selectedPhase == .action && phase == .yield) ||
+               (selectedPhase == .yield && phase == .action) {
+                return 0.7 // Keep the other end of carousel somewhat visible
+            }
+        }
+
+        // Standard opacity calculation
         let indexDifference = abs(phaseIndex - currentIndex)
         // Make selected card fully opaque, fade out others more quickly
         return indexDifference == 0 ? 1.0 : max(0, 0.6 - Double(indexDifference) * 0.3)
@@ -376,44 +478,66 @@ struct PostchainView: View {
         return pagesResult
     }
 
-    // Keep existing switchToPhase function, it's still needed for phase boundary logic
+    // Updated switchToPhase function with carousel support
     private func switchToPhase(direction: SwipeDirection) {
         guard let currentIndex = availablePhases.firstIndex(of: selectedPhase) else { return }
 
         var targetIndex = currentIndex
-        if direction == .next {
+        var isWrapping = false
+
+        // Handle carousel wrap-around for action and yield phases
+        if direction == .next && selectedPhase == .yield {
+            // Going next from yield - check if action is available for wrap-around
+            if availablePhases.contains(.action) {
+                if let actionIndex = availablePhases.firstIndex(of: .action) {
+                    targetIndex = actionIndex
+                    isWrapping = true
+                } else {
+                    targetIndex = min(currentIndex + 1, availablePhases.count - 1)
+                }
+            } else {
+                targetIndex = min(currentIndex + 1, availablePhases.count - 1)
+            }
+        } else if direction == .previous && selectedPhase == .action {
+            // Going previous from action - check if yield is available for wrap-around
+            if availablePhases.contains(.yield) {
+                if let yieldIndex = availablePhases.firstIndex(of: .yield) {
+                    targetIndex = yieldIndex
+                    isWrapping = true
+                } else {
+                    targetIndex = max(currentIndex - 1, 0)
+                }
+            } else {
+                targetIndex = max(currentIndex - 1, 0)
+            }
+        } else if direction == .next {
             targetIndex = min(currentIndex + 1, availablePhases.count - 1)
-        } else { // .previous
+        } else { // direction == .previous
             targetIndex = max(currentIndex - 1, 0)
         }
 
         if targetIndex != currentIndex {
             let newPhase = availablePhases[targetIndex]
 
-            // --- START CRITICAL RESET LOGIC ---
             // Reset the current page for the NEW phase
-            if direction == .next {
-                message.phaseCurrentPage[newPhase] = 0 // Reset to first page
-            } else { // direction == .previous
-                // Reset to last page - Requires calculating total pages for the *new* phase
-                // We need the size here too! This might be tricky.
-                // Simplification: Always reset to 0 when switching phases? Or pass size?
-                // Let's try resetting to 0 for now for simplicity, can refine later if needed.
-                // TODO: Revisit resetting to last page if required.
-                message.phaseCurrentPage[newPhase] = 0 // Simplified: Reset to first page
+            message.phaseCurrentPage[newPhase] = 0 // Always reset to first page for simplicity
 
-                // --- Original logic requiring size ---
-                // let phaseContent = message.getPhaseContent(newPhase)
-                // let vectorResults = message.vectorSearchResults.map { UnifiedSearchResult.vector($0) }
-                // let webResults = message.webSearchResults.map { UnifiedSearchResult.web($0) }
-                // let searchResults = vectorResults + webResults
-                // let totalPagesForNewPhase = calculateAccurateTotalPages(markdownText: phaseContent, searchResults: searchResults, size: latestAvailableSize) // Needs size!
-                // message.phaseCurrentPage[newPhase] = max(0, totalPagesForNewPhase - 1)
-                // --- End Original logic ---
+            // Set wrapping state for special animation
+            isWrappingAround = isWrapping
+
+            // Use different animation for wrap-around
+            let animation = isWrapping ?
+                Animation.spring(response: 0.5, dampingFraction: 0.7, blendDuration: 0.3) :
+                Animation.spring(response: 0.3, dampingFraction: 0.8)
+
+            withAnimation(animation) {
+                viewModel.updateSelectedPhase(for: message, phase: newPhase)
             }
-            // --- END CRITICAL RESET LOGIC ---
 
-            viewModel.updateSelectedPhase(for: message, phase: newPhase)
+            // Reset wrapping state after animation
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                isWrappingAround = false
+            }
         }
     }
 
