@@ -75,7 +75,7 @@ class AppCoordinator: ObservableObject {
         Group {
             switch currentAuthState {
             case .unauthenticated, .error:
-                LoginView()
+                OnboardingView()
                     .environmentObject(walletManager)
                     .environmentObject(authService)
                     .environmentObject(threadManager)
@@ -124,11 +124,11 @@ struct MainTabView: View {
                 .environmentObject(authService)
                 .environmentObject(threadManager)
 
-            // Wallet tab
+            // Wallets tab
             WalletView()
                 .tag(2)
                 .tabItem {
-                    Label("Wallet", systemImage: "wallet.pass")
+                    Label("Wallets", systemImage: "wallet.pass")
                 }
 
 

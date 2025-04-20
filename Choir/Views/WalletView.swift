@@ -10,11 +10,15 @@ struct WalletView: View {
     @State private var showingSendSheet = false
     @State private var showingPrivateKeyAlert = false
     @State private var privateKeyMessage = ""
+    @State private var showingWalletSelectionSheet = false
+    @State private var showingImportSheet = false
+    @State private var showingCreateWalletAlert = false
+    @State private var newWalletName = "New Wallet"
 
     var body: some View {
         NavigationStack {
             List {
-            Section("Wallet") {
+            Section(header: Text("Current Wallet")) {
                 if let wallet = walletManager.wallet {
                     HStack {
                         Text("Address")
@@ -53,13 +57,26 @@ struct WalletView: View {
                     }
                     .disabled(walletManager.isLoading)
                 } else {
-                    Button("Create Wallet") {
-                        Task {
-                            try? await walletManager.createOrLoadWallet()
-                        }
-                    }
-                    .disabled(walletManager.isLoading)
+                    Text("No wallet selected")
+                        .foregroundColor(.secondary)
                 }
+            }
+
+            Section(header: Text("Wallet Management")) {
+                Button(action: { showingWalletSelectionSheet = true }) {
+                    Label("Switch Wallet", systemImage: "arrow.left.arrow.right")
+                }
+                .disabled(walletManager.wallets.isEmpty || walletManager.isLoading)
+
+                Button(action: { showingCreateWalletAlert = true }) {
+                    Label("Create New Wallet", systemImage: "plus.circle")
+                }
+                .disabled(walletManager.isLoading)
+
+                Button(action: { showingImportSheet = true }) {
+                    Label("Import Wallet from Mnemonic", systemImage: "square.and.arrow.down")
+                }
+                .disabled(walletManager.isLoading)
             }
         }
         .sheet(isPresented: $showingSendSheet) {
@@ -92,7 +109,41 @@ struct WalletView: View {
         } message: {
             Text(privateKeyMessage)
         }
-        .navigationTitle("Wallet")
+        .navigationTitle("Wallets")
+        }
+        .sheet(isPresented: $showingWalletSelectionSheet) {
+            WalletSelectionView()
+                .environmentObject(walletManager)
+        }
+        .sheet(isPresented: $showingImportSheet) {
+            ImportMnemonicView()
+                .environmentObject(walletManager)
+        }
+        .alert("Create New Wallet", isPresented: $showingCreateWalletAlert) {
+            TextField("Wallet Name", text: $newWalletName)
+
+            Button("Cancel", role: .cancel) { }
+
+            Button("Create") {
+                createNewWallet()
+            }
+        } message: {
+            Text("Enter a name for your new wallet")
+        }
+    }
+
+    private func createNewWallet() {
+        Task {
+            do {
+                // Use the provided wallet name, or a default if empty
+                let name = newWalletName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?
+                    "Wallet \(Int.random(in: 1000...9999))" : newWalletName.trimmingCharacters(in: .whitespacesAndNewlines)
+
+                try await walletManager.createOrLoadWallet(name: name)
+                newWalletName = "New Wallet" // Reset for next time
+            } catch {
+                print("Error creating wallet: \(error)")
+            }
         }
     }
 
@@ -100,14 +151,23 @@ struct WalletView: View {
         await MainActor.run {
             do {
                 // Get the mnemonic from the keychain with biometric authentication
-                if let mnemonic = try walletManager.keychain.load(
-                    "sui_wallet_mnemonic",
-                    withPrompt: "Authenticate to export your private key",
-                    requireBiometric: true
-                ) {
-                    privateKeyMessage = "Your mnemonic phrase (keep this secret):\n\n\(mnemonic)"
+                if let currentWallet = walletManager.wallet,
+                   let address = try? currentWallet.accounts[0].address(),
+                   let walletName = walletManager.walletNames[address] {
+
+                    let walletKey = "wallet_\(walletName)_mnemonic"
+
+                    if let mnemonic = try walletManager.keychain.load(
+                        walletKey,
+                        withPrompt: "Authenticate to export your private key",
+                        requireBiometric: true
+                    ) {
+                        privateKeyMessage = "Your mnemonic phrase (keep this secret):\n\n\(mnemonic)"
+                    } else {
+                        privateKeyMessage = "Could not retrieve your private key. Please try again."
+                    }
                 } else {
-                    privateKeyMessage = "Could not retrieve your private key. Please try again."
+                    privateKeyMessage = "Could not determine the current wallet information."
                 }
                 showingPrivateKeyAlert = true
             } catch {

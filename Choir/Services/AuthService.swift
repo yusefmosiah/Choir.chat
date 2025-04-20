@@ -88,7 +88,10 @@ class AuthService: ObservableObject {
     }
 
     func login() async throws {
-        print("Starting login process")
+        print("Starting login process with biometric authentication")
+
+        // Set state to authenticating first
+        authState = .authenticating
 
         // First, authenticate with biometrics before proceeding
         do {
@@ -97,17 +100,19 @@ class AuthService: ObservableObject {
             print("Biometric authentication successful")
         } catch {
             print("Biometric authentication failed: \(error)")
-            // Convert any LA error to our own AuthError
+            // Reset auth state and throw error
+            authState = .unauthenticated
             throw AuthError.biometricAuthFailed
         }
 
+        // After successful biometric auth, check if we have a wallet
         guard let wallet = walletManager.wallet else {
             print("Wallet not available")
+            authState = .unauthenticated
             throw AuthError.walletNotAvailable
         }
 
-        authState = .authenticating
-        print("Auth state set to authenticating")
+        print("Proceeding with wallet authentication")
 
         do {
             // 1. Get wallet address
@@ -171,6 +176,11 @@ class AuthService: ObservableObject {
             userInfo = nil
             authState = .unauthenticated
         }
+    }
+
+    // Check if we have a token without triggering biometric auth
+    func hasAuthToken() -> Bool {
+        return (try? keychain.hasKey("auth_token")) ?? false
     }
 
     // MARK: - API Methods
@@ -291,42 +301,54 @@ class AuthService: ObservableObject {
     /// Verifies biometric authentication using LocalAuthentication framework directly
     private func verifyBiometricAuth() async throws {
         // Use LocalAuthentication framework directly
-
         let context = LAContext()
         var error: NSError?
 
-        // Check if biometric authentication is available
-        guard context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) else {
-            if let error = error {
-                print("Biometric authentication not available: \(error)")
-            } else {
-                print("Biometric authentication not available")
+        // First check if biometric authentication is available
+        if context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) {
+            // Biometric authentication is available (Face ID or Touch ID)
+            let biometricType = context.biometryType == .faceID ? "Face ID" : "Touch ID"
+            print("Using \(biometricType) for authentication")
+
+            // Create a task that can be awaited for the authentication result
+            try await withCheckedThrowingContinuation { continuation in
+                // Request biometric authentication
+                context.evaluatePolicy(
+                    .deviceOwnerAuthenticationWithBiometrics,
+                    localizedReason: "Authenticate to access your Choir account"
+                ) { success, error in
+                    if success {
+                        print("Biometric authentication successful")
+                        continuation.resume()
+                    } else if let error = error {
+                        print("Biometric authentication failed: \(error)")
+                        continuation.resume(throwing: AuthError.biometricAuthFailed)
+                    } else {
+                        print("Biometric authentication failed with unknown error")
+                        continuation.resume(throwing: AuthError.biometricAuthFailed)
+                    }
+                }
             }
-            // If biometric auth is not available, we'll still allow login
-            // but we'll use standard security
-            return
-        }
+        } else {
+            // Biometric authentication is not available, try device passcode instead
+            print("Biometric authentication not available, falling back to device passcode")
+            if let error = error {
+                print("Biometric error: \(error.localizedDescription)")
+            }
 
-        // Get the biometric type (Face ID or Touch ID)
-        let biometricType = context.biometryType == .faceID ? "Face ID" : "Touch ID"
-        print("Using \(biometricType) for authentication")
-
-        // Create a task that can be awaited for the authentication result
-        return try await withCheckedThrowingContinuation { continuation in
-            // Request biometric authentication
-            context.evaluatePolicy(
-                .deviceOwnerAuthenticationWithBiometrics,
-                localizedReason: "Authenticate to sign in to Choir"
-            ) { success, error in
-                if success {
-                    print("Biometric authentication successful")
-                    continuation.resume()
-                } else if let error = error {
-                    print("Biometric authentication failed: \(error)")
-                    continuation.resume(throwing: error)
-                } else {
-                    print("Biometric authentication failed with unknown error")
-                    continuation.resume(throwing: AuthError.biometricAuthFailed)
+            // Try device passcode authentication
+            try await withCheckedThrowingContinuation { continuation in
+                context.evaluatePolicy(
+                    .deviceOwnerAuthentication, // This allows passcode as fallback
+                    localizedReason: "Authenticate to access your Choir account"
+                ) { success, error in
+                    if success {
+                        print("Passcode authentication successful")
+                        continuation.resume()
+                    } else {
+                        print("Passcode authentication failed: \(error?.localizedDescription ?? "Unknown error")")
+                        continuation.resume(throwing: AuthError.biometricAuthFailed)
+                    }
                 }
             }
         }

@@ -71,6 +71,7 @@ tree.md
 │       ├── LoginView.swift
 │       ├── MessageRow.swift
 │       ├── ModelConfigView.swift
+│       ├── OnboardingView.swift
 │       ├── PaginatedMarkdownView.swift
 │       ├── PhaseCard.swift
 │       ├── PhaseCardContextMenu.swift
@@ -279,7 +280,7 @@ tree.md
     ├── test_api.sh
     └── test_postchain_multiturn.sh
 
-66 directories, 198 files
+66 directories, 199 files
 
 === File: docs/CHANGELOG.md ===
 

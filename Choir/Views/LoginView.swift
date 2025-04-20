@@ -1,197 +1,161 @@
 import SwiftUI
 
 struct LoginView: View {
+    @Environment(\.dismiss) var dismiss
     @EnvironmentObject var walletManager: WalletManager
     @EnvironmentObject var authService: AuthService
     @State private var isLoading = false
     @State private var errorMessage: String?
-    @State private var showingImportSheet = false
-    @State private var showingWalletSelectionSheet = false
-
-    // No custom initializer needed - using environment objects
+    @State private var isRetrying = false
 
     var body: some View {
-        VStack(spacing: 20) {
-            Text("Welcome to Choir")
+        VStack(spacing: 30) {
+            // Navigation bar with close button
+            HStack {
+                Button(action: { dismiss() }) {
+                    Image(systemName: "xmark")
+                        .font(.headline)
+                        .padding()
+                }
+                Spacer()
+            }
+
+            Spacer()
+
+            // App logo and title
+            Image("Icon-App-1024x1024")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 120, height: 120)
+                .padding()
+
+            Text("Sign in to Choir")
                 .font(.largeTitle)
                 .fontWeight(.bold)
 
-            Text("Sign in with your Sui wallet")
+            Text("Authenticate with Face ID or Touch ID to access your wallet")
                 .font(.headline)
                 .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal)
 
             Spacer()
 
-            // Wallet info section
-            if let wallet = walletManager.wallet {
-                VStack(alignment: .leading, spacing: 10) {
-                    HStack {
-                        Text("Current Wallet:")
-                            .font(.headline)
+            // Authentication status
+            if isLoading {
+                VStack(spacing: 15) {
+                    ProgressView()
+                        .scaleEffect(1.5)
 
-                        Spacer()
-
-                        Button(action: { showingWalletSelectionSheet = true }) {
-                            Label("Switch", systemImage: "arrow.left.arrow.right")
-                                .font(.caption)
-                        }
-                    }
-
-                    if let address = try? wallet.accounts[0].address(),
-                       let name = walletManager.walletNames[address] {
-                        Text(name)
-                            .font(.subheadline)
-                            .foregroundColor(.primary)
-                            .fontWeight(.bold)
-                    }
-
-                    Text("Address:")
-                        .font(.headline)
-
-                    if let address = try? wallet.accounts[0].address() {
-                        Text(address)
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                            .textSelection(.enabled)
-                            .lineLimit(1)
-                            .truncationMode(.middle)
-                    }
-
-                    Text("Balance:")
-                        .font(.headline)
-
-                    Text(String(format: "%.9f SUI", walletManager.balance))
-                        .font(.subheadline)
+                    Text("Verifying your identity...")
                         .foregroundColor(.secondary)
                 }
                 .padding()
-                .background(Color.gray.opacity(0.1))
-                .cornerRadius(10)
-
-                Button(action: login) {
-                    Text("Sign In")
-                        .font(.headline)
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
+            } else if let errorMessage = errorMessage {
+                // Error message with retry button
+                VStack(spacing: 15) {
+                    Text(errorMessage)
+                        .foregroundColor(.red)
+                        .multilineTextAlignment(.center)
                         .padding()
-                        .background(Color.blue)
-                        .cornerRadius(10)
-                }
-                .disabled(isLoading)
-            } else {
-                Text("No wallet selected")
-                    .font(.headline)
-                    .foregroundColor(.secondary)
-                    .padding()
-            }
 
-            // Wallet management buttons
-            VStack(spacing: 16) {
-                Button(action: createWallet) {
-                    Text("Create New Wallet")
-                        .font(.headline)
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.blue)
-                        .cornerRadius(10)
-                }
-                .disabled(isLoading)
-
-                Button(action: { showingImportSheet = true }) {
-                    Text("Import Wallet from Mnemonic")
-                        .font(.headline)
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.green)
-                        .cornerRadius(10)
-                }
-                .disabled(isLoading)
-
-                if walletManager.wallets.count > 0 {
-                    Button(action: { showingWalletSelectionSheet = true }) {
-                        Text("Select from \(walletManager.wallets.count) Wallets")
+                    Button(action: {
+                        Task {
+                            await attemptLogin()
+                        }
+                    }) {
+                        Text("Try Again")
                             .font(.headline)
                             .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
+                            .frame(maxWidth: 200)
                             .padding()
-                            .background(Color.orange)
+                            .background(Color.blue)
                             .cornerRadius(10)
                     }
-                    .disabled(isLoading)
+                    .disabled(isRetrying)
                 }
-            }
-
-            if isLoading {
-                ProgressView()
+            } else {
+                // Sign in button
+                Button(action: {
+                    Task {
+                        await attemptLogin()
+                    }
+                }) {
+                    HStack {
+                        Image(systemName: "faceid")
+                        Text("Sign In with Biometrics")
+                    }
+                    .font(.headline)
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
                     .padding()
-            }
-
-            if let errorMessage = errorMessage {
-                Text(errorMessage)
-                    .foregroundColor(.red)
-                    .padding()
+                    .background(Color.blue)
+                    .cornerRadius(10)
+                }
+                .padding(.horizontal, 40)
+                .disabled(isLoading)
             }
 
             Spacer()
+
+            // Small note about wallet management
+            Text("Wallet management is available in the Wallets tab after login")
+                .font(.caption)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal)
+                .padding(.bottom, 20)
         }
         .padding()
         .onAppear {
+            // Load wallet if needed, but don't attempt login automatically
             Task {
+                // Make sure we have a wallet loaded
                 if walletManager.wallet == nil {
-                    try? await walletManager.createOrLoadWallet()
+                    do {
+                        try await walletManager.createOrLoadWallet()
+                    } catch {
+                        await handleError(error)
+                    }
                 }
             }
         }
-        .sheet(isPresented: $showingImportSheet) {
-            ImportMnemonicView()
-                .environmentObject(walletManager)
-        }
-        .sheet(isPresented: $showingWalletSelectionSheet) {
-            WalletSelectionView()
-                .environmentObject(walletManager)
+    }
+
+    private func attemptLogin() async {
+        isLoading = true
+        errorMessage = nil
+        isRetrying = true
+
+        do {
+            print("Starting automatic login with biometric authentication")
+            try await authService.login()
+            print("Login successful")
+            isLoading = false
+            isRetrying = false
+        } catch {
+            await handleError(error)
         }
     }
 
-    private func createWallet() {
-        isLoading = true
-        errorMessage = nil
+    private func handleError(_ error: Error) async {
+        await MainActor.run {
+            isLoading = false
+            isRetrying = false
+            print("Login error in LoginView: \(error)")
 
-        Task {
-            do {
-                // Generate a random wallet name
-                let walletName = "Wallet \(Int.random(in: 1000...9999))"
-                try await walletManager.createOrLoadWallet(name: walletName)
-                isLoading = false
-            } catch {
-                isLoading = false
-                errorMessage = error.localizedDescription
-            }
-        }
-    }
-
-    private func login() {
-        isLoading = true
-        errorMessage = nil
-        print("Login button pressed")
-
-        Task {
-            do {
-                print("Starting login process in LoginView")
-                try await authService.login()
-                print("Login successful")
-                isLoading = false
-            } catch {
-                isLoading = false
-                print("Login error in LoginView: \(error)")
-
-                // Show more detailed error message
-                if let authError = error as? AuthError {
+            // Show more detailed error message
+            if let authError = error as? AuthError {
+                switch authError {
+                case .biometricAuthFailed:
+                    errorMessage = "Biometric authentication failed. Please try again to unlock your wallet."
+                case .walletNotAvailable:
+                    errorMessage = "No wallet is available. Please go to the Wallet tab after login to set up your wallet."
+                default:
                     errorMessage = authError.errorDescription
-                } else {
-                    errorMessage = "Error: \(error.localizedDescription)\n\nPlease check the console for more details."
                 }
+            } else {
+                errorMessage = "Error: \(error.localizedDescription)\n\nPlease try again."
             }
         }
     }

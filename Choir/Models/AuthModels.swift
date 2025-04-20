@@ -111,7 +111,7 @@ enum AuthState: Equatable {
 
 // MARK: - Auth Error
 
-enum AuthError: Error, LocalizedError {
+enum AuthError: Error, LocalizedError, Equatable {
     case invalidSignature
     case challengeExpired
     case networkError(Error)
@@ -136,6 +136,29 @@ enum AuthError: Error, LocalizedError {
             return "Failed to securely store authentication token"
         case .biometricAuthFailed:
             return "Face ID or Touch ID authentication failed. Please try again."
+        }
+    }
+
+    static func == (lhs: AuthError, rhs: AuthError) -> Bool {
+        switch (lhs, rhs) {
+        case (.invalidSignature, .invalidSignature):
+            return true
+        case (.challengeExpired, .challengeExpired):
+            return true
+        case (.invalidResponse, .invalidResponse):
+            return true
+        case (.walletNotAvailable, .walletNotAvailable):
+            return true
+        case (.tokenStorageFailed, .tokenStorageFailed):
+            return true
+        case (.biometricAuthFailed, .biometricAuthFailed):
+            return true
+        case (.networkError, .networkError):
+            // We can't compare the associated Error values directly as they might not be Equatable
+            // So we consider all network errors as equal for UI purposes
+            return true
+        default:
+            return false
         }
     }
 }
