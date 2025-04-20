@@ -29,25 +29,27 @@ struct WalletView: View {
                         .font(.headline)
                         .padding(.horizontal)
 
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 16) {
-                            // Display all wallets as cards, sorted by recent usage
-                            ForEach(walletManager.getSortedWalletAddresses(), id: \.self) { address in
-                                if let wallet = walletManager.wallets[address] {
-                                    let isSelected = walletManager.wallet?.accounts[0].publicKey.hex() == wallet.accounts[0].publicKey.hex()
+                    ScrollViewReader { scrollProxy in
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 16) {
+                                // Display all wallets as cards
+                                ForEach(Array(walletManager.wallets.keys), id: \.self) { address in
+                                    if let wallet = walletManager.wallets[address] {
+                                        let isSelected = walletManager.wallet?.accounts[0].publicKey.hex() == wallet.accounts[0].publicKey.hex()
 
-                                    WalletCardView(
-                                        wallet: wallet,
-                                        name: walletManager.walletNames[address] ?? "Unnamed Wallet",
-                                        address: address,
-                                        balance: isSelected ? walletManager.balance : 0, // Only show balance for selected wallet
-                                        isSelected: isSelected,
-                                        onSelect: {
-                                            selectWallet(address: address)
-                                        }
-                                    )
+                                        WalletCardView(
+                                            wallet: wallet,
+                                            name: walletManager.walletNames[address] ?? "Unnamed Wallet",
+                                            address: address,
+                                            balance: isSelected ? walletManager.balance : 0, // Only show balance for selected wallet
+                                            isSelected: isSelected,
+                                            onSelect: {
+                                                selectWallet(address: address)
+                                            }
+                                        )
+                                        .id(address) // Add ID for scrolling
+                                    }
                                 }
-                            }
 
                             // Add wallet button
                             Button(action: { showingCreateWalletAlert = true }) {
@@ -73,6 +75,13 @@ struct WalletView: View {
                             .buttonStyle(PlainButtonStyle())
                         }
                         .padding(.horizontal)
+                        }
+                        .onAppear {
+                            scrollToCurrentWallet(proxy: scrollProxy)
+                        }
+                        .onChange(of: walletManager.wallet) { _, _ in
+                            scrollToCurrentWallet(proxy: scrollProxy)
+                        }
                     }
                 }
                 .padding(.vertical)
@@ -353,6 +362,16 @@ struct WalletView: View {
                     paymentErrorMessage = error.localizedDescription
                     showingPaymentErrorAlert = true
                 }
+            }
+        }
+    }
+
+    // Helper method to scroll to the current wallet
+    private func scrollToCurrentWallet(proxy: ScrollViewProxy) {
+        if let currentWallet = walletManager.wallet,
+           let currentAddress = try? currentWallet.accounts[0].address() {
+            withAnimation {
+                proxy.scrollTo(currentAddress, anchor: .center)
             }
         }
     }
