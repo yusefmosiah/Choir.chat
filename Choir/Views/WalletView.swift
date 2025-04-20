@@ -17,6 +17,8 @@ struct WalletView: View {
     @State private var isWalletSwitching = false
     @State private var showingPaymentErrorAlert = false
     @State private var paymentErrorMessage = ""
+    @State private var hasCopiedAddress = false
+    @State private var hasCopiedPrivateKey = false
 
     var body: some View {
         NavigationStack {
@@ -92,11 +94,24 @@ struct WalletView: View {
                                     HStack {
                                         Button(action: {
                                             UIPasteboard.general.string = address
+                                            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                                                hasCopiedAddress = true
+                                            }
+
+                                            // Reset after delay
+                                            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                                                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                                                    hasCopiedAddress = false
+                                                }
+                                            }
                                         }) {
-                                            Label("Copy Address", systemImage: "doc.on.doc")
+                                            Label(
+                                                hasCopiedAddress ? "Copied!" : "Copy Address",
+                                                systemImage: hasCopiedAddress ? "checkmark.circle.fill" : "doc.on.doc"
+                                            )
                                         }
                                         .buttonStyle(.bordered)
-                                        .tint(.blue)
+                                        .tint(hasCopiedAddress ? .green : .blue)
 
                                         Spacer()
 
@@ -214,10 +229,18 @@ struct WalletView: View {
             }
         }
         .alert("Private Key", isPresented: $showingPrivateKeyAlert) {
-            Button("Copy to Clipboard") {
+            Button(hasCopiedPrivateKey ? "Copied!" : "Copy to Clipboard") {
                 UIPasteboard.general.string = privateKeyMessage
+                hasCopiedPrivateKey = true
+
+                // Reset after delay
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                    hasCopiedPrivateKey = false
+                }
             }
-            Button("OK", role: .cancel) {}
+            Button("OK", role: .cancel) {
+                hasCopiedPrivateKey = false
+            }
         } message: {
             Text(privateKeyMessage)
         }
