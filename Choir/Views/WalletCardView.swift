@@ -61,7 +61,7 @@ struct WalletCardView: View {
                 Spacer()
             }
             .padding()
-            .frame(width: 200, height: 180)
+            .frame(width: 180, height: 180)
             .background(
                 RoundedRectangle(cornerRadius: 16)
                     .fill(Color(.systemBackground))

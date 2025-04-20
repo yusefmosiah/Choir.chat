@@ -8,12 +8,12 @@ struct WalletSelectionView: View {
     @State private var showingImportSheet = false
     @State private var showingCreateSheet = false
     @State private var newWalletName = "New Wallet"
-    
+
     var body: some View {
         NavigationView {
             List {
                 Section(header: Text("Your Wallets")) {
-                    ForEach(Array(walletManager.wallets.keys), id: \.self) { address in
+                    ForEach(walletManager.getSortedWalletAddresses(), id: \.self) { address in
                         Button(action: {
                             selectWallet(address: address)
                         }) {
@@ -21,16 +21,16 @@ struct WalletSelectionView: View {
                                 VStack(alignment: .leading) {
                                     Text(walletManager.walletNames[address] ?? "Unnamed Wallet")
                                         .font(.headline)
-                                    
+
                                     Text(address)
                                         .font(.caption)
                                         .foregroundColor(.secondary)
                                         .lineLimit(1)
                                         .truncationMode(.middle)
                                 }
-                                
+
                                 Spacer()
-                                
+
                                 if let currentWallet = walletManager.wallet,
                                    let currentAddress = try? currentWallet.accounts[0].address(),
                                    currentAddress == address {
@@ -48,17 +48,17 @@ struct WalletSelectionView: View {
                         }
                     }
                 }
-                
+
                 Section {
                     Button(action: { showingCreateSheet = true }) {
                         Label("Create New Wallet", systemImage: "plus.circle")
                     }
-                    
+
                     Button(action: { showingImportSheet = true }) {
                         Label("Import Wallet from Mnemonic", systemImage: "square.and.arrow.down")
                     }
                 }
-                
+
                 if let errorMessage = errorMessage {
                     Section {
                         Text(errorMessage)
@@ -79,9 +79,9 @@ struct WalletSelectionView: View {
             }
             .alert("Create New Wallet", isPresented: $showingCreateSheet) {
                 TextField("Wallet Name", text: $newWalletName)
-                
+
                 Button("Cancel", role: .cancel) { }
-                
+
                 Button("Create") {
                     createNewWallet()
                 }
@@ -98,11 +98,11 @@ struct WalletSelectionView: View {
             }
         }
     }
-    
+
     private func selectWallet(address: String) {
         isLoading = true
         errorMessage = nil
-        
+
         Task {
             do {
                 try await walletManager.switchWallet(address: address)
@@ -118,11 +118,11 @@ struct WalletSelectionView: View {
             }
         }
     }
-    
+
     private func deleteWallet(address: String) {
         isLoading = true
         errorMessage = nil
-        
+
         Task {
             do {
                 try await walletManager.deleteWallet(address: address)
@@ -137,11 +137,11 @@ struct WalletSelectionView: View {
             }
         }
     }
-    
+
     private func createNewWallet() {
         isLoading = true
         errorMessage = nil
-        
+
         Task {
             do {
                 try await walletManager.createOrLoadWallet(name: newWalletName)

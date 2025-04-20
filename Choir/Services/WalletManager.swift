@@ -4,12 +4,14 @@ import Bip39
 
 @MainActor
 class WalletManager: ObservableObject {
-    // UserDefaults key for storing the current wallet address
+    // UserDefaults keys
     private let currentWalletAddressKey = "currentWalletAddress"
+    private let recentWalletsKey = "recentWallets"
 
     @Published private(set) var wallet: Wallet?
     @Published private(set) var wallets: [String: Wallet] = [:] // Address -> Wallet
     @Published private(set) var walletNames: [String: String] = [:] // Address -> Name
+    @Published private(set) var recentWalletAddresses: [String] = [] // Recently used wallet addresses
     @Published private(set) var balance: Double = 0
     @Published private(set) var isLoading = false
     @Published var error: Error?
@@ -44,6 +46,13 @@ class WalletManager: ObservableObject {
             // Clear existing wallets
             wallets = [:]
             walletNames = [:]
+
+            // Load recent wallet addresses from UserDefaults
+            if let savedAddresses = UserDefaults.standard.stringArray(forKey: recentWalletsKey) {
+                recentWalletAddresses = savedAddresses
+            } else {
+                recentWalletAddresses = []
+            }
 
             // Load each wallet
             for key in walletKeys {
@@ -93,6 +102,35 @@ class WalletManager: ObservableObject {
     private func saveCurrentWalletAddress(_ address: String) {
         UserDefaults.standard.set(address, forKey: currentWalletAddressKey)
         print("Saved current wallet address: \(address)")
+
+        // Update recent wallets list
+        updateRecentWallets(address)
+    }
+
+    // Update the list of recently used wallets
+    private func updateRecentWallets(_ address: String) {
+        // Remove the address if it already exists in the list
+        recentWalletAddresses.removeAll { $0 == address }
+
+        // Add the address to the beginning of the list
+        recentWalletAddresses.insert(address, at: 0)
+
+        // Save the updated list to UserDefaults
+        UserDefaults.standard.set(recentWalletAddresses, forKey: recentWalletsKey)
+        print("Updated recent wallets list: \(recentWalletAddresses)")
+    }
+
+    // Get wallet addresses sorted by recent usage
+    func getSortedWalletAddresses() -> [String] {
+        // Start with recent wallets that exist in the current wallet list
+        var sortedAddresses = recentWalletAddresses.filter { wallets[$0] != nil }
+
+        // Add any remaining wallets that aren't in the recent list
+        for address in wallets.keys where !sortedAddresses.contains(address) {
+            sortedAddresses.append(address)
+        }
+
+        return sortedAddresses
     }
 
     func createOrLoadWallet(name: String = "Default") async throws {
@@ -306,6 +344,12 @@ class WalletManager: ObservableObject {
                 // Remove the saved wallet address since there are no wallets
                 UserDefaults.standard.removeObject(forKey: currentWalletAddressKey)
             }
+        }
+
+        // Remove the deleted wallet from recent wallets list
+        if let index = recentWalletAddresses.firstIndex(of: address) {
+            recentWalletAddresses.remove(at: index)
+            UserDefaults.standard.set(recentWalletAddresses, forKey: recentWalletsKey)
         }
     }
 }

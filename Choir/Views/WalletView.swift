@@ -31,8 +31,8 @@ struct WalletView: View {
 
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 16) {
-                            // Display all wallets as cards
-                            ForEach(Array(walletManager.wallets.keys), id: \.self) { address in
+                            // Display all wallets as cards, sorted by recent usage
+                            ForEach(walletManager.getSortedWalletAddresses(), id: \.self) { address in
                                 if let wallet = walletManager.wallets[address] {
                                     let isSelected = walletManager.wallet?.accounts[0].publicKey.hex() == wallet.accounts[0].publicKey.hex()
 
