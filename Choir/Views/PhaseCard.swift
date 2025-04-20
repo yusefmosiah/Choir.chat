@@ -273,9 +273,9 @@ struct PhaseCard: View {
         rotationTimer = Timer.scheduledTimer(withTimeInterval: 0.02, repeats: true) { [self] _ in
             // Update rotation on the main thread
             DispatchQueue.main.async {
-                // Increment rotation by 1 degree each time
+                // Increment rotation by 2 degrees each time
                 withAnimation(.linear(duration: 0.02)) {
-                    self.gradientRotation = (self.gradientRotation + 1).truncatingRemainder(dividingBy: 360)
+                    self.gradientRotation = (self.gradientRotation + 2).truncatingRemainder(dividingBy: 360)
                 }
             }
         }
