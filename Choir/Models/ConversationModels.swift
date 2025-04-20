@@ -1,5 +1,6 @@
 import Foundation
 import SwiftUI
+import UIKit
 
 // Import for PostchainStreamEvent
 // This ensures we can use the type from APITypes
@@ -212,7 +213,12 @@ class Message: ObservableObject, Identifiable, Equatable {
     let timestamp: Date
     @Published var isStreaming: Bool
 
-    @Published var selectedPhase: Phase = .action
+    @Published var selectedPhase: Phase = .action {
+        didSet {
+            // When the selected phase changes, dismiss the keyboard
+            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+        }
+    }
     @Published var phaseCurrentPage: [Phase: Int] = [:]
     @Published var phaseResults: [Phase: PhaseResult] = [:]
     @Published var vectorSearchResults: [VectorSearchResult] = []
@@ -244,7 +250,7 @@ class Message: ObservableObject, Identifiable, Equatable {
         self.isStreaming = isStreaming
         self.phaseResults = phaseResults
 
-        
+
     }
 
     static func == (lhs: Message, rhs: Message) -> Bool {
@@ -373,8 +379,7 @@ class Message: ObservableObject, Identifiable, Equatable {
         // Automatically update selected phase to show the user what's happening
         if status == "running" && !content.isEmpty {
             let shouldSwitch = self.selectedPhase != phase &&
-                              (self.selectedPhase == .action || // Always switch from action
-                               phase == .yield) // Always prefer yield when available
+                              (self.selectedPhase == .action) // Only switch from action, don't special-case yield
 
             if shouldSwitch {
                 self.selectedPhase = phase

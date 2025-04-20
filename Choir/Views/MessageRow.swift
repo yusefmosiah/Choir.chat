@@ -5,17 +5,17 @@ struct MessageRow: View {
     @ObservedObject var message: Message
     let isProcessing: Bool
     @ObservedObject var viewModel: PostchainViewModel
-    
+
     // State for lazy loading
     @State private var isVisible = false
     @State private var shouldLoadFullContent = false
-    
+
     init(message: Message, isProcessing: Bool = false, viewModel: PostchainViewModel) {
         self.message = message
         self.isProcessing = isProcessing
         self.viewModel = viewModel
     }
-    
+
     var body: some View {
         VStack(alignment: message.isUser ? .trailing : .leading, spacing: 8) {
             // User messages
@@ -32,12 +32,12 @@ struct MessageRow: View {
                             return Text(LocalizedStringKey(message.content))
                         }
                     }() // Immediately execute the closure
-                    
+
                     // Apply modifiers to the resulting Text view
                     textView
                         .multilineTextAlignment(.trailing)
                         .fixedSize(horizontal: false, vertical: true)
-                    
+
                     Image(systemName: "person.circle.fill")
                         .foregroundColor(.white)
                         .opacity(0.8)
@@ -56,7 +56,7 @@ struct MessageRow: View {
                     Button("Copy Content") {
                         UIPasteboard.general.string = message.content
                     }
-                    
+
                     Button("Select Text...") {
                         TextSelectionManager.shared.showSheet(withText: message.content)
                     }
@@ -67,7 +67,7 @@ struct MessageRow: View {
                 // Header with AI icon
                 HStack {
                     Spacer()
-                    
+
                     if isProcessing {
                         ProgressView()
                             .scaleEffect(0.7)
@@ -77,7 +77,7 @@ struct MessageRow: View {
                     }
                 }
                 .padding(.horizontal)
-                
+
                 // Main content area with lazy loading
                 ZStack {
                     // Placeholder shown initially or when off-screen
@@ -96,7 +96,7 @@ struct MessageRow: View {
                                 isVisible = false
                             }
                     }
-                    
+
                     // Full PostchainView loaded lazily
                     if shouldLoadFullContent {
                         PostchainView(
@@ -120,7 +120,7 @@ struct MessageRow: View {
         .padding(.vertical, 4)
         .padding(.bottom, 8)
     }
-    
+
     // Lightweight placeholder view shown before full content loads
     private var placeholderView: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -128,16 +128,16 @@ struct MessageRow: View {
             Text("AI Response")
                 .font(.headline)
                 .padding(.bottom, 4)
-            
-            // Preview content (first part of yield phase if available)
-            let previewContent = message.getPhaseContent(.yield).prefix(200)
+
+            // Preview content (first part of action phase if available, don't special-case yield)
+            let previewContent = message.getPhaseContent(.action).prefix(200)
             Text(previewContent.isEmpty ? "Loading..." : previewContent)
                 .lineLimit(5)
                 .padding()
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .background(Color.gray.opacity(0.1))
                 .cornerRadius(8)
-            
+
             Spacer()
         }
         .padding()

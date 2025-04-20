@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 @MainActor
 class PostchainViewModel: ObservableObject {
@@ -175,13 +176,13 @@ class PostchainViewModel: ObservableObject {
         // Crucial to invoke UI updates on main thread
         DispatchQueue.main.async {
             // DEBUG LOG: Add specific logging for ViewModel update
-            
+
             // First update the viewModel state to reflect the latest data
             self.currentPhase = phase
 
             // Update text content - now handled consistently for all phases including yield
             let contentToUpdate = content ?? ""
-            
+
             if !contentToUpdate.isEmpty {
                 self.responses[phase] = contentToUpdate
 
@@ -190,7 +191,7 @@ class PostchainViewModel: ObservableObject {
             }
 
             // DEBUG LOG: Log final contentToUpdate
-            
+
             // Update the message object directly (needed for streaming UI)
             if let msg = self.findMessage(by: targetMessageId) {
                 // Make sure we always trigger an update for streaming content
@@ -227,10 +228,10 @@ class PostchainViewModel: ObservableObject {
             if phase == .experienceVectors {
                 if let newVectorResults = vectorResults {
                     self.vectorResultsByMessage[targetMessageId] = newVectorResults
-                    
+
                     // Debug the structure of what we received
                     for (i, result) in newVectorResults.enumerated() {
-                        
+
                         // If we have a content_preview but no content, use the preview
                         if result.content.isEmpty && result.content_preview != nil {
                         }
@@ -239,7 +240,7 @@ class PostchainViewModel: ObservableObject {
             } else if phase == .experienceWeb {
                 if let newWebResults = webResults {
                     self.webResultsByMessage[targetMessageId] = newWebResults
-                    
+
                     // Debug the structure of what we received
                     for (i, result) in newWebResults.enumerated() {
                     }
@@ -252,14 +253,16 @@ class PostchainViewModel: ObservableObject {
             if isLastPhaseComplete {
                 self.isProcessing = false
 
-                // Close the loop: auto-select yield if user is on action phase
-                if let message = self.findMessage(by: targetMessageId), message.selectedPhase == .action {
-                    withAnimation(.spring()) {
-                        self.updateSelectedPhase(for: message, phase: .yield)
-                    }
-                }
+                // Explicitly dismiss keyboard when processing completes
+                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+
+                // Don't auto-select yield phase anymore
+                // Let the user manually select the phase they want to view
             } else if status == "error" {
                 self.isProcessing = false // Also stop on error
+
+                // Also dismiss keyboard on error
+                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
             }
 
             // Force one last UI update to make sure changes are reflected

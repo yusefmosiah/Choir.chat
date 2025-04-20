@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct ChoirThreadDetailView: View {
     let thread: ChoirThread
@@ -62,7 +63,8 @@ struct ChoirThreadDetailView: View {
                     viewModel.cancel()
                 },
                 processingStatus: viewModel.processingStatus,
-                isProcessingLargeInput: viewModel.isProcessingLargeInput
+                isProcessingLargeInput: viewModel.isProcessingLargeInput,
+                allowFocus: false // Explicitly prevent focus to avoid keyboard appearing
             )
         }
         .navigationTitle(thread.title)
@@ -103,6 +105,9 @@ struct ChoirThreadDetailView: View {
     }
 
     private func sendMessage(_ content: String) async {
+        // Explicitly dismiss keyboard when sending a message
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+
         do {
             if let coordinator = viewModel.coordinator as? PostchainCoordinatorImpl {
                 coordinator.currentChoirThread = thread

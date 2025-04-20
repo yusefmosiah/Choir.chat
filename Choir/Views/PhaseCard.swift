@@ -15,19 +15,19 @@ struct PhaseCard: View {
     // --- Computed Properties for Styling ---
 
     private var cardBackgroundColor: Color {
-        phase == .yield ? Color.accentColor : Color(.systemBackground)  // Use semantic color
+        Color(.systemBackground)  // Use same background color for all phases
     }
 
     private var primaryTextColor: Color {
-        phase == .yield ? .white : .primary
+        .primary  // Use same text color for all phases
     }
 
     private var secondaryTextColor: Color {
-        phase == .yield ? .white.opacity(0.8) : .secondary
+        .secondary  // Use same secondary text color for all phases
     }
 
     private var headerIconColor: Color {
-        phase == .yield ? .white : .accentColor
+        .accentColor  // Use same icon color for all phases
     }
 
     private var shadowOpacity: Double {
@@ -44,7 +44,7 @@ struct PhaseCard: View {
 
     private var overlayStrokeColor: Color {
         if isSelected {
-            return phase == .yield ? Color.white : Color.accentColor
+            return Color.accentColor  // Use same stroke color for all phases when selected
         } else {
             return Color.gray.opacity(0.2)
         }
@@ -137,20 +137,10 @@ struct PhaseCard: View {
                 loadingContentView
             } else {
                 // For debugging, identify the phase in "No content available" message
-                VStack {
-                    Text("No content available for \(phase.rawValue) phase")
-                        .foregroundColor(.secondary)
-                        .frame(maxWidth: .infinity, alignment: .center)
-                        .padding(.vertical, 20)
-
-                    // Add debug info
-                    if phase == .yield {
-                        Text("Debug info: Check logs for yield phase diagnosis")
-                            .font(.footnote)
-                            .foregroundColor(.red)
-                            .padding(.top, 10)
-                    }
-                }
+                Text("...")
+                    .foregroundColor(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.vertical, 20)
             }
         }
         .padding(12)

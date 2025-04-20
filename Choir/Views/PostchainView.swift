@@ -52,15 +52,15 @@ struct PostchainView: View {
 
             // Check if the coordinator indicates this phase is currently processing
             let isProcessingPhase = coordinator?.isProcessingPhase(phase) ?? false
-            
+
             let shouldShow = hasTextContent || hasVectorResults || hasWebResults || isProcessingPhase || message.isStreaming
-            
+
             if shouldShow {
             }
-            
+
             return shouldShow
         }
-        
+
         return filtered
     }
 
@@ -77,7 +77,7 @@ struct PostchainView: View {
 
     // Use this state variable to trigger UI refreshes when phases change
     @State private var phaseRefreshCounter = 0
-    
+
     // Phase content checker - for watching changes
     var phaseContentChanges: [String: Int] {
         var result: [String: Int] = [:]
@@ -87,16 +87,16 @@ struct PostchainView: View {
         }
         return result
     }
-    
+
     var body: some View {
         GeometryReader { geometry in
             let cardWidth = geometry.size.width * 0.98 // Adjust card width slightly
             let totalWidth = geometry.size.width
-            
+
             // Use derived state to force UI refresh when message changes
             // Get a string representation of available phases to force updates
             let _ = availablePhases.map { $0.rawValue }.joined() + String(phaseRefreshCounter)
-            
+
             // Also track content changes for each phase
             let _ = phaseContentChanges.map { "\($0):\($1)" }.joined()
 
@@ -242,15 +242,15 @@ struct PostchainView: View {
             initialSelectionDone = true
             // Set initial selection only if current selection is not valid within available phases
             if !availablePhases.contains(message.selectedPhase) && !availablePhases.isEmpty {
-                // Prioritize yield > web > vectors > action
-                if availablePhases.contains(.yield) {
-                    viewModel.updateSelectedPhase(for: message, phase: .yield)
-                } else if availablePhases.contains(.experienceWeb) {
-                    viewModel.updateSelectedPhase(for: message, phase: .experienceWeb)
+                // Prioritize action > vectors > web > yield (reversed priority)
+                if availablePhases.contains(.action) {
+                    viewModel.updateSelectedPhase(for: message, phase: .action)
                 } else if availablePhases.contains(.experienceVectors) {
                     viewModel.updateSelectedPhase(for: message, phase: .experienceVectors)
-                } else if availablePhases.contains(.action) {
-                    viewModel.updateSelectedPhase(for: message, phase: .action)
+                } else if availablePhases.contains(.experienceWeb) {
+                    viewModel.updateSelectedPhase(for: message, phase: .experienceWeb)
+                } else if availablePhases.contains(.yield) {
+                    viewModel.updateSelectedPhase(for: message, phase: .yield)
                 } else {
                     viewModel.updateSelectedPhase(for: message, phase: availablePhases.first ?? .action)
                 }
@@ -268,13 +268,7 @@ struct PostchainView: View {
             return totalWidth
         }
 
-        // Wrap-around logic: treat yield as immediately left of action
-        if selectedPhase == .action && phase == .yield {
-            return -cardWidth + dragOffset
-        }
-        if selectedPhase == .yield && phase == .action {
-            return cardWidth + dragOffset
-        }
+        // No special wrap-around logic for yield phase anymore
 
         let indexDifference = phaseIndex - currentIndex
         return CGFloat(indexDifference) * cardWidth + dragOffset
