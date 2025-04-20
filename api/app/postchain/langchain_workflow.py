@@ -20,6 +20,7 @@ import hashlib
 import logging
 from typing import List, Dict, Any, AsyncIterator, Optional
 import json
+import re
 
 from langchain_core.messages import HumanMessage, AIMessage, SystemMessage, BaseMessage, ToolMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
@@ -53,6 +54,8 @@ from app.postchain.prompts.prompts import (
 # Langchain Tool Imports
 from app.tools.brave_search import BraveSearchTool # Specific tool for web search phase
 from app.tools.qdrant import qdrant_search # Specific tool for vector search phase
+
+from app.database import DatabaseClient # Add import for DB client
 
 # Configure logging
 logger = logging.getLogger("postchain_langchain")
@@ -224,7 +227,6 @@ async def run_action_phase(
 # --- New Phase Implementations ---
 
 # --- Refactored Phase Implementation (Manual Vector Search) ---
-from app.database import DatabaseClient # Add import for DB client
 
 async def run_experience_vectors_phase(
     messages: List[BaseMessage],
@@ -853,7 +855,6 @@ def get_referenced_vectors(text, available_vectors):
     Returns:
         list: The vector results that are referenced in the text
     """
-    import re
     referenced_vectors = []
 
     # Extract all #number references
