@@ -79,8 +79,9 @@ class KeychainService {
             if let accessControl = biometricAccessControl() {
                 query[kSecAttrAccessControl as String] = accessControl
 
-                // Explicitly set these for biometric auth
-                query[kSecUseAuthenticationUI as String] = kSecUseAuthenticationUIAllow
+                // Use LAContext for biometric auth instead of deprecated kSecUseAuthenticationUI
+                let context = LAContext()
+                query[kSecUseAuthenticationContext as String] = context
             } else {
                 print("Biometric access control not available, using standard protection")
                 query[kSecAttrAccessible as String] = kSecAttrAccessibleWhenUnlockedThisDeviceOnly
@@ -108,10 +109,14 @@ class KeychainService {
 
     // Check if a key exists in the keychain without triggering biometric auth
     func hasKey(_ key: String) throws -> Bool {
+        // Create a context with interaction disabled
+        let context = LAContext()
+        context.interactionNotAllowed = true
+
         let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrAccount as String: key,
-            kSecUseAuthenticationUI as String: kSecUseAuthenticationUIFail, // Don't show auth UI
+            kSecUseAuthenticationContext as String: context, // Use context instead of deprecated kSecUseAuthenticationUI
             kSecReturnData as String: false // Don't return the actual data
         ]
 
@@ -137,24 +142,27 @@ class KeychainService {
             kSecMatchLimit as String: kSecMatchLimitOne
         ]
 
+        // Create LAContext for authentication
+        let context = LAContext()
+
         // Add authentication prompt if provided
         if let prompt = prompt {
-            query[kSecUseOperationPrompt as String] = prompt
-            query[kSecUseAuthenticationUI as String] = kSecUseAuthenticationUIAllow
+            context.localizedReason = prompt
+            query[kSecUseAuthenticationContext as String] = context
         }
 
         // Force biometric authentication if required
         if requireBiometric {
             // Check if biometric authentication is available
-            let context = LAContext()
             var authError: NSError?
 
             if context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &authError) {
-                query[kSecUseAuthenticationUI as String] = kSecUseAuthenticationUIAllow
+                // Set the context in the query
+                query[kSecUseAuthenticationContext as String] = context
 
                 // If no prompt was provided, use a default one
                 if prompt == nil {
-                    query[kSecUseOperationPrompt as String] = "Authenticate to access secure data"
+                    context.localizedReason = "Authenticate to access secure data"
                 }
             } else {
                 throw KeychainError.biometricNotAvailable
@@ -190,7 +198,7 @@ class KeychainService {
     }
 
     func getAllKeys(withPrefix prefix: String? = nil) throws -> [String] {
-        var query: [String: Any] = [
+        let query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecReturnAttributes as String: true,
             kSecMatchLimit as String: kSecMatchLimitAll
