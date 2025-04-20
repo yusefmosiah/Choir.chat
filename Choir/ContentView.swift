@@ -85,12 +85,6 @@ struct ContentView: View {
             }
             .navigationTitle("Chat")
             .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) { // Explicit placement for the primary action
-                    Button(action: createNewChoirThread) {
-                        Label("New Chat", systemImage: "plus")
-                    }
-                }
-
                 ToolbarItem(placement: .navigationBarLeading) { // Keep explicit placement for leading item
                     EditButton()
                 }
@@ -105,13 +99,14 @@ struct ContentView: View {
                             Label("Import Threads", systemImage: "square.and.arrow.down")
                         }
 
-                        Button(action: {
-                            loadThreads()
-                        }) {
-                            Label("Refresh Threads", systemImage: "arrow.clockwise")
-                        }
                     } label: {
                         Image(systemName: "ellipsis.circle")
+                    }
+                }
+
+                ToolbarItem(placement: .navigationBarTrailing) { // Explicit placement for the primary action
+                    Button(action: createNewChoirThread) {
+                        Label("New Chat", systemImage: "plus")
                     }
                 }
             }
