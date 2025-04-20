@@ -8,13 +8,21 @@ import SwiftUI
 
 struct ContentView: View {
     // Use environment objects instead of creating new instances
-    @StateObject private var viewModel = PostchainViewModel(coordinator: PostchainCoordinatorImpl())
+    @StateObject private var postchainViewModel = PostchainViewModel(coordinator: PostchainCoordinatorImpl())
     @EnvironmentObject var threadManager: ThreadManager
     @EnvironmentObject var walletManager: WalletManager
     @State private var selectedChoirThread: ChoirThread?
     @State private var showingExportSheet = false
     @State private var showingImportSheet = false
     @State private var isLoadingThreads = false
+
+    // View model for controlling thread selection from MainTabView
+    @ObservedObject var viewModel: ContentViewModel
+
+    // Initialize with default ContentViewModel if none provided
+    init(viewModel: ContentViewModel = ContentViewModel()) {
+        self.viewModel = viewModel
+    }
 
     var body: some View {
         NavigationSplitView {
@@ -109,7 +117,7 @@ struct ContentView: View {
             }
         } detail: {
             if let thread = selectedChoirThread {
-                ChoirThreadDetailView(thread: thread, viewModel: viewModel)
+                ChoirThreadDetailView(thread: thread, viewModel: postchainViewModel)
                     .toolbar(.hidden, for: .tabBar) // Hide the tab bar when viewing a thread
             } else {
                 VStack(spacing: 20) {
@@ -162,23 +170,26 @@ struct ContentView: View {
 
                     // Force UI update
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                        // If threads were imported, select the first one
-                        if !threadManager.threads.isEmpty {
-                            print("Setting selected thread to first thread")
-                            selectedChoirThread = threadManager.threads.first
-                        } else {
-                            print("No threads available to select")
-                        }
+                        // Do not auto-select a thread after import
+                        print("Threads imported successfully, showing thread list")
                     }
                 }
             })
             .environmentObject(threadManager)
         }
+
+
         .onAppear {
+            // Always reset thread selection to show the thread list
+            selectedChoirThread = nil
             // Load saved threads
             loadThreads()
-            // Do NOT auto-create or select a thread on startup
-            selectedChoirThread = nil
+        }
+        .onChange(of: viewModel.shouldResetThreadSelection) { _, shouldReset in
+            if shouldReset {
+                // Reset thread selection when signaled from tab change
+                selectedChoirThread = nil
+            }
         }
         .onChange(of: selectedChoirThread) { _, newThread in
             guard let thread = newThread else { return }
@@ -194,12 +205,7 @@ struct ContentView: View {
         // Use a slight delay to ensure the UI updates
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
             threadManager.loadThreads()
-
-            // If no thread is selected but we have threads, select the first one
-            if selectedChoirThread == nil && !threadManager.threads.isEmpty {
-                selectedChoirThread = threadManager.threads.first
-            }
-
+            // Do not auto-select a thread
             isLoadingThreads = false
         }
     }
@@ -282,5 +288,5 @@ struct ChoirThreadRow: View {
 }
 
 #Preview {
-    ContentView()
+    ContentView(viewModel: ContentViewModel())
 }

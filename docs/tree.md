@@ -62,7 +62,6 @@
 │       ├── PhaseCard.swift
 │       ├── PhaseCardContextMenu.swift
 │       ├── PostchainView.swift
-│       ├── PriorCard.swift
 │       ├── SettingsView.swift
 │       ├── Thread
 │       │   └── Components
@@ -267,4 +266,4 @@
     ├── test_api.sh
     └── test_postchain_multiturn.sh
 
-66 directories, 199 files
+66 directories, 198 files

@@ -107,11 +107,15 @@ struct MainTabView: View {
     @EnvironmentObject var walletManager: WalletManager
     @EnvironmentObject var threadManager: ThreadManager
     @State private var selectedTab = 0 // Default to Home tab
+    @State private var previousTab: Int? = nil
+
+    // Reference to ContentView to control thread selection
+    @State private var contentViewModel = ContentViewModel()
 
     var body: some View {
         TabView(selection: $selectedTab) {
             // Chat tab (ContentView)
-            ContentView()
+            ContentView(viewModel: contentViewModel)
                 .tag(3)
                 .tabItem {
                     Label("Chat", systemImage: "message")
@@ -135,6 +139,31 @@ struct MainTabView: View {
                 .tabItem {
                     Label("Settings", systemImage: "gear")
                 }
+        }
+        .onChange(of: selectedTab) { oldValue, newValue in
+            // Store the previous tab
+            previousTab = oldValue
+
+            // If switching to the Chat tab (3), reset thread selection
+            if newValue == 3 && oldValue != 3 {
+                // Reset thread selection to show thread list
+                contentViewModel.resetThreadSelection()
+            }
+        }
+    }
+}
+
+// View model to control ContentView's thread selection
+class ContentViewModel: ObservableObject {
+    @Published var shouldResetThreadSelection = false
+
+    func resetThreadSelection() {
+        // Trigger thread selection reset
+        shouldResetThreadSelection = true
+
+        // Reset the flag after a short delay to allow for future resets
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            self.shouldResetThreadSelection = false
         }
     }
 }
