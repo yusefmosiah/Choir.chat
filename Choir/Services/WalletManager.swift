@@ -4,6 +4,9 @@ import Bip39
 
 @MainActor
 class WalletManager: ObservableObject {
+    // UserDefaults key for storing the current wallet address
+    private let currentWalletAddressKey = "currentWalletAddress"
+
     @Published private(set) var wallet: Wallet?
     @Published private(set) var wallets: [String: Wallet] = [:] // Address -> Wallet
     @Published private(set) var walletNames: [String: String] = [:] // Address -> Name
@@ -63,16 +66,33 @@ class WalletManager: ObservableObject {
                 }
             }
 
-            // Set the active wallet to the first one if available
-            if let firstAddress = wallets.keys.first, let firstWallet = wallets[firstAddress] {
-                wallet = firstWallet
-                try? await updateBalance(for: firstWallet)
+            // Try to load the previously selected wallet from UserDefaults
+            if let savedAddress = UserDefaults.standard.string(forKey: currentWalletAddressKey),
+               let savedWallet = wallets[savedAddress] {
+                // Restore the previously selected wallet
+                wallet = savedWallet
+                try? await updateBalance(for: savedWallet)
+                print("Restored previously selected wallet: \(savedAddress)")
             } else {
-                wallet = nil
+                // Fall back to the first wallet if no saved wallet or the saved wallet doesn't exist anymore
+                if let firstAddress = wallets.keys.first, let firstWallet = wallets[firstAddress] {
+                    wallet = firstWallet
+                    try? await updateBalance(for: firstWallet)
+                    print("No saved wallet found, using first wallet: \(firstAddress)")
+                } else {
+                    wallet = nil
+                    print("No wallets available")
+                }
             }
         } catch {
             print("Error loading wallets: \(error)")
         }
+    }
+
+    // Save the current wallet address to UserDefaults
+    private func saveCurrentWalletAddress(_ address: String) {
+        UserDefaults.standard.set(address, forKey: currentWalletAddressKey)
+        print("Saved current wallet address: \(address)")
     }
 
     func createOrLoadWallet(name: String = "Default") async throws {
@@ -98,6 +118,9 @@ class WalletManager: ObservableObject {
 
             // Set as active wallet
             wallet = newWallet
+
+            // Save the current wallet address
+            saveCurrentWalletAddress(address)
 
             // Update balance
             try await updateBalance(for: newWallet)
@@ -151,6 +174,9 @@ class WalletManager: ObservableObject {
 
             // Set as active wallet
             wallet = importedWallet
+
+            // Save the current wallet address
+            saveCurrentWalletAddress(address)
 
             // Update the balance
             try await updateBalance(for: importedWallet)
@@ -243,6 +269,10 @@ class WalletManager: ObservableObject {
         }
 
         wallet = selectedWallet
+
+        // Save the current wallet address
+        saveCurrentWalletAddress(address)
+
         try await updateBalance(for: selectedWallet)
     }
 
@@ -264,10 +294,17 @@ class WalletManager: ObservableObject {
         if let currentWallet = wallet, let currentAddress = try? currentWallet.accounts[0].address(), currentAddress == address {
             if let firstAddress = wallets.keys.first, let firstWallet = wallets[firstAddress] {
                 wallet = firstWallet
+
+                // Save the new current wallet address
+                saveCurrentWalletAddress(firstAddress)
+
                 try await updateBalance(for: firstWallet)
             } else {
                 wallet = nil
                 balance = 0
+
+                // Remove the saved wallet address since there are no wallets
+                UserDefaults.standard.removeObject(forKey: currentWalletAddressKey)
             }
         }
     }
