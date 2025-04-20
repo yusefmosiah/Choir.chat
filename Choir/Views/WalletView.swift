@@ -1,11 +1,15 @@
 import SwiftUI
 import SuiKit
+import UIKit
+import LocalAuthentication
 
 struct WalletView: View {
     @EnvironmentObject var walletManager: WalletManager
     @State private var sendAmount: String = ""
     @State private var recipientAddress: String = ""
     @State private var showingSendSheet = false
+    @State private var showingPrivateKeyAlert = false
+    @State private var privateKeyMessage = ""
 
     var body: some View {
         NavigationStack {
@@ -41,6 +45,13 @@ struct WalletView: View {
                         showingSendSheet = true
                     }
                     .disabled(walletManager.isLoading)
+
+                    Button("Export Private Key") {
+                        Task {
+                            await exportPrivateKey()
+                        }
+                    }
+                    .disabled(walletManager.isLoading)
                 } else {
                     Button("Create Wallet") {
                         Task {
@@ -73,7 +84,37 @@ struct WalletView: View {
                 Text(error.localizedDescription)
             }
         }
+        .alert("Private Key", isPresented: $showingPrivateKeyAlert) {
+            Button("Copy to Clipboard") {
+                UIPasteboard.general.string = privateKeyMessage
+            }
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(privateKeyMessage)
+        }
         .navigationTitle("Wallet")
+        }
+    }
+
+    private func exportPrivateKey() async {
+        await MainActor.run {
+            do {
+                // Get the mnemonic from the keychain with biometric authentication
+                if let mnemonic = try walletManager.keychain.load(
+                    "sui_wallet_mnemonic",
+                    withPrompt: "Authenticate to export your private key",
+                    requireBiometric: true
+                ) {
+                    privateKeyMessage = "Your mnemonic phrase (keep this secret):\n\n\(mnemonic)"
+                } else {
+                    privateKeyMessage = "Could not retrieve your private key. Please try again."
+                }
+                showingPrivateKeyAlert = true
+            } catch {
+                print("Error retrieving private key: \(error)")
+                privateKeyMessage = "Error retrieving private key: \(error.localizedDescription)"
+                showingPrivateKeyAlert = true
+            }
         }
     }
 }

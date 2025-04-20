@@ -1,6 +1,7 @@
 import Foundation
 import SuiKit
 import SwiftUI
+import LocalAuthentication
 
 @MainActor
 class AuthService: ObservableObject {
@@ -12,12 +13,23 @@ class AuthService: ObservableObject {
     private let keychain = KeychainService()
 
     private var authToken: String? {
-        get { try? keychain.load("auth_token") }
+        get {
+            do {
+                return try keychain.load("auth_token", withPrompt: "Authenticate to access your Choir account")
+            } catch {
+                print("Error loading auth token: \(error)")
+                return nil
+            }
+        }
         set {
-            if let newValue = newValue {
-                try? keychain.save(newValue, forKey: "auth_token")
-            } else {
-                // TODO: Implement delete from keychain
+            do {
+                if let newValue = newValue {
+                    try keychain.save(newValue, forKey: "auth_token", useBiometric: true)
+                } else {
+                    try keychain.delete("auth_token")
+                }
+            } catch {
+                print("Error saving/deleting auth token: \(error)")
             }
         }
     }
@@ -46,22 +58,44 @@ class AuthService: ObservableObject {
     // MARK: - Authentication Methods
 
     private func checkExistingAuth() async {
-        guard let token = authToken else {
+        // First check if we have a token without triggering biometric auth
+        let hasToken = (try? keychain.hasKey("auth_token")) ?? false
+
+        if !hasToken {
             authState = .unauthenticated
             return
         }
 
+        // We have a token, now try to access it with biometric auth
         do {
+            guard let token = try keychain.load("auth_token", withPrompt: "Authenticate to access your Choir account") else {
+                authState = .unauthenticated
+                return
+            }
+
             let userInfo = try await getUserInfo(token: token)
             self.userInfo = userInfo
         } catch {
+            print("Authentication error: \(error)")
             authState = .unauthenticated
-            authToken = nil
+            // Don't delete the token, just couldn't authenticate this time
         }
     }
 
     func login() async throws {
         print("Starting login process")
+
+        // First, authenticate with biometrics before proceeding
+        do {
+            print("Requesting biometric authentication...")
+            try await verifyBiometricAuth()
+            print("Biometric authentication successful")
+        } catch {
+            print("Biometric authentication failed: \(error)")
+            // Convert any LA error to our own AuthError
+            throw AuthError.biometricAuthFailed
+        }
+
         guard let wallet = walletManager.wallet else {
             print("Wallet not available")
             throw AuthError.walletNotAvailable
@@ -95,9 +129,14 @@ class AuthService: ObservableObject {
             )
             print("Received auth response with token: \(authResponse.access_token.prefix(10))...")
 
-            // 5. Store token
-            authToken = authResponse.access_token
-            print("Stored auth token")
+            // 5. Store token with biometric protection
+            do {
+                try keychain.save(authResponse.access_token, forKey: "auth_token", useBiometric: true)
+                print("Stored auth token with biometric protection")
+            } catch {
+                print("Error storing token: \(error)")
+                throw AuthError.tokenStorageFailed
+            }
 
             // 6. Get user info
             print("Fetching user info")
@@ -113,9 +152,20 @@ class AuthService: ObservableObject {
     }
 
     func logout() {
-        authToken = nil
-        userInfo = nil
-        authState = .unauthenticated
+        do {
+            // Delete the auth token from keychain
+            try keychain.delete("auth_token")
+            print("Auth token deleted from keychain")
+
+            // Clear the user info and update auth state
+            userInfo = nil
+            authState = .unauthenticated
+        } catch {
+            print("Error deleting auth token: \(error)")
+            // Still clear the user info and update auth state
+            userInfo = nil
+            authState = .unauthenticated
+        }
     }
 
     // MARK: - API Methods
@@ -233,6 +283,50 @@ class AuthService: ObservableObject {
 
     // MARK: - Helper Methods
 
+    /// Verifies biometric authentication using LocalAuthentication framework directly
+    private func verifyBiometricAuth() async throws {
+        // Use LocalAuthentication framework directly
+
+        let context = LAContext()
+        var error: NSError?
+
+        // Check if biometric authentication is available
+        guard context.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, error: &error) else {
+            if let error = error {
+                print("Biometric authentication not available: \(error)")
+            } else {
+                print("Biometric authentication not available")
+            }
+            // If biometric auth is not available, we'll still allow login
+            // but we'll use standard security
+            return
+        }
+
+        // Get the biometric type (Face ID or Touch ID)
+        let biometricType = context.biometryType == .faceID ? "Face ID" : "Touch ID"
+        print("Using \(biometricType) for authentication")
+
+        // Create a task that can be awaited for the authentication result
+        return try await withCheckedThrowingContinuation { continuation in
+            // Request biometric authentication
+            context.evaluatePolicy(
+                .deviceOwnerAuthenticationWithBiometrics,
+                localizedReason: "Authenticate to sign in to Choir"
+            ) { success, error in
+                if success {
+                    print("Biometric authentication successful")
+                    continuation.resume()
+                } else if let error = error {
+                    print("Biometric authentication failed: \(error)")
+                    continuation.resume(throwing: error)
+                } else {
+                    print("Biometric authentication failed with unknown error")
+                    continuation.resume(throwing: AuthError.biometricAuthFailed)
+                }
+            }
+        }
+    }
+
     /// Creates a JSONDecoder with a custom date decoding strategy that can handle various ISO8601 formats
     private func createJSONDecoder() -> JSONDecoder {
         let decoder = JSONDecoder()
@@ -271,10 +365,15 @@ class AuthService: ObservableObject {
     }
 
     func getAuthHeader() -> [String: String]? {
-        guard let token = authToken else {
+        do {
+            guard let token = try keychain.load("auth_token", withPrompt: "Authenticate to access your Choir account") else {
+                return nil
+            }
+
+            return ["Authorization": "Bearer \(token)"]
+        } catch {
+            print("Error getting auth token for header: \(error)")
             return nil
         }
-
-        return ["Authorization": "Bearer \(token)"]
     }
 }

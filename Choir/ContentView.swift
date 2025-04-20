@@ -9,25 +9,71 @@ import SwiftUI
 struct ContentView: View {
     // Use environment objects instead of creating new instances
     @StateObject private var viewModel = PostchainViewModel(coordinator: PostchainCoordinatorImpl())
-    @State private var threads: [ChoirThread] = []
+    @EnvironmentObject var threadManager: ThreadManager
+    @EnvironmentObject var walletManager: WalletManager
     @State private var selectedChoirThread: ChoirThread?
+    @State private var showingExportSheet = false
+    @State private var showingImportSheet = false
+    @State private var isLoadingThreads = false
 
     var body: some View {
         NavigationSplitView {
-            List(selection: $selectedChoirThread) {
-                ForEach(threads, id: \.id) { thread in
-                    NavigationLink(value: thread) {
-                        ChoirThreadRow(thread: thread)
-                    }
-                    .contextMenu {
-                        Button(role: .destructive, action: {
-                            deleteThread(thread)
-                        }) {
-                            Label("Delete", systemImage: "trash")
+            ZStack {
+                List(selection: $selectedChoirThread) {
+                    ForEach(threadManager.threads, id: \.id) { thread in
+                        NavigationLink(value: thread) {
+                            ChoirThreadRow(thread: thread)
+                        }
+                        .contextMenu {
+                            Button(role: .destructive, action: {
+                                deleteThread(thread)
+                            }) {
+                                Label("Delete", systemImage: "trash")
+                            }
                         }
                     }
+                    .onDelete(perform: deleteThreads)
                 }
-                .onDelete(perform: deleteThreads)
+
+                if isLoadingThreads {
+                    ProgressView("Loading threads...")
+                        .padding()
+                        .background(Color.secondary.opacity(0.1))
+                        .cornerRadius(10)
+                }
+
+                if threadManager.threads.isEmpty && !isLoadingThreads {
+                    VStack {
+                        Text("No threads found")
+                            .font(.headline)
+                            .padding(.bottom, 4)
+
+                        if threadManager.currentWalletAddress != nil {
+                            Text("Create a new thread or import existing ones")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal)
+
+                            Button(action: createNewChoirThread) {
+                                Label("New Thread", systemImage: "plus.circle")
+                                    .padding()
+                                    .background(Color.accentColor)
+                                    .foregroundColor(.white)
+                                    .cornerRadius(8)
+                            }
+                            .padding(.top)
+                        } else {
+                            Text("Select a wallet to see its threads")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal)
+                        }
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(Color.clear)
+                }
             }
             .navigationTitle("Chat")
             .toolbar {
@@ -39,6 +85,26 @@ struct ContentView: View {
 
                 ToolbarItem(placement: .navigationBarLeading) { // Keep explicit placement for leading item
                     EditButton()
+                }
+
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Menu {
+                        Button(action: { showingExportSheet = true }) {
+                            Label("Export Threads", systemImage: "square.and.arrow.up")
+                        }
+
+                        Button(action: { showingImportSheet = true }) {
+                            Label("Import Threads", systemImage: "square.and.arrow.down")
+                        }
+
+                        Button(action: {
+                            loadThreads()
+                        }) {
+                            Label("Refresh Threads", systemImage: "arrow.clockwise")
+                        }
+                    } label: {
+                        Image(systemName: "ellipsis.circle")
+                    }
                 }
             }
         } detail: {
@@ -76,7 +142,38 @@ struct ContentView: View {
                 .background(Color.secondary.opacity(0.1))
             }
         }
-        // No longer need wallet sheet
+        .sheet(isPresented: $showingExportSheet) {
+            ThreadExportView()
+                .environmentObject(threadManager)
+                .environmentObject(walletManager)
+        }
+        .sheet(isPresented: $showingImportSheet) {
+            ThreadImportView(onImportSuccess: { count in
+                // Force a reload of threads after successful import
+                print("Import successful, reloading threads...")
+
+                // First, force a reload of the current wallet's threads
+                threadManager.loadThreads()
+
+                // Then, after a delay, reload again and update the UI
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                    // Reload threads after successful import
+                    threadManager.loadThreads()
+
+                    // Force UI update
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        // If threads were imported, select the first one
+                        if !threadManager.threads.isEmpty {
+                            print("Setting selected thread to first thread")
+                            selectedChoirThread = threadManager.threads.first
+                        } else {
+                            print("No threads available to select")
+                        }
+                    }
+                }
+            })
+            .environmentObject(threadManager)
+        }
         .onAppear {
             // Load saved threads
             loadThreads()
@@ -85,46 +182,50 @@ struct ContentView: View {
         }
         .onChange(of: selectedChoirThread) { _, newThread in
             guard let thread = newThread else { return }
-            thread.lastOpened = Date()
-            threads.sort { $0.lastOpened > $1.lastOpened }
+            thread.lastModified = Date()
+            threadManager.loadThreads() // Reload to get sorted threads
         }
     }
 
-    /// Load all threads from persistent storage
+    /// Load all threads from the thread manager
     private func loadThreads() {
-        let loadedThreads = ThreadPersistenceService.shared.loadAllThreads()
-        if !loadedThreads.isEmpty {
-            threads = loadedThreads
-            selectedChoirThread = threads.first
+        isLoadingThreads = true
+
+        // Use a slight delay to ensure the UI updates
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            threadManager.loadThreads()
+
+            // If no thread is selected but we have threads, select the first one
+            if selectedChoirThread == nil && !threadManager.threads.isEmpty {
+                selectedChoirThread = threadManager.threads.first
+            }
+
+            isLoadingThreads = false
         }
     }
 
     /// Create a new thread and save it
     private func createNewChoirThread() {
-        let thread = ChoirThread() // Uses auto-generated title
-        threads.append(thread)
+        // Create a new thread with the current wallet address
+        let thread = threadManager.createThread()
         selectedChoirThread = thread
-
-        // Save the new thread
-        ThreadPersistenceService.shared.saveThread(thread)
     }
 
     /// Delete a thread
     private func deleteThread(_ thread: ChoirThread) {
         // Remove from UI
         if selectedChoirThread?.id == thread.id {
-            selectedChoirThread = threads.first(where: { $0.id != thread.id })
+            selectedChoirThread = threadManager.threads.first(where: { $0.id != thread.id })
         }
-        threads.removeAll(where: { $0.id == thread.id })
 
-        // Delete from storage
-        ThreadPersistenceService.shared.deleteThread(threadId: thread.id)
+        // Delete using thread manager
+        threadManager.deleteThread(thread)
     }
 
     /// Delete threads at offsets (for swipe-to-delete)
     private func deleteThreads(at offsets: IndexSet) {
         for index in offsets {
-            let thread = threads[index]
+            let thread = threadManager.threads[index]
             deleteThread(thread)
         }
     }
@@ -157,9 +258,18 @@ struct ChoirThreadRow: View {
                     }
             }
 
-            Text("\(thread.messages.count) messages")
-                .font(.caption)
-                .foregroundStyle(.secondary)
+            HStack {
+                Text("\(thread.messages.count) messages")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+
+                Spacer()
+
+                // Show the last modified date
+                Text(thread.lastModified, style: .relative)
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+            }
         }
         .contextMenu {
             Button(action: {

@@ -23,6 +23,14 @@ struct ChoirApp: App {
                 // TODO: Store threadIDs in a shared model or environment object
 
                 print("App appeared - checking authentication state")
+
+                // Check biometric authentication availability
+                let keychain = KeychainService()
+                if keychain.canUseBiometricAuthentication() {
+                    print("Biometric authentication available: \(keychain.biometricType())")
+                } else {
+                    print("Biometric authentication not available, using passcode fallback")
+                }
             }
             .onChange(of: appCoordinator.currentAuthState) { newState in
                 print("Auth state changed to \(newState)")

@@ -5,6 +5,8 @@ struct LoginView: View {
     @EnvironmentObject var authService: AuthService
     @State private var isLoading = false
     @State private var errorMessage: String?
+    @State private var showingImportSheet = false
+    @State private var showingWalletSelectionSheet = false
 
     // No custom initializer needed - using environment objects
 
@@ -20,27 +22,39 @@ struct LoginView: View {
 
             Spacer()
 
-            if walletManager.wallet == nil {
-                Button(action: createWallet) {
-                    Text("Create Wallet")
-                        .font(.headline)
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.blue)
-                        .cornerRadius(10)
-                }
-                .disabled(isLoading)
-            } else {
+            // Wallet info section
+            if let wallet = walletManager.wallet {
                 VStack(alignment: .leading, spacing: 10) {
-                    Text("Wallet Address:")
+                    HStack {
+                        Text("Current Wallet:")
+                            .font(.headline)
+
+                        Spacer()
+
+                        Button(action: { showingWalletSelectionSheet = true }) {
+                            Label("Switch", systemImage: "arrow.left.arrow.right")
+                                .font(.caption)
+                        }
+                    }
+
+                    if let address = try? wallet.accounts[0].address(),
+                       let name = walletManager.walletNames[address] {
+                        Text(name)
+                            .font(.subheadline)
+                            .foregroundColor(.primary)
+                            .fontWeight(.bold)
+                    }
+
+                    Text("Address:")
                         .font(.headline)
 
-                    if let address = try? walletManager.wallet?.accounts[0].address() {
+                    if let address = try? wallet.accounts[0].address() {
                         Text(address)
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                             .textSelection(.enabled)
+                            .lineLimit(1)
+                            .truncationMode(.middle)
                     }
 
                     Text("Balance:")
@@ -64,6 +78,49 @@ struct LoginView: View {
                         .cornerRadius(10)
                 }
                 .disabled(isLoading)
+            } else {
+                Text("No wallet selected")
+                    .font(.headline)
+                    .foregroundColor(.secondary)
+                    .padding()
+            }
+
+            // Wallet management buttons
+            VStack(spacing: 16) {
+                Button(action: createWallet) {
+                    Text("Create New Wallet")
+                        .font(.headline)
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.blue)
+                        .cornerRadius(10)
+                }
+                .disabled(isLoading)
+
+                Button(action: { showingImportSheet = true }) {
+                    Text("Import Wallet from Mnemonic")
+                        .font(.headline)
+                        .foregroundColor(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.green)
+                        .cornerRadius(10)
+                }
+                .disabled(isLoading)
+
+                if walletManager.wallets.count > 0 {
+                    Button(action: { showingWalletSelectionSheet = true }) {
+                        Text("Select from \(walletManager.wallets.count) Wallets")
+                            .font(.headline)
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.orange)
+                            .cornerRadius(10)
+                    }
+                    .disabled(isLoading)
+                }
             }
 
             if isLoading {
@@ -87,6 +144,14 @@ struct LoginView: View {
                 }
             }
         }
+        .sheet(isPresented: $showingImportSheet) {
+            ImportMnemonicView()
+                .environmentObject(walletManager)
+        }
+        .sheet(isPresented: $showingWalletSelectionSheet) {
+            WalletSelectionView()
+                .environmentObject(walletManager)
+        }
     }
 
     private func createWallet() {
@@ -95,7 +160,9 @@ struct LoginView: View {
 
         Task {
             do {
-                try await walletManager.createOrLoadWallet()
+                // Generate a random wallet name
+                let walletName = "Wallet \(Int.random(in: 1000...9999))"
+                try await walletManager.createOrLoadWallet(name: walletName)
                 isLoading = false
             } catch {
                 isLoading = false

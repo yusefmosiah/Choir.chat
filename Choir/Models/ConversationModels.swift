@@ -163,12 +163,17 @@ struct PhaseResult: Codable, Equatable, Hashable {
 class ChoirThread: ObservableObject, Identifiable, Hashable {
     let id: UUID
     @Published var title: String
-    @Published var lastOpened: Date = Date()
+    @Published var createdAt: Date
+    @Published var lastModified: Date
+    @Published var walletAddress: String?
     @Published var messages: [Message] = []
 
-    init(id: UUID = UUID(), title: String? = nil) {
+    init(id: UUID = UUID(), title: String? = nil, walletAddress: String? = nil) {
         self.id = id
         self.title = title ?? "ChoirThread \(DateFormatter.localizedString(from: Date(), dateStyle: .short, timeStyle: .short))"
+        self.createdAt = Date()
+        self.lastModified = Date()
+        self.walletAddress = walletAddress
     }
 
     static func == (lhs: ChoirThread, rhs: ChoirThread) -> Bool {
@@ -187,6 +192,9 @@ class ChoirThread: ObservableObject, Identifiable, Hashable {
     }
 
     private func saveThread() {
+        // Update the last modified date
+        self.lastModified = Date()
+
         Task {
             await Task.detached {
                 ThreadPersistenceService.shared.saveThread(self)
@@ -265,9 +273,9 @@ class Message: ObservableObject, Identifiable, Equatable {
         objectWillChange.send()
 
         // Debug output for monitoring
-        
+
         // Enhanced logging for model information
-        
+
         // Add debugging for vector results - check what we're getting in the event
         if let vectorResults = event.vectorResults {
             if !vectorResults.isEmpty {
@@ -304,17 +312,17 @@ class Message: ObservableObject, Identifiable, Equatable {
         // Enhanced debug logging for yield phase
         if phase == .yield {
             // DEBUG LOG: Add specific logging for Message update
-            
+
             // Standard handling for yield phase (same as other phases)
             if !content.isEmpty {
                 phaseResults[phase] = PhaseResult(content: content, provider: provider, modelName: modelName)
-                
+
                 // Update main content with yield content
                 self.content = content
             } else {
                 phaseResults[phase] = PhaseResult(content: "", provider: provider, modelName: modelName)
             }
-            
+
             // DEBUG LOG: Log content after update
         } else {
             // Standard handling for normal content
@@ -329,15 +337,15 @@ class Message: ObservableObject, Identifiable, Equatable {
         // Handle search results
         if phase == .experienceVectors {
             if let results = event.vectorResults {
-                
+
                 // Enhanced debug info about incoming vector results
-                
+
                 for (index, result) in results.enumerated() {
                 }
-                
+
                 // Actually store the results
                 self.vectorSearchResults = results
-                
+
                 // IMPORTANT: Since vector results typically come with the Experience Vectors phase,
                 // But might be referenced in ANY phase, we need to store this information more prominently
                 if !results.isEmpty {
@@ -345,19 +353,19 @@ class Message: ObservableObject, Identifiable, Equatable {
                 }
             } else {
             }
-        } 
+        }
         // Even if we're in another phase, if we receive vector results, we should store them
         // This could happen if results from experienceVectors are attached to other phase events
         else if let results = event.vectorResults, !results.isEmpty {
-            
+
             // Enhanced debug info for non-experienceVectors phase
             for (index, result) in results.enumerated() {
             }
-            
+
             // Store the results
             self.vectorSearchResults = results
         }
-        
+
         // Handle web search results
         if phase == .experienceWeb {
             if let results = event.webResults {
@@ -385,7 +393,7 @@ class Message: ObservableObject, Identifiable, Equatable {
 
         // Get the content and log details
         let content = phaseResults[phase]?.content ?? ""
-        
+
         // NOTE: Vector reference conversion (#123 -> links) is now handled in PaginatedMarkdownView
         return content
     }
@@ -427,13 +435,13 @@ extension Message {
         var markdown = "\n\n---\n**Vector Search Results:**\n\n" // Separator and title
         for result in vectorSearchResults {
             markdown += "*   **Score: \(String(format: "%.2f", result.score))**"
-            
+
             // Check for local thread link
             if let threadIDString = result.metadata?["thread_id"] as? String,
                let _ = UUID(uuidString: threadIDString) {
                  markdown += " [Local Thread](choir://thread/\(threadIDString))"
             }
-            
+
             // Handle both content formats - full content or preview content
             let contentText: String
             if !result.content.isEmpty {
@@ -443,9 +451,9 @@ extension Message {
             } else {
                 contentText = "[Vector Result]"
             }
-            
+
             markdown += "\n    > \(contentText.replacingOccurrences(of: "\n", with: "\n    > "))" // Blockquote for content
-            
+
             if let provider = result.provider {
                  markdown += "\n    *Provider: \(provider)*"
             }
@@ -464,14 +472,14 @@ extension Message {
             // Make sure we have title and URL
             let titleText = !result.title.isEmpty ? result.title : "Web Result"
             let urlText = !result.url.isEmpty ? result.url : "#"
-            
+
             // Format title as link
             markdown += "*   **[\(titleText)](\(urlText))**"
-            
+
             // Handle content
             let contentText = !result.content.isEmpty ? result.content : "[Content not available]"
             markdown += "\n    > \(contentText.replacingOccurrences(of: "\n", with: "\n    > "))" // Blockquote for content
-            
+
             if let provider = result.provider {
                  markdown += "\n    *Provider: \(provider)*"
             }

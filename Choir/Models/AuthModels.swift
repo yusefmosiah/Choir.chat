@@ -117,6 +117,8 @@ enum AuthError: Error, LocalizedError {
     case networkError(Error)
     case invalidResponse
     case walletNotAvailable
+    case tokenStorageFailed
+    case biometricAuthFailed
 
     var errorDescription: String? {
         switch self {
@@ -130,6 +132,10 @@ enum AuthError: Error, LocalizedError {
             return "Invalid response from server"
         case .walletNotAvailable:
             return "Wallet not available"
+        case .tokenStorageFailed:
+            return "Failed to securely store authentication token"
+        case .biometricAuthFailed:
+            return "Face ID or Touch ID authentication failed. Please try again."
         }
     }
 }

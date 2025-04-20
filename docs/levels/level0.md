@@ -55,6 +55,7 @@ tree.md
 │   │   ├── AuthService.swift
 │   │   ├── KeychainService.swift
 │   │   ├── ModelConfigManager.swift
+│   │   ├── ThreadManager.swift
 │   │   ├── ThreadPersistenceService.swift
 │   │   └── WalletManager.swift
 │   ├── Utils
@@ -66,6 +67,7 @@ tree.md
 │   │   └── PostchainViewModel.swift
 │   └── Views
 │       ├── ChoirThreadDetailView.swift
+│       ├── ImportMnemonicView.swift
 │       ├── LoginView.swift
 │       ├── MessageRow.swift
 │       ├── ModelConfigView.swift
@@ -79,6 +81,9 @@ tree.md
 │       │   └── Components
 │       │       ├── ThreadInputBar.swift
 │       │       └── ThreadMessageList.swift
+│       ├── ThreadExportView.swift
+│       ├── ThreadImportView.swift
+│       ├── WalletSelectionView.swift
 │       └── WalletView.swift
 ├── Choir.xcodeproj
 │   ├── project.pbxproj
@@ -275,7 +280,7 @@ tree.md
     ├── test_api.sh
     └── test_postchain_multiturn.sh
 
-66 directories, 194 files
+66 directories, 199 files
 
 === File: docs/CHANGELOG.md ===
 

@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 @MainActor
 class AppCoordinator: ObservableObject {
@@ -6,7 +7,10 @@ class AppCoordinator: ObservableObject {
 
     @Published var authService: AuthService
     @Published var walletManager: WalletManager
+    @Published var threadManager: ThreadManager
     @Published private(set) var currentAuthState: AuthState = .unauthenticated
+
+    private var cancellables = Set<AnyCancellable>()
 
     // MARK: - Initialization
 
@@ -14,9 +18,37 @@ class AppCoordinator: ObservableObject {
         let walletManager = WalletManager()
         self.walletManager = walletManager
         self.authService = AuthService(walletManager: walletManager)
+        self.threadManager = ThreadManager()
 
         // Set up observer for auth state changes
         setupAuthStateObserver()
+
+        // Observe wallet changes
+        walletManager.$wallet.sink { [weak self] newWallet in
+            guard let self = self else { return }
+            Task { @MainActor in
+                if let wallet = newWallet,
+                   let address = try? wallet.accounts[0].address() {
+                    // When wallet changes, update the thread manager
+                    self.threadManager.switchWallet(to: address)
+                }
+            }
+        }.store(in: &cancellables)
+
+        // Observe auth state changes for wallet switching
+        authService.$authState.sink { [weak self] newState in
+            guard let self = self else { return }
+            Task { @MainActor in
+                if case .authenticated(let userInfo) = newState,
+                   let walletAddress = try? self.walletManager.wallet?.accounts[0].address() {
+                    // When authenticated, switch to the current wallet's threads
+                    self.threadManager.switchWallet(to: walletAddress)
+                } else if case .unauthenticated = newState {
+                    // When logged out, switch to nil wallet (show no threads)
+                    self.threadManager.switchWallet(to: nil)
+                }
+            }
+        }.store(in: &cancellables)
     }
 
     private func setupAuthStateObserver() {
@@ -39,18 +71,21 @@ class AppCoordinator: ObservableObject {
                 LoginView()
                     .environmentObject(walletManager)
                     .environmentObject(authService)
+                    .environmentObject(threadManager)
                     .transition(.opacity)
 
             case .authenticating:
                 ProgressView("Authenticating...")
                     .environmentObject(walletManager)
                     .environmentObject(authService)
+                    .environmentObject(threadManager)
                     .transition(.opacity)
 
             case .authenticated:
                 MainTabView()
                     .environmentObject(walletManager)
                     .environmentObject(authService)
+                    .environmentObject(threadManager)
                     .transition(.opacity)
             }
         }
@@ -63,6 +98,7 @@ class AppCoordinator: ObservableObject {
 struct MainTabView: View {
     @EnvironmentObject var authService: AuthService
     @EnvironmentObject var walletManager: WalletManager
+    @EnvironmentObject var threadManager: ThreadManager
     @State private var selectedTab = 0 // Default to Home tab
 
     var body: some View {
@@ -75,6 +111,7 @@ struct MainTabView: View {
                 }
                 .environmentObject(walletManager)
                 .environmentObject(authService)
+                .environmentObject(threadManager)
 
             // Wallet tab
             WalletView()
@@ -82,7 +119,7 @@ struct MainTabView: View {
                 .tabItem {
                     Label("Wallet", systemImage: "wallet.pass")
                 }
-            
+
 
 
             // Settings tab

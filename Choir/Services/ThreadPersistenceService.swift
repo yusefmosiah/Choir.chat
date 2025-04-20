@@ -21,6 +21,29 @@ class ThreadPersistenceService {
 
         // Create the directory if it doesn't exist
         try? FileManager.default.createDirectory(at: threadsDirectory, withIntermediateDirectories: true)
+
+        // Create a default directory for threads not associated with any wallet
+        let defaultDir = threadsDirectory.appendingPathComponent("default", isDirectory: true)
+        try? FileManager.default.createDirectory(at: defaultDir, withIntermediateDirectories: true)
+    }
+
+    // Get the directory for a specific wallet
+    private func walletDirectory(for walletAddress: String?) -> URL {
+        if let walletAddress = walletAddress {
+            let walletDir = threadsDirectory.appendingPathComponent(walletAddress, isDirectory: true)
+            try? FileManager.default.createDirectory(at: walletDir, withIntermediateDirectories: true)
+            return walletDir
+        } else {
+            // For threads not associated with any wallet (legacy or device-only)
+            let defaultDir = threadsDirectory.appendingPathComponent("default", isDirectory: true)
+            try? FileManager.default.createDirectory(at: defaultDir, withIntermediateDirectories: true)
+            return defaultDir
+        }
+    }
+
+    // Get file URL for a thread
+    private func fileURL(for threadId: UUID, walletAddress: String?) -> URL {
+        return walletDirectory(for: walletAddress).appendingPathComponent("\(threadId.uuidString).json")
     }
 
     // MARK: - Public Methods
@@ -31,22 +54,28 @@ class ThreadPersistenceService {
     @discardableResult
     func saveThread(_ thread: ChoirThread) -> Bool {
         do {
+            // Debug print
+            print("Saving thread \(thread.id) with wallet address: \(thread.walletAddress ?? "nil")")
+
             // Create a serializable representation of the thread
             let threadData = ThreadData(from: thread)
 
             // Encode the thread data
             let encoder = JSONEncoder()
             encoder.outputFormatting = .prettyPrinted
+            encoder.dateEncodingStrategy = .iso8601
             let data = try encoder.encode(threadData)
 
-            // Create a file URL for this thread
-            let fileURL = threadsDirectory.appendingPathComponent("\(thread.id.uuidString).json")
+            // Create a file URL for this thread in the appropriate wallet directory
+            let fileURL = self.fileURL(for: thread.id, walletAddress: thread.walletAddress)
+            print("Saving to file: \(fileURL.path)")
 
             // Write the data to the file
             try data.write(to: fileURL)
 
             return true
         } catch {
+            print("Error saving thread: \(error)")
             return false
         }
     }
@@ -54,15 +83,53 @@ class ThreadPersistenceService {
     /// Load a thread from a file
     /// - Parameter threadId: The UUID of the thread to load
     /// - Returns: The loaded thread, or nil if loading failed
-    func loadThread(threadId: UUID) -> ChoirThread? {
-        let fileURL = threadsDirectory.appendingPathComponent("\(threadId.uuidString).json")
+    func loadThread(threadId: UUID, walletAddress: String? = nil) -> ChoirThread? {
+        // If wallet address is provided, try to load from that wallet's directory
+        if let walletAddress = walletAddress {
+            let fileURL = self.fileURL(for: threadId, walletAddress: walletAddress)
 
+            if let thread = loadThreadFromFile(fileURL) {
+                return thread
+            }
+        } else {
+            // Try to find the thread in any wallet directory
+            do {
+                // First check the default directory
+                let defaultFileURL = self.fileURL(for: threadId, walletAddress: nil)
+                if let thread = loadThreadFromFile(defaultFileURL) {
+                    return thread
+                }
+
+                // Then check all wallet directories
+                let walletDirs = try FileManager.default.contentsOfDirectory(at: threadsDirectory, includingPropertiesForKeys: nil)
+                    .filter { $0.hasDirectoryPath && $0.lastPathComponent != "default" }
+
+                for walletDir in walletDirs {
+                    let walletAddress = walletDir.lastPathComponent
+                    let fileURL = walletDir.appendingPathComponent("\(threadId.uuidString).json")
+
+                    if let thread = loadThreadFromFile(fileURL) {
+                        // Set the wallet address on the thread
+                        thread.walletAddress = walletAddress
+                        return thread
+                    }
+                }
+            } catch {
+                print("Error searching for thread: \(error)")
+            }
+        }
+
+        return nil
+    }
+
+    private func loadThreadFromFile(_ fileURL: URL) -> ChoirThread? {
         do {
             // Read the data from the file
             let data = try Data(contentsOf: fileURL)
 
             // Decode the thread data
             let decoder = JSONDecoder()
+            decoder.dateDecodingStrategy = .iso8601
             let threadData = try decoder.decode(ThreadData.self, from: data)
 
             // Create a thread from the data
@@ -74,26 +141,69 @@ class ThreadPersistenceService {
 
     /// Load all threads from the threads directory
     /// - Returns: Array of loaded threads
-    func loadAllThreads() -> [ChoirThread] {
+    func loadAllThreads(walletAddress: String? = nil) -> [ChoirThread] {
         do {
-            // Get all JSON files in the threads directory
-            let fileURLs = try FileManager.default.contentsOfDirectory(at: threadsDirectory, includingPropertiesForKeys: nil)
+            print("Loading threads for wallet address: \(walletAddress ?? "all")")
+
+            if let walletAddress = walletAddress {
+                // Load threads for a specific wallet
+                let walletDir = walletDirectory(for: walletAddress)
+                print("Loading from wallet directory: \(walletDir.path)")
+                let threads = try loadThreadsFromDirectory(walletDir, walletAddress: walletAddress)
+                print("Found \(threads.count) threads for wallet \(walletAddress)")
+                return threads
+            } else {
+                // Load all threads from all wallets
+                var allThreads: [ChoirThread] = []
+
+                // First load threads from the default directory
+                let defaultDir = walletDirectory(for: nil)
+                print("Loading from default directory: \(defaultDir.path)")
+                let defaultThreads = try loadThreadsFromDirectory(defaultDir, walletAddress: nil)
+                print("Found \(defaultThreads.count) threads in default directory")
+                allThreads.append(contentsOf: defaultThreads)
+
+                // Then load threads from each wallet directory
+                let walletDirs = try FileManager.default.contentsOfDirectory(at: threadsDirectory, includingPropertiesForKeys: nil)
+                    .filter { $0.hasDirectoryPath && $0.lastPathComponent != "default" }
+
+                print("Found \(walletDirs.count) wallet directories")
+                for walletDir in walletDirs {
+                    let walletAddress = walletDir.lastPathComponent
+                    print("Loading from wallet directory: \(walletDir.path)")
+                    let walletThreads = try loadThreadsFromDirectory(walletDir, walletAddress: walletAddress)
+                    print("Found \(walletThreads.count) threads for wallet \(walletAddress)")
+                    allThreads.append(contentsOf: walletThreads)
+                }
+
+                print("Total threads loaded: \(allThreads.count)")
+                return allThreads
+            }
+        } catch {
+            print("Error loading threads: \(error)")
+            return []
+        }
+    }
+
+    private func loadThreadsFromDirectory(_ directory: URL, walletAddress: String?) -> [ChoirThread] {
+        do {
+            // Get all JSON files in the directory
+            let fileURLs = try FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil)
                 .filter { $0.pathExtension == "json" }
 
             // Load each thread
             var threads: [ChoirThread] = []
             for fileURL in fileURLs {
-                do {
-                    let data = try Data(contentsOf: fileURL)
-                    let decoder = JSONDecoder()
-                    let threadData = try decoder.decode(ThreadData.self, from: data)
-                    threads.append(threadData.toChoirThread())
-                } catch {
+                if let thread = loadThreadFromFile(fileURL) {
+                    // Set the wallet address on the thread
+                    thread.walletAddress = walletAddress
+                    threads.append(thread)
                 }
             }
 
             return threads
         } catch {
+            print("Error loading threads from directory: \(error)")
             return []
         }
     }
@@ -102,13 +212,23 @@ class ThreadPersistenceService {
     /// - Parameter threadId: The UUID of the thread to delete
     /// - Returns: Success or failure
     @discardableResult
-    func deleteThread(threadId: UUID) -> Bool {
-        let fileURL = threadsDirectory.appendingPathComponent("\(threadId.uuidString).json")
+    func deleteThread(threadId: UUID, walletAddress: String? = nil) -> Bool {
+        if let walletAddress = walletAddress {
+            // Delete from the specific wallet directory
+            let fileURL = self.fileURL(for: threadId, walletAddress: walletAddress)
 
-        do {
-            try FileManager.default.removeItem(at: fileURL)
-            return true
-        } catch {
+            do {
+                try FileManager.default.removeItem(at: fileURL)
+                return true
+            } catch {
+                print("Error deleting thread: \(error)")
+                return false
+            }
+        } else {
+            // Try to find and delete the thread from any wallet directory
+            if let thread = loadThread(threadId: threadId) {
+                return deleteThread(threadId: threadId, walletAddress: thread.walletAddress)
+            }
             return false
         }
     }
@@ -121,11 +241,17 @@ struct ThreadData: Codable {
     let id: String
     let title: String
     let messages: [MessageData]
+    let walletAddress: String?
+    let createdAt: Date
+    let lastModified: Date
 
     init(from thread: ChoirThread) {
         self.id = thread.id.uuidString
         self.title = thread.title
         self.messages = thread.messages.map { MessageData(from: $0) }
+        self.walletAddress = thread.walletAddress
+        self.createdAt = thread.createdAt
+        self.lastModified = thread.lastModified
     }
 
     func toChoirThread() -> ChoirThread {
@@ -133,7 +259,11 @@ struct ThreadData: Codable {
         let threadId = UUID(uuidString: id) ?? UUID()
 
         // Create a new thread
-        let thread = ChoirThread(id: threadId, title: title)
+        let thread = ChoirThread(id: threadId, title: title, walletAddress: walletAddress)
+
+        // Set dates
+        thread.createdAt = createdAt
+        thread.lastModified = lastModified
 
         // Add messages
         thread.messages = messages.map { $0.toMessage() }
