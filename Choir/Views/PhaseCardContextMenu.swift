@@ -15,16 +15,21 @@ struct PhaseCardContextMenu: View {
         let phaseResult = message.getPhaseResult(phase)
         let modelName = phaseResult?.modelName
         let provider = phaseResult?.provider
-        
+
         VStack(alignment: .leading) {
             // Display model name with provider if both are available, otherwise fallback to phase description
-            // Simplified display logic
             if let provider = provider, !provider.isEmpty {
-                Text("Model: \(provider)")
+                if let modelName = modelName, !modelName.isEmpty {
+                    Text("Model: \(provider), \(modelName)")
+                } else {
+                    Text("Model: \(provider)")
+                }
+            } else if let modelName = modelName, !modelName.isEmpty {
+                Text("Model: \(modelName)")
             } else {
                 Text("Model: \(phase.description)")
             }
-            
+
             Text("Page: \(currentPage + 1)")
 
             Button {
@@ -43,22 +48,35 @@ struct PhaseCardContextMenu: View {
         }
         .onAppear {
             // Detailed debugging for model name issues
-            
+            print("PhaseCardContextMenu - Phase: \(phase.rawValue)")
+
             if let result = phaseResult {
-                
+                print("  PhaseResult found")
+
                 if let provider = result.provider {
+                    print("  Provider: \(provider)")
+                } else {
+                    print("  Provider: nil")
                 }
-                
+
                 if let modelName = result.modelName {
+                    print("  ModelName: \(modelName)")
+                } else {
+                    print("  ModelName: nil")
                 }
-                
+
                 // Which display condition was used
                 if let provider = provider, !provider.isEmpty, let modelName = modelName, !modelName.isEmpty {
+                    print("  Display condition: provider and modelName")
                 } else if let modelName = modelName, !modelName.isEmpty {
+                    print("  Display condition: modelName only")
                 } else if let provider = provider, !provider.isEmpty {
+                    print("  Display condition: provider only")
                 } else {
+                    print("  Display condition: fallback to phase description")
                 }
             } else {
+                print("  No PhaseResult found")
             }
         }
     }

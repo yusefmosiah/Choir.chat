@@ -75,7 +75,13 @@ async def process_simple_postchain(
                 **model_overrides, # Expand the model overrides as keyword arguments
             ):
                 # Convert chunk to JSON and yield with newline for proper SSE formatting
-                yield f"data: {json.dumps(event)}\n\n"
+                json_data = json.dumps(event)
+                # Enhanced debug logging
+                if "model_name" in event:
+                    print(f"SERVER: Sending event with model_name: {event['model_name']}")
+                    print(f"SERVER: JSON keys: {list(event.keys())}")
+                    print(f"SERVER: Full JSON: {json_data}")
+                yield f"data: {json_data}\n\n"
                 await asyncio.sleep(0.01) # Add a small delay to allow flushing
 
             # End of stream

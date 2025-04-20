@@ -742,21 +742,76 @@ async def run_langchain_postchain_workflow(
     # --- Workflow Sequence ---
 
     # 1. Action Phase
-    yield {"phase": "action", "status": "running"}
+    # Ensure model_name is not empty for running status
+    action_model_name = action_model_config.model_name if action_model_config.model_name else "unknown"
+
+    # Create the response object for running status
+    running_obj = {
+        "phase": "action",
+        "status": "running",
+        "provider": action_model_config.provider,
+        "model_name": action_model_name
+    }
+
+    # Log the running status
+    logger.info(f"🐍 ACTION PHASE: Sending running status with model_name: {action_model_name}")
+
+    yield running_obj
     action_result = await run_action_phase(current_messages, action_model_config)
     if "error" in action_result:
-        yield {"phase": "action", "status": "error", "content": action_result["error"]}
+        # Ensure model_name is not empty
+        action_model_name = action_model_config.model_name if action_model_config.model_name else "unknown"
+
+        # Create the response object
+        response_obj = {
+            "phase": "action",
+            "status": "error",
+            "content": action_result["error"],
+            "provider": action_model_config.provider,
+            "model_name": action_model_name
+        }
+
+        # Log the exact JSON that will be sent
+        logger.info(f"🐍 ACTION PHASE ERROR: Sending JSON response: {json.dumps(response_obj)}")
+
+        yield response_obj
         return
     action_response: AIMessage = action_result["action_response"]
     current_messages.append(action_response)
     conversation_history_store[thread_id] = current_messages
-    yield {
-        "phase": "action", "status": "complete", "content": action_response.content,
-        "provider": action_model_config.provider, "model_name": action_model_config.model_name
+    # Ensure model_name is not empty
+    action_model_name = action_model_config.model_name if action_model_config.model_name else "unknown"
+
+    # Create the response object
+    response_obj = {
+        "phase": "action",
+        "status": "complete",
+        "content": action_response.content,
+        "provider": action_model_config.provider,
+        "model_name": action_model_name
     }
 
+    # Log the exact JSON that will be sent
+    logger.info(f"🐍 ACTION PHASE: Sending JSON response: {json.dumps(response_obj)}")
+
+    yield response_obj
+
     # 2. Experience Vectors Phase
-    yield {"phase": "experience_vectors", "status": "running"}
+    # Ensure model_name is not empty for running status
+    exp_vectors_model_name = experience_vectors_model_config.model_name if experience_vectors_model_config.model_name else "unknown"
+
+    # Create the response object for running status
+    running_obj = {
+        "phase": "experience_vectors",
+        "status": "running",
+        "provider": experience_vectors_model_config.provider,
+        "model_name": exp_vectors_model_name
+    }
+
+    # Log the running status
+    logger.info(f"🐍 EXPERIENCE VECTORS PHASE: Sending running status with model_name: {exp_vectors_model_name}")
+
+    yield running_obj
     exp_vectors_output: ExperienceVectorsPhaseOutput = await run_experience_vectors_phase(current_messages, experience_vectors_model_config, thread_id=thread_id)
     if exp_vectors_output.error:
         # Use same format for error case, but include full content
@@ -772,11 +827,23 @@ async def run_langchain_postchain_workflow(
             }
             vector_result_data.append(compact_result)
 
-        yield {
-            "phase": "experience_vectors", "status": "error", "content": exp_vectors_output.error,
-            "provider": experience_vectors_model_config.provider, "model_name": experience_vectors_model_config.model_name,
+        # Ensure model_name is not empty
+        exp_vectors_model_name = experience_vectors_model_config.model_name if experience_vectors_model_config.model_name else "unknown"
+
+        # Create the response object
+        response_obj = {
+            "phase": "experience_vectors",
+            "status": "error",
+            "content": exp_vectors_output.error,
+            "provider": experience_vectors_model_config.provider,
+            "model_name": exp_vectors_model_name,
             "vector_results": vector_result_data # Include compact partial results on error
         }
+
+        # Log the exact JSON that will be sent
+        logger.info(f"🐍 EXPERIENCE VECTORS PHASE ERROR: Sending JSON response with model_name: {exp_vectors_model_name}")
+
+        yield response_obj
         return
     current_messages.append(exp_vectors_output.experience_vectors_response)
     conversation_history_store[thread_id] = current_messages
@@ -818,164 +885,303 @@ async def run_langchain_postchain_workflow(
         logger.info(f"Vector {i+1}: id={v.get('id', 'None')}, content length={len(v.get('content', ''))}")
 
     # Create the event payload
-    yield {
+    # Ensure model_name is not empty
+    exp_vectors_model_name = experience_vectors_model_config.model_name if experience_vectors_model_config.model_name else "unknown"
+
+    # Create the response object
+    response_obj = {
         "phase": "experience_vectors",
         "status": "complete",
         "content": exp_vectors_output.experience_vectors_response.content,
         "provider": experience_vectors_model_config.provider,
-        "model_name": experience_vectors_model_config.model_name,
+        "model_name": exp_vectors_model_name,
         "vector_results": vector_result_data  # Include vector results for client
     }
+
+    # Log the exact JSON that will be sent
+    logger.info(f"🐍 EXPERIENCE VECTORS PHASE: Sending JSON response with model_name: {exp_vectors_model_name}")
+
+    yield response_obj
     # 3. Experience Web Phase
-    yield {"phase": "experience_web", "status": "running"}
+    # Ensure model_name is not empty for running status
+    exp_web_model_name = experience_web_model_config.model_name if experience_web_model_config.model_name else "unknown"
+
+    # Create the response object for running status
+    running_obj = {
+        "phase": "experience_web",
+        "status": "running",
+        "provider": experience_web_model_config.provider,
+        "model_name": exp_web_model_name
+    }
+
+    # Log the running status
+    logger.info(f"🐍 EXPERIENCE WEB PHASE: Sending running status with model_name: {exp_web_model_name}")
+
+    yield running_obj
     exp_web_output: ExperienceWebPhaseOutput = await run_experience_web_phase(current_messages, experience_web_model_config)
     if exp_web_output.error:
-        yield {
-            "phase": "experience_web", "status": "error", "content": exp_web_output.error,
-            "provider": experience_web_model_config.provider, "model_name": experience_web_model_config.model_name,
+        # Ensure model_name is not empty
+        exp_web_model_name = experience_web_model_config.model_name if experience_web_model_config.model_name else "unknown"
+
+        # Create the response object
+        response_obj = {
+            "phase": "experience_web",
+            "status": "error",
+            "content": exp_web_output.error,
+            "provider": experience_web_model_config.provider,
+            "model_name": exp_web_model_name,
             "web_results": [res.dict() for res in exp_web_output.web_results] # Include partial results on error
         }
+
+        # Log the exact JSON that will be sent
+        logger.info(f"🐍 EXPERIENCE WEB PHASE ERROR: Sending JSON response with model_name: {exp_web_model_name}")
+
+        yield response_obj
         return
     current_messages.append(exp_web_output.experience_web_response)
     conversation_history_store[thread_id] = current_messages
-    yield {
-        "phase": "experience_web", "status": "complete", "content": exp_web_output.experience_web_response.content,
-        "provider": experience_web_model_config.provider, "model_name": experience_web_model_config.model_name,
+    # Ensure model_name is not empty
+    exp_web_model_name = experience_web_model_config.model_name if experience_web_model_config.model_name else "unknown"
+
+    # Create the response object
+    response_obj = {
+        "phase": "experience_web",
+        "status": "complete",
+        "content": exp_web_output.experience_web_response.content,
+        "provider": experience_web_model_config.provider,
+        "model_name": exp_web_model_name,
         "web_results": [res.dict() for res in exp_web_output.web_results] # Key for results
     }
 
+    # Log the exact JSON that will be sent
+    logger.info(f"🐍 EXPERIENCE WEB PHASE: Sending JSON response with model_name: {exp_web_model_name}")
+
+    yield response_obj
+
     # 4. Intention Phase
-    yield {"phase": "intention", "status": "running"}
+    # Ensure model_name is not empty for running status
+    intention_model_name = intention_model_config.model_name if intention_model_config.model_name else "unknown"
+
+    # Create the response object for running status
+    running_obj = {
+        "phase": "intention",
+        "status": "running",
+        "provider": intention_model_config.provider,
+        "model_name": intention_model_name
+    }
+
+    # Log the running status
+    logger.info(f"🐍 INTENTION PHASE: Sending running status with model_name: {intention_model_name}")
+
+    yield running_obj
     intention_result = await run_intention_phase(current_messages, intention_model_config)
     if "error" in intention_result:
-        yield {
-            "phase": "intention", "status": "error", "content": intention_result["error"],
-             "provider": intention_model_config.provider, "model_name": intention_model_config.model_name
+        # Ensure model_name is not empty
+        intention_model_name = intention_model_config.model_name if intention_model_config.model_name else "unknown"
+
+        # Create the response object
+        response_obj = {
+            "phase": "intention",
+            "status": "error",
+            "content": intention_result["error"],
+            "provider": intention_model_config.provider,
+            "model_name": intention_model_name
         }
+
+        # Log the exact JSON that will be sent
+        logger.info(f"🐍 INTENTION PHASE ERROR: Sending JSON response with model_name: {intention_model_name}")
+
+        yield response_obj
         return
     intention_response: AIMessage = intention_result["intention_response"]
     current_messages.append(intention_response)
     conversation_history_store[thread_id] = current_messages
-    yield {
-        "phase": "intention", "status": "complete", "content": intention_response.content,
-        "provider": intention_model_config.provider, "model_name": intention_model_config.model_name
+    # Ensure model_name is not empty
+    intention_model_name = intention_model_config.model_name if intention_model_config.model_name else "unknown"
+
+    # Create the response object
+    response_obj = {
+        "phase": "intention",
+        "status": "complete",
+        "content": intention_response.content,
+        "provider": intention_model_config.provider,
+        "model_name": intention_model_name
     }
 
+    # Log the exact JSON that will be sent
+    logger.info(f"🐍 INTENTION PHASE: Sending JSON response with model_name: {intention_model_name}")
+
+    yield response_obj
+
     # 5. Observation Phase
-    yield {"phase": "observation", "status": "running"}
+    # Ensure model_name is not empty for running status
+    observation_model_name = observation_model_config.model_name if observation_model_config.model_name else "unknown"
+
+    # Create the response object for running status
+    running_obj = {
+        "phase": "observation",
+        "status": "running",
+        "provider": observation_model_config.provider,
+        "model_name": observation_model_name
+    }
+
+    # Log the running status
+    logger.info(f"🐍 OBSERVATION PHASE: Sending running status with model_name: {observation_model_name}")
+
+    yield running_obj
     observation_result = await run_observation_phase(current_messages, observation_model_config)
     if "error" in observation_result:
-        yield {
-            "phase": "observation", "status": "error", "content": observation_result["error"],
-            "provider": observation_model_config.provider, "model_name": observation_model_config.model_name
+        # Ensure model_name is not empty
+        observation_model_name = observation_model_config.model_name if observation_model_config.model_name else "unknown"
+
+        # Create the response object
+        response_obj = {
+            "phase": "observation",
+            "status": "error",
+            "content": observation_result["error"],
+            "provider": observation_model_config.provider,
+            "model_name": observation_model_name
         }
+
+        # Log the exact JSON that will be sent
+        logger.info(f"🐍 OBSERVATION PHASE ERROR: Sending JSON response with model_name: {observation_model_name}")
+
+        yield response_obj
         return
     observation_response: AIMessage = observation_result["observation_response"]
     current_messages.append(observation_response)
     conversation_history_store[thread_id] = current_messages
-    yield {
-        "phase": "observation", "status": "complete", "content": observation_response.content,
-        "provider": observation_model_config.provider, "model_name": observation_model_config.model_name
+    # Ensure model_name is not empty
+    observation_model_name = observation_model_config.model_name if observation_model_config.model_name else "unknown"
+
+    # Create the response object
+    response_obj = {
+        "phase": "observation",
+        "status": "complete",
+        "content": observation_response.content,
+        "provider": observation_model_config.provider,
+        "model_name": observation_model_name
     }
 
+    # Log the exact JSON that will be sent
+    logger.info(f"🐍 OBSERVATION PHASE: Sending JSON response with model_name: {observation_model_name}")
+
+    yield response_obj
+
     # 6. Understanding Phase
-    yield {"phase": "understanding", "status": "running"}
+    # Ensure model_name is not empty for running status
+    understanding_model_name = understanding_model_config.model_name if understanding_model_config.model_name else "unknown"
+
+    # Create the response object for running status
+    running_obj = {
+        "phase": "understanding",
+        "status": "running",
+        "provider": understanding_model_config.provider,
+        "model_name": understanding_model_name
+    }
+
+    # Log the running status
+    logger.info(f"🐍 UNDERSTANDING PHASE: Sending running status with model_name: {understanding_model_name}")
+
+    yield running_obj
     understanding_result = await run_understanding_phase(current_messages, understanding_model_config)
     if "error" in understanding_result:
-        yield {
-            "phase": "understanding", "status": "error", "content": understanding_result["error"],
-            "provider": understanding_model_config.provider, "model_name": understanding_model_config.model_name
+        # Ensure model_name is not empty
+        understanding_model_name = understanding_model_config.model_name if understanding_model_config.model_name else "unknown"
+
+        # Create the response object
+        response_obj = {
+            "phase": "understanding",
+            "status": "error",
+            "content": understanding_result["error"],
+            "provider": understanding_model_config.provider,
+            "model_name": understanding_model_name
         }
+
+        # Log the exact JSON that will be sent
+        logger.info(f"🐍 UNDERSTANDING PHASE ERROR: Sending JSON response with model_name: {understanding_model_name}")
+
+        yield response_obj
         return
     understanding_response: AIMessage = understanding_result["understanding_response"]
     current_messages.append(understanding_response)
     conversation_history_store[thread_id] = current_messages
-    yield {
-        "phase": "understanding", "status": "complete", "content": understanding_response.content,
-        "provider": understanding_model_config.provider, "model_name": understanding_model_config.model_name,
+    # Ensure model_name is not empty
+    understanding_model_name = understanding_model_config.model_name if understanding_model_config.model_name else "unknown"
+
+    # Create the response object
+    response_obj = {
+        "phase": "understanding",
+        "status": "complete",
+        "content": understanding_response.content,
+        "provider": understanding_model_config.provider,
+        "model_name": understanding_model_name,
     }
 
+    # Log the exact JSON that will be sent
+    logger.info(f"🐍 UNDERSTANDING PHASE: Sending JSON response with model_name: {understanding_model_name}")
+
+    yield response_obj
+
     # 7. Yield Phase
-    yield {"phase": "yield", "status": "running"}
+    # Ensure model_name is not empty for running status
+    yield_model_name = yield_model_config.model_name if yield_model_config.model_name else "unknown"
+
+    # Create the response object for running status
+    running_obj = {
+        "phase": "yield",
+        "status": "running",
+        "provider": yield_model_config.provider,
+        "model_name": yield_model_name
+    }
+
+    # Log the running status
+    logger.info(f"🐍 YIELD PHASE: Sending running status with model_name: {yield_model_name}")
+
+    yield running_obj
     yield_result = await run_yield_phase(current_messages, yield_model_config)
     logger.info(f"🐍 WORKFLOW: Received yield_result: {yield_result}") # DEBUG LOG
     if "error" in yield_result:
-        yield {
-            "phase": "yield", "status": "error", "content": yield_result["error"],
-            "provider": yield_model_config.provider, "model_name": yield_model_config.model_name
+        # Ensure model_name is not empty
+        yield_model_name = yield_model_config.model_name if yield_model_config.model_name else "unknown"
+
+        # Create the response object
+        response_obj = {
+            "phase": "yield",
+            "status": "error",
+            "content": yield_result["error"],
+            "provider": yield_model_config.provider,
+            "model_name": yield_model_name
         }
+
+        # Log the exact JSON that will be sent
+        logger.info(f"🐍 YIELD PHASE ERROR: Sending JSON response with model_name: {yield_model_name}")
+
+        yield response_obj
         return
     yield_response: AIMessage = yield_result["yield_response"]
     # Don't add Yield to history for now
-    yield {
-        "phase": "yield", "status": "complete", "content": yield_response.content,
-        "provider": yield_model_config.provider, "model_name": yield_model_config.model_name,
+
+    # Add debug logging for model information
+    logger.info(f"🐍 YIELD PHASE: Sending model info - provider: '{yield_model_config.provider}', model_name: '{yield_model_config.model_name}'")
+
+    # Ensure model_name is not empty
+    model_name = yield_model_config.model_name if yield_model_config.model_name else "unknown"
+
+    # Create the response object
+    response_obj = {
+        "phase": "yield",
+        "status": "complete",
+        "content": yield_response.content,
+        "provider": yield_model_config.provider,
+        "model_name": model_name,
     }
+
+    # Log the exact JSON that will be sent
+    logger.info(f"🐍 YIELD PHASE: Sending JSON response with model_name: {model_name}")
+
+    yield response_obj
 
     logger.info(f"Langchain PostChain workflow completed for thread {thread_id}")
 
-# --- Example Usage (for testing - needs update for new overrides) ---
-async def main():
-    thread_id = "test-thread-lc-split"
-    message_history = []
-    query = "Tell me about the latest developments in large language models. Search web and internal docs."
-
-    # Example passing overrides (replace with actual keys or load from env for testing)
-    # test_action_mc = ModelConfig(provider="google", model_name="gemini-2.0-flash-lite", google_api_key="YOUR_GOOGLE_KEY")
-    # test_exp_vectors_mc = ModelConfig(provider="openrouter", model_name="...", openrouter_api_key="YOUR_OR_KEY", ...)
-    # test_exp_web_mc = ModelConfig(provider="openrouter", model_name="...", openrouter_api_key="YOUR_OR_KEY", brave_api_key="YOUR_BRAVE_KEY", ...)
-
-    print(f"--- Starting Workflow for Query: {query} ---")
-    async for event in run_langchain_postchain_workflow(
-        query=query,
-        thread_id=thread_id,
-        message_history=message_history,
-        # Pass overrides if needed for testing:
-        # action_mc_override=test_action_mc,
-        # experience_vectors_mc_override=test_exp_vectors_mc,
-        # experience_web_mc_override=test_exp_web_mc,
-    ):
-        print(json.dumps(event, indent=2))
-        # Update history (simplified)
-        if event.get("status") == "complete":
-             phase = event.get("phase")
-             content = event.get("content") or event.get("final_content")
-             response_msg = None
-             if phase == "action" and content:
-                 # Need access to the original result dict to get the AIMessage object
-                 # This simplified history tracking in main() won't work perfectly without refactoring how results are stored/passed
-                 # For the sake of testing, we'll just create a new AIMessage
-                 response_msg = AIMessage(content=content, additional_kwargs={"phase": phase})
-             elif phase == "experience_vectors" and content:
-                 # Same issue as above
-                 response_msg = AIMessage(content=content, additional_kwargs={"phase": phase})
-             elif phase == "experience_web" and content:
-                 # Same issue as above
-                 response_msg = AIMessage(content=content, additional_kwargs={"phase": phase})
-             elif phase == "intention" and content:
-                 # Same issue as above
-                 response_msg = AIMessage(content=content, additional_kwargs={"phase": phase})
-             elif phase == "observation" and content:
-                  # Same issue as above
-                  response_msg = AIMessage(content=content, additional_kwargs={"phase": phase})
-             elif phase == "understanding" and content:
-                  # Same issue as above
-                  response_msg = AIMessage(content=content, additional_kwargs={"phase": phase})
-             # Don't add yield to history
-
-             if response_msg and isinstance(response_msg, AIMessage):
-                 message_history.append(response_msg)
-
-             if phase == "yield" and content:
-                 print("\n--- FINAL RESPONSE ---")
-                 print(content)
-                 print("----------------------")
-
-if __name__ == "__main__":
-    import asyncio
-    import json
-    logging.basicConfig(level=logging.INFO)
-    # Set higher level for noisy libraries if needed
-    logging.getLogger("httpx").setLevel(logging.WARNING)
-    logging.getLogger("httpcore").setLevel(logging.WARNING)
-    asyncio.run(main())
+# This file is imported by routers/postchain.py and used to run the workflow

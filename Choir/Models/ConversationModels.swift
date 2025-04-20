@@ -98,14 +98,14 @@ struct ModelConfig: Codable, Equatable, Hashable {
 
     enum CodingKeys: String, CodingKey {
         case provider, model, temperature
-        case openaiApiKey = "openai_api_key"
-        case anthropicApiKey = "anthropic_api_key"
-        case googleApiKey = "google_api_key"
-        case mistralApiKey = "mistral_api_key"
-        case fireworksApiKey = "fireworks_api_key"
-        case cohereApiKey = "cohere_api_key"
-        case openrouterApiKey = "openrouter_api_key"
-        case groqApiKey = "groq_api_key"
+        case openaiApiKey = "openai_api_key" // Keep this as snake_case since it's used in API requests
+        case anthropicApiKey = "anthropic_api_key" // Keep this as snake_case since it's used in API requests
+        case googleApiKey = "google_api_key" // Keep this as snake_case since it's used in API requests
+        case mistralApiKey = "mistral_api_key" // Keep this as snake_case since it's used in API requests
+        case fireworksApiKey = "fireworks_api_key" // Keep this as snake_case since it's used in API requests
+        case cohereApiKey = "cohere_api_key" // Keep this as snake_case since it's used in API requests
+        case openrouterApiKey = "openrouter_api_key" // Keep this as snake_case since it's used in API requests
+        case groqApiKey = "groq_api_key" // Keep this as snake_case since it's used in API requests
     }
 }
 
@@ -138,7 +138,7 @@ struct PhaseResult: Codable, Equatable, Hashable {
 
     enum CodingKeys: String, CodingKey {
         case content, provider
-        case modelName = "model_name"
+        case modelName = "model_name" // Keep this as snake_case since it's used in API responses
     }
 
     // Add explicit initializer for debugging
@@ -147,9 +147,10 @@ struct PhaseResult: Codable, Equatable, Hashable {
         self.provider = provider
         self.modelName = modelName
 
-        // Add debug output for empty content
-        if content.isEmpty {
-        }
+        // Add debug output for PhaseResult creation
+        print("PhaseResult.init - Content length: \(content.count)")
+        print("  Provider: \(provider ?? "nil")")
+        print("  ModelName: \(modelName ?? "nil")")
     }
 
     func hash(into hasher: inout Hasher) {
@@ -273,6 +274,9 @@ class Message: ObservableObject, Identifiable, Equatable {
         objectWillChange.send()
 
         // Debug output for monitoring
+        print("Message.updatePhase - Phase: \(phase.rawValue), Status: \(status)")
+        print("  Provider: \(provider ?? "nil")")
+        print("  ModelName: \(modelName ?? "nil")")
 
         // Enhanced logging for model information
 
@@ -312,21 +316,32 @@ class Message: ObservableObject, Identifiable, Equatable {
         // Enhanced debug logging for yield phase
         if phase == .yield {
             // DEBUG LOG: Add specific logging for Message update
+            print("  Updating YIELD phase")
 
             // Standard handling for yield phase (same as other phases)
             if !content.isEmpty {
-                phaseResults[phase] = PhaseResult(content: content, provider: provider, modelName: modelName)
+                // Create PhaseResult with explicit provider and modelName
+                let result = PhaseResult(content: content, provider: provider, modelName: modelName)
+                print("  Created PhaseResult with provider: \(result.provider ?? "nil"), modelName: \(result.modelName ?? "nil")")
+                phaseResults[phase] = result
 
                 // Update main content with yield content
                 self.content = content
             } else {
-                phaseResults[phase] = PhaseResult(content: "", provider: provider, modelName: modelName)
+                // Create PhaseResult with explicit provider and modelName
+                let result = PhaseResult(content: "", provider: provider, modelName: modelName)
+                print("  Created empty PhaseResult with provider: \(result.provider ?? "nil"), modelName: \(result.modelName ?? "nil")")
+                phaseResults[phase] = result
             }
 
             // DEBUG LOG: Log content after update
+            print("  After update - provider: \(phaseResults[phase]?.provider ?? "nil"), modelName: \(phaseResults[phase]?.modelName ?? "nil")")
         } else {
             // Standard handling for normal content
-            phaseResults[phase] = PhaseResult(content: content, provider: provider, modelName: modelName)
+            // Create PhaseResult with explicit provider and modelName
+            let result = PhaseResult(content: content, provider: provider, modelName: modelName)
+            print("  Created PhaseResult for \(phase.rawValue) with provider: \(result.provider ?? "nil"), modelName: \(result.modelName ?? "nil")")
+            phaseResults[phase] = result
 
             // Update main content when we have actual content
             if !content.isEmpty {

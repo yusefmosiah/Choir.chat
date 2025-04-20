@@ -239,12 +239,20 @@ class PostchainCoordinatorImpl: PostchainCoordinator, ObservableObject {
         // Debug output
 
         // Enhanced model information logging for all phases
+        print("PostchainEvent - Phase: \(event.phase), Status: \(event.status)")
+        print("  Provider: \(event.provider ?? "nil")")
+        print("  ModelName: \(event.modelName ?? "nil")")
 
         // Special diagnostic for yield phase - log structure of entire event
         if event.phase == "yield" {
             if let content = event.content, !content.isEmpty {
+                print("  Yield content length: \(content.count)")
             }
-            if let provider = event.provider, let modelName = event.modelName {
+            if let provider = event.provider {
+                print("  Yield provider: \(provider)")
+            }
+            if let modelName = event.modelName {
+                print("  Yield modelName: \(modelName)")
             }
         }
 

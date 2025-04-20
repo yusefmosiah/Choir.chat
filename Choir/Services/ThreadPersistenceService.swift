@@ -364,18 +364,35 @@ struct PhaseResultData: Codable {
     let provider: String?
     let modelName: String?
 
+    enum CodingKeys: String, CodingKey {
+        case content, provider
+        case modelName = "model_name" // Keep this as snake_case since it's used in API responses
+    }
+
     init(from phaseResult: PhaseResult) {
         self.content = phaseResult.content
         self.provider = phaseResult.provider
         self.modelName = phaseResult.modelName
+
+        // Debug logging
+        print("PhaseResultData.init - Content length: \(content.count)")
+        print("  Provider: \(provider ?? "nil")")
+        print("  ModelName: \(modelName ?? "nil")")
     }
 
     func toPhaseResult() -> PhaseResult {
-        return PhaseResult(
+        print("PhaseResultData.toPhaseResult - Converting to PhaseResult")
+        print("  Provider: \(provider ?? "nil")")
+        print("  ModelName: \(modelName ?? "nil")")
+
+        let result = PhaseResult(
             content: content,
             provider: provider,
             modelName: modelName
         )
+
+        print("  Created PhaseResult with provider: \(result.provider ?? "nil"), modelName: \(result.modelName ?? "nil")")
+        return result
     }
 }
 
@@ -392,6 +409,18 @@ struct ModelConfigData: Codable {
     let cohereApiKey: String?
     let openrouterApiKey: String?
     let groqApiKey: String?
+
+    enum CodingKeys: String, CodingKey {
+        case provider, model, temperature
+        case openaiApiKey = "openai_api_key" // Keep this as snake_case since it's used in API requests
+        case anthropicApiKey = "anthropic_api_key" // Keep this as snake_case since it's used in API requests
+        case googleApiKey = "google_api_key" // Keep this as snake_case since it's used in API requests
+        case mistralApiKey = "mistral_api_key" // Keep this as snake_case since it's used in API requests
+        case fireworksApiKey = "fireworks_api_key" // Keep this as snake_case since it's used in API requests
+        case cohereApiKey = "cohere_api_key" // Keep this as snake_case since it's used in API requests
+        case openrouterApiKey = "openrouter_api_key" // Keep this as snake_case since it's used in API requests
+        case groqApiKey = "groq_api_key" // Keep this as snake_case since it's used in API requests
+    }
 
     init(from modelConfig: ModelConfig) {
         self.provider = modelConfig.provider

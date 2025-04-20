@@ -124,9 +124,9 @@ struct PostchainRequest: APIRequest {
     var endpoint: String { "langchain" }
 
     enum CodingKeys: String, CodingKey {
-        case userQuery = "user_query"
-        case threadId = "thread_id"
-        case modelConfigs = "model_configs"
+        case userQuery = "user_query" // Keep this as snake_case since it's used in API requests
+        case threadId = "thread_id" // Keep this as snake_case since it's used in API requests
+        case modelConfigs = "model_configs" // Keep this as snake_case since it's used in API requests
         case stream
     }
 }
@@ -167,16 +167,16 @@ struct ModelConfigRequest: Codable {
 
     enum CodingKeys: String, CodingKey {
         case provider
-        case model_name
+        case model_name // Keep this as snake_case since it's used in API requests
         case temperature
-        case openaiApiKey = "openai_api_key"
-        case anthropicApiKey = "anthropic_api_key"
-        case googleApiKey = "google_api_key"
-        case mistralApiKey = "mistral_api_key"
-        case fireworksApiKey = "fireworks_api_key"
-        case cohereApiKey = "cohere_api_key"
-        case openrouterApiKey = "openrouter_api_key"
-        case groqApiKey = "groq_api_key"
+        case openaiApiKey = "openai_api_key" // Keep this as snake_case since it's used in API requests
+        case anthropicApiKey = "anthropic_api_key" // Keep this as snake_case since it's used in API requests
+        case googleApiKey = "google_api_key" // Keep this as snake_case since it's used in API requests
+        case mistralApiKey = "mistral_api_key" // Keep this as snake_case since it's used in API requests
+        case fireworksApiKey = "fireworks_api_key" // Keep this as snake_case since it's used in API requests
+        case cohereApiKey = "cohere_api_key" // Keep this as snake_case since it's used in API requests
+        case openrouterApiKey = "openrouter_api_key" // Keep this as snake_case since it's used in API requests
+        case groqApiKey = "groq_api_key" // Keep this as snake_case since it's used in API requests
     }
 }
 
@@ -189,7 +189,7 @@ struct PostchainResponse: Decodable {
     enum CodingKeys: String, CodingKey {
         case status
         case phases
-        case phaseSettings = "phase_settings"
+        case phaseSettings = "phase_settings" // Keep this as snake_case since it's used in API responses
     }
 }
 
@@ -201,7 +201,7 @@ struct ThreadRecoveryRequest: APIRequest {
     var endpoint: String { "recover" }
 
     enum CodingKeys: String, CodingKey {
-        case threadId = "thread_id"
+        case threadId = "thread_id" // Keep this as snake_case since it's used in API requests
     }
 }
 
@@ -216,11 +216,11 @@ struct ThreadRecoveryResponse: Decodable {
 
     enum CodingKeys: String, CodingKey {
         case status
-        case threadId = "thread_id"
-        case phaseStates = "phase_states"
-        case currentPhase = "current_phase"
+        case threadId = "thread_id" // Keep this as snake_case since it's used in API responses
+        case phaseStates = "phase_states" // Keep this as snake_case since it's used in API responses
+        case currentPhase = "current_phase" // Keep this as snake_case since it's used in API responses
         case error
-        case messageCount = "message_count"
+        case messageCount = "message_count" // Keep this as snake_case since it's used in API responses
     }
 }
 
@@ -254,9 +254,9 @@ struct PostchainEvent: Decodable {
         case status
         case content
         case provider
-        case modelName = "model_name"
-        case webResults = "web_results"
-        case vectorResults = "vector_results"
+        case modelName = "model_name" // Keep this as snake_case since it's used in API responses
+        case webResults = "web_results" // Keep this as snake_case since it's used in API responses
+        case vectorResults = "vector_results" // Keep this as snake_case since it's used in API responses
         case error
     }
 
@@ -268,15 +268,21 @@ struct PostchainEvent: Decodable {
         content = try container.decodeIfPresent(String.self, forKey: .content)
         provider = try container.decodeIfPresent(String.self, forKey: .provider)
 
-        // Extra debug for model name decoding
+        // Enhanced model name decoding with debug logging
+        print("PostchainEvent - Available keys: \(container.allKeys.map { $0.stringValue })")
+
+        // Try to decode model_name directly
         do {
-            // Try to decode model_name directly to inspect raw value
-            if let rawModelName = try container.decodeIfPresent(String.self, forKey: .modelName) {
-                modelName = rawModelName
+            if container.contains(.modelName) {
+                print("PostchainEvent - Found modelName key")
+                modelName = try container.decodeIfPresent(String.self, forKey: .modelName)
+                print("PostchainEvent - Decoded model name: \(modelName ?? "nil")")
             } else {
+                print("PostchainEvent - modelName key not found")
                 modelName = nil
             }
         } catch {
+            print("PostchainEvent - Error decoding model_name: \(error)")
             modelName = nil
         }
 
@@ -335,9 +341,9 @@ struct PostchainStreamEvent: Codable {
 
     enum CodingKeys: String, CodingKey {
         case phase, status, content, provider
-        case modelName = "model_name"
-        case webResults = "web_results"
-        case vectorResults = "vector_results"
+        case modelName = "model_name" // Keep this as snake_case since it's used in API responses
+        case webResults = "web_results" // Keep this as snake_case since it's used in API responses
+        case vectorResults = "vector_results" // Keep this as snake_case since it's used in API responses
     }
 
     init(from decoder: Decoder) throws {
@@ -348,11 +354,21 @@ struct PostchainStreamEvent: Codable {
         content = try container.decodeIfPresent(String.self, forKey: .content)
         provider = try container.decodeIfPresent(String.self, forKey: .provider)
 
-        // Try to decode model_name with enhanced handling to avoid empty strings
-        if let rawModelName = try container.decodeIfPresent(String.self, forKey: .modelName),
-           !rawModelName.isEmpty {
-            modelName = rawModelName
-        } else {
+        // Enhanced model name decoding with debug logging
+        print("PostchainStreamEvent - Available keys: \(container.allKeys.map { $0.stringValue })")
+
+        // Try to decode model_name directly
+        do {
+            if container.contains(.modelName) {
+                print("PostchainStreamEvent - Found modelName key")
+                modelName = try container.decodeIfPresent(String.self, forKey: .modelName)
+                print("PostchainStreamEvent - Decoded model name: \(modelName ?? "nil")")
+            } else {
+                print("PostchainStreamEvent - modelName key not found")
+                modelName = nil
+            }
+        } catch {
+            print("PostchainStreamEvent - Error decoding model_name: \(error)")
             modelName = nil
         }
 

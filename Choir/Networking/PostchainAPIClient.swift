@@ -19,13 +19,19 @@ actor PostchainAPIClient {
     // MARK: - Initialization
 
     init() {
-        // Initialize encoder with snake_case conversion
+        // Initialize encoder with default key encoding strategy
         encoder = JSONEncoder()
-        encoder.keyEncodingStrategy = .convertToSnakeCase
+        // We're using explicit CodingKeys in our models, so we don't need to use .convertToSnakeCase
 
-        // Initialize decoder with camel case conversion
+        // Set date encoding strategy
+        encoder.dateEncodingStrategy = .iso8601
+
+        // Initialize decoder with default key decoding strategy
         decoder = JSONDecoder()
-        decoder.keyDecodingStrategy = .convertFromSnakeCase
+        // We're using explicit CodingKeys in our models, so we don't need to use .convertFromSnakeCase
+
+        // Set date decoding strategy
+        decoder.dateDecodingStrategy = .iso8601
 
         #if DEBUG
         #endif
@@ -228,8 +234,28 @@ actor PostchainAPIClient {
                                             continue // Skip this event if data conversion fails
                                         }
 
-                                        // For debugging: print the raw JSON if it contains model_name
+                                        // Enhanced debug logging
                                         if jsonString.contains("model_name") {
+                                            print("Received JSON with model_name field: \(jsonString)")
+
+                                            // Try to parse the JSON manually to see the structure
+                                            if let jsonObj = try? JSONSerialization.jsonObject(with: jsonData, options: []) as? [String: Any] {
+                                                print("JSON keys: \(jsonObj.keys)")
+                                                if let modelName = jsonObj["model_name"] {
+                                                    print("Found model_name in raw JSON: \(modelName)")
+
+                                                    // Create a custom decoder with specific configuration
+                                                    let customDecoder = JSONDecoder()
+                                                    customDecoder.keyDecodingStrategy = .convertFromSnakeCase
+
+                                                    do {
+                                                        let event = try customDecoder.decode(PostchainEvent.self, from: jsonData)
+                                                        print("Custom decoder result - model name: \(event.modelName ?? "nil")")
+                                                    } catch {
+                                                        print("Custom decoder error: \(error)")
+                                                    }
+                                                }
+                                            }
                                         }
 
                                         // ---> ADDED DEBUG LOG <---
