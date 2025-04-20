@@ -66,6 +66,8 @@ struct PhaseCard: View {
 
     // State to track updates
     @State private var cardRefreshCounter = 0
+    @State private var gradientRotation: Double = 0
+    @State private var rotationTimer: Timer?
 
     var body: some View {
         // Compute markdown content and displayable flag outside ViewBuilder
@@ -77,7 +79,7 @@ struct PhaseCard: View {
             combinedMarkdown += message.formatWebResultsToMarkdown()
         }
         // Special handling for yield phase - show content even if it's from initial test content
-        let hasDisplayableContent = !combinedMarkdown.isEmpty
+        let _ = !combinedMarkdown.isEmpty
 
         // Debug logging for all phases to compare
 
@@ -91,8 +93,7 @@ struct PhaseCard: View {
 
         // Minimal yield phase debug info
         if phase == .yield {
-            if let rawYieldContent = message.phaseResults[.yield]?.content {
-            }
+            let _ = message.phaseResults[.yield]?.content != nil
         }
 
         // For debugging comparing the yield phase with other phases that work
@@ -100,7 +101,7 @@ struct PhaseCard: View {
 
             // Compare with a phase that works (action or understanding)
             let comparePhase = phase == .yield ? .action : phase
-            let compareContent = message.phaseResults[comparePhase]?.content ?? ""
+            let _ = message.phaseResults[comparePhase]?.content ?? ""
         }
 
 
@@ -116,7 +117,7 @@ struct PhaseCard: View {
 
         // DEBUG LOG: Add specific logging for PhaseCard display
         if phase == .yield {
-            let displayContent = combinedMarkdown // Use the already computed content
+            let _ = combinedMarkdown // Use the already computed content
         }
         return VStack(alignment: .leading, spacing: 12) {
             // Header (Keep existing header)
@@ -174,7 +175,8 @@ struct PhaseCard: View {
                             .init(color: .blue, location: 0.75),
                             .init(color: .green, location: 1.0),
                         ]),
-                        center: .center
+                        center: .center,
+                        angle: isLoading ? .degrees(gradientRotation) : .zero
                     ),
                     lineWidth: overlayLineWidth
                 )
@@ -194,8 +196,24 @@ struct PhaseCard: View {
 
             // Check all phases to compare
             for checkPhase in Phase.allCases {
-                let checkContent = message.phaseResults[checkPhase]?.content ?? ""
+                let _ = message.phaseResults[checkPhase]?.content ?? ""
             }
+        }
+        .onAppear {
+            // Start rotation timer if loading
+            if isLoading {
+                startRotationTimer()
+            }
+        }
+        .onChange(of: isLoading) { _, newValue in
+            if newValue {
+                startRotationTimer()
+            } else {
+                stopRotationTimer()
+            }
+        }
+        .onDisappear {
+            stopRotationTimer()
         }
     }
 
@@ -205,10 +223,9 @@ struct PhaseCard: View {
             Spacer()
             HStack {
                 Spacer()
-                ProgressView()
-                    .tint(secondaryTextColor)
-                Text("Loading...")
+                Text("...")
                     .foregroundColor(secondaryTextColor)
+                    .font(.headline)
                 Spacer()
             }
             Spacer()
@@ -243,6 +260,31 @@ struct PhaseCard: View {
             }
         }
     }
+
+    // --- Rotation Animation Functions ---
+    private func startRotationTimer() {
+        // Stop any existing timer first
+        stopRotationTimer()
+
+        // Reset rotation to 0
+        gradientRotation = 0
+
+        // Create a new timer that updates the rotation angle
+        rotationTimer = Timer.scheduledTimer(withTimeInterval: 0.02, repeats: true) { [self] _ in
+            // Update rotation on the main thread
+            DispatchQueue.main.async {
+                // Increment rotation by 1 degree each time
+                withAnimation(.linear(duration: 0.02)) {
+                    self.gradientRotation = (self.gradientRotation + 1).truncatingRemainder(dividingBy: 360)
+                }
+            }
+        }
+    }
+
+    private func stopRotationTimer() {
+        rotationTimer?.invalidate()
+        rotationTimer = nil
+    }
 }
 
 #Preview {
@@ -253,15 +295,30 @@ struct PhaseCard: View {
         isUser: false
     )
 
-    PhaseCard(
-        phase: Phase.action,  // Explicitly use Phase enum
-        message: testMessage,
-        isSelected: true,
-        isLoading: false,
-        viewModel: previewViewModel,
-        messageId: testMessage.id.uuidString,
-        localThreadIDs: []
-    )
-    .frame(height: 300)
+    VStack(spacing: 20) {
+        // Normal state
+        PhaseCard(
+            phase: Phase.action,
+            message: testMessage,
+            isSelected: true,
+            isLoading: false,
+            viewModel: previewViewModel,
+            messageId: testMessage.id.uuidString,
+            localThreadIDs: []
+        )
+        .frame(height: 200)
+
+        // Loading state
+        PhaseCard(
+            phase: Phase.action,
+            message: testMessage,
+            isSelected: true,
+            isLoading: true,
+            viewModel: previewViewModel,
+            messageId: testMessage.id.uuidString,
+            localThreadIDs: []
+        )
+        .frame(height: 200)
+    }
     .padding()
 }

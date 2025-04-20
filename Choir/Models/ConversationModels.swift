@@ -244,25 +244,7 @@ class Message: ObservableObject, Identifiable, Equatable {
         self.isStreaming = isStreaming
         self.phaseResults = phaseResults
 
-        // Print when a new message is created for debugging
-
-        for phase in Phase.allCases {
-            if self.phaseResults[phase] == nil {
-                // For debugging - provide all non-user messages with test content
-                // for all phases to see if the issue is with content rendering
-                if !isUser {
-                    self.phaseResults[phase] = PhaseResult(
-                        content: "Test content for \(phase.rawValue) phase",
-                        provider: "test_provider",
-                        modelName: "test_model"
-                    )
-                } else {
-                    self.phaseResults[phase] = PhaseResult(content: "", provider: nil, modelName: nil)
-                }
-            }
-        }
-
-        // Verify all phases are initialized
+        
     }
 
     static func == (lhs: Message, rhs: Message) -> Bool {
