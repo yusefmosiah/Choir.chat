@@ -24,6 +24,7 @@ import json
 from langchain_core.messages import HumanMessage, AIMessage, SystemMessage, BaseMessage, ToolMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.runnables import RunnablePassthrough, RunnableLambda
+from langchain_openai import OpenAIEmbeddings
 
 # Local imports
 from app.config import Config # Although config object isn't passed directly, defaults might still be used
@@ -73,6 +74,101 @@ You will see <phase_instructions> embedded in user messages, which contain the i
 conversation_history_store: Dict[str, List[BaseMessage]] = {}
 
 
+# --- Helper Functions ---
+
+def prepare_messages_for_gemini(messages: List[BaseMessage]) -> List[BaseMessage]:
+    """
+    Prepare messages for Gemini models which require non-empty content in all parts.
+    This function ensures that no empty messages are sent to Gemini models.
+
+    Args:
+        messages: List of LangChain message objects
+
+    Returns:
+        List of LangChain message objects with no empty content
+    """
+    logger.info("Preparing messages for Gemini model to prevent empty content errors")
+    prepared_messages = []
+
+    for message in messages:
+        # Create a copy of the message to avoid modifying the original
+        if isinstance(message, HumanMessage):
+            # For user messages, ensure they have content
+            content = message.content if message.content else "Please continue."
+            prepared_messages.append(HumanMessage(content=content))
+        elif isinstance(message, SystemMessage):
+            # For system messages, ensure they have content
+            content = message.content if message.content else "You are a helpful assistant."
+            prepared_messages.append(SystemMessage(content=content))
+        elif isinstance(message, AIMessage):
+            # For AI messages, ensure they have content
+            content = message.content if message.content else "I'll help you with that."
+            # Preserve tool_calls if they exist
+            if hasattr(message, 'tool_calls') and message.tool_calls:
+                prepared_messages.append(AIMessage(content=content, tool_calls=message.tool_calls))
+            else:
+                prepared_messages.append(AIMessage(content=content))
+        else:
+            # For other message types (like ToolMessage), keep as is but ensure content is not empty
+            if hasattr(message, 'content') and not message.content:
+                # Create a new message with the same attributes but non-empty content
+                message_dict = message.dict()
+                message_dict['content'] = "Tool response received."
+                prepared_messages.append(type(message)(**message_dict))
+            else:
+                prepared_messages.append(message)
+
+    return prepared_messages
+
+
+def sanitize_messages_for_openai(messages: List[BaseMessage]) -> List[BaseMessage]:
+    """
+    Sanitize messages for OpenAI models to ensure proper tool call handling.
+    This function ensures that any assistant message with tool_calls has corresponding tool response messages.
+
+    Args:
+        messages: List of LangChain message objects
+
+    Returns:
+        List of LangChain message objects with proper tool call handling
+    """
+    logger.info("Sanitizing messages for OpenAI model to prevent tool call errors")
+    sanitized_messages = []
+
+    # First pass: identify assistant messages with tool_calls that don't have corresponding tool responses
+    tool_call_ids_with_responses = set()
+    for message in messages:
+        if isinstance(message, ToolMessage) and hasattr(message, 'tool_call_id'):
+            tool_call_ids_with_responses.add(message.tool_call_id)
+
+    # Second pass: filter out problematic messages or add dummy tool responses
+    i = 0
+    while i < len(messages):
+        message = messages[i]
+
+        if isinstance(message, AIMessage) and hasattr(message, 'tool_calls') and message.tool_calls:
+            # Check if all tool_calls have corresponding tool responses
+            missing_tool_call_ids = []
+            for tool_call in message.tool_calls:
+                tool_call_id = tool_call.get('id')
+                if tool_call_id and tool_call_id not in tool_call_ids_with_responses:
+                    missing_tool_call_ids.append(tool_call_id)
+
+            if missing_tool_call_ids:
+                # Option 1: Remove tool_calls from the message
+                sanitized_messages.append(AIMessage(content=message.content))
+                logger.info(f"Removed tool_calls from assistant message to prevent OpenAI API errors")
+            else:
+                # All tool_calls have responses, keep the message as is
+                sanitized_messages.append(message)
+        else:
+            # Keep all other message types as is
+            sanitized_messages.append(message)
+
+        i += 1
+
+    return sanitized_messages
+
 # --- Phase Implementations using LCEL ---
 
 async def run_action_phase(
@@ -93,9 +189,23 @@ async def run_action_phase(
 
     try:
         logger.info(f"Directly calling post_llm with model: {model_config}")
+
+        # Prepare messages based on the provider
+        prepared_messages = action_messages
+
+        # For Google models, ensure no empty content
+        if model_config.provider.lower() == "google":
+            prepared_messages = prepare_messages_for_gemini(action_messages)
+            logger.info("Using prepared messages for Google Gemini model")
+
+        # For OpenAI models, ensure proper tool call handling
+        elif model_config.provider.lower() == "openai" or model_config.provider.lower() == "openrouter":
+            prepared_messages = sanitize_messages_for_openai(action_messages)
+            logger.info("Using sanitized messages for OpenAI model")
+
         response = await post_llm(
             model_config=model_config,
-            messages=action_messages
+            messages=prepared_messages
         )
 
         if isinstance(response, AIMessage):
@@ -114,7 +224,6 @@ async def run_action_phase(
 # --- New Phase Implementations ---
 
 # --- Refactored Phase Implementation (Manual Vector Search) ---
-from langchain_openai import OpenAIEmbeddings # Add import for embeddings
 from app.database import DatabaseClient # Add import for DB client
 
 async def run_experience_vectors_phase(
@@ -321,9 +430,23 @@ Your task: Synthesize the information above and the conversation history to resp
         phase_messages = [SystemMessage(content=COMMON_SYSTEM_PROMPT)] + messages + [HumanMessage(content=phase_query)]
 
         logger.info("Calling LLM to synthesize vector search results.")
+
+        # Prepare messages based on the provider
+        prepared_messages = phase_messages
+
+        # For Google models, ensure no empty content
+        if model_config.provider.lower() == "google":
+            prepared_messages = prepare_messages_for_gemini(phase_messages)
+            logger.info("Using prepared messages for Google Gemini model in Experience Vectors phase")
+
+        # For OpenAI models, ensure proper tool call handling
+        elif model_config.provider.lower() == "openai" or model_config.provider.lower() == "openrouter":
+            prepared_messages = sanitize_messages_for_openai(phase_messages)
+            logger.info("Using sanitized messages for OpenAI model in Experience Vectors phase")
+
         llm_response = await post_llm(
             model_config=model_config,
-            messages=phase_messages,
+            messages=prepared_messages,
             tools=None # Explicitly disable tools for this call
         )
 
@@ -401,7 +524,19 @@ Your task: Decide if web search is needed and call BraveSearchTool if relevant. 
 
     # Define the runnable chain
     async def _get_response(msgs):
-        return await post_llm(model_config=model_config, messages=msgs, tools=tools)
+        # Prepare messages based on the provider
+        prepared_msgs = msgs
+
+        # For Google models, ensure no empty content
+        if model_config.provider.lower() == "google":
+            prepared_msgs = prepare_messages_for_gemini(msgs)
+            logger.info("Using prepared messages for Google Gemini model in Experience Web phase")
+
+        # For OpenAI models, ensure proper tool call handling
+        elif model_config.provider.lower() == "openai" or model_config.provider.lower() == "openrouter":
+            prepared_msgs = sanitize_messages_for_openai(msgs)
+            logger.info("Using sanitized messages for OpenAI model in Experience Web phase")
+        return await post_llm(model_config=model_config, messages=prepared_msgs, tools=tools)
     chain = RunnableLambda(_get_response)
 
     web_results_list: List[SearchResult] = []
@@ -496,7 +631,7 @@ Your task: Decide if web search is needed and call BraveSearchTool if relevant. 
                 # Add explicit web search results summary to help the model format results properly
                 if web_results_list:
                     web_results_summary = "\n\nWeb Search Results:\n"
-                    for i, result in enumerate(web_results_list):
+                    for result in web_results_list:
                         # Format in the simplified way specified in the prompt
                         web_results_summary += f"[{result.title}]({result.url})\n"
                         web_results_summary += f"> {result.content}\n\n"
@@ -562,7 +697,19 @@ async def run_intention_phase(
 
     async def _get_intention_response(msgs):
         logger.info(f"Calling post_llm with model: {model_config}")
-        return await post_llm(model_config=model_config, messages=msgs)
+        # Prepare messages based on the provider
+        prepared_msgs = msgs
+
+        # For Google models, ensure no empty content
+        if model_config.provider.lower() == "google":
+            prepared_msgs = prepare_messages_for_gemini(msgs)
+            logger.info("Using prepared messages for Google Gemini model in Intention phase")
+
+        # For OpenAI models, ensure proper tool call handling
+        elif model_config.provider.lower() == "openai" or model_config.provider.lower() == "openrouter":
+            prepared_msgs = sanitize_messages_for_openai(msgs)
+            logger.info("Using sanitized messages for OpenAI model in Intention phase")
+        return await post_llm(model_config=model_config, messages=prepared_msgs)
     intention_chain = RunnableLambda(_get_intention_response)
 
     try:
@@ -589,7 +736,19 @@ async def run_observation_phase(
 
     async def observation_wrapper(msgs):
         logger.info(f"Calling post_llm with model: {model_config}")
-        return await post_llm(model_config=model_config, messages=msgs)
+        # Prepare messages based on the provider
+        prepared_msgs = msgs
+
+        # For Google models, ensure no empty content
+        if model_config.provider.lower() == "google":
+            prepared_msgs = prepare_messages_for_gemini(msgs)
+            logger.info("Using prepared messages for Google Gemini model in Observation phase")
+
+        # For OpenAI models, ensure proper tool call handling
+        elif model_config.provider.lower() == "openai" or model_config.provider.lower() == "openrouter":
+            prepared_msgs = sanitize_messages_for_openai(msgs)
+            logger.info("Using sanitized messages for OpenAI model in Observation phase")
+        return await post_llm(model_config=model_config, messages=prepared_msgs)
     observation_chain = RunnableLambda(observation_wrapper)
 
     try:
@@ -616,7 +775,19 @@ async def run_understanding_phase(
 
     async def understanding_wrapper(msgs):
         logger.info(f"Calling post_llm with model: {model_config}")
-        return await post_llm(model_config=model_config, messages=msgs)
+        # Prepare messages based on the provider
+        prepared_msgs = msgs
+
+        # For Google models, ensure no empty content
+        if model_config.provider.lower() == "google":
+            prepared_msgs = prepare_messages_for_gemini(msgs)
+            logger.info("Using prepared messages for Google Gemini model in Understanding phase")
+
+        # For OpenAI models, ensure proper tool call handling
+        elif model_config.provider.lower() == "openai" or model_config.provider.lower() == "openrouter":
+            prepared_msgs = sanitize_messages_for_openai(msgs)
+            logger.info("Using sanitized messages for OpenAI model in Understanding phase")
+        return await post_llm(model_config=model_config, messages=prepared_msgs)
     understanding_chain = RunnableLambda(understanding_wrapper)
 
     try:
@@ -643,7 +814,19 @@ async def run_yield_phase(
 
     async def yield_wrapper(msgs):
         logger.info(f"Calling post_llm with model: {model_config}")
-        return await post_llm(model_config=model_config, messages=msgs)
+        # Prepare messages based on the provider
+        prepared_msgs = msgs
+
+        # For Google models, ensure no empty content
+        if model_config.provider.lower() == "google":
+            prepared_msgs = prepare_messages_for_gemini(msgs)
+            logger.info("Using prepared messages for Google Gemini model in Yield phase")
+
+        # For OpenAI models, ensure proper tool call handling
+        elif model_config.provider.lower() == "openai" or model_config.provider.lower() == "openrouter":
+            prepared_msgs = sanitize_messages_for_openai(msgs)
+            logger.info("Using sanitized messages for OpenAI model in Yield phase")
+        return await post_llm(model_config=model_config, messages=prepared_msgs)
     yield_chain = RunnableLambda(yield_wrapper)
 
     try:
