@@ -79,24 +79,31 @@ class AppCoordinator: ObservableObject {
                     .environmentObject(walletManager)
                     .environmentObject(authService)
                     .environmentObject(threadManager)
-                    .transition(.opacity)
+                    .transition(.asymmetric(
+                        insertion: .opacity.combined(with: .scale(scale: 1.05)),
+                        removal: .opacity.combined(with: .scale(scale: 0.95))
+                    ))
 
             case .authenticating:
                 ProgressView("Authenticating...")
+                    .scaleEffect(1.5)
                     .environmentObject(walletManager)
                     .environmentObject(authService)
                     .environmentObject(threadManager)
-                    .transition(.opacity)
+                    .transition(.opacity.combined(with: .scale))
 
             case .authenticated:
                 MainTabView()
                     .environmentObject(walletManager)
                     .environmentObject(authService)
                     .environmentObject(threadManager)
-                    .transition(.opacity)
+                    .transition(.asymmetric(
+                        insertion: .opacity.combined(with: .move(edge: .bottom)),
+                        removal: .opacity.combined(with: .move(edge: .top))
+                    ))
             }
         }
-        .animation(.easeInOut, value: currentAuthState)
+        .animation(.spring(response: 0.5, dampingFraction: 0.8), value: currentAuthState)
     }
 }
 
