@@ -14,69 +14,181 @@ struct WalletView: View {
     @State private var showingImportSheet = false
     @State private var showingCreateWalletAlert = false
     @State private var newWalletName = "New Wallet"
+    @State private var isWalletSwitching = false
+    @State private var showingPaymentErrorAlert = false
+    @State private var paymentErrorMessage = ""
 
     var body: some View {
         NavigationStack {
-            List {
-            Section(header: Text("Current Wallet")) {
-                if let wallet = walletManager.wallet {
-                    HStack {
-                        Text("Address")
-                        Spacer()
-                        if let address = try? wallet.accounts[0].address() {
-                            Text(address)
-                                .textSelection(.enabled)
-                        } else {
-                            Text("Error getting address")
-                                .foregroundColor(.red)
+            VStack(spacing: 0) {
+                // Horizontal wallet selector
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Your Wallets")
+                        .font(.headline)
+                        .padding(.horizontal)
+
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 16) {
+                            // Display all wallets as cards
+                            ForEach(Array(walletManager.wallets.keys), id: \.self) { address in
+                                if let wallet = walletManager.wallets[address] {
+                                    let isSelected = walletManager.wallet?.accounts[0].publicKey.hex() == wallet.accounts[0].publicKey.hex()
+
+                                    WalletCardView(
+                                        wallet: wallet,
+                                        name: walletManager.walletNames[address] ?? "Unnamed Wallet",
+                                        address: address,
+                                        balance: isSelected ? walletManager.balance : 0, // Only show balance for selected wallet
+                                        isSelected: isSelected,
+                                        onSelect: {
+                                            selectWallet(address: address)
+                                        }
+                                    )
+                                }
+                            }
+
+                            // Add wallet button
+                            Button(action: { showingCreateWalletAlert = true }) {
+                                VStack {
+                                    Image(systemName: "plus.circle")
+                                        .font(.largeTitle)
+                                        .padding()
+
+                                    Text("Add Wallet")
+                                        .font(.headline)
+                                }
+                                .frame(width: 150, height: 180)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 16)
+                                        .fill(Color(.systemBackground))
+                                        .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
+                                )
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 16)
+                                        .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                                )
+                            }
+                            .buttonStyle(PlainButtonStyle())
                         }
+                        .padding(.horizontal)
                     }
+                }
+                .padding(.vertical)
+                .background(Color(.systemBackground))
 
-                    HStack {
-                        Text("Balance")
-                        Spacer()
-                        Text(String(format: "%.9f SUI", walletManager.balance))
-                    }
+                // Current wallet details in a Form
+                Form {
+                        // Wallet Address Section
+                        Section(header: Text("Wallet Address")) {
+                            if let wallet = walletManager.wallet,
+                               let address = try? wallet.accounts[0].address() {
+                                VStack(alignment: .leading, spacing: 8) {
+                                    Text(address)
+                                        .font(.system(.body, design: .monospaced))
+                                        .lineLimit(1)
+                                        .truncationMode(.middle)
+                                        .textSelection(.enabled)
 
-                    Button("Request Testnet SUI") {
-                        Task {
-                            try? await walletManager.requestAirdrop()
+                                    HStack {
+                                        Button(action: {
+                                            UIPasteboard.general.string = address
+                                        }) {
+                                            Label("Copy Address", systemImage: "doc.on.doc")
+                                        }
+                                        .buttonStyle(.bordered)
+                                        .tint(.blue)
+
+                                        Spacer()
+
+                                        Text("Balance: \(String(format: "%.9f SUI", walletManager.balance))")
+                                            .font(.caption)
+                                            .foregroundColor(.secondary)
+                                    }
+                                }
+                            } else {
+                                Text("No wallet selected")
+                                    .foregroundColor(.secondary)
+                            }
                         }
-                    }
-                    .disabled(walletManager.isLoading)
 
-                    Button("Send SUI") {
-                        showingSendSheet = true
-                    }
-                    .disabled(walletManager.isLoading)
+                        // Send Payment Section
+                        Section(header: Text("Send Payment")) {
+                            if let wallet = walletManager.wallet {
+                                VStack(spacing: 16) {
+                                    TextField("Recipient Address", text: $recipientAddress)
+                                        .font(.system(.body, design: .monospaced))
+                                        .autocapitalization(.none)
+                                        .disableAutocorrection(true)
+                                        .textContentType(.none)
+                                        .padding(8)
+                                        .background(Color(.systemGray6))
+                                        .cornerRadius(8)
 
-                    Button("Export Private Key") {
-                        Task {
-                            await exportPrivateKey()
+                                    TextField("Amount (SUI)", text: $sendAmount)
+                                        .keyboardType(.decimalPad)
+                                        .padding(8)
+                                        .background(Color(.systemGray6))
+                                        .cornerRadius(8)
+
+                                    Button(action: {
+                                        sendPayment()
+                                    }) {
+                                        Text("Send SUI")
+                                            .frame(maxWidth: .infinity)
+                                            .padding()
+                                            .background(Color.blue)
+                                            .foregroundColor(.white)
+                                            .cornerRadius(8)
+                                    }
+                                    .disabled(recipientAddress.isEmpty || sendAmount.isEmpty || walletManager.isLoading)
+                                }
+                                .padding(.vertical, 8)
+                            } else {
+                                Text("Select a wallet to send payments")
+                                    .foregroundColor(.secondary)
+                            }
                         }
-                    }
-                    .disabled(walletManager.isLoading)
-                } else {
-                    Text("No wallet selected")
-                        .foregroundColor(.secondary)
-                }
-            }
 
-            Section(header: Text("Wallet Management")) {
-                Button(action: { showingWalletSelectionSheet = true }) {
-                    Label("Switch Wallet", systemImage: "arrow.left.arrow.right")
-                }
-                .disabled(walletManager.wallets.isEmpty || walletManager.isLoading)
+                        // Receive Section
+                        Section(header: Text("Receive")) {
+                            if let wallet = walletManager.wallet {
+                                Button("Request Testnet SUI") {
+                                    Task {
+                                        try? await walletManager.requestAirdrop()
+                                    }
+                                }
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(Color.green)
+                                .foregroundColor(.white)
+                                .cornerRadius(8)
+                                .disabled(walletManager.isLoading)
+                            } else {
+                                Text("Select a wallet to receive funds")
+                                    .foregroundColor(.secondary)
+                            }
+                        }
 
-                Button(action: { showingCreateWalletAlert = true }) {
-                    Label("Create New Wallet", systemImage: "plus.circle")
-                }
-                .disabled(walletManager.isLoading)
+                        // Security Section
+                        Section(header: Text("Security")) {
+                            Button(action: {
+                                Task {
+                                    await exportPrivateKey()
+                                }
+                            }) {
+                                Label("Export Private Key", systemImage: "key.fill")
+                            }
+                            .disabled(walletManager.wallet == nil || walletManager.isLoading)
+                        }
 
-                Button(action: { showingImportSheet = true }) {
-                    Label("Import Wallet from Mnemonic", systemImage: "square.and.arrow.down")
+                        // Wallet Management Section
+                        Section(header: Text("Wallet Management")) {
+                            Button(action: { showingImportSheet = true }) {
+                                Label("Import Wallet from Mnemonic", systemImage: "square.and.arrow.down")
+                            }
+                            .disabled(walletManager.isLoading)
+                        }
                 }
-                .disabled(walletManager.isLoading)
             }
         }
         .sheet(isPresented: $showingSendSheet) {
@@ -109,8 +221,12 @@ struct WalletView: View {
         } message: {
             Text(privateKeyMessage)
         }
-        .navigationTitle("Wallets")
+        .alert("Payment Error", isPresented: $showingPaymentErrorAlert) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(paymentErrorMessage)
         }
+        .navigationTitle("Wallets")
         .sheet(isPresented: $showingWalletSelectionSheet) {
             WalletSelectionView()
                 .environmentObject(walletManager)
@@ -130,6 +246,51 @@ struct WalletView: View {
         } message: {
             Text("Enter a name for your new wallet")
         }
+        .overlay(Group {
+            if isWalletSwitching || walletManager.isLoading {
+                ZStack {
+                    Color.black.opacity(0.2)
+                        .edgesIgnoringSafeArea(.all)
+
+                    VStack(spacing: 15) {
+                        ProgressView()
+                            .scaleEffect(1.5)
+
+                        Text(isWalletSwitching ? "Switching wallet..." : "Loading...")
+                            .foregroundColor(.white)
+                            .font(.headline)
+                            .padding()
+                            .background(Color.black.opacity(0.7))
+                            .cornerRadius(10)
+                    }
+                }
+                .transition(.opacity)
+                .animation(.easeInOut, value: isWalletSwitching || walletManager.isLoading)
+            }
+        })
+    }
+
+    private func selectWallet(address: String) {
+        // Don't do anything if this is already the selected wallet
+        if let currentWallet = walletManager.wallet,
+           let currentAddress = try? currentWallet.accounts[0].address(),
+           currentAddress == address {
+            return
+        }
+
+        isWalletSwitching = true
+
+        Task {
+            do {
+                try await walletManager.switchWallet(address: address)
+            } catch {
+                print("Error switching wallet: \(error)")
+            }
+
+            // Add a small delay to make the transition smoother
+            try? await Task.sleep(nanoseconds: 300_000_000) // 0.3 seconds
+            isWalletSwitching = false
+        }
     }
 
     private func createNewWallet() {
@@ -143,6 +304,32 @@ struct WalletView: View {
                 newWalletName = "New Wallet" // Reset for next time
             } catch {
                 print("Error creating wallet: \(error)")
+            }
+        }
+    }
+
+    private func sendPayment() {
+        guard !recipientAddress.isEmpty, !sendAmount.isEmpty else { return }
+
+        // Convert the amount to SUI units (1 SUI = 10^9 units)
+        guard let amountDouble = Double(sendAmount) else { return }
+        let amountInSui = UInt64(amountDouble * 1_000_000_000)
+
+        Task {
+            do {
+                try await walletManager.send(amount: amountInSui, to: recipientAddress)
+
+                // Clear the fields after successful send
+                await MainActor.run {
+                    sendAmount = ""
+                    recipientAddress = ""
+                }
+            } catch {
+                print("Error sending payment: \(error)")
+                await MainActor.run {
+                    paymentErrorMessage = error.localizedDescription
+                    showingPaymentErrorAlert = true
+                }
             }
         }
     }

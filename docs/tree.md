@@ -70,6 +70,7 @@
 │       │       └── ThreadMessageList.swift
 │       ├── ThreadExportView.swift
 │       ├── ThreadImportView.swift
+│       ├── WalletCardView.swift
 │       ├── WalletSelectionView.swift
 │       └── WalletView.swift
 ├── Choir.xcodeproj
@@ -267,4 +268,4 @@
     ├── test_api.sh
     └── test_postchain_multiturn.sh
 
-66 directories, 199 files
+66 directories, 200 files
