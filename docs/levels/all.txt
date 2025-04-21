@@ -26,9 +26,11 @@ tree.md
 │   │   │   ├── Contents.json
 │   │   │   └── Icon-App-1024x1024@2x.png
 │   │   ├── Contents.json
-│   │   └── Icon-App-1024x1024.imageset
-│   │       ├── Contents.json
-│   │       └── Icon-App-1024x1024@2x.png
+│   │   ├── Icon-App-1024x1024.imageset
+│   │   │   ├── Contents.json
+│   │   │   └── Icon-App-1024x1024@2x.png
+│   │   └── choir-logo.imageset
+│   │       └── Contents.json
 │   ├── Choir.entitlements
 │   ├── Config
 │   │   └── ApiConfig.swift
@@ -42,8 +44,10 @@ tree.md
 │   │   ├── APITypes.swift
 │   │   ├── AnyCodable.swift
 │   │   ├── AuthModels.swift
+│   │   ├── CoinType.swift
 │   │   ├── ConversationModels.swift
-│   │   └── SearchModels.swift
+│   │   ├── SearchModels.swift
+│   │   └── WalletBalance.swift
 │   ├── Networking
 │   │   ├── EventSource.swift
 │   │   ├── PostchainAPIClient.swift
@@ -68,6 +72,7 @@ tree.md
 │   │   └── PostchainViewModel.swift
 │   └── Views
 │       ├── ChoirThreadDetailView.swift
+│       ├── EnhancedSendCoinView.swift
 │       ├── ImportMnemonicView.swift
 │       ├── LoginView.swift
 │       ├── MessageRow.swift
@@ -77,6 +82,8 @@ tree.md
 │       ├── PhaseCard.swift
 │       ├── PhaseCardContextMenu.swift
 │       ├── PostchainView.swift
+│       ├── QRScannerView.swift
+│       ├── SendCoinView.swift
 │       ├── SettingsView.swift
 │       ├── Thread
 │       │   └── Components
@@ -281,7 +288,7 @@ tree.md
     ├── test_api.sh
     └── test_postchain_multiturn.sh
 
-67 directories, 199 files
+68 directories, 205 files
 
 === File: docs/CHANGELOG.md ===
 

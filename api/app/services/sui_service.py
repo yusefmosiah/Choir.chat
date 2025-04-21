@@ -32,8 +32,8 @@ class SuiService:
             self.signer = keypair_from_keystring(deployer_key)
 
             # Store deployed CHOIR contract info
-            self.package_id = "0x73ca46e946d915e61639409c5496e277169d9f24a5c71e4d62c646f2f790e60c"
-            self.treasury_cap_id = "0x708b5e124cc6c317487be189b4395ace2a88b02b5ba877bc3705c57742b107e0"
+            self.package_id = "0xd3b2e1abf59c4e135015f3f3917ad54424c6d45f16cc069585a905af9815c999"
+            self.treasury_cap_id = "0x343a5b3780a05eaf4ea139f786a28cee4120cdc14334d0666c386e014dbe8659"
 
             logger.info("SuiService initialized successfully")
         except Exception as e:

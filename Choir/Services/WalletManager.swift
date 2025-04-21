@@ -1,6 +1,10 @@
 import Foundation
 import SuiKit
 import Bip39
+import Combine
+
+// Type alias for SuiKit transaction effects
+typealias SuiTransactionBlockEffects = SuiKit.TransactionEffects
 
 @MainActor
 class WalletManager: ObservableObject {
@@ -12,9 +16,13 @@ class WalletManager: ObservableObject {
     @Published private(set) var wallets: [String: Wallet] = [:] // Address -> Wallet
     @Published private(set) var walletNames: [String: String] = [:] // Address -> Name
     @Published private(set) var recentWalletAddresses: [String] = [] // Recently used wallet addresses
-    @Published private(set) var balance: Double = 0
+    @Published private(set) var balances: [CoinType: WalletBalance] = [:] // CoinType -> Balance
+    @Published private(set) var suiBalance: Double = 0 // Legacy support for existing code
     @Published private(set) var isLoading = false
     @Published var error: Error?
+
+    // Supported coin types
+    private(set) var supportedCoinTypes: [CoinType] = [.sui, .choir]
 
     let keychain = KeychainService()
     private let restClient: SuiProvider
@@ -225,23 +233,97 @@ class WalletManager: ObservableObject {
     }
 
     func updateBalance(for wallet: Wallet) async throws {
-        // Use Task to isolate non-sendable types
-        let balanceResponse = try await Task {
-            return try await restClient.getBalance(
-                account: wallet.accounts[0].publicKey
+        // Clear existing balances
+        balances = [:]
+
+        // Get the address
+        let address = try wallet.accounts[0].address()
+
+        // Get all coin balances
+        // We need to use a different approach to handle Sendable issues
+
+        // Create a custom implementation to get balances
+        // This avoids Sendable issues by using a custom implementation
+
+        // Get SUI balance first
+        do {
+            // Get the account to use for the API call
+            let account = wallet.accounts[0]
+
+            // Get SUI balance
+            let suiCoinBalance = try await restClient.getBalance(account: account.publicKey, coinType: CoinType.sui.fullType)
+
+            // Create wallet balance for SUI
+            let balanceUInt64 = UInt64(suiCoinBalance.totalBalance) ?? 0
+            let suiWalletBalance = WalletBalance(
+                coinType: .sui,
+                balance: Double(balanceUInt64),
+                objectCount: suiCoinBalance.coinObjectCount
             )
-        }.value
 
-        // Convert the String to Double safely
-        let totalBalanceString = balanceResponse.totalBalance
-        let totalBalance = Double(totalBalanceString) ?? 0.0
+            // Calculate the display balance as a Double
+            let balanceDouble = Double(balanceUInt64)
 
-        self.balance = totalBalance / 1_000_000_000.0
+            // Add to balances dictionary
+            balances[.sui] = suiWalletBalance
+
+            // Update legacy SUI balance for backward compatibility
+            suiBalance = Double(suiWalletBalance.balance) / pow(10.0, Double(CoinType.sui.decimals))
+        } catch {
+            // If we can't get SUI balance, set it to 0
+            balances[.sui] = WalletBalance(
+                coinType: .sui,
+                balance: 0,
+                objectCount: 0
+            )
+            suiBalance = 0
+        }
+
+        // Get CHOIR balance
+        do {
+            // Get the account to use for the API call
+            let account = wallet.accounts[0]
+
+            // Get CHOIR balance
+            let choirCoinBalance = try await restClient.getBalance(account: account.publicKey, coinType: CoinType.choir.fullType)
+
+            // Create wallet balance for CHOIR
+            let balanceUInt64 = UInt64(choirCoinBalance.totalBalance) ?? 0
+            let choirWalletBalance = WalletBalance(
+                coinType: .choir,
+                balance: Double(balanceUInt64),
+                objectCount: choirCoinBalance.coinObjectCount
+            )
+
+            // Add to balances dictionary
+            balances[.choir] = choirWalletBalance
+        } catch {
+            // If we can't get CHOIR balance, set it to 0
+            balances[.choir] = WalletBalance(
+                coinType: .choir,
+                balance: 0,
+                objectCount: 0
+            )
+        }
+
+        // We've already handled both SUI and CHOIR balances above
+        // No need for additional checks
     }
 
-    func send(amount: UInt64, to recipient: String) async throws {
+    // Legacy method for sending SUI (for backward compatibility)
+    func send(amount: UInt64, to recipient: String) async throws -> SuiTransactionBlockEffects? {
+        return try await send(amount: amount, coinType: .sui, to: recipient)
+    }
+
+    // Send any supported coin type
+    func send(amount: UInt64, coinType: CoinType, to recipient: String) async throws -> SuiTransactionBlockEffects? {
         guard let wallet else {
             throw WalletError.noWalletLoaded
+        }
+
+        // Check if we have enough balance
+        guard let walletBalance = balances[coinType], walletBalance.balance >= Double(amount) else {
+            throw WalletError.insufficientBalance
         }
 
         isLoading = true
@@ -249,22 +331,118 @@ class WalletManager: ObservableObject {
 
         do {
             var txBlock = try TransactionBlock()
-            let coin = try txBlock.splitCoin(
-                coin: txBlock.gas,
-                amounts: [
-                    txBlock.pure(
-                        value: .number(amount)
-                    )
-                ]
-            )
-            let _ = try txBlock.transferObject(
-                objects: [coin],
-                address: recipient
-            )
+
+            if coinType == .sui {
+                // For SUI, we can use gas directly
+                // Create the pure value for the amount
+                let amountArg = try txBlock.pure(value: .number(amount))
+
+                // Split the gas coin
+                let coin = try txBlock.splitCoin(
+                    coin: txBlock.gas,
+                    amounts: [amountArg]
+                )
+                let _ = try txBlock.transferObject(
+                    objects: [coin],
+                    address: recipient
+                )
+            } else {
+                // For other coins, we need to get the coin objects first
+                // Get the account to use for the API call
+                let account = wallet.accounts[0]
+
+                // Get coins directly using the account's address
+                let address = try account.address()
+                let coins = try await restClient.getCoins(
+                    account: address,
+                    coinType: coinType.fullType
+                )
+
+                // Extract the coin data
+                let coinData = coins.data
+                guard !coinData.isEmpty else {
+                    throw WalletError.noCoinObjectsFound
+                }
+
+                // Find coins that have enough balance
+                var remainingAmount = amount
+                var selectedCoins: [String] = []
+
+                for coin in coinData {
+                    if let balance = UInt64(coin.balance), balance > 0 {
+                        selectedCoins.append(coin.coinObjectId)
+                        remainingAmount -= min(balance, remainingAmount)
+
+                        if remainingAmount == 0 {
+                            break
+                        }
+                    }
+                }
+
+                guard remainingAmount == 0 else {
+                    throw WalletError.insufficientBalance
+                }
+
+                // Create the transaction
+                let primaryCoin = try txBlock.object(id: selectedCoins[0])
+
+                // If we need multiple coins, merge them first
+                if selectedCoins.count > 1 {
+                    for i in 1..<selectedCoins.count {
+                        let additionalCoin = try txBlock.object(id: selectedCoins[i])
+                        // We need to convert the TransactionObjectArgument to TransactionArgument
+                        // For now, we'll use a workaround by creating a new transaction
+                        // This is a temporary solution until we find a better way to convert the types
+                        let primaryCoinId = selectedCoins[0]
+                        let additionalCoinId = selectedCoins[i]
+
+                        // Use the IDs directly in the transaction
+                        // Convert TransactionObjectArgument to TransactionArgument
+                        let primaryArg = (try txBlock.object(id: primaryCoinId)).toTransactionArgument()
+                        let additionalArg = (try txBlock.object(id: additionalCoinId)).toTransactionArgument()
+
+                        // Call moveCall with proper TransactionArgument objects
+                        // We need to use the TransactionArgument objects directly
+                        let _ = try txBlock.moveCall(
+                            target: "0x2::coin::join",
+                            arguments: [primaryArg, additionalArg],
+                            typeArguments: [coinType.fullType]
+                        )
+                    }
+                }
+
+                // Split and transfer
+                // Create the pure value for the amount
+                let amountArg = try txBlock.pure(value: .number(amount))
+
+                // We need to use a different approach for splitting coins
+                // Use moveCall with the coin::split function
+                let primaryCoinId = selectedCoins[0]
+
+                // Split the coin using moveCall
+                // Convert TransactionObjectArgument to TransactionArgument
+                let primaryArg = (try txBlock.object(id: primaryCoinId)).toTransactionArgument()
+
+                // Call moveCall with proper TransactionArgument objects
+                // We need to convert the TransactionBlockInput to TransactionArgument
+                let primaryArgument = TransactionArgument.input(TransactionBlockInput(index: 0))
+                let amountArgument = TransactionArgument.input(TransactionBlockInput(index: 1))
+
+                let transferCoin = try txBlock.moveCall(
+                    target: "0x2::coin::split",
+                    arguments: [primaryArgument, amountArgument],
+                    typeArguments: [coinType.fullType]
+                )
+
+                let _ = try txBlock.transferObject(
+                    objects: transferCoin,
+                    address: recipient
+                )
+            }
 
             let options = SuiTransactionBlockResponseOptions(showEffects: true)
 
-            // Use Task to isolate non-sendable types
+            // Execute the transaction using Task to isolate non-sendable types
             let result = try await Task {
                 var txResult = try await restClient.signAndExecuteTransactionBlock(
                     transactionBlock: &txBlock,
@@ -280,11 +458,18 @@ class WalletManager: ObservableObject {
                 return txResult
             }.value
 
+            // Extract the effects from the result
+            let effects = result.effects
+
             try await updateBalance(for: wallet)
+
+            return effects
         } catch {
             self.error = error
             throw error
         }
+
+        return nil
     }
 
     func requestAirdrop() async throws {
@@ -292,9 +477,12 @@ class WalletManager: ObservableObject {
             throw WalletError.noWalletLoaded
         }
 
+        // Get the address
+        let address = try wallet.accounts[0].address()
+
         // Use Task to isolate non-sendable types
         let _ = try await Task {
-            return try await faucetClient.funcAccount(try wallet.accounts[0].address())
+            return try await faucetClient.funcAccount(address)
         }.value
 
         try await updateBalance(for: wallet)
@@ -339,7 +527,8 @@ class WalletManager: ObservableObject {
                 try await updateBalance(for: firstWallet)
             } else {
                 wallet = nil
-                balance = 0
+                suiBalance = 0
+                balances = [:]
 
                 // Remove the saved wallet address since there are no wallets
                 UserDefaults.standard.removeObject(forKey: currentWalletAddressKey)
@@ -359,6 +548,9 @@ enum WalletError: Error, LocalizedError {
     case invalidMnemonic
     case walletNotFound
     case walletAlreadyExists
+    case insufficientBalance
+    case noCoinObjectsFound
+    case unsupportedCoinType
 
     var errorDescription: String? {
         switch self {
@@ -370,6 +562,12 @@ enum WalletError: Error, LocalizedError {
             return "Wallet not found"
         case .walletAlreadyExists:
             return "This wallet already exists in your account list"
+        case .insufficientBalance:
+            return "Insufficient balance for this transaction"
+        case .noCoinObjectsFound:
+            return "No coin objects found for this coin type"
+        case .unsupportedCoinType:
+            return "This coin type is not supported"
         }
     }
 }

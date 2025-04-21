@@ -8,7 +8,8 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             List {
-                Section(header: Text("Account")) {
+                Section(content: {
+                    // Account section content
                     if let userInfo = getUserInfo() {
                         HStack {
                             Text("Wallet Address")
@@ -21,17 +22,21 @@ struct SettingsView: View {
                     HStack {
                         Text("Balance")
                         Spacer()
-                        Text(String(format: "%.9f SUI", walletManager.balance))
+                        Text(String(format: "%.9f SUI", walletManager.suiBalance))
                             .foregroundColor(.secondary)
                     }
-                }
+                }, header: {
+                    Text("Account")
+                })
 
-                Section(header: Text("App Settings")) {
+                Section(content: {
                     Toggle("Enable Notifications", isOn: .constant(true))
                     Toggle("Dark Mode", isOn: .constant(false))
-                }
+                }, header: {
+                    Text("App Settings")
+                })
 
-                Section(header: Text("About")) {
+                Section(content: {
                     NavigationLink(destination: Text("Privacy Policy Content").padding()) {
                         Text("Privacy Policy")
                     }
@@ -46,7 +51,9 @@ struct SettingsView: View {
                         Text("1.0.0")
                             .foregroundColor(.secondary)
                     }
-                }
+                }, header: {
+                    Text("About")
+                })
 
                 Section {
                     Button(action: {

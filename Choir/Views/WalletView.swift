@@ -41,7 +41,7 @@ struct WalletView: View {
                                             wallet: wallet,
                                             name: walletManager.walletNames[address] ?? "Unnamed Wallet",
                                             address: address,
-                                            balance: isSelected ? walletManager.balance : 0, // Only show balance for selected wallet
+                                            balances: isSelected ? walletManager.balances : [:], // Only show balances for selected wallet
                                             isSelected: isSelected,
                                             onSelect: {
                                                 selectWallet(address: address)
@@ -124,9 +124,19 @@ struct WalletView: View {
 
                                         Spacer()
 
-                                        Text("Balance: \(String(format: "%.9f SUI", walletManager.balance))")
-                                            .font(.caption)
-                                            .foregroundColor(.secondary)
+                                        VStack(alignment: .trailing, spacing: 2) {
+                                            if let suiBalance = walletManager.balances[.sui] {
+                                                Text("SUI: \(suiBalance.formattedBalance)")
+                                                    .font(.caption)
+                                                    .foregroundColor(.secondary)
+                                            }
+
+                                            if let choirBalance = walletManager.balances[.choir], choirBalance.balance > 0 {
+                                                Text("CHOIR: \(choirBalance.formattedBalance)")
+                                                    .font(.caption)
+                                                    .foregroundColor(.secondary)
+                                            }
+                                        }
                                     }
                                 }
                             } else {
@@ -139,32 +149,66 @@ struct WalletView: View {
                         Section(header: Text("Send Payment")) {
                             if let wallet = walletManager.wallet {
                                 VStack(spacing: 16) {
-                                    TextField("Recipient Address", text: $recipientAddress)
-                                        .font(.system(.body, design: .monospaced))
-                                        .autocapitalization(.none)
-                                        .disableAutocorrection(true)
-                                        .textContentType(.none)
-                                        .padding(8)
-                                        .background(Color(.systemGray6))
-                                        .cornerRadius(8)
+                                    // Show buttons for each coin type with balance
+                                    ForEach(walletManager.supportedCoinTypes.filter {
+                                        walletManager.balances[$0]?.balance ?? 0 > 0
+                                    }, id: \.self) { coinType in
+                                        Button(action: {
+                                            showingSendSheet = true
+                                        }) {
+                                            HStack {
+                                                Text("Send \(coinType.symbol)")
+                                                    .frame(maxWidth: .infinity, alignment: .leading)
 
-                                    TextField("Amount (SUI)", text: $sendAmount)
-                                        .keyboardType(.decimalPad)
-                                        .padding(8)
-                                        .background(Color(.systemGray6))
-                                        .cornerRadius(8)
+                                                if let balance = walletManager.balances[coinType] {
+                                                    Text(balance.formattedBalance)
+                                                        .font(.caption)
+                                                        .foregroundColor(.secondary)
+                                                }
 
-                                    Button(action: {
-                                        sendPayment()
-                                    }) {
-                                        Text("Send SUI")
-                                            .frame(maxWidth: .infinity)
+                                                Image(systemName: "chevron.right")
+                                                    .font(.caption)
+                                                    .foregroundColor(.secondary)
+                                            }
                                             .padding()
-                                            .background(Color.blue)
-                                            .foregroundColor(.white)
+                                            .background(Color(.systemGray6))
                                             .cornerRadius(8)
+                                        }
                                     }
-                                    .disabled(recipientAddress.isEmpty || sendAmount.isEmpty || walletManager.isLoading)
+
+                                    // Legacy quick send for SUI (can be removed later)
+                                    VStack(spacing: 8) {
+                                        Text("Quick Send SUI")
+                                            .font(.headline)
+                                            .frame(maxWidth: .infinity, alignment: .leading)
+
+                                        TextField("Recipient Address", text: $recipientAddress)
+                                            .font(.system(.body, design: .monospaced))
+                                            .autocapitalization(.none)
+                                            .disableAutocorrection(true)
+                                            .textContentType(.none)
+                                            .padding(8)
+                                            .background(Color(.systemGray6))
+                                            .cornerRadius(8)
+
+                                        TextField("Amount (SUI)", text: $sendAmount)
+                                            .keyboardType(.decimalPad)
+                                            .padding(8)
+                                            .background(Color(.systemGray6))
+                                            .cornerRadius(8)
+
+                                        Button(action: {
+                                            sendPayment()
+                                        }) {
+                                            Text("Send SUI")
+                                                .frame(maxWidth: .infinity)
+                                                .padding()
+                                                .background(Color.blue)
+                                                .foregroundColor(.white)
+                                                .cornerRadius(8)
+                                        }
+                                        .disabled(recipientAddress.isEmpty || sendAmount.isEmpty || walletManager.isLoading)
+                                    }
                                 }
                                 .padding(.vertical, 8)
                             } else {
@@ -216,7 +260,7 @@ struct WalletView: View {
             }
         }
         .sheet(isPresented: $showingSendSheet) {
-            SendSuiView(walletManager: walletManager)
+            EnhancedSendCoinView(walletManager: walletManager)
         }
         .task {
             if walletManager.wallet == nil {
