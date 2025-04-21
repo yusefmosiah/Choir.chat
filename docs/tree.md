@@ -70,7 +70,6 @@
 │       ├── PhaseCardContextMenu.swift
 │       ├── PostchainView.swift
 │       ├── QRScannerView.swift
-│       ├── SendCoinView.swift
 │       ├── SettingsView.swift
 │       ├── Thread
 │       │   └── Components
@@ -275,4 +274,4 @@
     ├── test_api.sh
     └── test_postchain_multiturn.sh
 
-68 directories, 205 files
+68 directories, 204 files

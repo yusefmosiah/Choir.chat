@@ -5,8 +5,7 @@ import LocalAuthentication
 
 struct WalletView: View {
     @EnvironmentObject var walletManager: WalletManager
-    @State private var sendAmount: String = ""
-    @State private var recipientAddress: String = ""
+
     @State private var showingSendSheet = false
     @State private var showingPrivateKeyAlert = false
     @State private var privateKeyMessage = ""
@@ -15,8 +14,7 @@ struct WalletView: View {
     @State private var showingCreateWalletAlert = false
     @State private var newWalletName = "New Wallet"
     @State private var isWalletSwitching = false
-    @State private var showingPaymentErrorAlert = false
-    @State private var paymentErrorMessage = ""
+
     @State private var hasCopiedAddress = false
     @State private var hasCopiedPrivateKey = false
 
@@ -176,39 +174,7 @@ struct WalletView: View {
                                         }
                                     }
 
-                                    // Legacy quick send for SUI (can be removed later)
-                                    VStack(spacing: 8) {
-                                        Text("Quick Send SUI")
-                                            .font(.headline)
-                                            .frame(maxWidth: .infinity, alignment: .leading)
 
-                                        TextField("Recipient Address", text: $recipientAddress)
-                                            .font(.system(.body, design: .monospaced))
-                                            .autocapitalization(.none)
-                                            .disableAutocorrection(true)
-                                            .textContentType(.none)
-                                            .padding(8)
-                                            .background(Color(.systemGray6))
-                                            .cornerRadius(8)
-
-                                        TextField("Amount (SUI)", text: $sendAmount)
-                                            .keyboardType(.decimalPad)
-                                            .padding(8)
-                                            .background(Color(.systemGray6))
-                                            .cornerRadius(8)
-
-                                        Button(action: {
-                                            sendPayment()
-                                        }) {
-                                            Text("Send SUI")
-                                                .frame(maxWidth: .infinity)
-                                                .padding()
-                                                .background(Color.blue)
-                                                .foregroundColor(.white)
-                                                .cornerRadius(8)
-                                        }
-                                        .disabled(recipientAddress.isEmpty || sendAmount.isEmpty || walletManager.isLoading)
-                                    }
                                 }
                                 .padding(.vertical, 8)
                             } else {
@@ -297,11 +263,7 @@ struct WalletView: View {
         } message: {
             Text(privateKeyMessage)
         }
-        .alert("Payment Error", isPresented: $showingPaymentErrorAlert) {
-            Button("OK", role: .cancel) {}
-        } message: {
-            Text(paymentErrorMessage)
-        }
+
         .navigationTitle("Wallets")
         .sheet(isPresented: $showingWalletSelectionSheet) {
             WalletSelectionView()
@@ -384,31 +346,7 @@ struct WalletView: View {
         }
     }
 
-    private func sendPayment() {
-        guard !recipientAddress.isEmpty, !sendAmount.isEmpty else { return }
 
-        // Convert the amount to SUI units (1 SUI = 10^9 units)
-        guard let amountDouble = Double(sendAmount) else { return }
-        let amountInSui = UInt64(amountDouble * 1_000_000_000)
-
-        Task {
-            do {
-                try await walletManager.send(amount: amountInSui, to: recipientAddress)
-
-                // Clear the fields after successful send
-                await MainActor.run {
-                    sendAmount = ""
-                    recipientAddress = ""
-                }
-            } catch {
-                print("Error sending payment: \(error)")
-                await MainActor.run {
-                    paymentErrorMessage = error.localizedDescription
-                    showingPaymentErrorAlert = true
-                }
-            }
-        }
-    }
 
     // Helper method to scroll to the current wallet
     private func scrollToCurrentWallet(proxy: ScrollViewProxy) {
@@ -447,56 +385,6 @@ struct WalletView: View {
                 print("Error retrieving private key: \(error)")
                 privateKeyMessage = "Error retrieving private key: \(error.localizedDescription)"
                 showingPrivateKeyAlert = true
-            }
-        }
-    }
-}
-
-struct SendSuiView: View {
-    @Environment(\.dismiss) var dismiss
-    @ObservedObject var walletManager: WalletManager
-    @State private var amount = ""
-    @State private var recipient = ""
-    @State private var showError = false
-    @State private var errorMessage = ""
-
-    var body: some View {
-        NavigationView {
-            Form {
-                TextField("Amount (SUI)", text: $amount)
-                    .keyboardType(.decimalPad)
-
-                TextField("Recipient Address", text: $recipient)
-
-                Button("Send") {
-                    guard let amountDouble = Double(amount) else {
-                        errorMessage = "Invalid amount format"
-                        showError = true
-                        return
-                    }
-
-                    let amountInSui = UInt64(amountDouble * 1_000_000_000)
-
-                    Task {
-                        do {
-                            try await walletManager.send(amount: amountInSui, to: recipient)
-                            dismiss()
-                        } catch {
-                            errorMessage = error.localizedDescription
-                            showError = true
-                        }
-                    }
-                }
-                .disabled(amount.isEmpty || recipient.isEmpty || walletManager.isLoading)
-            }
-            .navigationTitle("Send SUI")
-            .navigationBarItems(trailing: Button("Cancel") {
-                dismiss()
-            })
-            .alert("Error", isPresented: $showError) {
-                Button("OK") { showError = false }
-            } message: {
-                Text(errorMessage)
             }
         }
     }

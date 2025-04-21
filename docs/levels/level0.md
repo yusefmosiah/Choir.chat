@@ -83,7 +83,6 @@ tree.md
 │       ├── PhaseCardContextMenu.swift
 │       ├── PostchainView.swift
 │       ├── QRScannerView.swift
-│       ├── SendCoinView.swift
 │       ├── SettingsView.swift
 │       ├── Thread
 │       │   └── Components
@@ -288,7 +287,7 @@ tree.md
     ├── test_api.sh
     └── test_postchain_multiturn.sh
 
-68 directories, 205 files
+68 directories, 204 files
 
 === File: docs/CHANGELOG.md ===
 

@@ -310,7 +310,9 @@ class WalletManager: ObservableObject {
         // No need for additional checks
     }
 
-    // Legacy method for sending SUI (for backward compatibility)
+    // DEPRECATED: Legacy method for sending SUI (for backward compatibility)
+    // This method is kept for backward compatibility but should not be used in new code.
+    // Use the send(amount:coinType:to:) method instead with EnhancedSendCoinView.
     func send(amount: UInt64, to recipient: String) async throws -> SuiTransactionBlockEffects? {
         return try await send(amount: amount, coinType: .sui, to: recipient)
     }
