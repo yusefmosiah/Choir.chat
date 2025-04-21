@@ -6,6 +6,9 @@ from typing import List, Dict, Any, Optional
 from pydantic import BaseModel, Field
 from langchain_core.messages import BaseMessage, AIMessage # Import AIMessage
 
+# Import reward schemas
+from app.postchain.schemas.rewards import RewardInfo, NoveltyRewardInfo, CitationRewardInfo
+
 class PostChainState(BaseModel):
     """
     Structured state model for PostChain.
@@ -80,6 +83,8 @@ class ExperienceVectorsPhaseOutput(BaseModel):
     experience_vectors_response: AIMessage = Field(..., description="The AI's message potentially triggering or summarizing the vector search")
     vector_results: List[VectorSearchResult] = Field(default_factory=list, description="List of vector search results found")
     error: Optional[str] = Field(None, description="Error message if the phase failed")
+    max_similarity: Optional[float] = Field(None, description="Maximum similarity score found during vector search")
+    novelty_reward: Optional[NoveltyRewardInfo] = Field(None, description="Information about novelty reward if issued")
 
     class Config:
         arbitrary_types_allowed = True
@@ -89,6 +94,16 @@ class ExperienceWebPhaseOutput(BaseModel):
     experience_web_response: AIMessage = Field(..., description="The AI's message potentially triggering or summarizing the web search")
     web_results: List[SearchResult] = Field(default_factory=list, description="List of web search results found")
     error: Optional[str] = Field(None, description="Error message if the phase failed")
+
+    class Config:
+        arbitrary_types_allowed = True
+
+class YieldPhaseOutput(BaseModel):
+    """Structured output for the Yield phase."""
+    yield_response: AIMessage = Field(..., description="The AI's final response")
+    error: Optional[str] = Field(None, description="Error message if the phase failed")
+    citation_reward: Optional[CitationRewardInfo] = Field(None, description="Information about citation reward if issued")
+    citations: List[str] = Field(default_factory=list, description="List of citation references found in the response")
 
     class Config:
         arbitrary_types_allowed = True

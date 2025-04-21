@@ -9,5 +9,5 @@ license = "MIT"
 Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "framework/testnet" }
 
 [addresses]
-choir = "0x50c65cb11acb624b3a53be22ae511d0828007af3f28903ba1a1d87b64597c830"
+choir = "0x0"
 sui = "0x2"

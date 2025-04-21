@@ -33,7 +33,8 @@
 │   │   └── SearchModels.swift
 │   ├── Networking
 │   │   ├── EventSource.swift
-│   │   └── PostchainAPIClient.swift
+│   │   ├── PostchainAPIClient.swift
+│   │   └── RewardsService.swift
 │   ├── Preview Content
 │   │   └── Preview Assets.xcassets
 │   │       └── Contents.json
@@ -126,6 +127,7 @@
 │   │   │   │   └── prompts.py
 │   │   │   ├── schemas
 │   │   │   │   ├── __init__.py
+│   │   │   │   ├── rewards.py
 │   │   │   │   └── state.py
 │   │   │   ├── state
 │   │   │   └── utils.py
@@ -139,6 +141,7 @@
 │   │   ├── services
 │   │   │   ├── __init__.py
 │   │   │   ├── auth_service.py
+│   │   │   ├── rewards_service.py
 │   │   │   └── sui_service.py
 │   │   ├── tools
 │   │   │   ├── __init__.py
@@ -198,19 +201,16 @@
 │       ├── Move.lock
 │       ├── Move.toml
 │       ├── build
-│       │   └── choir
-│       │       ├── BuildInfo.yaml
-│       │       ├── bytecode_modules
-│       │       │   ├── choir.mv
-│       │       │   └── choir_tests.mv
-│       │       ├── source_maps
-│       │       │   ├── choir.json
-│       │       │   ├── choir.mvsm
-│       │       │   ├── choir_tests.json
-│       │       │   └── choir_tests.mvsm
-│       │       └── sources
-│       │           ├── choir.move
-│       │           └── choir_tests.move
+│       │   ├── choir
+│       │   │   ├── BuildInfo.yaml
+│       │   │   ├── bytecode_modules
+│       │   │   │   └── choir.mv
+│       │   │   ├── source_maps
+│       │   │   │   ├── choir.json
+│       │   │   │   └── choir.mvsm
+│       │   │   └── sources
+│       │   │       └── choir.move
+│       │   └── locks
 │       ├── sources
 │       │   └── choir_coin.move
 │       └── tests
@@ -268,4 +268,4 @@
     ├── test_api.sh
     └── test_postchain_multiturn.sh
 
-66 directories, 200 files
+67 directories, 199 files

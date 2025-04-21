@@ -83,6 +83,9 @@ async def process_simple_postchain(
                 query=request.user_query,
                 thread_id=thread_id,
                 message_history=message_history, # Pass the recovered history
+                # Pass user information for rewards
+                user_id=current_user.user_id,
+                wallet_address=current_user.wallet_address,
                 # config=config, # REMOVED
                 **model_overrides, # Expand the model overrides as keyword arguments
             ):

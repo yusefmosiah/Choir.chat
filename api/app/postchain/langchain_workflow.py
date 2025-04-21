@@ -36,9 +36,12 @@ from app.postchain.schemas.state import (
     PostChainState,
     ExperienceVectorsPhaseOutput,
     ExperienceWebPhaseOutput,
+    YieldPhaseOutput,
     SearchResult,
     VectorSearchResult
 )
+from app.postchain.schemas.rewards import NoveltyRewardInfo, CitationRewardInfo
+from app.services.rewards_service import RewardsService
 from app.postchain.utils import format_stream_event
 # Import updated prompts
 from app.postchain.prompts.prompts import (
@@ -231,7 +234,9 @@ async def run_action_phase(
 async def run_experience_vectors_phase(
     messages: List[BaseMessage],
     model_config: ModelConfig,
-    thread_id: str
+    thread_id: str,
+    user_id: Optional[str] = None,
+    wallet_address: Optional[str] = None
 ) -> ExperienceVectorsPhaseOutput:
     """Runs the Experience Vectors phase: Embeds query, searches Qdrant, calls LLM with results.
 
@@ -329,6 +334,7 @@ async def run_experience_vectors_phase(
             scores = [float(res.get("similarity", 0.0)) for res in qdrant_raw_results]
             if scores:
                 max_similarity = max(scores)
+                logger.info(f"Maximum similarity score: {max_similarity:.6f}")
 
         # Skip saving if we find an exact duplicate
         should_save_query = (max_similarity < (1.0 - SIMILARITY_EPSILON))
@@ -483,11 +489,46 @@ Your task: Synthesize the information above and the conversation history to resp
     if vector_results_list:
         logger.info(f"Selected {len(referenced_vector_results)} out of {len(vector_results_list)} total vector results to return to client")
 
-    # Return the structured output with the referenced vectors
+    # Calculate and issue novelty reward if wallet address is provided
+    novelty_reward = None
+    if wallet_address and max_similarity is not None:
+        try:
+            # Initialize rewards service
+            rewards_service = RewardsService()
+
+            # Issue novelty reward
+            reward_result = await rewards_service.issue_novelty_reward(wallet_address, max_similarity)
+
+            # Create reward info object if successful
+            if reward_result.get("success"):
+                novelty_reward = NoveltyRewardInfo(
+                    reward_type="novelty",
+                    reward_amount=reward_result.get("reward_amount", 0),
+                    success=True,
+                    digest=reward_result.get("digest"),
+                    similarity=max_similarity
+                )
+            else:
+                # Create failed reward info
+                novelty_reward = NoveltyRewardInfo(
+                    reward_type="novelty",
+                    reward_amount=0,
+                    success=False,
+                    error=reward_result.get("reason") or "Unknown error",
+                    similarity=max_similarity
+                )
+
+            logger.info(f"Novelty reward processed: {novelty_reward.dict()}")
+        except Exception as e:
+            logger.error(f"Error processing novelty reward: {e}", exc_info=True)
+
+    # Return the structured output with the referenced vectors and reward info
     return ExperienceVectorsPhaseOutput(
         experience_vectors_response=final_response,
         vector_results=referenced_vector_results,
-        error=error_msg
+        error=error_msg,
+        max_similarity=max_similarity,
+        novelty_reward=novelty_reward
     )
 
 
@@ -807,8 +848,10 @@ async def run_understanding_phase(
 
 async def run_yield_phase(
     messages: List[BaseMessage],
-    model_config: ModelConfig
-) -> Dict[str, Any]:
+    model_config: ModelConfig,
+    user_id: Optional[str] = None,
+    wallet_address: Optional[str] = None
+) -> YieldPhaseOutput:
     """Runs the Yield phase using LCEL."""
     logger.info(f"Running Yield phase with model: {model_config.provider}/{model_config.model_name}")
     yield_query = f"<yield_instruction>{yield_instruction(model_config)}</yield_instruction>"
@@ -835,10 +878,61 @@ async def run_yield_phase(
         response: AIMessage = await yield_chain.ainvoke(yield_messages)
         logger.info(f"🐍 YIELD PHASE: Raw response content length: {len(response.content)}. Content snippet: '{response.content[:100]}...'" if hasattr(response, 'content') else "🐍 YIELD PHASE: Raw response has no content attribute") # DEBUG LOG
         logger.info(f"Yield phase completed. Final Response: {response.content[:100]}...")
-        return {"yield_response": response}
+
+        # Extract citations from the response
+        citations = []
+        citation_reward = None
+
+        if hasattr(response, 'content') and response.content:
+            # Initialize rewards service
+            rewards_service = RewardsService()
+
+            # Extract citations
+            citations = rewards_service.extract_citations(response.content)
+            logger.info(f"Found {len(citations)} citations in yield response")
+
+            # Issue citation rewards if wallet address is provided
+            if wallet_address and citations:
+                try:
+                    # Issue citation reward
+                    reward_result = await rewards_service.issue_citation_rewards(wallet_address, len(citations))
+
+                    # Create reward info object if successful
+                    if reward_result.get("success"):
+                        citation_reward = CitationRewardInfo(
+                            reward_type="citation",
+                            reward_amount=reward_result.get("reward_amount", 0),
+                            success=True,
+                            digest=reward_result.get("digest"),
+                            citation_count=reward_result.get("citation_count", len(citations)),
+                            cited_messages=citations
+                        )
+                    else:
+                        # Create failed reward info
+                        citation_reward = CitationRewardInfo(
+                            reward_type="citation",
+                            reward_amount=0,
+                            success=False,
+                            error=reward_result.get("reason") or "Unknown error",
+                            citation_count=len(citations),
+                            cited_messages=citations
+                        )
+
+                    logger.info(f"Citation reward processed: {citation_reward.dict()}")
+                except Exception as e:
+                    logger.error(f"Error processing citation reward: {e}", exc_info=True)
+
+        return YieldPhaseOutput(
+            yield_response=response,
+            citations=citations,
+            citation_reward=citation_reward
+        )
     except Exception as e:
         logger.error(f"Error during Yield phase: {e}", exc_info=True)
-        return {"error": f"Yield phase failed: {e}"}
+        return YieldPhaseOutput(
+            yield_response=AIMessage(content=f"Error in phase: {e}"),
+            error=f"Yield phase failed: {e}"
+        )
 
 
 # --- Main Workflow (Updated) ---
@@ -881,6 +975,9 @@ async def run_langchain_postchain_workflow(
     query: str,
     thread_id: str,
     message_history: List[BaseMessage],
+    # User information for rewards
+    user_id: Optional[str] = None,
+    wallet_address: Optional[str] = None,
     # Allow overriding models per phase for testing
     action_mc_override: Optional[ModelConfig] = None,
     experience_vectors_mc_override: Optional[ModelConfig] = None, # New override
@@ -996,7 +1093,13 @@ async def run_langchain_postchain_workflow(
     logger.info(f"🐍 EXPERIENCE VECTORS PHASE: Sending running status with model_name: {exp_vectors_model_name}")
 
     yield running_obj
-    exp_vectors_output: ExperienceVectorsPhaseOutput = await run_experience_vectors_phase(current_messages, experience_vectors_model_config, thread_id=thread_id)
+    exp_vectors_output: ExperienceVectorsPhaseOutput = await run_experience_vectors_phase(
+        messages=current_messages,
+        model_config=experience_vectors_model_config,
+        thread_id=thread_id,
+        user_id=user_id,
+        wallet_address=wallet_address
+    )
     if exp_vectors_output.error:
         # Use same format for error case, but include full content
         vector_result_data = []
@@ -1079,8 +1182,13 @@ async def run_langchain_postchain_workflow(
         "content": exp_vectors_output.experience_vectors_response.content,
         "provider": experience_vectors_model_config.provider,
         "model_name": exp_vectors_model_name,
-        "vector_results": vector_result_data  # Include vector results for client
+        "vector_results": vector_result_data,  # Include vector results for client
+        "max_similarity": exp_vectors_output.max_similarity  # Include similarity score
     }
+
+    # Add novelty reward information if available
+    if exp_vectors_output.novelty_reward:
+        response_obj["novelty_reward"] = exp_vectors_output.novelty_reward.dict()
 
     # Log the exact JSON that will be sent
     logger.info(f"🐍 EXPERIENCE VECTORS PHASE: Sending JSON response with model_name: {exp_vectors_model_name}")
@@ -1323,9 +1431,14 @@ async def run_langchain_postchain_workflow(
     logger.info(f"🐍 YIELD PHASE: Sending running status with model_name: {yield_model_name}")
 
     yield running_obj
-    yield_result = await run_yield_phase(current_messages, yield_model_config)
+    yield_result = await run_yield_phase(
+        messages=current_messages,
+        model_config=yield_model_config,
+        user_id=user_id,
+        wallet_address=wallet_address
+    )
     logger.info(f"🐍 WORKFLOW: Received yield_result: {yield_result}") # DEBUG LOG
-    if "error" in yield_result:
+    if yield_result.error:
         # Ensure model_name is not empty
         yield_model_name = yield_model_config.model_name if yield_model_config.model_name else "unknown"
 
@@ -1333,7 +1446,7 @@ async def run_langchain_postchain_workflow(
         response_obj = {
             "phase": "yield",
             "status": "error",
-            "content": yield_result["error"],
+            "content": yield_result.error,
             "provider": yield_model_config.provider,
             "model_name": yield_model_name
         }
@@ -1343,7 +1456,7 @@ async def run_langchain_postchain_workflow(
 
         yield response_obj
         return
-    yield_response: AIMessage = yield_result["yield_response"]
+    yield_response: AIMessage = yield_result.yield_response
     # Don't add Yield to history for now
 
     # Add debug logging for model information
@@ -1360,6 +1473,14 @@ async def run_langchain_postchain_workflow(
         "provider": yield_model_config.provider,
         "model_name": model_name,
     }
+
+    # Add citation reward information if available
+    if yield_result.citation_reward:
+        response_obj["citation_reward"] = yield_result.citation_reward.dict()
+
+    # Add citations if available
+    if yield_result.citations:
+        response_obj["citations"] = yield_result.citations
 
     # Log the exact JSON that will be sent
     logger.info(f"🐍 YIELD PHASE: Sending JSON response with model_name: {model_name}")
