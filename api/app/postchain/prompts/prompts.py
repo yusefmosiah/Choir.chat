@@ -42,7 +42,7 @@ After analyzing the search results, create a structured summary section with bul
 
 Continue flowing with the same voice as the previous phase, Action.
 
-LEAD YOUR RESPONSE WITH A REWARDS ISSUANCE ACKNOWLEDGEMENT IF APPLICABLE AS THIS IS THE INFORMATION OF GREATEST VALUE.
+Begin your response with information about novelty rewards.
 
 <model_config>{model_config.provider}/{model_config.model_name}</model_config>
 """

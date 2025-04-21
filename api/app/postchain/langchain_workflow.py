@@ -391,7 +391,40 @@ async def run_experience_vectors_phase(
 
         logger.info(f"Formatted {len(vector_results_list)} unique vector search results.")
 
-        # --- 4. Call LLM with Search Results --- #
+        # --- 4. Calculate Novelty Reward --- #
+        novelty_reward = None
+        if wallet_address and max_similarity is not None:
+            try:
+                # Initialize rewards service
+                rewards_service = RewardsService()
+
+                # Issue novelty reward
+                reward_result = await rewards_service.issue_novelty_reward(wallet_address, max_similarity)
+
+                # Create reward info object if successful
+                if reward_result.get("success"):
+                    novelty_reward = NoveltyRewardInfo(
+                        reward_type="novelty",
+                        reward_amount=reward_result.get("reward_amount", 0),
+                        success=True,
+                        digest=reward_result.get("digest"),
+                        similarity=max_similarity
+                    )
+                else:
+                    # Create failed reward info
+                    novelty_reward = NoveltyRewardInfo(
+                        reward_type="novelty",
+                        reward_amount=0,
+                        success=False,
+                        error=reward_result.get("reason") or "Unknown error",
+                        similarity=max_similarity
+                    )
+
+                logger.info(f"Novelty reward processed: {novelty_reward.dict()}")
+            except Exception as e:
+                logger.error(f"Error processing novelty reward: {e}", exc_info=True)
+
+        # --- 5. Call LLM with Search Results and Reward Information --- #
         # Prepare context string from results in the format specified in the prompt
         search_context = "\n\nRelevant Information from Internal Documents:\n"
         if vector_results_list:
@@ -422,6 +455,16 @@ async def run_experience_vectors_phase(
         # Add explicit instruction about the reference syntax
         search_context += "\nIMPORTANT: When referencing any vector result in your response, use the #ID syntax (e.g., #123). These references will be converted to clickable links in the UI, allowing users to view the full content of each result. You MUST use this syntax whenever referring to specific vector results.\n\n"
 
+        # Add novelty reward information if available
+        reward_context = ""
+        if novelty_reward and novelty_reward.success:
+            reward_amount = float(novelty_reward.reward_amount) / 1_000_000_000.0  # Convert to CHOIR tokens
+            novelty_score = 1.0 - max_similarity if max_similarity is not None else 0.0
+            reward_context = f"\nNOVELTY REWARD: The user has earned {reward_amount:.2f} CHOIR tokens for this novel prompt! The novelty score is {novelty_score:.2f} (similarity: {max_similarity:.2f}).\n\n"
+        elif max_similarity is not None:
+            novelty_score = 1.0 - max_similarity
+            reward_context = f"\nPROMPT SIMILARITY: This prompt has a novelty score of {novelty_score:.2f} (similarity: {max_similarity:.2f}).\n\n"
+
         # Find last AI message (likely Action response) to include in context
         last_ai_msg = next((m for m in reversed(messages) if isinstance(m, AIMessage)), None)
 
@@ -431,7 +474,7 @@ async def run_experience_vectors_phase(
 
 Original Query: {last_user_msg.content}
 {f'Previous Response: {last_ai_msg.content}' if last_ai_msg else ''}
-{search_context}
+{reward_context}{search_context}
 Your task: Synthesize the information above and the conversation history to respond to the original query. DO NOT call any tools.
 """
         # Use current message history PLUS the new query incorporating search results
@@ -489,38 +532,7 @@ Your task: Synthesize the information above and the conversation history to resp
     if vector_results_list:
         logger.info(f"Selected {len(referenced_vector_results)} out of {len(vector_results_list)} total vector results to return to client")
 
-    # Calculate and issue novelty reward if wallet address is provided
-    novelty_reward = None
-    if wallet_address and max_similarity is not None:
-        try:
-            # Initialize rewards service
-            rewards_service = RewardsService()
-
-            # Issue novelty reward
-            reward_result = await rewards_service.issue_novelty_reward(wallet_address, max_similarity)
-
-            # Create reward info object if successful
-            if reward_result.get("success"):
-                novelty_reward = NoveltyRewardInfo(
-                    reward_type="novelty",
-                    reward_amount=reward_result.get("reward_amount", 0),
-                    success=True,
-                    digest=reward_result.get("digest"),
-                    similarity=max_similarity
-                )
-            else:
-                # Create failed reward info
-                novelty_reward = NoveltyRewardInfo(
-                    reward_type="novelty",
-                    reward_amount=0,
-                    success=False,
-                    error=reward_result.get("reason") or "Unknown error",
-                    similarity=max_similarity
-                )
-
-            logger.info(f"Novelty reward processed: {novelty_reward.dict()}")
-        except Exception as e:
-            logger.error(f"Error processing novelty reward: {e}", exc_info=True)
+    # Novelty reward was already calculated and issued before the LLM call
 
     # Return the structured output with the referenced vectors and reward info
     return ExperienceVectorsPhaseOutput(
