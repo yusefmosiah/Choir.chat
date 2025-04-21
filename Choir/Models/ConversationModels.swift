@@ -223,6 +223,8 @@ class Message: ObservableObject, Identifiable, Equatable {
     @Published var phaseResults: [Phase: PhaseResult] = [:]
     @Published var vectorSearchResults: [VectorSearchResult] = []
     @Published var webSearchResults: [SearchResult] = []
+    @Published var noveltyReward: RewardInfo?
+    @Published var maxSimilarity: Double?
 
     var phases: [Phase: String] {
         get { phaseResults.mapValues { $0.content } }
@@ -273,6 +275,19 @@ class Message: ObservableObject, Identifiable, Equatable {
             if !vectorResults.isEmpty {
             }
         } else {
+        }
+
+        // Handle novelty reward information
+        if phase == .experienceVectors {
+            if let reward = event.noveltyReward {
+                print("  Received novelty reward: \(reward.formattedAmount) CHOIR")
+                self.noveltyReward = reward
+            }
+
+            if let similarity = event.maxSimilarity {
+                print("  Received max similarity: \(similarity)")
+                self.maxSimilarity = similarity
+            }
         }
 
         // Always mark as streaming when we receive updates
@@ -432,9 +447,31 @@ class Message: ObservableObject, Identifiable, Equatable {
 extension Message {
     // Function to format Vector Search Results into Markdown
     func formatVectorResultsToMarkdown() -> String {
-        guard !vectorSearchResults.isEmpty else { return "" }
+        var markdown = ""
 
-        var markdown = "\n\n---\n**Vector Search Results:**\n\n" // Separator and title
+        // Add novelty reward information if available
+        if let reward = noveltyReward, reward.success {
+            markdown += "\n\n---\n**Novelty Reward:**\n\n"
+            markdown += "🎁 You earned **\(reward.formattedAmount) CHOIR** for your novel prompt!\n"
+
+            if let similarity = maxSimilarity {
+                let noveltyScore = 1.0 - similarity
+                markdown += "Novelty score: **\(String(format: "%.2f", noveltyScore))** (similarity: \(String(format: "%.2f", similarity)))\n"
+            }
+
+            markdown += "\n---\n"
+        } else if let similarity = maxSimilarity {
+            // Show similarity even if no reward was issued
+            markdown += "\n\n---\n**Prompt Similarity:**\n\n"
+            let noveltyScore = 1.0 - similarity
+            markdown += "Novelty score: **\(String(format: "%.2f", noveltyScore))** (similarity: \(String(format: "%.2f", similarity)))\n"
+            markdown += "\n---\n"
+        }
+
+        // Add vector search results if available
+        guard !vectorSearchResults.isEmpty else { return markdown }
+
+        markdown += "\n\n---\n**Vector Search Results:**\n\n" // Separator and title
         for result in vectorSearchResults {
             markdown += "*   **Score: \(String(format: "%.2f", result.score))**"
 

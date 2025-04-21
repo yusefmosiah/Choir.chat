@@ -311,7 +311,9 @@ class PostchainCoordinatorImpl: PostchainCoordinator, ObservableObject {
                 provider: event.provider,
                 modelName: event.modelName,
                 webResults: self.webResults,
-                vectorResults: self.vectorResults
+                vectorResults: self.vectorResults,
+                noveltyReward: event.noveltyReward,
+                maxSimilarity: event.maxSimilarity
             )
 
             // Add extra debugging specifically for model name issue
@@ -360,6 +362,8 @@ class PostchainCoordinatorImpl: PostchainCoordinator, ObservableObject {
             modelName: event.modelName,
             webResults: self.webResults,
             vectorResults: self.vectorResults,
+            noveltyReward: event.noveltyReward,
+            maxSimilarity: event.maxSimilarity,
             messageId: activeMessageId?.uuidString
         )
 

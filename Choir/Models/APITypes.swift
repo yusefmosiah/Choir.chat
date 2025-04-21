@@ -248,6 +248,8 @@ struct PostchainEvent: Decodable {
     let webResults: [SearchResult]?
     let vectorResults: [VectorSearchResult]?
     let error: String?
+    let noveltyReward: RewardInfo?
+    let maxSimilarity: Double?
 
     enum CodingKeys: String, CodingKey {
         case phase
@@ -258,6 +260,8 @@ struct PostchainEvent: Decodable {
         case webResults = "web_results" // Keep this as snake_case since it's used in API responses
         case vectorResults = "vector_results" // Keep this as snake_case since it's used in API responses
         case error
+        case noveltyReward = "novelty_reward" // Keep this as snake_case since it's used in API responses
+        case maxSimilarity = "max_similarity" // Keep this as snake_case since it's used in API responses
     }
 
     init(from decoder: Decoder) throws {
@@ -287,6 +291,24 @@ struct PostchainEvent: Decodable {
         }
 
         error = try container.decodeIfPresent(String.self, forKey: .error)
+
+        // Decode novelty reward information
+        do {
+            if container.contains(.noveltyReward) {
+                print("PostchainEvent - Found noveltyReward key")
+                let rewardData = try container.decodeIfPresent(RewardInfo.self, forKey: .noveltyReward)
+                noveltyReward = rewardData
+                print("PostchainEvent - Decoded novelty reward: \(rewardData?.formattedAmount ?? "nil")")
+            } else {
+                noveltyReward = nil
+            }
+        } catch {
+            print("PostchainEvent - Error decoding novelty_reward: \(error)")
+            noveltyReward = nil
+        }
+
+        // Decode max similarity
+        maxSimilarity = try container.decodeIfPresent(Double.self, forKey: .maxSimilarity)
 
         // Handle the cases where web/vector results might be in a different format
         do {
@@ -328,8 +350,10 @@ struct PostchainStreamEvent: Codable {
     let modelName: String?
     let webResults: [SearchResult]?
     let vectorResults: [VectorSearchResult]?
+    let noveltyReward: RewardInfo?
+    let maxSimilarity: Double?
 
-    init(phase: String, status: String = "complete", content: String? = nil, provider: String? = nil, modelName: String? = nil, webResults: [SearchResult]? = nil, vectorResults: [VectorSearchResult]? = nil) {
+    init(phase: String, status: String = "complete", content: String? = nil, provider: String? = nil, modelName: String? = nil, webResults: [SearchResult]? = nil, vectorResults: [VectorSearchResult]? = nil, noveltyReward: RewardInfo? = nil, maxSimilarity: Double? = nil) {
         self.phase = phase
         self.status = status
         self.content = content
@@ -337,6 +361,8 @@ struct PostchainStreamEvent: Codable {
         self.modelName = modelName
         self.webResults = webResults
         self.vectorResults = vectorResults
+        self.noveltyReward = noveltyReward
+        self.maxSimilarity = maxSimilarity
     }
 
     enum CodingKeys: String, CodingKey {
@@ -344,6 +370,8 @@ struct PostchainStreamEvent: Codable {
         case modelName = "model_name" // Keep this as snake_case since it's used in API responses
         case webResults = "web_results" // Keep this as snake_case since it's used in API responses
         case vectorResults = "vector_results" // Keep this as snake_case since it's used in API responses
+        case noveltyReward = "novelty_reward" // Keep this as snake_case since it's used in API responses
+        case maxSimilarity = "max_similarity" // Keep this as snake_case since it's used in API responses
     }
 
     init(from decoder: Decoder) throws {
@@ -378,6 +406,24 @@ struct PostchainStreamEvent: Codable {
         } catch {
             webResults = nil
         }
+
+        // Decode novelty reward information
+        do {
+            if container.contains(.noveltyReward) {
+                print("PostchainStreamEvent - Found noveltyReward key")
+                let rewardData = try container.decodeIfPresent(RewardInfo.self, forKey: .noveltyReward)
+                noveltyReward = rewardData
+                print("PostchainStreamEvent - Decoded novelty reward: \(rewardData?.formattedAmount ?? "nil")")
+            } else {
+                noveltyReward = nil
+            }
+        } catch {
+            print("PostchainStreamEvent - Error decoding novelty_reward: \(error)")
+            noveltyReward = nil
+        }
+
+        // Decode max similarity
+        maxSimilarity = try container.decodeIfPresent(Double.self, forKey: .maxSimilarity)
 
         do {
             // Add explicit check for vector_results

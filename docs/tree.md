@@ -253,6 +253,7 @@
 │   ├── require_phase_requirements_index.md
 │   ├── require_understanding_phase.md
 │   ├── require_yield_phase.md
+│   ├── rewards_system.md
 │   ├── scripts
 │   │   ├── combiner.sh
 │   │   └── update_tree.sh
@@ -274,4 +275,4 @@
     ├── test_api.sh
     └── test_postchain_multiturn.sh
 
-68 directories, 204 files
+68 directories, 205 files

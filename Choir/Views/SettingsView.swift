@@ -22,8 +22,13 @@ struct SettingsView: View {
                     HStack {
                         Text("Balance")
                         Spacer()
-                        Text(String(format: "%.9f SUI", walletManager.suiBalance))
-                            .foregroundColor(.secondary)
+                        if let suiBalance = walletManager.balances[.sui] {
+                            Text(suiBalance.formattedBalance)
+                                .foregroundColor(.secondary)
+                        } else {
+                            Text("0.0 SUI")
+                                .foregroundColor(.secondary)
+                        }
                     }
                 }, header: {
                     Text("Account")

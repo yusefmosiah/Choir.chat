@@ -17,7 +17,6 @@ class WalletManager: ObservableObject {
     @Published private(set) var walletNames: [String: String] = [:] // Address -> Name
     @Published private(set) var recentWalletAddresses: [String] = [] // Recently used wallet addresses
     @Published private(set) var balances: [CoinType: WalletBalance] = [:] // CoinType -> Balance
-    @Published private(set) var suiBalance: Double = 0 // Legacy support for existing code
     @Published private(set) var isLoading = false
     @Published var error: Error?
 
@@ -261,14 +260,11 @@ class WalletManager: ObservableObject {
                 objectCount: suiCoinBalance.coinObjectCount
             )
 
-            // Calculate the display balance as a Double
-            let balanceDouble = Double(balanceUInt64)
+            // Calculate the raw balance
+            let _ = Double(balanceUInt64)
 
             // Add to balances dictionary
             balances[.sui] = suiWalletBalance
-
-            // Update legacy SUI balance for backward compatibility
-            suiBalance = Double(suiWalletBalance.balance) / pow(10.0, Double(CoinType.sui.decimals))
         } catch {
             // If we can't get SUI balance, set it to 0
             balances[.sui] = WalletBalance(
@@ -276,7 +272,6 @@ class WalletManager: ObservableObject {
                 balance: 0,
                 objectCount: 0
             )
-            suiBalance = 0
         }
 
         // Get CHOIR balance
@@ -308,13 +303,6 @@ class WalletManager: ObservableObject {
 
         // We've already handled both SUI and CHOIR balances above
         // No need for additional checks
-    }
-
-    // DEPRECATED: Legacy method for sending SUI (for backward compatibility)
-    // This method is kept for backward compatibility but should not be used in new code.
-    // Use the send(amount:coinType:to:) method instead with EnhancedSendCoinView.
-    func send(amount: UInt64, to recipient: String) async throws -> SuiTransactionBlockEffects? {
-        return try await send(amount: amount, coinType: .sui, to: recipient)
     }
 
     // Send any supported coin type
@@ -529,7 +517,6 @@ class WalletManager: ObservableObject {
                 try await updateBalance(for: firstWallet)
             } else {
                 wallet = nil
-                suiBalance = 0
                 balances = [:]
 
                 // Remove the saved wallet address since there are no wallets

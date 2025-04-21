@@ -165,7 +165,7 @@ class PostchainViewModel: ObservableObject {
 
     // Called by the coordinator to update the view model with new phase content AND results
     // Updated signature to include provider and modelName - removed finalContent parameter
-    func updatePhaseData(phase: Phase, status: String, content: String?, provider: String?, modelName: String?, webResults: [SearchResult]? = nil, vectorResults: [VectorSearchResult]? = nil, messageId: String? = nil) {
+    func updatePhaseData(phase: Phase, status: String, content: String?, provider: String?, modelName: String?, webResults: [SearchResult]? = nil, vectorResults: [VectorSearchResult]? = nil, noveltyReward: RewardInfo? = nil, maxSimilarity: Double? = nil, messageId: String? = nil) {
         // Cancel any pending update
         updateWorkItem?.cancel()
 
@@ -212,7 +212,9 @@ class PostchainViewModel: ObservableObject {
                     provider: provider,
                     modelName: modelName,
                     webResults: webResults,
-                    vectorResults: vectorResults
+                    vectorResults: vectorResults,
+                    noveltyReward: noveltyReward,
+                    maxSimilarity: maxSimilarity
                 )
 
                 // Enhanced debug logging for all phases

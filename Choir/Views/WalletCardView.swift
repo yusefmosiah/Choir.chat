@@ -10,24 +10,7 @@ struct WalletCardView: View {
     let isSelected: Bool
     let onSelect: () -> Void
 
-    // For backward compatibility
-    init(wallet: Wallet, name: String, address: String, balance: Double, isSelected: Bool, onSelect: @escaping () -> Void) {
-        self.wallet = wallet
-        self.name = name
-        self.address = address
-        self.isSelected = isSelected
-        self.onSelect = onSelect
-
-        // Create a SUI balance
-        let suiBalance = WalletBalance(
-            coinType: .sui,
-            balance: balance * 1_000_000_000, // Convert to raw units
-            objectCount: 1
-        )
-        self.balances = [.sui: suiBalance]
-    }
-
-    // New initializer with multiple balances
+    // Main initializer
     init(wallet: Wallet, name: String, address: String, balances: [CoinType: WalletBalance], isSelected: Bool, onSelect: @escaping () -> Void) {
         self.wallet = wallet
         self.name = name
@@ -174,7 +157,11 @@ struct WalletCardView: View {
             wallet: mockWallet,
             name: "Secondary Wallet",
             address: mockAddress,
-            balance: 7.89, // Using the backward compatibility initializer
+            balances: [.sui: WalletBalance(
+                coinType: .sui,
+                balance: 7_890_000_000, // 7.89 SUI
+                objectCount: 1
+            )],
             isSelected: false,
             onSelect: {}
         )
