@@ -39,6 +39,9 @@ struct ApiConfig {
 
         // Thread endpoints
         static let threads = "api/threads"
+
+        // Vector endpoints
+        static let vectors = "api/vectors"
     }
 
     // MARK: - Helper Methods

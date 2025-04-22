@@ -432,8 +432,10 @@ async def run_experience_vectors_phase(
             for i, res in enumerate(vector_results_list):
                 # Use the position number (1-based) as the reference, not the actual UUID
                 position_number = i + 1
-                # Include the ID in the context for potential future retrieval
-                vector_id = f"ID: {res.id}" if res.id else ""
+                # Include the actual vector ID for retrieval
+                actual_vector_id = res.id if res.id else ""
+                # Create a unique reference that includes the actual vector ID
+                vector_id_display = f"ID: {actual_vector_id}" if actual_vector_id else ""
 
                 # Use content preview if it exists, otherwise a short version of the content
                 display_content = res.content
@@ -442,9 +444,14 @@ async def run_experience_vectors_phase(
                 elif len(res.content) > 200:
                     display_content = res.content[:200] + "..."
 
+                # Create a unique reference format that includes the actual vector ID
+                # Format: #V{actual_vector_id} (without position number to match what the LLM is using)
+                # Note: We'll use the full ID in the reference to ensure it can be properly matched
+                unique_reference = f"#V{actual_vector_id}" if actual_vector_id else f"#{position_number}"
+
                 search_context += f"""
 ```
-#{position_number} | {res.score:.2f} {vector_id}
+{unique_reference} | {res.score:.2f} {vector_id_display}
 {display_content}
 ```
 
@@ -453,7 +460,7 @@ async def run_experience_vectors_phase(
             search_context += "No relevant information found in internal documents.\n"
 
         # Add explicit instruction about the reference syntax
-        search_context += "\nIMPORTANT: When referencing any vector result in your response, use the #ID syntax (e.g., #123). These references will be converted to clickable links in the UI, allowing users to view the full content of each result. You MUST use this syntax whenever referring to specific vector results.\n\n"
+        search_context += "\nIMPORTANT: When referencing any vector result in your response, use the exact reference format shown above (e.g., #V12345). You MUST include the full vector ID as shown above, not a truncated version. These references will be converted to clickable links in the UI, allowing users to view the full content of each result.\n\n"
 
         # Add novelty reward information if available
         reward_context = ""
@@ -963,23 +970,77 @@ def get_referenced_vectors(text, available_vectors):
     """
     referenced_vectors = []
 
-    # Extract all #number references
-    vector_refs = re.findall(r'#(\d+)', text)
-    if not vector_refs:
-        return []
+    # Extract references in the new format: #V{vector_id} (with or without position number)
+    # Also handle legacy format: #{position_number}
+    vector_refs_new_with_position = re.findall(r'#V([\w-]+)-(\d+)', text)  # Format: #V{id}-{position}
+    vector_refs_new_without_position = re.findall(r'#V([\w-]+)(?!-\d)', text)  # Format: #V{id} without position
+    vector_refs_legacy = re.findall(r'#(\d+)(?!\w|-\d)', text)  # Match #123 but not #V123-1 or #123-456
 
-    # Convert to integers and get unique values
-    referenced_indices = sorted(set(int(ref) for ref in vector_refs if ref.isdigit()))
-    logger.info(f"Found vector references: {referenced_indices}")
+    logger.info(f"Found new format vector references with position: {vector_refs_new_with_position}")
+    logger.info(f"Found new format vector references without position: {vector_refs_new_without_position}")
+    logger.info(f"Found legacy format vector references: {vector_refs_legacy}")
 
-    # Get the referenced vectors
-    for ref_num in referenced_indices:
-        array_idx = ref_num - 1  # Convert 1-based to 0-based
-        if 0 <= array_idx < len(available_vectors):
-            referenced_vectors.append(available_vectors[array_idx])
-            logger.info(f"Including vector #{ref_num}")
-        else:
-            logger.warning(f"Vector reference #{ref_num} is out of range (1-{len(available_vectors)})")
+    # Process new format references without position first (they have priority)
+    for vector_id in vector_refs_new_without_position:
+        # First try exact match
+        vector_by_id = next((v for v in available_vectors if v.id == vector_id), None)
+
+        # If exact match fails, try partial match (for truncated IDs)
+        if vector_by_id is None:
+            # Try to find a vector where the ID starts with the provided ID (truncated case)
+            vector_by_id = next((v for v in available_vectors if v.id and v.id.startswith(vector_id)), None)
+            if vector_by_id:
+                logger.info(f"Found vector by partial ID match: {vector_id} -> {vector_by_id.id}")
+
+        if vector_by_id:
+            if vector_by_id not in referenced_vectors:
+                referenced_vectors.append(vector_by_id)
+                logger.info(f"Including vector by ID (without position): {vector_id}")
+
+    # Process new format references with position
+    for vector_id, position_number in vector_refs_new_with_position:
+        # First try exact match
+        vector_by_id = next((v for v in available_vectors if v.id == vector_id), None)
+
+        # If exact match fails, try partial match (for truncated IDs)
+        if vector_by_id is None:
+            # Try to find a vector where the ID starts with the provided ID (truncated case)
+            vector_by_id = next((v for v in available_vectors if v.id and v.id.startswith(vector_id)), None)
+            if vector_by_id:
+                logger.info(f"Found vector by partial ID match: {vector_id} -> {vector_by_id.id}")
+
+        if vector_by_id:
+            if vector_by_id not in referenced_vectors:
+                referenced_vectors.append(vector_by_id)
+                logger.info(f"Including vector by ID: {vector_id}")
+            continue
+
+        # If not found by ID, try by position
+        try:
+            position = int(position_number)
+            array_idx = position - 1  # Convert 1-based to 0-based
+            if 0 <= array_idx < len(available_vectors):
+                if available_vectors[array_idx] not in referenced_vectors:
+                    referenced_vectors.append(available_vectors[array_idx])
+                    logger.info(f"Including vector by position: {position}")
+            else:
+                logger.warning(f"Vector reference position {position} is out of range (1-{len(available_vectors)})")
+        except ValueError:
+            logger.warning(f"Invalid position number in vector reference: {position_number}")
+
+    # Process legacy format references
+    for ref in vector_refs_legacy:
+        try:
+            ref_num = int(ref)
+            array_idx = ref_num - 1  # Convert 1-based to 0-based
+            if 0 <= array_idx < len(available_vectors):
+                if available_vectors[array_idx] not in referenced_vectors:
+                    referenced_vectors.append(available_vectors[array_idx])
+                    logger.info(f"Including vector by legacy reference: #{ref_num}")
+            else:
+                logger.warning(f"Legacy vector reference #{ref_num} is out of range (1-{len(available_vectors)})")
+        except ValueError:
+            logger.warning(f"Invalid legacy vector reference: #{ref}")
 
     return referenced_vectors
 

@@ -236,6 +236,45 @@ struct HealthCheckResponse: Decodable {
     let message: String
 }
 
+// MARK: - Vector Models
+
+/// Model for vector data returned from the API
+struct VectorResult: Decodable {
+    let id: String
+    let content: String
+    let vector: [Double]?
+    let metadata: [String: Any]?
+    let created_at: String?
+
+    enum CodingKeys: String, CodingKey {
+        case id
+        case content
+        case vector
+        case metadata
+        case created_at
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        id = try container.decode(String.self, forKey: .id)
+        content = try container.decode(String.self, forKey: .content)
+        vector = try container.decodeIfPresent([Double].self, forKey: .vector)
+        created_at = try container.decodeIfPresent(String.self, forKey: .created_at)
+
+        // Decode metadata as AnyCodable and convert to [String: Any]
+        if let metadataContainer = try? container.decodeIfPresent([String: AnyCodable].self, forKey: .metadata) {
+            var convertedMetadata: [String: Any] = [:]
+            for (key, value) in metadataContainer {
+                convertedMetadata[key] = value.value
+            }
+            metadata = convertedMetadata
+        } else {
+            metadata = nil
+        }
+    }
+}
+
 // MARK: - Streaming Event Models
 
 /// Event received from Postchain streaming endpoint

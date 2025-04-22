@@ -269,19 +269,23 @@ struct PaginatedMarkdownView: View {
     }
 
     private func handleVectorDeepLink(vectorId: String) {
-        guard let indexNumber = Int(vectorId) else {
-            TextSelectionManager.shared.showSheet(withText: "Invalid vector reference format. Expected #<number> but got #\(vectorId).")
-            return
-        }
-
         // Use the message passed to this view
         guard let message = currentMessage else {
-            TextSelectionManager.shared.showSheet(withText: "Unable to display vector result #\(indexNumber): No message context available.")
+            TextSelectionManager.shared.showSheet(withText: "Unable to display vector result: No message context available.")
             return
         }
 
-        // Enhanced debug logging
+        // Check if this is a numeric ID (legacy format) or a vector ID (new format)
+        if let indexNumber = Int(vectorId) {
+            // Legacy format - try to find by position
+            handleLegacyVectorReference(indexNumber: indexNumber, message: message)
+        } else {
+            // New format - try to find by actual vector ID
+            fetchVectorFromAPI(vectorId: vectorId, message: message)
+        }
+    }
 
+    private func handleLegacyVectorReference(indexNumber: Int, message: Message) {
         // Try to find the vector result with the matching index
         var vectorResult: VectorSearchResult? = nil
 
@@ -294,7 +298,7 @@ struct PaginatedMarkdownView: View {
         if vectorResult == nil {
             vectorResult = message.vectorSearchResults.first { result in
                 guard let resultId = result.id else { return false }
-                return resultId.contains(vectorId) || resultId.contains("#\(indexNumber)")
+                return resultId.contains(String(indexNumber)) || resultId.contains("#\(indexNumber)")
             }
         }
 
@@ -343,16 +347,133 @@ struct PaginatedMarkdownView: View {
         }
     }
 
-    private func displayVectorResult(_ vectorResult: VectorSearchResult, index: Int) {
-        // Debug the vector content
-        if let preview = vectorResult.content_preview {
+    private func fetchVectorFromAPI(vectorId: String, message: Message) {
+        // First check if we already have this vector in the local results with exact match
+        if let localVector = message.vectorSearchResults.first(where: { $0.id == vectorId }) {
+            displayVectorResult(localVector, index: -1) // Use -1 to indicate it's not a position-based reference
+            return
         }
 
-        // Check if vector has an ID and might have fuller content available
+        // If exact match fails, try partial match for truncated IDs
+        if let partialMatchVector = message.vectorSearchResults.first(where: {
+            guard let fullId = $0.id else { return false }
+            return fullId.hasPrefix(vectorId) || vectorId.hasPrefix(fullId)
+        }) {
+            displayVectorResult(partialMatchVector, index: -1)
+            return
+        }
 
+        // Show loading indicator
+        let loadingContent = """
+        # Loading Vector Content
+
+        Fetching full content for vector ID: \(vectorId)...
+
+        Please wait...
+        """
+        TextSelectionManager.shared.showSheet(withText: loadingContent)
+
+        // Fetch from API
+        Task {
+            do {
+                // Create URL for the vector API endpoint
+                let url = ApiConfig.url(for: "\(ApiConfig.Endpoints.vectors)/\(vectorId)")
+
+                // Create request
+                var request = URLRequest(url: url)
+                request.httpMethod = "GET"
+
+                // Add authorization header if available
+                if let authToken = UserDefaults.standard.string(forKey: "authToken") {
+                    request.addValue("Bearer \(authToken)", forHTTPHeaderField: "Authorization")
+                }
+
+                // Make the request
+                let (data, response) = try await URLSession.shared.data(for: request)
+
+                // Check response status
+                guard let httpResponse = response as? HTTPURLResponse else {
+                    throw NSError(domain: "Invalid response", code: 0)
+                }
+
+                // If we get a 404, it might be because the vector ID is truncated
+                // Try to find a vector with a similar ID in the local results
+                if httpResponse.statusCode == 404 {
+                    // Try to find a vector with an ID that starts with the provided ID
+                    if let partialMatchVector = message.vectorSearchResults.first(where: {
+                        guard let fullId = $0.id else { return false }
+                        return fullId.hasPrefix(vectorId) || vectorId.hasPrefix(fullId)
+                    }) {
+                        // Found a match, display it
+                        await MainActor.run {
+                            displayVectorResult(partialMatchVector, index: -1)
+                        }
+                        return
+                    } else {
+                        // No match found, throw an error
+                        throw NSError(domain: "Vector not found", code: 404)
+                    }
+                }
+
+                // For other errors, throw an exception
+                guard httpResponse.statusCode == 200 else {
+                    throw NSError(domain: "Invalid response", code: httpResponse.statusCode)
+                }
+
+                // Parse the response
+                let decoder = JSONDecoder()
+                let apiResponse = try decoder.decode(APIResponse<VectorResult>.self, from: data)
+
+                // Check if the response was successful
+                guard apiResponse.success, let vectorData = apiResponse.data else {
+                    throw NSError(domain: apiResponse.message ?? "Unknown error", code: 0)
+                }
+
+                // Create a VectorSearchResult from the API response
+                let vectorResult = VectorSearchResult(
+                    content: vectorData.content,
+                    score: 1.0, // Default score for direct fetches
+                    provider: "qdrant",
+                    metadata: vectorData.metadata?.compactMapValues { $0 as? String },
+                    id: vectorData.id,
+                    content_preview: nil
+                )
+
+                // Display the result
+                await MainActor.run {
+                    displayVectorResult(vectorResult, index: -1) // Use -1 to indicate it's not a position-based reference
+                }
+
+            } catch {
+                // Show error
+                await MainActor.run {
+                    let errorContent = """
+                    # Error Fetching Vector Content
+
+                    Failed to fetch content for vector ID: \(vectorId)
+
+                    Error: \(error.localizedDescription)
+                    """
+                    TextSelectionManager.shared.showSheet(withText: errorContent)
+                }
+            }
+        }
+    }
+
+    private func displayVectorResult(_ vectorResult: VectorSearchResult, index: Int) {
         // Format initial content with metadata
         var formattedContent = """
-        # Vector Result #\(index)
+        # Vector Result
+        """
+
+        // Add index if it's a position-based reference
+        if index > 0 {
+            formattedContent = """
+            # Vector Result #\(index)
+            """
+        }
+
+        formattedContent += """
 
         Score: \(String(format: "%.2f", vectorResult.score))
         """
@@ -379,12 +500,7 @@ struct PaginatedMarkdownView: View {
         formattedContent += "\n\nContent Length: \(vectorResult.content.count) characters"
 
         // Use best available content version
-        var contentToDisplay = vectorResult.content
-
-        // If content is short and we have an ID, add a note that this might be truncated
-        if vectorResult.id != nil && contentToDisplay.count < 500 {
-            formattedContent += "\n\n*Note: This is a truncated view. Full content may be available from the server using the vector ID.*"
-        }
+        let contentToDisplay = vectorResult.content
 
         formattedContent += """
 
