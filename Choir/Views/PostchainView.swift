@@ -103,36 +103,7 @@ struct PostchainView: View {
             // Also track content changes for each phase
             let _ = phaseContentChanges.map { "\($0):\($1)" }.joined()
 
-            ZStack { // Main ZStack containing only the card stack
-
-                // --- Carousel Indicators ---
-                if availablePhases.contains(.action) && availablePhases.contains(.yield) {
-                    VStack {
-                        Spacer()
-
-                        HStack(spacing: 20) {
-                            // Action indicator
-                            Image(systemName: "arrow.left")
-                                .foregroundColor(selectedPhase == .action ? .gray : .accentColor)
-                                .opacity(selectedPhase == .action ? 0.3 : 0.7)
-                                .scaleEffect(selectedPhase == .yield ? 1.2 : 1.0)
-                                .animation(.easeInOut, value: selectedPhase)
-
-                            Spacer()
-
-                            // Yield indicator
-                            Image(systemName: "arrow.right")
-                                .foregroundColor(selectedPhase == .yield ? .gray : .accentColor)
-                                .opacity(selectedPhase == .yield ? 0.3 : 0.7)
-                                .scaleEffect(selectedPhase == .action ? 1.2 : 1.0)
-                                .animation(.easeInOut, value: selectedPhase)
-                        }
-                        .padding(.horizontal, 30)
-                        .padding(.bottom, 10)
-                    }
-                    .zIndex(2)
-                }
-
+            VStack(spacing: 8) { // Main VStack containing card stack and page control
                 // --- Card Stack ---
                 ZStack {
                     ForEach(availablePhases) { phase in
@@ -161,7 +132,8 @@ struct PostchainView: View {
                         }
                     } // End ForEach
                 }
-                .frame(maxWidth: .infinity, maxHeight: .infinity) // Ensure card stack uses space
+                .frame(maxWidth: .infinity) // Allow card stack to use available width
+                .frame(height: geometry.size.height) 
                 .onChange(of: availablePhases.count) { _, newCount in
                     // Increment the counter to force UI refresh when available phases change
                     phaseRefreshCounter += 1
@@ -196,29 +168,23 @@ struct PostchainView: View {
                         }
                 )
 
-            } // End Main ZStack (containing only cards)
-            .overlay(alignment: .leading) { // Left Tap Area Overlay
-                let tapAreaWidth = max(0, (geometry.size.width - (cardWidth * 0.8)) / 2)
-                Color.clear
-                    .frame(width: tapAreaWidth)
-                    .padding(.leading, -20) // Expand overlay outward beyond parent bounds
-                    .contentShape(Rectangle())
-                    .onTapGesture {
-                        handlePageTap(direction: .previous, size: geometry.size)
+                // Add unified glass page control below the card stack
+                GlassPageControl(
+                    currentPhase: selectedPhase,
+                    availablePhases: availablePhases,
+                    currentPage: pageBinding(for: selectedPhase),
+                    totalPages: calculateTotalPages(for: selectedPhase, size: geometry.size),
+                    onPhaseChange: { newPhase in
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                            viewModel.updateSelectedPhase(for: message, phase: newPhase)
+                        }
+                    },
+                    onPageChange: { direction in
+                        handlePageNavigation(direction: direction, size: geometry.size)
                     }
-                    .zIndex(2) // Ensure overlay is above phase cards
-            }
-            .overlay(alignment: .trailing) { // Right Tap Area Overlay
-                let tapAreaWidth = max(0, geometry.size.width - (cardWidth * 0.7))
-                Color.clear
-                    .frame(width: tapAreaWidth)
-                    .padding(.trailing, -60) // Expand overlay outward beyond parent bounds
-                    .contentShape(Rectangle())
-                    .onTapGesture {
-                        handlePageTap(direction: .next, size: geometry.size)
-                    }
-                    .zIndex(2) // Ensure overlay is above phase cards
-            }
+                )
+                .padding(.bottom, 5)
+            } // End Main VStack
         } // End GeometryReader
         .onAppear(perform: handleOnAppear) // Apply .onAppear to GeometryReader's content
         // Removed onChange(of: geometry.size)
@@ -388,10 +354,31 @@ struct PostchainView: View {
     } // Closing brace for calculateOpacity
     // Removed handleTap and calculateTotalPages functions
 
-    private enum PageTapDirection { case previous, next }
     private enum SwipeDirection { case next, previous } // Keep SwipeDirection for switchToPhase
 
-    private func handlePageTap(direction: PageTapDirection, size: CGSize) {
+    // Helper function to create a binding for the current page of a phase
+    private func pageBinding(for phase: Phase) -> Binding<Int> {
+        Binding<Int>(
+            get: { message.phaseCurrentPage[phase] ?? 0 },
+            set: { message.phaseCurrentPage[phase] = $0 }
+        )
+    }
+
+    // Helper function to calculate the total number of pages for a phase
+    private func calculateTotalPages(for phase: Phase, size: CGSize) -> Int {
+        let baseContent = message.getPhaseContent(phase)
+        var combinedMarkdown = baseContent
+        if phase == .experienceVectors && !message.vectorSearchResults.isEmpty {
+            combinedMarkdown += message.formatVectorResultsToMarkdown()
+        } else if phase == .experienceWeb && !message.webSearchResults.isEmpty {
+            combinedMarkdown += message.formatWebResultsToMarkdown()
+        }
+        let pages = splitMarkdownIntoPages(combinedMarkdown, size: size)
+        return max(1, pages.count)
+    }
+
+    // Unified function to handle page navigation
+    private func handlePageNavigation(direction: PageDirection, size: CGSize) {
         // Recalculate combined markdown for the current phase
         let phase = selectedPhase
         let baseContent = message.getPhaseContent(phase)
@@ -430,9 +417,8 @@ struct PostchainView: View {
         }
 
         let measurer = TextMeasurer(sizeCategory: .medium)
-        let paginationControlsHeight: CGFloat = 35
         let verticalPadding: CGFloat = 8
-        let availableTextHeight = size.height - verticalPadding - paginationControlsHeight
+        let availableTextHeight = size.height - verticalPadding
 
         guard availableTextHeight > 20 else {
             return [text]

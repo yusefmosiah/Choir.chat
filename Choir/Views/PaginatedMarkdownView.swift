@@ -57,41 +57,7 @@ struct PaginatedMarkdownView: View {
                     }
                 }
 
-                Spacer(minLength: 0)
-
-                // Pagination Controls
-                HStack {
-                    Button(action: {
-                        if currentPage > 0 {
-                            currentPage -= 1
-                        } else {
-                            onNavigateToPreviousPhase?()
-                        }
-                    }) {
-                        Image(systemName: "chevron.left")
-                    }
-                    .disabled(currentPage <= 0 && onNavigateToPreviousPhase == nil)
-
-                    Spacer()
-                    Text("\(currentPage + 1) / \(totalPages)")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                    Spacer()
-
-                    Button(action: {
-                        if currentPage < totalPages - 1 {
-                            currentPage += 1
-                        } else {
-                            onNavigateToNextPhase?()
-                        }
-                    }) {
-                        Image(systemName: "chevron.right")
-                    }
-                    .disabled(currentPage >= totalPages - 1 && onNavigateToNextPhase == nil)
-                }
-                .padding(.horizontal)
-                .padding(.bottom, 5)
-                .frame(height: 30)
+                // Pagination controls are now handled by GlassPageControl
             }
             .onAppear {
                 paginateContent(size: geometry.size)
@@ -187,9 +153,8 @@ struct PaginatedMarkdownView: View {
         }
 
         let measurer = TextMeasurer(sizeCategory: .medium)
-        let paginationControlsHeight: CGFloat = 35
         let verticalPadding: CGFloat = 8
-        let availableTextHeight = size.height - verticalPadding - paginationControlsHeight
+        let availableTextHeight = size.height - verticalPadding
 
         guard availableTextHeight > 20 else {
             return [text]
