@@ -109,6 +109,11 @@ struct TextViewWrapper: UIViewRepresentable {
 
     func updateUIView(_ uiView: UITextView, context: Context) {
         if uiView.text != text {
+            // Save scroll position if possible
+            let contentOffset = uiView.contentOffset
+            let visibleHeight = uiView.bounds.height
+
+            // Update text
             uiView.text = text
             uiView.layoutIfNeeded()
 
@@ -116,6 +121,15 @@ struct TextViewWrapper: UIViewRepresentable {
                 DispatchQueue.main.async {
                     uiView.selectedRange = selectedRange
                     uiView.scrollRangeToVisible(selectedRange)
+                }
+            } else {
+                // Try to maintain scroll position for content updates
+                DispatchQueue.main.async {
+                    // If the content is similar (like when updating vector content),
+                    // try to maintain the scroll position
+                    if text.hasPrefix("# Vector Result") && uiView.contentSize.height > visibleHeight {
+                        uiView.contentOffset = contentOffset
+                    }
                 }
             }
         }

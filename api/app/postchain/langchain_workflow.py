@@ -20,7 +20,6 @@ import hashlib
 import logging
 from typing import List, Dict, Any, AsyncIterator, Optional
 import json
-import re
 
 from langchain_core.messages import HumanMessage, AIMessage, SystemMessage, BaseMessage, ToolMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
@@ -444,10 +443,10 @@ async def run_experience_vectors_phase(
                 elif len(res.content) > 200:
                     display_content = res.content[:200] + "..."
 
-                # Create a unique reference format that includes the actual vector ID
-                # Format: #V{actual_vector_id} (without position number to match what the LLM is using)
-                # Note: We'll use the full ID in the reference to ensure it can be properly matched
-                unique_reference = f"#V{actual_vector_id}" if actual_vector_id else f"#{position_number}"
+                # Create a unique reference format using vid tags that includes the actual vector ID
+                # Format: <vid>{actual_vector_id}</vid>
+                # This format is easier to parse on the client side and clearly distinguishes vector references
+                unique_reference = f"<vid>{actual_vector_id}</vid>" if actual_vector_id else f"#{position_number}"
 
                 search_context += f"""
 ```
@@ -460,7 +459,7 @@ async def run_experience_vectors_phase(
             search_context += "No relevant information found in internal documents.\n"
 
         # Add explicit instruction about the reference syntax
-        search_context += "\nIMPORTANT: When referencing any vector result in your response, use the exact reference format shown above (e.g., #V12345). You MUST include the full vector ID as shown above, not a truncated version. These references will be converted to clickable links in the UI, allowing users to view the full content of each result.\n\n"
+        search_context += "\nIMPORTANT: When referencing any vector result in your response, use the exact tag format shown above: <vid>vector_id</vid>. You MUST include the full vector ID as shown above. These references will be converted to clickable links in the UI, allowing users to view the full content of each result.\n\n"
 
         # Add novelty reward information if available
         reward_context = ""
@@ -520,20 +519,9 @@ Your task: Synthesize the information above and the conversation history to resp
         # Use a generic error message if LLM call failed before assignment
         final_response = final_response or AIMessage(content=f"Error in phase: {e}")
 
-    # Find vector results that are referenced in the response
-    referenced_vector_results = []
-
-    if final_response and vector_results_list:
-        # Use our helper function to extract referenced vectors
-        referenced_vector_results = get_referenced_vectors(
-            final_response.content,
-            vector_results_list
-        )
-
-        # If no references were found or no valid references exist, include default vectors as fallback
-        if not referenced_vector_results:
-            logger.info(f"No valid vector references found, including up to {MAX_VECTOR_RESULTS} default vectors")
-            referenced_vector_results = vector_results_list[:MAX_VECTOR_RESULTS]
+    # We'll include all vector results that were shown to the LLM
+    # The client will handle parsing the <vid> tags and displaying the appropriate content
+    referenced_vector_results = vector_results_list[:MAX_VECTOR_RESULTS] if vector_results_list else []
 
     # Log the final selection of vectors
     if vector_results_list:
@@ -955,94 +943,6 @@ async def run_yield_phase(
 
 
 # --- Main Workflow (Updated) ---
-
-# Helper function to extract vector references from text and fetch the corresponding vectors
-def get_referenced_vectors(text, available_vectors):
-    """
-    Extract vector references from text and return the referenced vectors.
-
-    Args:
-        text (str): The text to search for vector references
-        available_vectors (list): List of VectorSearchResult objects
-
-    Returns:
-        list: The vector results that are referenced in the text
-    """
-    referenced_vectors = []
-
-    # Extract references in the new format: #V{vector_id} (with or without position number)
-    # Also handle legacy format: #{position_number}
-    vector_refs_new_with_position = re.findall(r'#V([\w-]+)-(\d+)', text)  # Format: #V{id}-{position}
-    vector_refs_new_without_position = re.findall(r'#V([\w-]+)(?!-\d)', text)  # Format: #V{id} without position
-    vector_refs_legacy = re.findall(r'#(\d+)(?!\w|-\d)', text)  # Match #123 but not #V123-1 or #123-456
-
-    logger.info(f"Found new format vector references with position: {vector_refs_new_with_position}")
-    logger.info(f"Found new format vector references without position: {vector_refs_new_without_position}")
-    logger.info(f"Found legacy format vector references: {vector_refs_legacy}")
-
-    # Process new format references without position first (they have priority)
-    for vector_id in vector_refs_new_without_position:
-        # First try exact match
-        vector_by_id = next((v for v in available_vectors if v.id == vector_id), None)
-
-        # If exact match fails, try partial match (for truncated IDs)
-        if vector_by_id is None:
-            # Try to find a vector where the ID starts with the provided ID (truncated case)
-            vector_by_id = next((v for v in available_vectors if v.id and v.id.startswith(vector_id)), None)
-            if vector_by_id:
-                logger.info(f"Found vector by partial ID match: {vector_id} -> {vector_by_id.id}")
-
-        if vector_by_id:
-            if vector_by_id not in referenced_vectors:
-                referenced_vectors.append(vector_by_id)
-                logger.info(f"Including vector by ID (without position): {vector_id}")
-
-    # Process new format references with position
-    for vector_id, position_number in vector_refs_new_with_position:
-        # First try exact match
-        vector_by_id = next((v for v in available_vectors if v.id == vector_id), None)
-
-        # If exact match fails, try partial match (for truncated IDs)
-        if vector_by_id is None:
-            # Try to find a vector where the ID starts with the provided ID (truncated case)
-            vector_by_id = next((v for v in available_vectors if v.id and v.id.startswith(vector_id)), None)
-            if vector_by_id:
-                logger.info(f"Found vector by partial ID match: {vector_id} -> {vector_by_id.id}")
-
-        if vector_by_id:
-            if vector_by_id not in referenced_vectors:
-                referenced_vectors.append(vector_by_id)
-                logger.info(f"Including vector by ID: {vector_id}")
-            continue
-
-        # If not found by ID, try by position
-        try:
-            position = int(position_number)
-            array_idx = position - 1  # Convert 1-based to 0-based
-            if 0 <= array_idx < len(available_vectors):
-                if available_vectors[array_idx] not in referenced_vectors:
-                    referenced_vectors.append(available_vectors[array_idx])
-                    logger.info(f"Including vector by position: {position}")
-            else:
-                logger.warning(f"Vector reference position {position} is out of range (1-{len(available_vectors)})")
-        except ValueError:
-            logger.warning(f"Invalid position number in vector reference: {position_number}")
-
-    # Process legacy format references
-    for ref in vector_refs_legacy:
-        try:
-            ref_num = int(ref)
-            array_idx = ref_num - 1  # Convert 1-based to 0-based
-            if 0 <= array_idx < len(available_vectors):
-                if available_vectors[array_idx] not in referenced_vectors:
-                    referenced_vectors.append(available_vectors[array_idx])
-                    logger.info(f"Including vector by legacy reference: #{ref_num}")
-            else:
-                logger.warning(f"Legacy vector reference #{ref_num} is out of range (1-{len(available_vectors)})")
-        except ValueError:
-            logger.warning(f"Invalid legacy vector reference: #{ref}")
-
-    return referenced_vectors
 
 async def run_langchain_postchain_workflow(
     query: str,

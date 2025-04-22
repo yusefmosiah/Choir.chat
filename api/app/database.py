@@ -139,7 +139,7 @@ class DatabaseClient:
     async def get_vector(self, vector_id: str) -> Optional[Dict[str, Any]]:
         """Get a vector by ID."""
         try:
-            # First try exact match
+            # Only perform exact match
             result = self.client.retrieve(
                 collection_name=self.config.MESSAGES_COLLECTION,
                 ids=[vector_id],
@@ -156,41 +156,10 @@ class DatabaseClient:
                     "created_at": point.payload.get('created_at', '')
                 }
 
-            # If exact match fails, try partial match
-            return await self.get_vector_by_partial_id(vector_id)
-        except Exception as e:
-            logger.error(f"Error retrieving vector: {e}")
-            raise
-
-    async def get_vector_by_partial_id(self, partial_id: str) -> Optional[Dict[str, Any]]:
-        """Get a vector by partial ID match."""
-        try:
-            # Use scroll with a filter to find vectors with IDs that start with the partial ID
-            search_result = self.client.scroll(
-                collection_name=self.config.MESSAGES_COLLECTION,
-                limit=10,  # Limit to 10 potential matches
-                with_payload=True,
-                with_vectors=True
-            )
-
-            points, _ = search_result
-
-            # Find the first point where the ID starts with the partial ID
-            for point in points:
-                if str(point.id).startswith(partial_id):
-                    logger.info(f"Found vector by partial ID match: {partial_id} -> {point.id}")
-                    return {
-                        "id": str(point.id),
-                        "content": point.payload.get('content', ''),
-                        "vector": point.vector,
-                        "metadata": point.payload.get('metadata', {}),
-                        "created_at": point.payload.get('created_at', '')
-                    }
-
             # No match found
             return None
         except Exception as e:
-            logger.error(f"Error retrieving vector by partial ID: {e}")
+            logger.error(f"Error retrieving vector: {e}")
             raise
 
     async def create_user(self, user_data: UserCreate) -> Dict[str, Any]:

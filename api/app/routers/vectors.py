@@ -2,6 +2,9 @@ from fastapi import APIRouter, HTTPException
 from app.models.api import VectorSearchRequest, VectorStoreRequest, APIResponse
 from app.database import DatabaseClient
 from app.config import Config
+import logging
+
+logger = logging.getLogger("api")
 
 router = APIRouter()
 config = Config.from_env()
@@ -40,6 +43,7 @@ async def store_vector(request: VectorStoreRequest):
 @router.get("/{vector_id}", response_model=APIResponse)
 async def get_vector(vector_id: str):
     """Get a specific vector by ID."""
+    logger.info(f"Getting vvvvvvector with ID: {vector_id}")
     try:
         result = await db.get_vector(vector_id)
         if not result:

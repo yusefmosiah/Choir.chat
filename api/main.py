@@ -8,7 +8,7 @@ import markdown # Import markdown library
 import os
 from datetime import datetime # For footer year
 
-from app.routers import threads, users, balance, postchain, auth
+from app.routers import threads, users, balance, postchain, auth, vectors
 from app.config import Config
 
 app = FastAPI(title="Choir API", version="1.0.0")
@@ -76,6 +76,7 @@ app.include_router(threads.router, prefix="/api/threads", tags=["threads"])
 app.include_router(users.router, prefix="/api/users", tags=["users"])
 app.include_router(balance.router, prefix="/api/balance", tags=["balance"])
 app.include_router(postchain.router, prefix="/api/postchain", tags=["postchain"])
+app.include_router(vectors.router, prefix="/api/vectors", tags=["vectors"])
 
 
 # --- Blog Routes (Modified) ---

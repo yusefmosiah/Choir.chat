@@ -23,59 +23,65 @@ extension String {
         return prefix.joined(separator: " ")
     }
 
-    /// Converts vector ID references into clickable deep links.
-    /// Handles both new format (#V{vector_id}-{position}) and legacy format (#123).
+    /// Converts vector ID references in <vid> tags into clickable deep links.
     /// Uses a bold formatting approach to make them visually distinct.
     ///
     /// - Returns: A string with vector references converted to links.
     func convertVectorReferencesToDeepLinks() -> String {
-        // Pattern for new format: #V{vector_id} (with or without position number)
-        // This pattern matches formats like #V8defd5b8-b25f-e887-8f50-9459ce5c1628 or #V8defd5b8-b25f-e887-8f50-9459ce5c1628-1
-        let newFormatPattern = "(?<=\\s|\\(|\\[|^)(#V[\\w-]+(?:-\\d+)?)(?=\\s|\\)|\\]|,|\\.|$)"
+        // Pattern for <vid> tags: <vid>vector_id</vid>
+        // Allow for all possible vector ID formats (UUIDs, hashes, etc.)
+        let vidTagPattern = "<vid>([^<>]+)</vid>"
 
-        // Pattern for legacy format: #{position_number}
-        let legacyPattern = "(?<=\\s|\\(|\\[|^)(#\\d+)(?=\\s|\\)|\\]|,|\\.|$)"
-
-        // Create regex for both patterns
-        let newFormatRegex = try? NSRegularExpression(pattern: newFormatPattern, options: [])
-        let legacyRegex = try? NSRegularExpression(pattern: legacyPattern, options: [])
-
-        guard let newRegex = newFormatRegex, let oldRegex = legacyRegex else {
+        // Create regex for the pattern
+        guard let vidTagRegex = try? NSRegularExpression(pattern: vidTagPattern, options: []) else {
             return self
         }
 
         let nsString = NSString(string: self)
         let range = NSRange(location: 0, length: nsString.length)
 
-        // Find all matches for both formats
-        let newFormatMatches = newRegex.matches(in: self, options: [], range: range)
-        let legacyMatches = oldRegex.matches(in: self, options: [], range: range)
+        // Find all matches for the vid tag format
+        let vidTagMatches = vidTagRegex.matches(in: self, options: [], range: range)
 
-        // If no matches of either type, return original text
-        if newFormatMatches.isEmpty && legacyMatches.isEmpty {
+        // If no matches, return original text
+        if vidTagMatches.isEmpty {
             return self
         }
 
         // Process in reverse order to not affect the indices of earlier matches
         var result = self
 
-        // Process new format matches first
-        for match in newFormatMatches.reversed() {
+        // Process vid tag matches
+        for match in vidTagMatches.reversed() {
             let matchRange = match.range
-            let matchText = nsString.substring(with: matchRange)
+            let vectorId = nsString.substring(with: match.range(at: 1))
 
-            // Extract the vector_id part from formats like:
-            // #V8defd5b8-b25f-e887-8f50-9459ce5c1628 or #V8defd5b8-b25f-e887-8f50-9459ce5c1628-1
-            // The full match is used as the display text
-            // The vector_id is extracted for the API call
-            if let regex = try? NSRegularExpression(pattern: "#V([\\w-]+)(?:-(\\d+))?", options: []),
-               let idMatch = regex.firstMatch(in: matchText, options: [], range: NSRange(location: 0, length: matchText.count)) {
+            // Create a shortened display version of the vector ID (first 8 chars)
+            let shortDisplayId = vectorId.prefix(8)
 
-                let nsMatchText = NSString(string: matchText)
-                let vectorId = nsMatchText.substring(with: idMatch.range(at: 1))
+            // Use bold formatting to make them visually distinct
+            // The URL format is choir://vector/{vector_id} to call the API endpoint
+            let replacement = "[**V\(shortDisplayId)**](choir://vector/\(vectorId))"
+
+            // Apply the replacement
+            if let range = Range(matchRange, in: result) {
+                result.replaceSubrange(range, with: replacement)
+            }
+        }
+
+        // Also handle legacy format: #{position_number} for backward compatibility
+        let legacyPattern = "(?<=\\s|\\(|\\[|^)(#\\d+)(?=\\s|\\)|\\]|,|\\.|$)"
+        if let legacyRegex = try? NSRegularExpression(pattern: legacyPattern, options: []) {
+            let legacyMatches = legacyRegex.matches(in: result, options: [], range: NSRange(location: 0, length: result.count))
+
+            for match in legacyMatches.reversed() {
+                let matchRange = match.range
+                let matchText = NSString(string: result).substring(with: matchRange)
+
+                // Extract the numeric part by removing the '#' prefix
+                let vectorId = matchText.dropFirst()
 
                 // Use bold formatting to make them visually distinct
-                // The URL format is choir://vector/{vector_id} to call the API endpoint
                 let replacement = "[**\(matchText)**](choir://vector/\(vectorId))"
 
                 // Apply the replacement
@@ -85,101 +91,51 @@ extension String {
             }
         }
 
-        // Process legacy format matches
-        for match in legacyMatches.reversed() {
-            let matchRange = match.range
-            let matchText = nsString.substring(with: matchRange)
-
-            // Skip if this is actually part of a new format reference
-            // This prevents double-processing references like #V123-456
-            let fullText = nsString as String
-            let startIdx = matchRange.location
-            if startIdx >= 2 {
-                let prevChars = fullText[fullText.index(fullText.startIndex, offsetBy: startIdx-2)..<fullText.index(fullText.startIndex, offsetBy: startIdx)]
-                if prevChars == "#V" {
-                    continue
-                }
-            }
-
-            // Extract the numeric part by removing the '#' prefix
-            let vectorId = matchText.dropFirst()
-
-            // Use bold formatting to make them visually distinct
-            let replacement = "[**\(matchText)**](choir://vector/\(vectorId))"
-
-            // Apply the replacement
-            if let range = Range(matchRange, in: result) {
-                result.replaceSubrange(range, with: replacement)
-            }
-        }
-
         return result
     }
 
     /// Extracts all vector reference IDs from text.
-    /// Handles both new format (#V{vector_id}-{position}) and legacy format (#123).
+    /// Handles both new format (<vid>vector_id</vid>) and legacy format (#123).
     /// Used for debugging and ensuring vector results are available.
     ///
     /// - Returns: Array of vector reference IDs (actual vector IDs for new format, position numbers for legacy format)
     func extractVectorReferenceIDs() -> [String] {
-        // Pattern for new format: #V{vector_id} (with or without position number)
-        // This pattern matches formats like #V8defd5b8-b25f-e887-8f50-9459ce5c1628 or #V8defd5b8-b25f-e887-8f50-9459ce5c1628-1
-        let newFormatPattern = "(?<=\\s|\\(|\\[|^)(#V[\\w-]+(?:-\\d+)?)(?=\\s|\\)|\\]|,|\\.|$)"
+        // Pattern for <vid> tags: <vid>vector_id</vid>
+        // Allow for all possible vector ID formats (UUIDs, hashes, etc.)
+        let vidTagPattern = "<vid>([^<>]+)</vid>"
 
         // Pattern for legacy format: #{position_number}
         let legacyPattern = "(?<=\\s|\\(|\\[|^)(#\\d+)(?=\\s|\\)|\\]|,|\\.|$)"
 
         // Create regex for both patterns
-        let newFormatRegex = try? NSRegularExpression(pattern: newFormatPattern, options: [])
+        let vidTagRegex = try? NSRegularExpression(pattern: vidTagPattern, options: [])
         let legacyRegex = try? NSRegularExpression(pattern: legacyPattern, options: [])
 
-        guard let newRegex = newFormatRegex, let oldRegex = legacyRegex else {
-            return []
-        }
+        var vectorIds: [String] = []
 
         let nsString = NSString(string: self)
         let range = NSRange(location: 0, length: nsString.length)
 
-        // Find all matches for both formats
-        let newFormatMatches = newRegex.matches(in: self, options: [], range: range)
-        let legacyMatches = oldRegex.matches(in: self, options: [], range: range)
-
-        var vectorIds: [String] = []
-
-        // Process new format matches
-        for match in newFormatMatches {
-            let matchRange = match.range
-            let matchText = nsString.substring(with: matchRange)
-
-            // Extract the vector ID from formats like:
-            // #V8defd5b8-b25f-e887-8f50-9459ce5c1628 or #V8defd5b8-b25f-e887-8f50-9459ce5c1628-1
-            if let regex = try? NSRegularExpression(pattern: "#V([\\w-]+)(?:-(\\d+))?", options: []),
-               let idMatch = regex.firstMatch(in: matchText, options: [], range: NSRange(location: 0, length: matchText.count)) {
-
-                let nsMatchText = NSString(string: matchText)
-                let vectorId = nsMatchText.substring(with: idMatch.range(at: 1))
+        // Process <vid> tag matches
+        if let vidRegex = vidTagRegex {
+            let vidTagMatches = vidRegex.matches(in: self, options: [], range: range)
+            for match in vidTagMatches {
+                let vectorId = nsString.substring(with: match.range(at: 1))
                 vectorIds.append(vectorId)
             }
         }
 
         // Process legacy format matches
-        for match in legacyMatches {
-            let matchRange = match.range
-            let matchText = nsString.substring(with: matchRange)
+        if let legacyRegex = legacyRegex {
+            let legacyMatches = legacyRegex.matches(in: self, options: [], range: range)
+            for match in legacyMatches {
+                let matchRange = match.range
+                let matchText = nsString.substring(with: matchRange)
 
-            // Skip if this is actually part of a new format reference
-            let fullText = nsString as String
-            let startIdx = matchRange.location
-            if startIdx >= 2 {
-                let prevChars = fullText[fullText.index(fullText.startIndex, offsetBy: startIdx-2)..<fullText.index(fullText.startIndex, offsetBy: startIdx)]
-                if prevChars == "#V" {
-                    continue
-                }
+                // Extract the numeric part by removing the '#' prefix
+                let vectorIdString = matchText.dropFirst() // Remove # prefix
+                vectorIds.append(String(vectorIdString))
             }
-
-            // Extract the numeric part by removing the '#' prefix
-            let vectorIdString = matchText.dropFirst() // Remove # prefix
-            vectorIds.append(String(vectorIdString))
         }
 
         return vectorIds

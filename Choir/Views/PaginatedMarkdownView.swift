@@ -119,10 +119,8 @@ struct PaginatedMarkdownView: View {
 
     @ViewBuilder
     private func markdownPageView(_ textPage: String) -> some View {
-        // Convert any #number references to Markdown links
-        let processedText = textPage.convertVectorReferencesToDeepLinks()
-
-        Markdown(processedText)
+        // The text is already processed for vector references during pagination
+        Markdown(textPage)
             .markdownTheme(.normalizedHeadings)
             .padding([.horizontal, .top], 4)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
@@ -136,14 +134,16 @@ struct PaginatedMarkdownView: View {
 
     private func paginateContent(size: CGSize) {
         guard size.width > 0, size.height > 0 else {
-            pages = [markdownText]
+            // Process links even for single page
+            let processedText = markdownText.convertVectorReferencesToDeepLinks()
+            pages = [processedText]
             totalPages = 1
             currentPage = 0
             return
         }
 
-        // Use original text for pagination to avoid issues with HTML elements
-        // The vector references will be converted to HTML links when rendering each page
+        // Process vector references before pagination to ensure consistent link handling
+        let processedText = markdownText.convertVectorReferencesToDeepLinks()
 
         // Check if we have a valid cache that matches current parameters
         let potentialCache = PaginationCache(
@@ -157,14 +157,13 @@ struct PaginatedMarkdownView: View {
             // Use cached pages
             pages = existingCache.pages
         } else {
-            // Calculate new pages with the original text
-            // Processing happens in markdownPageView for each individual page
-            let newPages = splitMarkdownIntoPages(markdownText, size: size)
+            // Calculate new pages with the processed text
+            let newPages = splitMarkdownIntoPages(processedText, size: size)
             pages = newPages
 
             // Store the result in cache
             cache = PaginationCache(
-                text: markdownText,
+                text: markdownText, // Still use original text for cache key
                 width: size.width,
                 height: size.height,
                 pages: newPages
@@ -347,31 +346,36 @@ struct PaginatedMarkdownView: View {
         }
     }
 
+    // Track active API requests to prevent duplicates
+    private static var activeVectorRequests: Set<String> = []
+
     private func fetchVectorFromAPI(vectorId: String, message: Message) {
-        // First check if we already have this vector in the local results with exact match
-        if let localVector = message.vectorSearchResults.first(where: { $0.id == vectorId }) {
-            displayVectorResult(localVector, index: -1) // Use -1 to indicate it's not a position-based reference
+        // Check if we're already fetching this vector
+        if Self.activeVectorRequests.contains(vectorId) {
             return
         }
 
-        // If exact match fails, try partial match for truncated IDs
-        if let partialMatchVector = message.vectorSearchResults.first(where: {
-            guard let fullId = $0.id else { return false }
-            return fullId.hasPrefix(vectorId) || vectorId.hasPrefix(fullId)
-        }) {
-            displayVectorResult(partialMatchVector, index: -1)
-            return
-        }
+        // Add to active requests
+        Self.activeVectorRequests.insert(vectorId)
 
-        // Show loading indicator
+        // Show loading indicator immediately
         let loadingContent = """
         # Loading Vector Content
 
-        Fetching full content for vector ID: \(vectorId)...
+        Fetching full content for vector ID: V\(vectorId.prefix(8))...
 
         Please wait...
         """
-        TextSelectionManager.shared.showSheet(withText: loadingContent)
+        TextSelectionManager.shared.showVectorSheet(withText: loadingContent, vectorId: vectorId)
+
+        // Check if we have a local match to use as fallback if API call fails
+        let localMatch = message.vectorSearchResults.first(where: { $0.id == vectorId })
+
+        // If we have a local match, show it immediately while we fetch the full content
+        if let localMatch = localMatch {
+            let previewContent = formatVectorResult(localMatch, index: -1, source: "local (loading full content...)")
+            TextSelectionManager.shared.updateVectorSheet(withText: previewContent, vectorId: vectorId)
+        }
 
         // Fetch from API
         Task {
@@ -396,22 +400,41 @@ struct PaginatedMarkdownView: View {
                     throw NSError(domain: "Invalid response", code: 0)
                 }
 
-                // If we get a 404, it might be because the vector ID is truncated
-                // Try to find a vector with a similar ID in the local results
+                // If we get a 404, the vector doesn't exist
+                // Use the local match if available
                 if httpResponse.statusCode == 404 {
-                    // Try to find a vector with an ID that starts with the provided ID
-                    if let partialMatchVector = message.vectorSearchResults.first(where: {
-                        guard let fullId = $0.id else { return false }
-                        return fullId.hasPrefix(vectorId) || vectorId.hasPrefix(fullId)
-                    }) {
-                        // Found a match, display it
+                    if let localMatch = localMatch {
+                        // Format the local match content
+                        let formattedContent = formatVectorResult(localMatch, index: -1, source: "local")
+
+                        // Update the sheet with the local content
                         await MainActor.run {
-                            displayVectorResult(partialMatchVector, index: -1)
+                            TextSelectionManager.shared.updateVectorSheet(withText: formattedContent, vectorId: vectorId)
+                            // Remove from active requests
+                            Self.activeVectorRequests.remove(vectorId)
                         }
                         return
                     } else {
-                        // No match found, throw an error
-                        throw NSError(domain: "Vector not found", code: 404)
+                        // No match found, show an error message
+                        let errorContent = """
+                        # Vector Not Found
+
+                        The vector with ID V\(vectorId.prefix(8)) could not be found.
+
+                        This may be because:
+                        - The vector ID is incorrect
+                        - The vector has been deleted
+                        - The vector is not accessible to your account
+
+                        Please try a different vector reference.
+                        """
+
+                        await MainActor.run {
+                            TextSelectionManager.shared.updateVectorSheet(withText: errorContent, vectorId: vectorId)
+                            // Remove from active requests
+                            Self.activeVectorRequests.remove(vectorId)
+                        }
+                        return
                     }
                 }
 
@@ -439,29 +462,37 @@ struct PaginatedMarkdownView: View {
                     content_preview: nil
                 )
 
-                // Display the result
+                // Format the result content
+                let formattedContent = formatVectorResult(vectorResult, index: -1, source: "api")
+
+                // Update the sheet with the fetched content
                 await MainActor.run {
-                    displayVectorResult(vectorResult, index: -1) // Use -1 to indicate it's not a position-based reference
+                    TextSelectionManager.shared.updateVectorSheet(withText: formattedContent, vectorId: vectorId)
+                    // Remove from active requests
+                    Self.activeVectorRequests.remove(vectorId)
                 }
 
             } catch {
                 // Show error
+                let errorContent = """
+                # Error Fetching Vector Content
+
+                Failed to fetch content for vector ID: \(vectorId)
+
+                Error: \(error.localizedDescription)
+                """
+
                 await MainActor.run {
-                    let errorContent = """
-                    # Error Fetching Vector Content
-
-                    Failed to fetch content for vector ID: \(vectorId)
-
-                    Error: \(error.localizedDescription)
-                    """
-                    TextSelectionManager.shared.showSheet(withText: errorContent)
+                    TextSelectionManager.shared.updateVectorSheet(withText: errorContent, vectorId: vectorId)
+                    // Remove from active requests
+                    Self.activeVectorRequests.remove(vectorId)
                 }
             }
         }
     }
 
-    private func displayVectorResult(_ vectorResult: VectorSearchResult, index: Int) {
-        // Format initial content with metadata
+    private func formatVectorResult(_ vectorResult: VectorSearchResult, index: Int, source: String = "local") -> String {
+        // Format initial content with minimal metadata
         var formattedContent = """
         # Vector Result
         """
@@ -473,31 +504,20 @@ struct PaginatedMarkdownView: View {
             """
         }
 
-        formattedContent += """
+        // Add source information
+        let sourceInfo = source == "api" ? "(from API)" : "(from local cache)"
+        formattedContent += " \(sourceInfo)"
 
-        Score: \(String(format: "%.2f", vectorResult.score))
-        """
-
-        // Add provider if available
-        if let provider = vectorResult.provider {
-            formattedContent += "\nProvider: \(provider)"
-        }
-
-        // Add ID if available
+        // Add ID if available (just the shortened version)
         if let id = vectorResult.id {
-            formattedContent += "\nID: \(id)"
+            let shortId = id.prefix(8)
+            formattedContent += "\nID: V\(shortId)..."
         }
 
-        // Add other metadata if available
-        if let metadata = vectorResult.metadata, !metadata.isEmpty {
-            formattedContent += "\n\nMetadata:"
-            for (key, value) in metadata.sorted(by: { $0.key < $1.key }) {
-                formattedContent += "\n- \(key): \(value)"
-            }
+        // Add note about content source
+        if source == "local" && vectorResult.content.count < 1000 {
+            formattedContent += "\n\n**Note:** This content may be truncated. The full content is being fetched from the API."
         }
-
-        // Debug info
-        formattedContent += "\n\nContent Length: \(vectorResult.content.count) characters"
 
         // Use best available content version
         let contentToDisplay = vectorResult.content
@@ -509,7 +529,18 @@ struct PaginatedMarkdownView: View {
         \(contentToDisplay)
         """
 
+        return formattedContent
+    }
+
+    private func displayVectorResult(_ vectorResult: VectorSearchResult, index: Int, source: String = "local") {
+        // Format the content
+        let formattedContent = formatVectorResult(vectorResult, index: index, source: source)
+
         // Show the content in a text selection sheet
-        TextSelectionManager.shared.showSheet(withText: formattedContent)
+        if let id = vectorResult.id {
+            TextSelectionManager.shared.showVectorSheet(withText: formattedContent, vectorId: id)
+        } else {
+            TextSelectionManager.shared.showSheet(withText: formattedContent)
+        }
     }
 }
