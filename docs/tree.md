@@ -127,7 +127,7 @@
 │   │   │   ├── README.md
 │   │   │   ├── __init__.py
 │   │   │   ├── langchain_workflow.py
-│   │   │   ├── nodes
+│   │   │   ├── phases
 │   │   │   ├── postchain_llm.py
 │   │   │   ├── prompts
 │   │   │   │   └── prompts.py

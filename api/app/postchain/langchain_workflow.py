@@ -568,7 +568,7 @@ async def run_experience_web_phase(
 Original Query: {last_user_msg.content}
 Conversation History: [Review previous messages]
 
-Your task: Decide if web search is needed and call BraveSearchTool if relevant. Summarize findings or integrate them into your response.
+Your task: Eagerly use BraveSearchTool to find salient information from the web. Summarize and integrate the findings into your response.
 """
     phase_messages = [SystemMessage(content=COMMON_SYSTEM_PROMPT)] + messages + [HumanMessage(content=phase_query)]
 
