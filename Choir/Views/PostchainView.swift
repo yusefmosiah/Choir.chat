@@ -133,7 +133,7 @@ struct PostchainView: View {
                     } // End ForEach
                 }
                 .frame(maxWidth: .infinity) // Allow card stack to use available width
-                .frame(height: geometry.size.height) 
+                .frame(height: geometry.size.height)
                 .onChange(of: availablePhases.count) { _, newCount in
                     // Increment the counter to force UI refresh when available phases change
                     phaseRefreshCounter += 1
