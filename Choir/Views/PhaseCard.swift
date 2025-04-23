@@ -146,30 +146,47 @@ struct PhaseCard: View {
         .padding(12)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(cardBackgroundColor)
-                .shadow(
-                    color: Color.black.opacity(shadowOpacity),
-                    radius: shadowRadius,
-                    x: 0,
-                    y: shadowYOffset)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(
-                    AngularGradient(
-                        gradient: Gradient(stops: [
-                            .init(color: .green, location: 0.0),
-                            .init(color: .blue, location: 0.25),
-                            .init(color: .purple, location: 0.5),
-                            .init(color: .blue, location: 0.75),
-                            .init(color: .green, location: 1.0),
-                        ]),
-                        center: .center,
-                        angle: isLoading ? .degrees(gradientRotation) : .zero
-                    ),
-                    lineWidth: overlayLineWidth
-                )
+            ZStack {
+                // Angular gradient shadow (only visible when loading)
+                if isLoading {
+                    // First create a shape with the angular gradient fill
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(
+                            AngularGradient(
+                                gradient: Gradient(stops: [
+                                    .init(color: .green, location: 0.0),
+                                    .init(color: .blue, location: 0.25),
+                                    .init(color: .purple, location: 0.5),
+                                    .init(color: .blue, location: 0.75),
+                                    .init(color: .green, location: 1.0),
+                                ]),
+                                center: .center,
+                                angle: .degrees(gradientRotation)
+                            )
+                        )
+                        // Make it slightly larger than the card
+                        .frame(width: UIScreen.main.bounds.width - 32, height: 320)
+                        // Apply blur for diffuse effect
+                        .blur(radius: 12)
+                        // Lower opacity for subtlety
+                        .opacity(0.5)
+                        // Offset slightly to create shadow effect
+                        .offset(y: 2)
+                }
+
+                // Regular card with standard shadow
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(cardBackgroundColor)
+                    .shadow(
+                        color: Color.black.opacity(shadowOpacity),
+                        radius: shadowRadius,
+                        x: 0,
+                        y: shadowYOffset)
+                    // Apply blur for diffuse effect
+                    .blur(radius: 6)
+                    // Lower opacity for subtlety
+                    .opacity(0.5)
+            }
         )
         .padding(.horizontal, 4)
         .contextMenu {
