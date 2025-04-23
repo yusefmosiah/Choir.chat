@@ -403,4 +403,55 @@ class AuthService: ObservableObject {
             return nil
         }
     }
+
+    /// Updates the authentication token when switching wallets
+    /// - Parameter walletAddress: The new wallet address
+    /// - Returns: True if successful, false otherwise
+    func updateAuthForWallet(walletAddress: String) async -> Bool {
+        print("Updating auth token for wallet: \(walletAddress)")
+
+        // First check if we're already authenticated
+        guard case .authenticated(let currentUserInfo) = authState else {
+            print("Not authenticated, cannot update token")
+            return false
+        }
+
+        do {
+            // 1. Request challenge for the new wallet address
+            let challenge = try await requestChallenge(walletAddress: walletAddress)
+            print("Received challenge for wallet switch: \(challenge)")
+
+            // 2. Get the wallet from the wallet manager
+            guard let wallet = walletManager.wallet,
+                  let address = try? wallet.accounts[0].address(),
+                  address == walletAddress else {
+                print("Wallet mismatch or not available")
+                return false
+            }
+
+            // 3. Sign challenge
+            let message = "Sign this message to authenticate with Choir: \(challenge)"
+            let signature = try await signMessage(message: message, wallet: wallet)
+
+            // 4. Submit signature to get new token
+            let authResponse = try await submitSignature(
+                walletAddress: walletAddress,
+                challenge: challenge,
+                signature: signature
+            )
+
+            // 5. Store the new token
+            try keychain.save(authResponse.access_token, forKey: "auth_token", useBiometric: true)
+
+            // 6. Update user info
+            let userInfo = try await getUserInfo(token: authResponse.access_token)
+            self.userInfo = userInfo
+
+            print("Successfully updated auth token for wallet: \(walletAddress)")
+            return true
+        } catch {
+            print("Error updating auth token for wallet: \(error)")
+            return false
+        }
+    }
 }

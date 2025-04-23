@@ -167,6 +167,14 @@ class WalletManager: ObservableObject {
             // Save the current wallet address
             saveCurrentWalletAddress(address)
 
+            // Update the auth token with the new wallet address
+            Task {
+                let authUpdateSuccess = await AuthService.shared.updateAuthForWallet(walletAddress: address)
+                if !authUpdateSuccess {
+                    print("Warning: Failed to update auth token for new wallet: \(address)")
+                }
+            }
+
             // Update balance
             try await updateBalance(for: newWallet)
         } catch {
@@ -222,6 +230,14 @@ class WalletManager: ObservableObject {
 
             // Save the current wallet address
             saveCurrentWalletAddress(address)
+
+            // Update the auth token with the new wallet address
+            Task {
+                let authUpdateSuccess = await AuthService.shared.updateAuthForWallet(walletAddress: address)
+                if !authUpdateSuccess {
+                    print("Warning: Failed to update auth token for imported wallet: \(address)")
+                }
+            }
 
             // Update the balance
             try await updateBalance(for: importedWallet)
@@ -489,6 +505,18 @@ class WalletManager: ObservableObject {
         // Save the current wallet address
         saveCurrentWalletAddress(address)
 
+        // Update the auth token with the new wallet address
+        // This ensures that rewards go to the correct wallet
+        Task {
+            // We use AuthService.shared here since we don't have a direct reference
+            let authUpdateSuccess = await AuthService.shared.updateAuthForWallet(walletAddress: address)
+            if !authUpdateSuccess {
+                print("Warning: Failed to update auth token for wallet: \(address)")
+                // We don't throw an error here as the wallet switch should still succeed
+                // even if the auth token update fails
+            }
+        }
+
         try await updateBalance(for: selectedWallet)
     }
 
@@ -513,6 +541,14 @@ class WalletManager: ObservableObject {
 
                 // Save the new current wallet address
                 saveCurrentWalletAddress(firstAddress)
+
+                // Update the auth token with the new wallet address
+                Task {
+                    let authUpdateSuccess = await AuthService.shared.updateAuthForWallet(walletAddress: firstAddress)
+                    if !authUpdateSuccess {
+                        print("Warning: Failed to update auth token after wallet deletion: \(firstAddress)")
+                    }
+                }
 
                 try await updateBalance(for: firstWallet)
             } else {
