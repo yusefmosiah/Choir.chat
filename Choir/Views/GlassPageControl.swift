@@ -4,6 +4,10 @@ import SwiftUI
 public enum PageDirection { case previous, next }
 
 public struct GlassPageControl: View {
+    // Animation state
+    @State private var gradientRotation: Double = 0
+    @State private var rotationTimer: Timer?
+    @State private var isChangingPhase: Bool = false
     // Current phase and available phases
     let currentPhase: Phase
     let availablePhases: [Phase]
@@ -23,100 +27,174 @@ public struct GlassPageControl: View {
     public var body: some View {
         // Glass background with controls
         HStack(spacing: 16) {
-            // Previous phase button
-            if let previousPhase = getPreviousPhase() {
-                Button(action: {
-                    onPhaseChange(previousPhase)
-                }) {
-                    HStack(spacing: 4) {
-                        Image(systemName: "chevron.left")
-                            .font(.caption)
+            // Left control - handles previous page or previous phase
+            Button(action: {
+                // If we're on the first page and we can go to a previous phase
+                if currentPage == 0 {
+                    if let previousPhase = getPreviousPhase() {
+                        // Special case for action -> yield carousel
+                        let isCarouselTransition = currentPhase == .action && previousPhase == .yield
 
-                        // Show phase icon if it's action or yield for special carousel effect
+                        // Show animation for phase change
+                        withAnimation {
+                            isChangingPhase = true
+                        }
+
+                        // Shorter delay for faster animation
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                            // For carousel transitions, go to the last page of the previous phase
+                            if isCarouselTransition {
+                                onPhaseChange(previousPhase)
+                            } else {
+                                onPhaseChange(previousPhase)
+                            }
+
+                            // Hide animation after a shorter delay
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                                withAnimation {
+                                    isChangingPhase = false
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    // Just go to the previous page
+                    onPageChange(.previous)
+                }
+            }) {
+                HStack(spacing: 4) {
+                    Image(systemName: "chevron.left")
+                        .font(.caption)
+
+                    // Show phase icon if we're on first page and going to previous phase
+                    if currentPage == 0, let previousPhase = getPreviousPhase() {
                         if previousPhase == .action || previousPhase == .yield {
                             phaseIcon(for: previousPhase)
                                 .font(.caption)
                         }
                     }
-                    .foregroundColor(.accentColor)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(
-                        Capsule()
-                            .fill(Color.accentColor.opacity(0.1))
-                    )
                 }
+                .foregroundColor(.accentColor)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .background(
+                    Capsule()
+                        .fill(Color.accentColor.opacity(0.1))
+                )
+                .opacity((currentPage > 0 || getPreviousPhase() != nil) ? 1.0 : 0.3)
             }
+            .disabled(currentPage <= 0 && getPreviousPhase() == nil)
 
             Spacer()
 
-            // Page controls - only show if there are multiple pages
+            // Page indicator - only show if there are multiple pages
             if totalPages > 1 {
-                Button(action: {
-                    onPageChange(.previous)
-                }) {
-                    Image(systemName: "chevron.left")
-                        .font(.caption)
-                        .foregroundColor(.primary)
-                        .opacity(currentPage > 0 ? 1.0 : 0.3)
-                }
-                .disabled(currentPage <= 0)
-
                 Text("\(currentPage + 1) / \(totalPages)")
                     .font(.caption)
                     .foregroundColor(.secondary)
-
-                Button(action: {
-                    onPageChange(.next)
-                }) {
-                    Image(systemName: "chevron.right")
-                        .font(.caption)
-                        .foregroundColor(.primary)
-                        .opacity(currentPage < totalPages - 1 ? 1.0 : 0.3)
-                }
-                .disabled(currentPage >= totalPages - 1)
             }
 
             Spacer()
 
-            // Next phase button
-            if let nextPhase = getNextPhase() {
-                Button(action: {
-                    onPhaseChange(nextPhase)
-                }) {
-                    HStack(spacing: 4) {
-                        // Show phase icon if it's action or yield for special carousel effect
+            // Right control - handles next page or next phase
+            Button(action: {
+                // If we're on the last page and we can go to a next phase
+                if currentPage >= totalPages - 1 {
+                    if let nextPhase = getNextPhase() {
+                        // Special case for yield -> action carousel
+                        let isCarouselTransition = currentPhase == .yield && nextPhase == .action
+
+                        // Show animation for phase change
+                        withAnimation {
+                            isChangingPhase = true
+                        }
+
+                        // Shorter delay for faster animation
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                            // For carousel transitions, go to the first page of the next phase
+                            if isCarouselTransition {
+                                onPhaseChange(nextPhase)
+                            } else {
+                                onPhaseChange(nextPhase)
+                            }
+
+                            // Hide animation after a shorter delay
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                                withAnimation {
+                                    isChangingPhase = false
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    // Just go to the next page
+                    onPageChange(.next)
+                }
+            }) {
+                HStack(spacing: 4) {
+                    // Show phase icon if we're on last page and going to next phase
+                    if currentPage >= totalPages - 1, let nextPhase = getNextPhase() {
                         if nextPhase == .action || nextPhase == .yield {
                             phaseIcon(for: nextPhase)
                                 .font(.caption)
                         }
-
-                        Image(systemName: "chevron.right")
-                            .font(.caption)
                     }
-                    .foregroundColor(.accentColor)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(
-                        Capsule()
-                            .fill(Color.accentColor.opacity(0.1))
-                    )
+
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
                 }
+                .foregroundColor(.accentColor)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .background(
+                    Capsule()
+                        .fill(Color.accentColor.opacity(0.1))
+                )
+                .opacity((currentPage < totalPages - 1 || getNextPhase() != nil) ? 1.0 : 0.3)
             }
+            .disabled(currentPage >= totalPages - 1 && getNextPhase() == nil)
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 6)
         .background(
-            RoundedRectangle(cornerRadius: 16)
-                .fill(Color(UIColor.systemBackground).opacity(glassOpacity))
-                .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
-                .blur(radius: 0.5)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 16)
-                .stroke(Color.white.opacity(0.2), lineWidth: 0.5)
+            ZStack {
+                // Angular gradient shadow - only visible when changing phase
+                if isChangingPhase {
+                    RoundedRectangle(cornerRadius: 20)
+                        .fill(
+                            AngularGradient(
+                                gradient: Gradient(stops: [
+                                    .init(color: .green, location: 0.0),
+                                    .init(color: .blue, location: 0.25),
+                                    .init(color: .purple, location: 0.5),
+                                    .init(color: .blue, location: 0.75),
+                                    .init(color: .green, location: 1.0),
+                                ]),
+                                center: .center,
+                                angle: .degrees(gradientRotation)
+                            )
+                        )
+                        // Make it slightly larger than the control
+                        .frame(width: UIScreen.main.bounds.width - 20, height: 60)
+                        // Apply less blur for a sharper, faster-looking effect
+                        .blur(radius: 8)
+                        // Higher opacity for more vibrant appearance
+                        .opacity(0.6)
+                }
+
+                // Glass background
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(Color(UIColor.systemBackground).opacity(glassOpacity))
+                    .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
+            }
         )
         .padding(.horizontal, 20)
+        .onAppear {
+            startRotationTimer()
+        }
+        .onDisappear {
+            stopRotationTimer()
+        }
     }
 
     // Helper function to get the previous phase
@@ -166,6 +244,31 @@ public struct GlassPageControl: View {
         @unknown default:
             Image(systemName: "questionmark.circle")
         }
+    }
+
+    // --- Rotation Animation Functions ---
+    private func startRotationTimer() {
+        // Stop any existing timer first
+        stopRotationTimer()
+
+        // Reset rotation to 0
+        gradientRotation = 0
+
+        // Create a new timer that updates the rotation angle
+        rotationTimer = Timer.scheduledTimer(withTimeInterval: 0.02, repeats: true) { [self] _ in
+            // Update rotation on the main thread
+            DispatchQueue.main.async {
+                // Increment rotation by 3 degrees each time for faster animation
+                withAnimation(.linear(duration: 0.02)) {
+                    self.gradientRotation = (self.gradientRotation + 3).truncatingRemainder(dividingBy: 360)
+                }
+            }
+        }
+    }
+
+    private func stopRotationTimer() {
+        rotationTimer?.invalidate()
+        rotationTimer = nil
     }
 }
 

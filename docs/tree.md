@@ -59,6 +59,7 @@
 │   │   └── PostchainViewModel.swift
 │   └── Views
 │       ├── ChoirThreadDetailView.swift
+│       ├── Components
 │       ├── EnhancedSendCoinView.swift
 │       ├── GlassPageControl.swift
 │       ├── ImportMnemonicView.swift
@@ -276,4 +277,4 @@
     ├── test_api.sh
     └── test_postchain_multiturn.sh
 
-68 directories, 206 files
+69 directories, 206 files

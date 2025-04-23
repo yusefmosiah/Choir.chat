@@ -72,6 +72,7 @@ tree.md
 │   │   └── PostchainViewModel.swift
 │   └── Views
 │       ├── ChoirThreadDetailView.swift
+│       ├── Components
 │       ├── EnhancedSendCoinView.swift
 │       ├── GlassPageControl.swift
 │       ├── ImportMnemonicView.swift
@@ -289,7 +290,7 @@ tree.md
     ├── test_api.sh
     └── test_postchain_multiturn.sh
 
-68 directories, 206 files
+69 directories, 206 files
 
 === File: docs/CHANGELOG.md ===
 
