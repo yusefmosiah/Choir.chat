@@ -88,7 +88,8 @@ struct PaginatedMarkdownView: View {
         // The text is already processed for vector references during pagination
         Markdown(textPage)
             .markdownTheme(.normalizedHeadings)
-            .padding([.horizontal, .top], 4)
+            .padding([.horizontal], 2) // Reduce horizontal padding
+            .padding(.top, 2) // Reduce top padding
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             // Add drawing group to leverage Metal rendering
             .drawingGroup(opaque: false)
@@ -108,8 +109,11 @@ struct PaginatedMarkdownView: View {
             return
         }
 
-        // Process vector references before pagination to ensure consistent link handling
+        // First convert vector references to deep links
         let processedText = markdownText.convertVectorReferencesToDeepLinks()
+
+        // Then optimize the text for pagination by replacing long vector IDs with shorter placeholders
+        let (optimizedText, idMapping) = processedText.optimizeForPagination()
 
         // Check if we have a valid cache that matches current parameters
         let potentialCache = PaginationCache(
@@ -123,16 +127,22 @@ struct PaginatedMarkdownView: View {
             // Use cached pages
             pages = existingCache.pages
         } else {
-            // Calculate new pages with the processed text
-            let newPages = splitMarkdownIntoPages(processedText, size: size)
-            pages = newPages
+            // Calculate new pages with the optimized text
+            var optimizedPages = splitMarkdownIntoPages(optimizedText, size: size)
+
+            // Restore the original vector IDs in each page
+            let restoredPages = optimizedPages.map { page in
+                return page.restoreVectorIds(idMapping: idMapping)
+            }
+
+            pages = restoredPages
 
             // Store the result in cache
             cache = PaginationCache(
                 text: markdownText, // Still use original text for cache key
                 width: size.width,
                 height: size.height,
-                pages: newPages
+                pages: restoredPages
             )
         }
 
@@ -144,6 +154,9 @@ struct PaginatedMarkdownView: View {
         } else if currentPage < 0 {
             currentPage = 0
         }
+
+        // Debug logging to help diagnose pagination issues
+        print("Pagination: \(totalPages) pages created for size \(size)")
     }
 
     private func splitMarkdownIntoPages(_ text: String, size: CGSize) -> [String] {
@@ -153,19 +166,22 @@ struct PaginatedMarkdownView: View {
         }
 
         let measurer = TextMeasurer(sizeCategory: .medium)
-        let verticalPadding: CGFloat = 8
+        // Use minimal vertical padding to maximize content
+        let verticalPadding: CGFloat = 4
         let availableTextHeight = size.height - verticalPadding
 
         guard availableTextHeight > 20 else {
             return [text]
         }
 
-        let availableTextWidth = size.width - 8
+        // Use slightly more width to maximize content
+        let availableTextWidth = size.width - 4
 
         var pagesResult: [String] = []
         var remainingText = Substring(text)
 
         while !remainingText.isEmpty {
+            // Use our improved fitTextToHeight that respects link boundaries
             let pageText = measurer.fitTextToHeight(
                 text: String(remainingText),
                 width: availableTextWidth,
@@ -196,6 +212,9 @@ struct PaginatedMarkdownView: View {
         if pagesResult.isEmpty && text.isEmpty {
             return [""]
         }
+
+        // Debug logging to help diagnose pagination issues
+        print("Split text into \(pagesResult.count) pages")
 
         return pagesResult
     }

@@ -94,6 +94,81 @@ extension String {
         return result
     }
 
+    /// Optimizes text for pagination by temporarily replacing long vector IDs with shorter placeholders
+    /// This helps pagination calculations by reducing the effective length of the text
+    ///
+    /// - Returns: A tuple containing the optimized text and a mapping to restore the original IDs
+    func optimizeForPagination() -> (optimizedText: String, idMapping: [String: String]) {
+        // Pattern for markdown links with vector IDs: [**V12345678**](choir://vector/12345678-1234-1234-1234-1234567890ab)
+        let vectorLinkPattern = "\\[\\*\\*V([^\\]]+)\\*\\*\\]\\(choir://vector/([^\\)]+)\\)"
+
+        // Create regex for the pattern
+        guard let vectorLinkRegex = try? NSRegularExpression(pattern: vectorLinkPattern, options: []) else {
+            return (self, [:])
+        }
+
+        let nsString = NSString(string: self)
+        let range = NSRange(location: 0, length: nsString.length)
+
+        // Find all matches for vector links
+        let vectorLinkMatches = vectorLinkRegex.matches(in: self, options: [], range: range)
+
+        // If no matches, return original text
+        if vectorLinkMatches.isEmpty {
+            return (self, [:])
+        }
+
+        // Process in reverse order to not affect the indices of earlier matches
+        var result = self
+        var idMapping: [String: String] = [:]
+
+        // Generate unique placeholder IDs
+        for (index, match) in vectorLinkMatches.enumerated().reversed() {
+            let matchRange = match.range
+            let displayId = nsString.substring(with: match.range(at: 1))
+            let fullVectorId = nsString.substring(with: match.range(at: 2))
+
+            // Create a unique placeholder ID
+            let placeholderId = "placeholder_\(index)"
+
+            // Store the mapping for later restoration
+            idMapping[placeholderId] = fullVectorId
+
+            // Create a replacement with the same display ID but a shorter URL
+            let replacement = "[**V\(displayId)**](choir://vector/\(placeholderId))"
+
+            // Apply the replacement
+            if let range = Range(matchRange, in: result) {
+                result.replaceSubrange(range, with: replacement)
+            }
+        }
+
+        return (result, idMapping)
+    }
+
+    /// Restores the original vector IDs from the optimized text using the provided mapping
+    ///
+    /// - Parameter idMapping: The mapping from placeholder IDs to original vector IDs
+    /// - Returns: The text with original vector IDs restored
+    func restoreVectorIds(idMapping: [String: String]) -> String {
+        if idMapping.isEmpty {
+            return self
+        }
+
+        var result = self
+
+        // Replace each placeholder with its original ID
+        for (placeholderId, originalId) in idMapping {
+            // Pattern for the placeholder in a link
+            let pattern = "choir://vector/\(placeholderId)"
+
+            // Replace all occurrences
+            result = result.replacingOccurrences(of: pattern, with: "choir://vector/\(originalId)")
+        }
+
+        return result
+    }
+
     /// Extracts all vector reference IDs from text.
     /// Handles both new format (<vid>vector_id</vid>) and legacy format (#123).
     /// Used for debugging and ensuring vector results are available.

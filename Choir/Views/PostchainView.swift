@@ -373,7 +373,15 @@ struct PostchainView: View {
         } else if phase == .experienceWeb && !message.webSearchResults.isEmpty {
             combinedMarkdown += message.formatWebResultsToMarkdown()
         }
-        let pages = splitMarkdownIntoPages(combinedMarkdown, size: size)
+
+        // First convert vector references to deep links
+        let processedText = combinedMarkdown.convertVectorReferencesToDeepLinks()
+
+        // Then optimize the text for pagination by replacing long vector IDs with shorter placeholders
+        let (optimizedText, _) = processedText.optimizeForPagination()
+
+        // Calculate pages with the optimized text
+        let pages = splitMarkdownIntoPages(optimizedText, size: size)
         return max(1, pages.count)
     }
 
@@ -388,7 +396,15 @@ struct PostchainView: View {
         } else if phase == .experienceWeb && !message.webSearchResults.isEmpty {
             combinedMarkdown += message.formatWebResultsToMarkdown()
         }
-        let pages = splitMarkdownIntoPages(combinedMarkdown, size: size)
+
+        // First convert vector references to deep links
+        let processedText = combinedMarkdown.convertVectorReferencesToDeepLinks()
+
+        // Then optimize the text for pagination by replacing long vector IDs with shorter placeholders
+        let (optimizedText, _) = processedText.optimizeForPagination()
+
+        // Calculate pages with the optimized text
+        let pages = splitMarkdownIntoPages(optimizedText, size: size)
         let totalPages = max(1, pages.count)
         let currentPage = message.phaseCurrentPage[phase] ?? 0
 
@@ -417,19 +433,22 @@ struct PostchainView: View {
         }
 
         let measurer = TextMeasurer(sizeCategory: .medium)
-        let verticalPadding: CGFloat = 8
+        // Use minimal vertical padding to maximize content
+        let verticalPadding: CGFloat = 4
         let availableTextHeight = size.height - verticalPadding
 
         guard availableTextHeight > 20 else {
             return [text]
         }
 
-        let availableTextWidth = size.width - 8
+        // Use slightly more width to maximize content
+        let availableTextWidth = size.width - 4
 
         var pagesResult: [String] = []
         var remainingText = Substring(text)
 
         while !remainingText.isEmpty {
+            // Use our improved fitTextToHeight that respects link boundaries
             let pageText = measurer.fitTextToHeight(
                 text: String(remainingText),
                 width: availableTextWidth,

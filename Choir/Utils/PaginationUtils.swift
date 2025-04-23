@@ -136,6 +136,9 @@ class TextMeasurer {
     func fitTextToHeight(text: String, width: CGFloat, height: CGFloat) -> String {
         if text.isEmpty { return "" }
 
+        // Process the text to find link boundaries
+        let linkRanges = findLinkRanges(in: text)
+
         let paragraphStyle = NSMutableParagraphStyle()
         paragraphStyle.lineBreakMode = .byWordWrapping
         paragraphStyle.lineSpacing = 4
@@ -159,9 +162,70 @@ class TextMeasurer {
         let glyphRange = layoutManager.glyphRange(for: textContainer)
         let characterRange = layoutManager.characterRange(forGlyphRange: glyphRange, actualGlyphRange: nil)
 
-        let fittingText = text.prefix(characterRange.length)
+        // Get the initial fitting text length
+        var length = characterRange.length
 
+        // Adjust length to avoid breaking links
+        if !linkRanges.isEmpty && !text.isEmpty {
+            let textStartIndex = text.startIndex
+
+            for range in linkRanges {
+                // Convert String.Index values to integer offsets for comparison
+                let rangeStart = text.distance(from: textStartIndex, to: range.lowerBound)
+                let rangeEnd = text.distance(from: textStartIndex, to: range.upperBound)
+
+                // If a link is partially included, either include it fully or exclude it
+                if rangeStart < length && rangeEnd > length {
+                    // If more than half of the link is included, include the whole link
+                    let linkLength = rangeEnd - rangeStart
+                    if (length - rangeStart) > (linkLength / 2) {
+                        length = rangeEnd
+                    } else {
+                        // Otherwise, exclude the link entirely
+                        length = rangeStart
+                    }
+                }
+            }
+        }
+
+        // Make sure we don't exceed the text length
+        length = min(length, text.count)
+
+        let fittingText = text.prefix(length)
         return String(fittingText)
+    }
+
+    // Helper function to find markdown link ranges in text
+    private func findLinkRanges(in text: String) -> [Range<String.Index>] {
+        var ranges: [Range<String.Index>] = []
+
+        // Find markdown links [text](url)
+        let linkPattern = "\\[([^\\[\\]]*)\\]\\(([^\\(\\)]*)\\)"
+        if let regex = try? NSRegularExpression(pattern: linkPattern, options: []) {
+            let nsString = NSString(string: text)
+            let matches = regex.matches(in: text, options: [], range: NSRange(location: 0, length: nsString.length))
+
+            for match in matches {
+                if let range = Range(match.range, in: text) {
+                    ranges.append(range)
+                }
+            }
+        }
+
+        // Find <vid> tags
+        let vidPattern = "<vid>([^<>]+)</vid>"
+        if let regex = try? NSRegularExpression(pattern: vidPattern, options: []) {
+            let nsString = NSString(string: text)
+            let matches = regex.matches(in: text, options: [], range: NSRange(location: 0, length: nsString.length))
+
+            for match in matches {
+                if let range = Range(match.range, in: text) {
+                    ranges.append(range)
+                }
+            }
+        }
+
+        return ranges
     }
 
     func splitMarkdownIntoPages(_ text: String, size: CGSize) -> [String] {
