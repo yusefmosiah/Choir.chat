@@ -68,6 +68,7 @@ struct WalletView: View {
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 16)
                                         .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                                        .blur(radius: 1.5)
                                 )
                             }
                             .buttonStyle(PlainButtonStyle())
