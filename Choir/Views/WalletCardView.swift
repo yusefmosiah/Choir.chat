@@ -10,6 +10,10 @@ struct WalletCardView: View {
     let isSelected: Bool
     let onSelect: () -> Void
 
+    // Animation state for gradient
+    @State private var gradientRotation: Double = 0
+    @State private var rotationTimer: Timer?
+
     // Main initializer
     init(wallet: Wallet, name: String, address: String, balances: [CoinType: WalletBalance], isSelected: Bool, onSelect: @escaping () -> Void) {
         self.wallet = wallet
@@ -96,18 +100,82 @@ struct WalletCardView: View {
                 Spacer()
             }
             .padding()
-            .frame(width: 180, height: 180)
+            .frame(width: 168, height: 168)
             .background(
                 RoundedRectangle(cornerRadius: 16)
                     .fill(Color(.systemBackground))
                     .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
             )
             .overlay(
-                RoundedRectangle(cornerRadius: 16)
-                    .stroke(isSelected ? Color.blue : Color.gray.opacity(0.3), lineWidth: isSelected ? 2 : 1)
+                ZStack {
+                    // Angular gradient for selected wallets, grey for unselected
+                    if isSelected {
+                        RoundedRectangle(cornerRadius: 16)
+                            .stroke(
+                                AngularGradient(
+                                    gradient: Gradient(stops: [
+                                        .init(color: .green, location: 0.0),
+                                        .init(color: .blue, location: 0.25),
+                                        .init(color: .purple, location: 0.5),
+                                        .init(color: .blue, location: 0.75),
+                                        .init(color: .green, location: 1.0),
+                                    ]),
+                                    center: .center,
+                                    angle: .degrees(gradientRotation)
+                                ),
+                                lineWidth: 2
+                            )
+                            // Apply blur for diffuse effect
+                            .blur(radius: 1.5)
+                    } else {
+                        RoundedRectangle(cornerRadius: 16)
+                            .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                            .blur(radius: 1.5)
+                    }
+                }
             )
         }
         .buttonStyle(PlainButtonStyle())
+        .onAppear {
+            if isSelected {
+                startRotationTimer()
+            }
+        }
+        .onDisappear {
+            stopRotationTimer()
+        }
+        .onChange(of: isSelected) { _, newValue in
+            if newValue {
+                startRotationTimer()
+            } else {
+                stopRotationTimer()
+            }
+        }
+    }
+
+    // --- Rotation Animation Functions ---
+    private func startRotationTimer() {
+        // Stop any existing timer first
+        stopRotationTimer()
+
+        // Reset rotation to 0
+        gradientRotation = 0
+
+        // Create a new timer that updates the rotation angle
+        rotationTimer = Timer.scheduledTimer(withTimeInterval: 0.03, repeats: true) { [self] _ in
+            // Update rotation on the main thread
+            DispatchQueue.main.async {
+                // Increment rotation by 1 degree each time for a slow, subtle rotation
+                withAnimation(.linear(duration: 0.03)) {
+                    self.gradientRotation = (self.gradientRotation + 1).truncatingRemainder(dividingBy: 360)
+                }
+            }
+        }
+    }
+
+    private func stopRotationTimer() {
+        rotationTimer?.invalidate()
+        rotationTimer = nil
     }
 
     private func shortenAddress(_ address: String) -> String {
