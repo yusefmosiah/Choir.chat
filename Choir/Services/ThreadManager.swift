@@ -32,8 +32,8 @@ class ThreadManager: ObservableObject {
             print("ThreadManager: Thread \(thread.id) with wallet address: \(thread.walletAddress ?? "nil"), title: \(thread.title)")
         }
 
-        // Sort threads by last modified date
-        let sortedThreads = loadedThreads.sorted { $0.lastModified > $1.lastModified }
+        // Sort threads by creation date (newest first)
+        let sortedThreads = loadedThreads.sorted { $0.createdAt > $1.createdAt }
 
         // Update the published property
         self.threads = sortedThreads
@@ -242,9 +242,9 @@ class ThreadManager: ObservableObject {
 
             // If we imported threads for the current wallet, make sure they're sorted properly
             if !currentWalletThreads.isEmpty {
-                // Sort threads by last modified date
-                threads.sort { $0.lastModified > $1.lastModified }
-                print("Sorted \(threads.count) threads by last modified date")
+                // Sort threads by creation date (newest first)
+                threads.sort { $0.createdAt > $1.createdAt }
+                print("Sorted \(threads.count) threads by creation date")
             }
 
             return importedCount

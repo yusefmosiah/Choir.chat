@@ -188,8 +188,9 @@ struct ContentView: View {
         }
         .onChange(of: selectedChoirThread) { _, newThread in
             guard let thread = newThread else { return }
-            thread.lastModified = Date()
-            threadManager.loadThreads() // Reload to get sorted threads
+            // No need to update lastModified since we're sorting by createdAt
+            // We still need to reload threads to ensure proper sorting
+            threadManager.loadThreads()
         }
     }
 
@@ -266,8 +267,8 @@ struct ChoirThreadRow: View {
 
                 Spacer()
 
-                // Show the last modified date
-                Text(thread.lastModified, style: .relative)
+                // Show the creation date
+                Text(thread.createdAt, style: .relative)
                     .font(.caption2)
                     .foregroundStyle(.secondary)
             }
