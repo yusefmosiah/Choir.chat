@@ -26,7 +26,7 @@ public struct GlassPageControl: View {
 
     public var body: some View {
         // Glass background with controls
-        HStack(spacing: 16) {
+        HStack(spacing: 8) {
             // Left control - handles previous page or previous phase
             Button(action: {
                 // If we're on the first page and we can go to a previous phase
@@ -75,11 +75,12 @@ public struct GlassPageControl: View {
                     }
                 }
                 .foregroundColor(.accentColor)
-                .padding(.horizontal, 8)
+                .padding(.horizontal, 24)
                 .padding(.vertical, 4)
-                .background(
+                .overlay(
                     Capsule()
-                        .fill(Color.accentColor.opacity(0.1))
+                        .stroke(Color.accentColor.opacity(0.3), lineWidth: 1)
+                        .blur(radius: 1)
                 )
                 .opacity((currentPage > 0 || getPreviousPhase() != nil) ? 1.0 : 0.3)
             }
@@ -92,6 +93,7 @@ public struct GlassPageControl: View {
                 Text("\(currentPage + 1) / \(totalPages)")
                     .font(.caption)
                     .foregroundColor(.secondary)
+                    .frame(minWidth: 40) // Ensure minimum width for the text
             }
 
             Spacer()
@@ -144,11 +146,12 @@ public struct GlassPageControl: View {
                         .font(.caption)
                 }
                 .foregroundColor(.accentColor)
-                .padding(.horizontal, 8)
+                .padding(.horizontal, 24)
                 .padding(.vertical, 4)
-                .background(
+                .overlay(
                     Capsule()
-                        .fill(Color.accentColor.opacity(0.1))
+                        .stroke(Color.accentColor.opacity(0.3), lineWidth: 1)
+                        .blur(radius: 1)
                 )
                 .opacity((currentPage < totalPages - 1 || getNextPhase() != nil) ? 1.0 : 0.3)
             }
