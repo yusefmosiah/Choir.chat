@@ -64,6 +64,7 @@ tree.md
 │   │   ├── ThreadPersistenceService.swift
 │   │   └── WalletManager.swift
 │   ├── Utils
+│   │   ├── MarkdownPaginator.swift
 │   │   ├── MarkdownThemes.swift
 │   │   ├── PaginationUtils.swift
 │   │   ├── String+Extensions.swift
@@ -290,7 +291,7 @@ tree.md
     ├── test_api.sh
     └── test_postchain_multiturn.sh
 
-69 directories, 206 files
+69 directories, 207 files
 
 === File: docs/CHANGELOG.md ===
 

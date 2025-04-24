@@ -177,34 +177,13 @@ struct PaginatedMarkdownView: View {
         // Use slightly more width to maximize content
         let availableTextWidth = size.width - 4
 
-        var pagesResult: [String] = []
-        var remainingText = Substring(text)
-
-        while !remainingText.isEmpty {
-            // Use our improved fitTextToHeight that respects link boundaries
-            let pageText = measurer.fitTextToHeight(
-                text: String(remainingText),
-                width: availableTextWidth,
-                height: availableTextHeight
-            )
-
-            guard !pageText.isEmpty else {
-                if !remainingText.isEmpty {
-                    pagesResult.append(String(remainingText))
-                }
-                remainingText = ""
-                break
-            }
-
-            pagesResult.append(pageText)
-
-            if pageText.count < remainingText.count {
-                let index = remainingText.index(remainingText.startIndex, offsetBy: pageText.count)
-                remainingText = remainingText[index...]
-            } else {
-                remainingText = ""
-            }
-        }
+        // Use the new MarkdownPaginator to handle pagination with formatting preservation
+        let paginator = MarkdownPaginator(textMeasurer: measurer)
+        let pagesResult = paginator.paginateMarkdown(
+            text,
+            width: availableTextWidth,
+            height: availableTextHeight
+        )
 
         if pagesResult.isEmpty && !text.isEmpty {
             return [text]

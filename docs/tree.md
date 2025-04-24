@@ -51,6 +51,7 @@
 │   │   ├── ThreadPersistenceService.swift
 │   │   └── WalletManager.swift
 │   ├── Utils
+│   │   ├── MarkdownPaginator.swift
 │   │   ├── MarkdownThemes.swift
 │   │   ├── PaginationUtils.swift
 │   │   ├── String+Extensions.swift
@@ -277,4 +278,4 @@
     ├── test_api.sh
     └── test_postchain_multiturn.sh
 
-69 directories, 206 files
+69 directories, 207 files
