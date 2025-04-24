@@ -1,5 +1,6 @@
 import Foundation
 import SwiftUI
+// Removed UIKit import again
 
 struct PhaseCard: View {
     let phase: Phase
@@ -8,9 +9,10 @@ struct PhaseCard: View {
     let isSelected: Bool
     var isLoading: Bool = false
     // var priors: [Prior]? = nil // REMOVE: Prior struct is removed
-    @ObservedObject var viewModel: PostchainViewModel  // Keep viewModel for SearchResultListView
-    var messageId: String?  // Message ID parameter
+    @ObservedObject var viewModel: PostchainViewModel
+    var messageId: String?
     let localThreadIDs: Set<UUID>
+    let pageContent: String // Add property to receive pre-calculated page content
 
     // --- Computed Properties for Styling ---
 
@@ -70,73 +72,35 @@ struct PhaseCard: View {
     @State private var rotationTimer: Timer?
 
     var body: some View {
-        // Compute markdown content and displayable flag outside ViewBuilder
-        let baseContent = message.getPhaseContent(phase)
-        var combinedMarkdown = baseContent
-        if phase == .experienceVectors && !message.vectorSearchResults.isEmpty {
-            combinedMarkdown += message.formatVectorResultsToMarkdown()
-        } else if phase == .experienceWeb && !message.webSearchResults.isEmpty {
-            combinedMarkdown += message.formatWebResultsToMarkdown()
-        }
-        // Special handling for yield phase - show content even if it's from initial test content
-        let _ = !combinedMarkdown.isEmpty
+        // Use the passed-in pageContent directly
+        // Remove calculation of combinedMarkdown
 
-        // Debug logging for all phases to compare
-
-        // Check raw phase result
-        let phaseResult = message.getPhaseResult(phase)
-        if let result = phaseResult {
-            if result.content.isEmpty {
-            } else {
-            }
-        }
-
-        // Minimal yield phase debug info
-        if phase == .yield {
-            let _ = message.phaseResults[.yield]?.content != nil
-        }
-
-        // For debugging comparing the yield phase with other phases that work
-        if phase == .yield || phase == .action || phase == .understanding {
-
-            // Compare with a phase that works (action or understanding)
-            let comparePhase = phase == .yield ? .action : phase
-            let _ = message.phaseResults[comparePhase]?.content ?? ""
-        }
-
-
-        // Force refresh content when message changes
+        // Force refresh content when message changes (keep for potential future use)
         let _ = cardRefreshCounter
 
-        // Debug output for all phases to see why yield is different
+        VStack(alignment: .leading, spacing: 12) {
+            // Header (Keep existing header - assuming it doesn't depend on combinedMarkdown)
+            // TODO: Verify Header doesn't need combinedMarkdown
 
-        // In case the problem is with the empty check, double-check it manually
-        if !combinedMarkdown.isEmpty {
-        } else {
-        }
-
-        // DEBUG LOG: Add specific logging for PhaseCard display
-        if phase == .yield {
-            let _ = combinedMarkdown // Use the already computed content
-        }
-        return VStack(alignment: .leading, spacing: 12) {
-            // Header (Keep existing header)
-
-            if !combinedMarkdown.isEmpty {
+            // Use pageContent to determine if content exists
+            if !pageContent.isEmpty {
+                // GeometryReader might still be useful if PaginatedMarkdownView needs size constraints internally
                 GeometryReader { geometry in
+                    // Updated call to PaginatedMarkdownView
                     PaginatedMarkdownView(
-                        markdownText: combinedMarkdown,
-                        availableSize: geometry.size,
-                        currentPage: pageBinding,
+                        pageContent: pageContent, // Pass the single page content string
+                        // Pass other necessary props like message context or handlers
                         onNavigateToPreviousPhase: createNavigationHandler(direction: .previous),
                         onNavigateToNextPhase: createNavigationHandler(direction: .next),
                         currentMessage: message
                     )
+                    // Frame applied to PaginatedMarkdownView itself
+                     .frame(width: geometry.size.width, height: geometry.size.height)
                 }
             } else if isLoading {
                 loadingContentView
             } else {
-                // For debugging, identify the phase in "No content available" message
+                // Simplified empty state
                 Text("...")
                     .foregroundColor(.secondary)
                     .frame(maxWidth: .infinity, alignment: .center)
@@ -164,8 +128,8 @@ struct PhaseCard: View {
                                 angle: .degrees(gradientRotation)
                             )
                         )
-                        // Make it slightly larger than the card
-                        .frame(width: UIScreen.main.bounds.width - 32, height: 320)
+                        // Use relative sizing or remove explicit frame if problematic
+                        // .frame(width: UIScreen.main.bounds.width - 32, height: 320) // Removed UIScreen usage
                         // Apply blur for diffuse effect
                         .blur(radius: 12)
                         // Lower opacity for subtlety
@@ -190,12 +154,14 @@ struct PhaseCard: View {
         )
         .padding(.horizontal, 4)
         .contextMenu {
-            PhaseCardContextMenu(
-                phase: phase,
-                message: message,
-                currentPage: pageBinding,
-                availableSize: UIScreen.main.bounds.size
-            )
+            GeometryReader { geometry in
+                PhaseCardContextMenu(
+                    phase: phase,
+                    message: message,
+                    currentPage: pageBinding,
+                    availableSize: geometry.size
+                )
+            }
         }
         .onReceive(message.objectWillChange) {
             // Update card when message changes
@@ -297,13 +263,18 @@ struct PhaseCard: View {
 #Preview {
     // Mock ViewModel and Message for Preview
     let previewViewModel = PostchainViewModel(coordinator: PostchainCoordinatorImpl())
-    let testMessage = Message(
-        content: "Test message content",
-        isUser: false
-    )
+    let testMessage = Message(content: "Test message content", isUser: false)
+    // Add some sample content for preview if needed, or use placeholder
+    let samplePageContent = """
+    # Sample Page Content
+
+    This is the content for a single page passed to PhaseCard.
+    - Item 1
+    - Item 2
+    """
 
     VStack(spacing: 20) {
-        // Normal state
+        // Normal state - pass sample pageContent
         PhaseCard(
             phase: Phase.action,
             message: testMessage,
@@ -311,11 +282,12 @@ struct PhaseCard: View {
             isLoading: false,
             viewModel: previewViewModel,
             messageId: testMessage.id.uuidString,
-            localThreadIDs: []
+            localThreadIDs: [],
+            pageContent: samplePageContent // Pass sample content
         )
         .frame(height: 200)
 
-        // Loading state
+        // Loading state - pass empty pageContent
         PhaseCard(
             phase: Phase.action,
             message: testMessage,
@@ -323,7 +295,8 @@ struct PhaseCard: View {
             isLoading: true,
             viewModel: previewViewModel,
             messageId: testMessage.id.uuidString,
-            localThreadIDs: []
+            localThreadIDs: [],
+            pageContent: "" // Pass empty content for loading state
         )
         .frame(height: 200)
     }

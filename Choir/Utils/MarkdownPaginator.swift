@@ -1,359 +1,122 @@
 import Foundation
 import SwiftUI
+// Removed UIKit import
+import CoreText
 
-/// A class that handles pagination of markdown content while preserving formatting across page boundaries
+/// A class that handles pagination of markdown content using accurate text measurement.
 class MarkdownPaginator {
 
-    /// Represents a markdown block type
-    enum BlockType {
-        case bulletedList
-        case numberedList
-        case codeBlock
-        case blockquote
-        case paragraph
-        case heading
-    }
-
-    /// Represents the context at a specific point in the markdown
-    struct MarkdownContext {
-        let blockType: BlockType
-        let indentationLevel: Int
-        let listItemNumber: Int? // For numbered lists
-        let codeBlockLanguage: String? // For code blocks
-
-        /// Returns the prefix needed to continue this context on a new page
-        func continuationPrefix() -> String {
-            var prefix = ""
-
-            // Add indentation
-            if indentationLevel > 0 {
-                prefix += String(repeating: "  ", count: indentationLevel)
-            }
-
-            // Add block-specific prefix
-            switch blockType {
-            case .bulletedList:
-                prefix += "- "
-            case .numberedList:
-                if let number = listItemNumber {
-                    prefix += "\(number). "
-                } else {
-                    prefix += "1. "
-                }
-            case .codeBlock:
-                if let language = codeBlockLanguage {
-                    prefix += "```\(language)\n"
-                } else {
-                    prefix += "```\n"
-                }
-            case .blockquote:
-                prefix += "> "
-            case .paragraph, .heading:
-                // No special prefix needed
-                break
-            }
-
-            return prefix
-        }
-    }
-
-    /// The text measurer used to determine how much text fits on a page
-    private let textMeasurer: TextMeasurer
-
-    init(textMeasurer: TextMeasurer) {
-        self.textMeasurer = textMeasurer
-    }
-
-    /// Paginates markdown content while preserving formatting across page boundaries
+    /// Paginates markdown content using Core Text for accurate measurement.
     /// - Parameters:
-    ///   - text: The markdown text to paginate
-    ///   - width: The available width for each page
-    ///   - height: The available height for each page
-    /// - Returns: An array of strings, each representing a page of content
+    ///   - text: The markdown text to paginate.
+    ///   - width: The available width for each page.
+    ///   - height: The available height for each page.
+    /// - Returns: An array of strings, each representing a page of content.
     func paginateMarkdown(_ text: String, width: CGFloat, height: CGFloat) -> [String] {
-        var pages: [String] = []
-        var remainingText = text
-
-        // Use a character count estimation approach instead of scaling factors
-        // Estimate average characters per page based on dimensions
-        let estimatedCharsPerPage = estimateCharsPerPage(width: width, height: height)
-
-        // Debug logging
-        print("Paginating text of length \(text.count) with estimated \(estimatedCharsPerPage) chars per page")
-
-        while !remainingText.isEmpty {
-            // Calculate a target character count for this page
-            let targetCharCount = min(estimatedCharsPerPage, remainingText.count)
-
-            // Find a good break point near the target character count
-            let (pageText, breakPoint) = findOptimalBreakPoint(in: remainingText, targetCharCount: targetCharCount)
-
-            guard !pageText.isEmpty else {
-                // If we couldn't find a good break point, take at least one line to avoid infinite loops
-                let firstLine = remainingText.components(separatedBy: .newlines).first ?? remainingText
-                pages.append(firstLine)
-                print("Fallback to single line: \(firstLine.prefix(20))...")
-
-                if remainingText.count > firstLine.count {
-                    let index = remainingText.index(remainingText.startIndex, offsetBy: firstLine.count + 1)
-                    remainingText = String(remainingText[index...])
-                } else {
-                    remainingText = ""
-                }
-                continue
-            }
-
-            // Add this page to our result
-            pages.append(pageText)
-            print("Added page \(pages.count) with \(pageText.count) characters")
-
-            if breakPoint < remainingText.count {
-                // Get the context at the split point
-                let context = analyzeContextAtSplitPoint(
-                    fullText: remainingText,
-                    splitPoint: breakPoint
-                )
-
-                // Remove the text we've already paginated
-                let index = remainingText.index(remainingText.startIndex, offsetBy: breakPoint)
-                remainingText = String(remainingText[index...])
-
-                // Add the continuation prefix to the remaining text if needed
-                if let context = context {
-                    remainingText = context.continuationPrefix() + remainingText
-                    print("Added continuation prefix for \(context.blockType)")
-                }
-            } else {
-                remainingText = ""
-            }
+        guard !text.isEmpty, width > 0, height > 0 else {
+            print("[MarkdownPaginator] Input text is empty or dimensions are invalid. Returning single page.")
+            return [text] // Return original text if empty or dimensions invalid
         }
 
-        print("Pagination complete: \(pages.count) pages created")
+        var pages: [String] = []
+        var currentStartIndex = text.startIndex
+
+        // Prepare the full attributed string (minimal attributes for measurement)
+        // Core Text will use default font/paragraph styles if not specified.
+        // The goal is layout fitting, not perfect style matching here.
+        let baseAttributes: [NSAttributedString.Key: Any] = [
+             .paragraphStyle: NSParagraphStyle.default // Keep paragraph style for basic line breaking
+        ]
+        // Create NSAttributedString without explicit font
+        let fullAttributedString = NSAttributedString(string: text, attributes: baseAttributes)
+
+
+        print("[MarkdownPaginator] Starting pagination for text length \(text.count) with size W:\(width) H:\(height)")
+
+        while currentStartIndex < text.endIndex {
+            let remainingRange = NSRange(currentStartIndex..<text.endIndex, in: text)
+            if remainingRange.length == 0 { break } // Should not happen if loop condition is correct, but safety check
+
+            let remainingAttributedString = fullAttributedString.attributedSubstring(from: remainingRange)
+
+            // Create a CTFramesetter
+            let framesetter = CTFramesetterCreateWithAttributedString(remainingAttributedString as CFAttributedString)
+
+            // Define the frame path (available area)
+            let framePath = CGPath(rect: CGRect(x: 0, y: 0, width: width, height: height), transform: nil)
+
+            // Create a frame to see how much text fits
+            let frame = CTFramesetterCreateFrame(framesetter, CFRangeMake(0, 0), framePath, nil)
+
+            // Get the range of characters that fit in this frame
+            let visibleRange = CTFrameGetVisibleStringRange(frame)
+
+            if visibleRange.length == 0 {
+                // If absolutely nothing fits (e.g., extremely small height),
+                // we must consume *something* to avoid an infinite loop.
+                // Take the first character or line. This is an edge case.
+                print("[MarkdownPaginator] Warning: Zero characters fit in the frame. Consuming first character/line.")
+                let nextNewline = text[currentStartIndex...].firstIndex(of: "\n")
+                let endIndex: String.Index
+                if let nextNewline = nextNewline, nextNewline > currentStartIndex {
+                    endIndex = text.index(after: nextNewline) // Include newline
+                } else {
+                    endIndex = text.index(currentStartIndex, offsetBy: 1, limitedBy: text.endIndex) ?? text.endIndex
+                }
+                let pageText = String(text[currentStartIndex..<endIndex])
+                if !pageText.isEmpty {
+                    pages.append(pageText)
+                }
+                currentStartIndex = endIndex
+                continue // Move to the next iteration
+            }
+
+            // Calculate the end index in the original string
+            guard let pageEndIndex = text.index(currentStartIndex, offsetBy: visibleRange.length, limitedBy: text.endIndex) else {
+                 print("[MarkdownPaginator] Error: Could not calculate pageEndIndex. Aborting pagination.")
+                 // If we can't calculate the end index, something is wrong. Return what we have.
+                 if pages.isEmpty { pages.append(text) } // Avoid returning empty if text was present
+                 return pages
+            }
+
+
+            // Extract the text for the current page
+            let pageText = String(text[currentStartIndex..<pageEndIndex])
+            pages.append(pageText)
+            print("[MarkdownPaginator] Added page \(pages.count) with \(pageText.count) characters (Range: \(visibleRange.location)-\(visibleRange.location + visibleRange.length))")
+
+
+            // Update the start index for the next iteration
+            currentStartIndex = pageEndIndex
+        }
+
+        print("[MarkdownPaginator] Pagination complete: \(pages.count) pages created.")
+        // Ensure at least one page is returned if the original text was not empty
+        if pages.isEmpty && !text.isEmpty {
+            print("[MarkdownPaginator] Pagination resulted in zero pages for non-empty text. Returning original text as single page.")
+            return [text]
+        } else if pages.isEmpty && text.isEmpty {
+             return [""] // Return one empty page for empty input
+        }
+
+
         return pages
     }
 
-    /// Estimates the number of characters that can fit on a page based on dimensions
-    private func estimateCharsPerPage(width: CGFloat, height: CGFloat) -> Int {
-        // Calculate area and use a character density factor
-        // This is more principled than arbitrary scaling factors
-        let area = width * height
-
-        // Estimate character density based on typical rendering
-        // For markdown content, we need to account for formatting overhead
-        let charDensity: CGFloat = 150 // points² per character (increased density)
-
-        // Calculate estimated character count with a small safety margin (0.9)
-        let estimatedChars = Int(area / charDensity * 0.9)
-
-        // Set reasonable min/max bounds
-        return min(5000, max(500, estimatedChars))
-    }
-
-    /// Finds an optimal break point in text near the target character count
-    private func findOptimalBreakPoint(in text: String, targetCharCount: Int) -> (pageText: String, breakPoint: Int) {
-        // Start with the target count as our initial guess
-        var breakPoint = min(targetCharCount, text.count)
-
-        // Don't exceed text length
-        if breakPoint >= text.count {
-            return (String(text), text.count)
-        }
-
-        // Look for natural break points (paragraph, sentence, or word boundaries)
-        // First try to find a paragraph break within a reasonable range
-        let lookAheadRange = min(100, text.count - breakPoint)
-        let lookBehindRange = min(100, breakPoint)
-
-        // Check for paragraph breaks
-        if let newlineIndex = text[text.index(text.startIndex, offsetBy: breakPoint - lookBehindRange)...text.index(text.startIndex, offsetBy: min(breakPoint + lookAheadRange, text.count - 1))].lastIndex(of: "\n") {
-            let newBreakPoint = text.distance(from: text.startIndex, to: newlineIndex) + 1 // +1 to include the newline
-            if abs(newBreakPoint - breakPoint) <= lookAheadRange + lookBehindRange {
-                breakPoint = newBreakPoint
-                print("Found paragraph break at position \(breakPoint)")
-                return (String(text.prefix(breakPoint)), breakPoint)
-            }
-        }
-
-        // Check for sentence breaks
-        let sentenceEndChars: [Character] = [".", "!", "?"]
-        for i in (breakPoint - lookBehindRange)...(breakPoint + lookAheadRange) {
-            if i < 0 || i >= text.count { continue }
-
-            let index = text.index(text.startIndex, offsetBy: i)
-            if sentenceEndChars.contains(text[index]) {
-                // Make sure we include the sentence end character and any following space
-                var newBreakPoint = i + 1
-                if newBreakPoint < text.count {
-                    let nextIndex = text.index(text.startIndex, offsetBy: newBreakPoint)
-                    if text[nextIndex] == " " {
-                        newBreakPoint += 1
-                    }
-                }
-
-                breakPoint = newBreakPoint
-                print("Found sentence break at position \(breakPoint)")
-                return (String(text.prefix(breakPoint)), breakPoint)
-            }
-        }
-
-        // If no natural breaks found, at least try to break at a word boundary
-        let substring = text.prefix(breakPoint)
-        if let lastSpace = substring.lastIndex(of: " ") {
-            breakPoint = text.distance(from: text.startIndex, to: lastSpace) + 1 // +1 to include the space
-            print("Found word break at position \(breakPoint)")
-        }
-
-        return (String(text.prefix(breakPoint)), breakPoint)
-    }
-
-    /// Analyzes the context at a split point in the markdown
-    /// - Parameters:
-    ///   - fullText: The full text being paginated
-    ///   - splitPoint: The character index where the split occurs
-    /// - Returns: The markdown context at the split point, or nil if no special context is needed
-    private func analyzeContextAtSplitPoint(fullText: String, splitPoint: Int) -> MarkdownContext? {
-        // Get the text up to the split point
-        let textBeforeSplit = String(fullText.prefix(splitPoint))
-
-        // Split into lines
-        let lines = textBeforeSplit.components(separatedBy: .newlines)
-
-        // Start from the last line and work backwards to find the context
-        var currentLineIndex = lines.count - 1
-        var inCodeBlock = false
-        var codeBlockLanguage: String? = nil
-
-        // Check if we're in the middle of a code block
-        for (index, line) in lines.enumerated().reversed() {
-            let trimmedLine = line.trimmingCharacters(in: .whitespaces)
-
-            if trimmedLine.hasPrefix("```") {
-                inCodeBlock = !inCodeBlock
-
-                // If this is the start of a code block, extract the language
-                if inCodeBlock {
-                    let languagePart = trimmedLine.dropFirst(3)
-                    if !languagePart.isEmpty {
-                        codeBlockLanguage = String(languagePart)
-                    }
-                    break
-                }
-            }
-        }
-
-        // If we're in a code block, return that context
-        if inCodeBlock {
-            return MarkdownContext(
-                blockType: .codeBlock,
-                indentationLevel: 0,
-                listItemNumber: nil,
-                codeBlockLanguage: codeBlockLanguage
-            )
-        }
-
-        // Find the last non-empty line
-        while currentLineIndex >= 0 && lines[currentLineIndex].trimmingCharacters(in: .whitespaces).isEmpty {
-            currentLineIndex -= 1
-        }
-
-        // If we couldn't find a non-empty line, no special context is needed
-        guard currentLineIndex >= 0 else {
-            return nil
-        }
-
-        let lastLine = lines[currentLineIndex]
-        let trimmedLastLine = lastLine.trimmingCharacters(in: .whitespaces)
-        let indentationLevel = getIndentationLevel(lastLine)
-
-        // Check for different block types
-        if trimmedLastLine.hasPrefix("- ") || trimmedLastLine.hasPrefix("* ") {
-            // Bulleted list
-            return MarkdownContext(
-                blockType: .bulletedList,
-                indentationLevel: indentationLevel,
-                listItemNumber: nil,
-                codeBlockLanguage: nil
-            )
-        } else if let listItemNumber = extractNumberedListItem(trimmedLastLine) {
-            // Numbered list
-            // Find the next number in the sequence by looking at previous list items
-            var nextNumber = listItemNumber + 1
-
-            // Look for the next list item in the remaining text
-            let remainingText = String(fullText.suffix(from: fullText.index(fullText.startIndex, offsetBy: splitPoint)))
-            let remainingLines = remainingText.components(separatedBy: .newlines)
-
-            // Check if the next line is a list item with the same indentation
-            if !remainingLines.isEmpty {
-                let nextLine = remainingLines[0]
-                let nextLineIndentation = getIndentationLevel(nextLine)
-
-                // If the indentation is the same, this is a continuation of the same list
-                if nextLineIndentation == indentationLevel {
-                    // Use the same list item number to continue the current item
-                    nextNumber = listItemNumber
-                }
-            }
-
-            return MarkdownContext(
-                blockType: .numberedList,
-                indentationLevel: indentationLevel,
-                listItemNumber: nextNumber,
-                codeBlockLanguage: nil
-            )
-        } else if trimmedLastLine.hasPrefix(">") {
-            // Blockquote
-            return MarkdownContext(
-                blockType: .blockquote,
-                indentationLevel: indentationLevel,
-                listItemNumber: nil,
-                codeBlockLanguage: nil
-            )
-        }
-
-        // For paragraphs, we only need to preserve indentation
-        if indentationLevel > 0 {
-            return MarkdownContext(
-                blockType: .paragraph,
-                indentationLevel: indentationLevel,
-                listItemNumber: nil,
-                codeBlockLanguage: nil
-            )
-        }
-
-        // No special context needed
-        return nil
-    }
-
-    /// Gets the indentation level of a line (number of leading spaces / 2)
-    private func getIndentationLevel(_ line: String) -> Int {
-        var count = 0
-        for char in line {
-            if char == " " {
-                count += 1
-            } else {
-                break
-            }
-        }
-        return count / 2
-    }
-
-    /// Extracts the list item number from a numbered list item
-    private func extractNumberedListItem(_ line: String) -> Int? {
-        // Match patterns like "1. " or "123. "
-        let pattern = "^\\s*(\\d+)\\."
-        guard let regex = try? NSRegularExpression(pattern: pattern, options: []) else {
-            return nil
-        }
-
-        let nsString = NSString(string: line)
-        let range = NSRange(location: 0, length: nsString.length)
-
-        if let match = regex.firstMatch(in: line, options: [], range: range) {
-            let numberString = nsString.substring(with: match.range(at: 1))
-            return Int(numberString)
-        }
-
-        return nil
-    }
+    // Note: Context preservation logic (analyzeContextAtSplitPoint, continuationPrefix)
+    // is removed as Core Text measurement handles layout directly. If specific markdown
+    // block continuation (like list numbers, code block fences) is needed across
+    // Core Text frames, it would require significantly more complex logic involving
+    // parsing the markdown structure alongside measurement, which is beyond the scope
+    // of this refactor focused on accurate splitting. The current approach ensures
+    // all text is included, split accurately by visual height.
 }
+
+// TextMeasurer class is no longer needed by MarkdownPaginator and can be removed
+// if it's not used elsewhere. For now, we leave it commented out or remove it later.
+/*
+/// A helper class to measure text height
+class TextMeasurer {
+    // ... (Keep implementation if used elsewhere, otherwise remove)
+}
+*/
