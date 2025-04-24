@@ -309,10 +309,14 @@ struct PostchainView: View {
         let availableTextHeight = max(20, size.height - verticalPadding) // Ensure minimum height
         let availableTextWidth = max(8, size.width - horizontalPadding) // Ensure minimum width
 
+        // Get the current font for accessibility-aware measurement
+        let bodyFont = UIFont.preferredFont(forTextStyle: .body)
+
         let newPages = paginator.paginateMarkdown(
             textToPaginate,
             width: availableTextWidth,
-            height: availableTextHeight
+            height: availableTextHeight,
+            font: bodyFont // Pass the font to consider accessibility settings
         )
 
         // 5. Update cache

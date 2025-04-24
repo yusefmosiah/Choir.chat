@@ -19,7 +19,10 @@ struct PaginatedMarkdownView: View {
                     .padding([.horizontal], 2)
                     .padding(.top, 2)
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                    .fixedSize(horizontal: false, vertical: true) // Allow content to use its natural height
                     .drawingGroup(opaque: false)
+                    .environment(\.layoutDirection, .leftToRight) // Ensure consistent layout
+                    .environment(\.lineLimit, nil) // Ensure no line limits
                     .onOpenURL { url in
                         handleLinkTap(url)
                     }
