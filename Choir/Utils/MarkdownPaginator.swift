@@ -9,11 +9,16 @@ class MarkdownPaginator {
 
     // Minimum page fill threshold - if a page is less than this percentage full,
     // try to pull content from the next page
-    private let minPageFillThreshold: CGFloat = 0.4
+    private let minPageFillThreshold: CGFloat = 0.6
 
-    // Maximum page fill threshold - don't try to add more content if the page
-    // is already this percentage full
-    private let maxPageFillThreshold: CGFloat = 0.85
+    // Target page fill threshold - aim to fill pages to this percentage
+    private let targetPageFillThreshold: CGFloat = 0.8
+
+    // Maximum page fill threshold - absolute maximum to prevent overflow
+    private let maxPageFillThreshold: CGFloat = 0.95
+
+    // Safety margin - percentage of height to reserve as safety margin
+    private let safetyMargin: CGFloat = 0.05
 
     /// Paginates markdown content using a sentence-aware approach.
     /// - Parameters:
@@ -105,16 +110,29 @@ class MarkdownPaginator {
 
             // Check if adding this unit would exceed the page height
             let projectedHeight = currentPageHeight + unitHeight
+            let effectiveMaxHeight = height * (maxPageFillThreshold - safetyMargin)
 
-            if projectedHeight <= height * maxPageFillThreshold || currentPage.isEmpty {
-                // Unit fits on current page or current page is empty (must add at least one unit)
-                if !currentPage.isEmpty && index > 0 {
-                    currentPage += "\n\n"
-                }
-                currentPage += unit
+            // If the page is empty, we must add at least one unit regardless of size
+            if currentPage.isEmpty {
+                currentPage = unit
+                currentPageHeight = unitHeight
+            }
+            // If adding this unit would still keep us under our target fill threshold, add it
+            else if projectedHeight <= effectiveMaxHeight {
+                // Add the unit with proper spacing
+                currentPage += "\n\n" + unit
                 currentPageHeight = projectedHeight
-            } else {
-                // Unit doesn't fit, start a new page
+
+                // If we're now above our target fill threshold, start a new page for the next unit
+                if currentPageHeight >= height * targetPageFillThreshold && index < units.count - 1 {
+                    pages.append(currentPage)
+                    currentPage = ""
+                    currentPageHeight = 0
+                }
+            }
+            // Unit doesn't fit within our max threshold, start a new page
+            else {
+                // Only start a new page if the current one has content
                 if !currentPage.isEmpty {
                     pages.append(currentPage)
                 }
@@ -156,14 +174,15 @@ class MarkdownPaginator {
             let pageHeight = measureTextHeight(page, width: width, attributes: baseAttributes)
             let pageFillRatio = pageHeight / height
 
-            // If this is a very small page (less than 20% full) and not the first page,
+            // If this is a small page (less than 30% full) and not the first page,
             // try to combine it with the previous page
-            if pageFillRatio < 0.2 && index > 0 && !page.isEmpty {
+            if pageFillRatio < 0.3 && index > 0 && !page.isEmpty {
                 let prevPage = balancedPages.last ?? ""
                 let combinedPage = prevPage + (prevPage.isEmpty ? "" : "\n\n") + page
                 let combinedHeight = measureTextHeight(combinedPage, width: width, attributes: baseAttributes)
+                let effectiveMaxHeight = height * (maxPageFillThreshold - safetyMargin)
 
-                if combinedHeight <= height * maxPageFillThreshold {
+                if combinedHeight <= effectiveMaxHeight {
                     // It fits! Replace the previous page with the combined page
                     if !balancedPages.isEmpty {
                         balancedPages.removeLast()
@@ -207,10 +226,12 @@ class MarkdownPaginator {
                     var bestCombinedPage = page
                     var bestRemainingPage = nextPage
                     var bestCombinedHeight = pageHeight
+                    var bestFillRatio = pageFillRatio
 
                     // Try adding units from the next page one by one
                     var combinedPage = page
                     var remainingUnits = nextPageUnits
+                    let effectiveMaxHeight = height * (maxPageFillThreshold - safetyMargin)
 
                     for j in 0..<nextPageUnits.count {
                         let unitToAdd = nextPageUnits[j]
@@ -218,17 +239,25 @@ class MarkdownPaginator {
                         let newCombinedPage = combinedPage + separator + unitToAdd
 
                         let newCombinedHeight = measureTextHeight(newCombinedPage, width: width, attributes: baseAttributes)
+                        let newFillRatio = newCombinedHeight / height
 
-                        if newCombinedHeight <= height * maxPageFillThreshold {
+                        if newCombinedHeight <= effectiveMaxHeight {
                             // It fits! Update the combined page
                             combinedPage = newCombinedPage
                             remainingUnits.removeFirst()
 
                             // Update the best combination if this is better
-                            if newCombinedHeight > bestCombinedHeight {
+                            // We prefer combinations that get us closer to our target fill ratio
+                            if newFillRatio <= targetPageFillThreshold && newFillRatio > bestFillRatio {
                                 bestCombinedPage = newCombinedPage
                                 bestCombinedHeight = newCombinedHeight
+                                bestFillRatio = newFillRatio
                                 bestRemainingPage = remainingUnits.joined(separator: "\n\n")
+                            }
+
+                            // If we've reached our target fill threshold, we can stop
+                            if newFillRatio >= targetPageFillThreshold {
+                                break
                             }
                         } else {
                             // Doesn't fit anymore, stop adding
@@ -259,21 +288,47 @@ class MarkdownPaginator {
             }
         }
 
-        // Final check: ensure no tiny fragments at the end
+        // Final check: ensure no tiny fragments at the end and try to balance the last pages
         if finalPages.count > 1 {
             let lastPage = finalPages.last ?? ""
             let lastPageHeight = measureTextHeight(lastPage, width: width, attributes: baseAttributes)
+            let lastPageFillRatio = lastPageHeight / height
+            let effectiveMaxHeight = height * (maxPageFillThreshold - safetyMargin)
 
-            if lastPageHeight < height * 0.2 && lastPage.count < minContentThreshold {
-                // Last page is very small, try to combine with previous page
+            // If the last page is small (less than 40% full), try to combine with previous page
+            if lastPageFillRatio < 0.4 {
                 let prevPage = finalPages[finalPages.count - 2]
-                let combinedPage = prevPage + (prevPage.isEmpty ? "" : "\n\n") + lastPage
-                let combinedHeight = measureTextHeight(combinedPage, width: width, attributes: baseAttributes)
+                let prevPageHeight = measureTextHeight(prevPage, width: width, attributes: baseAttributes)
+                let prevPageFillRatio = prevPageHeight / height
 
-                if combinedHeight <= height * maxPageFillThreshold {
-                    // It fits! Replace the last two pages with the combined page
-                    finalPages.removeLast(2)
-                    finalPages.append(combinedPage)
+                // Only try to combine if the previous page isn't already very full
+                if prevPageFillRatio < targetPageFillThreshold {
+                    let combinedPage = prevPage + (prevPage.isEmpty ? "" : "\n\n") + lastPage
+                    let combinedHeight = measureTextHeight(combinedPage, width: width, attributes: baseAttributes)
+
+                    if combinedHeight <= effectiveMaxHeight {
+                        // It fits! Replace the last two pages with the combined page
+                        finalPages.removeLast(2)
+                        finalPages.append(combinedPage)
+                    }
+                }
+            }
+
+            // If we still have a very tiny last page, make one more attempt with a higher threshold
+            if finalPages.count > 1 {
+                let lastPage = finalPages.last ?? ""
+                let lastPageHeight = measureTextHeight(lastPage, width: width, attributes: baseAttributes)
+
+                if lastPageHeight < height * 0.2 && lastPage.count < minContentThreshold {
+                    let prevPage = finalPages[finalPages.count - 2]
+                    let combinedPage = prevPage + (prevPage.isEmpty ? "" : "\n\n") + lastPage
+                    let combinedHeight = measureTextHeight(combinedPage, width: width, attributes: baseAttributes)
+
+                    // Use a higher threshold for tiny fragments
+                    if combinedHeight <= height * maxPageFillThreshold {
+                        finalPages.removeLast(2)
+                        finalPages.append(combinedPage)
+                    }
                 }
             }
         }
