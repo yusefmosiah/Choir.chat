@@ -429,56 +429,44 @@ struct PostchainView: View {
     private func splitMarkdownIntoPages(_ text: String, size: CGSize) -> [String] {
         guard !text.isEmpty else { return [""] }
         guard size.width > 8, size.height > 40 else {
+            print("PostchainView: Size too small for pagination, returning single page")
             return [text]
         }
 
         let measurer = TextMeasurer(sizeCategory: .medium)
-        // Use minimal vertical padding to maximize content
+        // Use standard padding values
         let verticalPadding: CGFloat = 4
+        let horizontalPadding: CGFloat = 4
+
         let availableTextHeight = size.height - verticalPadding
+        let availableTextWidth = size.width - horizontalPadding
 
         guard availableTextHeight > 20 else {
+            print("PostchainView: Available height too small for pagination, returning single page")
             return [text]
         }
 
-        // Use slightly more width to maximize content
-        let availableTextWidth = size.width - 4
+        print("PostchainView: Available space for pagination: \(availableTextWidth) x \(availableTextHeight)")
 
-        var pagesResult: [String] = []
-        var remainingText = Substring(text)
-
-        while !remainingText.isEmpty {
-            // Use our improved fitTextToHeight that respects link boundaries
-            let pageText = measurer.fitTextToHeight(
-                text: String(remainingText),
-                width: availableTextWidth,
-                height: availableTextHeight
-            )
-
-            guard !pageText.isEmpty else {
-                if !remainingText.isEmpty {
-                    pagesResult.append(String(remainingText))
-                }
-                remainingText = ""
-                break
-            }
-
-            pagesResult.append(pageText)
-
-            if pageText.count < remainingText.count {
-                let index = remainingText.index(remainingText.startIndex, offsetBy: pageText.count)
-                remainingText = remainingText[index...]
-            } else {
-                remainingText = ""
-            }
-        }
+        // Use the improved MarkdownPaginator with character estimation approach
+        let paginator = MarkdownPaginator(textMeasurer: measurer)
+        let pagesResult = paginator.paginateMarkdown(
+            text,
+            width: availableTextWidth,
+            height: availableTextHeight
+        )
 
         if pagesResult.isEmpty && !text.isEmpty {
+            print("PostchainView: Pagination returned empty result for non-empty text, falling back to single page")
             return [text]
         }
         if pagesResult.isEmpty && text.isEmpty {
             return [""]
         }
+
+        // Debug logging to help diagnose pagination issues
+        let avgCharsPerPage = text.count / max(1, pagesResult.count)
+        print("PostchainView: Split text into \(pagesResult.count) pages with average \(avgCharsPerPage) chars per page")
 
         return pagesResult
     }

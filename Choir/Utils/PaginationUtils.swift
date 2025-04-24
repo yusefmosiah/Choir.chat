@@ -133,15 +133,17 @@ class TextMeasurer {
         return UIFont(descriptor: descriptor, size: 0)
     }
 
+    // This method is now simplified since we're using a more principled approach in MarkdownPaginator
     func fitTextToHeight(text: String, width: CGFloat, height: CGFloat) -> String {
         if text.isEmpty { return "" }
 
-        // Process the text to find link boundaries
-        let linkRanges = findLinkRanges(in: text)
+        // Process the text to find link boundaries and special markdown elements
+        let preservedRanges = findPreservedRanges(in: text)
 
+        // Use standard paragraph style with reasonable line spacing
         let paragraphStyle = NSMutableParagraphStyle()
         paragraphStyle.lineBreakMode = .byWordWrapping
-        paragraphStyle.lineSpacing = 4
+        paragraphStyle.lineSpacing = 4 // Standard line spacing
 
         let attributes: [NSAttributedString.Key: Any] = [
             .font: font,
@@ -165,23 +167,26 @@ class TextMeasurer {
         // Get the initial fitting text length
         var length = characterRange.length
 
-        // Adjust length to avoid breaking links
-        if !linkRanges.isEmpty && !text.isEmpty {
+        // Debug logging
+        print("TextMeasurer: Initial text fit: \(length) characters out of \(text.count)")
+
+        // Adjust length to avoid breaking preserved elements
+        if !preservedRanges.isEmpty && !text.isEmpty {
             let textStartIndex = text.startIndex
 
-            for range in linkRanges {
+            for range in preservedRanges {
                 // Convert String.Index values to integer offsets for comparison
                 let rangeStart = text.distance(from: textStartIndex, to: range.lowerBound)
                 let rangeEnd = text.distance(from: textStartIndex, to: range.upperBound)
 
-                // If a link is partially included, either include it fully or exclude it
+                // If an element is partially included, either include it fully or exclude it
                 if rangeStart < length && rangeEnd > length {
-                    // If more than half of the link is included, include the whole link
-                    let linkLength = rangeEnd - rangeStart
-                    if (length - rangeStart) > (linkLength / 2) {
+                    // If more than half of the element is included, include the whole element
+                    let elementLength = rangeEnd - rangeStart
+                    if (length - rangeStart) > (elementLength / 2) {
                         length = rangeEnd
                     } else {
-                        // Otherwise, exclude the link entirely
+                        // Otherwise, exclude the element entirely
                         length = rangeStart
                     }
                 }
@@ -193,6 +198,20 @@ class TextMeasurer {
 
         let fittingText = text.prefix(length)
         return String(fittingText)
+    }
+
+    // Combined method to find all ranges that should be preserved during pagination
+    private func findPreservedRanges(in text: String) -> [Range<String.Index>] {
+        var ranges = findLinkRanges(in: text)
+        ranges.append(contentsOf: findMarkdownElementRanges(in: text))
+
+        // Sort ranges by start position for easier processing
+        ranges.sort { range1, range2 in
+            text.distance(from: text.startIndex, to: range1.lowerBound) <
+            text.distance(from: text.startIndex, to: range2.lowerBound)
+        }
+
+        return ranges
     }
 
     // Helper function to find markdown link ranges in text
@@ -221,6 +240,76 @@ class TextMeasurer {
             for match in matches {
                 if let range = Range(match.range, in: text) {
                     ranges.append(range)
+                }
+            }
+        }
+
+        return ranges
+    }
+
+    // Helper function to find markdown elements that should not be broken across pages
+    private func findMarkdownElementRanges(in text: String) -> [Range<String.Index>] {
+        var ranges: [Range<String.Index>] = []
+
+        // Find code blocks (```...```)
+        do {
+            let codeBlockPattern = "```[\\s\\S]*?```"
+            if let regex = try? NSRegularExpression(pattern: codeBlockPattern, options: []) {
+                let nsString = NSString(string: text)
+                let matches = regex.matches(in: text, options: [], range: NSRange(location: 0, length: nsString.length))
+
+                for match in matches {
+                    if let range = Range(match.range, in: text) {
+                        ranges.append(range)
+                    }
+                }
+            }
+        }
+
+        // Find tables (rows starting with |)
+        do {
+            // Match consecutive lines that start with | and contain | characters
+            // This is a simplified approach - a more robust solution would use line-by-line analysis
+            let tablePattern = "(\\|[^\n]*\\|\n)+(\\|[^\n]*\\|)"
+            if let regex = try? NSRegularExpression(pattern: tablePattern, options: []) {
+                let nsString = NSString(string: text)
+                let matches = regex.matches(in: text, options: [], range: NSRange(location: 0, length: nsString.length))
+
+                for match in matches {
+                    if let range = Range(match.range, in: text) {
+                        ranges.append(range)
+                    }
+                }
+            }
+        }
+
+        // Find headings (# Heading)
+        do {
+            let headingPattern = "^#{1,6}\\s+.*$"
+            if let regex = try? NSRegularExpression(pattern: headingPattern, options: [.anchorsMatchLines]) {
+                let nsString = NSString(string: text)
+                let matches = regex.matches(in: text, options: [], range: NSRange(location: 0, length: nsString.length))
+
+                for match in matches {
+                    if let range = Range(match.range, in: text) {
+                        ranges.append(range)
+                    }
+                }
+            }
+        }
+
+        // Find list items (both bulleted and numbered)
+        do {
+            // Match list items with their indentation
+            let listItemPattern = "^\\s*([*\\-+]|\\d+\\.)\\s+.*$"
+            if let regex = try? NSRegularExpression(pattern: listItemPattern, options: [.anchorsMatchLines]) {
+                let nsString = NSString(string: text)
+                let matches = regex.matches(in: text, options: [], range: NSRange(location: 0, length: nsString.length))
+
+                for match in matches {
+                    if let range = Range(match.range, in: text) {
+                        ranges.append(range)
+                    }
                 }
             }
         }

@@ -115,6 +115,9 @@ struct PaginatedMarkdownView: View {
         // Then optimize the text for pagination by replacing long vector IDs with shorter placeholders
         let (optimizedText, idMapping) = processedText.optimizeForPagination()
 
+        // Debug logging to help diagnose pagination issues
+        print("Paginating content of length \(optimizedText.count) for size \(size)")
+
         // Check if we have a valid cache that matches current parameters
         let potentialCache = PaginationCache(
             text: markdownText, // Use original text for cache key
@@ -126,9 +129,15 @@ struct PaginatedMarkdownView: View {
         if let existingCache = cache, existingCache == potentialCache {
             // Use cached pages
             pages = existingCache.pages
+            print("Using cached pagination: \(pages.count) pages")
         } else {
             // Calculate new pages with the optimized text
             var optimizedPages = splitMarkdownIntoPages(optimizedText, size: size)
+
+            // Log the page distribution
+            for (i, page) in optimizedPages.enumerated() {
+                print("Page \(i+1): \(page.count) characters")
+            }
 
             // Restore the original vector IDs in each page
             let restoredPages = optimizedPages.map { page in
@@ -144,6 +153,8 @@ struct PaginatedMarkdownView: View {
                 height: size.height,
                 pages: restoredPages
             )
+
+            print("Created new pagination: \(pages.count) pages")
         }
 
         totalPages = max(1, pages.count)
@@ -156,28 +167,32 @@ struct PaginatedMarkdownView: View {
         }
 
         // Debug logging to help diagnose pagination issues
-        print("Pagination: \(totalPages) pages created for size \(size)")
+        print("Pagination complete: \(totalPages) pages created for size \(size)")
     }
 
     private func splitMarkdownIntoPages(_ text: String, size: CGSize) -> [String] {
         guard !text.isEmpty else { return [""] }
         guard size.width > 8, size.height > 40 else {
+            print("Size too small for pagination, returning single page")
             return [text]
         }
 
         let measurer = TextMeasurer(sizeCategory: .medium)
-        // Use minimal vertical padding to maximize content
+        // Use standard padding values
         let verticalPadding: CGFloat = 4
+        let horizontalPadding: CGFloat = 4
+
         let availableTextHeight = size.height - verticalPadding
+        let availableTextWidth = size.width - horizontalPadding
 
         guard availableTextHeight > 20 else {
+            print("Available height too small for pagination, returning single page")
             return [text]
         }
 
-        // Use slightly more width to maximize content
-        let availableTextWidth = size.width - 4
+        print("Available space for pagination: \(availableTextWidth) x \(availableTextHeight)")
 
-        // Use the new MarkdownPaginator to handle pagination with formatting preservation
+        // Use the improved MarkdownPaginator with character estimation approach
         let paginator = MarkdownPaginator(textMeasurer: measurer)
         let pagesResult = paginator.paginateMarkdown(
             text,
@@ -186,6 +201,7 @@ struct PaginatedMarkdownView: View {
         )
 
         if pagesResult.isEmpty && !text.isEmpty {
+            print("Pagination returned empty result for non-empty text, falling back to single page")
             return [text]
         }
         if pagesResult.isEmpty && text.isEmpty {
@@ -193,7 +209,8 @@ struct PaginatedMarkdownView: View {
         }
 
         // Debug logging to help diagnose pagination issues
-        print("Split text into \(pagesResult.count) pages")
+        let avgCharsPerPage = text.count / max(1, pagesResult.count)
+        print("Split text into \(pagesResult.count) pages with average \(avgCharsPerPage) chars per page")
 
         return pagesResult
     }
