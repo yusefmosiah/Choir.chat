@@ -26,6 +26,8 @@
 │   │   ├── AppCoordinator.swift
 │   │   ├── PostchainCoordinator.swift
 │   │   └── PostchainCoordinatorImpl.swift
+│   ├── Documentation
+│   │   └── DesignStyleGuide.md
 │   ├── Info.plist
 │   ├── Models
 │   │   ├── APITypes.swift
@@ -278,4 +280,4 @@
     ├── test_api.sh
     └── test_postchain_multiturn.sh
 
-69 directories, 207 files
+70 directories, 208 files

@@ -39,6 +39,8 @@ tree.md
 │   │   ├── AppCoordinator.swift
 │   │   ├── PostchainCoordinator.swift
 │   │   └── PostchainCoordinatorImpl.swift
+│   ├── Documentation
+│   │   └── DesignStyleGuide.md
 │   ├── Info.plist
 │   ├── Models
 │   │   ├── APITypes.swift
@@ -291,7 +293,7 @@ tree.md
     ├── test_api.sh
     └── test_postchain_multiturn.sh
 
-69 directories, 207 files
+70 directories, 208 files
 
 === File: docs/CHANGELOG.md ===
 
