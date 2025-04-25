@@ -119,18 +119,26 @@ class AuthService: ObservableObject {
             let address = try wallet.accounts[0].address()
             print("Got wallet address: \(address)")
 
-            // 2. Request challenge
+            // 2. Request challenge - start this early
             print("Requesting challenge for address: \(address)")
-            let challenge = try await requestChallenge(walletAddress: address)
+            let challengeTask = Task {
+                try await requestChallenge(walletAddress: address)
+            }
+
+            // 3. Prepare the message for signing (can be done while waiting for challenge)
+            let messagePrefix = "Sign this message to authenticate with Choir: "
+
+            // 4. Wait for challenge to complete
+            let challenge = try await challengeTask.value
             print("Received challenge: \(challenge)")
 
-            // 3. Sign challenge
-            let message = "Sign this message to authenticate with Choir: \(challenge)"
+            // 5. Sign challenge
+            let message = messagePrefix + challenge
             print("Signing message: \(message)")
             let signature = try await signMessage(message: message, wallet: wallet)
             print("Generated signature: \(signature)")
 
-            // 4. Submit signature
+            // 6. Submit signature
             print("Submitting signature to server")
             let authResponse = try await submitSignature(
                 walletAddress: address,
@@ -139,18 +147,23 @@ class AuthService: ObservableObject {
             )
             print("Received auth response with token: \(authResponse.access_token.prefix(10))...")
 
-            // 5. Store token with biometric protection
-            do {
-                try keychain.save(authResponse.access_token, forKey: "auth_token", useBiometric: true)
-                print("Stored auth token with biometric protection")
-            } catch {
-                print("Error storing token: \(error)")
-                throw AuthError.tokenStorageFailed
-            }
+            // 7. Store token and get user info in parallel
+            async let saveTokenTask: Void = Task {
+                do {
+                    try keychain.save(authResponse.access_token, forKey: "auth_token", useBiometric: true)
+                    print("Stored auth token with biometric protection")
+                } catch {
+                    print("Error storing token: \(error)")
+                    throw AuthError.tokenStorageFailed
+                }
+            }.value
 
-            // 6. Get user info
-            print("Fetching user info")
-            let userInfo = try await getUserInfo(token: authResponse.access_token)
+            async let userInfoTask = getUserInfo(token: authResponse.access_token)
+
+            // 8. Wait for both tasks to complete
+            try await saveTokenTask
+            let userInfo = try await userInfoTask
+
             self.userInfo = userInfo
             print("Login complete, user info: \(userInfo.user_id)")
 
@@ -192,6 +205,12 @@ class AuthService: ObservableObject {
         request.httpMethod = "POST"
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
 
+        // Set a shorter timeout for faster failure
+        request.timeoutInterval = 10
+
+        // Set caching policy to return cached data if available
+        request.cachePolicy = .returnCacheDataElseLoad
+
         let body = ChallengeRequest(wallet_address: walletAddress)
         request.httpBody = try JSONEncoder().encode(body)
 
@@ -231,6 +250,12 @@ class AuthService: ObservableObject {
         request.httpMethod = "POST"
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
 
+        // Set a shorter timeout for faster failure
+        request.timeoutInterval = 10
+
+        // Set caching policy to return cached data if available
+        request.cachePolicy = .returnCacheDataElseLoad
+
         let body = AuthRequest(
             wallet_address: walletAddress,
             signature: signature,
@@ -265,6 +290,12 @@ class AuthService: ObservableObject {
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+        // Set a shorter timeout for faster failure
+        request.timeoutInterval = 10
+
+        // Set caching policy to return cached data if available
+        request.cachePolicy = .returnCacheDataElseLoad
 
         print("User info request headers: \(request.allHTTPHeaderFields ?? [:])")
 
@@ -302,6 +333,10 @@ class AuthService: ObservableObject {
     private func verifyBiometricAuth() async throws {
         // Use LocalAuthentication framework directly
         let context = LAContext()
+
+        // Set timeout to a shorter value for faster authentication
+        context.touchIDAuthenticationAllowableReuseDuration = 10
+
         var error: NSError?
 
         // First check if biometric authentication is available

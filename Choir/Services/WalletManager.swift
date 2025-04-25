@@ -144,7 +144,29 @@ class WalletManager: ObservableObject {
         isLoading = true
         defer { isLoading = false }
 
+        // First check if we already have wallets loaded
+        if let currentWallet = wallet {
+            print("Wallet already loaded, using existing wallet")
+            return
+        }
+
+        // Check if we have any wallets in the dictionary
+        if let firstAddress = wallets.keys.first, let firstWallet = wallets[firstAddress] {
+            print("Using first available wallet: \(firstAddress)")
+            wallet = firstWallet
+            saveCurrentWalletAddress(firstAddress)
+
+            // Start balance update in background
+            Task {
+                try? await updateBalance(for: firstWallet)
+            }
+
+            return
+        }
+
+        // If we get here, we need to create a new wallet
         do {
+            print("No existing wallets found, creating new wallet")
             // Generate a new wallet
             let newWallet = try Wallet() // Creates new wallet with random mnemonic
             let address = try newWallet.accounts[0].address()
@@ -175,8 +197,10 @@ class WalletManager: ObservableObject {
                 }
             }
 
-            // Update balance
-            try await updateBalance(for: newWallet)
+            // Start balance update in background
+            Task {
+                try? await updateBalance(for: newWallet)
+            }
         } catch {
             self.error = error
             throw error
