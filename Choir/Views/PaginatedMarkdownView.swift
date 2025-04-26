@@ -16,8 +16,9 @@ struct PaginatedMarkdownView: View {
             if !pageContent.isEmpty {
                 Markdown(pageContent)
                     .markdownTheme(.normalizedHeadings)
-                    .padding([.horizontal], 2)
-                    .padding(.top, 2)
+                    .padding([.horizontal], 1) // Reduced horizontal padding
+                    .padding(.top, 1) // Reduced top padding
+                    .padding(.bottom, 0) // No bottom padding
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                     .fixedSize(horizontal: false, vertical: true) // Allow content to use its natural height
                     .drawingGroup(opaque: false)

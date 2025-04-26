@@ -31,11 +31,33 @@ extension Theme {
                 FontWeight(.bold)
             }
 
-            // List items with proper spacing
+            // List items with compact spacing - ensure content stays with marker
             .listItem { cfg in
+                HStack(alignment: .top, spacing: 0) {
+                    cfg.label
+                        .lineLimit(nil)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+            // List styling with reduced indentation
+            .list { cfg in
                 cfg.label
-                    .lineLimit(nil)
-                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.leading, -4) // Reduce indentation for all lists
+            }
+            // Bulleted list marker styling
+            .bulletedListMarker { cfg in
+                Text("•")
+                    .font(.system(size: 12))
+                    .foregroundColor(.primary)
+                    .padding(.trailing, 4) // Add spacing between bullet and content
+            }
+            // Numbered list marker styling - ensure number stays with content
+            .numberedListMarker { cfg in
+                Text("\(cfg.itemNumber).")
+                    .font(.system(size: 12))
+                    .foregroundColor(.primary)
+                    .padding(.trailing, 4) // Add spacing between number and content
+                    .fixedSize() // Prevent the number from wrapping
             }
 
             // Code blocks with proper formatting
@@ -43,7 +65,7 @@ extension Theme {
                 cfg.label
                     .lineLimit(nil)
                     .fixedSize(horizontal: false, vertical: true)
-                    .font(.system(.body, design: .monospaced))
+                    .font(.system(size: 14, weight: .regular, design: .monospaced))
             }
 
             // Blockquotes with distinct styling
