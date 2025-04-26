@@ -5,6 +5,7 @@
 //  Created by Yusef Mosiah Nathanson on 11/9/24.
 //
 import SwiftUI
+import UIKit
 
 struct ContentView: View {
     // Use environment objects instead of creating new instances
@@ -113,7 +114,7 @@ struct ContentView: View {
         } detail: {
             if let thread = selectedChoirThread {
                 ChoirThreadDetailView(thread: thread, viewModel: postchainViewModel)
-                    .toolbar(.hidden, for: .tabBar) // Hide the tab bar when viewing a thread
+                    .modifier(HideTabBarModifier(onlyOnIPhone: true))
             } else {
                 VStack(spacing: 20) {
                     Text("Choir")
@@ -285,4 +286,19 @@ struct ChoirThreadRow: View {
 
 #Preview {
     ContentView(viewModel: ContentViewModel())
+}
+
+// MARK: - Hide Tab Bar Modifier
+struct HideTabBarModifier: ViewModifier {
+    let onlyOnIPhone: Bool
+
+    func body(content: Content) -> some View {
+        if !onlyOnIPhone || UIDevice.current.userInterfaceIdiom == .phone {
+            // Only hide the tab bar on iPhone, or if onlyOnIPhone is false
+            content.toolbar(.hidden, for: .tabBar)
+        } else {
+            // On iPad, don't hide the tab bar
+            content
+        }
+    }
 }

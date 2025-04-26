@@ -58,7 +58,8 @@
 │   │   ├── PaginationCacheManager.swift
 │   │   ├── PaginationUtils.swift
 │   │   ├── String+Extensions.swift
-│   │   └── TextSelectionSheet.swift
+│   │   ├── TextSelectionSheet.swift
+│   │   └── UIDevice+Extensions.swift
 │   ├── ViewModels
 │   │   └── PostchainViewModel.swift
 │   └── Views
@@ -282,4 +283,4 @@
     ├── test_api.sh
     └── test_postchain_multiturn.sh
 
-71 directories, 209 files
+71 directories, 210 files
