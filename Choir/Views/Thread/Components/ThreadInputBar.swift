@@ -20,15 +20,9 @@ struct ThreadInputBar: View {
     @State private var contentHeight: CGFloat = 36
     @State private var isLargeInput: Bool = false
 
-    // Animation state for gradient
-    @State private var gradientRotation: Double = 0
-    @State private var rotationTimer: Timer?
-
     // Constants
     private let minHeight: CGFloat = 36
-    private let maxLines: Int = 4
-    private let lineHeight: CGFloat = 20
-    private let maxHeight: CGFloat = 36 + (20 * 3) + 16 // minHeight + (lineHeight * (maxLines-1)) + padding
+    private let maxHeight: CGFloat = 120 // Approximately 4 lines + padding
     private let largeInputThreshold: Int = 10000
 
     var body: some View {
@@ -54,11 +48,8 @@ struct ThreadInputBar: View {
                         .background(Color.clear)
                         .focused($isFocused)
                         .disabled(isProcessing)
-                        // Fix the font to ensure consistent line height calculations
                         .font(.system(size: 16))
-                        // Always enable scrolling to ensure cursor visibility
                         .scrollDisabled(false)
-                        // Show scrollbar only when needed
                         .scrollIndicators(.automatic)
                         .onAppear {
                             // Explicitly prevent focus when view appears
@@ -80,31 +71,11 @@ struct ThreadInputBar: View {
 
                             // Animate the height change
                             withAnimation(.easeInOut(duration: 0.15)) {
-                                // If input is empty, reset to minimum height
-                                if newValue.isEmpty {
-                                    contentHeight = minHeight
-                                } else {
-                                    updateHeight(for: newValue)
-                                }
-                            }
-
-                            // If text was added (not deleted), ensure cursor is visible by briefly
-                            // requesting focus again to trigger scroll-to-cursor behavior
-                            if newValue.count > oldValue.count && isFocused {
-                                // Use a very short delay to ensure the height update completes first
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-                                    // This trick forces TextEditor to scroll to cursor position
-                                    isFocused = false
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-                                        isFocused = true
-                                    }
-                                }
+                                updateHeight(for: newValue)
                             }
                         }
                 }
-                .frame(minHeight: minHeight, maxHeight: maxHeight, alignment: .top)
                 .frame(height: contentHeight)
-                .padding(.vertical, 0) // Remove vertical padding to ensure proper alignment
                 .background(
                     ZStack {
                         // Glass background with neumorphic effect
@@ -148,36 +119,25 @@ struct ThreadInputBar: View {
                             .padding(.vertical, 8)
                             .background(
                                 ZStack {
-                                    // Angular gradient for processing state
+                                    // Static gradient for cancel button
                                     RoundedRectangle(cornerRadius: 14)
                                         .fill(
-                                            AngularGradient(
-                                                gradient: Gradient(stops: [
-                                                    .init(color: .red, location: 0.0),
-                                                    .init(color: .orange, location: 0.5),
-                                                    .init(color: .red, location: 1.0),
-                                                ]),
-                                                center: .center,
-                                                angle: .degrees(gradientRotation)
+                                            LinearGradient(
+                                                gradient: Gradient(colors: [.red, .orange.opacity(0.8)]),
+                                                startPoint: .topLeading,
+                                                endPoint: .bottomTrailing
                                             )
                                         )
-                                        .blur(radius: 4)
                                         .opacity(0.8)
 
                                     // Glass overlay
                                     RoundedRectangle(cornerRadius: 14)
-                                        .fill(Color.red.opacity(0.7))
+                                        .fill(Color.red.opacity(0.3))
                                         .blur(radius: 0.5)
                                 }
                             )
                     }
-                    .frame(height: contentHeight) // Match the height of the input field
-                    .onAppear {
-                        startRotationTimer()
-                    }
-                    .onDisappear {
-                        stopRotationTimer()
-                    }
+                    .frame(height: 36) // Fixed height for button
                 } else {
                     Button {
                         guard !input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
@@ -202,21 +162,15 @@ struct ThreadInputBar: View {
                             .frame(width: 36, height: 36)
                             .background(
                                 ZStack {
-                                    // Angular gradient background
+                                    // Static gradient background
                                     Circle()
                                         .fill(
-                                            AngularGradient(
-                                                gradient: Gradient(stops: [
-                                                    .init(color: .green, location: 0.0),
-                                                    .init(color: .blue, location: 0.25),
-                                                    .init(color: .purple, location: 0.5),
-                                                    .init(color: .blue, location: 0.75),
-                                                    .init(color: .green, location: 1.0),
-                                                ]),
-                                                center: .center
+                                            LinearGradient(
+                                                gradient: Gradient(colors: [.green, .blue, .purple]),
+                                                startPoint: .topLeading,
+                                                endPoint: .bottomTrailing
                                             )
                                         )
-                                        .blur(radius: 4)
                                         .opacity(0.8)
 
                                     // Glass overlay
@@ -226,7 +180,7 @@ struct ThreadInputBar: View {
                                 }
                             )
                     }
-                    .frame(height: contentHeight) // Match the height of the input field
+                    .frame(height: 36) // Fixed height for button
                     .disabled(input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                     .opacity(input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? 0.5 : 1.0)
                 }
@@ -299,8 +253,13 @@ struct ThreadInputBar: View {
         )
     }
 
-    // Update the content height based on text
+    // Update the content height based on text - more accurate calculation
     private func updateHeight(for text: String) {
+        if text.isEmpty {
+            contentHeight = minHeight
+            return
+        }
+
         // Count explicit line breaks
         let explicitLineBreaks = text.split(separator: "\n").count
 
@@ -320,44 +279,15 @@ struct ThreadInputBar: View {
         // Total estimated line count (explicit breaks + word wrapping)
         let estimatedLineCount = max(1, explicitLineBreaks + estimatedWrappedLines)
 
-        // For height calculation, we limit to maxLines
-        // But we don't limit the actual text - it will scroll
+        // For height calculation, we limit to maxLines (approximately 4)
+        let maxLines = Int((maxHeight - minHeight) / 20) + 1
         let visibleLineCount = min(estimatedLineCount, maxLines)
 
         // Calculate height based on visible line count
-        let calculatedHeight = minHeight + (lineHeight * CGFloat(visibleLineCount - 1))
+        let calculatedHeight = minHeight + (20 * CGFloat(visibleLineCount - 1))
 
         // Apply min/max constraints with some padding
         contentHeight = max(minHeight, min(calculatedHeight + 16, maxHeight))
-
-        // Debug info
-        print("Text length: \(text.count), Total lines: \(estimatedLineCount), Visible lines: \(visibleLineCount), Height: \(contentHeight)")
-    }
-
-    // MARK: - Animation Functions
-
-    private func startRotationTimer() {
-        // Stop any existing timer first
-        stopRotationTimer()
-
-        // Reset rotation to 0
-        gradientRotation = 0
-
-        // Create a new timer that updates the rotation angle
-        rotationTimer = Timer.scheduledTimer(withTimeInterval: 0.02, repeats: true) { [self] _ in
-            // Update rotation on the main thread
-            DispatchQueue.main.async {
-                // Increment rotation by 3 degrees each time for faster rotation
-                withAnimation(.linear(duration: 0.02)) {
-                    self.gradientRotation = (self.gradientRotation + 3).truncatingRemainder(dividingBy: 360)
-                }
-            }
-        }
-    }
-
-    private func stopRotationTimer() {
-        rotationTimer?.invalidate()
-        rotationTimer = nil
     }
 }
 
@@ -368,15 +298,6 @@ struct ThreadInputBar: View {
         // Single line state
         ThreadInputBar(
             input: .constant("Hello, this is a single line message"),
-            isProcessing: false,
-            onSend: { _ in },
-            onCancel: {}
-        )
-        .padding(.bottom, 20)
-
-        // Multiline state (2 lines)
-        ThreadInputBar(
-            input: .constant("This is a multiline message.\nIt has two lines of text to demonstrate how the input bar grows."),
             isProcessing: false,
             onSend: { _ in },
             onCancel: {}
@@ -394,22 +315,21 @@ struct ThreadInputBar: View {
 
         // Processing state
         ThreadInputBar(
-            input: .constant("This is a message being processed with multiple lines.\nShowing how it looks during processing."),
+            input: .constant("This is a message being processed"),
             isProcessing: true,
             onSend: { _ in },
             onCancel: {},
-            processingStatus: "Processing multiline input...",
+            processingStatus: "Processing input...",
             isProcessingLargeInput: true
         )
         .padding(.bottom, 20)
 
         // Large input warning state
         ThreadInputBar(
-            input: .constant("This is a very large message that would trigger the warning. It also has multiple lines to show how the warning appears with a taller input field.\nThis is the second line of the message."),
+            input: .constant("This is a very large message that would trigger the warning"),
             isProcessing: false,
             onSend: { _ in },
-            onCancel: {},
-            isProcessingLargeInput: false
+            onCancel: {}
         )
         .environment(\.colorScheme, .dark) // Show in dark mode for contrast
     }

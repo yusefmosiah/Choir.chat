@@ -89,6 +89,7 @@ tree.md
 │       ├── PostchainView.swift
 │       ├── QRScannerView.swift
 │       ├── SettingsView.swift
+│       ├── Styles
 │       ├── Thread
 │       │   └── Components
 │       │       ├── ThreadInputBar.swift
@@ -293,7 +294,7 @@ tree.md
     ├── test_api.sh
     └── test_postchain_multiturn.sh
 
-70 directories, 208 files
+71 directories, 208 files
 
 === File: docs/CHANGELOG.md ===
 
