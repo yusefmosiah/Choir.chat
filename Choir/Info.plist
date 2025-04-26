@@ -24,5 +24,7 @@
 	<string>Choir uses Face ID to securely access your wallet and authentication credentials.</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<true/>
+    <key>NSCameraUsageDescription</key>
+    <string>Camera access is required for QR code scanning.</string>
 </dict>
 </plist>
