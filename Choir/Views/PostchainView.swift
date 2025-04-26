@@ -1,6 +1,7 @@
 import SwiftUI
 import Foundation
 import Combine // Needed for Publishers
+import UIKit // Needed for UIFont
 
 struct PostchainView: View {
     // --- State Variables ---
@@ -83,16 +84,7 @@ struct PostchainView: View {
     @State private var phaseRefreshCounter = 0
 
     // --- Pagination Cache ---
-    // Conforms to Hashable (and Equatable automatically)
-    struct PageCacheKey: Hashable {
-        let messageId: UUID
-        let phase: Phase
-        let width: CGFloat
-        let height: CGFloat
-        let contentHash: Int // Hash of the combined markdown content
-    }
-    @State private var pageCache: [PageCacheKey: [String]] = [:]
-    @State private var paginator = MarkdownPaginator() // Instance of the new paginator
+    // Using the centralized PaginationCacheManager instead of local cache
 
     // --- Debouncer for Size Changes ---
     // Use a PassthroughSubject to publish size changes
@@ -206,6 +198,11 @@ struct PostchainView: View {
                             message.phaseCurrentPage[newPhase] = 0
                             viewModel.updateSelectedPhase(for: message, phase: newPhase)
                             phaseRefreshCounter += 1 // Trigger refresh
+
+                            // Preload pagination for the new phase
+                            if let size = debouncedSize, size.width > 0, size.height > 0 {
+                                let _ = getPaginatedContent(for: newPhase, size: size)
+                            }
                         }
                     },
                     onPageChange: { direction in
@@ -238,7 +235,11 @@ struct PostchainView: View {
             // --- Other Event Handlers ---
             .onChange(of: availablePhases.count) { _, _ in phaseRefreshCounter += 1 }
             .onChange(of: message.isStreaming) { _, _ in phaseRefreshCounter += 1 }
-            .onChange(of: message.phaseResults) { _, _ in phaseRefreshCounter += 1 }
+            .onChange(of: message.phaseResults) { _, _ in
+                phaseRefreshCounter += 1
+                // Invalidate cache when phase results change
+                PaginationCacheManager.shared.invalidateCache(for: message.id)
+            }
             .onReceive(message.objectWillChange) { phaseRefreshCounter += 1 }
 
 
@@ -250,6 +251,11 @@ struct PostchainView: View {
                 // For simplicity, let's assume it gets set quickly by onChange
             }
             handleOnAppear()
+
+            // Preload pagination for the selected phase
+            if let size = debouncedSize, size.width > 0, size.height > 0 {
+                let _ = getPaginatedContent(for: selectedPhase, size: size)
+            }
         }
         .id("postchain_view_\(message.id)_\(viewId)") // Stable ID for the view itself
         .frame(maxHeight: .infinity)
@@ -269,7 +275,7 @@ struct PostchainView: View {
         return combinedMarkdown
     }
 
-    // Centralized function for pagination and caching
+    // Centralized function for pagination and caching using PaginationCacheManager
     private func getPaginatedContent(for phase: Phase, size: CGSize) -> [String] {
         guard size.width > 0, size.height > 0 else {
             print("[PostchainView] Size invalid (\(size)), returning single page.")
@@ -278,62 +284,28 @@ struct PostchainView: View {
 
         // 1. Get combined and pre-processed content
         let combinedMarkdown = getCombinedMarkdown(for: phase)
-        // Ensure deep links are converted *before* pagination
-        let textToPaginate = combinedMarkdown.convertVectorReferencesToDeepLinks()
-        // Note: optimizeForPagination was likely specific to the old estimation method and is removed.
-        let contentHash = textToPaginate.hashValue // Hash the final text being paginated
 
-        // 2. Create cache key
-        // Use rounded dimensions to reduce cache misses from minor floating point differences
-        let roundedWidth = (size.width * 10).rounded() / 10
-        let roundedHeight = (size.height * 10).rounded() / 10
-        let cacheKey = PageCacheKey(
+        // 2. Use the centralized cache manager for pagination
+        let pages = PaginationCacheManager.shared.getPaginatedContentSync(
+            for: phase,
             messageId: message.id,
-            phase: phase,
-            width: roundedWidth,
-            height: roundedHeight,
-            contentHash: contentHash
+            content: combinedMarkdown,
+            size: size
         )
 
-        // 3. Check cache
-        if let cachedPages = pageCache[cacheKey] {
-            print("[PostchainView] Cache hit for \(phase) size \(size)")
-            return cachedPages
+        // 3. Preload adjacent phases for smoother navigation
+        if phase == selectedPhase {
+            PaginationCacheManager.shared.preloadAdjacentPhases(
+                currentPhase: phase,
+                availablePhases: availablePhases,
+                messageId: message.id,
+                contentProvider: { getCombinedMarkdown(for: $0) },
+                size: size
+            )
         }
 
-        // 4. Cache miss - Paginate
-        print("[PostchainView] Cache miss for \(phase) size \(size). Paginating...")
-        // Use appropriate padding adjustments if needed by PaginatedMarkdownView's internal padding
-        let verticalPadding: CGFloat = 4 // Match PaginatedMarkdownView's expected padding
-        let horizontalPadding: CGFloat = 4 // Match PaginatedMarkdownView's expected padding
-        let availableTextHeight = max(20, size.height - verticalPadding) // Ensure minimum height
-        let availableTextWidth = max(8, size.width - horizontalPadding) // Ensure minimum width
-
-        // Get the current font for accessibility-aware measurement
-        let bodyFont = UIFont.preferredFont(forTextStyle: .body)
-
-        let newPages = paginator.paginateMarkdown(
-            textToPaginate,
-            width: availableTextWidth,
-            height: availableTextHeight,
-            font: bodyFont // Pass the font to consider accessibility settings
-        )
-
-        // 5. Update cache
-        pageCache[cacheKey] = newPages
-        print("[PostchainView] Cached \(newPages.count) pages for \(phase) size \(size)")
-
-        // Clean up old cache entries occasionally (optional)
-        // if pageCache.count > 100 { cleanupCache() }
-
-        return newPages
+        return pages
     }
-
-    // Optional: Cache cleanup logic
-    // private func cleanupCache() {
-    //     // Example: Remove entries not related to the current message
-    //     pageCache = pageCache.filter { $0.key.messageId == message.id }
-    // }
 
     private func isLoadingPhase(_ phase: Phase) -> Bool {
         // If coordinator exists, ask it if the phase is processing

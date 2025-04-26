@@ -55,6 +55,7 @@
 │   ├── Utils
 │   │   ├── MarkdownPaginator.swift
 │   │   ├── MarkdownThemes.swift
+│   │   ├── PaginationCacheManager.swift
 │   │   ├── PaginationUtils.swift
 │   │   ├── String+Extensions.swift
 │   │   └── TextSelectionSheet.swift
@@ -281,4 +282,4 @@
     ├── test_api.sh
     └── test_postchain_multiturn.sh
 
-71 directories, 208 files
+71 directories, 209 files
