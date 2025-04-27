@@ -11,6 +11,7 @@ class Config:
     MESSAGES_COLLECTION: str = "choir"
     CHAT_THREADS_COLLECTION: str = "chat_threads"
     USERS_COLLECTION: str = "users"
+    NOTIFICATIONS_COLLECTION: str = "notifications"
     SEARCH_LIMIT: int = 80
     VECTOR_SIZE: int = 1536
 

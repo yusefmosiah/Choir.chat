@@ -8,6 +8,9 @@ typealias SuiTransactionBlockEffects = SuiKit.TransactionEffects
 
 @MainActor
 class WalletManager: ObservableObject {
+    // Shared instance for use with services that need access to the wallet
+    static let shared = WalletManager()
+
     // UserDefaults keys
     private let currentWalletAddressKey = "currentWalletAddress"
     private let recentWalletsKey = "recentWallets"

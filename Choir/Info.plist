@@ -26,5 +26,9 @@
 	<false/>
     <key>NSCameraUsageDescription</key>
     <string>Camera access is required for QR code scanning.</string>
+    <key>UIBackgroundModes</key>
+    <array>
+        <string>remote-notification</string>
+    </array>
 </dict>
 </plist>

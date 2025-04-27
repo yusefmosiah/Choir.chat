@@ -103,7 +103,8 @@ def validate_thread_id(thread_id: str) -> str:
 
 def format_stream_event(state: PostChainState, content: str = None, error: str = None,
                   vector_results: List[Dict[str, Any]] = None, web_results: List[Dict[str, Any]] = None,
-                  provider: str = None, model_name: str = None) -> Dict[str, Any]:
+                  provider: str = None, model_name: str = None, citation_reward: Dict[str, Any] = None,
+                  citation_explanations: Dict[str, str] = None) -> Dict[str, Any]:
     """
     Format state for streaming to clients.
 
@@ -115,6 +116,8 @@ def format_stream_event(state: PostChainState, content: str = None, error: str =
         web_results: Optional web search results to include in the event
         provider: Optional model provider name
         model_name: Optional model name
+        citation_reward: Optional citation reward information
+        citation_explanations: Optional explanations for citations
 
     Returns:
         A formatted event dictionary for streaming
@@ -163,6 +166,16 @@ def format_stream_event(state: PostChainState, content: str = None, error: str =
     if web_results:
         logger.info(f"Adding {len(web_results)} web results to stream event for phase {state.current_phase}")
         event["web_results"] = web_results
+
+    # Add citation reward if provided
+    if citation_reward:
+        logger.info(f"Adding citation reward to stream event for phase {state.current_phase}")
+        event["citation_reward"] = citation_reward
+
+    # Add citation explanations if provided
+    if citation_explanations:
+        logger.info(f"Adding {len(citation_explanations)} citation explanations to stream event for phase {state.current_phase}")
+        event["citation_explanations"] = citation_explanations
 
     return event
 

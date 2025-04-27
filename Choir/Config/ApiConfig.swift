@@ -42,6 +42,9 @@ struct ApiConfig {
 
         // Vector endpoints
         static let vectors = "api/vectors"
+
+        // Notifications endpoints
+        static let notifications = "api/notifications"
     }
 
     // MARK: - Helper Methods

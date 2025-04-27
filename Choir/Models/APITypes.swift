@@ -289,6 +289,8 @@ struct PostchainEvent: Decodable {
     let error: String?
     let noveltyReward: RewardInfo?
     let maxSimilarity: Double?
+    let citationReward: [String: Any]?
+    let citationExplanations: [String: String]?
 
     enum CodingKeys: String, CodingKey {
         case phase
@@ -301,6 +303,8 @@ struct PostchainEvent: Decodable {
         case error
         case noveltyReward = "novelty_reward" // Keep this as snake_case since it's used in API responses
         case maxSimilarity = "max_similarity" // Keep this as snake_case since it's used in API responses
+        case citationReward = "citation_reward" // Keep this as snake_case since it's used in API responses
+        case citationExplanations = "citation_explanations" // Keep this as snake_case since it's used in API responses
     }
 
     init(from decoder: Decoder) throws {
@@ -377,6 +381,44 @@ struct PostchainEvent: Decodable {
         } catch {
             vectorResults = nil // Ensure it's nil on error
         }
+
+        // Decode citation reward
+        do {
+            if container.contains(.citationReward) {
+                print("PostchainEvent - Found citationReward key")
+
+                // Try to decode as AnyCodable and convert to [String: Any]
+                if let citationRewardContainer = try? container.decodeIfPresent([String: AnyCodable].self, forKey: .citationReward) {
+                    var convertedCitationReward: [String: Any] = [:]
+                    for (key, value) in citationRewardContainer {
+                        convertedCitationReward[key] = value.value
+                    }
+                    citationReward = convertedCitationReward
+                    print("PostchainEvent - Decoded citation reward")
+                } else {
+                    citationReward = nil
+                }
+            } else {
+                citationReward = nil
+            }
+        } catch {
+            print("PostchainEvent - Error decoding citation_reward: \(error)")
+            citationReward = nil
+        }
+
+        // Decode citation explanations
+        do {
+            if container.contains(.citationExplanations) {
+                print("PostchainEvent - Found citationExplanations key")
+                citationExplanations = try container.decodeIfPresent([String: String].self, forKey: .citationExplanations)
+                print("PostchainEvent - Decoded citation explanations: \(citationExplanations?.count ?? 0) items")
+            } else {
+                citationExplanations = nil
+            }
+        } catch {
+            print("PostchainEvent - Error decoding citation_explanations: \(error)")
+            citationExplanations = nil
+        }
     }
 }
 
@@ -391,8 +433,10 @@ struct PostchainStreamEvent: Codable {
     let vectorResults: [VectorSearchResult]?
     let noveltyReward: RewardInfo?
     let maxSimilarity: Double?
+    let citationReward: [String: Any]?
+    let citationExplanations: [String: String]?
 
-    init(phase: String, status: String = "complete", content: String? = nil, provider: String? = nil, modelName: String? = nil, webResults: [SearchResult]? = nil, vectorResults: [VectorSearchResult]? = nil, noveltyReward: RewardInfo? = nil, maxSimilarity: Double? = nil) {
+    init(phase: String, status: String = "complete", content: String? = nil, provider: String? = nil, modelName: String? = nil, webResults: [SearchResult]? = nil, vectorResults: [VectorSearchResult]? = nil, noveltyReward: RewardInfo? = nil, maxSimilarity: Double? = nil, citationReward: [String: Any]? = nil, citationExplanations: [String: String]? = nil) {
         self.phase = phase
         self.status = status
         self.content = content
@@ -402,6 +446,8 @@ struct PostchainStreamEvent: Codable {
         self.vectorResults = vectorResults
         self.noveltyReward = noveltyReward
         self.maxSimilarity = maxSimilarity
+        self.citationReward = citationReward
+        self.citationExplanations = citationExplanations
     }
 
     enum CodingKeys: String, CodingKey {
@@ -411,6 +457,8 @@ struct PostchainStreamEvent: Codable {
         case vectorResults = "vector_results" // Keep this as snake_case since it's used in API responses
         case noveltyReward = "novelty_reward" // Keep this as snake_case since it's used in API responses
         case maxSimilarity = "max_similarity" // Keep this as snake_case since it's used in API responses
+        case citationReward = "citation_reward" // Keep this as snake_case since it's used in API responses
+        case citationExplanations = "citation_explanations" // Keep this as snake_case since it's used in API responses
     }
 
     init(from decoder: Decoder) throws {
@@ -464,6 +512,44 @@ struct PostchainStreamEvent: Codable {
         // Decode max similarity
         maxSimilarity = try container.decodeIfPresent(Double.self, forKey: .maxSimilarity)
 
+        // Decode citation reward
+        do {
+            if container.contains(.citationReward) {
+                print("PostchainStreamEvent - Found citationReward key")
+
+                // Try to decode as AnyCodable and convert to [String: Any]
+                if let citationRewardContainer = try? container.decodeIfPresent([String: AnyCodable].self, forKey: .citationReward) {
+                    var convertedCitationReward: [String: Any] = [:]
+                    for (key, value) in citationRewardContainer {
+                        convertedCitationReward[key] = value.value
+                    }
+                    citationReward = convertedCitationReward
+                    print("PostchainStreamEvent - Decoded citation reward")
+                } else {
+                    citationReward = nil
+                }
+            } else {
+                citationReward = nil
+            }
+        } catch {
+            print("PostchainStreamEvent - Error decoding citation_reward: \(error)")
+            citationReward = nil
+        }
+
+        // Decode citation explanations
+        do {
+            if container.contains(.citationExplanations) {
+                print("PostchainStreamEvent - Found citationExplanations key")
+                citationExplanations = try container.decodeIfPresent([String: String].self, forKey: .citationExplanations)
+                print("PostchainStreamEvent - Decoded citation explanations: \(citationExplanations?.count ?? 0) items")
+            } else {
+                citationExplanations = nil
+            }
+        } catch {
+            print("PostchainStreamEvent - Error decoding citation_explanations: \(error)")
+            citationExplanations = nil
+        }
+
         do {
             // Add explicit check for vector_results
             if container.contains(.vectorResults) {
@@ -487,5 +573,31 @@ struct PostchainStreamEvent: Codable {
         } catch {
             vectorResults = nil
         }
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+
+        try container.encode(phase, forKey: .phase)
+        try container.encode(status, forKey: .status)
+        try container.encodeIfPresent(content, forKey: .content)
+        try container.encodeIfPresent(provider, forKey: .provider)
+        try container.encodeIfPresent(modelName, forKey: .modelName)
+        try container.encodeIfPresent(webResults, forKey: .webResults)
+        try container.encodeIfPresent(vectorResults, forKey: .vectorResults)
+        try container.encodeIfPresent(noveltyReward, forKey: .noveltyReward)
+        try container.encodeIfPresent(maxSimilarity, forKey: .maxSimilarity)
+
+        // Handle citationReward ([String: Any]) by converting to [String: AnyCodable]
+        if let citationReward = citationReward {
+            var encodableCitationReward: [String: AnyCodable] = [:]
+            for (key, value) in citationReward {
+                encodableCitationReward[key] = AnyCodable(value)
+            }
+            try container.encodeIfPresent(encodableCitationReward, forKey: .citationReward)
+        }
+
+        // citationExplanations is already [String: String] which is Encodable
+        try container.encodeIfPresent(citationExplanations, forKey: .citationExplanations)
     }
 }

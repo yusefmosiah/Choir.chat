@@ -39,16 +39,55 @@ struct TextSelectionView: View {
     @Environment(\.dismiss) private var dismiss
     @StateObject private var textSelectionManager = TextSelectionManager.shared
 
+    // Format reward amount from raw value
+    private func formattedRewardAmount(_ amount: Int) -> String {
+        let choirAmount = Double(amount) / 1_000_000_000.0
+        return String(format: "%.2f", choirAmount)
+    }
+
     var body: some View {
         NavigationView {
-            GeometryReader { geometry in
-                ZStack {
-                    Color(UIColor.systemBackground)
-                        .opacity(0.85)
-                        .edgesIgnoringSafeArea(.all)
+            VStack(spacing: 0) {
+                // Citation information section
+                if let explanation = textSelectionManager.citationExplanation {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Citation Information")
+                            .font(.headline)
+                            .padding(.bottom, 4)
 
-                    TextViewWrapper(text: text, selectedRange: selectedRange)
-                        .frame(width: geometry.size.width, height: geometry.size.height)
+                        Text(explanation)
+                            .font(.body)
+
+                        if let reward = textSelectionManager.citationReward,
+                           let amount = reward["reward_amount"] as? Int,
+                           let success = reward["success"] as? Bool,
+                           success {
+                            HStack {
+                                Image(systemName: "star.fill")
+                                    .foregroundColor(.yellow)
+                                Text("This citation earned the author \(formattedRewardAmount(amount)) CHOIR tokens")
+                                    .foregroundColor(.green)
+                            }
+                            .padding(.top, 4)
+                        }
+                    }
+                    .padding()
+                    .background(Color.gray.opacity(0.1))
+                    .cornerRadius(8)
+                    .padding(.horizontal)
+                    .padding(.top)
+                }
+
+                // Main content
+                GeometryReader { geometry in
+                    ZStack {
+                        Color(UIColor.systemBackground)
+                            .opacity(0.85)
+                            .edgesIgnoringSafeArea(.all)
+
+                        TextViewWrapper(text: text, selectedRange: selectedRange)
+                            .frame(width: geometry.size.width, height: geometry.size.height)
+                    }
                 }
             }
             .navigationTitle("Select Text")

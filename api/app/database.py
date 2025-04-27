@@ -3,9 +3,9 @@ from qdrant_client.http.exceptions import ApiException, UnexpectedResponse
 from typing import List, Dict, Any, Optional
 from datetime import datetime, UTC
 import uuid
+import logging
 from .config import Config
 from .models.api import VectorStoreRequest, UserCreate, ThreadCreate
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -25,10 +25,22 @@ class DatabaseClient:
         for collection in [
             self.config.MESSAGES_COLLECTION,
             self.config.USERS_COLLECTION,
-            self.config.CHAT_THREADS_COLLECTION
+            self.config.CHAT_THREADS_COLLECTION,
+            self.config.NOTIFICATIONS_COLLECTION
         ]:
             if not self.client.collection_exists(collection):
-                raise RuntimeError(f"Required collection {collection} does not exist")
+                # Create the collection if it doesn't exist
+                if collection == self.config.NOTIFICATIONS_COLLECTION:
+                    logger.info(f"Creating notifications collection: {collection}")
+                    self.client.create_collection(
+                        collection_name=collection,
+                        vectors_config=models.VectorParams(
+                            size=self.config.VECTOR_SIZE,
+                            distance=models.Distance.COSINE
+                        )
+                    )
+                else:
+                    raise RuntimeError(f"Required collection {collection} does not exist")
 
     async def search_similar(self, collection: str, query_vector: List[float], limit: int = 10) -> List[Dict[str, Any]]:
         try:
@@ -406,6 +418,181 @@ class DatabaseClient:
         except Exception as e:
             logger.error(f"Error adding thread to user: {e}")
             raise
+
+    async def get_vector_by_id(self, vector_id: str) -> Optional[Dict[str, Any]]:
+        """Get a vector by ID."""
+        try:
+            result = self.client.retrieve(
+                collection_name=self.config.MESSAGES_COLLECTION,
+                ids=[vector_id],
+                with_payload=True
+            )
+            if result and len(result) > 0:
+                point = result[0]
+                return {
+                    "id": str(point.id),
+                    "content": point.payload.get("content", ""),
+                    "metadata": point.payload.get("metadata", {})
+                }
+            return None
+        except Exception as e:
+            logger.error(f"Error getting vector by ID: {e}")
+            return None
+
+    async def save_notification(self, notification: Dict[str, Any]) -> Dict[str, str]:
+        """Save a notification."""
+        try:
+            notification_id = str(uuid.uuid4())
+
+            # Add timestamp
+            notification["created_at"] = datetime.now(UTC).isoformat()
+
+            # Create point
+            point = models.PointStruct(
+                id=notification_id,
+                vector=[0.0] * self.config.VECTOR_SIZE,  # Placeholder vector
+                payload=notification
+            )
+
+            # Save notification
+            self.client.upsert(
+                collection_name=self.config.NOTIFICATIONS_COLLECTION,
+                points=[point]
+            )
+
+            return {"id": notification_id}
+        except Exception as e:
+            logger.error(f"Error saving notification: {e}")
+            return {"error": str(e)}
+
+    async def get_user_notifications(self, wallet_address: str, limit: int = 50) -> List[Dict[str, Any]]:
+        """Get notifications for a user."""
+        try:
+            # Build filter
+            must_conditions = [
+                models.FieldCondition(
+                    key="recipient_wallet_address",
+                    match=models.MatchValue(value=wallet_address)
+                )
+            ]
+
+            search_result = self.client.scroll(
+                collection_name=self.config.NOTIFICATIONS_COLLECTION,
+                scroll_filter=models.Filter(
+                    must=must_conditions
+                ),
+                limit=limit,
+                with_payload=True,
+                with_vectors=False
+            )
+
+            points, _ = search_result
+            return [
+                {
+                    "id": str(point.id),
+                    **point.payload
+                }
+                for point in points
+            ]
+        except Exception as e:
+            logger.error(f"Error getting user notifications: {e}")
+            return []
+
+    async def mark_notification_as_read(self, notification_id: str) -> Dict[str, Any]:
+        """Mark a notification as read."""
+        try:
+            # Get the notification
+            result = self.client.retrieve(
+                collection_name=self.config.NOTIFICATIONS_COLLECTION,
+                ids=[notification_id],
+                with_payload=True
+            )
+
+            if not result or len(result) == 0:
+                return {"success": False, "reason": "notification_not_found"}
+
+            # Update the notification
+            point = result[0]
+            payload = point.payload
+            payload["read"] = True
+
+            # Save the updated notification
+            self.client.upsert(
+                collection_name=self.config.NOTIFICATIONS_COLLECTION,
+                points=[
+                    models.PointStruct(
+                        id=notification_id,
+                        vector=[0.0] * self.config.VECTOR_SIZE,  # Keep existing vector
+                        payload=payload
+                    )
+                ]
+            )
+
+            return {"success": True, "id": notification_id}
+        except Exception as e:
+            logger.error(f"Error marking notification as read: {e}")
+            return {"success": False, "reason": str(e)}
+
+    async def save_device_token(self, device_token: str, wallet_address: str) -> Dict[str, Any]:
+        """Save a device token for push notifications."""
+        try:
+            # Check if this device token already exists for this wallet
+            search_result = self.client.scroll(
+                collection_name=self.config.NOTIFICATIONS_COLLECTION,
+                scroll_filter=models.Filter(
+                    must=[
+                        models.FieldCondition(
+                            key="type",
+                            match=models.MatchValue(value="device_token")
+                        ),
+                        models.FieldCondition(
+                            key="wallet_address",
+                            match=models.MatchValue(value=wallet_address)
+                        ),
+                        models.FieldCondition(
+                            key="token",
+                            match=models.MatchValue(value=device_token)
+                        )
+                    ]
+                ),
+                limit=1,
+                with_payload=True
+            )
+
+            points, _ = search_result
+
+            # If the token already exists, just return success
+            if points and len(points) > 0:
+                return {"success": True, "message": "Device token already registered"}
+
+            # Create a new device token record
+            token_id = str(uuid.uuid4())
+
+            # Create payload
+            payload = {
+                "type": "device_token",
+                "wallet_address": wallet_address,
+                "token": device_token,
+                "created_at": datetime.now(UTC).isoformat(),
+                "platform": "ios"  # Hardcoded for now, could be passed as a parameter
+            }
+
+            # Save to database
+            self.client.upsert(
+                collection_name=self.config.NOTIFICATIONS_COLLECTION,
+                points=[
+                    models.PointStruct(
+                        id=token_id,
+                        vector=[0.0] * self.config.VECTOR_SIZE,  # Placeholder vector
+                        payload=payload
+                    )
+                ]
+            )
+
+            return {"success": True, "id": token_id}
+        except Exception as e:
+            logger.error(f"Error saving device token: {e}")
+            return {"error": str(e)}
 
 async def search_vectors(query_vector: List[float], limit: int = 10) -> List[Dict[str, Any]]:
     """Standalone vector search function for direct use."""

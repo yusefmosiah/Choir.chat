@@ -304,17 +304,8 @@ class PostchainCoordinatorImpl: PostchainCoordinator, ObservableObject {
             let message = thread.messages[messageIndex]
 
             // Update the message with all the information (without finalContent)
-            let streamEvent = PostchainStreamEvent(
-                phase: event.phase,
-                status: event.status,
-                content: content,
-                provider: event.provider,
-                modelName: event.modelName,
-                webResults: self.webResults,
-                vectorResults: self.vectorResults,
-                noveltyReward: event.noveltyReward,
-                maxSimilarity: event.maxSimilarity
-            )
+            // Use the extension to create a PostchainStreamEvent from a PostchainEvent
+            let streamEvent = PostchainStreamEvent(from: event)
 
             // Add extra debugging specifically for model name issue
 
@@ -353,17 +344,22 @@ class PostchainCoordinatorImpl: PostchainCoordinator, ObservableObject {
         } else {
         }
 
+        // Create a PostchainStreamEvent from the event
+        let streamEvent = PostchainStreamEvent(from: event)
+
         // Update the view model (always update even if content is empty to handle status changes)
         viewModel?.updatePhaseData(
             phase: phaseEnum,
-            status: event.status,
+            status: streamEvent.status,
             content: content,
-            provider: event.provider,
-            modelName: event.modelName,
+            provider: streamEvent.provider,
+            modelName: streamEvent.modelName,
             webResults: self.webResults,
             vectorResults: self.vectorResults,
-            noveltyReward: event.noveltyReward,
-            maxSimilarity: event.maxSimilarity,
+            noveltyReward: streamEvent.noveltyReward,
+            maxSimilarity: streamEvent.maxSimilarity,
+            citationReward: streamEvent.citationReward,
+            citationExplanations: streamEvent.citationExplanations,
             messageId: activeMessageId?.uuidString
         )
 

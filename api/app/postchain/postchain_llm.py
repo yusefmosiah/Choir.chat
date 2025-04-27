@@ -97,10 +97,68 @@ async def process_streaming_response(model: BaseChatModel, messages: List[BaseMe
         yield AIMessageChunk(content=f"Error during streaming: {e}") # Example error chunk
         # Or simply raise: raise ValueError(f"Streaming failed: {e}") from e
 
-async def process_non_streaming_response(model: BaseChatModel, messages: List[BaseMessage]) -> AIMessage:
-    """Handle non-streaming response from the model."""
+async def process_non_streaming_response(
+    model: BaseChatModel,
+    messages: List[BaseMessage],
+    response_model: Optional[Type[BaseModel]] = None
+) -> Union[AIMessage, BaseModel]:
+    """Handle non-streaming response from the model, optionally with structured output."""
     try:
-        return await model.ainvoke(messages)
+        if response_model:
+            # Use structured output if response_model is provided
+            logger.info(f"Using structured output with model {response_model.__name__}")
+
+            # Special handling for YieldPhaseResponse
+            if response_model.__name__ == "YieldPhaseResponse":
+                # First get the raw response
+                raw_response = await model.ainvoke(messages)
+
+                # Try to extract structured data from the raw response
+                try:
+                    import json
+                    import re
+
+                    # Extract JSON-like content from the response
+                    content = raw_response.content
+
+                    # Look for JSON blocks in the content
+                    json_match = re.search(r'```json\s*(.*?)\s*```', content, re.DOTALL)
+                    if json_match:
+                        json_str = json_match.group(1)
+                    else:
+                        # Try to find any JSON-like structure
+                        json_match = re.search(r'({.*})', content, re.DOTALL)
+                        if json_match:
+                            json_str = json_match.group(1)
+                        else:
+                            # No JSON found, use the standard approach
+                            structured_model = model.with_structured_output(response_model)
+                            return await structured_model.ainvoke(messages)
+
+                    # Parse the JSON
+                    data = json.loads(json_str)
+
+                    # Create the response model
+                    if "response_content" in data:
+                        # Handle citation_explanations if it's a string
+                        if "citation_explanations" in data and isinstance(data["citation_explanations"], str):
+                            try:
+                                data["citation_explanations"] = json.loads(data["citation_explanations"])
+                            except json.JSONDecodeError:
+                                data["citation_explanations"] = {}
+
+                        # Create the response model
+                        return response_model(**data)
+                except Exception as parsing_error:
+                    logger.warning(f"Failed to parse raw response as structured output: {parsing_error}")
+                    # Fall back to standard approach
+
+            # Standard approach for structured output
+            structured_model = model.with_structured_output(response_model)
+            return await structured_model.ainvoke(messages)
+        else:
+            # Regular invocation without structured output
+            return await model.ainvoke(messages)
     except Exception as e:
         logger.error(f"Error during non-streaming response: {e}", exc_info=True)
         # Return an error message or re-raise
@@ -113,28 +171,23 @@ async def post_llm(
     response_model: Optional[Type[BaseModel]] = None,
     stream: bool = False,
     tools: Optional[List[Any]] = None
-) -> Union[AIMessage, AsyncIterator[AIMessageChunk]]:
+) -> Union[AIMessage, BaseModel, AsyncIterator[AIMessageChunk]]:
     """Refactored version of post_llm with cleaner separation of concerns
     and API key fallback logic moved to initialize_model.
 
     Args:
         messages: Conversation messages in LangChain format
         model_config: Configuration for the model including provider (API keys are optional, will fallback to env)
-        response_model: Optional Pydantic model for structured output (NOT fully implemented here)
+        response_model: Optional Pydantic model for structured output
         stream: Whether to stream the response
         tools: Optional list of tools to bind to the model
 
     Returns:
-        Either a single AIMessage or an async iterator of AIMessageChunks
+        Either a single AIMessage, a Pydantic model instance, or an async iterator of AIMessageChunks
     """
     try:
         # Initialize model (handles API key fallback)
         model = await initialize_model(model_config)
-
-        # TODO: Implement structured output logic if response_model is provided
-        if response_model:
-             logger.warning("Structured output with response_model is not fully implemented in this version of post_llm.")
-             # model = model.with_structured_output(response_model) # Example usage
 
         # Handle tools if provided
         if tools:
@@ -142,9 +195,13 @@ async def post_llm(
 
         # Handle response based on streaming preference
         if stream:
+            # Structured output is not supported with streaming
+            if response_model:
+                logger.warning("Structured output is not supported with streaming. Ignoring response_model.")
             return process_streaming_response(model, messages)
         else:
-            return await process_non_streaming_response(model, messages)
+            # Pass response_model to process_non_streaming_response
+            return await process_non_streaming_response(model, messages, response_model)
 
     except ValueError as e:
          # Catch initialization or tool binding errors specifically

@@ -147,7 +147,32 @@ struct PaginatedMarkdownView: View {
 
         Please wait...
         """
-        TextSelectionManager.shared.showVectorSheet(withText: loadingContent, vectorId: vectorId)
+
+        // Check if we have citation explanations for this vector
+        var citationExplanation: String? = nil
+        var citationReward: [String: Any]? = nil
+
+        // Look for citation explanations in the message
+        if let explanations = message.citationExplanations, let explanation = explanations[vectorId] {
+            citationExplanation = explanation
+        }
+
+        // Look for citation reward in the message
+        if let reward = message.citationReward, reward["success"] as? Bool == true {
+            citationReward = reward
+        }
+
+        // Show the vector sheet with citation information if available
+        if citationExplanation != nil || citationReward != nil {
+            TextSelectionManager.shared.showVectorSheetWithCitation(
+                withText: loadingContent,
+                vectorId: vectorId,
+                explanation: citationExplanation,
+                reward: citationReward
+            )
+        } else {
+            TextSelectionManager.shared.showVectorSheet(withText: loadingContent, vectorId: vectorId)
+        }
 
         let localMatch = message.vectorSearchResults.first(where: { $0.id == vectorId })
 

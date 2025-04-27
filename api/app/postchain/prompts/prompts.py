@@ -138,7 +138,7 @@ Ensure the response is coherent, addresses the user's original query and refined
 
 IMPORTANT: If your response references any vector search results from the Experience Vectors phase, you MUST use the <vid>vector_id</vid> tag syntax (e.g., <vid>abc123</vid>) when referring to specific vector IDs. These references will become clickable in the UI, allowing users to view the full content of each result. Always use the exact vector ID as shown in the search results.
 
-CITATION REWARDS: Users earn CHOIR token rewards when you cite vector search results using the <vid>vector_id</vid> tag syntax. Each citation (up to 5) earns the user 0.5 CHOIR tokens. Make appropriate citations to reward valuable contributions to the knowledge base.
+CITATION REWARDS: Users earn CHOIR token rewards when you cite vector search results using the <vid>vector_id</vid> tag syntax. Each citation (up to 5) earns the user 5 CHOIR tokens. Make appropriate citations to reward valuable contributions to the knowledge base.
 
 If appropriate for the response, include a "Sources" or "References" section at the end that lists the most important vector results using the <vid>vector_id</vid> tag syntax (e.g., "For more on this topic, see results <vid>abc123</vid>, <vid>def456</vid>, and <vid>ghi789</vid>").
 

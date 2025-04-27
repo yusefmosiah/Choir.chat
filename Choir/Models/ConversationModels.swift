@@ -224,6 +224,8 @@ class Message: ObservableObject, Identifiable, Equatable {
     @Published var vectorSearchResults: [VectorSearchResult] = []
     @Published var webSearchResults: [SearchResult] = []
     @Published var noveltyReward: RewardInfo?
+    @Published var citationReward: [String: Any]?
+    @Published var citationExplanations: [String: String]?
     @Published var maxSimilarity: Double?
 
     var phases: [Phase: String] {
@@ -388,6 +390,19 @@ class Message: ObservableObject, Identifiable, Equatable {
         if phase == .experienceWeb {
             if let results = event.webResults {
                 self.webSearchResults = results
+            }
+        }
+
+        // Handle citation rewards and explanations in yield phase
+        if phase == .yield {
+            // Handle citation reward
+            if let reward = event.citationReward {
+                self.citationReward = reward
+            }
+
+            // Handle citation explanations
+            if let explanations = event.citationExplanations {
+                self.citationExplanations = explanations
             }
         }
 

@@ -17,6 +17,10 @@ class TextSelectionManager: ObservableObject {
     @Published var preventBackgroundUpdates = false
     @Published var phaseContentSelection: PhaseContentSelection? = nil
 
+    // Citation information
+    @Published var citationExplanation: String? = nil
+    @Published var citationReward: [String: Any]? = nil
+
     // Track the current vector ID being fetched to prevent duplicate API calls
     private var currentVectorId: String? = nil
     private var isProcessingVectorRequest = false
@@ -109,6 +113,20 @@ class TextSelectionManager: ObservableObject {
         // Reset vector request tracking
         self.currentVectorId = nil
         self.isProcessingVectorRequest = false
+
+        // Reset citation information
+        self.citationExplanation = nil
+        self.citationReward = nil
+    }
+
+    // Show sheet with citation information
+    func showVectorSheetWithCitation(withText text: String, vectorId: String, explanation: String?, reward: [String: Any]?) {
+        // Set citation information
+        self.citationExplanation = explanation
+        self.citationReward = reward
+
+        // Show the vector sheet
+        showVectorSheet(withText: text, vectorId: vectorId)
     }
 
     func temporarilyDisableInteractions() {
