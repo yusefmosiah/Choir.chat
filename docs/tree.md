@@ -51,7 +51,6 @@
 │   │   │   ├── brave_search.py
 │   │   │   ├── calculator.py
 │   │   │   ├── qdrant.py
-│   │   │   ├── rewards_tool.py
 │   │   │   ├── tavily_search.py
 │   │   │   └── web_search.py
 │   │   └── utils.py
@@ -293,4 +292,4 @@
     ├── test_api.sh
     └── test_postchain_multiturn.sh
 
-71 directories, 220 files
+71 directories, 219 files

@@ -167,13 +167,9 @@ async def process_non_streaming_response(
                                         logger.info(f"Calling tool coroutine: {tool['coroutine']}")
 
                                         try:
-                                            # Create a CitationRewardInput object
-                                            from app.tools.rewards_tool import CitationRewardInput
-                                            input_data = CitationRewardInput(**function_args)
-
-                                            # Call the coroutine
-                                            logger.info(f"About to call tool coroutine with input: {input_data}")
-                                            result = await tool['coroutine'](input_data)
+                                            # Call the coroutine directly with the function arguments
+                                            logger.info(f"About to call tool coroutine with input: {function_args}")
+                                            result = await tool['coroutine'](**function_args)
                                             logger.info(f"Tool call result: {result}")
 
                                             # We'll use this result later when creating the response model
