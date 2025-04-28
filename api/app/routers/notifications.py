@@ -1,26 +1,27 @@
 """
-Notifications API router.
+Transactions API router.
 """
 
 from fastapi import APIRouter, HTTPException, Depends
-from pydantic import BaseModel
+from typing import Optional
 from app.models.api import APIResponse
 from app.database import DatabaseClient
 from app.config import Config
 from app.services.auth_service import get_current_user
 from app.models.auth import TokenData
 
-class DeviceTokenRegistration(BaseModel):
-    device_token: str
-    wallet_address: str
-
 router = APIRouter()
 config = Config.from_env()
 db = DatabaseClient(config)
 
 @router.get("", response_model=APIResponse)
-async def get_notifications(current_user: TokenData = Depends(get_current_user)):
-    """Get notifications for the current user."""
+async def get_notifications(wallet_address: Optional[str] = None, current_user: TokenData = Depends(get_current_user)):
+    """
+    Get notifications/transactions for the current user across all their wallets.
+
+    Args:
+        wallet_address: Optional wallet address to filter notifications for a specific wallet
+    """
     try:
         if not current_user.wallet_address:
             return APIResponse(
@@ -28,7 +29,20 @@ async def get_notifications(current_user: TokenData = Depends(get_current_user))
                 error="No wallet address associated with this user"
             )
 
-        notifications = await db.get_user_notifications(current_user.wallet_address)
+        # Get all wallet addresses for the user
+        wallet_addresses = []
+
+        # If a specific wallet address is provided, only get notifications for that wallet
+        if wallet_address:
+            wallet_addresses = [wallet_address]
+        else:
+            # Otherwise, get all wallet addresses associated with the user
+            # For now, we only have the authenticated wallet address
+            # In the future, this could be expanded to include all wallets the user has
+            wallet_addresses = [current_user.wallet_address]
+
+        # Get notifications for all wallet addresses
+        notifications = await db.get_user_notifications(wallet_addresses)
 
         return APIResponse(
             success=True,
@@ -52,33 +66,6 @@ async def mark_notification_as_read(notification_id: str, current_user: TokenDat
         return APIResponse(
             success=True,
             data={"notification_id": notification_id}
-        )
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@router.post("/register-device", response_model=APIResponse)
-async def register_device_token(request: DeviceTokenRegistration, current_user: TokenData = Depends(get_current_user)):
-    """Register a device token for push notifications."""
-    try:
-        # Verify that the wallet address matches the authenticated user
-        if request.wallet_address != current_user.wallet_address:
-            return APIResponse(
-                success=False,
-                error="Wallet address does not match authenticated user"
-            )
-
-        # Save the device token to the database
-        result = await db.save_device_token(request.device_token, request.wallet_address)
-
-        if "error" in result:
-            return APIResponse(
-                success=False,
-                error=result.get("error", "Failed to register device token")
-            )
-
-        return APIResponse(
-            success=True,
-            data={"message": "Device token registered successfully"}
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

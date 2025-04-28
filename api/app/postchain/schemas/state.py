@@ -3,7 +3,7 @@ State schema for the PostChain graph.
 """
 
 from typing import List, Dict, Any, Optional
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field
 from langchain_core.messages import BaseMessage, AIMessage # Import AIMessage
 
 # Import reward schemas
@@ -100,25 +100,9 @@ class ExperienceWebPhaseOutput(BaseModel):
 
 class YieldPhaseResponse(BaseModel):
     """Structured response format for the Yield phase LLM output."""
-    response_content: str = Field(..., description="The main response content to show to the user")
     citations: List[str] = Field(default_factory=list, description="List of vector IDs that were cited in the response")
-    citation_explanations: Dict[str, str] = Field(default_factory=dict, description="Explanations for why each citation was included")
-
-    # Add validators for citation_explanations
-    @validator('citation_explanations', pre=True)
-    def parse_citation_explanations(cls, v):
-        """Parse citation_explanations if it's a string."""
-        if isinstance(v, dict):
-            return v
-        elif isinstance(v, str):
-            try:
-                # Try to parse as JSON
-                import json
-                return json.loads(v)
-            except json.JSONDecodeError:
-                # If parsing fails, return empty dict
-                return {}
-        return {}
+    citation_reward_info: Optional[Dict[str, Any]] = Field(None, description="Information about the citation reward if issued")
+    response_content: str = Field(..., description="The main response content to show to the user")
 
 class YieldPhaseOutput(BaseModel):
     """Structured output for the Yield phase."""
@@ -126,7 +110,6 @@ class YieldPhaseOutput(BaseModel):
     error: Optional[str] = Field(None, description="Error message if the phase failed")
     citation_reward: Optional[CitationRewardInfo] = Field(None, description="Information about citation reward if issued")
     citations: List[str] = Field(default_factory=list, description="List of citation references found in the response")
-    citation_explanations: Dict[str, str] = Field(default_factory=dict, description="Explanations for why each citation was included")
 
     class Config:
         arbitrary_types_allowed = True

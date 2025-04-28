@@ -115,7 +115,7 @@ struct MainTabView: View {
     @EnvironmentObject var threadManager: ThreadManager
     @State private var selectedTab = 0 // Default to Home tab
     @State private var previousTab: Int? = nil
-    @StateObject private var notificationService = NotificationService()
+    @StateObject private var transactionService = TransactionService()
 
     // Reference to ContentView to control thread selection
     @State private var contentViewModel = ContentViewModel()
@@ -141,13 +141,13 @@ struct MainTabView: View {
 
 
 
-            // Notifications tab
-            NotificationsView()
+            // Transactions tab
+            TransactionsView()
                 .tag(4)
                 .tabItem {
-                    Label("Notifications", systemImage: "bell")
+                    Label("Transactions", systemImage: "arrow.left.arrow.right")
                 }
-                .badge(notificationService.unreadCount > 0 ? "\(notificationService.unreadCount)" : "")
+                .badge(transactionService.unreadCount > 0 ? "\(transactionService.unreadCount)" : "")
 
             // Settings tab
             SettingsView()
@@ -166,14 +166,14 @@ struct MainTabView: View {
                 contentViewModel.resetThreadSelection()
             }
 
-            // If switching to the Notifications tab (4), fetch notifications
+            // If switching to the Transactions tab (4), fetch transactions
             if newValue == 4 {
-                notificationService.fetchNotifications()
+                transactionService.fetchTransactions()
             }
         }
         .onAppear {
-            // Fetch notifications when the view appears
-            notificationService.fetchNotifications()
+            // Fetch transactions when the view appears
+            transactionService.fetchTransactions()
         }
     }
 }

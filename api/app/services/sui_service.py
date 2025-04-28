@@ -32,8 +32,23 @@ class SuiService:
             self.signer = keypair_from_keystring(deployer_key)
 
             # Store deployed CHOIR contract info
+            # These IDs are for the devnet deployment
             self.package_id = "0xd3b2e1abf59c4e135015f3f3917ad54424c6d45f16cc069585a905af9815c999"
             self.treasury_cap_id = "0x343a5b3780a05eaf4ea139f786a28cee4120cdc14334d0666c386e014dbe8659"
+
+            # Verify that the contract exists
+            try:
+                # Get object info for the treasury cap using the correct method signature
+                # The pysui library expects the object_id as a positional argument, not a keyword
+                treasury_cap_result = self.client.get_object(self.treasury_cap_id)
+                if not treasury_cap_result.is_ok():
+                    logger.warning(f"Treasury cap object not found: {treasury_cap_result.result_string}")
+                    logger.warning("This may indicate that the contract has been redeployed or is not available on this network")
+                else:
+                    logger.info(f"Treasury cap object verified: {self.treasury_cap_id}")
+            except Exception as e:
+                logger.warning(f"Error verifying treasury cap: {e}")
+                # We don't raise an exception here as we want to continue initialization
 
             logger.info("SuiService initialized successfully")
         except Exception as e:
@@ -41,6 +56,9 @@ class SuiService:
 
     async def mint_choir(self, recipient_address: str, amount: int = 1_000_000_000):
         """Mint CHOIR tokens to recipient (default 1 CHOIR)"""
+        logger.info(f"SUI SERVICE: Minting {amount/1_000_000_000} CHOIR to {recipient_address}")
+        print(f"SUI SERVICE: Minting {amount/1_000_000_000} CHOIR to {recipient_address}")
+
         try:
             # Create transaction
             txn = SuiTransaction(client=self.client)
@@ -61,6 +79,18 @@ class SuiService:
 
             # Log the full result for debugging
             logger.info(f"Transaction result: {result.result_data}")
+
+            # Add more detailed error logging
+            if not result.is_ok():
+                logger.error(f"Transaction execution failed with error: {result.result_string}")
+                if hasattr(result, 'result_data') and hasattr(result.result_data, 'errors'):
+                    logger.error(f"Transaction errors: {result.result_data.errors}")
+
+            # Log the transaction details for debugging
+            logger.info(f"Transaction target: {self.package_id}::choir::mint")
+            logger.info(f"Transaction treasury_cap_id: {self.treasury_cap_id}")
+            logger.info(f"Transaction amount: {amount}")
+            logger.info(f"Transaction recipient: {recipient_address}")
 
             if result.is_ok():
                 # Get transaction digest

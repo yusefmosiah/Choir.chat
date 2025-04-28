@@ -12,6 +12,7 @@ class Config:
     CHAT_THREADS_COLLECTION: str = "chat_threads"
     USERS_COLLECTION: str = "users"
     NOTIFICATIONS_COLLECTION: str = "notifications"
+    DEVICE_TOKENS_COLLECTION: str = "device_tokens"
     SEARCH_LIMIT: int = 80
     VECTOR_SIZE: int = 1536
 

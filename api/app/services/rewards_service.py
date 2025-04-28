@@ -54,13 +54,21 @@ class RewardsService:
         Returns:
             List of citation IDs
         """
-        # Extract all #number references
-        citation_refs = re.findall(r'#(\d+)', content)
-        if not citation_refs:
-            return []
+        # First try to extract <vid>vector_id</vid> format
+        vid_citations = re.findall(r'<vid>(.*?)</vid>', content)
+        if vid_citations:
+            logger.info(f"Found {len(vid_citations)} citations in <vid> format")
+            return list(set(vid_citations))
 
-        # Return unique citation references
-        return list(set(citation_refs))
+        # If no <vid> tags found, try the old #number format
+        citation_refs = re.findall(r'#(\d+)', content)
+        if citation_refs:
+            logger.info(f"Found {len(citation_refs)} citations in #number format")
+            return list(set(citation_refs))
+
+        # If no citations found in either format
+        logger.info("No citations found in content")
+        return []
 
     async def issue_novelty_reward(self, wallet_address: str, max_similarity: float) -> Dict[str, Any]:
         """
@@ -99,46 +107,126 @@ class RewardsService:
 
         return result
 
-    async def issue_citation_rewards(self, wallet_address: str, citation_count: int) -> Dict[str, Any]:
+    async def issue_citation_rewards(self, wallet_address: str, citation_ids: List[str]) -> Dict[str, Any]:
         """
         Issue rewards for citations.
 
         Args:
             wallet_address: The wallet address to send the reward to
-            citation_count: The number of citations
+            citation_ids: List of vector IDs that were cited
 
         Returns:
             Result of the mint operation
         """
-        if citation_count <= 0:
+        logger.info(f"REWARDS SERVICE: Issuing citation rewards for wallet {wallet_address} with citations: {citation_ids}")
+        print(f"REWARDS SERVICE: Issuing citation rewards for wallet {wallet_address} with citations: {citation_ids}")
+
+        # Ensure citation_ids is a list
+        if not citation_ids or not isinstance(citation_ids, list) or len(citation_ids) == 0:
             logger.info(f"No citation reward issued for wallet {wallet_address} (no citations)")
             return {
                 "success": False,
                 "reason": "no_citations",
-                "citation_count": 0,
                 "wallet": wallet_address
             }
 
-        # Base reward per citation (0.5 CHOIR = 500_000_000 units)
-        base_reward_per_citation = 500_000_000
+        # Base reward per citation (5 CHOIR = 5_000_000_000 units)
+        base_reward_per_citation = 5_000_000_000
 
         # Cap at 5 citations max
-        effective_citation_count = min(5, citation_count)
+        effective_citation_count = min(5, len(citation_ids))
 
-        # Calculate total reward
-        reward_amount = base_reward_per_citation * effective_citation_count
+        # We don't issue rewards to the citing user, only to the authors of the cited content
+        # Initialize result with success=True
+        result = {
+            "success": True,
+            "author_rewards": []
+        }
 
-        # Issue the reward
-        result = await self.sui_service.mint_choir(wallet_address, reward_amount)
+        # Issue rewards to the authors of the cited content
+        if citation_ids:
+            from app.database import DatabaseClient
+            from app.config import Config
 
-        if result["success"]:
-            logger.info(f"Successfully issued citation reward of {reward_amount/1_000_000_000} CHOIR to {wallet_address} for {effective_citation_count} citations")
-        else:
-            logger.error(f"Failed to issue citation reward to {wallet_address}: {result.get('error')}")
+            db = DatabaseClient(Config.from_env())
+            author_rewards = []
+            total_reward_amount = 0
+
+            for vector_id in citation_ids:
+                try:
+                    # Get the vector to find the author
+                    vector_info = await db.get_vector_by_id(vector_id)
+
+                    if vector_info:
+                        # Get the author's wallet address
+                        author_wallet_address = vector_info.get("metadata", {}).get("wallet_address")
+
+                        # Log only non-sensitive metadata for debugging
+                        safe_metadata = vector_info.get('metadata', {}).copy()
+                        if 'wallet_address' in safe_metadata:
+                            safe_metadata['wallet_address'] = '***redacted***'
+                        logger.info(f"Vector {vector_id} metadata (sensitive info redacted): {safe_metadata}")
+
+                        # Skip if no wallet address or if it's "unknown"
+                        if not author_wallet_address or author_wallet_address.lower() == "unknown":
+                            logger.warning(f"No valid wallet address found for vector {vector_id}, skipping reward")
+                            author_rewards.append({
+                                "vector_id": vector_id,
+                                "author": None,
+                                "success": False,
+                                "reason": "author_not_found"
+                            })
+                            continue
+
+                        # Skip if the author is the same as the citing user (no self-rewards)
+                        if author_wallet_address == wallet_address:
+                            logger.info(f"Skipping self-citation reward for vector {vector_id}")
+                            author_rewards.append({
+                                "vector_id": vector_id,
+                                "author": author_wallet_address,
+                                "success": False,
+                                "reason": "self_citation"
+                            })
+                            continue
+
+                        # If we get here, we have a valid author wallet address
+                        # Issue reward to the author
+                        author_result = await self.sui_service.mint_choir(author_wallet_address, base_reward_per_citation)
+                        total_reward_amount += base_reward_per_citation
+
+                        if author_result["success"]:
+                            logger.info(f"Successfully issued citation reward of {base_reward_per_citation/1_000_000_000} CHOIR to author {author_wallet_address} for vector {vector_id}")
+                            author_rewards.append({
+                                "vector_id": vector_id,
+                                "author": author_wallet_address,
+                                "reward_amount": base_reward_per_citation,
+                                "success": True,
+                                "digest": author_result.get("digest")
+                            })
+                        else:
+                            logger.error(f"Failed to issue citation reward to author {author_wallet_address}: {author_result.get('error')}")
+                            author_rewards.append({
+                                "vector_id": vector_id,
+                                "author": author_wallet_address,
+                                "success": False,
+                                "error": author_result.get("error")
+                            })
+                except Exception as e:
+                    logger.error(f"Error processing author reward for vector {vector_id}: {e}", exc_info=True)
+
+            # Add author rewards to the result
+            result["author_rewards"] = author_rewards
+            result["reward_amount"] = total_reward_amount / 1_000_000_000
+
+        # Log error if the reward failed
+        if not result["success"]:
+            logger.error(f"Failed to issue citation reward to authors: {result.get('error')}")
 
         # Add reward details to the result
         result["reward_type"] = "citation"
-        result["reward_amount"] = reward_amount
-        result["citation_count"] = effective_citation_count
+
+        # Make sure reward_amount is set (it should be set above, but just in case)
+        if "reward_amount" not in result:
+            result["reward_amount"] = 0
 
         return result

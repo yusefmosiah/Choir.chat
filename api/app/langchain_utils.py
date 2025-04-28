@@ -365,26 +365,87 @@ def convert_tools_to_pydantic(tools: List[Any]) -> List[Type[BaseModel]]:
     pydantic_tools = []
 
     for tool in tools:
+        logger.info(f"Converting tool to pydantic: {tool}")
+
+        # Check if the tool is a dictionary with a function key
+        if isinstance(tool, dict) and "function" in tool:
+            logger.info(f"Tool is a dictionary with function key")
+
+            # Extract function details
+            function_data = tool["function"]
+            tool_name = function_data["name"]
+            tool_description = function_data["description"]
+
+            if "parameters" in function_data:
+                logger.info(f"Tool has parameters schema: {function_data['parameters']}")
+
+                # Get properties from parameters
+                properties = function_data["parameters"].get("properties", {})
+
+                # Create field definitions for the model
+                field_defs = {}
+                for prop_name, prop_data in properties.items():
+                    # Get the Python type based on the JSON schema type
+                    if prop_data.get("type") == "string":
+                        field_type = str
+                    elif prop_data.get("type") == "integer":
+                        field_type = int
+                    elif prop_data.get("type") == "number":
+                        field_type = float
+                    elif prop_data.get("type") == "boolean":
+                        field_type = bool
+                    elif prop_data.get("type") == "array":
+                        field_type = list
+                    elif prop_data.get("type") == "object":
+                        field_type = dict
+                    else:
+                        field_type = str  # Default to string
+
+                    # Create the field
+                    field_defs[prop_name] = (field_type, Field(..., description=prop_data.get("description", "")))
+
+                # Create the model
+                logger.info(f"Creating model with fields: {field_defs}")
+                tool_model = create_model(
+                    tool_name,
+                    __doc__=tool_description,
+                    **field_defs
+                )
+                logger.info(f"Created model from schema: {tool_model}")
+            else:
+                # No parameters, create a simple model
+                logger.info(f"Tool has no parameters schema, creating simple model")
+                tool_model = create_model(
+                    tool_name,
+                    __doc__=tool_description,
+                    input=(str, Field(..., description="Input to the tool"))
+                )
+                logger.info(f"Created simple model: {tool_model}")
         # For WebSearchTool and similar tools, we want to use a different schema
-        if hasattr(tool, "name") and "search" in tool.name.lower():
+        elif hasattr(tool, "name") and "search" in tool.name.lower():
             # Create a special model for search tools that accepts a query parameter
             tool_model = create_model(
                 tool.name,  # Use the tool name as the class name
                 __doc__=tool.description if hasattr(tool, "description") else f"Search using {tool.name}",
                 query=(str, Field(..., description="The search query to look up"))
             )
+            logger.info(f"Created search tool model: {tool_model}")
         else:
             # Default model for other tools
+            tool_name = tool.name if hasattr(tool, "name") else "Tool"
+            tool_description = tool.description if hasattr(tool, "description") else "A tool to perform a task"
+
             tool_model = create_model(
-                tool.name if hasattr(tool, "name") else "Tool",  # Use the tool name as the class name
-                __doc__=tool.description if hasattr(tool, "description") else "A tool to perform a task",
+                tool_name,  # Use the tool name as the class name
+                __doc__=tool_description,
                 input=(str, Field(..., description="Input to the tool")),  # Add an input field
             )
+            logger.info(f"Created default tool model: {tool_model}")
+
         pydantic_tools.append(tool_model)
+        logger.info(f"Added tool model to pydantic_tools: {tool_model}")
 
-        # Log the schema of the created tool model
-        logger.info(f"Created Pydantic model for {tool.name if hasattr(tool, 'name') else 'Tool'}")
-
+    logger.info(f"Returning {len(pydantic_tools)} pydantic tools")
     return pydantic_tools
 
 

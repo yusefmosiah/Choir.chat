@@ -77,11 +77,41 @@ async def initialize_model(model_config: ModelConfig) -> BaseChatModel:
 async def handle_tools(model: BaseChatModel, tools: Optional[List[Any]]) -> BaseChatModel:
     """Configure model with tools if provided."""
     if not tools:
+        logger.info("No tools provided to handle_tools")
         return model
 
     try:
+        logger.info(f"Processing tools for model binding: {tools}")
+
+        # For Groq models, we need to create a special tool definition
+        if hasattr(model, "model_name") and "groq" in str(model).lower():
+            logger.info("Creating special tool definition for Groq model")
+
+            # Create a list of tool definitions without the coroutine
+            groq_tools = []
+            for tool in tools:
+                if isinstance(tool, dict) and "function" in tool:
+                    # Create a clean version without the coroutine
+                    clean_tool = {
+                        "type": "function",
+                        "function": tool["function"]
+                    }
+                    groq_tools.append(clean_tool)
+
+            logger.info(f"Created clean tool definitions for Groq: {groq_tools}")
+
+            # Bind the tools to the model
+            bound_model = model.bind(tools=groq_tools)
+            logger.info(f"Successfully bound tools to Groq model: {bound_model}")
+            return bound_model
+
+        # For other models, use the standard approach
+        logger.info(f"Converting tools to pydantic: {tools}")
         pydantic_tools = convert_tools_to_pydantic(tools)
-        return model.bind_tools(pydantic_tools)
+        logger.info(f"Binding tools to model: {pydantic_tools}")
+        bound_model = model.bind_tools(pydantic_tools)
+        logger.info(f"Successfully bound tools to model: {bound_model}")
+        return bound_model
     except Exception as e:
         logger.error(f"Failed to bind tools to model: {e}", exc_info=True)
         raise ValueError(f"Tool binding failed: {e}") from e
@@ -100,7 +130,8 @@ async def process_streaming_response(model: BaseChatModel, messages: List[BaseMe
 async def process_non_streaming_response(
     model: BaseChatModel,
     messages: List[BaseMessage],
-    response_model: Optional[Type[BaseModel]] = None
+    response_model: Optional[Type[BaseModel]] = None,
+    tools: Optional[List[Any]] = None
 ) -> Union[AIMessage, BaseModel]:
     """Handle non-streaming response from the model, optionally with structured output."""
     try:
@@ -112,6 +143,52 @@ async def process_non_streaming_response(
             if response_model.__name__ == "YieldPhaseResponse":
                 # First get the raw response
                 raw_response = await model.ainvoke(messages)
+
+                # Check if the response contains tool calls
+                if hasattr(raw_response, 'additional_kwargs') and 'tool_calls' in raw_response.additional_kwargs:
+                    logger.info(f"Response contains tool calls: {raw_response.additional_kwargs['tool_calls']}")
+
+                    # Import json here to avoid UnboundLocalError
+                    import json
+
+                    # Process each tool call
+                    for tool_call in raw_response.additional_kwargs['tool_calls']:
+                        if 'function' in tool_call:
+                            function_name = tool_call['function']['name']
+                            function_args = json.loads(tool_call['function']['arguments'])
+
+                            logger.info(f"Processing tool call: {function_name} with args: {function_args}")
+
+                            # Find the matching tool
+                            for tool in tools or []:
+                                if isinstance(tool, dict) and 'function' in tool and tool['function']['name'] == function_name:
+                                    if 'coroutine' in tool:
+                                        # Call the coroutine with the arguments
+                                        logger.info(f"Calling tool coroutine: {tool['coroutine']}")
+
+                                        try:
+                                            # Create a CitationRewardInput object
+                                            from app.tools.rewards_tool import CitationRewardInput
+                                            input_data = CitationRewardInput(**function_args)
+
+                                            # Call the coroutine
+                                            logger.info(f"About to call tool coroutine with input: {input_data}")
+                                            result = await tool['coroutine'](input_data)
+                                            logger.info(f"Tool call result: {result}")
+
+                                            # We'll use this result later when creating the response model
+                                            if hasattr(result, 'dict'):
+                                                raw_response.citation_reward_info = result.dict()
+                                            else:
+                                                raw_response.citation_reward_info = result
+                                        except Exception as tool_error:
+                                            logger.error(f"Error calling tool: {tool_error}", exc_info=True)
+                                            raw_response.citation_reward_info = {
+                                                "success": False,
+                                                "error": str(tool_error)
+                                            }
+
+                                        break
 
                 # Try to extract structured data from the raw response
                 try:
@@ -146,6 +223,18 @@ async def process_non_streaming_response(
                                 data["citation_explanations"] = json.loads(data["citation_explanations"])
                             except json.JSONDecodeError:
                                 data["citation_explanations"] = {}
+
+                        # Handle citation_reward_info if it's a string
+                        if "citation_reward_info" in data and isinstance(data["citation_reward_info"], str):
+                            try:
+                                data["citation_reward_info"] = json.loads(data["citation_reward_info"])
+                            except json.JSONDecodeError:
+                                data["citation_reward_info"] = None
+
+                        # Check if we have citation_reward_info from a tool call
+                        if hasattr(raw_response, 'citation_reward_info'):
+                            data['citation_reward_info'] = raw_response.citation_reward_info
+                            logger.info(f"Using citation_reward_info from tool call: {data['citation_reward_info']}")
 
                         # Create the response model
                         return response_model(**data)
@@ -191,7 +280,10 @@ async def post_llm(
 
         # Handle tools if provided
         if tools:
+            logger.info(f"Tools provided to post_llm: {tools}")
             model = await handle_tools(model, tools)
+        else:
+            logger.info("No tools provided to post_llm")
 
         # Handle response based on streaming preference
         if stream:
@@ -200,8 +292,8 @@ async def post_llm(
                 logger.warning("Structured output is not supported with streaming. Ignoring response_model.")
             return process_streaming_response(model, messages)
         else:
-            # Pass response_model to process_non_streaming_response
-            return await process_non_streaming_response(model, messages, response_model)
+            # Pass response_model and tools to process_non_streaming_response
+            return await process_non_streaming_response(model, messages, response_model, tools)
 
     except ValueError as e:
          # Catch initialization or tool binding errors specifically

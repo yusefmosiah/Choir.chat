@@ -131,23 +131,7 @@ struct PaginatedMarkdownView: View {
         }
     }
 
-    private static var activeVectorRequests: Set<String> = []
-
     private func fetchVectorFromAPI(vectorId: String, message: Message) {
-        if Self.activeVectorRequests.contains(vectorId) {
-            return
-        }
-
-        Self.activeVectorRequests.insert(vectorId)
-
-        let loadingContent = """
-        # Loading Vector Content
-
-        Fetching full content for vector ID: V\(vectorId.prefix(8))...
-
-        Please wait...
-        """
-
         // Check if we have citation explanations for this vector
         var citationExplanation: String? = nil
         var citationReward: [String: Any]? = nil
@@ -162,6 +146,15 @@ struct PaginatedMarkdownView: View {
             citationReward = reward
         }
 
+        // Show loading content
+        let loadingContent = """
+        # Loading Vector Content
+
+        Fetching full content for vector ID: V\(vectorId.prefix(8))...
+
+        Please wait...
+        """
+
         // Show the vector sheet with citation information if available
         if citationExplanation != nil || citationReward != nil {
             TextSelectionManager.shared.showVectorSheetWithCitation(
@@ -174,6 +167,7 @@ struct PaginatedMarkdownView: View {
             TextSelectionManager.shared.showVectorSheet(withText: loadingContent, vectorId: vectorId)
         }
 
+        // Check if we have a local match in the message's vector results
         let localMatch = message.vectorSearchResults.first(where: { $0.id == vectorId })
 
         if let localMatch = localMatch {
@@ -181,91 +175,44 @@ struct PaginatedMarkdownView: View {
             TextSelectionManager.shared.updateVectorSheet(withText: previewContent, vectorId: vectorId)
         }
 
-        Task {
-            do {
-                let url = ApiConfig.url(for: "\(ApiConfig.Endpoints.vectors)/\(vectorId)")
-                var request = URLRequest(url: url)
-                request.httpMethod = "GET"
-
-                if let authToken = UserDefaults.standard.string(forKey: "authToken") {
-                    request.addValue("Bearer \(authToken)", forHTTPHeaderField: "Authorization")
-                }
-
-                let (data, response) = try await URLSession.shared.data(for: request)
-                guard let httpResponse = response as? HTTPURLResponse else {
-                    throw NSError(domain: "Invalid response", code: 0)
-                }
-
-                if httpResponse.statusCode == 404 {
-                    if let localMatch = localMatch {
-                        let formattedContent = formatVectorResult(localMatch, index: -1, source: "local")
-                        await MainActor.run {
-                            TextSelectionManager.shared.updateVectorSheet(withText: formattedContent, vectorId: vectorId)
-                            Self.activeVectorRequests.remove(vectorId)
-                        }
-                        return
-                    } else {
-                        let errorContent = """
-                        # Vector Not Found
-
-                        The vector with ID V\(vectorId.prefix(8)) could not be found.
-
-                        This may be because:
-                        - The vector ID is incorrect
-                        - The vector has been deleted
-                        - The vector is not accessible to your account
-
-                        Please try a different vector reference.
-                        """
-
-                        await MainActor.run {
-                            TextSelectionManager.shared.updateVectorSheet(withText: errorContent, vectorId: vectorId)
-                            Self.activeVectorRequests.remove(vectorId)
-                        }
-                        return
-                    }
-                }
-
-                guard httpResponse.statusCode == 200 else {
-                    throw NSError(domain: "Invalid response", code: httpResponse.statusCode)
-                }
-
-                let decoder = JSONDecoder()
-                let apiResponse = try decoder.decode(APIResponse<VectorResult>.self, from: data)
-
-                guard apiResponse.success, let vectorData = apiResponse.data else {
-                    throw NSError(domain: apiResponse.message ?? "Unknown error", code: 0)
-                }
-
-                let vectorResult = VectorSearchResult(
-                    content: vectorData.content,
-                    score: 1.0,
-                    provider: "qdrant",
-                    metadata: vectorData.metadata?.compactMapValues { $0 as? String },
-                    id: vectorData.id,
-                    content_preview: nil
-                )
-
+        // Fetch the vector from the API
+        VectorService.shared.fetchVector(vectorId: vectorId) { success, vectorResult, errorMessage in
+            if success, let vectorResult = vectorResult {
+                // Format and display the vector result
                 let formattedContent = formatVectorResult(vectorResult, index: -1, source: "api")
+                TextSelectionManager.shared.updateVectorSheet(withText: formattedContent, vectorId: vectorId)
+            } else if let localMatch = localMatch {
+                // If API fetch failed but we have a local match, use that
+                let formattedContent = formatVectorResult(localMatch, index: -1, source: "local")
+                TextSelectionManager.shared.updateVectorSheet(withText: formattedContent, vectorId: vectorId)
+            } else {
+                // Display error message
+                let errorContent: String
 
-                await MainActor.run {
-                    TextSelectionManager.shared.updateVectorSheet(withText: formattedContent, vectorId: vectorId)
-                    Self.activeVectorRequests.remove(vectorId)
+                if errorMessage?.contains("not found") == true {
+                    errorContent = """
+                    # Vector Not Found
+
+                    The vector with ID V\(vectorId.prefix(8)) could not be found.
+
+                    This may be because:
+                    - The vector ID is incorrect
+                    - The vector has been deleted
+                    - The vector is not accessible to your account
+
+                    Please try a different vector reference.
+                    """
+                } else {
+                    errorContent = """
+                    # Error Fetching Vector Content
+
+                    Failed to fetch content for vector ID: \(vectorId)
+
+                    Error: \(errorMessage ?? "Unknown error")
+                    """
                 }
 
-            } catch {
-                let errorContent = """
-                # Error Fetching Vector Content
-
-                Failed to fetch content for vector ID: \(vectorId)
-
-                Error: \(error.localizedDescription)
-                """
-
-                await MainActor.run {
-                    TextSelectionManager.shared.updateVectorSheet(withText: errorContent, vectorId: vectorId)
-                    Self.activeVectorRequests.remove(vectorId)
-                }
+                TextSelectionManager.shared.updateVectorSheet(withText: errorContent, vectorId: vectorId)
             }
         }
     }

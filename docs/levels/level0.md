@@ -64,6 +64,7 @@ tree.md
 │   │   │   ├── brave_search.py
 │   │   │   ├── calculator.py
 │   │   │   ├── qdrant.py
+│   │   │   ├── rewards_tool.py
 │   │   │   ├── tavily_search.py
 │   │   │   └── web_search.py
 │   │   └── utils.py
@@ -161,10 +162,11 @@ tree.md
 │   │   ├── AuthService.swift
 │   │   ├── KeychainService.swift
 │   │   ├── ModelConfigManager.swift
-│   │   ├── NotificationService.swift
 │   │   ├── PushNotificationManager.swift
 │   │   ├── ThreadManager.swift
 │   │   ├── ThreadPersistenceService.swift
+│   │   ├── TransactionService.swift
+│   │   ├── VectorService.swift
 │   │   └── WalletManager.swift
 │   ├── Utils
 │   │   ├── MarkdownPaginator.swift
@@ -185,7 +187,6 @@ tree.md
 │       ├── LoginView.swift
 │       ├── MessageRow.swift
 │       ├── ModelConfigView.swift
-│       ├── NotificationsView.swift
 │       ├── OnboardingView.swift
 │       ├── PaginatedMarkdownView.swift
 │       ├── PhaseCard.swift
@@ -200,6 +201,7 @@ tree.md
 │       │       └── ThreadMessageList.swift
 │       ├── ThreadExportView.swift
 │       ├── ThreadImportView.swift
+│       ├── TransactionsView.swift
 │       ├── WalletCardView.swift
 │       ├── WalletSelectionView.swift
 │       └── WalletView.swift
@@ -304,7 +306,7 @@ tree.md
     ├── test_api.sh
     └── test_postchain_multiturn.sh
 
-71 directories, 218 files
+71 directories, 220 files
 
 === File: docs/CHANGELOG.md ===
 

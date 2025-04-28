@@ -168,7 +168,7 @@ struct ModelConfigView: View {
             set: { newModel in
                 var config =
                     currentConfigs[phase]
-                    ?? ModelConfig(provider: "google", model: newModel, temperature: 0.33)
+                    ?? ModelConfig(provider: "openrouter", model: newModel, temperature: 0.33)
                 config.model = newModel
                 currentConfigs[phase] = config
             }
@@ -181,7 +181,7 @@ struct ModelConfigView: View {
             set: { newTemp in
                 var config =
                     currentConfigs[phase]
-                    ?? ModelConfig(provider: "google", model: "", temperature: newTemp)
+                    ?? ModelConfig(provider: "openrouter", model: "", temperature: newTemp)
                 config.temperature = newTemp
                 currentConfigs[phase] = config
             }

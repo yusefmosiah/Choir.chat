@@ -439,13 +439,22 @@ class DatabaseClient:
             logger.error(f"Error getting vector by ID: {e}")
             return None
 
-    async def save_notification(self, notification: Dict[str, Any]) -> Dict[str, str]:
-        """Save a notification."""
+    async def save_notification(self, notification: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Save a notification to the database.
+
+        Args:
+            notification: The notification data to save
+
+        Returns:
+            Result of the operation with the notification ID
+        """
         try:
             notification_id = str(uuid.uuid4())
 
-            # Add timestamp
-            notification["created_at"] = datetime.now(UTC).isoformat()
+            # Add timestamp if not present
+            if "created_at" not in notification:
+                notification["created_at"] = datetime.now(UTC).isoformat()
 
             # Create point
             point = models.PointStruct(
@@ -460,30 +469,49 @@ class DatabaseClient:
                 points=[point]
             )
 
-            return {"id": notification_id}
+            return {"success": True, "id": notification_id}
         except Exception as e:
             logger.error(f"Error saving notification: {e}")
-            return {"error": str(e)}
+            return {"success": False, "error": str(e)}
 
-    async def get_user_notifications(self, wallet_address: str, limit: int = 50) -> List[Dict[str, Any]]:
-        """Get notifications for a user."""
+    async def get_user_notifications(self, wallet_addresses: List[str], limit: int = 50) -> List[Dict[str, Any]]:
+        """
+        Get notifications for a user across all their wallets.
+
+        Args:
+            wallet_addresses: List of wallet addresses to fetch notifications for
+            limit: Maximum number of notifications to return
+
+        Returns:
+            List of notifications
+        """
         try:
-            # Build filter
-            must_conditions = [
+            if not wallet_addresses:
+                logger.warning("No wallet addresses provided, cannot get notifications")
+                return []
+
+            # Build filter to match any of the wallet addresses
+            should_conditions = [
                 models.FieldCondition(
                     key="recipient_wallet_address",
-                    match=models.MatchValue(value=wallet_address)
+                    match=models.MatchValue(value=address)
                 )
+                for address in wallet_addresses
             ]
 
             search_result = self.client.scroll(
                 collection_name=self.config.NOTIFICATIONS_COLLECTION,
                 scroll_filter=models.Filter(
-                    must=must_conditions
+                    should=should_conditions
                 ),
                 limit=limit,
                 with_payload=True,
-                with_vectors=False
+                with_vectors=False,
+                # Sort by created_at in descending order (newest first)
+                sort=models.SortParams(
+                    field_name="created_at",
+                    direction=models.Direction.DESC
+                )
             )
 
             points, _ = search_result

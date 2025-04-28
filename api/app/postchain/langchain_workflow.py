@@ -255,6 +255,7 @@ async def run_experience_vectors_phase(
        - Uses prompt hash in metadata for potential future optimizations
     """
     logger.info(f"Running Experience Vectors phase (manual search) with model: {model_config.provider}/{model_config.model_name}")
+    logger.info(f"WWWALLET ADDRESS: {wallet_address}")
 
     # Get necessary components
     app_config = Config() # Get app config for embedding model name etc.
@@ -349,6 +350,7 @@ async def run_experience_vectors_phase(
                 "thread_id": thread_id,
                 "prompt_hash": prompt_hash,
                 "original_prompt_length": len(query_text),
+                "wallet_address": wallet_address,
             }
 
             save_result = await db_client.store_vector(
@@ -356,7 +358,7 @@ async def run_experience_vectors_phase(
                 vector=query_vector,
                 metadata=metadata
             )
-            logger.info(f"Saved vector (type: {embedded_content_type}) with ID: {save_result.get('id')}")
+            logger.info(f"Saved vector (type: {embedded_content_type}) with ID: {save_result.get('id')} and wallet_address: {metadata.get('wallet_address')}")
 
         # --- 4. Format Qdrant Results --- #
         seen_content = set()
@@ -865,31 +867,17 @@ async def run_yield_phase(
     # Import YieldPhaseResponse here to avoid circular imports
     from app.postchain.schemas.state import YieldPhaseResponse
 
-    # Enhanced yield instruction that emphasizes citation rewards
-    enhanced_yield_instruction = f"""
-    <yield_instruction>{yield_instruction(model_config)}</yield_instruction>
+    # Import the rewards service directly
+    from app.services.rewards_service import RewardsService
 
-    IMPORTANT CITATION INSTRUCTIONS:
-    1. When referencing vector search results, use the <vid>vector_id</vid> tag format.
-    2. Each citation (up to 5) earns the user 0.5 CHOIR tokens as a reward.
-    3. For each citation, provide a brief explanation of why this source was valuable.
-    4. Users whose content is cited will receive a notification about the citation.
+    # Log the model being used for the yield phase
+    logger.info(f"Using model {model_config.provider}/{model_config.model_name} for yield phase")
 
-    Your response MUST be provided in the following structured format:
-    ```json
-    {{
-        "response_content": "Your main response to the user's query, including <vid>vector_id</vid> citations",
-        "citations": ["vector_id_1", "vector_id_2", ...],
-        "citation_explanations": {{
-            "vector_id_1": "Brief explanation of why this source was valuable",
-            "vector_id_2": "Brief explanation of why this source was valuable",
-            ...
-        }}
-    }}
-    ```
-    """
+    # Create the yield instruction
+    yield_query = f"<yield_instruction>{yield_instruction(model_config)}</yield_instruction>"
 
-    yield_messages = [SystemMessage(content=COMMON_SYSTEM_PROMPT)] + messages + [HumanMessage(content=enhanced_yield_instruction)]
+    # Create the messages for the yield phase
+    yield_messages = [SystemMessage(content=COMMON_SYSTEM_PROMPT)] + messages + [HumanMessage(content=yield_query)]
 
     async def yield_wrapper(msgs):
         logger.info(f"Calling post_llm with model: {model_config}")
@@ -907,11 +895,16 @@ async def run_yield_phase(
             logger.info("Using sanitized messages for OpenAI model in Yield phase")
 
         # Use structured output with the YieldPhaseResponse schema
-        return await post_llm(
+        logger.info("Calling post_llm for yield phase without tools")
+        result = await post_llm(
             model_config=model_config,
             messages=prepared_msgs,
             response_model=YieldPhaseResponse
         )
+        logger.info(f"post_llm for yield phase returned: {type(result)}")
+        if hasattr(result, 'citation_reward_info'):
+            logger.info(f"citation_reward_info in result: {result.citation_reward_info}")
+        return result
 
     yield_chain = RunnableLambda(yield_wrapper)
 
@@ -929,33 +922,47 @@ async def run_yield_phase(
             # Use citations from the structured response
             citations = structured_response.citations
 
-            # Handle citation_explanations - could be a string or a dictionary
-            if hasattr(structured_response, 'citation_explanations'):
-                if isinstance(structured_response.citation_explanations, dict):
-                    citation_explanations = structured_response.citation_explanations
-                elif isinstance(structured_response.citation_explanations, str):
-                    # Try to parse the string as JSON
-                    try:
-                        citation_explanations = json.loads(structured_response.citation_explanations)
-                        logger.info(f"Successfully parsed citation_explanations string as JSON dictionary")
-                    except json.JSONDecodeError:
-                        logger.warning(f"Failed to parse citation_explanations as JSON: {structured_response.citation_explanations}")
-                        citation_explanations = {}
-                else:
-                    logger.warning(f"Unexpected type for citation_explanations: {type(structured_response.citation_explanations)}")
-                    citation_explanations = {}
-            else:
-                citation_explanations = {}
+            # We've removed citation_explanations from the schema
 
         elif isinstance(structured_response, AIMessage):
             # Fallback to parsing from regular AIMessage if structured output failed
             logger.warning("Structured output failed, falling back to regular response parsing")
             response = structured_response
 
-            # Extract citations from the response content
-            rewards_service = RewardsService()
-            citations = rewards_service.extract_citations(response.content)
-            citation_explanations = {}  # No explanations available in this case
+            # Extract citations from the response content using regex for <vid> tags
+            import re
+            vid_pattern = r'<vid>(.*?)</vid>'
+            citations = re.findall(vid_pattern, response.content)
+            logger.info(f"Extracted {len(citations)} citations using regex: {citations}")
+
+            # If no citations found with <vid> tags, try the old #number format
+            if not citations:
+                rewards_service = RewardsService()
+                citations = rewards_service.extract_citations(response.content)
+                logger.info(f"Extracted {len(citations)} citations using extract_citations: {citations}")
+
+            # We've removed citation_explanations from the schema
+
+            # Try to extract citation_reward_info from the response if it exists
+            reward_info_pattern = r'```(?:json)?\s*({.*?"citation_reward_info".*?})\s*```'
+            reward_match = re.search(reward_info_pattern, response.content, re.DOTALL)
+            if reward_match:
+                try:
+                    import json
+                    reward_json = json.loads(reward_match.group(1))
+                    if "citation_reward_info" in reward_json:
+                        # Create a YieldPhaseResponse object to hold the citation_reward_info
+                        if not hasattr(structured_response, 'citation_reward_info'):
+                            structured_response = YieldPhaseResponse(
+                                citations=citations,
+                                citation_reward_info=reward_json["citation_reward_info"],
+                                response_content=response.content
+                            )
+                        else:
+                            structured_response.citation_reward_info = reward_json["citation_reward_info"]
+                        logger.info(f"Extracted citation_reward_info from response: {structured_response.citation_reward_info}")
+                except Exception as e:
+                    logger.warning(f"Failed to extract citation_reward_info from response: {e}")
 
         else:
             # Unexpected response type
@@ -968,67 +975,85 @@ async def run_yield_phase(
 
         logger.info(f"Yield phase completed. Found {len(citations)} citations.")
 
-        # Process citation rewards
+        # Get citation reward info from the structured response
         citation_reward = None
-        if wallet_address and citations:
+
+        # Check if we have citations
+        if citations:
+            logger.info(f"We have {len(citations)} citations. Issuing citation rewards directly.")
+
+            if wallet_address and wallet_address.lower() != "unknown":
+                try:
+                    # Create the rewards service
+                    rewards_service = RewardsService()
+
+                    # Call the service directly
+                    logger.info(f"Calling issue_citation_rewards with wallet_address={wallet_address}, citation_ids={citations}")
+                    result = await rewards_service.issue_citation_rewards(wallet_address, citations)
+                    logger.info(f"Citation rewards result: {result}")
+
+                    # Create a new structured_response with the result
+                    structured_response = YieldPhaseResponse(
+                        citations=citations,
+                        citation_reward_info=result,
+                        response_content=response.content
+                    )
+                except Exception as e:
+                    logger.error(f"Error issuing citation rewards: {e}", exc_info=True)
+
+        if hasattr(structured_response, 'citation_reward_info') and structured_response.citation_reward_info:
+            # Use the reward info from the model's tool call or our manual call
+            reward_info = structured_response.citation_reward_info
+            logger.info(f"Found citation_reward_info in response: {reward_info}")
+
             try:
-                # Initialize rewards service
-                rewards_service = RewardsService()
+                # Create reward info object
+                # Convert float reward_amount to int if needed
+                reward_amount = reward_info.get("reward_amount", 0)
+                if isinstance(reward_amount, float):
+                    # Convert to the smallest unit (1 CHOIR = 1_000_000_000 units)
+                    reward_amount = int(reward_amount * 1_000_000_000)
 
-                # Issue citation reward
-                reward_result = await rewards_service.issue_citation_rewards(wallet_address, len(citations))
+                # Create a sanitized version of the reward info that doesn't include wallet addresses
+                # Extract author rewards but remove wallet addresses for privacy
+                author_rewards = reward_info.get("author_rewards", [])
+                sanitized_author_rewards = []
 
-                # Create reward info object if successful
-                if reward_result.get("success"):
-                    citation_reward = CitationRewardInfo(
-                        reward_type="citation",
-                        reward_amount=reward_result.get("reward_amount", 0),
-                        success=True,
-                        digest=reward_result.get("digest"),
-                        citation_count=reward_result.get("citation_count", len(citations)),
-                        cited_messages=citations
-                    )
-                else:
-                    # Create failed reward info
-                    citation_reward = CitationRewardInfo(
-                        reward_type="citation",
-                        reward_amount=0,
-                        success=False,
-                        error=reward_result.get("reason") or "Unknown error",
-                        citation_count=len(citations),
-                        cited_messages=citations
-                    )
+                for reward in author_rewards:
+                    # Create a copy without the author wallet address
+                    sanitized_reward = reward.copy()
+                    if "author" in sanitized_reward:
+                        sanitized_reward["author"] = "***redacted***"
+                    sanitized_author_rewards.append(sanitized_reward)
+
+                # Create the citation reward info with sanitized data
+                citation_reward = CitationRewardInfo(
+                    reward_type="citation",
+                    reward_amount=reward_amount,
+                    success=reward_info.get("success", False),
+                    digest=reward_info.get("digest"),
+                    cited_messages=citations,
+                    error=reward_info.get("error"),
+                    author_rewards=sanitized_author_rewards
+                )
 
                 logger.info(f"Citation reward processed: {citation_reward.dict()}")
-
-                # Send notifications to users whose content was cited
-                from app.services.notification_service import NotificationService
-                notification_service = NotificationService()
-
-                # Send notifications for each citation
-                for vector_id in citations:
-                    try:
-                        notification_result = await notification_service.send_citation_notification(
-                            vector_id=vector_id,
-                            citing_wallet_address=wallet_address
-                        )
-
-                        if notification_result.get("success"):
-                            logger.info(f"Sent citation notification for vector {vector_id} to {notification_result.get('recipient')}")
-                        else:
-                            logger.warning(f"Failed to send citation notification for vector {vector_id}: {notification_result.get('reason')}")
-
-                    except Exception as e:
-                        logger.error(f"Error sending citation notification for vector {vector_id}: {e}", exc_info=True)
-
+                print(f"Citation reward processed: {citation_reward.dict()}")
             except Exception as e:
                 logger.error(f"Error processing citation reward: {e}", exc_info=True)
+                citation_reward = CitationRewardInfo(
+                    reward_type="citation",
+                    reward_amount=0,
+                    success=False,
+                    error=f"Error processing reward: {e}",
+                    cited_messages=citations,
+                    author_rewards=[]
+                )
 
         return YieldPhaseOutput(
             yield_response=response,
             citations=citations,
-            citation_reward=citation_reward,
-            citation_explanations=citation_explanations
+            citation_reward=citation_reward
         )
     except Exception as e:
         logger.error(f"Error during Yield phase: {e}", exc_info=True)
