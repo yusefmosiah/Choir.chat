@@ -241,6 +241,7 @@
 ├── docs
 │   ├── blockchain_integration.md
 │   ├── CHANGELOG.md
+│   ├── contract_deployment.md
 │   ├── core_core.md
 │   ├── core_economics.md
 │   ├── core_state_transitions.md
@@ -259,6 +260,8 @@
 │   │   ├── level3.md
 │   │   ├── level4.md
 │   │   └── level5.md
+│   ├── mainnet_migration.md
+│   ├── notification_system.md
 │   ├── plan_anonymity_by_default.md
 │   ├── plan_chip_materialization.md
 │   ├── postchain_temporal_logic.md
@@ -290,6 +293,7 @@
     ├── generate_single_provider_report.sh
     ├── sources_displaying.sh
     ├── test_api.sh
+    ├── test_notifications.py
     └── test_postchain_multiturn.sh
 
-71 directories, 219 files
+71 directories, 223 files

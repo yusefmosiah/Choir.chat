@@ -254,6 +254,7 @@ tree.md
 ├── docs
 │   ├── blockchain_integration.md
 │   ├── CHANGELOG.md
+│   ├── contract_deployment.md
 │   ├── core_core.md
 │   ├── core_economics.md
 │   ├── core_state_transitions.md
@@ -272,6 +273,8 @@ tree.md
 │   │   ├── level3.md
 │   │   ├── level4.md
 │   │   └── level5.md
+│   ├── mainnet_migration.md
+│   ├── notification_system.md
 │   ├── plan_anonymity_by_default.md
 │   ├── plan_chip_materialization.md
 │   ├── postchain_temporal_logic.md
@@ -303,9 +306,10 @@ tree.md
     ├── generate_single_provider_report.sh
     ├── sources_displaying.sh
     ├── test_api.sh
+    ├── test_notifications.py
     └── test_postchain_multiturn.sh
 
-71 directories, 219 files
+71 directories, 223 files
 
 === File: docs/CHANGELOG.md ===
 
@@ -2010,6 +2014,838 @@ Secure Key Provisioning: The Sui private key required by sui_service.py must be 
 
 Conclusion (MVP Focus)
 The Qdrant-Sui MVP utilizes a centralized approach for blockchain integration, embedding the logic within the main Python API backend via the sui_service.py module. This simplifies the architecture for the MVP, allowing focus on the core Qdrant data structures and the basic reward triggering mechanism. While deferring the complexities of distributed servers and TEEs, this approach provides a clear path to validating the fundamental interaction between AI-analyzed data in Qdrant and the Sui blockchain-based token economy. Secure management of the API's Sui key is paramount in this model.
+
+=== File: docs/contract_deployment.md ===
+
+
+
+==
+contract_deployment
+==
+
+
+# Choir Contract Deployment Guide
+
+This document outlines the process for deploying the Choir token contract to both devnet and mainnet environments. It provides step-by-step instructions, important considerations, and troubleshooting tips.
+
+## Table of Contents
+
+1. [Prerequisites](#prerequisites)
+2. [Devnet Deployment](#devnet-deployment)
+3. [Mainnet Deployment](#mainnet-deployment)
+4. [Post-Deployment Configuration](#post-deployment-configuration)
+5. [Troubleshooting](#troubleshooting)
+6. [Security Considerations](#security-considerations)
+
+## Prerequisites
+
+Before deploying the Choir contract, ensure you have:
+
+- Sui CLI installed (`sui` command available)
+- Active Sui wallet with sufficient gas tokens
+- Choir contract code in `choir_coin/choir_coin` directory
+- Backup of private keys (especially important for mainnet)
+- Python virtual environment set up for API updates
+
+## Devnet Deployment
+
+Follow these steps to deploy the Choir contract to Sui devnet:
+
+### 1. Navigate to the Contract Directory
+
+```bash
+cd choir_coin/choir_coin
+```
+
+### 2. Switch to Devnet Environment
+
+```bash
+sui client switch --env devnet
+```
+
+### 3. Verify Active Address
+
+```bash
+sui client active-address
+```
+
+This will display your active wallet address, which will be used for deployment.
+
+### 4. Check Gas Balance
+
+```bash
+sui client gas
+```
+
+Ensure you have sufficient SUI tokens for deployment (at least 1 SUI recommended).
+
+### 5. Build the Contract
+
+```bash
+sui move build
+```
+
+This compiles the Move code and prepares it for deployment.
+
+### 6. Publish the Contract
+
+```bash
+sui client publish --gas-budget 100000000
+```
+
+This command publishes the contract to devnet. The output will contain important information:
+
+- **Package ID**: Identified in the output as "Published to 0x..."
+- **Treasury Cap ID**: Found in the "Created Objects" section with type containing "TreasuryCapability"
+
+Example output:
+```
+Published to 0xb33aeae469ce4bdea302e66bb0330fbe4d606776451c3099a5fc557923556a6a
+...
+Created Objects:
+  ┌──
+  │ ID: 0x6eab9c65acf9b4001199ac98813951140417b5feff8a85218eddd14a62d14f37
+  │ Owner: Account Address ( 0xe9e9eba13e6868cbb3ab97b5615b2f09459fd6bbac500a251265165febc3073d )
+  │ ObjectType: 0xb33aeae469ce4bdea302e66bb0330fbe4d606776451c3099a5fc557923556a6a::choir::TreasuryCapability
+  ...
+```
+
+### 7. Test Minting Tokens
+
+```bash
+sui client call --package <PACKAGE_ID> --module choir --function mint --args <TREASURY_CAP_ID> 1000000000 <RECIPIENT_ADDRESS> --gas-budget 10000000
+```
+
+Replace the placeholders with your actual values:
+- `<PACKAGE_ID>`: The package ID from step 6
+- `<TREASURY_CAP_ID>`: The treasury cap ID from step 6
+- `<RECIPIENT_ADDRESS>`: Your wallet address or another test address
+
+Example:
+```bash
+sui client call --package 0xb33aeae469ce4bdea302e66bb0330fbe4d606776451c3099a5fc557923556a6a --module choir --function mint --args 0x6eab9c65acf9b4001199ac98813951140417b5feff8a85218eddd14a62d14f37 1000000000 0xe9e9eba13e6868cbb3ab97b5615b2f09459fd6bbac500a251265165febc3073d --gas-budget 10000000
+```
+
+This mints 1 CHOIR token (1,000,000,000 base units with 9 decimals) to the specified address.
+
+## Mainnet Deployment
+
+The process for mainnet deployment is similar to devnet, but requires additional care and consideration:
+
+### 1. Navigate to the Contract Directory
+
+```bash
+cd choir_coin/choir_coin
+```
+
+### 2. Switch to Mainnet Environment
+
+```bash
+sui client switch --env mainnet
+```
+
+### 3. Verify Active Address
+
+```bash
+sui client active-address
+```
+
+Ensure this is the address you want to use for the mainnet deployment.
+
+### 4. Check Gas Balance
+
+```bash
+sui client gas
+```
+
+Verify you have sufficient SUI tokens for deployment on mainnet (at least 2-3 SUI recommended).
+
+### 5. Build the Contract
+
+```bash
+sui move build
+```
+
+### 6. Publish the Contract
+
+```bash
+sui client publish --gas-budget 100000000
+```
+
+**IMPORTANT**: This will use real SUI tokens and deploy the contract to the mainnet blockchain.
+
+Record the Package ID and Treasury Cap ID from the output, as you did for devnet.
+
+### 7. Test Minting Tokens (Optional)
+
+```bash
+sui client call --package <MAINNET_PACKAGE_ID> --module choir --function mint --args <MAINNET_TREASURY_CAP_ID> 1000000000 <RECIPIENT_ADDRESS> --gas-budget 10000000
+```
+
+Consider minting a small amount first to verify everything works correctly.
+
+## Post-Deployment Configuration
+
+After deploying the contract, you need to update the application configuration:
+
+### 1. Update SUI Service Configuration
+
+Edit `api/app/services/sui_service.py` to update the package ID and treasury cap ID:
+
+```python
+# For network-specific configuration
+if self.network == "mainnet":
+    self.package_id = "0x..." # Your mainnet package ID
+    self.treasury_cap_id = "0x..." # Your mainnet treasury cap ID
+else:  # devnet
+    self.package_id = "0xb33aeae469ce4bdea302e66bb0330fbe4d606776451c3099a5fc557923556a6a"
+    self.treasury_cap_id = "0x6eab9c65acf9b4001199ac98813951140417b5feff8a85218eddd14a62d14f37"
+```
+
+### 2. Update Swift Client Configuration
+
+Edit `Choir/Models/CoinType.swift` to update the coin type identifier:
+
+```swift
+static let choir = CoinType(
+    coinTypeIdentifier: "0xb33aeae469ce4bdea302e66bb0330fbe4d606776451c3099a5fc557923556a6a::choir::CHOIR", // For devnet
+    name: "Choir",
+    symbol: "CHOIR",
+    decimals: 9,
+    iconName: "choir-logo"
+)
+
+// For mainnet, you would use:
+// coinTypeIdentifier: "0x<MAINNET_PACKAGE_ID>::choir::CHOIR"
+```
+
+For a multi-environment setup, consider implementing environment-specific configurations.
+
+### 3. Test the Notification System
+
+After updating the configuration, test the notification system to ensure it works with the new contract:
+
+```bash
+cd api
+source venv/bin/activate
+python ../scripts/test_notifications.py
+```
+
+## Troubleshooting
+
+### Common Issues and Solutions
+
+#### 1. "SuiKit.SuiError error 26"
+
+This error often indicates a coin type mismatch. Check:
+- The coin type identifier in `CoinType.swift` matches the actual deployed contract
+- The package ID in the API configuration matches the deployed contract
+
+#### 2. "No coin objects found for this coin type"
+
+This indicates that the wallet doesn't have any coins of the specified type. Solutions:
+- Verify the coin type is correct
+- Mint some tokens to the wallet
+- Check if the wallet address is correct
+
+#### 3. Transaction Failures
+
+If transactions fail:
+- Check gas budget (increase if necessary)
+- Verify the treasury cap ID is correct
+- Ensure the wallet has sufficient permissions
+
+#### 4. API Connection Issues
+
+If the API can't connect to the Sui network:
+- Verify network configuration (devnet vs mainnet)
+- Check if the Sui node is accessible
+- Verify API keys and authentication
+
+## Security Considerations
+
+### Treasury Cap Management
+
+The treasury cap gives complete control over the token supply. Consider:
+- Using a multi-signature wallet for the treasury cap
+- Implementing time-locks or governance mechanisms
+- Regularly auditing mint/burn operations
+
+### Private Key Security
+
+- Store private keys securely, preferably in hardware wallets
+- Use different wallets for development and production
+- Consider key rotation strategies
+
+### Contract Upgradability
+
+The current contract is not upgradable. For future versions:
+- Consider implementing upgrade mechanisms
+- Document the upgrade process
+- Test upgrades thoroughly on devnet before mainnet
+
+### Monitoring
+
+- Set up monitoring for contract interactions
+- Monitor token supply and large transfers
+- Implement alerts for unusual activity
+
+## Conclusion
+
+Deploying the Choir contract requires careful planning and execution. By following this guide, you can ensure a smooth deployment process and minimize potential issues. Always test thoroughly on devnet before proceeding to mainnet, and maintain secure practices for managing the treasury capability.
+
+=== File: docs/mainnet_migration.md ===
+
+
+
+==
+mainnet_migration
+==
+
+
+# Choir Mainnet Migration Guide
+
+This document outlines the process for migrating the Choir application from devnet to mainnet. It covers all aspects of the migration, including contract deployment, API configuration, client updates, and testing procedures.
+
+## Table of Contents
+
+1. [Migration Overview](#migration-overview)
+2. [Pre-Migration Checklist](#pre-migration-checklist)
+3. [Contract Deployment](#contract-deployment)
+4. [API Configuration](#api-configuration)
+5. [Client Configuration](#client-configuration)
+6. [Testing Procedures](#testing-procedures)
+7. [Rollout Strategy](#rollout-strategy)
+8. [Rollback Plan](#rollback-plan)
+9. [Post-Migration Monitoring](#post-migration-monitoring)
+
+## Migration Overview
+
+The migration from devnet to mainnet involves several key steps:
+
+1. Deploying the Choir token contract to Sui mainnet
+2. Updating API configurations to support both devnet and mainnet
+3. Updating client configurations to use the mainnet contract
+4. Testing the end-to-end flow on mainnet
+5. Gradually rolling out to users
+
+This process requires careful coordination and thorough testing to ensure a smooth transition.
+
+## Pre-Migration Checklist
+
+Before beginning the migration, ensure:
+
+- [ ] All devnet features are stable and working correctly
+- [ ] Contract code has been audited and reviewed
+- [ ] Sufficient SUI tokens are available for mainnet deployment
+- [ ] Backup of all private keys and mnemonics
+- [ ] Team members are assigned specific migration tasks
+- [ ] Rollback plan is in place
+- [ ] Monitoring tools are set up
+- [ ] Communication plan for users is prepared
+
+## Contract Deployment
+
+### 1. Prepare the Deployment Wallet
+
+```bash
+# Switch to mainnet
+sui client switch --env mainnet
+
+# Verify active address
+sui client active-address
+
+# Check gas balance
+sui client gas
+```
+
+Ensure the deployment wallet has at least 5 SUI for gas fees and is properly secured.
+
+### 2. Deploy the Contract
+
+```bash
+# Navigate to contract directory
+cd choir_coin/choir_coin
+
+# Build the contract
+sui move build
+
+# Publish to mainnet
+sui client publish --gas-budget 100000000
+```
+
+### 3. Record Contract IDs
+
+From the deployment output, record:
+
+- Package ID: `0x...`
+- Treasury Cap ID: `0x...`
+
+Store these values securely as they will be needed for API and client configuration.
+
+### 4. Initial Token Minting
+
+Mint an initial supply of tokens to the treasury wallet:
+
+```bash
+sui client call --package <MAINNET_PACKAGE_ID> --module choir --function mint --args <MAINNET_TREASURY_CAP_ID> 1000000000000 <TREASURY_WALLET_ADDRESS> --gas-budget 10000000
+```
+
+This mints 1,000 CHOIR tokens (with 9 decimals) to the treasury wallet.
+
+## API Configuration
+
+### 1. Update SUI Service
+
+Modify `api/app/services/sui_service.py` to support both environments:
+
+```python
+def __init__(self, network=None):
+    # Initialize network from parameter or environment variable
+    self.network = network or os.getenv("SUI_NETWORK", "devnet")
+    
+    # Configure RPC client based on network
+    if self.network == "mainnet":
+        self.client = SuiClient(config=ClientConfig(url="https://fullnode.mainnet.sui.io"))
+        self.package_id = "0x..." # Mainnet package ID
+        self.treasury_cap_id = "0x..." # Mainnet treasury cap ID
+        logger.info(f"Initialized SuiService for mainnet")
+    else:
+        self.client = SuiClient(config=ClientConfig(url="https://fullnode.devnet.sui.io"))
+        self.package_id = "0xb33aeae469ce4bdea302e66bb0330fbe4d606776451c3099a5fc557923556a6a"
+        self.treasury_cap_id = "0x6eab9c65acf9b4001199ac98813951140417b5feff8a85218eddd14a62d14f37"
+        logger.info(f"Initialized SuiService for devnet")
+```
+
+### 2. Update Config Module
+
+Modify `api/app/config.py` to include network configuration:
+
+```python
+class Config:
+    # Existing configuration...
+    
+    # SUI network configuration
+    SUI_NETWORK: str = os.getenv("SUI_NETWORK", "devnet")
+    
+    @classmethod
+    def from_env(cls):
+        # Existing code...
+        network = os.getenv("SUI_NETWORK", "devnet")
+        return cls(
+            # Existing parameters...
+            network=network,
+        )
+```
+
+### 3. Update Deployment Configuration
+
+Create environment-specific deployment configurations:
+
+```bash
+# For devnet
+export SUI_NETWORK=devnet
+
+# For mainnet
+export SUI_NETWORK=mainnet
+```
+
+## Client Configuration
+
+### 1. Update CoinType.swift
+
+Modify `Choir/Models/CoinType.swift` to support both environments:
+
+```swift
+#if DEBUG
+// Devnet configuration
+static let choir = CoinType(
+    coinTypeIdentifier: "0xb33aeae469ce4bdea302e66bb0330fbe4d606776451c3099a5fc557923556a6a::choir::CHOIR",
+    name: "Choir",
+    symbol: "CHOIR",
+    decimals: 9,
+    iconName: "choir-logo"
+)
+#else
+// Mainnet configuration
+static let choir = CoinType(
+    coinTypeIdentifier: "0x<MAINNET_PACKAGE_ID>::choir::CHOIR",
+    name: "Choir",
+    symbol: "CHOIR",
+    decimals: 9,
+    iconName: "choir-logo"
+)
+#endif
+```
+
+### 2. Update WalletManager.swift
+
+Ensure the `WalletManager` uses the correct network connection:
+
+```swift
+init() {
+    #if DEBUG
+    print("Using devnet connection")
+    restClient = SuiProvider(connection: DevnetConnection())
+    faucetClient = FaucetClient(connection: DevnetConnection())
+    #else
+    print("Using mainnet connection")
+    restClient = SuiProvider(connection: MainnetConnection())
+    faucetClient = FaucetClient(connection: MainnetConnection())
+    #endif
+    
+    // Load all wallets
+    Task {
+        await loadAllWallets()
+    }
+}
+```
+
+### 3. Update API Configuration
+
+Modify `Choir/Networking/APIClient.swift` to use the correct API endpoints:
+
+```swift
+#if DEBUG
+static let baseURL = URL(string: "https://api-dev.choir.io")!
+#else
+static let baseURL = URL(string: "https://api.choir.io")!
+#endif
+```
+
+## Testing Procedures
+
+### 1. API Testing
+
+Test the API with mainnet configuration:
+
+```bash
+# Set environment to mainnet
+export SUI_NETWORK=mainnet
+
+# Activate virtual environment
+cd api
+source venv/bin/activate
+
+# Run notification test
+python ../scripts/test_notifications.py
+```
+
+### 2. End-to-End Testing
+
+Perform these tests on the mainnet configuration:
+
+1. **Authentication**: Test wallet authentication with mainnet wallets
+2. **Wallet Balance**: Verify correct display of mainnet CHOIR tokens
+3. **Sending Tokens**: Test sending CHOIR tokens between wallets
+4. **Citation Rewards**: Test the citation reward flow
+5. **Notifications**: Verify citation notifications are received
+
+### 3. Performance Testing
+
+Test the performance of mainnet transactions:
+
+1. **Transaction Speed**: Measure transaction confirmation times
+2. **API Response Time**: Measure API response times with mainnet configuration
+3. **Load Testing**: Simulate multiple concurrent users
+
+## Rollout Strategy
+
+### 1. Phased Approach
+
+1. **Internal Testing**: Deploy to mainnet and test with internal team (1 week)
+2. **Beta Testers**: Invite select users to test mainnet version (2 weeks)
+3. **Gradual Rollout**: Roll out to 10%, 25%, 50%, then 100% of users
+
+### 2. Feature Flags
+
+Implement feature flags to control access to mainnet features:
+
+```swift
+// Example feature flag implementation
+let useMainnet = UserDefaults.standard.bool(forKey: "useMainnet") || isInBetaGroup
+```
+
+### 3. Communication Plan
+
+1. **Pre-Migration**: Inform users about upcoming migration
+2. **During Migration**: Provide status updates
+3. **Post-Migration**: Announce completion and new features
+
+## Rollback Plan
+
+In case of critical issues:
+
+### 1. API Rollback
+
+```bash
+# Switch API back to devnet
+export SUI_NETWORK=devnet
+```
+
+### 2. Client Rollback
+
+Release an emergency update reverting to devnet configuration.
+
+### 3. Data Recovery
+
+If necessary, implement a plan to reconcile any data discrepancies between devnet and mainnet.
+
+## Post-Migration Monitoring
+
+### 1. Transaction Monitoring
+
+Monitor:
+- Transaction success rates
+- Transaction confirmation times
+- Token balances and transfers
+
+### 2. Error Tracking
+
+Track:
+- API errors
+- Client-side errors
+- Contract interaction errors
+
+### 3. User Feedback
+
+Collect and respond to user feedback about the mainnet experience.
+
+## Conclusion
+
+Migrating from devnet to mainnet is a significant milestone for the Choir application. By following this guide and thoroughly testing each component, you can ensure a smooth transition with minimal disruption to users. Remember that mainnet operations involve real assets, so proceed with caution and prioritize security at every step.
+
+=== File: docs/notification_system.md ===
+
+
+
+==
+notification_system
+==
+
+
+# Choir Notification System
+
+This document describes the Choir notification system, focusing on citation notifications and their integration with the Choir token contract. It covers the architecture, implementation details, and troubleshooting procedures.
+
+## Table of Contents
+
+1. [System Overview](#system-overview)
+2. [Architecture](#architecture)
+3. [Implementation Details](#implementation-details)
+4. [Contract Integration](#contract-integration)
+5. [Testing](#testing)
+6. [Troubleshooting](#troubleshooting)
+7. [Future Improvements](#future-improvements)
+
+## System Overview
+
+The Choir notification system tracks and delivers notifications to users when their content is cited by others. These citations are also tied to the reward system, which mints Choir tokens to content creators when their work is cited.
+
+Key features:
+- Citation tracking and notification
+- Integration with the Choir token contract
+- In-app notification display
+- Transaction history
+
+## Architecture
+
+The notification system consists of several components:
+
+### Backend Components
+
+1. **NotificationService**: Handles the creation and retrieval of notifications
+2. **RewardsService**: Processes citation rewards and triggers notifications
+3. **DatabaseClient**: Stores and retrieves notifications from Qdrant
+4. **SuiService**: Interacts with the Sui blockchain and Choir contract
+
+### Frontend Components
+
+1. **TransactionService**: Fetches and displays notifications/transactions
+2. **NotificationsView**: UI for displaying notifications
+3. **WalletManager**: Manages wallet interactions and token transfers
+
+### Data Flow
+
+1. User cites content → Citation detected in yield phase
+2. RewardsService processes citation → Issues token rewards
+3. NotificationService creates notification → Stored in Qdrant
+4. Client fetches notifications → Displayed in TransactionsView
+
+## Implementation Details
+
+### Notification Data Structure
+
+```python
+notification = {
+    "type": "citation",  # or "self_citation"
+    "recipient_wallet_address": author_wallet_address,
+    "sender_wallet_address": citing_wallet_address,
+    "vector_id": vector_id,
+    "read": False,
+    "created_at": datetime.now(UTC).isoformat()
+}
+```
+
+### Database Storage
+
+Notifications are stored in Qdrant with:
+- Collection name: `notifications`
+- Vector size: Same as message vectors (placeholder vectors used)
+- Query filtering: By recipient wallet address
+
+### API Endpoints
+
+- `GET /api/notifications`: Retrieve notifications for a wallet
+- `POST /api/notifications/{id}/read`: Mark notification as read
+
+## Contract Integration
+
+The notification system integrates with the Choir token contract through the SuiService:
+
+### Citation Reward Flow
+
+1. Citation detected in `issue_citation_rewards` function
+2. SuiService mints tokens to author using:
+   ```python
+   mint_choir(recipient_address=author_wallet_address, amount=reward_amount)
+   ```
+3. NotificationService creates citation notification
+4. Both operations (minting and notification) are logged
+
+### Contract Dependencies
+
+The notification system depends on:
+- Package ID: Current devnet ID is `0xb33aeae469ce4bdea302e66bb0330fbe4d606776451c3099a5fc557923556a6a`
+- Treasury Cap ID: Current devnet ID is `0x6eab9c65acf9b4001199ac98813951140417b5feff8a85218eddd14a62d14f37`
+
+When the contract is redeployed, these IDs must be updated in:
+- `api/app/services/sui_service.py`
+- `Choir/Models/CoinType.swift`
+
+## Testing
+
+### Test Script
+
+The `scripts/test_notifications.py` script tests the end-to-end notification flow:
+
+1. Creates a test message with a wallet address
+2. Creates a citation to that message
+3. Verifies notification creation
+4. Tests notification retrieval
+5. Tests citation rewards through RewardsService
+
+### Running Tests
+
+```bash
+cd api
+source venv/bin/activate
+python ../scripts/test_notifications.py
+```
+
+### Expected Output
+
+A successful test will show:
+- Test message creation
+- Citation notification creation
+- Notification retrieval
+- Citation reward issuance
+- Transaction confirmation
+
+## Troubleshooting
+
+### Common Issues
+
+#### 1. Missing Notifications
+
+**Symptoms**: Citations occur but no notifications appear
+
+**Possible Causes**:
+- RewardsService not calling NotificationService
+- Database connection issues
+- Missing wallet metadata in vectors
+
+**Solutions**:
+- Check logs for errors in `issue_citation_rewards`
+- Verify Qdrant connection and collection existence
+- Ensure vectors have `wallet_address` in metadata
+
+#### 2. Contract Mismatch Errors
+
+**Symptoms**: "SuiKit.SuiError error 26" or similar errors
+
+**Possible Causes**:
+- Mismatched contract IDs after redeployment
+- Incorrect coin type identifier
+
+**Solutions**:
+- Update contract IDs in `sui_service.py`
+- Update coin type in `CoinType.swift`
+- Verify contract exists on the network
+
+#### 3. Database Errors
+
+**Symptoms**: "SortParams not available" or other Qdrant errors
+
+**Possible Causes**:
+- Qdrant client version mismatch
+- Missing collections
+- Query syntax errors
+
+**Solutions**:
+- Update Qdrant client or add compatibility code
+- Check collection existence and create if missing
+- Verify query syntax and parameters
+
+### Debugging Tools
+
+1. **Enhanced Logging**:
+   - NotificationService logs notification creation
+   - RewardsService logs reward issuance
+   - DatabaseClient logs database operations
+
+2. **Test Script**:
+   - Use `test_notifications.py` to verify the flow
+
+3. **Manual Verification**:
+   - Check Qdrant collections directly
+   - Verify Sui transactions on explorer
+
+## Future Improvements
+
+### Short-term Improvements
+
+1. **Batch Processing**:
+   - Process multiple notifications in a single operation
+   - Reduce database calls
+
+2. **Notification Categories**:
+   - Add support for different notification types
+   - Implement filtering by type
+
+3. **Read Status Sync**:
+   - Sync read status across devices
+   - Implement unread count badge
+
+### Long-term Improvements
+
+1. **Push Notifications**:
+   - Add optional push notification support
+   - Implement device token management
+
+2. **Notification Preferences**:
+   - Allow users to customize notification settings
+   - Implement notification frequency controls
+
+3. **Rich Notifications**:
+   - Add support for rich content in notifications
+   - Include preview of cited content
+
+## Conclusion
+
+The Choir notification system is a critical component that connects user interactions with the reward system. By ensuring proper integration with the Choir token contract and maintaining consistent configuration across deployments, the system can reliably deliver notifications and rewards to users.
+
+When deploying to new environments or redeploying the contract, special attention must be paid to updating the contract IDs and testing the end-to-end flow to ensure continued functionality.
 
 === File: docs/postchain_temporal_logic.md ===
 

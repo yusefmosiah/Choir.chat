@@ -449,12 +449,29 @@ class DatabaseClient:
         Returns:
             Result of the operation with the notification ID
         """
+        logger.info(f"DATABASE: Saving notification: {notification}")
+        print(f"DATABASE: Saving notification to collection {self.config.NOTIFICATIONS_COLLECTION}")
+
         try:
+            # Verify collection exists
+            if not self.client.collection_exists(self.config.NOTIFICATIONS_COLLECTION):
+                logger.warning(f"Notifications collection {self.config.NOTIFICATIONS_COLLECTION} does not exist, creating it")
+                self.client.create_collection(
+                    collection_name=self.config.NOTIFICATIONS_COLLECTION,
+                    vectors_config=models.VectorParams(
+                        size=self.config.VECTOR_SIZE,
+                        distance=models.Distance.COSINE
+                    )
+                )
+                logger.info(f"Created notifications collection: {self.config.NOTIFICATIONS_COLLECTION}")
+
             notification_id = str(uuid.uuid4())
+            logger.info(f"Generated notification ID: {notification_id}")
 
             # Add timestamp if not present
-            if "created_at" not in notification:
+            if "created_at" not in notification or notification["created_at"] is None:
                 notification["created_at"] = datetime.now(UTC).isoformat()
+                logger.info(f"Added timestamp: {notification['created_at']}")
 
             # Create point
             point = models.PointStruct(
@@ -462,16 +479,20 @@ class DatabaseClient:
                 vector=[0.0] * self.config.VECTOR_SIZE,  # Placeholder vector
                 payload=notification
             )
+            logger.info(f"Created point with ID: {notification_id}")
 
             # Save notification
+            logger.info(f"Upserting notification to collection: {self.config.NOTIFICATIONS_COLLECTION}")
             self.client.upsert(
                 collection_name=self.config.NOTIFICATIONS_COLLECTION,
                 points=[point]
             )
+            logger.info(f"Successfully upserted notification with ID: {notification_id}")
 
             return {"success": True, "id": notification_id}
         except Exception as e:
-            logger.error(f"Error saving notification: {e}")
+            logger.error(f"Error saving notification: {e}", exc_info=True)
+            print(f"Error saving notification: {e}")
             return {"success": False, "error": str(e)}
 
     async def get_user_notifications(self, wallet_addresses: List[str], limit: int = 50) -> List[Dict[str, Any]]:
@@ -485,9 +506,26 @@ class DatabaseClient:
         Returns:
             List of notifications
         """
+        logger.info(f"DATABASE: Getting notifications for wallet addresses: {wallet_addresses}")
+        print(f"DATABASE: Getting notifications for {len(wallet_addresses)} wallet addresses")
+
         try:
             if not wallet_addresses:
                 logger.warning("No wallet addresses provided, cannot get notifications")
+                return []
+
+            # Verify collection exists
+            if not self.client.collection_exists(self.config.NOTIFICATIONS_COLLECTION):
+                logger.warning(f"Notifications collection {self.config.NOTIFICATIONS_COLLECTION} does not exist, creating it")
+                self.client.create_collection(
+                    collection_name=self.config.NOTIFICATIONS_COLLECTION,
+                    vectors_config=models.VectorParams(
+                        size=self.config.VECTOR_SIZE,
+                        distance=models.Distance.COSINE
+                    )
+                )
+                logger.info(f"Created notifications collection: {self.config.NOTIFICATIONS_COLLECTION}")
+                # Return empty list since we just created the collection
                 return []
 
             # Build filter to match any of the wallet addresses
@@ -499,22 +537,50 @@ class DatabaseClient:
                 for address in wallet_addresses
             ]
 
-            search_result = self.client.scroll(
-                collection_name=self.config.NOTIFICATIONS_COLLECTION,
-                scroll_filter=models.Filter(
-                    should=should_conditions
-                ),
-                limit=limit,
-                with_payload=True,
-                with_vectors=False,
-                # Sort by created_at in descending order (newest first)
-                sort=models.SortParams(
-                    field_name="created_at",
-                    direction=models.Direction.DESC
+            logger.info(f"Built filter with {len(should_conditions)} conditions")
+
+            # Log the query we're about to execute
+            logger.info(f"Querying collection {self.config.NOTIFICATIONS_COLLECTION} with filter: should={[cond.key for cond in should_conditions]}")
+
+            # Check if SortParams is available in the models module
+            try:
+                # Try to use SortParams if available
+                search_result = self.client.scroll(
+                    collection_name=self.config.NOTIFICATIONS_COLLECTION,
+                    scroll_filter=models.Filter(
+                        should=should_conditions
+                    ),
+                    limit=limit,
+                    with_payload=True,
+                    with_vectors=False,
+                    # Sort by created_at in descending order (newest first)
+                    sort=models.SortParams(
+                        field_name="created_at",
+                        direction=models.Direction.DESC
+                    )
                 )
-            )
+            except AttributeError:
+                # Fall back to using without sort if SortParams is not available
+                logger.info("SortParams not available in this version of qdrant_client, using scroll without sorting")
+                search_result = self.client.scroll(
+                    collection_name=self.config.NOTIFICATIONS_COLLECTION,
+                    scroll_filter=models.Filter(
+                        should=should_conditions
+                    ),
+                    limit=limit,
+                    with_payload=True,
+                    with_vectors=False
+                )
+
 
             points, _ = search_result
+            logger.info(f"Found {len(points)} notifications")
+
+            # Log the first few notifications (if any)
+            if points:
+                for i, point in enumerate(points[:3]):  # Log first 3 notifications
+                    logger.info(f"Notification {i+1}: ID={point.id}, Type={point.payload.get('type')}, Created={point.payload.get('created_at')}")
+
             return [
                 {
                     "id": str(point.id),
@@ -523,7 +589,8 @@ class DatabaseClient:
                 for point in points
             ]
         except Exception as e:
-            logger.error(f"Error getting user notifications: {e}")
+            logger.error(f"Error getting user notifications: {e}", exc_info=True)
+            print(f"Error getting user notifications: {e}")
             return []
 
     async def mark_notification_as_read(self, notification_id: str) -> Dict[str, Any]:

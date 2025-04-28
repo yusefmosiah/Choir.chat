@@ -322,8 +322,22 @@ class WalletManager: ObservableObject {
             // Get the account to use for the API call
             let account = wallet.accounts[0]
 
+            print("Fetching CHOIR balance for coin type: \(CoinType.choir.fullType)")
+
             // Get CHOIR balance
             let choirCoinBalance = try await restClient.getBalance(account: account.publicKey, coinType: CoinType.choir.fullType)
+
+            print("CHOIR balance response: coinType=\(choirCoinBalance.coinType), balance=\(choirCoinBalance.totalBalance), objectCount=\(choirCoinBalance.coinObjectCount)")
+
+            // Verify that the coin type matches what we expect
+            // Convert to string for comparison since StructTag doesn't conform to StringProtocol
+            let actualCoinType = String(describing: choirCoinBalance.coinType)
+            if actualCoinType != CoinType.choir.fullType {
+                print("WARNING: Coin type mismatch. Expected: \(CoinType.choir.fullType), Actual: \(actualCoinType)")
+
+                // This is a warning, not an error, as we still want to show the balance
+                // But we'll log it for debugging purposes
+            }
 
             // Create wallet balance for CHOIR
             let balanceUInt64 = UInt64(choirCoinBalance.totalBalance) ?? 0
@@ -335,13 +349,20 @@ class WalletManager: ObservableObject {
 
             // Add to balances dictionary
             balances[.choir] = choirWalletBalance
+            print("Updated CHOIR balance: \(balanceUInt64)")
         } catch {
+            print("Error fetching CHOIR balance: \(error)")
+            if let suiError = error as? SuiError {
+                print("SUI Error: \(suiError)")
+            }
+
             // If we can't get CHOIR balance, set it to 0
             balances[.choir] = WalletBalance(
                 coinType: .choir,
                 balance: 0,
                 objectCount: 0
             )
+            print("Set CHOIR balance to 0 due to error")
         }
 
         // We've already handled both SUI and CHOIR balances above
@@ -351,11 +372,16 @@ class WalletManager: ObservableObject {
     // Send any supported coin type
     func send(amount: UInt64, coinType: CoinType, to recipient: String) async throws -> SuiTransactionBlockEffects? {
         guard let wallet else {
+            print("ERROR: No wallet loaded")
             throw WalletError.noWalletLoaded
         }
 
+        // Log the transaction details
+        print("Sending \(amount) of \(coinType.symbol) (\(coinType.fullType)) to \(recipient)")
+
         // Check if we have enough balance
         guard let walletBalance = balances[coinType], walletBalance.balance >= Double(amount) else {
+            print("ERROR: Insufficient balance. Required: \(amount), Available: \(balances[coinType]?.balance ?? 0)")
             throw WalletError.insufficientBalance
         }
 
@@ -364,37 +390,58 @@ class WalletManager: ObservableObject {
 
         do {
             var txBlock = try TransactionBlock()
+            print("Created transaction block")
 
             if coinType == .sui {
+                print("Processing SUI transaction")
                 // For SUI, we can use gas directly
                 // Create the pure value for the amount
                 let amountArg = try txBlock.pure(value: .number(amount))
+                print("Created amount argument: \(amount)")
 
                 // Split the gas coin
                 let coin = try txBlock.splitCoin(
                     coin: txBlock.gas,
                     amounts: [amountArg]
                 )
+                print("Split gas coin")
+
                 let _ = try txBlock.transferObject(
                     objects: [coin],
                     address: recipient
                 )
+                print("Added transfer object command")
             } else {
+                print("Processing \(coinType.symbol) transaction with type: \(coinType.fullType)")
                 // For other coins, we need to get the coin objects first
                 // Get the account to use for the API call
                 let account = wallet.accounts[0]
 
                 // Get coins directly using the account's address
                 let address = try account.address()
-                let coins = try await restClient.getCoins(
-                    account: address,
-                    coinType: coinType.fullType
-                )
+                print("Getting coins for address: \(address) and coin type: \(coinType.fullType)")
+
+                // Use Task to isolate non-sendable types
+                let coins = try await Task {
+                    return try await restClient.getCoins(
+                        account: address,
+                        coinType: coinType.fullType
+                    )
+                }.value
+                print("Retrieved \(coins.data.count) coin objects")
 
                 // Extract the coin data
                 let coinData = coins.data
                 guard !coinData.isEmpty else {
+                    print("ERROR: No coin objects found for type: \(coinType.fullType)")
                     throw WalletError.noCoinObjectsFound
+                }
+
+                print("Found \(coinData.count) coin objects")
+
+                // Log the first few coins for debugging
+                for (index, coin) in coinData.prefix(3).enumerated() {
+                    print("Coin \(index): ID=\(coin.coinObjectId), Balance=\(coin.balance)")
                 }
 
                 // Find coins that have enough balance
@@ -405,6 +452,7 @@ class WalletManager: ObservableObject {
                     if let balance = UInt64(coin.balance), balance > 0 {
                         selectedCoins.append(coin.coinObjectId)
                         remainingAmount -= min(balance, remainingAmount)
+                        print("Selected coin: \(coin.coinObjectId) with balance: \(balance), remaining amount: \(remainingAmount)")
 
                         if remainingAmount == 0 {
                             break
@@ -413,16 +461,23 @@ class WalletManager: ObservableObject {
                 }
 
                 guard remainingAmount == 0 else {
+                    print("ERROR: Not enough balance in coin objects. Remaining amount needed: \(remainingAmount)")
                     throw WalletError.insufficientBalance
                 }
 
+                print("Selected \(selectedCoins.count) coins with sufficient balance")
+
                 // Create the transaction
                 let primaryCoin = try txBlock.object(id: selectedCoins[0])
+                print("Added primary coin to transaction: \(selectedCoins[0])")
 
                 // If we need multiple coins, merge them first
                 if selectedCoins.count > 1 {
+                    print("Need to merge \(selectedCoins.count) coins")
                     for i in 1..<selectedCoins.count {
                         let additionalCoin = try txBlock.object(id: selectedCoins[i])
+                        print("Added additional coin to transaction: \(selectedCoins[i])")
+
                         // We need to convert the TransactionObjectArgument to TransactionArgument
                         // For now, we'll use a workaround by creating a new transaction
                         // This is a temporary solution until we find a better way to convert the types
@@ -441,63 +496,89 @@ class WalletManager: ObservableObject {
                             arguments: [primaryArg, additionalArg],
                             typeArguments: [coinType.fullType]
                         )
+                        print("Added join command for coins: \(primaryCoinId) and \(additionalCoinId)")
                     }
                 }
 
                 // Split and transfer
                 // Create the pure value for the amount
                 let amountArg = try txBlock.pure(value: .number(amount))
+                print("Created amount argument: \(amount)")
 
                 // We need to use a different approach for splitting coins
                 // Use moveCall with the coin::split function
                 let primaryCoinId = selectedCoins[0]
+                print("Using primary coin for split: \(primaryCoinId)")
 
                 // Split the coin using moveCall
                 // Convert TransactionObjectArgument to TransactionArgument
                 let primaryArg = (try txBlock.object(id: primaryCoinId)).toTransactionArgument()
+                print("Created primary coin argument")
 
                 // Call moveCall with proper TransactionArgument objects
                 // We need to convert the TransactionBlockInput to TransactionArgument
                 let primaryArgument = TransactionArgument.input(TransactionBlockInput(index: 0))
                 let amountArgument = TransactionArgument.input(TransactionBlockInput(index: 1))
+                print("Created transaction arguments")
 
+                print("Calling coin::split with type argument: \(coinType.fullType)")
                 let transferCoin = try txBlock.moveCall(
                     target: "0x2::coin::split",
                     arguments: [primaryArgument, amountArgument],
                     typeArguments: [coinType.fullType]
                 )
+                print("Split coin successfully")
 
                 let _ = try txBlock.transferObject(
                     objects: transferCoin,
                     address: recipient
                 )
+                print("Added transfer object command to recipient: \(recipient)")
             }
 
             let options = SuiTransactionBlockResponseOptions(showEffects: true)
+            print("Created transaction options with showEffects=true")
 
             // Execute the transaction using Task to isolate non-sendable types
+            print("Executing transaction...")
             let result = try await Task {
+                print("Signing and executing transaction block")
                 var txResult = try await restClient.signAndExecuteTransactionBlock(
                     transactionBlock: &txBlock,
                     signer: wallet.accounts[0],
                     options: options
                 )
+                print("Transaction executed with digest: \(txResult.digest)")
 
+                print("Waiting for transaction confirmation")
                 txResult = try await restClient.waitForTransaction(
                     tx: txResult.digest,
                     options: options
                 )
+                print("Transaction confirmed")
 
                 return txResult
             }.value
 
             // Extract the effects from the result
             let effects = result.effects
+            if let status = effects?.status {
+                print("Transaction effects status: \(status)")
+            } else {
+                print("Transaction effects status: unknown")
+            }
 
+            print("Updating wallet balance")
             try await updateBalance(for: wallet)
+            print("Transaction completed successfully")
 
             return effects
         } catch {
+            print("ERROR in send function: \(error)")
+            print("Error details: \(error.localizedDescription)")
+            if let suiError = error as? SuiError {
+                print("SUI Error: \(suiError)")
+            }
             self.error = error
             throw error
         }
@@ -603,6 +684,8 @@ enum WalletError: Error, LocalizedError {
     case insufficientBalance
     case noCoinObjectsFound
     case unsupportedCoinType
+    case coinTypeMismatch(expected: String, actual: String)
+    case transactionFailed(code: Int, message: String)
 
     var errorDescription: String? {
         switch self {
@@ -620,6 +703,10 @@ enum WalletError: Error, LocalizedError {
             return "No coin objects found for this coin type"
         case .unsupportedCoinType:
             return "This coin type is not supported"
+        case .coinTypeMismatch(let expected, let actual):
+            return "Coin type mismatch. Expected: \(expected), Actual: \(actual)"
+        case .transactionFailed(let code, let message):
+            return "Transaction failed with code \(code): \(message)"
         }
     }
 }

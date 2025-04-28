@@ -8,6 +8,7 @@ from typing import Dict, List, Optional, Tuple, Any
 import asyncio
 
 from app.services.sui_service import SuiService
+from app.services.notification_service import NotificationService
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -16,6 +17,7 @@ logger = logging.getLogger(__name__)
 class RewardsService:
     def __init__(self):
         self.sui_service = SuiService()
+        self.notification_service = NotificationService()
 
     async def calculate_novelty_reward(self, max_similarity: float) -> int:
         """
@@ -187,6 +189,17 @@ class RewardsService:
                                 "success": False,
                                 "reason": "self_citation"
                             })
+
+                            # Still send a self-citation notification
+                            try:
+                                notification_result = await self.notification_service.send_citation_notification(
+                                    vector_id=vector_id,
+                                    citing_wallet_address=wallet_address
+                                )
+                                logger.info(f"Self-citation notification result: {notification_result}")
+                            except Exception as e:
+                                logger.error(f"Error sending self-citation notification for vector {vector_id}: {e}", exc_info=True)
+
                             continue
 
                         # If we get here, we have a valid author wallet address
@@ -203,6 +216,16 @@ class RewardsService:
                                 "success": True,
                                 "digest": author_result.get("digest")
                             })
+
+                            # Send citation notification
+                            try:
+                                notification_result = await self.notification_service.send_citation_notification(
+                                    vector_id=vector_id,
+                                    citing_wallet_address=wallet_address
+                                )
+                                logger.info(f"Citation notification result: {notification_result}")
+                            except Exception as e:
+                                logger.error(f"Error sending citation notification for vector {vector_id}: {e}", exc_info=True)
                         else:
                             logger.error(f"Failed to issue citation reward to author {author_wallet_address}: {author_result.get('error')}")
                             author_rewards.append({

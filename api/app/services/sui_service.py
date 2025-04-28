@@ -32,22 +32,48 @@ class SuiService:
             self.signer = keypair_from_keystring(deployer_key)
 
             # Store deployed CHOIR contract info
-            # These IDs are for the devnet deployment
-            self.package_id = "0xd3b2e1abf59c4e135015f3f3917ad54424c6d45f16cc069585a905af9815c999"
-            self.treasury_cap_id = "0x343a5b3780a05eaf4ea139f786a28cee4120cdc14334d0666c386e014dbe8659"
+            # These IDs need to be updated when redeploying to devnet
+            # The current IDs may be outdated and need to be replaced with the new deployment IDs
+            logger.info("Initializing with contract IDs - these should match your latest deployment")
+            print("Initializing with contract IDs - these should match your latest deployment")
+
+            # Update these IDs with the values from your latest deployment to devnet
+            self.package_id = "0xb33aeae469ce4bdea302e66bb0330fbe4d606776451c3099a5fc557923556a6a"
+            self.treasury_cap_id = "0x6eab9c65acf9b4001199ac98813951140417b5feff8a85218eddd14a62d14f37"
+
+            logger.info(f"Using package_id: {self.package_id}")
+            logger.info(f"Using treasury_cap_id: {self.treasury_cap_id}")
+            print(f"Using package_id: {self.package_id}")
+            print(f"Using treasury_cap_id: {self.treasury_cap_id}")
 
             # Verify that the contract exists
             try:
                 # Get object info for the treasury cap using the correct method signature
                 # The pysui library expects the object_id as a positional argument, not a keyword
+                logger.info(f"Verifying treasury cap object: {self.treasury_cap_id}")
+                print(f"Verifying treasury cap object: {self.treasury_cap_id}")
                 treasury_cap_result = self.client.get_object(self.treasury_cap_id)
+
                 if not treasury_cap_result.is_ok():
                     logger.warning(f"Treasury cap object not found: {treasury_cap_result.result_string}")
                     logger.warning("This may indicate that the contract has been redeployed or is not available on this network")
+                    print(f"WARNING: Treasury cap object not found: {treasury_cap_result.result_string}")
+                    print("This may indicate that the contract has been redeployed or is not available on this network")
                 else:
                     logger.info(f"Treasury cap object verified: {self.treasury_cap_id}")
+                    print(f"Treasury cap object verified: {self.treasury_cap_id}")
+
+                    # Get more details about the object
+                    try:
+                        object_details = treasury_cap_result.result_data
+                        logger.info(f"Treasury cap object type: {object_details.type if hasattr(object_details, 'type') else 'Unknown'}")
+                        logger.info(f"Treasury cap object owner: {object_details.owner if hasattr(object_details, 'owner') else 'Unknown'}")
+                        logger.info(f"Treasury cap object status: {object_details.status if hasattr(object_details, 'status') else 'Unknown'}")
+                    except Exception as detail_e:
+                        logger.warning(f"Error getting treasury cap details: {detail_e}")
             except Exception as e:
                 logger.warning(f"Error verifying treasury cap: {e}")
+                print(f"Error verifying treasury cap: {e}")
                 # We don't raise an exception here as we want to continue initialization
 
             logger.info("SuiService initialized successfully")

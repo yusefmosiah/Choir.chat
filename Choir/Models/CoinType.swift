@@ -24,7 +24,7 @@ struct CoinType: Identifiable, Hashable, Sendable {
     )
 
     static let choir = CoinType(
-        coinTypeIdentifier: "0xd3b2e1abf59c4e135015f3f3917ad54424c6d45f16cc069585a905af9815c999::choir::CHOIR",
+        coinTypeIdentifier: "0xb33aeae469ce4bdea302e66bb0330fbe4d606776451c3099a5fc557923556a6a::choir::CHOIR",
         name: "Choir",
         symbol: "CHOIR",
         decimals: 9,
