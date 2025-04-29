@@ -170,12 +170,21 @@ class ChoirThread: ObservableObject, Identifiable, Hashable {
     @Published var walletAddress: String?
     @Published var messages: [Message] = []
 
-    init(id: UUID = UUID(), title: String? = nil, walletAddress: String? = nil) {
+    // Used when loading metadata-only to store message count without loading messages
+    @Published var metadataMessageCount: Int = 0
+
+    // Computed property to get the message count, either from messages array or metadata
+    var messageCount: Int {
+        return messages.isEmpty && metadataMessageCount > 0 ? metadataMessageCount : messages.count
+    }
+
+    init(id: UUID = UUID(), title: String? = nil, walletAddress: String? = nil, metadataMessageCount: Int = 0) {
         self.id = id
         self.title = title ?? "ChoirThread \(DateFormatter.localizedString(from: Date(), dateStyle: .short, timeStyle: .short))"
         self.createdAt = Date()
         self.lastModified = Date()
         self.walletAddress = walletAddress
+        self.metadataMessageCount = metadataMessageCount
     }
 
     static func == (lhs: ChoirThread, rhs: ChoirThread) -> Bool {

@@ -303,8 +303,8 @@ struct ThreadMetadata: Codable {
         // Create a UUID from the string
         let threadId = UUID(uuidString: id) ?? UUID()
 
-        // Create a new thread with metadata only (no messages)
-        let thread = ChoirThread(id: threadId, title: title, walletAddress: walletAddress)
+        // Create a new thread with metadata only (no messages) but with message count
+        let thread = ChoirThread(id: threadId, title: title, walletAddress: walletAddress, metadataMessageCount: messageCount)
 
         // Set dates
         thread.createdAt = createdAt

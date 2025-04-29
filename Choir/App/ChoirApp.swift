@@ -22,12 +22,6 @@ struct ChoirApp: App {
             .environmentObject(appDelegate)
             .environmentObject(backgroundMonitor)
             .onAppear {
-                // Load only thread metadata (not full content) for better performance
-                let threads = ThreadPersistenceService.shared.loadAllThreadsMetadata()
-                let threadIDs = Set(threads.map { $0.id })
-                // TODO: Store threadIDs in a shared model or environment object
-
-                print("App appeared - loaded \(threads.count) thread metadata entries")
                 print("App appeared - checking authentication state")
 
                 // Check biometric authentication availability

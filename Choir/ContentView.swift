@@ -271,7 +271,7 @@ struct ChoirThreadRow: View {
             }
 
             HStack {
-                Text("\(thread.messages.count) messages")
+                Text("\(thread.messageCount) messages")
                     .font(.caption)
                     .foregroundStyle(.secondary)
 
