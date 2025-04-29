@@ -1,4 +1,27 @@
 # Changelog
+## [2025-04-28] - 2025-04-28
+
+### Added
+
+- **Mainnet Deployment:** Successfully deployed Choir to the Sui mainnet with package ID `0x4f83f1cd85aefd0254e5b6f93bd344f49dd434269af698998dd5f4baec612898::choir::CHOIR`.
+- **Multiple Wallet Support:** Implemented support for multiple wallet accounts with horizontal scrolling in the Wallets tab.
+- **Wallet & Thread Import/Export:** Added secure import and export functionality for wallets and threads with biometric protection.
+- **Rewards System:** Implemented the full rewards system with:
+  - **Novelty Rewards:** Users earn rewards for original content based on vector similarity scores.
+  - **Citation Rewards:** Authors of cited content receive rewards when their contributions inform responses.
+  - **Choir Coin Integration:** Connected to Sui blockchain for minting and distributing CHOIR tokens.
+- **Improved Pagination:** Enhanced pagination system that preserves formatting across pages while maximizing content density.
+- **Transaction Management:** Added a dedicated Transactions tab showing a chronological history of all transactions across wallets.
+- **Citation Display:** Implemented early UI for displaying and interacting with citations in vector content.
+- **Performance Optimization:** Improved app launch and navigation performance by loading only thread metadata initially and loading full content when needed.
+- **Model Updates:** Added support for newer AI models and improved model configuration management.
+
+### Changed
+
+- **UI Redesign:** Completely redesigned interface with improved navigation flow and visual consistency.
+- **Thread Management:** Enhanced thread persistence with wallet-specific thread storage and optimized loading.
+- **Authentication Flow:** Improved authentication with biometric support (FaceID/TouchID) and passcode fallback.
+
 ## [2025-04-09] - 2025-04-09
 
 ### Added
