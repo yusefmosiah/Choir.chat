@@ -1,17 +1,35 @@
-/* api/static/shared/style.css */
+/* api/static/shared/style.css - Updated with Choir Design Style Guide */
 :root {
-    --background-start: #f0f2f5;
-    --background-end: #e0e4e8;
-    --text-color: #1a1a1a;
-    --primary-color: #0052ff; /* Electric Blue */
-    --primary-text: #ffffff;
-    --border-color: #1a1a1a;
-    --shadow-color: #1a1a1a;
-    --glass-bg: rgba(255, 255, 255, 0.1); /* Subtle glass for code/quotes */
-    --glass-border: rgba(255, 255, 255, 0.2);
-    --card-bg: #ffffff; /* Maybe for blockquotes? */
+    /* Base Colors */
+    --background-color: rgba(245, 245, 247, 0.8);
+    /* System background with transparency */
+    --text-color-primary: #1a1a1a;
+    --text-color-secondary: #4a4a4a;
+    --shadow-color: rgba(0, 0, 0, 0.15);
+    --highlight-color: rgba(255, 255, 255, 0.3);
 
+    /* Accent Gradient Colors */
+    --gradient-green: #00C853;
+    --gradient-blue: #2196F3;
+    --gradient-purple: #9C27B0;
+
+    /* Status Colors */
+    --error-color: #F44336;
+    --warning-color: #FF9800;
+    --success-color: #4CAF50;
+
+    /* Glass Effects */
+    --glass-bg: rgba(255, 255, 255, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.3);
+    --glass-shadow: rgba(0, 0, 0, 0.1);
+
+    /* Typography */
     --font-primary: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+    /* Border Radius */
+    --border-radius-sm: 12px;
+    --border-radius-md: 16px;
+    --border-radius-lg: 20px;
 }
 
 * {
@@ -26,88 +44,282 @@ html {
 
 body {
     font-family: var(--font-primary);
-    color: var(--text-color);
-    background: linear-gradient(135deg, var(--background-start), var(--background-end));
-    line-height: 1.7; /* Slightly more spacing for readability */
+    color: var(--text-color-primary);
+    background-color: var(--background-color);
+    background-image: linear-gradient(135deg, rgba(0, 200, 83, 0.05), rgba(33, 150, 243, 0.05), rgba(156, 39, 176, 0.05));
+    background-attachment: fixed;
+    line-height: 1.7;
+    /* Slightly more spacing for readability */
     padding: 20px;
     display: flex;
-    justify-content: center; /* Center content block */
+    justify-content: center;
+    /* Center content block */
+    min-height: 100vh;
 }
 
-/* Main content wrapper */
+/* Main content wrapper - Neumorphic glass card */
 .content-wrapper {
-    max-width: 800px; /* Readable width */
+    max-width: 800px;
+    /* Readable width */
     width: 100%;
-    background: var(--card-bg); /* Give content a white background */
+    background: var(--glass-bg);
+    /* Glass-like background */
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     padding: 30px 40px;
-    border: 2px solid var(--border-color);
-    box-shadow: 5px 5px 0px var(--shadow-color);
+    border-radius: var(--border-radius-lg);
+    box-shadow:
+        0 8px 20px var(--shadow-color),
+        /* Outer shadow */
+        inset 0 1px 2px var(--highlight-color);
+    /* Inner highlight */
     margin-top: 20px;
     margin-bottom: 40px;
+    position: relative;
+    overflow: hidden;
 }
 
-h1, h2, h3, h4, h5, h6 {
-    font-weight: 700;
+/* Optional: Angular gradient border for content wrapper */
+.content-wrapper::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: var(--border-radius-lg);
+    padding: 1px;
+    /* Border width */
+    background: linear-gradient(135deg,
+            var(--gradient-green),
+            var(--gradient-blue),
+            var(--gradient-purple),
+            var(--gradient-blue),
+            var(--gradient-green));
+    -webkit-mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    opacity: 0.7;
+    z-index: -1;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-weight: 500;
+    /* Medium weight as per style guide */
     margin-top: 1.5em;
     margin-bottom: 0.8em;
     line-height: 1.3;
-    color: var(--text-color);
+    color: var(--text-color-primary);
 }
 
-h1 { font-size: 2.8rem; border-bottom: 2px solid var(--border-color); padding-bottom: 0.3em; }
-h2 { font-size: 2.2rem; }
-h3 { font-size: 1.8rem; color: var(--primary-color); }
-h4 { font-size: 1.4rem; }
+h1 {
+    font-size: 2.6rem;
+    /* 42pt equivalent */
+    padding-bottom: 0.3em;
+    background: linear-gradient(135deg,
+            var(--gradient-green),
+            var(--gradient-blue),
+            var(--gradient-purple));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    display: inline-block;
+}
+
+h2 {
+    font-size: 2rem;
+    /* 32pt equivalent */
+}
+
+h3 {
+    font-size: 1.6rem;
+    /* 26pt equivalent */
+    background: linear-gradient(135deg,
+            var(--gradient-blue),
+            var(--gradient-purple));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    display: inline-block;
+}
+
+h4 {
+    font-size: 1.25rem;
+    /* 20pt equivalent */
+}
 
 p {
     margin-bottom: 1.2em;
 }
 
 a {
-    color: var(--primary-color);
+    color: var(--gradient-blue);
     text-decoration: none;
-    font-weight: 600;
-    border-bottom: 2px solid transparent;
-    transition: border-color 0.2s ease, color 0.2s ease;
+    font-weight: 500;
+    position: relative;
+    transition: all 0.2s ease;
+}
+
+a::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 1px;
+    bottom: -2px;
+    left: 0;
+    background: linear-gradient(90deg,
+            var(--gradient-blue),
+            var(--gradient-purple));
+    transform: scaleX(0);
+    transform-origin: bottom right;
+    transition: transform 0.3s ease;
 }
 
 a:hover {
-    border-bottom-color: var(--primary-color);
-    color: #003bb3; /* Darker blue on hover */
+    color: var(--gradient-purple);
+}
+
+a:hover::after {
+    transform: scaleX(1);
+    transform-origin: bottom left;
 }
 
 /* Styling for the mailto link to look like a button */
-a[href^="mailto:"] {
+a[href^="mailto:"],
+.btn-primary {
     display: inline-block;
-    padding: 10px 20px;
+    padding: 14px 24px;
     font-size: 1rem;
-    font-weight: 700;
+    font-weight: 500;
     text-decoration: none;
-    border: 2px solid var(--border-color);
-    box-shadow: 3px 3px 0px var(--shadow-color);
-    transition: all 0.15s ease-out;
+    border-radius: var(--border-radius-sm);
     cursor: pointer;
     text-align: center;
-    background-color: var(--primary-color);
-    color: var(--primary-text);
     margin-top: 1em;
     margin-bottom: 1em;
+    position: relative;
+    color: white;
+    background: linear-gradient(135deg,
+            var(--gradient-green),
+            var(--gradient-blue),
+            var(--gradient-purple));
+    background-size: 200% 200%;
+    animation: gradientShift 15s ease infinite;
+    box-shadow:
+        0 4px 12px rgba(0, 0, 0, 0.1),
+        inset 0 1px 1px rgba(255, 255, 255, 0.3);
+    transition: all 0.3s ease;
+    overflow: hidden;
 }
 
- a[href^="mailto:"]:hover {
-    transform: translate(-1px, -1px);
-    box-shadow: 4px 4px 0px var(--shadow-color);
-    border-bottom-color: transparent; /* Remove underline hover for button-like links */
-     background-color: #0048e0; /* Slightly darker blue */
+a[href^="mailto:"]::before,
+.btn-primary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: var(--border-radius-sm);
+    /* Removed blur effect that was causing text to be blurry */
 }
 
- a[href^="mailto:"]:active {
-    transform: translate(1px, 1px);
-    box-shadow: 2px 2px 0px var(--shadow-color);
+a[href^="mailto:"] span,
+.btn-primary span {
+    position: relative;
+    z-index: 1;
+}
+
+/* Special styling for TestFlight link */
+a[href^="mailto:"][href*="TestFlight"] {
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+    padding: 16px 28px;
+}
+
+a[href^="mailto:"]:hover,
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow:
+        0 6px 16px rgba(0, 0, 0, 0.15),
+        inset 0 1px 1px rgba(255, 255, 255, 0.3);
+}
+
+a[href^="mailto:"]:active,
+.btn-primary:active {
+    transform: translateY(1px);
+    box-shadow:
+        0 2px 8px rgba(0, 0, 0, 0.1),
+        inset 0 1px 1px rgba(255, 255, 255, 0.3);
+}
+
+/* Secondary button style */
+.btn-secondary {
+    display: inline-block;
+    padding: 12px 20px;
+    font-size: 1rem;
+    font-weight: 500;
+    text-decoration: none;
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    text-align: center;
+    margin-top: 1em;
+    margin-bottom: 1em;
+    color: var(--text-color-primary);
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow:
+        0 4px 12px rgba(0, 0, 0, 0.05),
+        inset 0 1px 1px rgba(255, 255, 255, 0.5);
+    border: 1px solid var(--glass-border);
+    transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+    transform: translateY(-2px);
+    box-shadow:
+        0 6px 16px rgba(0, 0, 0, 0.08),
+        inset 0 1px 1px rgba(255, 255, 255, 0.5);
+}
+
+.btn-secondary:active {
+    transform: translateY(1px);
+    box-shadow:
+        0 2px 8px rgba(0, 0, 0, 0.05),
+        inset 0 1px 1px rgba(255, 255, 255, 0.5);
+}
+
+/* Gradient animation */
+@keyframes gradientShift {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
 }
 
 
-ul, ol {
+ul,
+ol {
     margin-left: 2em;
     margin-bottom: 1.2em;
 }
@@ -116,46 +328,94 @@ li {
     margin-bottom: 0.5em;
 }
 
-/* Code Blocks - Subtle Glass */
+/* Code Blocks - Neumorphic Glass */
 pre {
     background: var(--glass-bg);
-    border: 1px solid var(--glass-border);
-    border-radius: 8px; /* Rounded corners for glass */
-    padding: 1em;
+    border-radius: var(--border-radius-md);
+    padding: 1.2em;
     margin-bottom: 1.5em;
     overflow-x: auto;
-    backdrop-filter: blur(5px); /* Subtle blur */
-    -webkit-backdrop-filter: blur(5px);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); /* Soft shadow */
-    border: 1px solid var(--border-color); /* Keep brutalist border */
-    box-shadow: 3px 3px 0px var(--shadow-color); /* Keep brutalist shadow */
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow:
+        0 8px 20px var(--shadow-color),
+        inset 0 1px 2px var(--highlight-color);
+    position: relative;
+    border: none;
+}
+
+/* Angular gradient border for code blocks */
+pre::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: var(--border-radius-md);
+    padding: 1px;
+    /* Border width */
+    background: linear-gradient(135deg,
+            var(--gradient-blue),
+            var(--gradient-purple));
+    -webkit-mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    opacity: 0.5;
+    z-index: -1;
 }
 
 code {
     font-family: monospace;
-    background-color: rgba(0, 0, 0, 0.05); /* Subtle background for inline code */
+    background-color: rgba(0, 0, 0, 0.05);
     padding: 0.2em 0.4em;
     border-radius: 3px;
     font-size: 0.9em;
 }
 
 pre code {
-    background-color: transparent; /* Code inside pre shouldn't have extra bg */
+    background-color: transparent;
     padding: 0;
     border-radius: 0;
-    font-size: 1em; /* Inherit pre font size */
+    font-size: 1em;
+    color: var(--text-color-primary);
 }
 
-/* Blockquotes - Optional Card Style */
+/* Blockquotes - Neumorphic Glass Card Style */
 blockquote {
     margin: 1.5em 0;
-    padding: 1em 1.5em;
-    border-left: 4px solid var(--primary-color);
-    background-color: var(--card-bg);
-    border: 2px solid var(--border-color);
-    box-shadow: 3px 3px 0px var(--shadow-color);
+    padding: 1.5em 2em;
+    background: var(--glass-bg);
+    border-radius: var(--border-radius-md);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow:
+        0 6px 16px var(--shadow-color),
+        inset 0 1px 2px var(--highlight-color);
     font-style: italic;
-    color: #444; /* Slightly muted text */
+    color: var(--text-color-secondary);
+    position: relative;
+    border: none;
+}
+
+/* Left border gradient for blockquotes */
+blockquote::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 4px;
+    background: linear-gradient(to bottom,
+            var(--gradient-green),
+            var(--gradient-blue),
+            var(--gradient-purple));
+    border-radius: 4px 0 0 4px;
 }
 
 blockquote p {
@@ -165,34 +425,173 @@ blockquote p {
 img {
     max-width: 100%;
     height: auto;
-    display: block; /* Prevent extra space below image */
-    margin: 1.5em auto; /* Center images */
-    border: 2px solid var(--border-color);
-    box-shadow: 4px 4px 0px var(--shadow-color);
+    display: block;
+    margin: 1.5em auto;
+    border-radius: var(--border-radius-md);
+    box-shadow: 0 8px 20px var(--shadow-color);
+    position: relative;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+img:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 24px var(--shadow-color);
+}
+
+/* Optional: Angular gradient border for images */
+.img-gradient {
+    position: relative;
+    padding: 3px;
+    border-radius: var(--border-radius-md);
+    background: linear-gradient(135deg,
+            var(--gradient-green),
+            var(--gradient-blue),
+            var(--gradient-purple));
+    display: inline-block;
+    margin: 1.5em auto;
+}
+
+.img-gradient img {
+    border-radius: calc(var(--border-radius-md) - 3px);
+    margin: 0;
+    display: block;
 }
 
 hr {
     border: none;
-    border-top: 2px solid var(--border-color);
-    margin: 2em 0;
+    height: 1px;
+    margin: 2.5em 0;
+    background: linear-gradient(90deg,
+            transparent,
+            var(--gradient-blue),
+            var(--gradient-purple),
+            var(--gradient-blue),
+            transparent);
+    opacity: 0.7;
 }
 
-/* Footer styling (if you add one in base.html) */
+/* Input fields - Neumorphic glass styling */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+textarea,
+select {
+    width: 100%;
+    padding: 12px 16px;
+    margin-bottom: 1.2em;
+    border: none;
+    border-radius: var(--border-radius-md);
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow:
+        0 4px 12px var(--shadow-color),
+        inset 0 1px 2px var(--highlight-color);
+    color: var(--text-color-primary);
+    font-family: var(--font-primary);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+textarea:focus,
+select:focus {
+    outline: none;
+    box-shadow:
+        0 6px 16px var(--shadow-color),
+        inset 0 1px 2px var(--highlight-color);
+}
+
+/* Input field with gradient border on focus */
+.input-gradient {
+    position: relative;
+}
+
+.input-gradient::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: var(--border-radius-md);
+    padding: 1px;
+    background: linear-gradient(135deg,
+            var(--gradient-green),
+            var(--gradient-blue),
+            var(--gradient-purple));
+    -webkit-mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    opacity: 0;
+    z-index: 1;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.input-gradient:focus-within::after {
+    opacity: 1;
+}
+
+/* Footer styling - simplified and lighter */
 footer {
     text-align: center;
     margin-top: 40px;
-    padding-top: 20px;
-    border-top: 1px solid rgba(0, 0, 0, 0.1);
-    font-size: 0.9rem;
-    color: var(--text-color);
-    opacity: 0.7;
+    padding: 15px 0;
+    font-size: 0.8rem;
+    color: var(--text-color-secondary);
+    opacity: 0.5;
+    position: relative;
+}
+
+/* Copyright text - even lighter */
+.copyright {
+    font-size: 0.75rem;
+    opacity: 0.4;
+    color: var(--text-color-secondary);
+    margin: 0;
+    padding: 0;
 }
 
 /* Responsive */
 @media (max-width: 768px) {
-    body { padding: 10px; }
-    .content-wrapper { padding: 20px; }
-    h1 { font-size: 2.2rem; }
-    h2 { font-size: 1.8rem; }
-    h3 { font-size: 1.5rem; }
+    body {
+        padding: 10px;
+    }
+
+    .content-wrapper {
+        padding: 20px;
+        margin-top: 10px;
+        margin-bottom: 20px;
+    }
+
+    h1 {
+        font-size: 2rem;
+        /* 32pt equivalent */
+    }
+
+    h2 {
+        font-size: 1.6rem;
+        /* 26pt equivalent */
+    }
+
+    h3 {
+        font-size: 1.25rem;
+        /* 20pt equivalent */
+    }
+
+    a[href^="mailto:"],
+    .btn-primary,
+    .btn-secondary {
+        width: 100%;
+        padding: 12px 16px;
+    }
 }

@@ -1,4 +1,4 @@
-choir.chat
+# choir.chat
 
 Imagine a world where your ideas and insights are truly valued.
 
@@ -9,4 +9,4 @@ Converse thoughtfully. Embued with knowledge and computation. Earn recognition a
 Rewarding intelligent chat.
 
 
-[iOS TestFlight](mailto:yusef@choir.chat?subject=Choir%20TestFlight%20Invite%20Request)
+[<span>iOS TestFlight</span>](mailto:yusef@choir.chat?subject=Choir%20TestFlight%20Invite%20Request)
