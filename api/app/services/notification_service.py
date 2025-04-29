@@ -6,6 +6,7 @@ import logging
 from typing import Dict, Any, List, Optional
 from app.database import DatabaseClient
 from app.config import Config
+from app.services.push_notification_service import PushNotificationService
 
 # Configure logging
 logger = logging.getLogger("notification_service")
@@ -17,6 +18,7 @@ class NotificationService:
         """Initialize the notification service."""
         self.config = Config.from_env()
         self.db = DatabaseClient(self.config)
+        self.push_notification_service = PushNotificationService()
 
     async def send_citation_notification(self, vector_id: str, citing_wallet_address: str) -> Dict[str, Any]:
         """
@@ -94,11 +96,29 @@ class NotificationService:
             if result.get("id"):
                 logger.info(f"Successfully recorded {notification_type} notification for {author_wallet_address} for vector {vector_id}")
                 logger.info(f"Notification ID: {result.get('id')}")
+
+                # Send push notification if this is not a self-citation
+                push_result = {"success": False, "reason": "not_attempted"}
+                if not is_self_citation:
+                    try:
+                        # Send push notification
+                        logger.info(f"Sending push notification for citation to {author_wallet_address}")
+                        push_result = await self.push_notification_service.send_citation_notification(
+                            wallet_address=author_wallet_address,
+                            vector_id=vector_id,
+                            citing_wallet_address=citing_wallet_address
+                        )
+                        logger.info(f"Push notification result: {push_result}")
+                    except Exception as e:
+                        logger.error(f"Error sending push notification: {e}", exc_info=True)
+                        push_result = {"success": False, "reason": str(e)}
+
                 return {
                     "success": True,
                     "notification_id": result.get("id"),
                     "recipient": author_wallet_address,
-                    "self_citation": is_self_citation
+                    "self_citation": is_self_citation,
+                    "push_notification": push_result
                 }
             else:
                 logger.error(f"Failed to record {notification_type} notification for {author_wallet_address}")

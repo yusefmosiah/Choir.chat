@@ -105,6 +105,12 @@ class Config:
     # Debug mode
     DEBUG: bool = os.getenv('DEBUG', 'False').lower() in ('true', '1', 't')
 
+    # Apple Push Notification service configuration
+    APNS_KEY_ID: str = os.getenv("APNS_KEY_ID", "")
+    APNS_TEAM_ID: str = os.getenv("APNS_TEAM_ID", "")
+    APNS_AUTH_KEY: str = os.getenv("APNS_AUTH_KEY", "AuthKey_XXXXXXXXXX.p8")
+    APNS_TOPIC: str = os.getenv("APNS_TOPIC", "com.choir.app")  # Bundle ID of your app
+
     @classmethod
     def from_env(cls):
         return cls()

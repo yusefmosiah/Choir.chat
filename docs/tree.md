@@ -43,6 +43,7 @@
 │   │   │   ├── __init__.py
 │   │   │   ├── auth_service.py
 │   │   │   ├── notification_service.py
+│   │   │   ├── push_notification_service.py
 │   │   │   ├── rewards_service.py
 │   │   │   └── sui_service.py
 │   │   ├── tools
@@ -71,6 +72,8 @@
 │   │       └── style.css
 │   ├── templates
 │   │   └── base.html
+│   ├── test_push_notification_e2e.py
+│   ├── test_push_notification.py
 │   └── tests
 │       ├── __init__.py
 │       ├── conftest.py
@@ -243,6 +246,7 @@
 ├── docs
 │   ├── blockchain_integration.md
 │   ├── CHANGELOG.md
+│   ├── ChoirPushNotificationsImplementationGuide.md
 │   ├── contract_deployment.md
 │   ├── core_core.md
 │   ├── core_economics.md
@@ -296,6 +300,7 @@
     ├── sources_displaying.sh
     ├── test_api.sh
     ├── test_notifications.py
-    └── test_postchain_multiturn.sh
+    ├── test_postchain_multiturn.sh
+    └── test_simulator_notifications.sh
 
-71 directories, 225 files
+71 directories, 230 files

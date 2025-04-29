@@ -131,6 +131,59 @@ struct TransactionsView: View {
             .onAppear {
                 // Fetch all transactions
                 transactionService.fetchTransactions()
+
+                // Set up notification observer for refreshing transactions
+                NotificationCenter.default.addObserver(
+                    forName: NSNotification.Name("RefreshNotifications"),
+                    object: nil,
+                    queue: .main
+                ) { _ in
+                    transactionService.fetchTransactions()
+                }
+
+                // Set up notification observer for citation received
+                NotificationCenter.default.addObserver(
+                    forName: NSNotification.Name("CitationReceived"),
+                    object: nil,
+                    queue: .main
+                ) { notification in
+                    // Extract notification details
+                    guard let vectorId = notification.userInfo?["vector_id"] as? String else {
+                        print("Citation received but no vector ID found")
+                        return
+                    }
+
+                    let citingWalletAddress = notification.userInfo?["citing_wallet_address"] as? String ?? "unknown"
+                    let title = notification.userInfo?["title"] as? String ?? "Your content was cited!"
+                    let body = notification.userInfo?["body"] as? String ?? "Someone cited your content"
+
+                    print("Citation received for vector: \(vectorId) from wallet: \(citingWalletAddress)")
+
+                    // Show a toast or alert with citation details
+                    #if DEBUG
+                    // In debug mode, show more details
+                    print("Citation notification details:")
+                    print("Title: \(title)")
+                    print("Body: \(body)")
+                    print("Vector ID: \(vectorId)")
+                    print("Citing Wallet: \(citingWalletAddress)")
+                    #endif
+
+                    // Refresh transactions to show the new citation
+                    transactionService.fetchTransactions()
+
+                    // Navigate to the vector if needed
+                    // This would be implemented in a parent view that can handle navigation
+                    NotificationCenter.default.post(
+                        name: NSNotification.Name("NavigateToVector"),
+                        object: nil,
+                        userInfo: ["vector_id": vectorId]
+                    )
+                }
+            }
+            .onDisappear {
+                // Remove notification observers
+                NotificationCenter.default.removeObserver(self)
             }
             .refreshable {
                 // Always fetch all transactions and filter client-side

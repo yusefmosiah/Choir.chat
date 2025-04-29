@@ -2,11 +2,11 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>NSAppTransportSecurity</key>
-	<dict>
-		<key>NSAllowsLocalNetworking</key>
-		<true/>
-	</dict>
+	<key>BGTaskSchedulerPermittedIdentifiers</key>
+	<array>
+		<string>com.choir.postchain.processing</string>
+		<string>com.choir.app.backgroundfetch</string>
+	</array>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
@@ -20,22 +20,16 @@
 			</array>
 		</dict>
 	</array>
-	<key>NSFaceIDUsageDescription</key>
-	<string>Choir uses Face ID to securely access your wallet and authentication credentials.</string>
-	<key>ITSAppUsesNonExemptEncryption</key>
-	<false/>
-    <key>NSCameraUsageDescription</key>
-    <string>Camera access is required for QR code scanning.</string>
-    <key>UIBackgroundModes</key>
-    <array>
-        <string>remote-notification</string>
-        <string>fetch</string>
-        <string>processing</string>
-    </array>
-    <key>BGTaskSchedulerPermittedIdentifiers</key>
-    <array>
-        <string>com.choir.postchain.processing</string>
-        <string>com.choir.app.backgroundfetch</string>
-    </array>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>remote-notification</string>
+		<string>fetch</string>
+		<string>processing</string>
+	</array>
 </dict>
 </plist>
