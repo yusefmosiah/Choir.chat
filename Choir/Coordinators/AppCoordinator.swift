@@ -142,7 +142,7 @@ struct MainTabView: View {
 
 
             // Transactions tab
-            TransactionsView()
+            TransactionsView(transactionService: transactionService)
                 .tag(4)
                 .tabItem {
                     Label("Transactions", systemImage: "arrow.left.arrow.right")

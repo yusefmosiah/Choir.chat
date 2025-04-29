@@ -8,50 +8,61 @@
 import SwiftUI
 
 struct TransactionsView: View {
-    @StateObject private var transactionService = TransactionService()
+    @ObservedObject var transactionService: TransactionService
     @EnvironmentObject var walletManager: WalletManager
-    @State private var selectedWalletIndex = 0
+    @State private var filterWalletAddress: String? = nil // nil means show all wallets
+    @State private var showFilterOptions = false
+
+    // Initialize with a transaction service
+    init(transactionService: TransactionService) {
+        self.transactionService = transactionService
+    }
+
+    // Computed property to get filtered transactions
+    private var filteredTransactions: [TransactionInfo] {
+        guard let filterAddress = filterWalletAddress else {
+            // No filter, return all transactions
+            return transactionService.transactions
+        }
+
+        // Filter transactions where the wallet is either sender or recipient
+        return transactionService.transactions.filter { transaction in
+            return transaction.senderAddress == filterAddress ||
+                   transaction.recipientAddress == filterAddress
+        }
+    }
 
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                // Wallet selector
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 12) {
-                        Button(action: {
-                            selectedWalletIndex = -1
-                            fetchAllTransactions()
-                        }) {
-                            Text("All Wallets")
-                                .padding(.horizontal, 16)
-                                .padding(.vertical, 8)
-                                .background(selectedWalletIndex == -1 ? Color.blue.opacity(0.2) : Color.gray.opacity(0.1))
-                                .cornerRadius(20)
-                                .foregroundColor(selectedWalletIndex == -1 ? .blue : .primary)
+                // Filter indicator
+                if let filterAddress = filterWalletAddress {
+                    HStack {
+                        // Show wallet name if available
+                        if let walletName = walletManager.walletNames[filterAddress] {
+                            Text("Filtered by: \(walletName)")
+                                .font(.footnote)
+                                .foregroundColor(.secondary)
+                        } else {
+                            Text("Filtered by wallet: \(filterAddress.prefix(6))...\(filterAddress.suffix(4))")
+                                .font(.footnote)
+                                .foregroundColor(.secondary)
                         }
 
-                        if let wallet = walletManager.wallet {
-                            ForEach(0..<wallet.accounts.count, id: \.self) { index in
-                                Button(action: {
-                                    selectedWalletIndex = index
-                                    fetchTransactionsForCurrentWallet()
-                                }) {
-                                    if let address = try? wallet.accounts[index].address() {
-                                        Text(address.prefix(6) + "..." + address.suffix(4))
-                                            .padding(.horizontal, 16)
-                                            .padding(.vertical, 8)
-                                            .background(selectedWalletIndex == index ? Color.blue.opacity(0.2) : Color.gray.opacity(0.1))
-                                            .cornerRadius(20)
-                                            .foregroundColor(selectedWalletIndex == index ? .blue : .primary)
-                                    }
-                                }
-                            }
+                        Spacer()
+
+                        Button(action: {
+                            filterWalletAddress = nil
+                        }) {
+                            Text("Clear")
+                                .font(.footnote)
+                                .foregroundColor(.blue)
                         }
                     }
                     .padding(.horizontal)
                     .padding(.vertical, 8)
+                    .background(Color.blue.opacity(0.05))
                 }
-                .background(Color.gray.opacity(0.05))
 
                 // Transactions list
                 ZStack {
@@ -63,9 +74,17 @@ struct TransactionsView: View {
                                 .foregroundColor(.secondary)
                             Spacer()
                         }
+                    } else if filteredTransactions.isEmpty && filterWalletAddress != nil {
+                        VStack {
+                            Spacer()
+                            Text("No transactions for this wallet")
+                                .font(.headline)
+                                .foregroundColor(.secondary)
+                            Spacer()
+                        }
                     } else {
                         List {
-                            ForEach(transactionService.transactions) { transaction in
+                            ForEach(filteredTransactions) { transaction in
                                 TransactionRow(transaction: transaction)
                                     .onTapGesture {
                                         if let details = transaction.details, details["read"] == "false" {
@@ -79,38 +98,45 @@ struct TransactionsView: View {
                 }
             }
             .navigationTitle("Transactions")
-            .onAppear {
-                // Default to "All Wallets" view
-                selectedWalletIndex = -1
-                fetchAllTransactions()
-            }
-            .refreshable {
-                if selectedWalletIndex == -1 {
-                    fetchAllTransactions()
-                } else {
-                    fetchTransactionsForCurrentWallet()
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Menu {
+                        Button(action: {
+                            filterWalletAddress = nil
+                        }) {
+                            Label("All Wallets", systemImage: "wallet.pass.fill")
+                        }
+                        .disabled(filterWalletAddress == nil)
+
+                        Divider()
+
+                        // List all available wallets
+                        ForEach(walletManager.getSortedWalletAddresses(), id: \.self) { address in
+                            Button(action: {
+                                filterWalletAddress = address
+                            }) {
+                                if let name = walletManager.walletNames[address] {
+                                    Label("\(name) (\(address.prefix(6))...\(address.suffix(4)))", systemImage: "wallet.pass")
+                                } else {
+                                    Label("\(address.prefix(6))...\(address.suffix(4))", systemImage: "wallet.pass")
+                                }
+                            }
+                            .disabled(filterWalletAddress == address)
+                        }
+                    } label: {
+                        Label("Filter", systemImage: "line.3.horizontal.decrease.circle")
+                    }
                 }
             }
+            .onAppear {
+                // Fetch all transactions
+                transactionService.fetchTransactions()
+            }
+            .refreshable {
+                // Always fetch all transactions and filter client-side
+                transactionService.fetchTransactions()
+            }
         }
-    }
-
-    private func fetchAllTransactions() {
-        // Fetch transactions for all wallets
-        // No need to pass a wallet address, the API will return transactions for all wallets
-        transactionService.fetchTransactions()
-    }
-
-    private func fetchTransactionsForCurrentWallet() {
-        guard selectedWalletIndex >= 0, let wallet = walletManager.wallet else {
-            return
-        }
-
-        guard let address = try? wallet.accounts[selectedWalletIndex].address() else {
-            return
-        }
-
-        // Fetch transactions for the specific wallet
-        transactionService.fetchTransactions(walletAddress: address)
     }
 
     private func mapNotificationTypeToTransactionType(_ type: String) -> TransactionType {
@@ -279,6 +305,40 @@ struct TransactionRow: View {
 }
 
 #Preview {
-    TransactionsView()
+    // Create a mock TransactionService for preview
+    let mockService = MockTransactionService()
+
+    return TransactionsView(transactionService: mockService)
         .environmentObject(WalletManager())
+}
+
+// Mock TransactionService for preview
+@MainActor
+class MockTransactionService: TransactionService {
+    override init() {
+        super.init()
+        // Add some mock transactions for preview
+        self.transactions = [
+            TransactionInfo(
+                id: "1",
+                type: "citation",
+                senderAddress: "0x123456789012",
+                recipientAddress: "0xabcdef123456",
+                amount: 1.5,
+                timestamp: "2024-06-15T10:30:00.000Z",
+                status: "Completed",
+                details: ["read": "false", "vectorId": "V123"]
+            ),
+            TransactionInfo(
+                id: "2",
+                type: "send",
+                senderAddress: "0xabcdef123456",
+                recipientAddress: "0x987654321098",
+                amount: 2.0,
+                timestamp: "2024-06-14T15:45:00.000Z",
+                status: "Completed",
+                details: ["read": "true"]
+            )
+        ]
+    }
 }
