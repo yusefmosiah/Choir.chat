@@ -112,15 +112,6 @@ struct EnhancedSendCoinView: View {
                                 }
                             }
                     }
-
-                    // Show equivalent in USD if available
-                    if let balance = walletManager.balances[selectedCoinType], let amountDouble = Double(amount) {
-                        // This is a placeholder - in a real app you'd fetch actual exchange rates
-                        let usdValue = amountDouble * (selectedCoinType == .sui ? 0.5 : 1.0) // Dummy exchange rates
-                        Text("≈ $\(String(format: "%.2f", usdValue)) USD")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
                 }
 
                 // Recipient section
