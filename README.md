@@ -7,7 +7,6 @@ Choir is a platform designed to amplify collective intelligence through AI-drive
 The Choir platform is a revolutionary system for building collective intelligence, structured around a sophisticated conceptual model. The Minimum Viable Product (MVP) focuses on validating the core data flow and reward mechanism using Qdrant and the Sui blockchain. Explore the foundational concepts:
 
 *   **[PostChain Temporal Logic](docs/postchain_temporal_logic.md):** The temporal essence of each AEIOU-Y phase, driving dynamic and context-aware AI workflows.
-*   **[FQAHO Model](docs/fqaho_visualization.md):** The Fractional Quantum Anharmonic Oscillator economic model, powering a self-improving token economy that rewards quality and innovation (conceptual basis for MVP rewards).
 *   **[Core Economics](docs/core_economics.md):** The economic principles and tokenomics of CHIP, designed to create a sustainable and equitable ecosystem for knowledge creation.
 *   **[Core State Transitions](docs/core_state_transitions.md):** The carefully defined state transitions that govern the evolution of threads and the flow of value within Choir (principles guiding MVP implementation).
 *   **[Evolution: Naming](docs/evolution_naming.md):** The story behind the evolution of Choir's name, reflecting the project's journey and vision.
@@ -88,4 +87,3 @@ cd api
 # source venv/bin/activate
 pip install -r requirements.txt
 pytest -v
-

@@ -10,10 +10,10 @@ The Choir system, for its Minimum Viable Product (MVP), is architected around a 
 
 Even within the MVP's focused scope, Choir is built upon a clear hierarchy of truth and state management, guided by underlying principles:
 
-1.  **Blockchain as Economic Truth (Sui):** The **Sui blockchain** serves as the *authoritative source of truth for the economic state*. In the MVP, this includes the basic existence of the CHIP token and the execution of simplified reward distributions. Ultimately, it will manage thread ownership, full token balances, message hashes, co-author lists, and the governance of the **FQAHO (Fractional Quantum Anharmonic Oscillator) economic model**.
+1.  **Blockchain as Economic Truth (Sui):** The **Sui blockchain** serves as the *authoritative source of truth for the economic state*. In the MVP, this includes the basic existence of the CHIP token and the execution of simplified reward distributions. Ultimately, it will manage thread ownership, full token balances, message hashes, co-author lists, and the governance of the economic model.
 2.  **Qdrant as Semantic Truth:** **Qdrant** serves as the *authoritative source for content and semantic relationships*. It stores message content, user/thread data, phase-specific memory, embeddings, and eventually, citation networks.
 3.  **AEIOU-Y Post Chain as Interaction Pattern:** The **AEIOU-Y Post Chain** defines the natural interaction pattern for processing user input and generating nuanced AI responses. In the MVP, this pattern is implemented via the LCEL workflow.
-4.  **FQAHO as Economic Model:** The economic model, based on **FQAHO dynamics** and the CHIP token, underpins the reward system, even if its full dynamic implementation is post-MVP.
+4.  **Dynamic Economic Model:** The economic model, based on dynamic principles and the CHIP token, underpins the reward system, even if its full implementation is post-MVP.
 
 ## Core Components (Qdrant-Sui MVP)
 
@@ -65,10 +65,9 @@ This architecture validates the core loop: **User Input -> API Orchestration -> 
 
 The MVP delivers a system combining:
 
-*   **Economic Incentives (CHIP token, Basic FQAHO Principles):** Managed via Sui and PySUI Service.
+*   **Economic Incentives (CHIP token, Basic Principles):** Managed via Sui and PySUI Service.
 *   **Semantic Knowledge (Qdrant):** Stored, accessed, and utilized by the PostChain workflow.
 *   **Natural Interaction Patterns (AEIOU-Y Post Chain):** Implemented via the LCEL workflow.
-*   **(Underlying) Fractional Quantum Dynamics (FQAHO):** The conceptual model guiding the economics, to be more fully realized post-MVP.
 *   **Python Async/await:** Powers the backend API and workflow.
 
 This streamlined MVP architecture focuses on demonstrating the fundamental interplay between semantic data storage (Qdrant) and a blockchain-based reward mechanism (Sui), laying the groundwork for the more complex, distributed, and secure system envisioned in the broader Choir architecture.

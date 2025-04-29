@@ -77,7 +77,7 @@ The system addresses the following potential threats:
 
 While the MVP focuses on core security, future enhancements could include:
 
-1.  **Formal Verification:** For critical smart contracts (like a more complex FQAHO or governance contract).
+1.  **Formal Verification:** For critical smart contracts (like a more complex economic or governance contract).
 2.  **Quantum-Resistant Cryptography:** For long-term key and signature security (relevant if Sui adopts it).
 3.  **Web Application Firewall (WAF):** Protect the API endpoint from common web attacks.
 4.  **Enhanced Authentication:** Implement more robust authentication mechanisms beyond simple signature verification if needed.

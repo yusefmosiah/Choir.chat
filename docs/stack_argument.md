@@ -88,7 +88,7 @@ The Qdrant-Sui MVP stack creates a clear data and execution flow:
 
 This MVP stack provides a solid foundation. Future iterations can build upon it:
 
-*   **Refine Reward Logic:** Implement the sophisticated FQAHO-based reward splitting formula on Sui or via a secure off-chain oracle.
+*   **Refine Reward Logic:** Implement the sophisticated reward splitting formula on Sui or via a secure off-chain oracle.
 *   **Scale PostChain:** Address performance bottlenecks in the `langchain_workflow.py` as needed, potentially by optimizing or modularizing phase execution.
 *   **Enhance Client:** Implement client-side caching for improved offline experience and UI responsiveness.
 *   **Security Hardening:** Implement enhanced security measures for the API and blockchain interactions.

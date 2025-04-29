@@ -269,8 +269,6 @@ tree.md
 │   ├── e_concept.md
 │   ├── evolution_naming.md
 │   ├── evolution_token.md
-│   ├── fqaho_simulation.md
-│   ├── fqaho_visualization.md
 │   ├── levels
 │   │   ├── all.txt
 │   │   ├── level0.md
@@ -301,7 +299,6 @@ tree.md
 │   ├── state_management_patterns.md
 │   └── tree.md
 ├── notebooks
-│   ├── fqaho_simulation.ipynb
 │   ├── post_chain0.ipynb
 │   └── vowel_loop3.ipynb
 ├── README.md
@@ -319,7 +316,7 @@ tree.md
     ├── test_postchain_multiturn.sh
     └── test_simulator_notifications.sh
 
-71 directories, 233 files
+71 directories, 230 files
 
 === File: docs/CHANGELOG.md ===
 
@@ -389,7 +386,7 @@ CHANGELOG.md
 -   Implementation of the full Model Context Protocol (MCP) server architecture.
 -   Integration of client-side libSQL caching for offline support.
 -   Deployment using Phala Network TEEs for confidential computing.
--   Implementation of the full FQAHO dynamic economic model (MVP uses basic rewards).
+-   Implementation of the full dynamic economic model (MVP uses basic rewards).
 
 ## [Unreleased] - 2025-03-12
 
@@ -416,7 +413,7 @@ CHANGELOG.md
 -   **Enhanced Token Economy and Reward System (RL-Driven CHIP):**
     -   **CHIP Tokens as Training Signals for AI:** Evolved the CHIP token to act as training signals for AI models, driving a self-improving AI ecosystem.
     -   **Novelty and Citation Rewards:** Implemented novelty rewards for original prompts and citation rewards for salient contributions, algorithmically distributed by AI models.
-    -   **FQHO Contract as Data Marketplace Foundation:** Defined the FQAHO contract as the basis for a data marketplace within Choir, enabling CHIP-based data access and contribution pricing.
+    -   **Contract as Data Marketplace Foundation:** Defined the contract as the basis for a data marketplace within Choir, enabling CHIP-based data access and contribution pricing.
     -   **"AI Supercomputer Box" Vision:** Incorporated the "AI Supercomputer Box" concept as a tangible product embodiment of the Choir platform and CHIP token utility, envisioning a premium, rent-to-own consumer appliance for private, personalized AI and content creation.
 
 ### Removed
@@ -439,7 +436,7 @@ CHANGELOG.md
 -   OpenRouter integration
 -   Conceptual evolution from "Chorus Cycle" to "Post Chain"
     -   Representing shift from harmonic oscillator (cycle) to anharmonic oscillator (chain)
-    -   Aligning interface terminology with underlying FQAHO model
+    -   Aligning interface terminology with underlying model
 -   Client-side editable system prompts for customization
 -   Additional phases in the Post Chain:
     -   Web search phase for real-time information access

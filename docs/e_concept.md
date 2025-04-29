@@ -30,10 +30,10 @@ Unlike traditional platforms that often extract value from users, Choir creates 
 
 **Dynamic Stake Evolution - Natural Quality Filters with Memory Effects:**
 
-Choir's dynamic stake evolution, driven by the Fractional Quantum Anharmonic Oscillator (FQAHO) model, creates **natural quality filters with built-in memory effects**:
+Choir's dynamic stake evolution, driven by the economic model, creates **natural quality filters with built-in memory effects**:
 
-*   **Fractional Quantum Anharmonic Oscillator (FQAHO) Model:** The FQAHO model, with its evolving parameters (anharmonic coefficient K₀, fractional parameter α, potential order m), dynamically adjusts stake prices based on thread history, community feedback, and network position.
-*   **Dynamic Stake Pricing - Natural Price Discovery:** Stake prices emerge naturally through the eigenvalue patterns of the fractional system, reflecting the evolving value and quality of each thread.
+*   **Dynamic Economic Model:** The model, with its evolving parameters, dynamically adjusts stake prices based on thread history, community feedback, and network position.
+*   **Dynamic Stake Pricing - Natural Price Discovery:** Stake prices emerge naturally through the system, reflecting the evolving value and quality of each thread.
 *   **Memory Effects Through Fractional Parameter (α):** The fractional parameter α captures how threads develop "memory" over time, with past interactions and community feedback influencing current stake prices and value distribution.
 *   **Lévy Flight-Like Value Propagation:** Value propagates through the network in Lévy flight-like patterns, reflecting the non-local nature of knowledge creation and the potential for occasional breakthrough insights to generate disproportionate impact across the ecosystem.
 

@@ -256,8 +256,6 @@
 │   ├── e_concept.md
 │   ├── evolution_naming.md
 │   ├── evolution_token.md
-│   ├── fqaho_simulation.md
-│   ├── fqaho_visualization.md
 │   ├── levels
 │   │   ├── all.txt
 │   │   ├── level0.md
@@ -288,7 +286,6 @@
 │   ├── state_management_patterns.md
 │   └── tree.md
 ├── notebooks
-│   ├── fqaho_simulation.ipynb
 │   ├── post_chain0.ipynb
 │   └── vowel_loop3.ipynb
 ├── README.md
@@ -306,4 +303,4 @@
     ├── test_postchain_multiturn.sh
     └── test_simulator_notifications.sh
 
-71 directories, 233 files
+71 directories, 230 files

@@ -95,7 +95,7 @@ get_balance(sui_address): Queries the SUI balance (primarily for testing/diagnos
 
 (Future) get_chip_balance(sui_address): Queries the CHIP token balance.
 
-(Future) get_thread_stake_price(thread_id): Fetches economic state from potential future FQAHO contract.
+(Future) get_thread_stake_price(thread_id): Fetches economic state from potential future contract.
 
 Security Considerations (MVP):
 
