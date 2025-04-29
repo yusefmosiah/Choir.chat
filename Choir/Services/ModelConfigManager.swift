@@ -23,14 +23,14 @@ class ModelConfigManager {
             return [
                 .action: ModelConfig(provider: "google", model: "gemini-2.0-flash-lite"),
                 .experienceVectors: ModelConfig(
-                    provider: "openrouter", model: "x-ai/grok-3-mini-beta"),
+                    provider: "groq", model: "meta-llama/llama-4-scout-17b-16e-instruct"),
                 .experienceWeb: ModelConfig(
-                    provider: "openrouter", model: "ai21/jamba-1.6-mini"),
-                .intention: ModelConfig(provider: "openai", model: "gpt-4.1-mini"),
+                    provider: "google", model: "gemini-2.0-flash"),
+                .intention: ModelConfig(provider: "groq", model: "meta-llama/llama-4-maverick-17b-128e-instruct"),
                 .observation: ModelConfig(provider: "groq", model: "qwen-qwq-32b"),
                 .understanding: ModelConfig(
-                    provider: "openrouter", model: "x-ai/grok-3-mini-beta"),
-                .yield: ModelConfig(provider: "openai", model: "gpt-4.1"),
+                    provider: "google", model: "gemini-2.5-flash-preview-04-17"),
+                .yield: ModelConfig(provider: "google", model: "gemini-2.5-flash-preview-04-17"),
             ]
         }
     }
