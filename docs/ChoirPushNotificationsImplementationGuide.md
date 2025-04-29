@@ -10,7 +10,7 @@ Ensure these environment variables are set on your server:
 APNS_KEY_ID=YOUR_KEY_ID
 APNS_TEAM_ID=YOUR_TEAM_ID
 APNS_AUTH_KEY=/path/to/AuthKey_KEYID.p8
-APNS_TOPIC=chat.choir
+APNS_TOPIC=choir.chat
 ```
 
 ### Required Packages
