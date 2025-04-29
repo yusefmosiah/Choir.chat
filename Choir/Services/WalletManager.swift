@@ -168,14 +168,33 @@ class WalletManager: ObservableObject {
         }
 
         // If we get here, we need to create a new wallet
+        try await createNewWallet(name: name)
+    }
+
+    /// Creates a new wallet regardless of whether there are existing wallets
+    /// - Parameter name: The name for the new wallet
+    func createNewWallet(name: String) async throws {
+        isLoading = true
+        defer { isLoading = false }
+
         do {
-            print("No existing wallets found, creating new wallet")
+            print("Creating new wallet with name: \(name)")
             // Generate a new wallet
             let newWallet = try Wallet() // Creates new wallet with random mnemonic
             let address = try newWallet.accounts[0].address()
 
+            // Generate a unique name if needed
+            var uniqueName = name
+            var counter = 1
+            while walletNames.values.contains(uniqueName) {
+                uniqueName = "\(name) \(counter)"
+                counter += 1
+            }
+
+            print("Using wallet name: \(uniqueName)")
+
             // Save the mnemonic to the keychain with biometric protection
-            let walletKey = "wallet_\(name)_mnemonic"
+            let walletKey = "wallet_\(uniqueName)_mnemonic"
             try keychain.save(
                 newWallet.mnemonic.mnemonic().joined(separator: " "),
                 forKey: walletKey,
@@ -184,7 +203,7 @@ class WalletManager: ObservableObject {
 
             // Add to wallets dictionary
             wallets[address] = newWallet
-            walletNames[address] = name
+            walletNames[address] = uniqueName
 
             // Set as active wallet
             wallet = newWallet

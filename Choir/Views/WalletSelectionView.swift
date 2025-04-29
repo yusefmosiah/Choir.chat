@@ -119,7 +119,8 @@ struct WalletSelectionView: View {
 
         Task {
             do {
-                try await walletManager.createOrLoadWallet(name: newWalletName)
+                // Use the new createNewWallet function instead of createOrLoadWallet
+                try await walletManager.createNewWallet(name: newWalletName)
                 await MainActor.run {
                     isLoading = false
                     newWalletName = "New Wallet"

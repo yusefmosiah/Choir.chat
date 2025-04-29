@@ -339,7 +339,8 @@ struct WalletView: View {
                 let name = newWalletName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?
                     "Wallet \(Int.random(in: 1000...9999))" : newWalletName.trimmingCharacters(in: .whitespacesAndNewlines)
 
-                try await walletManager.createOrLoadWallet(name: name)
+                // Use the new createNewWallet function instead of createOrLoadWallet
+                try await walletManager.createNewWallet(name: name)
                 newWalletName = "New Wallet" // Reset for next time
             } catch {
                 print("Error creating wallet: \(error)")
