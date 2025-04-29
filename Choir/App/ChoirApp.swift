@@ -9,6 +9,7 @@ import SwiftUI
 @main
 struct ChoirApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    @StateObject private var backgroundMonitor = SceneDelegate()
     @StateObject private var appCoordinator = AppCoordinator()
 
     var body: some Scene {
@@ -18,6 +19,8 @@ struct ChoirApp: App {
             }
             .environmentObject(appCoordinator.walletManager)
             .environmentObject(appCoordinator.authService)
+            .environmentObject(appDelegate)
+            .environmentObject(backgroundMonitor)
             .onAppear {
                 // Load only thread metadata (not full content) for better performance
                 let threads = ThreadPersistenceService.shared.loadAllThreadsMetadata()

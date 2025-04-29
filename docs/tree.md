@@ -102,6 +102,7 @@
 ├── Choir
 │   ├── App
 │   │   ├── AppDelegate.swift
+│   │   ├── BackgroundStateMonitor.swift
 │   │   └── ChoirApp.swift
 │   ├── Assets.xcassets
 │   │   ├── AccentColor.colorset
@@ -146,6 +147,7 @@
 │   ├── Services
 │   │   ├── APIClient.swift
 │   │   ├── AuthService.swift
+│   │   ├── BackgroundTaskManager.swift
 │   │   ├── KeychainService.swift
 │   │   ├── ModelConfigManager.swift
 │   │   ├── PushNotificationManager.swift
@@ -296,4 +298,4 @@
     ├── test_notifications.py
     └── test_postchain_multiturn.sh
 
-71 directories, 223 files
+71 directories, 225 files

@@ -29,6 +29,13 @@
     <key>UIBackgroundModes</key>
     <array>
         <string>remote-notification</string>
+        <string>fetch</string>
+        <string>processing</string>
+    </array>
+    <key>BGTaskSchedulerPermittedIdentifiers</key>
+    <array>
+        <string>com.choir.postchain.processing</string>
+        <string>com.choir.app.backgroundfetch</string>
     </array>
 </dict>
 </plist>

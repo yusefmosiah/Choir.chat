@@ -15,6 +15,9 @@ class PostchainCoordinatorImpl: PostchainCoordinator, ObservableObject {
     // Task for managing the current streaming operation
     private var streamTask: Task<Void, Error>?
 
+    // Background task identifier for this coordinator
+    private let backgroundTaskIdentifier = "com.choir.postchain.processing"
+
     // Published state for SwiftUI binding
     @Published private(set) var currentPhase: Phase = .action
     @Published private(set) var responses: [Phase: String] = [:]
@@ -82,6 +85,9 @@ class PostchainCoordinatorImpl: PostchainCoordinator, ObservableObject {
         // Clear active message ID
         activeMessageId = nil
 
+        // End the background task
+        BackgroundTaskManager.shared.endTask(identifier: backgroundTaskIdentifier)
+
         // Notify view model
         viewModel?.updateState()
     }
@@ -131,6 +137,13 @@ class PostchainCoordinatorImpl: PostchainCoordinator, ObservableObject {
 
         // Notify view model of initial state
         viewModel?.updateState()
+
+        // Start a background task to ensure processing continues in the background
+        BackgroundTaskManager.shared.beginTask(identifier: backgroundTaskIdentifier) {
+            // This is called if the background task is about to expire
+            print("PostChain background task is about to expire")
+            self.cancel() // Cancel the current processing
+        }
 
         // Use a continuation to bridge the asynchronous streaming with async/await
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
@@ -217,6 +230,9 @@ class PostchainCoordinatorImpl: PostchainCoordinator, ObservableObject {
                     // Notify view model
                     viewModel?.updateState()
 
+                    // End the background task since processing is complete
+                    BackgroundTaskManager.shared.endTask(identifier: backgroundTaskIdentifier)
+
                     // Resume the continuation with success
                     continuation.resume()
                 } catch {
@@ -229,6 +245,9 @@ class PostchainCoordinatorImpl: PostchainCoordinator, ObservableObject {
 
                     // Notify view model
                     viewModel?.updateState()
+
+                    // End the background task since processing encountered an error
+                    BackgroundTaskManager.shared.endTask(identifier: backgroundTaskIdentifier)
 
                     // Resume the continuation with error
                     continuation.resume(throwing: error)
