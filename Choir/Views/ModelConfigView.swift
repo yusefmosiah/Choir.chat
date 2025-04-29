@@ -14,7 +14,7 @@ struct ModelConfigView: View {
     @State private var dynamicModelsByProvider: [String: [String]] = [
         "google": ["gemini-2.0-flash-lite", "gemini-2.0-flash", "gemini-2.5-flash-preview-04-17", "gemini-2.5-pro-exp-03-25", "gemini-2.5-pro-preview-03-25"],
         "openrouter": [
-            "ai21/jamba-1.6-mini", "x-ai/grok-3-mini-beta", "qwen/qwen3-30b-a3b", "qwen/qwen3-8b", "qwen/qwen3-14b", "qwen/qwen3-32b", "qwen/qwen3-235b-a22b", "thudm/glm-z1-rumination-32b", "thudm/glm-z1-9b:free", "google/gemini-2.5-flash-preview:thinking", "tngtech/deepseek-r1t-chimera:free", "agentica-org/deepcoder-14b-preview:free"
+            "ai21/jamba-1.6-mini", "x-ai/grok-3-mini-beta", "qwen/qwen3-30b-a3b", "qwen/qwen3-8b:free", "qwen/qwen3-14b", "qwen/qwen3-32b", "qwen/qwen3-235b-a22b", "thudm/glm-z1-rumination-32b", "thudm/glm-z1-9b:free", "google/gemini-2.5-flash-preview:thinking", "tngtech/deepseek-r1t-chimera:free", "agentica-org/deepcoder-14b-preview:free"
         ],
         "anthropic": [
             "claude-3-5-haiku-latest", "claude-3-5-sonnet-latest", "claude-3-7-sonnet-latest",
@@ -214,7 +214,7 @@ struct ModelConfigView: View {
         var updatedModels = [
             "google": ["gemini-2.0-flash-lite", "gemini-2.0-flash", "gemini-2.5-flash-preview-04-17", "gemini-2.5-pro-exp-03-25", "gemini-2.5-pro-preview-03-25"],
             "openrouter": [
-                "ai21/jamba-1.6-mini", "x-ai/grok-3-mini-beta", "qwen/qwen3-30b-a3b", "qwen/qwen3-8b", "qwen/qwen3-14b", "qwen/qwen3-32b", "qwen/qwen3-235b-a22b", "thudm/glm-z1-rumination-32b", "thudm/glm-z1-9b:free", "google/gemini-2.5-flash-preview:thinking", "tngtech/deepseek-r1t-chimera:free", "agentica-org/deepcoder-14b-preview:free"
+                "ai21/jamba-1.6-mini", "x-ai/grok-3-mini-beta", "qwen/qwen3-30b-a3b", "qwen/qwen3-8b:free", "qwen/qwen3-14b", "qwen/qwen3-32b", "qwen/qwen3-235b-a22b", "thudm/glm-z1-rumination-32b", "thudm/glm-z1-9b:free", "google/gemini-2.5-flash-preview:thinking", "tngtech/deepseek-r1t-chimera:free", "agentica-org/deepcoder-14b-preview:free"
             ],
             "anthropic": [
                 "claude-3-5-haiku-latest", "claude-3-5-sonnet-latest", "claude-3-7-sonnet-latest",
