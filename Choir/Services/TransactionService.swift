@@ -68,7 +68,7 @@ class TransactionService: ObservableObject {
                                 type: mapNotificationType(notification.type),
                                 senderAddress: notification.senderWalletAddress,
                                 recipientAddress: notification.recipientWalletAddress,
-                                amount: 0.5, // Placeholder amount
+                                amount: 5.0, // Placeholder amount
                                 timestamp: notification.createdAt,
                                 status: "Completed",
                                 details: [

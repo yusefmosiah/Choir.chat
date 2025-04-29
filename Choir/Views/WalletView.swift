@@ -184,26 +184,6 @@ struct WalletView: View {
                             }
                         }
 
-                        // Receive Section
-                        Section(header: Text("Receive")) {
-                            if let wallet = walletManager.wallet {
-                                Button("Request Testnet SUI") {
-                                    Task {
-                                        try? await walletManager.requestAirdrop()
-                                    }
-                                }
-                                .frame(maxWidth: .infinity)
-                                .padding()
-                                .background(Color.green)
-                                .foregroundColor(.white)
-                                .cornerRadius(8)
-                                .disabled(walletManager.isLoading)
-                            } else {
-                                Text("Select a wallet to receive funds")
-                                    .foregroundColor(.secondary)
-                            }
-                        }
-
                         // Security Section
                         Section(header: Text("Security")) {
                             Button(action: {

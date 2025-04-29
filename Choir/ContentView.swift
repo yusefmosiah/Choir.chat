@@ -113,8 +113,15 @@ struct ContentView: View {
             }
         } detail: {
             if let thread = selectedChoirThread {
-                ChoirThreadDetailView(thread: thread, viewModel: postchainViewModel)
-                    .modifier(HideTabBarModifier(onlyOnIPhone: true))
+                // If we have a thread ID, load the full thread content before displaying
+                if let fullThread = threadManager.loadFullThread(threadId: thread.id) {
+                    ChoirThreadDetailView(thread: fullThread, viewModel: postchainViewModel)
+                        .modifier(HideTabBarModifier(onlyOnIPhone: true))
+                } else {
+                    // Fallback to using the metadata-only thread if full content can't be loaded
+                    ChoirThreadDetailView(thread: thread, viewModel: postchainViewModel)
+                        .modifier(HideTabBarModifier(onlyOnIPhone: true))
+                }
             } else {
                 VStack(spacing: 20) {
                     Text("Choir")
@@ -156,13 +163,13 @@ struct ContentView: View {
                 // Force a reload of threads after successful import
                 print("Import successful, reloading threads...")
 
-                // First, force a reload of the current wallet's threads
-                threadManager.loadThreads()
+                // First, force a reload of the current wallet's threads (metadata only)
+                threadManager.loadThreads(metadataOnly: true)
 
                 // Then, after a delay, reload again and update the UI
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                    // Reload threads after successful import
-                    threadManager.loadThreads()
+                    // Reload threads after successful import (metadata only)
+                    threadManager.loadThreads(metadataOnly: true)
 
                     // Force UI update
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
@@ -191,7 +198,8 @@ struct ContentView: View {
             guard let thread = newThread else { return }
             // No need to update lastModified since we're sorting by createdAt
             // We still need to reload threads to ensure proper sorting
-            threadManager.loadThreads()
+            // Use metadata-only loading to keep it fast
+            threadManager.loadThreads(metadataOnly: true)
         }
     }
 
@@ -201,7 +209,8 @@ struct ContentView: View {
 
         // Use a slight delay to ensure the UI updates
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            threadManager.loadThreads()
+            // Load only metadata for better performance
+            threadManager.loadThreads(metadataOnly: true)
             // Do not auto-select a thread
             isLoadingThreads = false
         }

@@ -20,12 +20,16 @@ class ThreadManager: ObservableObject {
     }
 
     /// Load threads for the current wallet
-    func loadThreads() {
-        print("ThreadManager: Loading threads for wallet address: \(currentWalletAddress ?? "nil")")
+    /// - Parameter metadataOnly: Whether to load only metadata (no messages)
+    func loadThreads(metadataOnly: Bool = true) {
+        print("ThreadManager: Loading threads\(metadataOnly ? " metadata" : "") for wallet address: \(currentWalletAddress ?? "nil")")
 
         // Load threads for the current wallet
-        let loadedThreads = persistenceService.loadAllThreads(walletAddress: currentWalletAddress)
-        print("ThreadManager: Loaded \(loadedThreads.count) threads")
+        let loadedThreads = metadataOnly
+            ? persistenceService.loadAllThreadsMetadata(walletAddress: currentWalletAddress)
+            : persistenceService.loadAllThreads(walletAddress: currentWalletAddress)
+
+        print("ThreadManager: Loaded \(loadedThreads.count) threads\(metadataOnly ? " (metadata only)" : " with full content")")
 
         // Debug print thread details
         for thread in loadedThreads {
@@ -37,6 +41,13 @@ class ThreadManager: ObservableObject {
 
         // Update the published property
         self.threads = sortedThreads
+    }
+
+    /// Load full thread content for a specific thread
+    /// - Parameter threadId: The UUID of the thread to load
+    /// - Returns: The loaded thread with full content, or nil if loading failed
+    func loadFullThread(threadId: UUID) -> ChoirThread? {
+        return persistenceService.loadThread(threadId: threadId, walletAddress: currentWalletAddress, metadataOnly: false)
     }
 
     /// Switch to a different wallet

@@ -82,13 +82,15 @@ class ThreadPersistenceService {
 
     /// Load a thread from a file
     /// - Parameter threadId: The UUID of the thread to load
+    /// - Parameter walletAddress: Optional wallet address to look in a specific wallet directory
+    /// - Parameter metadataOnly: Whether to load only metadata (no messages)
     /// - Returns: The loaded thread, or nil if loading failed
-    func loadThread(threadId: UUID, walletAddress: String? = nil) -> ChoirThread? {
+    func loadThread(threadId: UUID, walletAddress: String? = nil, metadataOnly: Bool = false) -> ChoirThread? {
         // If wallet address is provided, try to load from that wallet's directory
         if let walletAddress = walletAddress {
             let fileURL = self.fileURL(for: threadId, walletAddress: walletAddress)
 
-            if let thread = loadThreadFromFile(fileURL) {
+            if let thread = loadThreadFromFile(fileURL, metadataOnly: metadataOnly) {
                 return thread
             }
         } else {
@@ -96,7 +98,7 @@ class ThreadPersistenceService {
             do {
                 // First check the default directory
                 let defaultFileURL = self.fileURL(for: threadId, walletAddress: nil)
-                if let thread = loadThreadFromFile(defaultFileURL) {
+                if let thread = loadThreadFromFile(defaultFileURL, metadataOnly: metadataOnly) {
                     return thread
                 }
 
@@ -108,7 +110,7 @@ class ThreadPersistenceService {
                     let walletAddress = walletDir.lastPathComponent
                     let fileURL = walletDir.appendingPathComponent("\(threadId.uuidString).json")
 
-                    if let thread = loadThreadFromFile(fileURL) {
+                    if let thread = loadThreadFromFile(fileURL, metadataOnly: metadataOnly) {
                         // Set the wallet address on the thread
                         thread.walletAddress = walletAddress
                         return thread
@@ -122,7 +124,7 @@ class ThreadPersistenceService {
         return nil
     }
 
-    private func loadThreadFromFile(_ fileURL: URL) -> ChoirThread? {
+    private func loadThreadFromFile(_ fileURL: URL, metadataOnly: Bool = false) -> ChoirThread? {
         do {
             // Read the data from the file
             let data = try Data(contentsOf: fileURL)
@@ -132,24 +134,67 @@ class ThreadPersistenceService {
             decoder.dateDecodingStrategy = .iso8601
             let threadData = try decoder.decode(ThreadData.self, from: data)
 
-            // Create a thread from the data
-            return threadData.toChoirThread()
+            if metadataOnly {
+                // Create a thread with only metadata (no messages)
+                let metadata = ThreadMetadata(from: threadData)
+                return metadata.toChoirThread()
+            } else {
+                // Create a full thread with all messages
+                return threadData.toChoirThread()
+            }
+        } catch {
+            return nil
+        }
+    }
+
+    /// Load thread metadata from a file without loading all messages
+    /// - Parameter fileURL: The URL of the thread file
+    /// - Returns: ThreadMetadata object if successful, nil otherwise
+    private func loadThreadMetadataFromFile(_ fileURL: URL) -> ThreadMetadata? {
+        do {
+            // Read the data from the file
+            let data = try Data(contentsOf: fileURL)
+
+            // Decode the thread data
+            let decoder = JSONDecoder()
+            decoder.dateDecodingStrategy = .iso8601
+            let threadData = try decoder.decode(ThreadData.self, from: data)
+
+            // Create metadata from the thread data
+            return ThreadMetadata(from: threadData)
         } catch {
             return nil
         }
     }
 
     /// Load all threads from the threads directory
-    /// - Returns: Array of loaded threads
+    /// - Parameter walletAddress: Optional wallet address to filter threads
+    /// - Returns: Array of loaded threads with full message content
     func loadAllThreads(walletAddress: String? = nil) -> [ChoirThread] {
+        return loadAllThreadsInternal(walletAddress: walletAddress, metadataOnly: false)
+    }
+
+    /// Load all thread metadata from the threads directory without loading message content
+    /// - Parameter walletAddress: Optional wallet address to filter threads
+    /// - Returns: Array of loaded threads with only metadata (no messages)
+    func loadAllThreadsMetadata(walletAddress: String? = nil) -> [ChoirThread] {
+        return loadAllThreadsInternal(walletAddress: walletAddress, metadataOnly: true)
+    }
+
+    /// Internal implementation for loading threads with option for metadata only
+    /// - Parameters:
+    ///   - walletAddress: Optional wallet address to filter threads
+    ///   - metadataOnly: Whether to load only metadata (no messages)
+    /// - Returns: Array of loaded threads
+    private func loadAllThreadsInternal(walletAddress: String? = nil, metadataOnly: Bool = false) -> [ChoirThread] {
         do {
-            print("Loading threads for wallet address: \(walletAddress ?? "all")")
+            print("Loading threads\(metadataOnly ? " metadata" : "") for wallet address: \(walletAddress ?? "all")")
 
             if let walletAddress = walletAddress {
                 // Load threads for a specific wallet
                 let walletDir = walletDirectory(for: walletAddress)
                 print("Loading from wallet directory: \(walletDir.path)")
-                let threads = try loadThreadsFromDirectory(walletDir, walletAddress: walletAddress)
+                let threads = try loadThreadsFromDirectory(walletDir, walletAddress: walletAddress, metadataOnly: metadataOnly)
                 print("Found \(threads.count) threads for wallet \(walletAddress)")
                 return threads
             } else {
@@ -159,7 +204,7 @@ class ThreadPersistenceService {
                 // First load threads from the default directory
                 let defaultDir = walletDirectory(for: nil)
                 print("Loading from default directory: \(defaultDir.path)")
-                let defaultThreads = try loadThreadsFromDirectory(defaultDir, walletAddress: nil)
+                let defaultThreads = try loadThreadsFromDirectory(defaultDir, walletAddress: nil, metadataOnly: metadataOnly)
                 print("Found \(defaultThreads.count) threads in default directory")
                 allThreads.append(contentsOf: defaultThreads)
 
@@ -171,12 +216,12 @@ class ThreadPersistenceService {
                 for walletDir in walletDirs {
                     let walletAddress = walletDir.lastPathComponent
                     print("Loading from wallet directory: \(walletDir.path)")
-                    let walletThreads = try loadThreadsFromDirectory(walletDir, walletAddress: walletAddress)
+                    let walletThreads = try loadThreadsFromDirectory(walletDir, walletAddress: walletAddress, metadataOnly: metadataOnly)
                     print("Found \(walletThreads.count) threads for wallet \(walletAddress)")
                     allThreads.append(contentsOf: walletThreads)
                 }
 
-                print("Total threads loaded: \(allThreads.count)")
+                print("Total threads\(metadataOnly ? " metadata" : "") loaded: \(allThreads.count)")
                 return allThreads
             }
         } catch {
@@ -185,7 +230,7 @@ class ThreadPersistenceService {
         }
     }
 
-    private func loadThreadsFromDirectory(_ directory: URL, walletAddress: String?) -> [ChoirThread] {
+    private func loadThreadsFromDirectory(_ directory: URL, walletAddress: String?, metadataOnly: Bool = false) -> [ChoirThread] {
         do {
             // Get all JSON files in the directory
             let fileURLs = try FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil)
@@ -194,7 +239,7 @@ class ThreadPersistenceService {
             // Load each thread
             var threads: [ChoirThread] = []
             for fileURL in fileURLs {
-                if let thread = loadThreadFromFile(fileURL) {
+                if let thread = loadThreadFromFile(fileURL, metadataOnly: metadataOnly) {
                     // Set the wallet address on the thread
                     thread.walletAddress = walletAddress
                     threads.append(thread)
@@ -235,6 +280,39 @@ class ThreadPersistenceService {
 }
 
 // MARK: - Serializable Data Models
+
+/// Lightweight metadata for a thread without messages
+struct ThreadMetadata: Codable {
+    let id: String
+    let title: String
+    let walletAddress: String?
+    let createdAt: Date
+    let lastModified: Date
+    let messageCount: Int
+
+    init(from threadData: ThreadData) {
+        self.id = threadData.id
+        self.title = threadData.title
+        self.walletAddress = threadData.walletAddress
+        self.createdAt = threadData.createdAt
+        self.lastModified = threadData.lastModified
+        self.messageCount = threadData.messages.count
+    }
+
+    func toChoirThread() -> ChoirThread {
+        // Create a UUID from the string
+        let threadId = UUID(uuidString: id) ?? UUID()
+
+        // Create a new thread with metadata only (no messages)
+        let thread = ChoirThread(id: threadId, title: title, walletAddress: walletAddress)
+
+        // Set dates
+        thread.createdAt = createdAt
+        thread.lastModified = lastModified
+
+        return thread
+    }
+}
 
 /// Serializable representation of a ChoirThread
 struct ThreadData: Codable {

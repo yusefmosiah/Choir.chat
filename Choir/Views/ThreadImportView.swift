@@ -211,8 +211,8 @@ struct ThreadImportView: View {
                             exportData: exportData
                         )
 
-                        // Force a reload of threads in the ThreadManager
-                        threadManager.loadThreads()
+                        // Force a reload of threads in the ThreadManager (metadata only)
+                        threadManager.loadThreads(metadataOnly: true)
 
                         // Call the success callback if provided
                         onImportSuccess?(count)
