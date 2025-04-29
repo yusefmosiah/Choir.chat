@@ -6,6 +6,7 @@
 //
 import SwiftUI
 import UIKit
+import Combine
 
 struct ContentView: View {
     // Use environment objects instead of creating new instances
@@ -19,6 +20,9 @@ struct ContentView: View {
 
     // View model for controlling thread selection from MainTabView
     @ObservedObject var viewModel: ContentViewModel
+
+    // For notification handling
+    @State private var notificationCancellable: AnyCancellable?
 
     // Initialize with default ContentViewModel if none provided
     init(viewModel: ContentViewModel = ContentViewModel()) {
@@ -187,6 +191,21 @@ struct ContentView: View {
             selectedChoirThread = nil
             // Load saved threads
             loadThreads()
+
+            // Set up notification observer for thread metadata changes
+            notificationCancellable = NotificationCenter.default.publisher(for: NSNotification.Name("ThreadMetadataDidChange"))
+                .receive(on: DispatchQueue.main)
+                .sink { [weak threadManager] notification in
+                    guard let thread = notification.object as? ChoirThread else { return }
+
+                    // Update the thread in the UI
+                    threadManager?.updateThreadInUI(thread)
+                }
+        }
+        .onDisappear {
+            // Clean up notification observer
+            notificationCancellable?.cancel()
+            notificationCancellable = nil
         }
         .onChange(of: viewModel.shouldResetThreadSelection) { _, shouldReset in
             if shouldReset {
@@ -290,6 +309,8 @@ struct ChoirThreadRow: View {
                 Label("Rename", systemImage: "pencil")
             }
         }
+        // Force view to update when thread changes
+        .id(thread.id.uuidString + thread.title + String(thread.messageCount))
     }
 }
 

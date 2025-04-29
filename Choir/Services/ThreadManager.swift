@@ -73,6 +73,43 @@ class ThreadManager: ObservableObject {
         }
     }
 
+    /// Update a thread's metadata in the UI without reloading from storage
+    /// - Parameter thread: The thread to update in the UI
+    func updateThreadInUI(_ thread: ChoirThread) {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+
+            // Find the thread in the array
+            if let index = self.threads.firstIndex(of: thread) {
+                // Update the thread in the array with the latest metadata
+                self.objectWillChange.send()
+
+                // Update the thread's metadata in the array
+                self.threads[index].title = thread.title
+                self.threads[index].metadataMessageCount = thread.messageCount
+
+                // No need to re-sort since we're sorting by createdAt which doesn't change
+            }
+        }
+    }
+
+    /// Refresh a specific thread's metadata in the threads array
+    /// - Parameter thread: The thread to refresh
+    func refreshThreadMetadata(_ thread: ChoirThread) {
+        // Find the thread in the array
+        if let index = threads.firstIndex(of: thread) {
+            // Update the thread in the array with the latest metadata
+            objectWillChange.send()
+            threads[index] = thread
+
+            // Re-sort threads if needed (if sorting by lastModified)
+            threads.sort { $0.createdAt > $1.createdAt }
+        } else {
+            // If thread isn't in the array yet, reload all threads
+            loadThreads(metadataOnly: true)
+        }
+    }
+
     /// Export threads as JSON data
     func exportThreads(walletAddress: String? = nil) -> Data? {
         let threadsToExport: [ChoirThread]

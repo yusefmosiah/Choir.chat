@@ -408,6 +408,15 @@ class PostchainCoordinatorImpl: PostchainCoordinator, ObservableObject {
 
                 // Update thread title
                 thread.updateTitle(finalTitle)
+
+                // Force UI update for this thread
+                DispatchQueue.main.async {
+                    // Explicitly notify observers that the thread has changed
+                    thread.objectWillChange.send()
+
+                    // Also notify the ThreadManager to update its UI
+                    NotificationCenter.default.post(name: NSNotification.Name("ThreadMetadataDidChange"), object: thread)
+                }
             }
         }
     }
