@@ -462,7 +462,8 @@ def is_temperature_compatible(model_name: str) -> bool:
     provider, model_id = get_model_provider(model_name)
 
     # Models known to not support temperature
-    if provider == "openai" and model_id.startswith("o"):
+    incompatible_models = ["o", "gpt-4o-mini-search-preview"]
+    if provider == "openai" and any(model_id.startswith(prefix) for prefix in incompatible_models):
         return False
 
     # Add other temperature-incompatible models here as needed
