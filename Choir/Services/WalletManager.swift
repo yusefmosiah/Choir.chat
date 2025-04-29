@@ -31,8 +31,8 @@ class WalletManager: ObservableObject {
     private let faucetClient: FaucetClient
 
     init() {
-        #if DEBUG
-        print("Using devnet connection")
+        #if DEBUG && targetEnvironment(simulator)
+        print("Using devnet connection for simulator")
         restClient = SuiProvider(connection: DevnetConnection())
         faucetClient = FaucetClient(connection: DevnetConnection())
         #else

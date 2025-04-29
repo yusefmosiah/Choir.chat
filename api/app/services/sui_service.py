@@ -22,24 +22,34 @@ class SuiService:
         if not deployer_key:
             raise ValueError("SUI_PRIVATE_KEY environment variable not set")
 
+        # Get network from environment (default to devnet if not specified)
+        self.network = os.getenv("SUI_NETWORK", "devnet")
+
         try:
-            # Initialize config with devnet RPC and private key
+            # Initialize config with appropriate RPC and private key based on network
+            if self.network == "mainnet":
+                rpc_url = "https://fullnode.mainnet.sui.io:443"
+            else:
+                rpc_url = "https://fullnode.devnet.sui.io:443"
+
             self.config = SuiConfig.user_config(
-                rpc_url="https://fullnode.devnet.sui.io:443",
+                rpc_url=rpc_url,
                 prv_keys=[deployer_key]
             )
             self.client = SuiClient(config=self.config)
             self.signer = keypair_from_keystring(deployer_key)
 
-            # Store deployed CHOIR contract info
-            # These IDs need to be updated when redeploying to devnet
-            # The current IDs may be outdated and need to be replaced with the new deployment IDs
-            logger.info("Initializing with contract IDs - these should match your latest deployment")
-            print("Initializing with contract IDs - these should match your latest deployment")
+            # Store deployed CHOIR contract info based on network
+            logger.info(f"Initializing with contract IDs for {self.network}")
+            print(f"Initializing with contract IDs for {self.network}")
 
-            # Update these IDs with the values from your latest deployment to devnet
-            self.package_id = "0xb33aeae469ce4bdea302e66bb0330fbe4d606776451c3099a5fc557923556a6a"
-            self.treasury_cap_id = "0x6eab9c65acf9b4001199ac98813951140417b5feff8a85218eddd14a62d14f37"
+            # Set package and treasury cap IDs based on network
+            if self.network == "mainnet":
+                self.package_id = "0x4f83f1cd85aefd0254e5b6f93bd344f49dd434269af698998dd5f4baec612898"
+                self.treasury_cap_id = "0x1ee8226165efd8c2cf965199855b40acb0a86c667d64ea5251a06163feeeaa12"
+            else:
+                self.package_id = "0xb33aeae469ce4bdea302e66bb0330fbe4d606776451c3099a5fc557923556a6a"
+                self.treasury_cap_id = "0x6eab9c65acf9b4001199ac98813951140417b5feff8a85218eddd14a62d14f37"
 
             logger.info(f"Using package_id: {self.package_id}")
             logger.info(f"Using treasury_cap_id: {self.treasury_cap_id}")

@@ -211,9 +211,9 @@ tree.md
 │       │   │   ├── BuildInfo.yaml
 │       │   │   ├── bytecode_modules
 │       │   │   │   └── choir.mv
-│       │   │   ├── source_maps
+│       │   │   ├── debug_info
 │       │   │   │   ├── choir.json
-│       │   │   │   └── choir.mvsm
+│       │   │   │   └── choir.mvd
 │       │   │   └── sources
 │       │   │       └── choir.move
 │       │   └── locks

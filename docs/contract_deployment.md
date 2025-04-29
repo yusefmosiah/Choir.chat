@@ -150,6 +150,12 @@ sui client publish --gas-budget 100000000
 
 Record the Package ID and Treasury Cap ID from the output, as you did for devnet.
 
+**Mainnet Deployment Results:**
+- **Package ID**: `0x4f83f1cd85aefd0254e5b6f93bd344f49dd434269af698998dd5f4baec612898`
+- **Treasury Cap ID**: `0x1ee8226165efd8c2cf965199855b40acb0a86c667d64ea5251a06163feeeaa12`
+- **Deployer Address**: `0xe9e9eba13e6868cbb3ab97b5615b2f09459fd6bbac500a251265165febc3073d`
+- **Transaction Digest**: `EBv5AeY9HPYYrgrkSZNAEkQojjYqYurnHx1T4pydFxLj`
+
 ### 7. Test Minting Tokens (Optional)
 
 ```bash
@@ -157,6 +163,13 @@ sui client call --package <MAINNET_PACKAGE_ID> --module choir --function mint --
 ```
 
 Consider minting a small amount first to verify everything works correctly.
+
+**Initial Token Mint:**
+```bash
+sui client call --package 0x4f83f1cd85aefd0254e5b6f93bd344f49dd434269af698998dd5f4baec612898 --module choir --function mint --args 0x1ee8226165efd8c2cf965199855b40acb0a86c667d64ea5251a06163feeeaa12 1000000000 0xe9e9eba13e6868cbb3ab97b5615b2f09459fd6bbac500a251265165febc3073d --gas-budget 10000000
+```
+
+This minted 1 CHOIR token (1,000,000,000 base units with 9 decimals) to the deployer address. The transaction was successful with digest: `5wCGxiLk9pQjmuMk1Buc3koGCKVjAyYoQ2AFKjn8mVrm`.
 
 ## Post-Deployment Configuration
 
@@ -169,8 +182,8 @@ Edit `api/app/services/sui_service.py` to update the package ID and treasury cap
 ```python
 # For network-specific configuration
 if self.network == "mainnet":
-    self.package_id = "0x..." # Your mainnet package ID
-    self.treasury_cap_id = "0x..." # Your mainnet treasury cap ID
+    self.package_id = "0x4f83f1cd85aefd0254e5b6f93bd344f49dd434269af698998dd5f4baec612898"
+    self.treasury_cap_id = "0x1ee8226165efd8c2cf965199855b40acb0a86c667d64ea5251a06163feeeaa12"
 else:  # devnet
     self.package_id = "0xb33aeae469ce4bdea302e66bb0330fbe4d606776451c3099a5fc557923556a6a"
     self.treasury_cap_id = "0x6eab9c65acf9b4001199ac98813951140417b5feff8a85218eddd14a62d14f37"
@@ -190,10 +203,30 @@ static let choir = CoinType(
 )
 
 // For mainnet, you would use:
-// coinTypeIdentifier: "0x<MAINNET_PACKAGE_ID>::choir::CHOIR"
+// coinTypeIdentifier: "0x4f83f1cd85aefd0254e5b6f93bd344f49dd434269af698998dd5f4baec612898::choir::CHOIR"
 ```
 
-For a multi-environment setup, consider implementing environment-specific configurations.
+For a multi-environment setup, consider implementing environment-specific configurations like:
+
+```swift
+#if DEBUG
+static let choir = CoinType(
+    coinTypeIdentifier: "0xb33aeae469ce4bdea302e66bb0330fbe4d606776451c3099a5fc557923556a6a::choir::CHOIR", // Devnet
+    name: "Choir",
+    symbol: "CHOIR",
+    decimals: 9,
+    iconName: "choir-logo"
+)
+#else
+static let choir = CoinType(
+    coinTypeIdentifier: "0x4f83f1cd85aefd0254e5b6f93bd344f49dd434269af698998dd5f4baec612898::choir::CHOIR", // Mainnet
+    name: "Choir",
+    symbol: "CHOIR",
+    decimals: 9,
+    iconName: "choir-logo"
+)
+#endif
+```
 
 ### 3. Test the Notification System
 

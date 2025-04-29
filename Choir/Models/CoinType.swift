@@ -23,6 +23,8 @@ struct CoinType: Identifiable, Hashable, Sendable {
         iconName: "sui-logo"
     )
 
+    #if DEBUG && targetEnvironment(simulator)
+    // Devnet configuration for simulator in debug mode
     static let choir = CoinType(
         coinTypeIdentifier: "0xb33aeae469ce4bdea302e66bb0330fbe4d606776451c3099a5fc557923556a6a::choir::CHOIR",
         name: "Choir",
@@ -30,6 +32,16 @@ struct CoinType: Identifiable, Hashable, Sendable {
         decimals: 9,
         iconName: "choir-logo"
     )
+    #else
+    // Mainnet configuration for all other builds (including debug on device and all release builds)
+    static let choir = CoinType(
+        coinTypeIdentifier: "0x4f83f1cd85aefd0254e5b6f93bd344f49dd434269af698998dd5f4baec612898::choir::CHOIR",
+        name: "Choir",
+        symbol: "CHOIR",
+        decimals: 9,
+        iconName: "choir-logo"
+    )
+    #endif
 
     // Helper to format balance with proper decimals
     func formatBalance(_ rawBalance: Double) -> String {
