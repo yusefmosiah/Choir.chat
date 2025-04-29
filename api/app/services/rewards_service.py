@@ -4,6 +4,7 @@ Rewards service for issuing Choir coins to users.
 
 import logging
 import re
+import math
 from typing import Dict, List, Optional, Tuple, Any
 import asyncio
 
@@ -33,15 +34,33 @@ class RewardsService:
         if max_similarity > 0.95:
             return 0
 
-        # Calculate novelty score (1 - similarity)
-        # Apply softmax-like transformation to emphasize differences
-        novelty_score = 1 - max_similarity
-
         # Base reward amount (1 CHOIR = 1_000_000_000 units)
         base_reward = 1_000_000_000
 
-        # Scale reward based on novelty (0.1 to 1.0 CHOIR)
-        scaled_reward = int(base_reward * max(0.1, min(1.0, novelty_score)))
+        # Constants with clear meaning
+        reference_similarity = 0.95  # The reference point where reward = min_reward
+        min_reward = 0.01            # Reward at reference similarity
+        reward_factor = 10           # How much reward increases per similarity_step
+        similarity_step = 0.05       # How much similarity needs to decrease for reward to increase by reward_factor
+
+        # Calculate exponent: ln(reward_factor) / similarity_step
+        # This gives us how much the exponent changes per unit of similarity
+        exponent_factor = math.log(reward_factor) / similarity_step
+
+        # Calculate the reward using natural exponential function
+        # This creates an exponential scale where:
+        # 0.95 -> 0.01 CHOIR
+        # 0.90 -> 0.1 CHOIR
+        # 0.85 -> 1.0 CHOIR
+        # 0.80 -> 10.0 CHOIR
+        # 0.75 -> 100.0 CHOIR
+        reward_multiplier = min_reward * math.exp(exponent_factor * (reference_similarity - max_similarity))
+
+        # Cap the reward at 100 CHOIR
+        reward_multiplier = min(reward_multiplier, 100.0)
+
+        # Convert to smallest units
+        scaled_reward = int(base_reward * reward_multiplier)
 
         logger.info(f"Calculated novelty reward: {scaled_reward/1_000_000_000} CHOIR (similarity: {max_similarity})")
         return scaled_reward

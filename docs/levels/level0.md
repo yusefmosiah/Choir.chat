@@ -291,6 +291,7 @@ tree.md
 │   ├── require_phase_requirements_index.md
 │   ├── require_understanding_phase.md
 │   ├── require_yield_phase.md
+│   ├── reward_function.md
 │   ├── rewards_system.md
 │   ├── scripts
 │   │   ├── combiner.sh
@@ -305,6 +306,8 @@ tree.md
 │   └── vowel_loop3.ipynb
 ├── README.md
 ├── render.yaml
+├── reward_function_simplified.py
+├── reward_function.py
 └── scripts
     ├── generate_provider_reports.sh
     ├── generate_quick_search_report.sh
@@ -316,7 +319,7 @@ tree.md
     ├── test_postchain_multiturn.sh
     └── test_simulator_notifications.sh
 
-71 directories, 230 files
+71 directories, 233 files
 
 === File: docs/CHANGELOG.md ===
 

@@ -12,7 +12,7 @@ Novelty rewards are issued when a user submits a prompt that is semantically dif
 
 - **Calculation**: Novelty is calculated as `1 - max_similarity`, where `max_similarity` is the highest similarity score between the user's prompt and existing vectors.
 - **Issuance**: Rewards are issued during the Experience Vectors phase.
-- **Amount**: 0.1 to 1.0 CHOIR tokens, scaled based on the novelty score.
+- **Amount**: 0.01 to 100.0 CHOIR tokens, scaled exponentially based on the novelty score.
 
 ### 2. Citation Rewards
 
