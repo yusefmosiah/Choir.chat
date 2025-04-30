@@ -25,7 +25,7 @@ class ModelConfigManager {
                 .experienceVectors: ModelConfig(provider: "google", model: "gemini-2.0-flash-lite"),
                 .experienceWeb: ModelConfig(provider: "groq", model: "meta-llama/llama-4-scout-17b-16e-instruct"),
                 .intention: ModelConfig(provider: "google", model: "gemini-2.0-flash"),
-                .observation: ModelConfig(provider: "openrouter", model: "qwen/qwen3-30b-a3b"),
+                .observation: ModelConfig(provider: "openai", model: "gpt-4.1-nano"),
                 .understanding: ModelConfig(
                     provider: "groq", model: "meta-llama/llama-4-maverick-17b-128e-instruct"),
                 .yield: ModelConfig(provider: "google", model: "gemini-2.5-flash-preview-04-17"),

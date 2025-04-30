@@ -73,7 +73,10 @@ tree.md
 │   │   ├── inverse_scaling_law.md
 │   │   └── loop_of_thought.md
 │   ├── content
-│   │   └── landing.md
+│   │   ├── landing.md
+│   │   ├── marketing.md
+│   │   ├── privacy.md
+│   │   └── support.md
 │   ├── Dockerfile
 │   ├── main.py
 │   ├── pyproject.toml
@@ -316,7 +319,7 @@ tree.md
     ├── test_postchain_multiturn.sh
     └── test_simulator_notifications.sh
 
-71 directories, 230 files
+71 directories, 233 files
 
 === File: docs/CHANGELOG.md ===
 

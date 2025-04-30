@@ -65,6 +65,30 @@ async def read_landing_page(request: Request):
     md_path = root_dir / "content" / "landing.md"
     return render_markdown_to_html(request, md_path, "Welcome to Choir")
 
+# --- Privacy Policy ---
+@app.get("/privacy", response_class=HTMLResponse)
+async def privacy_policy(request: Request):
+    """Serves the privacy policy page rendered from Markdown."""
+    root_dir = Path(__file__).parent
+    md_path = root_dir / "content" / "privacy.md"
+    return render_markdown_to_html(request, md_path, "Choir Privacy Policy")
+
+# --- Support Page ---
+@app.get("/support", response_class=HTMLResponse)
+async def support_page(request: Request):
+    """Serves the support page rendered from Markdown."""
+    root_dir = Path(__file__).parent
+    md_path = root_dir / "content" / "support.md"
+    return render_markdown_to_html(request, md_path, "Choir Support")
+
+# --- Marketing Page ---
+@app.get("/marketing", response_class=HTMLResponse)
+async def marketing_page(request: Request):
+    """Serves the marketing page rendered from Markdown."""
+    root_dir = Path(__file__).parent
+    md_path = root_dir / "content" / "marketing.md"
+    return render_markdown_to_html(request, md_path, "About Choir")
+
 # --- Health Check ---
 @app.get("/health")
 async def health_check():
