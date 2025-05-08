@@ -6,7 +6,7 @@ This file provides guidelines for agentic coding agents working in the Choir rep
 
 - `api/`: Python FastAPI backend using LangChain for the PostChain workflow.
 - `Choir/`: Swift iOS client application.
-- `choir_coin/`: Sui Move smart contract for the CHIP token.
+- `choir_coin/`: Sui Move smart contract for the CHOIR coin.
 - `docs/`: Project documentation.
 - `notebooks/`: Jupyter notebooks for experimentation.
 

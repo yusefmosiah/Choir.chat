@@ -283,7 +283,7 @@ tree.md
 │   ├── mainnet_migration.md
 │   ├── notification_system.md
 │   ├── plan_anonymity_by_default.md
-│   ├── plan_chip_materialization.md
+│   ├── plan_choir_materialization.md
 │   ├── postchain_temporal_logic.md
 │   ├── require_action_phase.md
 │   ├── require_experience_phase.md
@@ -413,11 +413,11 @@ CHANGELOG.md
     -   **Docker:** Maintained Docker for containerization and deployment of MCP servers.
     -   **Phala Network:** Maintained Phala Network for TEE-secured operations and confidential computing for MCP servers.
 
--   **Enhanced Token Economy and Reward System (RL-Driven CHIP):**
-    -   **CHIP Tokens as Training Signals for AI:** Evolved the CHIP token to act as training signals for AI models, driving a self-improving AI ecosystem.
+-   **Enhanced Token Economy and Reward System (RL-Driven CHOIR):**
+    -   **CHOIR Coins as Training Signals for AI:** Evolved the CHOIR coin to act as training signals for AI models, driving a self-improving AI ecosystem.
     -   **Novelty and Citation Rewards:** Implemented novelty rewards for original prompts and citation rewards for salient contributions, algorithmically distributed by AI models.
-    -   **Contract as Data Marketplace Foundation:** Defined the contract as the basis for a data marketplace within Choir, enabling CHIP-based data access and contribution pricing.
-    -   **"AI Supercomputer Box" Vision:** Incorporated the "AI Supercomputer Box" concept as a tangible product embodiment of the Choir platform and CHIP token utility, envisioning a premium, rent-to-own consumer appliance for private, personalized AI and content creation.
+    -   **Contract as Data Marketplace Foundation:** Defined the contract as the basis for a data marketplace within Choir, enabling CHOIR-based data access and contribution pricing.
+    -   **Data Economy Vision:** Developed the vision for a comprehensive data marketplace where CHOIR serves as the currency for accessing and contributing to valuable datasets.
 
 ### Removed
 

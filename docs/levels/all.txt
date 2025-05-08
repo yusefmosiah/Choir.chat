@@ -283,7 +283,7 @@ tree.md
 │   ├── mainnet_migration.md
 │   ├── notification_system.md
 │   ├── plan_anonymity_by_default.md
-│   ├── plan_chip_materialization.md
+│   ├── plan_choir_materialization.md
 │   ├── postchain_temporal_logic.md
 │   ├── require_action_phase.md
 │   ├── require_experience_phase.md
@@ -413,11 +413,11 @@ CHANGELOG.md
     -   **Docker:** Maintained Docker for containerization and deployment of MCP servers.
     -   **Phala Network:** Maintained Phala Network for TEE-secured operations and confidential computing for MCP servers.
 
--   **Enhanced Token Economy and Reward System (RL-Driven CHIP):**
-    -   **CHIP Tokens as Training Signals for AI:** Evolved the CHIP token to act as training signals for AI models, driving a self-improving AI ecosystem.
+-   **Enhanced Token Economy and Reward System (RL-Driven CHOIR):**
+    -   **CHOIR Coins as Training Signals for AI:** Evolved the CHOIR coin to act as training signals for AI models, driving a self-improving AI ecosystem.
     -   **Novelty and Citation Rewards:** Implemented novelty rewards for original prompts and citation rewards for salient contributions, algorithmically distributed by AI models.
-    -   **Contract as Data Marketplace Foundation:** Defined the contract as the basis for a data marketplace within Choir, enabling CHIP-based data access and contribution pricing.
-    -   **"AI Supercomputer Box" Vision:** Incorporated the "AI Supercomputer Box" concept as a tangible product embodiment of the Choir platform and CHIP token utility, envisioning a premium, rent-to-own consumer appliance for private, personalized AI and content creation.
+    -   **Contract as Data Marketplace Foundation:** Defined the contract as the basis for a data marketplace within Choir, enabling CHOIR-based data access and contribution pricing.
+    -   **Data Economy Vision:** Developed the vision for a comprehensive data marketplace where CHOIR serves as the currency for accessing and contributing to valuable datasets.
 
 ### Removed
 
@@ -853,74 +853,74 @@ core_economics
 ==
 
 
-# Core Economic Model: Fueling a Self-Improving AI Ecosystem with CHIP Tokens
+# Core Economic Model: Fueling a Self-Improving AI Ecosystem with CHOIR Coins
 
 VERSION core_economics: 8.0 (RL-Driven Data Economy)
 
-The economic model of Choir is not just about transactions and value exchange; it's about creating a **self-sustaining engine for AI improvement and a thriving marketplace for valuable human data.**  The CHIP token is at the heart of this engine, acting as both the fuel and the training signal for a revolutionary AI ecosystem.
+The economic model of Choir is not just about transactions and value exchange; it's about creating a **self-sustaining engine for AI improvement and a thriving marketplace for valuable human data.**  The CHOIR coin is at the heart of this engine, acting as both the fuel and the training signal for a revolutionary AI ecosystem.
 
-## CHIP: Beyond a Utility Token - A Training Signal and Data Currency
+## CHOIR: Beyond a Utility Token - A Training Signal and Data Currency
 
-The CHIP token transcends the limitations of a traditional utility token. It is designed to be:
+The CHOIR coin transcends the limitations of a traditional utility token. It is designed to be:
 
-*   **A Representation of Contribution and Ownership:** CHIP tokens represent a stake in the collective intelligence of Choir, acknowledging and rewarding user contributions to the platform's knowledge base.
-*   **A Training Signal for AI Models:** CHIP tokens, distributed as novelty and citation rewards, act as *direct training signals* for AI models within the Choir ecosystem, guiding them to optimize for desired behaviors and high-quality content generation.
-*   **The Currency of a Data Marketplace:** CHIP tokens are the *exclusive currency* for accessing and transacting with the valuable, human-generated data within the Choir platform, creating a demand-driven data marketplace.
-*   **A Driver of Network Effects and Value Accrual:** The CHIP token economy is designed to create powerful network effects, driving user engagement, data creation, AI improvement, and sustainable token value accrual.
+*   **A Representation of Contribution and Ownership:** CHOIR coins represent a stake in the collective intelligence of Choir, acknowledging and rewarding user contributions to the platform's knowledge base.
+*   **A Training Signal for AI Models:** CHOIR coins, distributed as novelty and citation rewards, act as *direct training signals* for AI models within the Choir ecosystem, guiding them to optimize for desired behaviors and high-quality content generation.
+*   **The Currency of a Data Marketplace:** CHOIR coins are the *exclusive currency* for accessing and transacting with the valuable, human-generated data within the Choir platform, creating a demand-driven data marketplace.
+*   **A Driver of Network Effects and Value Accrual:** The CHOIR coin economy is designed to create powerful network effects, driving user engagement, data creation, AI improvement, and sustainable coin value accrual.
 
 ## The Dynamic Contract: Governing a Data Marketplace
 
 The dynamic contract, implemented on the Sui blockchain, is the **economic heart of the Choir data marketplace**. It provides a dynamic and nuanced mechanism for:
 
 *   **Stake Pricing and Value Discovery:** The model dynamically determines the stake price for contributing to threads, reflecting the evolving value of knowledge and user attention within the ecosystem.
-*   **Data Access and Contribution Pricing:** The contract governs the "price of data" within each thread. Users "pay" CHIP tokens (stake) to contribute to threads, and this contribution can be seen as a *price for accessing and adding value to the data within that thread*.
+*   **Data Access and Contribution Pricing:** The contract governs the "price of data" within each thread. Users "pay" CHOIR coins (stake) to contribute to threads, and this contribution can be seen as a *price for accessing and adding value to the data within that thread*.
 *   **Incentivizing Quality and Salience:** The contract, through its integration with the novelty and citation reward mechanisms, incentivizes users and AI agents to create *high-quality, novel, and salient contributions* that are valuable for AI training and knowledge building.
-*   **Decentralized Governance and Economic Evolution:** The contract is designed to be *governed by CHIP token holders*, allowing the community to democratically shape the rules of the data marketplace and evolve the economic model over time.
+*   **Decentralized Governance and Economic Evolution:** The contract is designed to be *governed by CHOIR coin holders*, allowing the community to democratically shape the rules of the data marketplace and evolve the economic model over time.
 
 ## Reward Mechanisms: Fueling the AI Data Engine
 
-The CHIP token economy is driven by two key reward mechanisms, algorithmically distributed by AI models within the Choir platform:
+The CHOIR coin economy is driven by two key reward mechanisms, algorithmically distributed by AI models within the Choir platform:
 
 1.  **Novelty Rewards (Experience Phase - Driving Data Diversity):**
     *   **Purpose:** To incentivize the creation of *novel and original prompts and messages*, ensuring a diverse and ever-expanding dataset for AI training.
     *   **Mechanism:** AI models in the Experience Phase analyze new user contributions for semantic novelty compared to existing data in the platform's vector databases.
-    *   **Distribution:** CHIP tokens are algorithmically distributed as novelty rewards to users who submit contributions deemed sufficiently novel, encouraging exploration of new ideas and knowledge domains.
+    *   **Distribution:** CHOIR coins are algorithmically distributed as novelty rewards to users who submit contributions deemed sufficiently novel, encouraging exploration of new ideas and knowledge domains.
 
 2.  **Citation Rewards (Yield Phase - Driving Predictive Salience and Data Quality):**
     *   **Purpose:** To incentivize users to create *salient and impactful contributions* that are recognized and valued by the community, and to reward the creation of high-quality, human-labeled training data through citations.
     *   **Mechanism:** AI models in the Yield Phase analyze the citation network, identifying messages that have been cited as valuable "priors" by other users.
-    *   **Distribution:** CHIP tokens are algorithmically distributed as citation rewards to users whose messages have been cited, based on the *salience* and *influence* of their contributions, as measured by citation metrics and model parameters.
+    *   **Distribution:** CHOIR coins are algorithmically distributed as citation rewards to users whose messages have been cited, based on the *salience* and *influence* of their contributions, as measured by citation metrics and model parameters.
 
-These reward mechanisms are not just about distributing tokens; they are **direct training signals for AI models within Choir**.  AI models learn to identify and reward the very data that is most valuable for their own improvement and for the growth of the collective intelligence of the platform.
+These reward mechanisms are not just about distributing coins; they are **direct training signals for AI models within Choir**.  AI models learn to identify and reward the very data that is most valuable for their own improvement and for the growth of the collective intelligence of the platform.
 
-## Data Marketplace Dynamics: CHIP as Data Purchase Power
+## Data Marketplace Dynamics: CHOIR as Data Purchase Power
 
-The CHIP token economy creates a dynamic **data marketplace** within Choir, where:
+The CHOIR coin economy creates a dynamic **data marketplace** within Choir, where:
 
-*   **CHIP Tokens are the Currency of Data Access:** AI companies, researchers, developers, and even individual users who want to access the high-quality, human-generated data within Choir must **purchase CHIP tokens** to participate in the data marketplace.
+*   **CHOIR Coins are the Currency of Data Access:** AI companies, researchers, developers, and even individual users who want to access the high-quality, human-generated data within Choir must **purchase CHOIR coins** to participate in the data marketplace.
 *   **Data is "Sold" at a Granular Level (Thread-Specific Contracts):** Data access and contribution pricing are governed by the contract at a granular, thread-specific level. Each thread effectively has its own "data contract" that determines the terms of data access and contribution within that thread.
-*   **Data Scarcity and Privacy Drive Value:** The deliberate emphasis on **data scarcity and user privacy** within Choir is a key driver of CHIP token value.  By limiting data sales and prioritizing user control, Choir creates a marketplace for *premium, high-quality, and ethically sourced data*, which is increasingly valuable in the AI age.
-*   **CHIP Holder Governance of Data Marketplace Terms:** CHIP token holders have **governance rights to shape the rules and policies of the data marketplace**, ensuring that it remains aligned with the community's values and long-term interests.
+*   **Data Scarcity and Privacy Drive Value:** The deliberate emphasis on **data scarcity and user privacy** within Choir is a key driver of CHOIR coin value.  By limiting data sales and prioritizing user control, Choir creates a marketplace for *premium, high-quality, and ethically sourced data*, which is increasingly valuable in the AI age.
+*   **CHOIR Holder Governance of Data Marketplace Terms:** CHOIR coin holders have **governance rights to shape the rules and policies of the data marketplace**, ensuring that it remains aligned with the community's values and long-term interests.
 
-## Business Sustainability and the "Pays for Itself" Model
+## Business Sustainability and the Data Economy Model
 
-The CHIP token economy is designed to create a **self-sustaining ecosystem** where value flows naturally and benefits all participants.  The "AI Supercomputer Box" and the IDaaS premium features are key components of the business model, designed to:
+The CHOIR coin economy is designed to create a **self-sustaining ecosystem** where value flows naturally and benefits all participants. The Data Marketplace and the IDaaS premium features are key components of the business model, designed to:
 
-*   **Drive CHIP Token Demand and Utility:**  Create tangible use cases for CHIP tokens, increasing their demand and utility beyond just platform-internal rewards.
-*   **Generate Revenue to Support Platform Operations:**  Revenue from "AI Supercomputer Box" sales/rent-to-own and IDaaS subscriptions will fund the ongoing development, maintenance, and operational costs of the Choir platform and the token economy.
-*   **"Pays for Itself" Value Proposition for Users:**  The "AI Supercomputer Box" is designed to be a valuable asset that "pays for itself" over time through:
-    *   **Financial Optimization and Savings (AI Household Assistant Features).**
-    *   **Token Earning for Background Compute Work.**
-    *   **Access to a Thriving Data Marketplace and Future AI-Powered Services.**
+*   **Drive CHOIR Coin Demand and Utility:** Create tangible use cases for CHOIR coins, increasing their demand and utility beyond just platform-internal rewards.
+*   **Generate Revenue to Support Platform Operations:** Revenue from IDaaS subscriptions and data marketplace transaction fees will fund the ongoing development, maintenance, and operational costs of the Choir platform and the coin economy.
+*   **Value Proposition for Users:** The Choir ecosystem is designed to provide value to users through:
+    *   **Financial Rewards for Quality Contributions:** Earn CHOIR coins for novel ideas and cited content.
+    *   **Access to a Thriving Data Marketplace:** Exchange valuable data and insights.
+    *   **Enhanced Identity and Reputation:** Build credibility through the IDaaS offering.
 
 ## Conclusion: Building a Self-Improving, Data-Driven AI Ecosystem
 
-The core economic model of Choir, centered around the CHIP token and the dynamic contract, is designed to create a **self-improving, data-driven AI ecosystem** where:
+The core economic model of Choir, centered around the CHOIR coin and the dynamic contract, is designed to create a **self-improving, data-driven AI ecosystem** where:
 
 *   **Human Ingenuity and AI Intelligence are Synergistically Combined:**  The platform leverages the unique strengths of both human users and AI models to create a powerful engine for knowledge creation and problem-solving.
-*   **Data is Recognized and Valued as a Core Asset:**  User data contributions are explicitly recognized as valuable assets and are rewarded through the CHIP token economy.
-*   **Value Flows Naturally and Incentives are Aligned:**  The token economy is designed to align the incentives of users, AI agents, and the platform itself, creating a virtuous cycle of growth, quality, and value creation.
-*   **CHIP Tokens Fuel a Self-Improving AI Engine:**  CHIP tokens are not just a currency; they are the *fuel and the training signals* that drive the continuous improvement and evolution of the Choir AI ecosystem, creating a truly revolutionary and sustainable model for the future of AI and online collaboration.
+*   **Data is Recognized and Valued as a Core Asset:**  User data contributions are explicitly recognized as valuable assets and are rewarded through the CHOIR coin economy.
+*   **Value Flows Naturally and Incentives are Aligned:**  The coin economy is designed to align the incentives of users, AI agents, and the platform itself, creating a virtuous cycle of growth, quality, and value creation.
+*   **CHOIR Coins Fuel a Self-Improving AI Engine:**  CHOIR coins are not just a currency; they are the *fuel and the training signals* that drive the continuous improvement and evolution of the Choir AI ecosystem, creating a truly revolutionary and sustainable model for the future of AI and online collaboration.
 
 === File: docs/core_state_transitions.md ===
 
@@ -1005,13 +1005,13 @@ e_business
 
 # File: docs/e_business.md
 
-# Choir Business Model: A Sustainable Ecosystem for Collective Intelligence Fueled by CHIP and Lush
+# Choir Business Model: A Sustainable Ecosystem for Collective Intelligence Fueled by CHOIR
 
-Choir's business model is designed to be as revolutionary and forward-thinking as the platform itself. It's not about extracting value through ads or intrusive subscriptions, but about **enabling and amplifying natural value creation** within a thriving ecosystem of human and AI collaboration, powered by the CHIP token and anchored by the Lush AI Supercomputer Box.
+Choir's business model is designed to be as revolutionary and forward-thinking as the platform itself. It's not about extracting value through ads or intrusive subscriptions, but about **enabling and amplifying natural value creation** within a thriving ecosystem of human and AI collaboration, powered by the CHOIR coin and developed by Choir Harmonic Intelligence Platform, Inc.
 
-## Freemium Foundation with a Path to Enhanced Agency
+## Freemium Foundation with Premium Identity Services
 
-Our model is built on a robust **freemium foundation** ensuring broad accessibility, complemented by a clear path towards enhanced capabilities and private compute power through the **Lush AI Supercomputer Box**.
+Our model is built on a robust **freemium foundation** ensuring broad accessibility, complemented by premium Identity-as-a-Service (IDaaS) offerings that provide enhanced capabilities and recognition.
 
 **Free Tier (Core Value and Broad Accessibility):**
 
@@ -1019,104 +1019,108 @@ The free tier provides essential access to participate in and benefit from the C
 
 *   **Thread Participation:** Full access to participate in public threads, contributing to the collective knowledge base using the Loop of Thought (LoT) interaction model.
 *   **Co-authorship:** Ability to become a co-author of threads through quality contributions and community recognition (via citations).
-*   **CHIP Token Earning:** Earn CHIP tokens for novel contributions and salient citations, rewarding participation and value creation.
+*   **CHOIR Coin Earning:** Earn CHOIR coins for novel contributions and salient citations, rewarding participation and value creation.
 *   **Basic Message Submission and Interaction:** Core functionalities for message creation, submission, and participation in the PostChain workflow.
 *   **Thread Visibility:** Full visibility of thread content and activity for participants.
 *   **Standard Resource Allocation:** Access to standard levels of platform resources (compute for AI phases, storage for contributions) sufficient for core participation.
 *   **Natural Team Formation:** Tools and features supporting organic team formation around valuable threads and shared interests.
 
-**Premium Offering: The Lush AI Supercomputer Box (Rent-to-Own)**
+**Premium Offering: Identity-as-a-Service (IDaaS)**
 
-Instead of a traditional subscription tier, Choir's premium offering materializes as tangible hardware – the **Lush AI Supercomputer Box**. This device serves as the primary monetization driver and the gateway to enhanced capabilities and true AI agency.
+Choir's premium offering centers on Identity-as-a-Service (IDaaS), providing users with persistent, recognized identities while maintaining the option for anonymity when desired.
 
-*   **Private Compute Substrate:** Lush provides powerful, local AI processing hardware (e.g., high-end NVIDIA RTX) within a premium home appliance. It runs Choir and other AI models locally, ensuring user data sovereignty and privacy.
-*   **Enabling User Agency:** Lush empowers users to deploy sophisticated applications and autonomous agents (like the "digital family office" concept) on their own private hardware.
-*   **CHIP-Powered Acquisition:** Lush Boxes are acquired primarily using **CHIP tokens**, likely via a rent-to-own model (e.g., a monthly CHIP payment). This creates a fundamental, non-speculative demand for CHIP earned through participation in Choir.
-*   **Circular Compute Economy:** Lush owners can potentially contribute idle compute power back to a distributed network, earning CHIP tokens and offsetting acquisition costs.
-*   **Enhanced Capabilities:** Owning and operating a Lush Box naturally grants access to higher resource allocations (compute, storage, network priority) and potentially unlocks advanced features within the Choir ecosystem that require significant local processing power or enhanced privacy.
+*   **Persistent Identity:** Users can establish a consistent, recognized presence across the platform, building reputation and credibility.
+*   **Attribution Control:** Fine-grained control over which contributions are attributed to your persistent identity.
+*   **Enhanced Discovery:** Premium identities receive improved visibility in relevant searches and recommendations.
+*   **Professional Networking:** Opportunities to connect with other premium users based on shared interests and complementary expertise.
+*   **Verified Credentials:** Optional verification of real-world credentials or expertise in specific domains.
+*   **Priority Access:** Preferential access to new features, higher resource allocations, and premium content.
 
 **Monetization Strategy - Aligning Revenue with Ecosystem Value:**
 
-Choir's monetization strategy is directly tied to the success and utility of the CHIP token and the desirability of the Lush Box:
+Choir's monetization strategy is directly tied to the success and utility of the CHOIR coin and the value of the data marketplace:
 
-1.  **Lush Box Rent-to-Own (via CHIP):** The primary revenue stream is anticipated to come from users acquiring Lush Boxes using CHIP tokens through a rent-to-own structure. Lush Inc. (the entity producing the boxes) receives CHIP, aligning its success with the token's value.
-2.  **CHIP Token Ecosystem Value:** As the Choir network grows and generates valuable data and interactions, the CHIP token (needed for Lush acquisition and potentially future Thread Contract participation) accrues value. Lush Inc., by receiving CHIP for boxes, benefits from this ecosystem growth. Equity investment would likely occur in Lush Inc., providing exposure to its CHIP holdings and hardware business.
-3.  **(Potential Future) Marketplace Fees:** A small percentage fee on data access or transactions within a future Choir data marketplace could provide an additional revenue stream, governed by CHIP holders.
+1.  **Identity-as-a-Service (IDaaS) Subscriptions:** The primary revenue stream comes from monthly subscription fees for persistent, recognized identities on the platform, providing Choir Harmonic Intelligence Platform, Inc. (CHI) with a stable, recurring revenue base.
+2.  **Data Marketplace Transaction Fees:** A small percentage fee on data access or transactions within the Choir data marketplace provides an additional revenue stream, scaling with ecosystem activity.
+3.  **CHOIR Coin Treasury Strategy:** CHI purchases CHOIR coins from the open market using a portion of its revenue, holding them as strategic treasury assets. This creates buy pressure for CHOIR and aligns CHI's success with the coin's value.
+4.  **Premium API Access:** Enterprise-grade API access to the Choir platform and data marketplace provides an additional revenue stream for business and developer use cases.
 
-This model avoids direct user data monetization and focuses on providing tangible value (private compute, enhanced agency) in exchange for participation in the token economy.
+This model avoids direct user data monetization and focuses on providing valuable services (identity, data access, API capabilities) in exchange for participation in the ecosystem.
 
 **Value Creation Flows - A Multi-Layered Ecosystem:**
 
 Value creation in Choir flows through multiple interconnected layers:
 
 *   **Individual Level:**
-    *   **Recognition & CHIP Rewards:** Earn CHIP tokens for novel and salient contributions via the LoT process.
-    *   **Path to Agency:** Accumulate CHIP to acquire a Lush Box, enabling private AI and enhanced capabilities.
-    *   **Potential Compute Rebate:** Earn CHIP by contributing Lush Box compute power.
-    *   **Natural Reputation:** Build influence through the quality and citation of ideas, even anonymously.
+    *   **Recognition & CHOIR Rewards:** Earn CHOIR coins for novel and salient contributions via the LoT process.
+    *   **Path to Enhanced Services:** Use CHOIR to access premium data marketplace services and participate in Thread Contracts.
+    *   **Identity Options:** Choose between anonymous participation or premium identity services based on your needs.
+    *   **Natural Reputation:** Build influence through the quality and citation of ideas, with or without a persistent identity.
 
 *   **Team Level (Threads and Co-authorship):**
-    *   **Collective Value Accumulation:** Threads become shared spaces where value (knowledge, potential CHIP rewards via citations) accumulates collectively.
+    *   **Collective Value Accumulation:** Threads become shared spaces where value (knowledge, potential CHOIR rewards via citations) accumulates collectively.
     *   **Shared Success:** Threads gain recognition and value through citations, creating network effects.
     *   **Natural Team Formation:** Teams organically form around valuable threads and shared goals.
 
 *   **Network Level (Choir Ecosystem):**
     *   **Knowledge Networks:** Citations create a growing web of interconnected knowledge.
-    *   **Value Flows:** CHIP tokens flow via rewards, Lush acquisition, and potential future thread staking, creating a dynamic economy.
-    *   **Collective Intelligence Emergence:** The interplay of LoT interactions, CHIP incentives, and network effects fosters emergent collective intelligence.
-    *   **Sustainable Ecosystem Growth:** The CHIP token economy, anchored by Lush Box utility, aims for self-sustaining growth.
+    *   **Value Flows:** CHOIR coins flow via rewards, data marketplace transactions, and thread staking, creating a dynamic economy.
+    *   **Collective Intelligence Emergence:** The interplay of LoT interactions, CHOIR incentives, and network effects fosters emergent collective intelligence.
+    *   **Sustainable Ecosystem Growth:** The CHOIR coin economy, anchored by the data marketplace and IDaaS utility, aims for self-sustaining growth.
 
 **Resource Allocation - Natural and Scalable:**
 
 Resource allocation within Choir scales naturally:
 
-*   **Processing Resources (AI Compute):** Standard access for free tier participation. Enhanced/prioritized access linked to Lush Box ownership or potentially high CHIP staking/activity in the future.
-*   **Storage Resources (Data Persistence):** Sufficient storage for free tier contributions. Enhanced storage or backup options potentially linked to Lush.
-*   **Network Resources (Real-Time Communication):** Standard access for free tier. Enhanced bandwidth/priority potentially linked to Lush.
+*   **Processing Resources (AI Compute):** Standard access for free tier participation. Enhanced/prioritized access linked to IDaaS subscription or high CHOIR staking/activity.
+*   **Storage Resources (Data Persistence):** Sufficient storage for free tier contributions. Enhanced storage or backup options for premium users.
+*   **Network Resources (Real-Time Communication):** Standard access for free tier. Enhanced bandwidth/priority for premium users and high-value threads.
 
 **Growth and Evolution - Organic and Sustainable:**
 
 Choir's growth is designed to be organic and sustainable, driven by natural amplification mechanisms:
 
-*   **Quality Emergence:** LoT and CHIP rewards incentivize high-quality contributions.
+*   **Quality Emergence:** LoT and CHOIR rewards incentivize high-quality contributions.
 *   **Team Formation:** Collaboration emerges around valuable threads.
 *   **Network Effects:** Value increases as more users participate and connect ideas.
-*   **Hardware Integration:** The Lush Box provides a tangible scaling path and utility anchor.
+*   **Data Marketplace:** The data marketplace provides a scalable utility for CHOIR and drives ecosystem growth.
 
 *   **Scaling Orientation via Global Context:** Crucially, Choir's ability to Orient (a key phase in the Loop of Thought) scales directly with user participation. The global vector database, populated by user contributions, grows richer and more comprehensive as the network expands. This means that as more users contribute diverse ideas and create valuable citations, the system's collective ability to retrieve relevant context, understand nuances, and inform better decisions improves for everyone. This creates a powerful positive feedback loop: more users generate better data, which improves the AI's orientation capabilities (via enhanced Experience phase retrieval), leading to better interactions and rewards, thus attracting more users. It's a network effect combined with an AI training feedback loop – the system improves its means of improving as it scales.
 
-*   **Resource Evolution Supports Scaling:** Resource allocations naturally evolve to support platform growth, with individual allocations expanding (potentially via Lush), team capabilities growing, and network capacity increasing to accommodate increasing user activity.
+*   **Resource Evolution Supports Scaling:** Resource allocations naturally evolve to support platform growth, with individual allocations expanding (through premium services), team capabilities growing, and network capacity increasing to accommodate increasing user activity.
 
 
 **Future Evolution - Expanding Capabilities and User Empowerment:**
 
 Future evolution will focus on:
 
-*   **Sophisticated Thread Contracts:** Enabling CHIP staking for participation and investment in specific ideas/teams.
-*   **Advanced Agent Frameworks:** Leveraging the LoT architecture and Lush Box compute for more powerful autonomous agents.
+*   **Sophisticated Thread Contracts:** Enabling CHOIR staking for participation and investment in specific ideas/teams.
+*   **Advanced Agent Frameworks:** Leveraging the LoT architecture for more powerful autonomous agents.
 *   **Knowledge Tools:** Developing tools for navigating and analyzing the emergent knowledge network.
-*   **Lush Box Ecosystem:** Expanding the capabilities and applications runnable on the Lush hardware.
+*   **Data Marketplace Expansion:** Enhancing the data marketplace with more sophisticated pricing, licensing, and discovery mechanisms.
+*   **Governance Mechanisms:** Implementing CHOIR-based governance for platform decisions and resource allocation.
 
 **Implementation Strategy - Phased and Iterative:**
 
 Our implementation follows a natural progression:
 
-1.  **Foundation Phase (MVP Focus):** Establish core LoT functionality on the Choir platform, initiate CHIP token distribution via basic rewards, build the initial community based on the vision.
-2.  **Enhancement Phase (Thread Contract):** Introduce on-chain Thread Contracts, enabling CHIP staking for participation and adding a software-based utility sink.
-3.  **Materialization Phase (Lush Box):** Develop and launch the Lush AI Supercomputer Box, establishing the primary CHIP utility sink and enabling the private compute future.
+1.  **Foundation Phase (MVP Focus):** Establish core LoT functionality on the Choir platform, initiate CHOIR coin distribution via basic rewards, build the initial community based on the vision.
+2.  **Enhancement Phase (Thread Contract):** Introduce on-chain Thread Contracts, enabling CHOIR staking for participation and adding a software-based utility sink.
+3.  **Marketplace Phase (Data Economy):** Develop and launch the Choir Data Marketplace, establishing a primary CHOIR utility and enabling the data economy.
+4.  **Governance Phase (Community Control):** Implement governance mechanisms allowing CHOIR holders to participate in platform decisions.
 
 **Success Metrics - Measuring Natural Growth and Value Creation:**
 
 Success is measured by metrics reflecting ecosystem health and value creation:
 
 *   **Quality Metrics:** Citation rates, novelty scores, thread depth, user retention based on interaction quality.
-*   **Economic Metrics:** CHIP token velocity (especially related to Lush acquisition), distribution fairness, Lush Box adoption rate, compute contribution rates.
+*   **Economic Metrics:** CHOIR coin velocity (marketplace transactions, IDaaS subscriptions), distribution fairness, data marketplace activity.
 *   **Network Metrics:** Growth in active users, thread creation/interconnection, emergence of valuable knowledge clusters.
 *   **Health Metrics:** System performance, resource efficiency, resilience against reward hacking.
 
 **Conclusion - A Sustainable Ecosystem for the Future of Knowledge Work:**
 
-Choir's business model aims to create a **sustainable ecosystem for the future of knowledge work and AI agency.** We grow by strengthening the natural flows of quality, collaboration, and collective intelligence, fueled by the CHIP token and grounded by the Lush Box. By aligning business success with user empowerment, privacy, and genuine value creation, we are building a platform where growth comes from enabling natural patterns of collaboration and knowledge sharing, rather than artificial engagement metrics or data extraction. Join us in building this future!
+Choir's business model aims to create a **sustainable ecosystem for the future of knowledge work and collective intelligence.** We grow by strengthening the natural flows of quality, collaboration, and collective intelligence, fueled by the CHOIR coin and developed by Choir Harmonic Intelligence Platform, Inc. (CHI). By aligning business success with user empowerment, privacy, and genuine value creation, we are building a platform where growth comes from enabling natural patterns of collaboration and knowledge sharing, rather than artificial engagement metrics or data extraction. Join us in building this future!
 
 === File: docs/e_concept.md ===
 
@@ -1231,113 +1235,105 @@ Anonymity is not just a feature of Choir; it's a fundamental principle, a design
 
 Anonymity by default is a core design principle of Choir, one that reflects the platform's commitment to privacy, freedom of expression, and the creation of a truly meritocratic space for the exchange of ideas. It's a bold choice in a world where online platforms increasingly demand real-name identification, but it's a choice that has the potential to unlock new levels of creativity, honesty, and collective intelligence. By prioritizing anonymity, Choir is not just building a platform; it's building a new model for online interaction, one that empowers individuals and fosters a more open and equitable exchange of ideas.
 
-=== File: docs/plan_chip_materialization.md ===
+=== File: docs/plan_choir_materialization.md ===
 
 
 
 ==
-plan_chip_materialization
+plan_choir_materialization
 ==
 
 
-# Plan: CHIP Token Materialization - The AI Supercomputer Box
+# Plan: CHOIR Coin Materialization - Building a Thriving Data Economy
 
 ## Overview
 
-This document outlines the plan for "CHIP Token Materialization" – the strategy to bring the CHIP token economy and the Choir platform to life through a tangible, high-value consumer product: the **Choir AI Supercomputer Box**. This box is envisioned as a premium, rent-to-own device that serves as a user's personal portal to private, powerful AI and the Choir ecosystem, while also driving CHIP token demand and utility.
+This document outlines the strategy for "CHOIR Coin Materialization" – the approach to bring the CHOIR coin economy and the Choir platform to life through a robust data marketplace, premium services, and governance mechanisms. The CHOIR coin is designed to serve as the currency of a thriving data economy, driving demand and utility while enabling a fair value exchange for contributors.
 
-## The "AI Supercomputer Box" - A Premium Consumer Appliance
+## The Data Marketplace - A Foundation for CHOIR Utility
 
-The "AI Supercomputer Box" is not just another tech gadget; it's envisioned as a **status symbol and a transformative household appliance** that will:
+The Choir Data Marketplace is envisioned as the primary utility driver for the CHOIR coin, creating a space where:
 
-*   **Replace Cable TV and Smart TVs:**  Become the central entertainment and information hub for the home, going beyond passive consumption to enable *two-way interaction with public discourse* and AI-powered content experiences.
-*   **Deliver Private, Personalized AI:** Provide users with access to *powerful, local AI compute* that is private, secure, and customizable to their individual needs and data.
-*   **Act as a "Household AI Assistant":**  Function as a comprehensive AI assistant for managing finances, household operations, planning, and personal knowledge, becoming an indispensable part of daily life.
-*   **Enable AI-Powered Content Creation and Live Streaming:**  Serve as a "live streaming home production studio," empowering users to create professional-quality content, interactive live streams, and XR experiences with AI assistance.
-*   **Drive CHIP Token Demand and Utility:**  Create a tangible use case for CHIP tokens, allowing users to earn tokens by contributing compute power and data, and to spend tokens to access premium features and participate in the Choir ecosystem.
+*   **High-Quality Training Data is Valued:** The marketplace enables the exchange of valuable, human-generated data that can be used for AI training, research, and development.
+*   **Contributors are Fairly Rewarded:** Data contributors receive CHOIR coins as compensation for the value they create, with transparent attribution and tracking.
+*   **Privacy and Control are Preserved:** Users maintain control over how their data is used, with clear permissions and usage rights.
+*   **CHOIR Serves as the Exclusive Currency:** All marketplace transactions require CHOIR coins, creating a fundamental utility and demand driver.
 
-## Key Features and Value Propositions of the "AI Supercomputer Box"
+## Key Features and Value Propositions of the Data Marketplace
 
-1.  **Private, Local AI Compute Power:**
-    *   **High-End NVIDIA RTX Workstation Hardware:** Powered by cutting-edge NVIDIA RTX GPUs, providing massive local compute power for AI training and inference.
-    *   **On-Device AI Processing:** All AI computations happen locally on the box, ensuring user privacy and data control.
-    *   **Personalized AI Models:** Users can train and customize AI models on their own personal data, creating truly individualized AI assistants.
+1.  **Thread-Specific Data Contracts:**
+    *   **Granular Access Control:** Data access and contribution rights are governed at the thread level, allowing for fine-grained control.
+    *   **Value-Based Pricing:** The price of data access is determined by the quality, uniqueness, and utility of the data within each thread.
+    *   **Transparent Attribution:** Contributors are clearly credited for their data, building reputation and enabling fair compensation.
 
-2.  **"Replacing Cable TV" - AI-Enhanced Entertainment and Information Hub:**
-    *   **4K/8K Video Processing and Output:**  Handles multiple high-resolution video streams for stunning visuals on TVs and projectors.
-    *   **AI-Powered Interactive Content Experiences:** Enables new forms of interactive TV, AI-driven entertainment, and personalized news and information consumption.
-    *   **Live Streaming Home Production Studio:**  Provides professional-quality tools for live streaming, video editing, and content creation, all powered by AI.
-    *   **XR (Extended Reality) Integration:**  Serves as a gateway to immersive XR and metaverse experiences, enabling users to create and participate in virtual worlds.
+2.  **Premium Data Services:**
+    *   **Curated Datasets:** Access to high-quality, curated datasets for specific domains or use cases.
+    *   **Custom Data Collection:** Ability to commission specific data collection or annotation tasks from the Choir community.
+    *   **Data Analytics and Insights:** Tools for analyzing and extracting insights from marketplace data.
 
-3.  **"Household AI Assistant" - Comprehensive Personal and Financial Management:**
-    *   **AI-Powered Financial Management:**  Automates budgeting, expense tracking, subscription optimization, tax preparation, investment analysis, and healthcare price shopping.
-    *   **Household Operations Management:**  Manages calendars, schedules, reminders, smart home devices, and other household tasks with AI assistance.
-    *   **Personal Knowledge Management and Organization:**  Acts as a personal knowledge base, organizing notes, documents, research, and personal data, and providing AI-powered search and retrieval.
-    *   **Proactive and Personalized AI Assistance:**  Learns user preferences and proactively provides helpful suggestions, reminders, and insights based on user data and context.
+3.  **Identity-as-a-Service (IDaaS) Integration:**
+    *   **Verified Contributor Status:** Paid IDaaS subscribers can build verifiable reputations as data contributors.
+    *   **Enhanced Discovery:** Premium identity services enable better discovery of contributors' work.
+    *   **Professional Networking:** Opportunities for professional connections based on data contributions and expertise.
 
-4.  **CHIP Token Integration and "Pays for Itself" Economics:**
-    *   **Rent-to-Own Model ($200/Month for 36 Months):**  Makes the "AI Supercomputer Box" financially accessible through a rent-to-own model, with the goal of the box "paying for itself" over time.
-    *   **CHIP Token Earning for Background Compute Work:**  Users can earn CHIP tokens by allowing the box to perform background AI computations (training, inference) when idle, contributing to the broader decentralized AI ecosystem.
-    *   **CHIP Token Utility for Premium Features and Data Access:**  CHIP tokens unlock premium features within the "AI Supercomputer Box" software and provide access to the Choir data marketplace and other premium services.
-    *   **"Investment in a Personal Compute Asset":**  Positions the "AI Supercomputer Box" as a long-term investment in a valuable personal compute asset that can generate financial returns and provide ongoing utility.
+4.  **CHOIR Coin Integration and Economic Model:**
+    *   **Direct Rewards for Quality:** CHOIR coins are awarded for novel and cited contributions, creating a direct incentive for quality.
+    *   **Marketplace Transaction Currency:** CHOIR coins are required for all data marketplace transactions.
+    *   **Staking for Premium Access:** Users can stake CHOIR coins to access premium features or higher-tier data.
+    *   **Governance Rights:** CHOIR holders can participate in governance decisions about marketplace rules and policies.
 
-### Private, Personalized Model Training - User Empowerment and Data Ownership
+## Thread Contracts - Programmable Data Agreements
 
-A defining feature of the "AI Supercomputer Box" is its ability to enable **private, personalized AI model training directly on user data, locally on the device.** This empowers users with unprecedented control and customization of their AI experiences:
+A core innovation in the Choir ecosystem is the concept of Thread Contracts - programmable agreements that govern data sharing, contribution rights, and value distribution within specific conversation threads:
 
-*   **Train Models on Your Own Data:** Users can train AI models on their personal data – photos, videos, documents, chat logs, creative works, financial records (with appropriate privacy controls and user consent) – to create AI assistants and tools that are *uniquely tailored to their individual needs and preferences.*
-*   **Enhanced Personalization and Relevance:**  Models trained on personal data will be *far more personalized and relevant* than generic, cloud-based AI models.  The "AI Supercomputer Box" will learn *your* patterns, *your* style, *your* knowledge, and *your* goals, providing a truly individualized AI experience.
-*   **Privacy by Design - Data Stays Local:**  All training data remains *securely on the user's device*.  No sensitive personal data needs to be uploaded to the cloud or shared with third parties for model training, ensuring maximum user privacy and data control.
-*   **Use Cases for Private Personalized Models:**
-    *   **Personalized AI Assistants:** Train a truly *personal AI assistant* that understands your unique context, preferences, and communication style, going far beyond generic voice assistants.
-    *   **Customized Content Creation Tools:**  Train AI models to generate content (text, images, music, code) in *your specific style* or based on *your creative data*, creating uniquely personalized content creation workflows.
-    *   **Domain-Specific AI Models:**  Train AI models for *specialized domains* relevant to your profession, hobbies, or interests, creating powerful AI tools tailored to your specific expertise.
-    *   **Continuous Learning and Adaptation:**  The "AI Supercomputer Box" enables *continuous learning and adaptation* of AI models over time as users generate more data and interact with the system, ensuring that the AI remains relevant and valuable as user needs evolve.
+*   **Stake-to-Participate Model:** Users stake CHOIR coins to participate in high-value threads, creating skin-in-the-game for quality contributions.
+*   **Programmable Revenue Sharing:** Thread contracts can specify how value is distributed among contributors, based on their roles and contributions.
+*   **Customizable Access Controls:** Thread creators can define who can access, contribute to, or benefit from the thread's data.
+*   **Dynamic Pricing Mechanisms:** The cost of participation and data access can adjust based on thread quality, popularity, and value.
 
-By putting the power of AI model training directly in the hands of users, the "AI Supercomputer Box" democratizes AI customization and empowers individuals to create AI tools that are truly their own.
+Thread Contracts create a flexible framework for collaboration and value exchange, allowing for diverse models of data creation and monetization while ensuring fair compensation for contributors.
 
-## Target Market and User Personas
+## Governance and Future Evolution
 
-The "AI Supercomputer Box" is initially targeted towards:
+The CHOIR coin is designed to evolve into a governance token, giving holders a say in the future development of the Choir platform:
 
-*   **Tech Enthusiasts and Early Adopters:**  Users who are excited about cutting-edge AI technology, privacy-focused solutions, and owning powerful personal compute devices.
-*   **Content Creators and Live Streamers:**  Professionals and hobbyists who need high-performance video processing, AI-powered content creation tools, and live streaming capabilities.
-*   **Affluent Households and "Prosumers":**  Households and individuals who are willing to invest in premium consumer electronics that offer significant productivity, entertainment, and financial benefits.
-*   **"Privacy-Conscious Consumers":**  Users who are increasingly concerned about data privacy and want to control their personal data and AI interactions locally, rather than relying solely on cloud services.
+*   **Protocol Parameter Governance:** CHOIR holders can vote on key parameters of the reward algorithms, marketplace fees, and other economic aspects.
+*   **Feature Prioritization:** Community voting on new features and platform enhancements.
+*   **Treasury Allocation:** Decisions on how to allocate community treasury funds for ecosystem development.
+*   **Dispute Resolution:** Mechanisms for resolving disputes related to data usage, attribution, or compensation.
+
+This governance layer ensures that the Choir platform remains aligned with the interests of its community and can adapt to changing needs and opportunities.
 
 ## Monetization Strategy
 
-The "AI Supercomputer Box" monetization strategy is multi-faceted:
+The monetization strategy for Choir Harmonic Intelligence Platform, Inc. (CHI) is multi-faceted:
 
-1.  **Rent-to-Own Revenue ($200/Month):**  The primary revenue stream will be the $200/month rent-to-own subscription fee for the "AI Supercomputer Box."
-2.  **CHIP Token Economy and Data Marketplace:**  The CHIP token economy and data marketplace will create additional revenue streams:
-    *   **CHIP Token Sales (Initial Token Distribution):**  Potentially selling a limited number of CHIP tokens to early adopters or investors to bootstrap the token economy and fund initial development.
-    *   **Data Marketplace Fees (Small Percentage):**  Charging a small percentage fee on data sales within the Choir data marketplace (governed by CHIP holders).
-    *   **Premium Features and Services (CHIP-Gated):**  Offering additional premium features and services within the "AI Supercomputer Box" software that are accessible only to CHIP holders.
-3.  **Potential Future Revenue Streams:**
-    *   **App Store or Marketplace for AI-Powered Apps and Services:**  Creating an app store or marketplace for third-party developers to build and sell AI-powered applications and services for the "AI Supercomputer Box," taking a percentage of app sales revenue.
-    *   **Enterprise or Professional Versions of the "AI Supercomputer Box":**  Developing higher-end, enterprise-grade versions of the box with enhanced features and support for professional users and organizations.
+1.  **Identity-as-a-Service (IDaaS) Subscriptions:** The primary revenue stream will be monthly subscription fees for persistent, recognized identities on the platform.
+2.  **Marketplace Transaction Fees:** A small percentage fee on data marketplace transactions, providing ongoing revenue tied to ecosystem activity.
+3.  **Premium API Access:** Fees for enterprise-grade API access to the Choir platform and data marketplace.
+4.  **Strategic CHOIR Holdings:** CHI will purchase CHOIR coins from the open market to hold as strategic treasury assets, aligning corporate success with token value.
+
+This strategy creates multiple revenue streams while ensuring that CHI's success is directly tied to the health and growth of the Choir ecosystem.
 
 ## Marketing and Messaging
 
-The marketing and messaging for the "AI Supercomputer Box" should emphasize:
+The marketing and messaging for the CHOIR coin and data marketplace should emphasize:
 
-*   **"Your Private AI Supercomputer for the Home":**  Highlight the privacy, personalization, and local compute power of the device.
-*   **"Replace Your Cable TV and Unleash AI-Powered Entertainment":**  Showcase the "replacing cable TV" vision and the transformative entertainment and information experiences enabled by AI.
-*   **"Take Control of Your Finances and Your Data":**  Emphasize the "household AI assistant" functionalities and the financial empowerment and data control benefits.
-*   **"Invest in the Future of AI - Own Your Piece of the Revolution":**  Position the "AI Supercomputer Box" as a long-term investment in a valuable personal compute asset and a way to participate in the AI revolution.
-*   **"Powered by NVIDIA, Inspired by Jobs":**  Leverage the NVIDIA brand for credibility and performance, and the "Jobs-inspired" tagline for design aesthetics and user experience focus.
-*   **"The Future of Home Computing is Here":**  Create a sense of excitement, innovation, and forward-thinking vision around the "AI Supercomputer Box" as a next-generation consumer appliance.
+*   **"Your Ideas Have Value":** Highlight how Choir enables users to monetize their intellectual contributions.
+*   **"A Fair Data Economy":** Emphasize the transparent, fair compensation model for data contributors.
+*   **"Privacy by Design":** Showcase the privacy-preserving aspects of the Choir platform and data marketplace.
+*   **"Collective Intelligence, Individual Reward":** Position Choir as a platform where collective knowledge building benefits individual contributors.
+*   **"CHOIR: The Currency of Ideas":** Establish CHOIR as the native currency of a new knowledge economy.
 
-## Next Steps - Towards "CHIP Materialization"
+## Next Steps - Towards "CHOIR Materialization"
 
-1.  **Continue App MVP Development (Software is Key):**  Maintain focus on building a compelling software MVP that showcases the core UX and value propositions of Choir and the "AI Supercomputer Box" vision.
-2.  **Refine "AI Supercomputer Box" Hardware Specifications and Design:**  Develop more detailed hardware specifications, explore industrial design options, and create early hardware prototypes (even if basic) to visualize the physical product.
-3.  **Develop a Detailed Financial Model and Business Plan:**  Create a comprehensive financial model for the "AI Supercomputer Box" rent-to-own business, including BOM costs, manufacturing costs, marketing expenses, revenue projections, and profitability analysis.
-4.  **Explore Manufacturing and Distribution Partnerships:**  Begin exploring potential partnerships with hardware manufacturers, distributors, and retailers to bring the "AI Supercomputer Box" to market.
-5.  **Refine Marketing and Messaging for Hardware Launch:**  Develop a detailed marketing and messaging strategy for the "AI Supercomputer Box" hardware launch, targeting early adopters, content creators, and premium consumers.
+1.  **Enhance Core Platform Experience:** Continue refining the Loop of Thought experience and reward mechanisms to ensure high-quality contributions.
+2.  **Develop Thread Contract Infrastructure:** Build and test the technical infrastructure for programmable thread contracts.
+3.  **Launch Initial Data Marketplace Features:** Implement basic marketplace functionality, allowing for data access and exchange using CHOIR.
+4.  **Expand IDaaS Offerings:** Develop enhanced identity services that integrate with the data marketplace.
+5.  **Implement Governance Framework:** Design and deploy the initial governance mechanisms for CHOIR holders.
 
-The "CHIP Materialization" plan for the "AI Supercomputer Box" represents a bold and ambitious step towards realizing the full potential of Choir and creating a truly transformative consumer AI product. By combining cutting-edge hardware, innovative software, and a revolutionary token economy, Choir is poised to redefine the future of home computing and personal AI.
+The "CHOIR Materialization" plan represents a comprehensive approach to creating tangible utility and value for the CHOIR coin through a robust data economy. By focusing on fair compensation for intellectual contributions, programmable data agreements, and community governance, Choir is positioned to create a sustainable and valuable ecosystem for knowledge creation and exchange.
 # Level 4 Documentation
 
 
@@ -1356,7 +1352,7 @@ data_engine_model
 
 # Ideal Data Engine Theory: Fueling AI with Human Ingenuity and Tokenized Incentives
 
-VERSION data_engine: 8.0 (CHIP Token & RL Edition)
+VERSION data_engine: 8.0 (CHOIR Coin & RL Edition)
 
 The Ideal Data Engine theory, at its core, is a framework for building systems that are **optimized for generating high-quality AI training data at scale**, recognizing that **human data is the new "oil" of the AI age.**  This theory emerged from the question: how can we design a system that not only leverages AI but also *continuously fuels its improvement* through a virtuous cycle of data creation and refinement?
 
@@ -1371,19 +1367,19 @@ The Ideal Data Engine is inspired by the data flywheels of successful big tech f
     *   **High-Quality, Human-Labeled Data:** User interactions, citations, and quality ratings provide valuable *human labels* that are essential for supervised and reinforcement learning, guiding AI models towards human preferences and values.
     *   **Real-World Context and Relevance:** User-generated content is grounded in real-world contexts, user needs, and evolving human discourse, making it more relevant and valuable for training AI models that are meant to interact with and serve human users.
 *   **Focused Attention and Engagement:**  The Choir platform is designed to capture and channel user *attention and engagement* towards high-quality knowledge creation and collaboration. This focused attention, when properly incentivized, becomes a powerful force for generating valuable training data.
-*   **Reinforcement Learning Signals:** The CHIP token reward system, with its novelty and citation rewards, creates a **built-in reinforcement learning environment** where AI models can learn from *real-world user feedback* and optimize for user-defined goals (novelty, salience, quality, collaboration).
+*   **Reinforcement Learning Signals:** The CHOIR coin reward system, with its novelty and citation rewards, creates a **built-in reinforcement learning environment** where AI models can learn from *real-world user feedback* and optimize for user-defined goals (novelty, salience, quality, collaboration).
 
-**CHIP Tokens as Training Signals: The Reinforcement Learning Loop:**
+**CHOIR Coins as Training Signals: The Reinforcement Learning Loop:**
 
 A key innovation of the Ideal Data Engine, as embodied in Choir, is the **integration of a token economy that *directly fuels AI model improvement through reinforcement learning*.**
 
-*   **CHIP Tokens as Rewards for Valuable Data Contributions:**  The CHIP token economy is designed to **reward users for generating high-quality, valuable data** that is useful for AI training.  Specifically, users earn CHIP tokens for:
+*   **CHOIR Coins as Rewards for Valuable Data Contributions:**  The CHOIR coin economy is designed to **reward users for generating high-quality, valuable data** that is useful for AI training.  Specifically, users earn CHOIR coins for:
     *   **Novel Prompts (Novelty Rewards):**  Creating original and innovative prompts that expand the knowledge space of the platform.
     *   **Salient Citations (Citation Rewards):**  Making contributions that are recognized as valuable and influential by the community, as evidenced by citations from other users.
-*   **AI Models Learn to Optimize for Token Rewards:**  The CHIP token reward system creates a **built-in reinforcement learning loop** where AI models within the Choir ecosystem (especially in the Experience and Yield phases) are incentivized to:
+*   **AI Models Learn to Optimize for Coin Rewards:**  The CHOIR coin reward system creates a **built-in reinforcement learning loop** where AI models within the Choir ecosystem (especially in the Experience and Yield phases) are incentivized to:
     *   **Identify and Reward Novelty:**  Learn to algorithmically detect and reward prompts and messages that exhibit semantic novelty and originality.
     *   **Identify and Reward Salience (Citations):** Learn to algorithmically recognize and reward contributions that are likely to be cited and valued by the community.
-    *   **Generate Content That Maximizes Token Rewards:**  AI models, in their quest to earn CHIP tokens, will *naturally learn to generate content and perform actions that are aligned with the platform's goals of promoting novelty, salience, quality, and collaboration.*
+    *   **Generate Content That Maximizes Coin Rewards:**  AI models, in their quest to earn CHOIR coins, will *naturally learn to generate content and perform actions that are aligned with the platform's goals of promoting novelty, salience, quality, and collaboration.*
 *   **Self-Improving AI Ecosystem:**  This creates a **virtuous cycle of AI improvement:** User contributions generate valuable training data -> AI models learn to reward valuable contributions -> Users are further incentivized to contribute high-quality data -> AI models become even better at recognizing and rewarding quality -> and so on, creating a **self-improving AI ecosystem** driven by user contributions and tokenized incentives.
 
 **Beyond Attention - Value Flows Through Semantic Density and Memory Effects:**
@@ -1452,46 +1448,50 @@ evolution_token
 ==
 
 
-# The Evolution of CHIP: From Utility Token to the Heart of a Learning Ecosystem
+# The Evolution of CHOIR: From Utility Token to the Heart of a Learning Ecosystem
 
-The CHIP token has undergone a remarkable evolution, transcending its initial conception as a mere utility token to become something far more significant: **the very heart of the Choir ecosystem, a representation of value, participation, ownership, and the driving force behind a self-improving AI knowledge engine.**
+The CHOIR coin has undergone a remarkable evolution, transcending its initial conception as a mere utility token to become something far more significant: **the very heart of the Choir ecosystem, a representation of value, participation, ownership, and the driving force behind a self-improving AI knowledge engine.**
 
-**Beyond "Utility" - CHIP as a Multifaceted Representation of Value:**
+**Beyond "Utility" - CHOIR as a Multifaceted Representation of Value:**
 
-The term "utility token" no longer fully captures the essence of CHIP.  It is not simply a means to access features or perform actions; CHIP has evolved into a multifaceted representation of value within Choir:
+The term "utility token" no longer fully captures the essence of CHOIR.  It is not simply a means to access features or perform actions; CHOIR has evolved into a multifaceted representation of value within Choir:
 
-*   **A Stake in Collective Intelligence:** CHIP represents a **stake in the collective intelligence of Choir**, a share in a dynamic and ever-evolving knowledge ecosystem.  Holding CHIP is not just about accessing a platform; it's about owning a piece of a growing, intelligent network.
-*   **A Symbol of Participation and Contribution:** CHIP is earned through **genuine participation and valuable contributions** to the Choir ecosystem.  It's a tangible recognition of intellectual effort, insightful prompts, and salient citations that enrich the collective knowledge base.  Holding CHIP signifies active engagement and a commitment to building a high-quality knowledge commons.
-*   **A Key to Unlocking Data Value:** CHIP tokens are the **exclusive currency for accessing and contributing to the Choir data marketplace.**  They represent "data purchase power," enabling users to buy access to valuable, human-labeled training data generated within the platform and to contribute their own data for economic benefit.
-*   **A Governance Right and a Voice in the Future:** CHIP tokens empower holders with **governance rights**, giving them a direct voice in shaping the future of the Choir platform, the rules of the data marketplace, and the evolution of the CHIP token economy itself.
-*   **A Training Signal for AI - Driving Self-Improvement:**  Most profoundly, CHIP tokens are the **driving force behind a self-improving AI ecosystem.**  Token rewards (novelty and citation) act as **training signals for AI models within Choir**, incentivizing them to learn, adapt, and optimize for behaviors that contribute to the platform's quality, coherence, and value creation.
+*   **A Stake in Collective Intelligence:** CHOIR represents a **stake in the collective intelligence of Choir**, a share in a dynamic and ever-evolving knowledge ecosystem.  Holding CHOIR is not just about accessing a platform; it's about owning a piece of a growing, intelligent network.
+*   **A Symbol of Participation and Contribution:** CHOIR is earned through **genuine participation and valuable contributions** to the Choir ecosystem.  It's a tangible recognition of intellectual effort, insightful prompts, and salient citations that enrich the collective knowledge base.  Holding CHOIR signifies active engagement and a commitment to building a high-quality knowledge commons.
+*   **A Key to Unlocking Data Value:** CHOIR coins are the **exclusive currency for accessing and contributing to the Choir data marketplace.**  They represent "data purchase power," enabling users to buy access to valuable, human-labeled training data generated within the platform and to contribute their own data for economic benefit.
+*   **A Governance Right and a Voice in the Future:** CHOIR coins empower holders with **governance rights**, giving them a direct voice in shaping the future of the Choir platform, the rules of the data marketplace, and the evolution of the CHOIR coin economy itself.
+*   **A Training Signal for AI - Driving Self-Improvement:**  Most profoundly, CHOIR coins are the **driving force behind a self-improving AI ecosystem.**  Coin rewards (novelty and citation) act as **training signals for AI models within Choir**, incentivizing them to learn, adapt, and optimize for behaviors that contribute to the platform's quality, coherence, and value creation.
 
 **The Poker Chip Analogy - Commitment, Engagement, and a Positive-Sum Game:**
 
-The analogy to poker chips remains apt, but with a deeper understanding: CHIP, like a poker chip, represents a **commitment to engage, a willingness to participate in the game of knowledge creation.**  However, unlike poker, Choir is not a zero-sum game. It's a **positive-sum environment** where collaboration, knowledge sharing, and collective intelligence benefit all participants.  CHIP represents your stake in this positive-sum game.
+The analogy to poker chips remains apt, but with a deeper understanding: CHOIR, like a poker chip, represents a **commitment to engage, a willingness to participate in the game of knowledge creation.**  However, unlike poker, Choir is not a zero-sum game. It's a **positive-sum environment** where collaboration, knowledge sharing, and collective intelligence benefit all participants.  CHOIR represents your stake in this positive-sum game.
 
 **The Liminal Space - Currency, Equity, and a Bet on the Future:**
 
-CHIP exists in the liminal space between a currency and an equity, reflecting its multifaceted nature.  It's not intended as a general-purpose medium of exchange, but it holds value far beyond its immediate utility.  CHIP is a **"bet" on the future of Choir**, an **investment in the potential of collective intelligence**, and a **claim on the value generated by a self-improving AI knowledge engine.**
+CHOIR exists in the liminal space between a currency and an equity, reflecting its multifaceted nature.  It's not intended as a general-purpose medium of exchange, but it holds value far beyond its immediate utility.  CHOIR is a **"bet" on the future of Choir**, an **investment in the potential of collective intelligence**, and a **claim on the value generated by a self-improving AI knowledge engine.**
 
 **ICM and Long-Term Value - Beyond Short-Term Speculation, Towards Sustainable Growth:**
 
-The Independent Chip Model (ICM) framework, borrowed from poker, remains relevant, guiding us to focus on **long-term expected value** rather than short-term speculative gains.  CHIP is designed to incentivize contributions that enhance the platform's overall worth, build a sustainable ecosystem, and drive long-term value accrual for all stakeholders.
+The Independent Chip Model (ICM) framework, borrowed from poker, remains relevant, guiding us to focus on **long-term expected value** rather than short-term speculative gains.  CHOIR is designed to incentivize contributions that enhance the platform's overall worth, build a sustainable ecosystem, and drive long-term value accrual for all stakeholders.
+
+**Mainnet Status - From Concept to Reality:**
+
+The CHOIR coin has now been minted and deployed on the Sui mainnet, marking a significant milestone in its evolution from concept to reality. This mainnet deployment (with package ID `0x4f83f1cd85aefd0254e5b6f93bd344f49dd434269af698998dd5f4baec612898::choir::CHOIR`) represents the transition of CHOIR from a theoretical construct to a functioning digital asset with real utility and value within the Choir ecosystem.
 
 **Beyond Speculation - Building a Real-World Data Economy and a Thriving Ecosystem:**
 
-By emphasizing CHIP's role in participation, value representation, ownership, and AI-driven learning, we actively **discourage purely speculative behavior** and focus on building a **real-world data economy** within Choir.  CHIP is not designed to be a "get-rich-quick scheme," but a **tool for building and sharing knowledge, for empowering users, and for creating a sustainable and thriving ecosystem for collective intelligence.**
+By emphasizing CHOIR's role in participation, value representation, ownership, and AI-driven learning, we actively **discourage purely speculative behavior** and focus on building a **real-world data economy** within Choir.  CHOIR is not designed to be a "get-rich-quick scheme," but a **tool for building and sharing knowledge, for empowering users, and for creating a sustainable and thriving ecosystem for collective intelligence.**
 
 **Implications for the Future - A New Paradigm for Tokenized Value and AI-Driven Growth:**
 
-The evolution of CHIP points towards a **new paradigm for tokenized value and AI-driven growth** in online platforms:
+The evolution of CHOIR points towards a **new paradigm for tokenized value and AI-driven growth** in online platforms:
 
-*   **Token Utility Beyond Access - Training Signals for AI:**  CHIP demonstrates that token utility can go far beyond simple access or governance. Tokens can become **active components in the AI system itself**, driving learning, incentivizing desired behaviors, and shaping the evolution of AI models.
-*   **User Ownership and Data Empowerment - A Counter-Narrative to Data Extraction:**  CHIP embodies a counter-narrative to the data-extractive models of traditional platforms.  It empowers users with **ownership and control over their data contributions** and allows them to **benefit economically** from the value they create.
-*   **Decentralized Governance of Data Marketplaces - User-Driven Data Ethics:**  CHIP holder governance of the data marketplace establishes a **decentralized and user-driven approach to data ethics and data governance**, ensuring that data is used responsibly and in alignment with community values.
-*   **Sustainable and Self-Improving AI Ecosystems - A New Model for the Future of AI:**  CHIP, as the heart of the Choir ecosystem, represents a step towards building **sustainable and self-improving AI ecosystems** that are driven by user contributions, guided by economic incentives, and focused on generating collective intelligence and long-term value for all participants.
+*   **Token Utility Beyond Access - Training Signals for AI:**  CHOIR demonstrates that token utility can go far beyond simple access or governance. Tokens can become **active components in the AI system itself**, driving learning, incentivizing desired behaviors, and shaping the evolution of AI models.
+*   **User Ownership and Data Empowerment - A Counter-Narrative to Data Extraction:**  CHOIR embodies a counter-narrative to the data-extractive models of traditional platforms.  It empowers users with **ownership and control over their data contributions** and allows them to **benefit economically** from the value they create.
+*   **Decentralized Governance of Data Marketplaces - User-Driven Data Ethics:**  CHOIR holder governance of the data marketplace establishes a **decentralized and user-driven approach to data ethics and data governance**, ensuring that data is used responsibly and in alignment with community values.
+*   **Sustainable and Self-Improving AI Ecosystems - A New Model for the Future of AI:**  CHOIR, as the heart of the Choir ecosystem, represents a step towards building **sustainable and self-improving AI ecosystems** that are driven by user contributions, guided by economic incentives, and focused on generating collective intelligence and long-term value for all participants.
 
-The evolution of CHIP is a journey from a simple utility token to a **fundamental building block of a revolutionary AI-powered knowledge ecosystem.** It represents a shift from extractive platforms to **value-aligned, user-empowering, and self-improving systems** that have the potential to reshape the future of online interaction and collective intelligence.
+The evolution of CHOIR is a journey from a simple utility token to a **fundamental building block of a revolutionary AI-powered knowledge ecosystem.** It represents a shift from extractive platforms to **value-aligned, user-empowering, and self-improving systems** that have the potential to reshape the future of online interaction and collective intelligence.
 
 === File: docs/blockchain_integration.md ===
 

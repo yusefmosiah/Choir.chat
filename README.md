@@ -1,16 +1,16 @@
 # Choir: Building a Tokenized Marketplace of Ideas (Qdrant-Sui MVP)
 
-Choir is a platform designed to amplify collective intelligence through AI-driven conversation analysis and a tokenized reward system. It utilizes the PostChain workflow (AEIOU-Y phases) to process interactions, leveraging multiple LLM providers, Qdrant for semantic storage, and the Sui blockchain for its native CHIP token.
+Choir is a platform designed to amplify collective intelligence through AI-driven conversation analysis and a tokenized reward system. It utilizes the PostChain workflow (AEIOU-Y phases) to process interactions, leveraging multiple LLM providers, Qdrant for semantic storage, and the Sui blockchain for its native CHOIR coin.
 
 ## Core Concepts
 
 The Choir platform is a revolutionary system for building collective intelligence, structured around a sophisticated conceptual model. The Minimum Viable Product (MVP) focuses on validating the core data flow and reward mechanism using Qdrant and the Sui blockchain. Explore the foundational concepts:
 
 *   **[PostChain Temporal Logic](docs/postchain_temporal_logic.md):** The temporal essence of each AEIOU-Y phase, driving dynamic and context-aware AI workflows.
-*   **[Core Economics](docs/core_economics.md):** The economic principles and tokenomics of CHIP, designed to create a sustainable and equitable ecosystem for knowledge creation.
+*   **[Core Economics](docs/core_economics.md):** The economic principles and tokenomics of CHOIR, designed to create a sustainable and equitable ecosystem for knowledge creation.
 *   **[Core State Transitions](docs/core_state_transitions.md):** The carefully defined state transitions that govern the evolution of threads and the flow of value within Choir (principles guiding MVP implementation).
 *   **[Evolution: Naming](docs/evolution_naming.md):** The story behind the evolution of Choir's name, reflecting the project's journey and vision.
-*   **[Evolution: Token](docs/evolution_token.md):** The evolution of the CHIP token concept.
+*   **[Evolution: Token](docs/evolution_token.md):** The evolution of the CHOIR coin concept.
 
 ## Architecture (Qdrant-Sui MVP)
 
@@ -50,10 +50,11 @@ Choir leverages the AEIOU-Y PostChain workflow to enable sophisticated context m
 Choir is not just building another AI application; we are building a **transformative platform for the future of AI and human collaboration**:
 
 *   **Revolutionizing Consumer Finance:** Empowering users with AI-driven tools to optimize their financial lives and achieve financial freedom.
-*   **Creating a Live Streaming Home Production Studio:** Transforming home entertainment and content creation with AI-powered tools for interactive and immersive experiences.
 *   **Building a Tokenized Marketplace of Ideas:** Fostering a new kind of online platform where quality ideas are valued, rewarded, and drive the emergence of collective intelligence.
-*   **Democratizing AI Training and Ownership:** Enabling users to participate in and benefit from the AI revolution, owning a piece of the AI infrastructure and contributing to a self-improving, community-driven AI ecosystem.
-*   **[Plan: CHIP Materialization (AI Supercomputer Box)](docs/plan_chip_materialization.md):** Long-term hardware vision.
+*   **Democratizing AI Training and Ownership:** Enabling users to participate in and benefit from the AI revolution, contributing to a self-improving, community-driven AI ecosystem.
+*   **Creating a Data Economy:** Developing a marketplace where valuable data can be exchanged using CHOIR coins, with proper attribution and rewards for contributors.
+
+*   **[Plan: CHOIR Materialization (Data Economy)](docs/plan_choir_materialization.md):** Long-term vision for CHOIR coin utility.
 
 Explore the documentation sections above to understand how Choir's Qdrant-Sui MVP architecture is designed to validate the core concepts needed to realize this ambitious vision.
 
@@ -61,7 +62,7 @@ Explore the documentation sections above to understand how Choir's Qdrant-Sui MV
 
 *   `api/`: Python backend (FastAPI application, PostChain logic, database interactions, tests).
 *   `Choir/`: Swift iOS client application.
-*   `choir_coin/`: Sui Move smart contract for the CHIP token.
+*   `choir_coin/`: Sui Move smart contract for the CHOIR coin.
 *   `docs/`: Project documentation (including detailed phase requirements, architecture, etc.).
 *   `notebooks/`: Jupyter notebooks for experimentation.
 *   `scripts/`: Utility scripts.

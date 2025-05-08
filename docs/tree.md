@@ -270,7 +270,7 @@
 │   ├── mainnet_migration.md
 │   ├── notification_system.md
 │   ├── plan_anonymity_by_default.md
-│   ├── plan_chip_materialization.md
+│   ├── plan_choir_materialization.md
 │   ├── postchain_temporal_logic.md
 │   ├── require_action_phase.md
 │   ├── require_experience_phase.md
