@@ -225,7 +225,10 @@ class Message: ObservableObject, Identifiable, Equatable {
     @Published var selectedPhase: Phase = .action {
         didSet {
             // When the selected phase changes, dismiss the keyboard
-            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+            // Ensure UI operations run on the main thread
+            DispatchQueue.main.async {
+                UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+            }
         }
     }
     @Published var phaseCurrentPage: [Phase: Int] = [:]
