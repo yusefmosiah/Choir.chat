@@ -18,7 +18,32 @@
         <footer>
             <p class="copyright">© {{ current_year }} CHOIR HARMONIC INTELLIGENCE</p>
             <p>yusef@choir.chat</p>
+            <div class="footer-links">
+                <a href="/privacy" class="footer-link">Privacy</a>
+                <span class="footer-divider">|</span>
+                <a href="/support" class="footer-link">Support</a>
+            </div>
         </footer>
+        
+        <style>
+            .footer-links {
+                margin-top: 0.5rem;
+                font-size: 0.9rem;
+            }
+            .footer-link {
+                color: var(--gradient-blue, #2196F3);
+                text-decoration: none;
+                transition: opacity 0.2s ease;
+            }
+            .footer-link:hover {
+                opacity: 0.8;
+                text-decoration: underline;
+            }
+            .footer-divider {
+                margin: 0 0.5rem;
+                color: var(--text-color-secondary, #4a4a4a);
+            }
+        </style>
     </div>
     <!-- Optional: Add shared JS -->
     <!-- <script src="/static/shared/script.js"></script> -->
