@@ -180,7 +180,7 @@ class ChoirThread: ObservableObject, Identifiable, Hashable {
 
     init(id: UUID = UUID(), title: String? = nil, walletAddress: String? = nil, metadataMessageCount: Int = 0) {
         self.id = id
-        self.title = title ?? "ChoirThread \(DateFormatter.localizedString(from: Date(), dateStyle: .short, timeStyle: .short))"
+        self.title = title ?? "✎ \(DateFormatter.localizedString(from: Date(), dateStyle: .short, timeStyle: .short))"
         self.createdAt = Date()
         self.lastModified = Date()
         self.walletAddress = walletAddress

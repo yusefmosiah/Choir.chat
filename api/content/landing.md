@@ -9,4 +9,4 @@ Converse thoughtfully. Embued with knowledge and computation. Earn recognition a
 Rewarding intelligent chat.
 
 
-<!-- [<span>iOS TestFlight</span>](https://testflight.apple.com/join/bDv6gSEB) -->
+[<span>iOS TestFlight</span>](https://testflight.apple.com/join/bDv6gSEB)

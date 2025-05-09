@@ -23,117 +23,25 @@ struct ThreadExportView: View {
     var body: some View {
         NavigationView {
             Form {
-                Section(header: Text("Export Options"), footer: Text("Exported threads can be imported to any wallet.")) {
-                    Picker("Export Type", selection: $exportType) {
-                        ForEach(ExportType.allCases) { type in
-                            Text(type.rawValue).tag(type)
-                        }
-                    }
-                    .pickerStyle(SegmentedPickerStyle())
+                // Export Options Section
+                exportOptionsSection
 
-                    if exportType == .specificWallet {
-                        Picker("Select Wallet", selection: $selectedWalletAddress) {
-                            ForEach(Array(walletManager.wallets.keys), id: \.self) { address in
-                                HStack {
-                                    Text(walletManager.walletNames[address] ?? "Unnamed Wallet")
-                                    Spacer()
-                                    Text(address.prefix(6) + "..." + address.suffix(4))
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
-                                }
-                                .tag(address as String?)
-                            }
-                        }
-                    }
-                }
-
+                // Export Information Section
                 Section(header: Text("Export Information")) {
                     VStack(alignment: .leading, spacing: 8) {
-                        switch exportType {
-                        case .currentWallet:
-                            if let currentWallet = threadManager.currentWalletAddress {
-                                let threads = threadManager.threads
-                                let count = threads.count
-                                let messageCount = threads.reduce(0) { $0 + $1.messages.count }
+                        // Export Type Info
+                        exportTypeInfoView
 
-                                Text("\(count) thread\(count == 1 ? "" : "s") in current wallet")
-                                    .font(.headline)
-                                Text("\(messageCount) message\(messageCount == 1 ? "" : "s") total")
-
-                                if let walletName = walletManager.walletNames[currentWallet] {
-                                    Text("Wallet: \(walletName)")
-                                }
-                                Text("Address: \(currentWallet.prefix(6))...\(currentWallet.suffix(4))")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                            } else {
-                                Text("No wallet selected")
-                            }
-
-                        case .allWallets:
-                            let threads = threadManager.persistenceService.loadAllThreads()
-                            let count = threads.count
-                            let messageCount = threads.reduce(0) { $0 + $1.messages.count }
-
-                            Text("\(count) thread\(count == 1 ? "" : "s") across all wallets")
-                                .font(.headline)
-                            Text("\(messageCount) message\(messageCount == 1 ? "" : "s") total")
-
-                            let walletCount = Set(threads.compactMap { $0.walletAddress }).count
-                            Text("\(walletCount) wallet\(walletCount == 1 ? "" : "s") included")
-
-                        case .specificWallet:
-                            if let selectedWallet = selectedWalletAddress {
-                                let threads = threadManager.persistenceService.loadAllThreads(walletAddress: selectedWallet)
-                                let count = threads.count
-                                let messageCount = threads.reduce(0) { $0 + $1.messages.count }
-
-                                Text("\(count) thread\(count == 1 ? "" : "s") in selected wallet")
-                                    .font(.headline)
-                                Text("\(messageCount) message\(messageCount == 1 ? "" : "s") total")
-
-                                if let walletName = walletManager.walletNames[selectedWallet] {
-                                    Text("Wallet: \(walletName)")
-                                }
-                                Text("Address: \(selectedWallet.prefix(6))...\(selectedWallet.suffix(4))")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                            } else {
-                                Text("No wallet selected")
-                            }
-                        }
-
-                        // Show device and app info
-                        Divider()
-                        Text("Device: \(UIDevice.current.name)")
-                            .font(.caption)
-
-                        if let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String,
-                           let buildNumber = Bundle.main.infoDictionary?["CFBundleVersion"] as? String {
-                            Text("App Version: \(appVersion) (\(buildNumber))")
-                                .font(.caption)
-                        }
+                        // Device Info
+                        deviceInfoView
                     }
                     .padding(.vertical, 4)
                 }
 
-                Section {
-                    Button(action: exportThreads) {
-                        HStack {
-                            Spacer()
-                            if isExporting {
-                                ProgressView()
-                                    .progressViewStyle(CircularProgressViewStyle())
-                            } else {
-                                Text("Export Threads")
-                                    .fontWeight(.bold)
-                            }
-                            Spacer()
-                        }
-                    }
-                    .disabled(isExporting || (exportType == .specificWallet && selectedWalletAddress == nil))
-                }
+                // Export Button Section
+                exportButtonSection
 
+                // Error Message Section
                 if let errorMessage = errorMessage {
                     Section {
                         Text(errorMessage)
@@ -162,6 +70,82 @@ struct ThreadExportView: View {
         }
     }
 
+    // MARK: - View Components
+
+    private var exportOptionsSection: some View {
+        Section(header: Text("Export Options"), footer: Text("Exported threads can be imported to any wallet.")) {
+            Picker("Export Type", selection: $exportType) {
+                ForEach(ExportType.allCases) { type in
+                    Text(type.rawValue).tag(type)
+                }
+            }
+            .pickerStyle(SegmentedPickerStyle())
+
+            if exportType == .specificWallet {
+                Picker("Select Wallet", selection: $selectedWalletAddress) {
+                    ForEach(Array(walletManager.wallets.keys), id: \.self) { address in
+                        HStack {
+                            Text(walletManager.walletNames[address] ?? "Unnamed Wallet")
+                            Spacer()
+                            Text(address.prefix(6) + "..." + address.suffix(4))
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        .tag(address as String?)
+                    }
+                }
+            }
+        }
+    }
+
+    private var exportTypeInfoView: some View {
+        Group {
+            switch exportType {
+            case .currentWallet:
+                CurrentWalletInfoView()
+            case .allWallets:
+                AllWalletsInfoView()
+            case .specificWallet:
+                SpecificWalletInfoView(selectedWalletAddress: selectedWalletAddress)
+            }
+        }
+    }
+
+    private var deviceInfoView: some View {
+        Group {
+            Divider()
+            Text("Device: \(UIDevice.current.name)")
+                .font(.caption)
+
+            if let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String,
+               let buildNumber = Bundle.main.infoDictionary?["CFBundleVersion"] as? String {
+                Text("App Version: \(appVersion) (\(buildNumber))")
+                    .font(.caption)
+            }
+        }
+    }
+
+    private var exportButtonSection: some View {
+        Section {
+            Button(action: exportThreads) {
+                HStack {
+                    Spacer()
+                    if isExporting {
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle())
+                    } else {
+                        Text("Export Threads")
+                            .fontWeight(.bold)
+                    }
+                    Spacer()
+                }
+            }
+            .disabled(isExporting || (exportType == .specificWallet && selectedWalletAddress == nil))
+        }
+    }
+
+    // MARK: - Functions
+
     private func exportThreads() {
         isExporting = true
         errorMessage = nil
@@ -180,7 +164,7 @@ struct ThreadExportView: View {
             }
 
             // Try to export the threads
-            if let exportData = threadManager.exportThreads(walletAddress: walletToExport) {
+            if let exportData = await threadManager.exportThreads(walletAddress: walletToExport) {
                 await MainActor.run {
                     self.exportData = exportData
                     isExporting = false
@@ -190,6 +174,136 @@ struct ThreadExportView: View {
                     errorMessage = "Failed to export threads"
                     isExporting = false
                 }
+            }
+        }
+    }
+}
+
+// MARK: - Helper Views
+
+struct CurrentWalletInfoView: View {
+    @EnvironmentObject var threadManager: ThreadManager
+    @EnvironmentObject var walletManager: WalletManager
+
+    var body: some View {
+        Group {
+            if let currentWallet = threadManager.currentWalletAddress {
+                let threads = threadManager.threads
+                let count = threads.count
+                let messageCount = threads.reduce(0) { $0 + $1.messages.count }
+
+                Text("\(count) thread\(count == 1 ? "" : "s") in current wallet")
+                    .font(.headline)
+                Text("\(messageCount) message\(messageCount == 1 ? "" : "s") total")
+
+                if let walletName = walletManager.walletNames[currentWallet] {
+                    Text("Wallet: \(walletName)")
+                }
+                Text("Address: \(currentWallet.prefix(6))...\(currentWallet.suffix(4))")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            } else {
+                Text("No wallet selected")
+            }
+        }
+    }
+}
+
+struct AllWalletsInfoView: View {
+    @EnvironmentObject var threadManager: ThreadManager
+    @State private var threadCount: Int?
+    @State private var messageCount: Int?
+    @State private var walletCount: Int?
+
+    var body: some View {
+        Group {
+            if threadCount != nil {
+                Text("\(threadCount!) thread\(threadCount == 1 ? "" : "s") across all wallets")
+                    .font(.headline)
+                Text("\(messageCount!) message\(messageCount == 1 ? "" : "s") total")
+                Text("\(walletCount!) wallet\(walletCount == 1 ? "" : "s") included")
+            } else {
+                Text("Loading threads across all wallets...")
+                    .font(.headline)
+                ProgressView()
+            }
+        }
+        .onAppear {
+            loadData()
+        }
+    }
+
+    private func loadData() {
+        Task {
+            let threads = await threadManager.persistenceService.loadAllThreads()
+            let count = threads.count
+            let msgCount = threads.reduce(0) { $0 + $1.messages.count }
+            let wCount = Set(threads.compactMap { $0.walletAddress }).count
+
+            await MainActor.run {
+                self.threadCount = count
+                self.messageCount = msgCount
+                self.walletCount = wCount
+            }
+        }
+    }
+}
+
+struct SpecificWalletInfoView: View {
+    @EnvironmentObject var threadManager: ThreadManager
+    @EnvironmentObject var walletManager: WalletManager
+    let selectedWalletAddress: String?
+
+    @State private var threadCount: Int?
+    @State private var messageCount: Int?
+
+    var body: some View {
+        Group {
+            if let selectedWallet = selectedWalletAddress {
+                if threadCount != nil {
+                    Text("\(threadCount!) thread\(threadCount == 1 ? "" : "s") in selected wallet")
+                        .font(.headline)
+                    Text("\(messageCount!) message\(messageCount == 1 ? "" : "s") total")
+                } else {
+                    Text("Loading threads for selected wallet...")
+                        .font(.headline)
+                    ProgressView()
+                }
+
+                if let walletName = walletManager.walletNames[selectedWallet] {
+                    Text("Wallet: \(walletName)")
+                }
+                Text("Address: \(selectedWallet.prefix(6))...\(selectedWallet.suffix(4))")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            } else {
+                Text("No wallet selected")
+            }
+        }
+        .onAppear {
+            if let wallet = selectedWalletAddress {
+                loadData(for: wallet)
+            }
+        }
+        .onChange(of: selectedWalletAddress) { newValue in
+            if let wallet = newValue {
+                loadData(for: wallet)
+            } else {
+                threadCount = nil
+                messageCount = nil
+            }
+        }
+    }
+
+    private func loadData(for wallet: String) {
+        Task {
+            let threads = await threadManager.persistenceService.loadAllThreads(walletAddress: wallet)
+            let count = threads.count
+            let msgCount = threads.reduce(0) { $0 + $1.messages.count }
+
+            await MainActor.run {
+                self.threadCount = count
+                self.messageCount = msgCount
             }
         }
     }

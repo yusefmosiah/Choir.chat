@@ -24,23 +24,26 @@ class ThreadManager: ObservableObject {
     func loadThreads(metadataOnly: Bool = true) {
         print("ThreadManager: Loading threads\(metadataOnly ? " metadata" : "") for wallet address: \(currentWalletAddress ?? "nil")")
 
-        // Load threads for the current wallet
-        let loadedThreads = metadataOnly
-            ? persistenceService.loadAllThreadsMetadata(walletAddress: currentWalletAddress)
-            : persistenceService.loadAllThreads(walletAddress: currentWalletAddress)
+        // Use Task to handle async loading
+        Task { @MainActor in
+            // Load threads for the current wallet
+            let loadedThreads = metadataOnly
+                ? await persistenceService.loadAllThreadsMetadata(walletAddress: currentWalletAddress)
+                : await persistenceService.loadAllThreads(walletAddress: currentWalletAddress)
 
-        print("ThreadManager: Loaded \(loadedThreads.count) threads\(metadataOnly ? " (metadata only)" : " with full content")")
+            print("ThreadManager: Loaded \(loadedThreads.count) threads\(metadataOnly ? " (metadata only)" : " with full content")")
 
-        // Debug print thread details
-        for thread in loadedThreads {
-            print("ThreadManager: Thread \(thread.id) with wallet address: \(thread.walletAddress ?? "nil"), title: \(thread.title)")
+            // Debug print thread details
+            for thread in loadedThreads {
+                print("ThreadManager: Thread \(thread.id) with wallet address: \(thread.walletAddress ?? "nil"), title: \(thread.title)")
+            }
+
+            // Sort threads by creation date (newest first)
+            let sortedThreads = loadedThreads.sorted { $0.createdAt > $1.createdAt }
+
+            // Update the published property
+            self.threads = sortedThreads
         }
-
-        // Sort threads by creation date (newest first)
-        let sortedThreads = loadedThreads.sorted { $0.createdAt > $1.createdAt }
-
-        // Update the published property
-        self.threads = sortedThreads
     }
 
     /// Load full thread content for a specific thread
@@ -111,24 +114,24 @@ class ThreadManager: ObservableObject {
     }
 
     /// Export threads as JSON data
-    func exportThreads(walletAddress: String? = nil) -> Data? {
+    func exportThreads(walletAddress: String? = nil) async -> Data? {
         let threadsToExport: [ChoirThread]
         let exportType: String
         let walletName: String?
 
         if let walletAddress = walletAddress {
             // Export threads for a specific wallet
-            threadsToExport = persistenceService.loadAllThreads(walletAddress: walletAddress)
+            threadsToExport = await persistenceService.loadAllThreads(walletAddress: walletAddress)
             exportType = "single_wallet"
             walletName = getWalletName(for: walletAddress)
         } else if let currentWallet = currentWalletAddress {
             // Export threads for the current wallet
-            threadsToExport = persistenceService.loadAllThreads(walletAddress: currentWallet)
+            threadsToExport = await persistenceService.loadAllThreads(walletAddress: currentWallet)
             exportType = "current_wallet"
             walletName = getWalletName(for: currentWallet)
         } else {
             // Export all threads
-            threadsToExport = persistenceService.loadAllThreads()
+            threadsToExport = await persistenceService.loadAllThreads()
             exportType = "all_wallets"
             walletName = nil
         }

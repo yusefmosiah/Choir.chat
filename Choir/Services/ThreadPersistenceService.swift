@@ -170,15 +170,15 @@ class ThreadPersistenceService {
     /// Load all threads from the threads directory
     /// - Parameter walletAddress: Optional wallet address to filter threads
     /// - Returns: Array of loaded threads with full message content
-    func loadAllThreads(walletAddress: String? = nil) -> [ChoirThread] {
-        return loadAllThreadsInternal(walletAddress: walletAddress, metadataOnly: false)
+    func loadAllThreads(walletAddress: String? = nil) async -> [ChoirThread] {
+        return await loadAllThreadsInternal(walletAddress: walletAddress, metadataOnly: false)
     }
 
     /// Load all thread metadata from the threads directory without loading message content
     /// - Parameter walletAddress: Optional wallet address to filter threads
     /// - Returns: Array of loaded threads with only metadata (no messages)
-    func loadAllThreadsMetadata(walletAddress: String? = nil) -> [ChoirThread] {
-        return loadAllThreadsInternal(walletAddress: walletAddress, metadataOnly: true)
+    func loadAllThreadsMetadata(walletAddress: String? = nil) async -> [ChoirThread] {
+        return await loadAllThreadsInternal(walletAddress: walletAddress, metadataOnly: true)
     }
 
     /// Internal implementation for loading threads with option for metadata only
@@ -186,7 +186,7 @@ class ThreadPersistenceService {
     ///   - walletAddress: Optional wallet address to filter threads
     ///   - metadataOnly: Whether to load only metadata (no messages)
     /// - Returns: Array of loaded threads
-    private func loadAllThreadsInternal(walletAddress: String? = nil, metadataOnly: Bool = false) -> [ChoirThread] {
+    private func loadAllThreadsInternal(walletAddress: String? = nil, metadataOnly: Bool = false) async -> [ChoirThread] {
         do {
             print("Loading threads\(metadataOnly ? " metadata" : "") for wallet address: \(walletAddress ?? "all")")
 
@@ -194,7 +194,9 @@ class ThreadPersistenceService {
                 // Load threads for a specific wallet
                 let walletDir = walletDirectory(for: walletAddress)
                 print("Loading from wallet directory: \(walletDir.path)")
-                let threads = try loadThreadsFromDirectory(walletDir, walletAddress: walletAddress, metadataOnly: metadataOnly)
+                let threads = try await Task {
+                    try loadThreadsFromDirectory(walletDir, walletAddress: walletAddress, metadataOnly: metadataOnly)
+                }.value
                 print("Found \(threads.count) threads for wallet \(walletAddress)")
                 return threads
             } else {
@@ -204,19 +206,25 @@ class ThreadPersistenceService {
                 // First load threads from the default directory
                 let defaultDir = walletDirectory(for: nil)
                 print("Loading from default directory: \(defaultDir.path)")
-                let defaultThreads = try loadThreadsFromDirectory(defaultDir, walletAddress: nil, metadataOnly: metadataOnly)
+                let defaultThreads = try await Task {
+                    try loadThreadsFromDirectory(defaultDir, walletAddress: nil, metadataOnly: metadataOnly)
+                }.value
                 print("Found \(defaultThreads.count) threads in default directory")
                 allThreads.append(contentsOf: defaultThreads)
 
                 // Then load threads from each wallet directory
-                let walletDirs = try FileManager.default.contentsOfDirectory(at: threadsDirectory, includingPropertiesForKeys: nil)
-                    .filter { $0.hasDirectoryPath && $0.lastPathComponent != "default" }
+                let walletDirs = try await Task {
+                    try FileManager.default.contentsOfDirectory(at: threadsDirectory, includingPropertiesForKeys: nil)
+                        .filter { $0.hasDirectoryPath && $0.lastPathComponent != "default" }
+                }.value
 
                 print("Found \(walletDirs.count) wallet directories")
                 for walletDir in walletDirs {
                     let walletAddress = walletDir.lastPathComponent
                     print("Loading from wallet directory: \(walletDir.path)")
-                    let walletThreads = try loadThreadsFromDirectory(walletDir, walletAddress: walletAddress, metadataOnly: metadataOnly)
+                    let walletThreads = try await Task {
+                        try loadThreadsFromDirectory(walletDir, walletAddress: walletAddress, metadataOnly: metadataOnly)
+                    }.value
                     print("Found \(walletThreads.count) threads for wallet \(walletAddress)")
                     allThreads.append(contentsOf: walletThreads)
                 }

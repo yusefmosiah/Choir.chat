@@ -399,23 +399,63 @@ class PostchainCoordinatorImpl: PostchainCoordinator, ObservableObject {
                let messageIndex = thread.messages.firstIndex(where: { $0.id == messageId }),
                thread.messages.count == 2, // User msg (0) + AI msg (1)
                messageIndex == 1, // Ensure we're updating the AI message
-               thread.title.hasPrefix("ChoirThread ") // Check if title is still default
+               thread.title.hasPrefix("✎ ") // Check if title is still default
             {
-                let message = thread.messages[messageIndex]
-                let actionContent = message.getPhaseContent(.action)
-                let generatedTitle = actionContent.prefixWords(10)
-                let finalTitle = generatedTitle.isEmpty ? "New Thread" : generatedTitle
+                // Get the user prompt from the first message (index 0)
+                if thread.messages.count > 0 && thread.messages[0].isUser {
+                    let userMessage = thread.messages[0]
+                    let userPrompt = userMessage.content
+                    var generatedTitle = userPrompt.prefixWords(10)
+                    let finalTitle = generatedTitle.isEmpty ? "New Thread" : generatedTitle
 
-                // Update thread title
-                thread.updateTitle(finalTitle)
+                    // Check for duplicate titles and append an incrementing number if needed
+                    var uniqueTitle = finalTitle
+                    var counter = 1
 
-                // Force UI update for this thread
-                DispatchQueue.main.async {
-                    // Explicitly notify observers that the thread has changed
-                    thread.objectWillChange.send()
+                    // Get all existing threads to check for duplicates
+                    Task {
+                        let allThreads = await ThreadPersistenceService.shared.loadAllThreads()
 
-                    // Also notify the ThreadManager to update its UI
-                    NotificationCenter.default.post(name: NSNotification.Name("ThreadMetadataDidChange"), object: thread)
+                        // Check if the title already exists
+                        while allThreads.contains(where: {
+                            $0.id != thread.id && // Don't compare with self
+                            $0.title == uniqueTitle
+                        }) {
+                            // Append incrementing number for duplicates
+                            counter += 1
+                            uniqueTitle = "\(finalTitle) (\(counter))"
+                        }
+
+                        // Update thread title with the unique title
+                        await MainActor.run {
+                            thread.updateTitle(uniqueTitle)
+
+                            // Force UI update for this thread
+                            // Explicitly notify observers that the thread has changed
+                            thread.objectWillChange.send()
+
+                            // Also notify the ThreadManager to update its UI
+                            NotificationCenter.default.post(name: NSNotification.Name("ThreadMetadataDidChange"), object: thread)
+                        }
+                    }
+                } else {
+                    // Fallback to the old behavior if user message is not found
+                    let message = thread.messages[messageIndex]
+                    let actionContent = message.getPhaseContent(.action)
+                    let generatedTitle = actionContent.prefixWords(10)
+                    let finalTitle = generatedTitle.isEmpty ? "New Thread" : generatedTitle
+
+                    // Update thread title
+                    thread.updateTitle(finalTitle)
+
+                    // Force UI update for this thread
+                    DispatchQueue.main.async {
+                        // Explicitly notify observers that the thread has changed
+                        thread.objectWillChange.send()
+
+                        // Also notify the ThreadManager to update its UI
+                        NotificationCenter.default.post(name: NSNotification.Name("ThreadMetadataDidChange"), object: thread)
+                    }
                 }
             }
         }
