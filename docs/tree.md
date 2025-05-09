@@ -132,6 +132,7 @@
 │   │   └── PostchainCoordinatorImpl.swift
 │   ├── Documentation
 │   │   └── DesignStyleGuide.md
+│   ├── Extensions
 │   ├── Info.plist
 │   ├── Models
 │   │   ├── AnyCodable.swift
@@ -308,4 +309,4 @@
     ├── test_postchain_multiturn.sh
     └── test_simulator_notifications.sh
 
-72 directories, 234 files
+73 directories, 234 files
