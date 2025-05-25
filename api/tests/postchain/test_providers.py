@@ -12,7 +12,7 @@ from langchain_openai import ChatOpenAI
 from langchain_anthropic import ChatAnthropic
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_mistralai import ChatMistralAI
-from langchain_fireworks import ChatFireworks
+from langchain_aws import ChatBedrock
 from langchain_cohere import ChatCohere
 from langchain_core.messages import HumanMessage
 
@@ -64,11 +64,11 @@ def get_cohere_models(config: Config) -> List[str]:
         config.COHERE_COMMAND_R7B
     ]
 
-def get_fireworks_models(config: Config) -> List[str]:
+def get_bedrock_models(config: Config) -> List[str]:
     return [
-        # config.FIREWORKS_DEEPSEEK_R1,  # Currently failing with internal server error
-        config.FIREWORKS_DEEPSEEK_V3,
-        config.FIREWORKS_QWEN25_CODER
+        config.BEDROCK_CLAUDE_3_5_HAIKU,  # Start with smaller model for testing
+        # config.BEDROCK_CLAUDE_3_5_SONNET,  # More expensive
+        # config.BEDROCK_LLAMA_3_2_11B,  # Alternative option
     ]
 
 class ProviderTester:
@@ -180,21 +180,37 @@ class ProviderTester:
 
         return results
 
-    async def test_fireworks_models(self) -> List[Dict[str, Any]]:
-        """Test Fireworks models."""
-        if not self.config.FIREWORKS_API_KEY:
-            return [{"status": "skipped", "reason": "API key not configured", "provider": "Fireworks"}]
+    async def test_bedrock_models(self) -> List[Dict[str, Any]]:
+        """Test AWS Bedrock models."""
+        if not self.config.AWS_ACCESS_KEY_ID:
+            return [{"status": "skipped", "reason": "AWS credentials not configured", "provider": "Bedrock"}]
 
         results = []
-        for model_name in get_fireworks_models(self.config):
-            # Fireworks models might need a prefix
-            model_id = f"accounts/fireworks/models/{model_name}"
-            result = await self.test_model(
-                "Fireworks",
-                model_id,
-                ChatFireworks,
-                self.config.FIREWORKS_API_KEY
-            )
+        for model_name in get_bedrock_models(self.config):
+            try:
+                # Bedrock uses different initialization
+                model = ChatBedrock(
+                    model_id=model_name,
+                    region_name=self.config.AWS_REGION,
+                    credentials_profile_name=None  # Use environment variables
+                )
+
+                response = await model.ainvoke([HumanMessage(content="Hello! Please respond with 'Hello from Bedrock!'")])
+
+                result = {
+                    "status": "success",
+                    "provider": "Bedrock",
+                    "model": model_name,
+                    "response": response.content
+                }
+            except Exception as e:
+                result = {
+                    "status": "error",
+                    "provider": "Bedrock",
+                    "model": model_name,
+                    "error": str(e)
+                }
+
             results.append(result)
 
         return results
@@ -223,7 +239,7 @@ class ProviderTester:
             self.test_anthropic_models(),
             self.test_google_models(),
             self.test_mistral_models(),
-            self.test_fireworks_models(),
+            self.test_bedrock_models(),
             self.test_cohere_models()
         ]
 
@@ -234,7 +250,7 @@ class ProviderTester:
             "Anthropic": all_results[1],
             "Google": all_results[2],
             "Mistral": all_results[3],
-            "Fireworks": all_results[4],
+            "Bedrock": all_results[4],
             "Cohere": all_results[5]
         }
 

@@ -142,7 +142,9 @@ struct ModelConfigRequest: Codable {
     let anthropicApiKey: String?
     let googleApiKey: String?
     let mistralApiKey: String?
-    let fireworksApiKey: String?
+    let awsAccessKeyId: String?
+    let awsSecretAccessKey: String?
+    let awsRegion: String?
     let cohereApiKey: String?
     let openrouterApiKey: String?
     let groqApiKey: String?
@@ -159,7 +161,9 @@ struct ModelConfigRequest: Codable {
         self.anthropicApiKey = modelConfig.anthropicApiKey
         self.googleApiKey = modelConfig.googleApiKey
         self.mistralApiKey = modelConfig.mistralApiKey
-        self.fireworksApiKey = modelConfig.fireworksApiKey
+        self.awsAccessKeyId = modelConfig.awsAccessKeyId
+        self.awsSecretAccessKey = modelConfig.awsSecretAccessKey
+        self.awsRegion = modelConfig.awsRegion
         self.cohereApiKey = modelConfig.cohereApiKey
         self.openrouterApiKey = modelConfig.openrouterApiKey
         self.groqApiKey = modelConfig.groqApiKey
@@ -173,7 +177,9 @@ struct ModelConfigRequest: Codable {
         case anthropicApiKey = "anthropic_api_key" // Keep this as snake_case since it's used in API requests
         case googleApiKey = "google_api_key" // Keep this as snake_case since it's used in API requests
         case mistralApiKey = "mistral_api_key" // Keep this as snake_case since it's used in API requests
-        case fireworksApiKey = "fireworks_api_key" // Keep this as snake_case since it's used in API requests
+        case awsAccessKeyId = "aws_access_key_id"
+        case awsSecretAccessKey = "aws_secret_access_key"
+        case awsRegion = "aws_region"
         case cohereApiKey = "cohere_api_key" // Keep this as snake_case since it's used in API requests
         case openrouterApiKey = "openrouter_api_key" // Keep this as snake_case since it's used in API requests
         case groqApiKey = "groq_api_key" // Keep this as snake_case since it's used in API requests

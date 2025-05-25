@@ -68,7 +68,9 @@ struct ModelConfig: Codable, Equatable, Hashable {
     var anthropicApiKey: String?
     var googleApiKey: String?
     var mistralApiKey: String?
-    var fireworksApiKey: String?
+    var awsAccessKeyId: String?
+    var awsSecretAccessKey: String?
+    var awsRegion: String?
     var cohereApiKey: String?
     var openrouterApiKey: String?
     var groqApiKey: String?
@@ -80,7 +82,9 @@ struct ModelConfig: Codable, Equatable, Hashable {
          anthropicApiKey: String? = nil,
          googleApiKey: String? = nil,
          mistralApiKey: String? = nil,
-         fireworksApiKey: String? = nil,
+         awsAccessKeyId: String? = nil,
+         awsSecretAccessKey: String? = nil,
+         awsRegion: String? = nil,
          cohereApiKey: String? = nil,
          openrouterApiKey: String? = nil,
          groqApiKey: String? = nil) {
@@ -91,7 +95,9 @@ struct ModelConfig: Codable, Equatable, Hashable {
         self.anthropicApiKey = anthropicApiKey
         self.googleApiKey = googleApiKey
         self.mistralApiKey = mistralApiKey
-        self.fireworksApiKey = fireworksApiKey
+        self.awsAccessKeyId = awsAccessKeyId
+        self.awsSecretAccessKey = awsSecretAccessKey
+        self.awsRegion = awsRegion
         self.cohereApiKey = cohereApiKey
         self.openrouterApiKey = openrouterApiKey
         self.groqApiKey = groqApiKey
@@ -103,7 +109,9 @@ struct ModelConfig: Codable, Equatable, Hashable {
         case anthropicApiKey = "anthropic_api_key" // Keep this as snake_case since it's used in API requests
         case googleApiKey = "google_api_key" // Keep this as snake_case since it's used in API requests
         case mistralApiKey = "mistral_api_key" // Keep this as snake_case since it's used in API requests
-        case fireworksApiKey = "fireworks_api_key" // Keep this as snake_case since it's used in API requests
+        case awsAccessKeyId = "aws_access_key_id"
+        case awsSecretAccessKey = "aws_secret_access_key"
+        case awsRegion = "aws_region"
         case cohereApiKey = "cohere_api_key" // Keep this as snake_case since it's used in API requests
         case openrouterApiKey = "openrouter_api_key" // Keep this as snake_case since it's used in API requests
         case groqApiKey = "groq_api_key" // Keep this as snake_case since it's used in API requests

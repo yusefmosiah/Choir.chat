@@ -23,7 +23,7 @@ langchain-anthropic==0.3.8
 langchain-google-genai==2.0.11
 langchain-cohere==0.4.2
 langchain-mistralai==0.2.7
-langchain-fireworks==0.2.7
+langchain-aws==0.2.23
 langchain-qdrant==0.2.0
 langchain-groq==0.2.4
 

@@ -9,7 +9,7 @@ struct ModelConfigView: View {
     @State private var newModelName: String = ""
     @State private var showResetAlert = false
 
-    private let providers = ["google", "openrouter", "anthropic", "groq", "openai"]
+    private let providers = ["google", "openrouter", "anthropic", "groq", "openai", "bedrock"]
 
     @State private var dynamicModelsByProvider: [String: [String]] = [
         "google": ["gemini-2.0-flash-lite", "gemini-2.0-flash", "gemini-2.5-flash-preview-04-17", "gemini-2.5-pro-exp-03-25", "gemini-2.5-pro-preview-03-25"],
@@ -21,6 +21,7 @@ struct ModelConfigView: View {
         ],
         "groq": ["qwen-qwq-32b", "meta-llama/llama-4-scout-17b-16e-instruct", "qwen-2.5-coder-32b", "deepseek-r1-distill-qwen-32b", "meta-llama/llama-4-maverick-17b-128e-instruct", "llama-3.1-8b-instant", "mistral-saba-24b"],
         "openai": ["gpt-4.1", "gpt-4.1-mini", "gpt-4.1-nano", "gpt-4o-mini-search-preview", "gpt-4o", "o3-mini"],
+        "bedrock": ["anthropic.claude-3-5-sonnet-20241022-v2:0", "anthropic.claude-3-5-haiku-20241022-v1:0", "anthropic.claude-3-opus-20240229-v1:0", "meta.llama3-2-90b-instruct-v1:0", "meta.llama3-2-11b-instruct-v1:0"],
     ]
 
     var body: some View {
@@ -221,6 +222,7 @@ struct ModelConfigView: View {
             ],
             "groq": ["qwen-qwq-32b", "meta-llama/llama-4-scout-17b-16e-instruct", "qwen-2.5-coder-32b", "deepseek-r1-distill-qwen-32b", "meta-llama/llama-4-maverick-17b-128e-instruct", "llama-3.1-8b-instant", "mistral-saba-24b"],
             "openai": ["gpt-4.1", "gpt-4.1-mini", "gpt-4.1-nano", "gpt-4o-mini-search-preview", "gpt-4o", "o3-mini"],
+            "bedrock": ["anthropic.claude-3-5-sonnet-20241022-v2:0", "anthropic.claude-3-5-haiku-20241022-v1:0", "anthropic.claude-3-opus-20240229-v1:0", "meta.llama3-2-90b-instruct-v1:0", "meta.llama3-2-11b-instruct-v1:0"],
         ]
 
         for provider in providers {
@@ -246,7 +248,9 @@ struct ModelConfigView: View {
                 config.anthropicApiKey = apiKeys["anthropic"]
                 config.googleApiKey = apiKeys["google"]
                 config.mistralApiKey = apiKeys["mistral"]
-                config.fireworksApiKey = apiKeys["fireworks"]
+                config.awsAccessKeyId = apiKeys["bedrock_access_key"]
+                config.awsSecretAccessKey = apiKeys["bedrock_secret_key"]
+                config.awsRegion = apiKeys["bedrock_region"]
                 config.cohereApiKey = apiKeys["cohere"]
                 config.openrouterApiKey = apiKeys["openrouter"]
                 config.groqApiKey = apiKeys["groq"]

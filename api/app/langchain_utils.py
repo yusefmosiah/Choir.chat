@@ -21,7 +21,7 @@ from langchain_openai import ChatOpenAI
 from langchain_anthropic import ChatAnthropic
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_mistralai import ChatMistralAI
-from langchain_fireworks import ChatFireworks
+from langchain_aws import ChatBedrock
 from langchain_cohere import ChatCohere
 from langchain_groq import ChatGroq
 
@@ -44,7 +44,9 @@ class ModelConfig(BaseModel):
     anthropic_api_key: Optional[str] = Field(None, description="Anthropic API Key")
     google_api_key: Optional[str] = Field(None, description="Google API Key")
     mistral_api_key: Optional[str] = Field(None, description="Mistral API Key")
-    fireworks_api_key: Optional[str] = Field(None, description="Fireworks API Key")
+    aws_access_key_id: Optional[str] = Field(None, description="AWS Access Key ID")
+    aws_secret_access_key: Optional[str] = Field(None, description="AWS Secret Access Key")
+    aws_region: Optional[str] = Field(None, description="AWS Region")
     cohere_api_key: Optional[str] = Field(None, description="Cohere API Key")
     openrouter_api_key: Optional[str] = Field(None, description="OpenRouter API Key")
     groq_api_key: Optional[str] = Field(None, description="Groq API Key")
@@ -90,13 +92,14 @@ def get_mistral_models(config: Config) -> List[str]:
         config.MISTRAL_CODESTRAL
     ]
 
-def get_fireworks_models(config: Config) -> List[str]:
-    """Get available Fireworks models"""
+def get_bedrock_models(config: Config) -> List[str]:
+    """Get available AWS Bedrock models"""
     return [
-        config.FIREWORKS_DEEPSEEK_R1,
-        config.FIREWORKS_DEEPSEEK_V3,
-        config.FIREWORKS_QWEN25_CODER,
-        config.FIREWORKS_QWEN_QWQ_32B
+        config.BEDROCK_CLAUDE_3_5_SONNET,
+        config.BEDROCK_CLAUDE_3_5_HAIKU,
+        config.BEDROCK_CLAUDE_3_OPUS,
+        config.BEDROCK_LLAMA_3_2_90B,
+        config.BEDROCK_LLAMA_3_2_11B
     ]
 
 def get_cohere_models(config: Config) -> List[str]:
@@ -143,6 +146,9 @@ def initialize_model_list(config: Config, disabled_providers: set = None) -> Lis
 
     if config.GROQ_API_KEY and "groq" not in disabled_providers:
         models.extend([ModelConfig("groq", m) for m in get_groq_models(config)])
+
+    if config.AWS_ACCESS_KEY_ID and "bedrock" not in disabled_providers:
+        models.extend([ModelConfig("bedrock", m) for m in get_bedrock_models(config)])
 
     logger.info(f"Initialized {len(models)} tool-capable models")
     return models
@@ -224,12 +230,12 @@ def get_base_model(model_config: ModelConfig) -> BaseChatModel:
             model=model_name,
             temperature=temp
         )
-    elif provider == "fireworks":
-        model_id = f"accounts/fireworks/models/{model_name}"
-        return ChatFireworks(
-            api_key=model_config.fireworks_api_key,
-            model=model_id,
-            temperature=temp
+    elif provider == "bedrock":
+        return ChatBedrock(
+            model_id=model_name,
+            region_name=model_config.aws_region or "us-east-1",
+            credentials_profile_name=None,  # Use environment variables or IAM role
+            model_kwargs={"temperature": temp}
         )
     elif provider == "cohere":
         return ChatCohere(

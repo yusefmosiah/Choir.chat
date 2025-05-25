@@ -39,7 +39,10 @@ class Config:
     ANTHROPIC_API_KEY: str = os.getenv("ANTHROPIC_API_KEY", "")
     GOOGLE_API_KEY: str = os.getenv("GOOGLE_API_KEY", "")
     MISTRAL_API_KEY: str = os.getenv("MISTRAL_API_KEY", "")
-    FIREWORKS_API_KEY: str = os.getenv("FIREWORKS_API_KEY", "")
+    # AWS Bedrock configuration
+    AWS_ACCESS_KEY_ID: str = os.getenv("AWS_ACCESS_KEY_ID", "")
+    AWS_SECRET_ACCESS_KEY: str = os.getenv("AWS_SECRET_ACCESS_KEY", "")
+    AWS_REGION: str = os.getenv("AWS_REGION", "us-east-1")
     COHERE_API_KEY: str = os.getenv("COHERE_API_KEY", "")
     GROQ_API_KEY: str = os.getenv("GROQ_API_KEY", "")
 
@@ -81,11 +84,12 @@ class Config:
     # Cohere models
     COHERE_COMMAND_R7B: str = "command-r7b-12-2024"
 
-    # Fireworks models (without prefix)
-    FIREWORKS_DEEPSEEK_R1: str = "deepseek-r1"
-    FIREWORKS_DEEPSEEK_V3: str = "deepseek-v3"
-    FIREWORKS_QWEN25_CODER: str = "qwen2p5-coder-32b-instruct"
-    FIREWORKS_QWEN_QWQ_32B: str = "qwq-32b"
+    # AWS Bedrock models
+    BEDROCK_CLAUDE_3_5_SONNET: str = "anthropic.claude-3-5-sonnet-20241022-v2:0"
+    BEDROCK_CLAUDE_3_5_HAIKU: str = "anthropic.claude-3-5-haiku-20241022-v1:0"
+    BEDROCK_CLAUDE_3_OPUS: str = "anthropic.claude-3-opus-20240229-v1:0"
+    BEDROCK_LLAMA_3_2_90B: str = "meta.llama3-2-90b-instruct-v1:0"
+    BEDROCK_LLAMA_3_2_11B: str = "meta.llama3-2-11b-instruct-v1:0"
 
     # Groq models
     GROQ_LLAMA3_3_70B_VERSATILE: str = "llama-3.3-70b-versatile"
