@@ -1,42 +1,42 @@
-# Core Economic Model: Fueling a Self-Improving AI Ecosystem with CHOIR Coins
+# Core Economic Model: Turning Social Interaction Into Value Creation
 
-VERSION core_economics: 8.0 (RL-Driven Data Economy)
+VERSION core_economics: 9.0 (Relationship-Focused Economy)
 
-The economic model of Choir is not just about transactions and value exchange; it's about creating a **self-sustaining engine for AI improvement and a thriving marketplace for valuable human data.**  The CHOIR coin is at the heart of this engine, acting as both the fuel and the training signal for a revolutionary AI ecosystem.
+The economic model of Choir solves a fundamental problem: on traditional social media, posting creates liability (cancel culture, reputation risk) while platforms capture all the value. Choir flips this by turning every thoughtful contribution into transferable value through CHOIR tokens, and enabling users to invest that value in meaningful relationships. This creates the first social platform where your intellectual contributions belong to you.
 
-## CHOIR: Beyond a Utility Token - A Training Signal and Data Currency
+## CHOIR: The Currency of Meaningful Relationships
 
-The CHOIR coin transcends the limitations of a traditional utility token. It is designed to be:
+The CHOIR coin represents a fundamental shift from platform-owned metrics to user-owned value:
 
-*   **A Representation of Contribution and Ownership:** CHOIR coins represent a stake in the collective intelligence of Choir, acknowledging and rewarding user contributions to the platform's knowledge base.
-*   **A Training Signal for AI Models:** CHOIR coins, distributed as novelty and citation rewards, act as *direct training signals* for AI models within the Choir ecosystem, guiding them to optimize for desired behaviors and high-quality content generation.
-*   **The Currency of a Data Marketplace:** CHOIR coins are the *exclusive currency* for accessing and transacting with the valuable, human-generated data within the Choir platform, creating a demand-driven data marketplace.
-*   **A Driver of Network Effects and Value Accrual:** The CHOIR coin economy is designed to create powerful network effects, driving user engagement, data creation, AI improvement, and sustainable coin value accrual.
+*   **Transferable Social Value:** Unlike likes, followers, or karma that disappear when you leave a platform, CHOIR tokens are yours to keep, transfer, or invest in relationships that matter.
+*   **Relationship Investment Currency:** CHOIR tokens enable relationship staking - the ability to invest your earned value directly in meaningful connections with other users, creating shared economic interest in quality discourse.
+*   **Merit-Based Rewards:** Tokens are earned through quality contributions (novelty rewards) and community recognition (citation rewards), not engagement farming or algorithmic manipulation.
+*   **Economic Alignment Tool:** By requiring token investment for relationship formation, CHOIR creates real skin in the game for meaningful discourse, filtering out low-effort interactions while rewarding thoughtful engagement.
 
-## The Dynamic Contract: Governing a Data Marketplace
+## Relationship Staking: Economic Alignment in Human Connections
 
-The dynamic contract, implemented on the Sui blockchain, is the **economic heart of the Choir data marketplace**. It provides a dynamic and nuanced mechanism for:
+The relationship staking system creates economic alignment between users who want to form meaningful connections:
 
-*   **Stake Pricing and Value Discovery:** The model dynamically determines the stake price for contributing to threads, reflecting the evolving value of knowledge and user attention within the ecosystem.
-*   **Data Access and Contribution Pricing:** The contract governs the "price of data" within each thread. Users "pay" CHOIR coins (stake) to contribute to threads, and this contribution can be seen as a *price for accessing and adding value to the data within that thread*.
-*   **Incentivizing Quality and Salience:** The contract, through its integration with the novelty and citation reward mechanisms, incentivizes users and AI agents to create *high-quality, novel, and salient contributions* that are valuable for AI training and knowledge building.
-*   **Decentralized Governance and Economic Evolution:** The contract is designed to be *governed by CHOIR coin holders*, allowing the community to democratically shape the rules of the data marketplace and evolve the economic model over time.
+*   **Investment-Based Connections:** When you want to respond to someone's thoughtful contribution, you stake CHOIR tokens as a non-refundable bond, demonstrating serious intent and filtering out spam.
+*   **Mutual Economic Interest:** If both parties engage, their tokens are locked in a shared relationship multisig, creating joint ownership of the relationship's economic value.
+*   **Dynamic Relationship Value:** Successful relationships can accumulate additional value through citation rewards when relationship content is referenced, and novelty rewards for collaborative insights.
+*   **Exit Rights and Ownership:** Users always maintain the right to exit relationships and take their proportional share of tokens, ensuring that social value remains owned by participants, not platforms.
 
-## Reward Mechanisms: Fueling the AI Data Engine
+## Reward Mechanisms: Recognizing Quality and Building Community
 
-The CHOIR coin economy is driven by two key reward mechanisms, algorithmically distributed by AI models within the Choir platform:
+The CHOIR economy rewards two types of valuable contributions that build better discourse:
 
-1.  **Novelty Rewards (Experience Phase - Driving Data Diversity):**
-    *   **Purpose:** To incentivize the creation of *novel and original prompts and messages*, ensuring a diverse and ever-expanding dataset for AI training.
-    *   **Mechanism:** AI models in the Experience Phase analyze new user contributions for semantic novelty compared to existing data in the platform's vector databases.
-    *   **Distribution:** CHOIR coins are algorithmically distributed as novelty rewards to users who submit contributions deemed sufficiently novel, encouraging exploration of new ideas and knowledge domains.
+1.  **Novelty Rewards - Rewarding Original Thinking:**
+    *   **Purpose:** Recognize and reward users who contribute genuinely original ideas and perspectives, encouraging intellectual diversity and creative thinking.
+    *   **Mechanism:** AI analyzes new contributions for semantic novelty compared to existing community knowledge, identifying truly fresh insights.
+    *   **Impact:** Creates incentives for users to think deeply and share authentic perspectives rather than repeating common talking points or engagement farming.
 
-2.  **Citation Rewards (Yield Phase - Driving Predictive Salience and Data Quality):**
-    *   **Purpose:** To incentivize users to create *salient and impactful contributions* that are recognized and valued by the community, and to reward the creation of high-quality, human-labeled training data through citations.
-    *   **Mechanism:** AI models in the Yield Phase analyze the citation network, identifying messages that have been cited as valuable "priors" by other users.
-    *   **Distribution:** CHOIR coins are algorithmically distributed as citation rewards to users whose messages have been cited, based on the *salience* and *influence* of their contributions, as measured by citation metrics and model parameters.
+2.  **Citation Rewards - Recognizing Community Value:**
+    *   **Purpose:** Reward users whose contributions prove valuable to others, as demonstrated when their ideas are referenced in subsequent conversations.
+    *   **Mechanism:** When AI identifies that a user's prior contribution informed a response to someone else, the original author receives citation rewards.
+    *   **Impact:** Creates a reputation system based on actual intellectual contribution rather than social metrics, encouraging users to share insights that genuinely help others.
 
-These reward mechanisms are not just about distributing coins; they are **direct training signals for AI models within Choir**.  AI models learn to identify and reward the very data that is most valuable for their own improvement and for the growth of the collective intelligence of the platform.
+These mechanisms work together to create a community where quality thinking is recognized and rewarded, while AI learns to identify the types of contributions that facilitate meaningful discourse and intellectual connection.
 
 ## Data Marketplace Dynamics: CHOIR as Data Purchase Power
 
@@ -58,11 +58,13 @@ The CHOIR coin economy is designed to create a **self-sustaining ecosystem** whe
     *   **Access to a Thriving Data Marketplace:** Exchange valuable data and insights.
     *   **Enhanced Identity and Reputation:** Build credibility through the IDaaS offering.
 
-## Conclusion: Building a Self-Improving, Data-Driven AI Ecosystem
+## Conclusion: A New Model for Social Value Creation
 
-The core economic model of Choir, centered around the CHOIR coin and the dynamic contract, is designed to create a **self-improving, data-driven AI ecosystem** where:
+The core economic model of Choir represents a fundamental shift from extractive to generative social platforms:
 
-*   **Human Ingenuity and AI Intelligence are Synergistically Combined:**  The platform leverages the unique strengths of both human users and AI models to create a powerful engine for knowledge creation and problem-solving.
-*   **Data is Recognized and Valued as a Core Asset:**  User data contributions are explicitly recognized as valuable assets and are rewarded through the CHOIR coin economy.
-*   **Value Flows Naturally and Incentives are Aligned:**  The coin economy is designed to align the incentives of users, AI agents, and the platform itself, creating a virtuous cycle of growth, quality, and value creation.
-*   **CHOIR Coins Fuel a Self-Improving AI Engine:**  CHOIR coins are not just a currency; they are the *fuel and the training signals* that drive the continuous improvement and evolution of the Choir AI ecosystem, creating a truly revolutionary and sustainable model for the future of AI and online collaboration.
+*   **User Ownership of Social Value:** For the first time, users own their social contributions as transferable assets rather than platform-locked metrics that disappear when they leave.
+*   **Economic Alignment in Relationships:** Relationship staking creates shared economic interest in maintaining quality discourse, transforming social interaction from cost center to value generator.
+*   **Merit-Based Community Building:** Anonymous, merit-based rewards enable authentic intellectual connection free from social surveillance and reputation management.
+*   **AI That Amplifies Human Connection:** Rather than replacing human relationships, AI facilitates better discourse and helps compatible minds find each other based on intellectual compatibility rather than demographic targeting.
+
+This model demonstrates that social platforms can create value for users rather than extracting it, building communities based on shared intellectual interest rather than engagement addiction.

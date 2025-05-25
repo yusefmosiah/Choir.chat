@@ -13,27 +13,27 @@
     <h3>Why Choir?</h3>
     <p>Choir represents a paradigm shift in how we interact with AI and each other. By orchestrating multiple AI models working in concert, we create a more balanced, nuanced, and reliable platform for knowledge sharing and creation.</p>
   </div>
-  
+
   <div class="choir-feature-card">
     <h3>Why Multi-Agent?</h3>
     <p>Trust emerges from consensus. Our diverse portfolio of AI models provides multiple perspectives, reducing bias and increasing reliability. When multiple independent agents agree, you can trust the result.</p>
   </div>
-  
+
   <div class="choir-feature-card">
     <h3>Why Anonymity?</h3>
     <p>Clarity of thought requires freedom from social surveillance. On Choir, ideas stand on their own merit, not on who said them. Express yourself freely without fear of judgment or social consequences.</p>
   </div>
-  
+
   <div class="choir-feature-card">
     <h3>Why Rewards?</h3>
-    <p>Your data and insights are valuable, and you deserve to benefit from them. Choir's reward system compensates you for your contributions, creating a fair ecosystem where value flows to those who create it.</p>
+    <p>Unlike other platforms where your likes and followers are valuable but not yours, Choir turns posting into value creation. Earn transferable CHOIR tokens for quality contributions, then stake them in relationships that matter. Your intellectual value belongs to you.</p>
   </div>
-  
+
   <div class="choir-feature-card">
     <h3>Why Pages?</h3>
     <p>Scrolling is a mind-killer. Our page-based structure creates focused, digestible content units that enhance engagement and comprehension, moving beyond the endless scroll of traditional platforms.</p>
   </div>
-  
+
   <div class="choir-feature-card">
     <h3>Why Blockchain?</h3>
     <p>Our AI-native transaction ledger provides transparency and reinforces trust. Blockchain technology ensures that contributions are immutably recorded and fairly rewarded, creating a new socioeconomic media paradigm.</p>
@@ -43,31 +43,36 @@
 <div class="choir-future-section">
   <h2>The Future of Choir</h2>
   <p>We're building a dynamic, collaborative platform that will continue to evolve with these exciting features:</p>
-  
+
   <div class="choir-future-features">
     <div class="choir-future-feature">
-      <h4>Modular Collaboration</h4>
-      <p>Each phase becomes an independent agent, enhancing flexibility and efficiency within the system.</p>
+      <h4>Relationship Staking</h4>
+      <p>Invest your earned CHOIR tokens directly into meaningful connections. Stake tokens to respond to someone's idea—they can engage and lock tokens into a shared relationship, or ignore you and keep them. Real skin in the game for quality discourse.</p>
     </div>
-    
+
+    <div class="choir-future-feature">
+      <h4>Multiparty Relationships</h4>
+      <p>Form groups with shared token pools. Members can exit unilaterally, taking their share, creating dynamic communities with real economic alignment.</p>
+    </div>
+
     <div class="choir-future-feature">
       <h4>Multimodality</h4>
       <p>Voice, image, and eventually video input/output will create more natural and versatile human-AI interactions.</p>
     </div>
-    
+
     <div class="choir-future-feature">
       <h4>Local Embeddings</h4>
       <p>Enhanced contextual understanding through localized knowledge representation.</p>
     </div>
-    
+
     <div class="choir-future-feature">
       <h4>Per-User Memory</h4>
       <p>Personalized experiences that remember your preferences and past interactions.</p>
     </div>
-    
+
     <div class="choir-future-feature">
-      <h4>User Connections</h4>
-      <p>Features like repeated mutual citations will introduce users to each other based on shared intellectual interests.</p>
+      <h4>Like Minds Discovery</h4>
+      <p>AI identifies intellectual compatibility through citation patterns and conversation quality, introducing you to kindred spirits based on merit, not metrics.</p>
     </div>
   </div>
 </div>
@@ -243,7 +248,7 @@
   .choir-features-grid, .choir-future-features {
     grid-template-columns: 1fr;
   }
-  
+
   .choir-hero-section h2 {
     font-size: 2rem;
   }

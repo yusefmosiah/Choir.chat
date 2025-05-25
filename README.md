@@ -1,6 +1,6 @@
-# Choir: Building a Tokenized Marketplace of Ideas (Qdrant-Sui MVP)
+# Choir: AI for Social Discourse
 
-Choir is a platform designed to amplify collective intelligence through AI-driven conversation analysis and a tokenized reward system. It utilizes the PostChain workflow (AEIOU-Y phases) to process interactions, leveraging multiple LLM providers, Qdrant for semantic storage, and the Sui blockchain for its native CHOIR coin.
+Choir is a language game that uses AI to facilitate meaningful social discourse. Unlike platforms where posting creates liability, Choir turns every thoughtful contribution into transferable value through CHOIR tokens. By rewarding quality ideas and enabling relationship staking, we're building a platform where AI amplifies human community rather than replacing it.
 
 ## Core Concepts
 

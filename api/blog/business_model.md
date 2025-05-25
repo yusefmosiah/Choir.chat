@@ -1,64 +1,78 @@
-# Choir's Blueprint: A Sustainable AI Ecosystem
+# Choir's Blueprint: Truthful Mechanism Design for Social Discourse
 
-## Vision: Harmonic Intelligence
+## Vision: AI for Social Discourse
 
-Choir is building a **harmonic intelligence platform** where human creativity and AI power work in concert. Our goal is to foster an ecosystem where value flows fairly, and the system itself continuously learns and improves through user contributions.
+Choir is building the first social platform based on mechanism design theory, where AI facilitates meaningful human connections rather than replacing them. Our goal is to create a DSIC (Dominant Strategy Incentive Compatible) truthful mechanism where authentic expression is the optimal strategy.
 
-## Core Pillars
+## Core Innovation: The Revenue Sequence
 
-1.  **Loop of Thought (LoT) Architecture:** Our unique AEIOU-Y PostChain implements the LoT, enabling dynamic, context-aware AI interactions. (Reference `loop_of_thought.md`)
-2.  **CHOIR Coin Economy:** The CHOIR coin fuels the ecosystem, rewarding valuable contributions and enabling access to premium features and services. This native cryptocurrency has been minted and deployed on the Sui mainnet.
-3.  **Choir Harmonic Intelligence Platform, Inc. (C-Corporation):** The entity responsible for developing and stewarding the Choir platform and its ecosystem, often referred to as "CHI" when discussing the corporate entity.
+**App Subscriptions** → **Relationship/Group Multisig Funds** → **Onchain Finance Agents**
 
-## Business Model for Choir Harmonic Intelligence Platform, Inc.
+This progression ensures that revenue grows naturally with user engagement and relationship formation, creating sustainable alignment between business success and community value.
 
-Choir Harmonic Intelligence Platform, Inc. (CHI) will generate revenue and drive growth through the following strategies:
+## Theoretical Foundation
 
-### 1. Identity-as-a-Service (IDaaS)
+Choir emerges from deep thinking about mechanism design theory. At its core, we're solving the problem of how to create a social platform where posting creates value rather than liability, treating social media posting as bidding in a Vickrey auction where truthful bidding (authentic expression) is the dominant strategy.
 
-*   **Concept:** While Choir is anonymous by default, users can opt for a paid subscription to establish a persistent, recognized identity on the platform.
-*   **Value Proposition for Users:**
-    *   Build reputation and credibility based on contributions.
-    *   Publicly attribute prompts and cited works.
-    *   Enhanced discovery or professional networking opportunities (future).
-*   **Revenue:** A recurring monthly subscription fee (e.g., $20-$50/month).
-*   **Impact:** Provides a primary, sustainable revenue stream for CHI.
+## Three-Phase Revenue Model
 
-### 2. Funding Strategy: Equity in Choir Harmonic Intelligence Platform, Inc.
+### Phase 1: App Subscription Model
 
-*   **Mechanism:** CHI will raise capital by selling equity (stock) to investors.
-*   **Rationale:** This provides traditional startup funding for platform development, operational costs, and marketing, while allowing the CHOIR coin to derive its value primarily from ecosystem utility.
+**Free Tier (Beta Only):** Core functionality free during beta to validate product-market fit
+**Subscription Tiers (Post-Beta):** Exponential price-to-rate-limit ratios covering AI model costs and Sui transaction fees:
 
-### 3. CHOIR Coin Strategy: Treasury Asset & Buybacks
+*   **Basic ($9/month):** 100 AI conversations, standard processing
+*   **Pro ($29/month):** 500 conversations, priority processing, advanced models
+*   **Expert ($99/month):** 2000 conversations, fastest processing, premium features
+*   **Unlimited ($299/month):** No rate limits, experimental features, dedicated support
 
-*   **No Coin Sale for Funding:** CHI will **not** sell CHOIR coins to raise capital. CHOIR coins are earned by users through platform participation (novelty and citation rewards).
-*   **C-Corp Coin Purchases:** CHI will allocate a portion of its capital (from equity funding or profits) to purchase CHOIR coins from the open market.
-*   **Rationale (MicroStrategy Model):**
-    *   Hold CHOIR coins as a strategic treasury asset, reflecting belief in the long-term value of the Choir ecosystem.
-    *   Create buy pressure and support the CHOIR coin's value.
-    *   Potentially use acquired CHOIR for ecosystem development grants, liquidity provision, or other strategic initiatives.
+**Full Anonymity:** Identity emerges from wallet activity and Sui's nameserver. No KYC or persistent identities required.
+
+### Phase 2: Relationship/Group Multisig Funds
+
+As users form meaningful relationships through staking, these connections become economic entities with shared treasuries that can make collective investment decisions.
+
+### Phase 3: Onchain Finance Agents (Primary Revenue Driver)
+
+**Financial Agent Services:** AI-powered portfolio management, DeFi strategies, cross-chain operations, and tax optimization for relationship/group funds.
+**Revenue:** 2-5% transaction fees on all financial operations executed by our AI agents.
+
+### CHOIR Coin Treasury Strategy & Financial Engineering
+
+**Buyback Program:** CHI allocates significant revenue to purchasing CHOIR tokens from the open market, creating sustained buy pressure and aligning corporate success with token value.
+
+**Debt Financing Strategy:** Once recurring revenue is established, CHI can leverage cash flows to take on debt for accelerated CHOIR acquisitions, amplifying returns when tokens appreciate.
+
+**Strategic Rationale:** Corporate success directly tied to CHOIR performance, creating alignment between business growth and token holder value.
 
 ## The CHOIR Coin Ecosystem
 
-*   **Earning CHOIR:** Users earn CHOIR coins by:
-    *   Contributing novel prompts and ideas (Novelty Rewards).
-    *   Having their contributions cited by others (Citation Rewards).
-*   **Using CHOIR:**
-    *   (Current) Participating in Thread Contracts (staking for specific conversations).
-    *   (Current) Accessing premium data or services in the Choir data marketplace.
-    *   (Future) Governance rights for platform decisions.
-*   **Value Proposition:** CHOIR's value is driven by its utility within the Choir ecosystem, the data marketplace, and the overall health and activity of the platform.
-*   **Mainnet Status:** The CHOIR coin has been minted and deployed on the Sui mainnet, with package ID `0x4f83f1cd85aefd0254e5b6f93bd344f49dd434269af698998dd5f4baec612898::choir::CHOIR`.
+**Earning CHOIR:**
+*   **Novelty Rewards:** Contributing original ideas and perspectives
+*   **Citation Rewards:** Having contributions referenced by others
+*   **Relationship Value:** Shared appreciation in successful relationship multisigs
 
-## Open Source and Community
+**Using CHOIR:**
+*   **Relationship Staking:** Invest tokens in meaningful connections with other users
+*   **Group Formation:** Pool resources with like-minded individuals for collective decisions
+*   **Financial Services:** Access AI-powered portfolio management and DeFi strategies
 
-*   Core Choir protocols and agent frameworks may be open-sourced to foster community development and wider adoption, with CHI focusing on the platform, premium services, and IDaaS offerings.
+**Mainnet Status:** CHOIR is live on Sui mainnet with package ID `0x4f83f1cd85aefd0254e5b6f93bd344f49dd434269af698998dd5f4baec612898::choir::CHOIR`.
+
+## Mechanism Design Innovation
+
+**DSIC Social Media:** Choir creates the first social platform where authentic expression is the dominant strategy, solving the fundamental incentive problems of traditional social media.
+
+**Vickrey Auction Analogy:**
+*   **Posting = Bidding:** Users contribute their authentic thoughts
+*   **Anonymity = Sealed Bids:** Removes social signaling and status games
+*   **Citation Rewards = Second-Price Auction:** Value flows based on community recognition, not self-promotion
 
 ## Path Forward
 
-1.  **MVP Launch:** Focus on core LoT experience, basic CHOIR rewards, and initial user acquisition. Introduce IDaaS as an early revenue stream.
-2.  **Ecosystem Growth:** Enhance CHOIR utility with features like Thread Contracts and data marketplace access.
-3.  **Data Economy Development:** Build out the data marketplace where CHOIR serves as the currency for accessing and contributing to valuable datasets.
-4.  **Continuous Improvement:** Iterate on the platform, tokenomics, and business model based on user feedback and market dynamics.
+1.  **Beta Launch:** Free tier to validate product-market fit and relationship formation
+2.  **Subscription Model:** Implement tiered pricing to cover AI and blockchain costs
+3.  **Relationship Economy:** Enable group multisigs and collective decision-making
+4.  **Financial Services:** Launch AI-powered financial agents for relationship funds
 
-This model aims for a sustainable, symbiotic relationship between Choir Harmonic Intelligence Platform, Inc. and the Choir ecosystem, where the success of the C-Corp is intertwined with the value and utility of the CHOIR coin and the vibrancy of the community.
+This model represents the first practical implementation of mechanism design theory for social media, creating a sustainable platform where technology serves human flourishing rather than exploiting human psychology.

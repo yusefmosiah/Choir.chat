@@ -267,7 +267,6 @@ tree.md
 │   ├── contract_deployment.md
 │   ├── core_core.md
 │   ├── core_economics.md
-│   ├── core_state_transitions.md
 │   ├── data_engine_model.md
 │   ├── e_business.md
 │   ├── e_concept.md
@@ -288,6 +287,10 @@ tree.md
 │   ├── plan_anonymity_by_default.md
 │   ├── plan_choir_materialization.md
 │   ├── postchain_temporal_logic.md
+│   ├── postchain_ui_redesign.md
+│   ├── process_doctrine.md
+│   ├── publish_thread_feature.md
+│   ├── relationship_staking.md
 │   ├── require_action_phase.md
 │   ├── require_experience_phase.md
 │   ├── require_intention_phase.md
@@ -303,7 +306,8 @@ tree.md
 │   ├── security_considerations.md
 │   ├── stack_argument.md
 │   ├── state_management_patterns.md
-│   └── tree.md
+│   ├── tree.md
+│   └── wallet_languification.md
 ├── notebooks
 │   ├── post_chain0.ipynb
 │   └── vowel_loop3.ipynb
@@ -322,7 +326,7 @@ tree.md
     ├── test_postchain_multiturn.sh
     └── test_simulator_notifications.sh
 
-73 directories, 234 files
+73 directories, 238 files
 
 === File: docs/CHANGELOG.md ===
 
@@ -773,40 +777,40 @@ core_core
 ==
 
 
-# Core System Overview (Qdrant-Sui MVP)
+# Core System Overview: AI for Social Discourse
 
-VERSION core_system: 8.0 (Qdrant-Sui MVP Focus)
+VERSION core_system: 9.0 (Relationship-Focused Architecture)
 
 ## Overview
 
-The Choir system, for its Minimum Viable Product (MVP), is architected around a focused stack designed to validate the core concepts of AI-driven conversation analysis and a tokenized reward mechanism. This MVP centers on **Qdrant** as the primary data and vector store and **Sui** as the blockchain layer for the CHIP token, orchestrated by a central **Python API**. While future iterations envision a distributed network of specialized servers, the MVP utilizes a streamlined architecture to accelerate validation.
+Choir is a language game that uses AI to facilitate meaningful social discourse. Our system architecture is designed around a core insight: turning posting from a liability into value creation through relationship staking and merit-based rewards. The MVP validates this concept through **Qdrant** for semantic understanding, **Sui** for economic alignment via CHOIR tokens, and a **Python API** that orchestrates AI-driven conversations that connect like minds.
 
-## Foundational Principles (Informed by Broader Vision)
+## Foundational Principles: Enabling Human Connection Through AI
 
-Even within the MVP's focused scope, Choir is built upon a clear hierarchy of truth and state management, guided by underlying principles:
+Choir's architecture embodies core principles that prioritize human relationships over algorithmic engagement:
 
-1.  **Blockchain as Economic Truth (Sui):** The **Sui blockchain** serves as the *authoritative source of truth for the economic state*. In the MVP, this includes the basic existence of the CHIP token and the execution of simplified reward distributions. Ultimately, it will manage thread ownership, full token balances, message hashes, co-author lists, and the governance of the economic model.
-2.  **Qdrant as Semantic Truth:** **Qdrant** serves as the *authoritative source for content and semantic relationships*. It stores message content, user/thread data, phase-specific memory, embeddings, and eventually, citation networks.
-3.  **AEIOU-Y Post Chain as Interaction Pattern:** The **AEIOU-Y Post Chain** defines the natural interaction pattern for processing user input and generating nuanced AI responses. In the MVP, this pattern is implemented via the LCEL workflow.
-4.  **Dynamic Economic Model:** The economic model, based on dynamic principles and the CHIP token, underpins the reward system, even if its full implementation is post-MVP.
+1.  **Economic Alignment (Sui):** The **Sui blockchain** manages CHOIR tokens that create real skin in the game for quality discourse. Beyond basic rewards, it enables **relationship staking** where users invest tokens in meaningful connections, creating shared economic interest in maintaining quality relationships.
+2.  **Semantic Understanding (Qdrant):** **Qdrant** stores not just content but the semantic relationships that help AI identify intellectual compatibility. It powers the discovery of "like minds" through citation patterns and conversation quality rather than superficial metrics.
+3.  **Conversational Intelligence (AEIOU-Y PostChain):** The **PostChain workflow** creates conversations that get smarter over time, helping users express ideas more clearly and connecting them with relevant prior thoughts from the community.
+4.  **Merit-Based Discovery:** Anonymous by default, ideas compete on merit rather than social status, enabling authentic discourse free from social surveillance and reputation management.
 
-## Core Components (Qdrant-Sui MVP)
+## Core Components: Building Blocks for Social Discourse
 
-1.  **Qdrant (Data & Vector Layer):**
-    *   **Role:** The authoritative source for persistent data relevant to the AI workflow and reward mechanism. Stores user mappings (linked to Sui addresses), thread metadata, conversation messages (user prompts and final AI responses with embedded phase outputs), and specialized memory collections (`intention_memory`, `observation_memory`).
-    *   **Function:** Enables semantic search (priors) for the Experience phase, stores structured outputs, and provides the necessary data inputs (novelty/similarity scores, author/prior linkage) for the reward system.
+1.  **Qdrant (Semantic Relationship Engine):**
+    *   **Role:** Powers the discovery of intellectual compatibility and meaningful connections. Stores conversation content, user interaction patterns, and the semantic relationships that enable AI to identify "like minds."
+    *   **Function:** Enables semantic search for relevant prior thoughts, calculates novelty scores for original contributions, and provides the data foundation for relationship recommendations based on citation patterns and conversation quality.
 
-2.  **Sui Blockchain (via PySUI Service):**
-    *   **Role:** Manages the CHIP token (basic contract) and handles reward distribution logic (simplified for MVP). The ultimate source of economic truth.
-    *   **Function (MVP):** Provides foundational token infrastructure. The `sui_service.py` within the API backend interacts with Sui (via PySUI) to execute basic reward actions.
+2.  **Sui Blockchain (Economic Alignment Layer):**
+    *   **Role:** Manages CHOIR tokens that create economic alignment in relationships. Handles both individual rewards and the upcoming relationship staking features that enable users to invest in meaningful connections.
+    *   **Function:** Executes reward distributions for quality contributions, manages relationship multisigs for staked connections, and provides the economic infrastructure for a platform where social value belongs to users, not the platform.
 
-3.  **Python API (FastAPI/Uvicorn - Orchestration Layer):**
-    *   **Role:** The central orchestrator connecting the client, AI logic, Qdrant, and Sui.
-    *   **Function:** Authenticates users (Sui signature), manages the PostChain workflow execution, handles Qdrant interactions, triggers reward calculations via the Sui service, and streams results to the client.
+3.  **Python API (Conversation Orchestrator):**
+    *   **Role:** The central intelligence that connects human input with AI processing, semantic understanding, and economic rewards.
+    *   **Function:** Authenticates users through Sui signatures, orchestrates the PostChain workflow that makes conversations smarter over time, and triggers both individual rewards and relationship-based economic interactions.
 
-4.  **PostChain Workflow (LCEL Implementation):**
-    *   **Role:** The core AI processing engine, implementing the AEIOU-Y pattern.
-    *   **Function:** Executes sequentially within the Python API (`langchain_workflow.py`). Phases interact with Qdrant (via `database.py`) for data retrieval/storage. Calculates scores needed for rewards.
+4.  **PostChain Workflow (Conversational Intelligence):**
+    *   **Role:** The AI system that helps users express ideas clearly and connects them with relevant community knowledge.
+    *   **Function:** Processes conversations through multiple phases to identify valuable insights, find relevant prior contributions, and create responses that facilitate meaningful discourse rather than mere information exchange.
 
 5.  **Supporting Technologies:**
     *   **Langchain Utils (`langchain_utils.py`):** LLM abstraction.
@@ -815,37 +819,37 @@ Even within the MVP's focused scope, Choir is built upon a clear hierarchy of tr
     *   **SwiftUI & Keychain:** Client UI and secure Sui key storage.
     *   **Python Async/await:** Used within the API and LCEL workflow for efficient concurrent operations.
 
-## MVP Architecture & Data Flow
+## Architecture Flow: From Thought to Connection
 
-The Qdrant-Sui MVP operates as follows:
+The system creates a flow that transforms individual thoughts into community connections:
 
-1.  User interacts via **SwiftUI Client**, authenticating using their **Sui** key.
-2.  Request hits the **Python API (FastAPI)**.
-3.  API orchestrates the **PostChain Workflow (LCEL)**.
-4.  PostChain phases interact with **Qdrant** for priors and memory, using **Langchain Utils** for LLM calls. Scores are calculated.
-5.  Final AI response (with embedded phase outputs/scores) is persisted in **Qdrant**.
-6.  API triggers the **Sui Service** for rewards based on Qdrant data.
-7.  API streams results back to the **SwiftUI Client**.
+1.  **Authentic Expression**: User shares thoughts via **SwiftUI Client** with Sui-based authentication ensuring ownership.
+2.  **AI Enhancement**: **Python API** orchestrates the **PostChain Workflow** to help clarify and contextualize the user's ideas.
+3.  **Semantic Discovery**: PostChain phases interact with **Qdrant** to find relevant prior thoughts and identify potential intellectual connections.
+4.  **Quality Recognition**: AI calculates novelty and citation scores, identifying valuable contributions worthy of rewards.
+5.  **Community Building**: Final response includes not just AI insights but potential connection points with like-minded users.
+6.  **Economic Alignment**: **Sui Service** distributes rewards and enables relationship staking for meaningful connections.
+7.  **Relationship Formation**: Users can invest earned tokens in relationships, creating shared economic interest in quality discourse.
 
-This architecture validates the core loop: **User Input -> API Orchestration -> PostChain (Qdrant Interaction) -> Reward Trigger (Sui Service)**.
+This architecture validates the core insight: **Individual Thought -> AI Enhancement -> Community Discovery -> Economic Alignment -> Meaningful Relationships**.
 
-## Strategic Focus for MVP
+## Strategic Focus: Validating Social Discourse Through AI
 
-*   **Qdrant Centrality:** Validate Qdrant for storing diverse AI-related data and supporting semantic search.
-*   **Sui Integration:** Establish the basic workflow for triggering token rewards based on Qdrant data.
-*   **Leveraging Existing Code:** Utilize the current LCEL PostChain implementation.
-*   **Simplicity:** Defer complexities like distributed servers, advanced client caching, and TEE deployment.
+*   **Relationship Discovery:** Validate that AI can identify intellectual compatibility and facilitate meaningful connections between users.
+*   **Economic Alignment:** Establish that token-based incentives create better discourse quality and relationship formation.
+*   **Merit-Based Community:** Demonstrate that anonymous, merit-based interactions lead to more authentic and valuable conversations.
+*   **Value Ownership:** Prove that users can own and transfer their social value rather than being locked into platform-specific metrics.
 
-## The Combined Result (MVP)
+## The Combined Result: AI That Amplifies Human Community
 
-The MVP delivers a system combining:
+The MVP delivers a new paradigm for online interaction:
 
-*   **Economic Incentives (CHIP token, Basic Principles):** Managed via Sui and PySUI Service.
-*   **Semantic Knowledge (Qdrant):** Stored, accessed, and utilized by the PostChain workflow.
-*   **Natural Interaction Patterns (AEIOU-Y Post Chain):** Implemented via the LCEL workflow.
-*   **Python Async/await:** Powers the backend API and workflow.
+*   **Economic Relationships (CHOIR tokens):** Users invest in connections, creating shared stakes in relationship quality and discourse outcomes.
+*   **Semantic Compatibility (Qdrant):** AI identifies like minds through conversation patterns rather than demographic or behavioral targeting.
+*   **Enhanced Expression (PostChain):** Conversations become collaborative intelligence sessions that help users articulate and develop ideas.
+*   **Authentic Community:** Anonymous merit-based interactions free from social surveillance enable genuine intellectual connection.
 
-This streamlined MVP architecture focuses on demonstrating the fundamental interplay between semantic data storage (Qdrant) and a blockchain-based reward mechanism (Sui), laying the groundwork for the more complex, distributed, and secure system envisioned in the broader Choir architecture.
+This architecture demonstrates that AI can facilitate human relationships rather than replace them, creating a platform where technology serves community building rather than attention extraction.
 
 === File: docs/core_economics.md ===
 
@@ -856,45 +860,45 @@ core_economics
 ==
 
 
-# Core Economic Model: Fueling a Self-Improving AI Ecosystem with CHOIR Coins
+# Core Economic Model: Turning Social Interaction Into Value Creation
 
-VERSION core_economics: 8.0 (RL-Driven Data Economy)
+VERSION core_economics: 9.0 (Relationship-Focused Economy)
 
-The economic model of Choir is not just about transactions and value exchange; it's about creating a **self-sustaining engine for AI improvement and a thriving marketplace for valuable human data.**  The CHOIR coin is at the heart of this engine, acting as both the fuel and the training signal for a revolutionary AI ecosystem.
+The economic model of Choir solves a fundamental problem: on traditional social media, posting creates liability (cancel culture, reputation risk) while platforms capture all the value. Choir flips this by turning every thoughtful contribution into transferable value through CHOIR tokens, and enabling users to invest that value in meaningful relationships. This creates the first social platform where your intellectual contributions belong to you.
 
-## CHOIR: Beyond a Utility Token - A Training Signal and Data Currency
+## CHOIR: The Currency of Meaningful Relationships
 
-The CHOIR coin transcends the limitations of a traditional utility token. It is designed to be:
+The CHOIR coin represents a fundamental shift from platform-owned metrics to user-owned value:
 
-*   **A Representation of Contribution and Ownership:** CHOIR coins represent a stake in the collective intelligence of Choir, acknowledging and rewarding user contributions to the platform's knowledge base.
-*   **A Training Signal for AI Models:** CHOIR coins, distributed as novelty and citation rewards, act as *direct training signals* for AI models within the Choir ecosystem, guiding them to optimize for desired behaviors and high-quality content generation.
-*   **The Currency of a Data Marketplace:** CHOIR coins are the *exclusive currency* for accessing and transacting with the valuable, human-generated data within the Choir platform, creating a demand-driven data marketplace.
-*   **A Driver of Network Effects and Value Accrual:** The CHOIR coin economy is designed to create powerful network effects, driving user engagement, data creation, AI improvement, and sustainable coin value accrual.
+*   **Transferable Social Value:** Unlike likes, followers, or karma that disappear when you leave a platform, CHOIR tokens are yours to keep, transfer, or invest in relationships that matter.
+*   **Relationship Investment Currency:** CHOIR tokens enable relationship staking - the ability to invest your earned value directly in meaningful connections with other users, creating shared economic interest in quality discourse.
+*   **Merit-Based Rewards:** Tokens are earned through quality contributions (novelty rewards) and community recognition (citation rewards), not engagement farming or algorithmic manipulation.
+*   **Economic Alignment Tool:** By requiring token investment for relationship formation, CHOIR creates real skin in the game for meaningful discourse, filtering out low-effort interactions while rewarding thoughtful engagement.
 
-## The Dynamic Contract: Governing a Data Marketplace
+## Relationship Staking: Economic Alignment in Human Connections
 
-The dynamic contract, implemented on the Sui blockchain, is the **economic heart of the Choir data marketplace**. It provides a dynamic and nuanced mechanism for:
+The relationship staking system creates economic alignment between users who want to form meaningful connections:
 
-*   **Stake Pricing and Value Discovery:** The model dynamically determines the stake price for contributing to threads, reflecting the evolving value of knowledge and user attention within the ecosystem.
-*   **Data Access and Contribution Pricing:** The contract governs the "price of data" within each thread. Users "pay" CHOIR coins (stake) to contribute to threads, and this contribution can be seen as a *price for accessing and adding value to the data within that thread*.
-*   **Incentivizing Quality and Salience:** The contract, through its integration with the novelty and citation reward mechanisms, incentivizes users and AI agents to create *high-quality, novel, and salient contributions* that are valuable for AI training and knowledge building.
-*   **Decentralized Governance and Economic Evolution:** The contract is designed to be *governed by CHOIR coin holders*, allowing the community to democratically shape the rules of the data marketplace and evolve the economic model over time.
+*   **Investment-Based Connections:** When you want to respond to someone's thoughtful contribution, you stake CHOIR tokens as a non-refundable bond, demonstrating serious intent and filtering out spam.
+*   **Mutual Economic Interest:** If both parties engage, their tokens are locked in a shared relationship multisig, creating joint ownership of the relationship's economic value.
+*   **Dynamic Relationship Value:** Successful relationships can accumulate additional value through citation rewards when relationship content is referenced, and novelty rewards for collaborative insights.
+*   **Exit Rights and Ownership:** Users always maintain the right to exit relationships and take their proportional share of tokens, ensuring that social value remains owned by participants, not platforms.
 
-## Reward Mechanisms: Fueling the AI Data Engine
+## Reward Mechanisms: Recognizing Quality and Building Community
 
-The CHOIR coin economy is driven by two key reward mechanisms, algorithmically distributed by AI models within the Choir platform:
+The CHOIR economy rewards two types of valuable contributions that build better discourse:
 
-1.  **Novelty Rewards (Experience Phase - Driving Data Diversity):**
-    *   **Purpose:** To incentivize the creation of *novel and original prompts and messages*, ensuring a diverse and ever-expanding dataset for AI training.
-    *   **Mechanism:** AI models in the Experience Phase analyze new user contributions for semantic novelty compared to existing data in the platform's vector databases.
-    *   **Distribution:** CHOIR coins are algorithmically distributed as novelty rewards to users who submit contributions deemed sufficiently novel, encouraging exploration of new ideas and knowledge domains.
+1.  **Novelty Rewards - Rewarding Original Thinking:**
+    *   **Purpose:** Recognize and reward users who contribute genuinely original ideas and perspectives, encouraging intellectual diversity and creative thinking.
+    *   **Mechanism:** AI analyzes new contributions for semantic novelty compared to existing community knowledge, identifying truly fresh insights.
+    *   **Impact:** Creates incentives for users to think deeply and share authentic perspectives rather than repeating common talking points or engagement farming.
 
-2.  **Citation Rewards (Yield Phase - Driving Predictive Salience and Data Quality):**
-    *   **Purpose:** To incentivize users to create *salient and impactful contributions* that are recognized and valued by the community, and to reward the creation of high-quality, human-labeled training data through citations.
-    *   **Mechanism:** AI models in the Yield Phase analyze the citation network, identifying messages that have been cited as valuable "priors" by other users.
-    *   **Distribution:** CHOIR coins are algorithmically distributed as citation rewards to users whose messages have been cited, based on the *salience* and *influence* of their contributions, as measured by citation metrics and model parameters.
+2.  **Citation Rewards - Recognizing Community Value:**
+    *   **Purpose:** Reward users whose contributions prove valuable to others, as demonstrated when their ideas are referenced in subsequent conversations.
+    *   **Mechanism:** When AI identifies that a user's prior contribution informed a response to someone else, the original author receives citation rewards.
+    *   **Impact:** Creates a reputation system based on actual intellectual contribution rather than social metrics, encouraging users to share insights that genuinely help others.
 
-These reward mechanisms are not just about distributing coins; they are **direct training signals for AI models within Choir**.  AI models learn to identify and reward the very data that is most valuable for their own improvement and for the growth of the collective intelligence of the platform.
+These mechanisms work together to create a community where quality thinking is recognized and rewarded, while AI learns to identify the types of contributions that facilitate meaningful discourse and intellectual connection.
 
 ## Data Marketplace Dynamics: CHOIR as Data Purchase Power
 
@@ -916,83 +920,16 @@ The CHOIR coin economy is designed to create a **self-sustaining ecosystem** whe
     *   **Access to a Thriving Data Marketplace:** Exchange valuable data and insights.
     *   **Enhanced Identity and Reputation:** Build credibility through the IDaaS offering.
 
-## Conclusion: Building a Self-Improving, Data-Driven AI Ecosystem
+## Conclusion: A New Model for Social Value Creation
 
-The core economic model of Choir, centered around the CHOIR coin and the dynamic contract, is designed to create a **self-improving, data-driven AI ecosystem** where:
+The core economic model of Choir represents a fundamental shift from extractive to generative social platforms:
 
-*   **Human Ingenuity and AI Intelligence are Synergistically Combined:**  The platform leverages the unique strengths of both human users and AI models to create a powerful engine for knowledge creation and problem-solving.
-*   **Data is Recognized and Valued as a Core Asset:**  User data contributions are explicitly recognized as valuable assets and are rewarded through the CHOIR coin economy.
-*   **Value Flows Naturally and Incentives are Aligned:**  The coin economy is designed to align the incentives of users, AI agents, and the platform itself, creating a virtuous cycle of growth, quality, and value creation.
-*   **CHOIR Coins Fuel a Self-Improving AI Engine:**  CHOIR coins are not just a currency; they are the *fuel and the training signals* that drive the continuous improvement and evolution of the Choir AI ecosystem, creating a truly revolutionary and sustainable model for the future of AI and online collaboration.
+*   **User Ownership of Social Value:** For the first time, users own their social contributions as transferable assets rather than platform-locked metrics that disappear when they leave.
+*   **Economic Alignment in Relationships:** Relationship staking creates shared economic interest in maintaining quality discourse, transforming social interaction from cost center to value generator.
+*   **Merit-Based Community Building:** Anonymous, merit-based rewards enable authentic intellectual connection free from social surveillance and reputation management.
+*   **AI That Amplifies Human Connection:** Rather than replacing human relationships, AI facilitates better discourse and helps compatible minds find each other based on intellectual compatibility rather than demographic targeting.
 
-=== File: docs/core_state_transitions.md ===
-
-
-
-==
-core_state_transitions
-==
-
-
-# Core State Transitions
-
-VERSION core_state_transitions: 7.1 (Reward Clarifications)
-
-The state transition system orchestrates the evolution of thread states through carefully defined transformations. These transitions follow precise fractional mathematical principles that ensure non-local energy conservation, dynamic parameter recalibration, and frequency coherence across the network.
-
-Thread Creation establishes the initial quantum state. Each new thread begins with α = 2 (standard quantum mechanics), baseline anharmonic coefficient (K₀_base), and potential order m = 2. The creator's address becomes the first co-author, and the thread maintains an empty set of message hashes. This initial state provides a foundation for future non-local evolution.
-
-Message Submission follows fractional quantum anharmonic energy principles. The required stake follows E(n) = (2n+1)^(α/2) + (K₀λ)^(α/(m+1)), where α, K₀, and m reflect the thread's history and network position. Each message generates a unique hash and carries its quantized energy contribution to the thread.
-
-Approval Processing drives state evolution through three possible outcomes. In the case of rejection, model parameters are adjusted to reflect recent refusals and to capture the memory of this rejection. The system recalculates pricing using our formula. For split decisions, energy divides between treasury and thread based on voter distribution while parameters adjust proportionally. When approved, energy distributes to approvers while parameters are adjusted to enhance effects. The author joins as a co-author, and all parameters recalibrate according to the updated thread characteristics.
-
-Dynamic Parameter Evolution follows principles of fractional quantum mechanics. The fractional parameter α evolves to reflect thread maturity and quality, decreasing from 2 toward 1 as threads develop memory and non-local interactions. The anharmonic coefficient K₀ responds primarily to recent approval/refusal patterns, while maintaining sensitivity to the fractional parameter. The potential order m increases with citation count and co-author network complexity, reflecting deepening interactions.
-
-Frequency Management reflects collective organization through coupled oscillators with fractional damping. The thread frequency evolves through three interacting modes: the message mode normalizes activity rate by the fractional power of co-author count, the value mode applies logarithmic scaling to energy per co-author, and the coupling strength maintains an inverse relationship with co-author count raised to the fractional power. These modes work together to create natural organizational rhythms with long-range correlations.
-
-**Reward System and Token Distribution (Clarified Phase-Specific Rewards):**
-
-The reward system operates through precisely defined state transitions with memory effects. AI models within the **Experience and Yield phases**, algorithmically distribute CHIP tokens based on contribution quality and network effects:
-
-1.  **Novelty Rewards (Issued in the Experience Phase):**
-    *   **Purpose:** To incentivize the creation of *novel and original prompts and messages* that expand the knowledge space of the Choir ecosystem.
-    *   **Mechanism:** AI models within the **Experience phase** analyze new user prompts and messages for *semantic novelty* compared to existing content in the platform's vector databases.
-    *   **Distribution:** CHIP tokens are algorithmically distributed as **novelty rewards** to users who submit prompts and messages that are deemed sufficiently novel and original by the Experience phase AI models.
-    *   **Timing:** Novelty rewards are issued **during the Experience phase**, as part of the context enrichment and knowledge retrieval process.
-
-2.  **Citation Rewards (Issued in the Yield Phase):**
-    *   **Purpose:** To incentivize users to create *salient and impactful contributions* that are recognized and valued by the community, and to foster the growth of a richly interconnected knowledge network through citations.
-    *   **Mechanism:** AI models within the **Yield phase** analyze the citation network and identify messages that have been *cited by other users as "priors"*.
-    *   **Distribution:** CHIP tokens are algorithmically distributed as **citation rewards** to users whose messages have been cited, based on the *salience* and *influence* of their cited contributions (as measured by citation metrics and model parameters).
-    *   **Timing:** Citation rewards are issued **during the Yield phase**, as part of the final response rendering and output formatting process, with inline links to citations providing transparent recognition of valuable contributions.
-
-The reward system operates through precisely defined state transitions with memory effects. New message rewards follow a fractional time-based decay described by R(t) = R_total × k/(1 + k·t_period)^(α/2), where k represents the decay constant (2.04), t_period spans the total time period of four years, and α is the thread's fractional parameter. Prior citation rewards strengthen thread coupling by drawing from treasury balance based on quality score ratios, expressed as V(p) = B_t × Q(p)^(α/2)/∑Q(i)^(α/2). Citations create frequency coupling between threads, with each thread's frequency increasing by 5% of the other's frequency, modulated by the fractional parameter. Treasury management maintains system solvency through careful balance tracking, where split decisions increase the balance, prior rewards decrease it, and system rewards add to it, all while maintaining a minimum balance for stability.
-
-The system's core properties maintain stability through:
-
-1. Fractional energy conservation in all transitions
-2. Parameter coherence via coupled feedback loops
-3. Frequency alignment through fractional organizational coupling
-4. Lévy flight-like value propagation through the network
-
-Error handling defines transition validity through multiple safeguards. Fractional energy conservation violations trigger immediate rejection. Parameter instability blocks updates until recalibration completes. Frequency decoherence blocks transitions that would disrupt organizational patterns. Phase transition failures maintain the previous state to ensure system stability.
-
-Through these precisely defined transitions, the system maintains fractional quantum anharmonic stability while enabling organic evolution of thread states. The careful balance of non-local energy conservation, dynamic parameter modulation, and frequency alignment creates a robust framework for organic growth and adaptation with memory effects.
-
-#### Fractional Parameter Evolution
-
-The evolution of thread parameters follows fractional quantum principles:
-
-• The fractional parameter α evolves via:
-α(t,q) = 2 - δ₁(1-e^(-t/τ)) - δ₂q
-
-• The anharmonic coefficient adjusts through:
-K₀(r,α) = K₀_base _ (1 + γ₁r) _ (2/α)^γ₂
-
-• The potential order develops according to:
-m(c,n) = 2 + β₁tanh(c/c₀) + β₂log(1+n/n₀)
-
-These modifications ensure that memory effects, non-local interactions, and network complexity are properly accounted for in the economic model.
+This model demonstrates that social platforms can create value for users rather than extracting it, building communities based on shared intellectual interest rather than engagement addiction.
 # Level 2 Documentation
 
 
@@ -1008,47 +945,105 @@ e_business
 
 # File: docs/e_business.md
 
-# Choir Business Model: A Sustainable Ecosystem for Collective Intelligence Fueled by CHOIR
+# Choir Business Model: Truthful Mechanism Design for Social Discourse
 
-Choir's business model is designed to be as revolutionary and forward-thinking as the platform itself. It's not about extracting value through ads or intrusive subscriptions, but about **enabling and amplifying natural value creation** within a thriving ecosystem of human and AI collaboration, powered by the CHOIR coin and developed by Choir Harmonic Intelligence Platform, Inc.
+Choir's business model emerges from deep thinking about mechanism design theory. At its core, Choir is what happens when you design a DSIC (Dominant Strategy Incentive Compatible) truthful mechanism for social media, treating posting as bidding in a Vickrey auction where authentic expression is the dominant strategy.
 
-## Freemium Foundation with Premium Identity Services
+## The Revenue Sequence: App → Relationships → Finance
 
-Our model is built on a robust **freemium foundation** ensuring broad accessibility, complemented by premium Identity-as-a-Service (IDaaS) offerings that provide enhanced capabilities and recognition.
+Our business model follows a clear progression that aligns with user value creation:
 
-**Free Tier (Core Value and Broad Accessibility):**
+**App Subscriptions** → **Relationship/Group Multisig Funds** → **Onchain Finance Agents** (with transaction fees)
 
-The free tier provides essential access to participate in and benefit from the Choir ecosystem:
+This sequence ensures that revenue grows naturally with user engagement and relationship formation, creating sustainable alignment between business success and community value.
 
-*   **Thread Participation:** Full access to participate in public threads, contributing to the collective knowledge base using the Loop of Thought (LoT) interaction model.
-*   **Co-authorship:** Ability to become a co-author of threads through quality contributions and community recognition (via citations).
-*   **CHOIR Coin Earning:** Earn CHOIR coins for novel contributions and salient citations, rewarding participation and value creation.
-*   **Basic Message Submission and Interaction:** Core functionalities for message creation, submission, and participation in the PostChain workflow.
-*   **Thread Visibility:** Full visibility of thread content and activity for participants.
-*   **Standard Resource Allocation:** Access to standard levels of platform resources (compute for AI phases, storage for contributions) sufficient for core participation.
-*   **Natural Team Formation:** Tools and features supporting organic team formation around valuable threads and shared interests.
+## Phase 1: App Subscription Model
 
-**Premium Offering: Identity-as-a-Service (IDaaS)**
+**Free Tier (Beta Only):**
+During beta, core functionality is free to validate product-market fit:
 
-Choir's premium offering centers on Identity-as-a-Service (IDaaS), providing users with persistent, recognized identities while maintaining the option for anonymity when desired.
+*   **Anonymous Discourse:** Full access to AI-enhanced conversations with complete anonymity
+*   **CHOIR Coin Earning:** Earn tokens for novel contributions and citations
+*   **Relationship Staking:** Invest earned tokens in meaningful connections
+*   **Basic AI Processing:** Standard PostChain workflow with rate limits
 
-*   **Persistent Identity:** Users can establish a consistent, recognized presence across the platform, building reputation and credibility.
-*   **Attribution Control:** Fine-grained control over which contributions are attributed to your persistent identity.
-*   **Enhanced Discovery:** Premium identities receive improved visibility in relevant searches and recommendations.
-*   **Professional Networking:** Opportunities to connect with other premium users based on shared interests and complementary expertise.
-*   **Verified Credentials:** Optional verification of real-world credentials or expertise in specific domains.
-*   **Priority Access:** Preferential access to new features, higher resource allocations, and premium content.
+**Subscription Tiers (Post-Beta):**
+Exponential price-to-rate-limit ratios ensure sustainable AI model costs and Sui transaction fees:
 
-**Monetization Strategy - Aligning Revenue with Ecosystem Value:**
+*   **Basic ($9/month):** 100 AI conversations, standard processing speed
+*   **Pro ($29/month):** 500 conversations, priority processing, advanced AI models
+*   **Expert ($99/month):** 2000 conversations, fastest processing, premium model access
+*   **Unlimited ($299/month):** No rate limits, experimental features, dedicated support
 
-Choir's monetization strategy is directly tied to the success and utility of the CHOIR coin and the value of the data marketplace:
+**Full Anonymity by Design:**
+Identity emerges naturally from wallet activity and Sui's built-in nameserver. No persistent identities or KYC required - reputation is built through contribution quality, not social credentials.
 
-1.  **Identity-as-a-Service (IDaaS) Subscriptions:** The primary revenue stream comes from monthly subscription fees for persistent, recognized identities on the platform, providing Choir Harmonic Intelligence Platform, Inc. (CHI) with a stable, recurring revenue base.
-2.  **Data Marketplace Transaction Fees:** A small percentage fee on data access or transactions within the Choir data marketplace provides an additional revenue stream, scaling with ecosystem activity.
-3.  **CHOIR Coin Treasury Strategy:** CHI purchases CHOIR coins from the open market using a portion of its revenue, holding them as strategic treasury assets. This creates buy pressure for CHOIR and aligns CHI's success with the coin's value.
-4.  **Premium API Access:** Enterprise-grade API access to the Choir platform and data marketplace provides an additional revenue stream for business and developer use cases.
+## Phase 2: Relationship/Group Multisig Funds
 
-This model avoids direct user data monetization and focuses on providing valuable services (identity, data access, API capabilities) in exchange for participation in the ecosystem.
+As users form meaningful relationships through staking, these connections become economic entities:
+
+**Relationship Multisigs:**
+*   **Shared Treasury:** Successful relationships accumulate CHOIR tokens through collaborative insights and citations
+*   **Investment Decisions:** Groups can collectively decide how to deploy their shared funds
+*   **Value Appreciation:** Relationship funds grow through continued quality discourse and community recognition
+
+**Group Formation:**
+*   **Natural Evolution:** Pair relationships expand into groups with shared economic interests
+*   **Collective Intelligence:** Groups become economic entities that can make investment decisions together
+*   **Exit Rights:** Members can always leave and take their proportional share
+
+## Phase 3: Onchain Finance Agents (Revenue Generation)
+
+The ultimate revenue driver: providing AI-powered financial services to relationship/group funds:
+
+**Financial Agent Services (2-5% transaction fees):**
+*   **Portfolio Management:** AI agents help groups optimize their CHOIR and other crypto holdings
+*   **DeFi Strategies:** Automated yield farming, liquidity provision, and risk management
+*   **Cross-Chain Operations:** Bridge assets and execute strategies across multiple blockchains
+*   **Tax Optimization:** AI-driven strategies for minimizing tax burden on group investments
+
+**Revenue Model:**
+*   **Transaction Fees:** 2-5% on all financial operations executed by our AI agents
+*   **Management Fees:** Annual fees for ongoing portfolio management services
+*   **Performance Fees:** Share of profits generated above benchmark returns
+
+## CHOIR Coin Treasury Strategy & Financial Engineering
+
+**Buyback Program:**
+CHI allocates significant revenue to purchasing CHOIR tokens from the open market, creating sustained buy pressure and aligning corporate success with token value appreciation.
+
+**Debt Financing Strategy:**
+Once recurring revenue is established (Phase 1), CHI can leverage its cash flows to take on debt for accelerated CHOIR acquisitions, similar to corporate treasury strategies but focused on our native ecosystem token rather than external assets.
+
+**Strategic Rationale:**
+*   **Ecosystem Alignment:** Corporate success directly tied to CHOIR token performance
+*   **Market Support:** Consistent buy pressure supports token price stability and growth
+*   **Financial Engineering:** Debt-financed buybacks amplify returns when token appreciates
+*   **User Benefit:** Token holders benefit from corporate treasury strategy
+
+**Risk Management:**
+*   **Revenue Diversification:** Multiple revenue streams reduce dependence on any single source
+*   **Conservative Leverage:** Debt levels maintained well below cash flow capacity
+*   **Market Timing:** Buyback intensity adjusted based on market conditions and cash flow
+
+## Mechanism Design Theory Foundation
+
+**DSIC (Dominant Strategy Incentive Compatible) Social Media:**
+Choir represents the practical implementation of mechanism design theory applied to social discourse. Traditional social media creates perverse incentives where engagement farming and controversy generation are rewarded. Choir creates a truthful mechanism where authentic expression is the dominant strategy.
+
+**Vickrey Auction Analogy:**
+*   **Bidding = Posting:** Users "bid" their authentic thoughts and insights
+*   **Truthful Bidding = Authentic Expression:** The reward structure makes honest contribution the optimal strategy
+*   **Second-Price Auction = Citation Rewards:** Value flows to contributors based on community recognition, not self-promotion
+*   **Sealed Bid = Anonymity:** Anonymous contribution removes social signaling and status games
+
+**Incentive Alignment:**
+*   **Individual Rationality:** Users benefit more from authentic contribution than gaming the system
+*   **Strategy-Proofness:** Honest expression dominates all other strategies
+*   **Efficiency:** Resources (attention, rewards) flow to highest-value contributions
+*   **Revenue Equivalence:** Multiple equilibria all lead to quality discourse outcomes
+
+This theoretical foundation ensures that Choir's economic incentives naturally align with the goal of meaningful social discourse, making it a sustainable and self-reinforcing system.
 
 **Value Creation Flows - A Multi-Layered Ecosystem:**
 
@@ -1121,9 +1116,13 @@ Success is measured by metrics reflecting ecosystem health and value creation:
 *   **Network Metrics:** Growth in active users, thread creation/interconnection, emergence of valuable knowledge clusters.
 *   **Health Metrics:** System performance, resource efficiency, resilience against reward hacking.
 
-**Conclusion - A Sustainable Ecosystem for the Future of Knowledge Work:**
+**Conclusion - Truthful Mechanisms for Sustainable Social Discourse:**
 
-Choir's business model aims to create a **sustainable ecosystem for the future of knowledge work and collective intelligence.** We grow by strengthening the natural flows of quality, collaboration, and collective intelligence, fueled by the CHOIR coin and developed by Choir Harmonic Intelligence Platform, Inc. (CHI). By aligning business success with user empowerment, privacy, and genuine value creation, we are building a platform where growth comes from enabling natural patterns of collaboration and knowledge sharing, rather than artificial engagement metrics or data extraction. Join us in building this future!
+Choir's business model represents the first practical implementation of mechanism design theory for social media. By creating a DSIC truthful mechanism where authentic expression is the dominant strategy, we solve the fundamental problems of traditional social platforms: engagement farming, controversy generation, and value extraction.
+
+Our three-phase revenue model (App → Relationships → Finance) ensures sustainable growth that aligns with user value creation. The CHOIR buyback strategy, potentially enhanced with debt financing, creates a powerful flywheel where corporate success directly benefits token holders and the broader community.
+
+This isn't just a business model - it's a proof of concept that technology can serve human flourishing rather than exploit human psychology. By building economic incentives that reward truth-telling and meaningful connection, we're creating a template for how social platforms should operate in the 21st century.
 
 === File: docs/e_concept.md ===
 
@@ -1353,60 +1352,70 @@ data_engine_model
 ==
 
 
-# Ideal Data Engine Theory: Fueling AI with Human Ingenuity and Tokenized Incentives
+# Social Discourse Engine: AI That Facilitates Human Connection
 
-VERSION data_engine: 8.0 (CHOIR Coin & RL Edition)
+VERSION social_discourse: 9.0 (Relationship-Focused Design)
 
-The Ideal Data Engine theory, at its core, is a framework for building systems that are **optimized for generating high-quality AI training data at scale**, recognizing that **human data is the new "oil" of the AI age.**  This theory emerged from the question: how can we design a system that not only leverages AI but also *continuously fuels its improvement* through a virtuous cycle of data creation and refinement?
+The Social Discourse Engine represents a fundamental shift from AI systems designed to replace human interaction to AI that enhances and facilitates meaningful human connections. This framework emerged from recognizing that the most valuable use of AI isn't to be a better chatbot, but to help humans have better conversations with each other.
 
-Rather than focusing solely on algorithmic efficiency or computational power, the Ideal Data Engine prioritizes the **generation of *valuable human data* as the primary driver of AI progress.**  It recognizes that in the age of large language models and increasingly sophisticated AI, the *quality and relevance of training data* are often the limiting factors in achieving truly intelligent and human-aligned AI systems.
+Rather than optimizing for engagement metrics or data extraction, the Social Discourse Engine prioritizes **the quality of human relationships and discourse** as the primary measure of success. It recognizes that in an age of increasing digital isolation and polarization, the most important role for AI is to help compatible minds find each other and engage in meaningful dialogue.
 
-**The Data Flywheel and the Power of User-Generated Content:**
+**The Relationship Flywheel: From Individual Expression to Community Formation:**
 
-The Ideal Data Engine is inspired by the data flywheels of successful big tech firms, but with a crucial difference: **it puts *users* at the center of the data creation process and *rewards them directly* for their valuable contributions.**  It leverages the insight that **user-generated content (UGC)**, when properly incentivized and curated, is an *exceptionally rich and valuable source of AI training data* because:
+The Social Discourse Engine creates a flywheel effect where individual expression leads to community formation through AI-facilitated connections:
 
-*   **Humans are Uniquely Bright Subjects:**  Human users are not just passive data sources; they are *active, intelligent agents* who can provide:
-    *   **Novel and Creative Prompts:**  Users generate diverse and original prompts that push the boundaries of AI models and explore new areas of inquiry.
-    *   **High-Quality, Human-Labeled Data:** User interactions, citations, and quality ratings provide valuable *human labels* that are essential for supervised and reinforcement learning, guiding AI models towards human preferences and values.
-    *   **Real-World Context and Relevance:** User-generated content is grounded in real-world contexts, user needs, and evolving human discourse, making it more relevant and valuable for training AI models that are meant to interact with and serve human users.
-*   **Focused Attention and Engagement:**  The Choir platform is designed to capture and channel user *attention and engagement* towards high-quality knowledge creation and collaboration. This focused attention, when properly incentivized, becomes a powerful force for generating valuable training data.
-*   **Reinforcement Learning Signals:** The CHOIR coin reward system, with its novelty and citation rewards, creates a **built-in reinforcement learning environment** where AI models can learn from *real-world user feedback* and optimize for user-defined goals (novelty, salience, quality, collaboration).
+*   **Authentic Expression Enabled by Anonymity:** Users share genuine thoughts without social surveillance, creating more honest and valuable discourse than reputation-managed social media.
+    *   **Merit-Based Evaluation:** Ideas compete on quality rather than social status, enabling breakthrough insights from unexpected sources.
+    *   **Freedom from Cancel Culture:** Anonymous contribution removes the liability of posting, encouraging intellectual risk-taking and authentic expression.
+    *   **Quality Over Engagement:** Without follower counts or viral metrics, users focus on thoughtful contribution rather than attention-seeking behavior.
+*   **AI-Enhanced Understanding:** The PostChain workflow helps users articulate ideas more clearly while identifying intellectual connections:
+    *   **Semantic Compatibility Detection:** AI identifies users with complementary thinking patterns through conversation analysis rather than demographic targeting.
+    *   **Citation Network Analysis:** AI tracks which ideas prove valuable to others, creating a reputation system based on intellectual contribution.
+    *   **Relationship Recommendations:** AI suggests potential connections based on intellectual compatibility rather than social graph proximity.
 
-**CHOIR Coins as Training Signals: The Reinforcement Learning Loop:**
+**Economic Alignment Through Relationship Staking:**
 
-A key innovation of the Ideal Data Engine, as embodied in Choir, is the **integration of a token economy that *directly fuels AI model improvement through reinforcement learning*.**
+The Social Discourse Engine's key innovation is using economic incentives to align users toward quality discourse and meaningful relationships:
 
-*   **CHOIR Coins as Rewards for Valuable Data Contributions:**  The CHOIR coin economy is designed to **reward users for generating high-quality, valuable data** that is useful for AI training.  Specifically, users earn CHOIR coins for:
-    *   **Novel Prompts (Novelty Rewards):**  Creating original and innovative prompts that expand the knowledge space of the platform.
-    *   **Salient Citations (Citation Rewards):**  Making contributions that are recognized as valuable and influential by the community, as evidenced by citations from other users.
-*   **AI Models Learn to Optimize for Coin Rewards:**  The CHOIR coin reward system creates a **built-in reinforcement learning loop** where AI models within the Choir ecosystem (especially in the Experience and Yield phases) are incentivized to:
-    *   **Identify and Reward Novelty:**  Learn to algorithmically detect and reward prompts and messages that exhibit semantic novelty and originality.
-    *   **Identify and Reward Salience (Citations):** Learn to algorithmically recognize and reward contributions that are likely to be cited and valued by the community.
-    *   **Generate Content That Maximizes Coin Rewards:**  AI models, in their quest to earn CHOIR coins, will *naturally learn to generate content and perform actions that are aligned with the platform's goals of promoting novelty, salience, quality, and collaboration.*
-*   **Self-Improving AI Ecosystem:**  This creates a **virtuous cycle of AI improvement:** User contributions generate valuable training data -> AI models learn to reward valuable contributions -> Users are further incentivized to contribute high-quality data -> AI models become even better at recognizing and rewarding quality -> and so on, creating a **self-improving AI ecosystem** driven by user contributions and tokenized incentives.
+*   **CHOIR Tokens as Relationship Investment:**  Users earn tokens through quality contributions and can invest them in relationships with other users, creating shared economic interest in maintaining quality discourse.
+    *   **Novelty Rewards:** Recognize original thinking and authentic perspectives that add value to community knowledge.
+    *   **Citation Rewards:** Reward users whose ideas prove valuable to others, creating a merit-based reputation system.
+    *   **Relationship Staking:** Enable users to invest earned tokens in connections with like-minded individuals.
+*   **Economic Filtering for Quality:**  Token requirements create natural barriers to low-effort interactions while enabling meaningful connections:
+    *   **Spam Prevention:** Economic cost of relationship initiation filters out automated and low-effort interactions.
+    *   **Serious Intent Signaling:** Staking tokens demonstrates genuine interest in forming meaningful connections.
+    *   **Shared Value Creation:** Successful relationships accumulate value through collaborative insights and mutual citations.
+*   **Self-Reinforcing Quality Cycles:**  Economic alignment creates positive feedback loops that improve discourse quality over time:
+    *   **Quality Attracts Quality:** Users with valuable insights attract other thoughtful contributors, creating high-quality conversation clusters.
+    *   **Economic Incentives for Thoughtfulness:** Token rewards encourage users to contribute meaningfully rather than seeking engagement through controversy.
+    *   **Community Self-Moderation:** Economic stakes in relationships create natural incentives for maintaining discourse quality.
 
-**Beyond Attention - Value Flows Through Semantic Density and Memory Effects:**
+**Beyond Engagement Metrics - Value Flows Through Relationship Quality:**
 
-The Ideal Data Engine, as implemented in Choir, moves beyond the limitations of the attention-driven models of traditional social media.  It focuses on:
+The Social Discourse Engine moves beyond the attention-driven models of traditional social media to focus on relationship quality and intellectual connection:
 
-*   **Semantic Density as the Measure of Value:**  Value in the Ideal Data Engine is not measured by clicks, likes, or engagement time, but by **semantic density** – the richness, depth, and interconnectedness of knowledge within the system.  Threads that become more semantically dense and contextually rich generate more value and attract more participation.
-*   **Memory Effects and Non-Local Interactions (FQHO Model):**  The Fractional Quantum Anharmonic Oscillator (FQHO) model is central to the Ideal Data Engine theory. It provides a mathematical framework for:
-    *   **Quantifying Value Flows with Memory Effects:**  Capturing how the value of contributions is influenced by the history of the conversation and non-local interactions within the knowledge network.
-    *   **Enabling Lévy Flight-Like Value Propagation:**  Modeling how value can propagate through the network in non-local, "heavy-tailed" patterns, reflecting the disproportionate impact of occasional breakthrough insights.
-    *   **Dynamic Stake Pricing and Parameter Evolution:**  Creating a dynamic and adaptive economic system where stake prices and system parameters evolve based on user feedback, network effects, and the emergent properties of the fractional system.
+*   **Relationship Quality as the Measure of Success:**  Value is not measured by clicks, likes, or time-on-platform, but by **the quality and depth of relationships formed** through meaningful discourse. Successful connections that lead to ongoing collaboration and mutual intellectual growth represent true platform success.
+*   **Intellectual Compatibility Over Demographic Targeting:**  Rather than connecting users based on age, location, or behavioral patterns, the system identifies intellectual compatibility through:
+    *   **Semantic Resonance:** Users whose ideas build on each other's thinking in meaningful ways.
+    *   **Citation Patterns:** Users who consistently find value in each other's contributions.
+    *   **Collaborative Potential:** Users whose different perspectives could create valuable synthesis when combined.
+*   **Long-Term Relationship Value:**  The system optimizes for relationships that create lasting value rather than momentary engagement:
+    *   **Sustained Discourse Quality:** Relationships that maintain high-quality conversation over time.
+    *   **Mutual Growth:** Connections where both parties develop their thinking through interaction.
+    *   **Collaborative Output:** Relationships that produce insights neither party could have reached alone.
 
-**Choir - A Practical Embodiment of the Ideal Data Engine:**
+**Choir - A Practical Embodiment of the Social Discourse Engine:**
 
-Choir is designed as a practical embodiment of the Ideal Data Engine theory.  It is not just a social platform or a token economy, but an **attempt to build a system that is fundamentally optimized for generating and harnessing collective intelligence through a self-improving, AI-driven data flywheel.**
+Choir is designed as a practical embodiment of the Social Discourse Engine theory. It is not just another social platform or AI chat app, but an **attempt to build a system that fundamentally transforms how humans connect and communicate online through AI-facilitated meaningful relationships.**
 
 By focusing on:
 
-*   **Rewarding High-Quality Human Data Contributions (Novelty and Citation Rewards)**
-*   **Leveraging AI Models to Algorithmically Curate and Distribute Value**
-*   **Building a Token Economy that Incentivizes Long-Term Value Creation and Knowledge Sharing**
-*   **Creating a Platform that is Open, Decentralized, and User-Empowering**
+*   **Facilitating Authentic Expression Through Anonymity and Merit-Based Evaluation**
+*   **Using AI to Identify Intellectual Compatibility Rather Than Demographic Similarity**
+*   **Creating Economic Alignment Through Relationship Staking and Quality Rewards**
+*   **Building a Platform Where Users Own Their Social Value and Relationships**
 
-Choir aims to create a new paradigm for online platforms – one where users are not just consumers or products, but **active participants and owners in a self-improving, AI-powered knowledge ecosystem** that benefits everyone.  The Ideal Data Engine theory provides the conceptual and economic foundation for this ambitious vision.
+Choir aims to create a new paradigm for social platforms – one where AI amplifies human connection rather than replacing it, where quality discourse is rewarded over engagement farming, and where meaningful relationships are the measure of success. The Social Discourse Engine theory provides the conceptual foundation for building technology that serves human community rather than extracting value from it.
 
 === File: docs/evolution_naming.md ===
 
@@ -2741,6 +2750,895 @@ The AEIOU-Y phases, implemented sequentially in the `langchain_workflow.py`, are
 The PostChain, viewed through its temporal logic, remains a carefully choreographed **dance through time** within the workflow. Each phase function takes its turn to engage with a different temporal dimension, building upon the previous phase and contributing to the overall temporal coherence of the conversational experience. It's a dynamic process where the AI, guided by the workflow and interacting with Qdrant, builds knowledge and understanding step by step, phase by phase.
 
 By understanding this temporal logic, developers can implement more effective and nuanced AI phase functions within the Choir workflow, creating conversational experiences that are not just intelligent but also deeply attuned to the temporal nature of human communication and knowledge creation.
+
+=== File: docs/postchain_ui_redesign.md ===
+
+
+
+==
+postchain_ui_redesign
+==
+
+
+# PostChain UI Redesign: Intelligent Content Categorization
+
+VERSION postchain_ui_redesign: 1.0 (From Prototype to Alpha)
+
+## Current State Analysis
+
+The existing postchain carousel is more prototype than alpha, with several issues:
+- **Flat content presentation**: All phase content treated equally regardless of user value
+- **Poor information hierarchy**: Critical content mixed with debug information
+- **Overwhelming detail**: Users see analysis they don't care about
+- **Inefficient navigation**: Pagination doesn't respect content importance
+- **Missing tool integration**: No support for Anthropic's Model Context Protocol
+
+## Content Categorization Framework
+
+### Primary Content (Always Visible)
+1. **Fast Initial Response** (Action Phase)
+   - Immediate AI response to user query
+   - Highest priority, always shown first
+   - Clean, conversational presentation
+
+2. **Final Response** (Yield Phase)
+   - Comprehensive, citation-enhanced response
+   - Primary destination for most users
+   - Rich formatting with embedded citations
+
+### Secondary Content (Contextual Display)
+3. **Novelty Rewards Distribution**
+   - Token rewards for original contributions
+   - Show prominently when rewards are earned
+   - Animate/highlight to celebrate user achievement
+
+4. **Citation Rewards**
+   - Rewards for being cited by others
+   - Display when user's content helps others
+   - Link to original cited content
+
+### Tertiary Content (Collapsible/Hidden by Default)
+5. **Sources** (Experience Phases)
+   - Prior prompts from vector search
+   - Web search results
+   - Tool call results
+   - Collapsed by default, expandable on demand
+
+6. **Analysis** (Intention, Observation, Understanding)
+   - AI reasoning and pattern analysis
+   - Hidden by default - most users don't care
+   - Available for power users who want to see "AI thinking"
+
+7. **Tool Calls** (Model Context Protocol)
+   - Anthropic MCP tool interactions
+   - Structured display of tool inputs/outputs
+   - Expandable sections for debugging
+
+## Redesigned UI Architecture
+
+### Smart Card Layout
+```
+┌─────────────────────────────────────┐
+│ Fast Response (Action)              │ ← Always visible, immediate
+│ "Here's what I think..."            │
+└─────────────────────────────────────┘
+
+┌─────────────────────────────────────┐
+│ 🎉 Novelty Reward: +15 CHOIR        │ ← Conditional, celebrated
+│ Your insight was original!          │
+└─────────────────────────────────────┘
+
+┌─────────────────────────────────────┐
+│ Final Response (Yield)              │ ← Primary destination
+│ Enhanced response with citations... │
+│ [1] [2] [3] ← Clickable citations   │
+└─────────────────────────────────────┘
+
+▼ Sources (3 found) ← Collapsible
+┌─────────────────────────────────────┐
+│ • Prior conversation about X        │
+│ • Web result: "Article title"       │
+│ • Tool call: weather_api()          │
+└─────────────────────────────────────┘
+
+▼ Analysis ← Hidden by default
+┌─────────────────────────────────────┐
+│ Intent: User wants to understand... │
+│ Patterns: Similar to previous...    │
+└─────────────────────────────────────┘
+```
+
+### Navigation Redesign: Scroll-Triggered Pagination
+
+**Frameless Paginated Scrolling**:
+- Remove visual frame constraints
+- Scroll gesture triggers page transitions
+- Whole pages slide into focus smoothly
+- Each page can be internally scrollable
+
+**Page Transition Mechanics**:
+```
+User scrolls down → Next logical page slides up into view
+User scrolls up → Previous page slides down into view
+Pages snap to focus position automatically
+Individual pages can scroll internally if content overflows
+```
+
+**Smart Page Boundaries**:
+- Primary content (Fast + Final response) = Page 1
+- Rewards + Sources = Page 2 (if present)
+- Analysis + Tool calls = Page 3 (if expanded)
+- Dynamic page creation based on available content
+
+### Content Intelligence
+
+**Dynamic Visibility**:
+```swift
+struct ContentVisibility {
+    let showRewards: Bool        // Only when rewards > 0
+    let showSources: Bool        // Only when sources exist
+    let showAnalysis: Bool       // User preference, default false
+    let showToolCalls: Bool      // Only when tools were used
+}
+```
+
+**User Preferences**:
+- Toggle for showing analysis phases
+- Preference for expanded vs collapsed sources
+- Power user mode for full detail
+
+## Implementation Strategy
+
+### Phase 1: Content Categorization
+1. **Classify existing content** into primary/secondary/tertiary
+2. **Implement conditional rendering** based on content availability
+3. **Add collapse/expand functionality** for tertiary content
+
+### Phase 2: Vertical Layout
+1. **Replace carousel with vertical scroll**
+2. **Implement smart pagination** for long content
+3. **Add smooth animations** for expand/collapse
+
+### Phase 3: Tool Integration
+1. **Add Model Context Protocol support**
+2. **Structured tool call display**
+3. **Interactive tool result exploration**
+
+### Phase 4: Intelligence Features
+1. **User preference system**
+2. **Adaptive content display** based on usage patterns
+3. **Smart notifications** for rewards and citations
+
+## Technical Implementation
+
+### Scroll-Triggered Pagination View
+```swift
+struct ScrollPaginatedPostchainView: View {
+    let message: Message
+    @State private var currentPageIndex: Int = 0
+    @State private var expandedSections: Set<ContentSection> = []
+    @State private var dragOffset: CGFloat = 0
+
+    var availablePages: [PostchainPage] {
+        generatePages(for: message, expandedSections: expandedSections)
+    }
+
+    var body: some View {
+        GeometryReader { geometry in
+            ZStack {
+                ForEach(Array(availablePages.enumerated()), id: \.offset) { index, page in
+                    PostchainPageView(page: page, message: message)
+                        .frame(width: geometry.size.width, height: geometry.size.height)
+                        .offset(y: calculatePageOffset(for: index, containerHeight: geometry.size.height))
+                        .opacity(calculatePageOpacity(for: index))
+                        .allowsHitTesting(index == currentPageIndex)
+                }
+            }
+            .gesture(
+                DragGesture()
+                    .onChanged { value in
+                        dragOffset = value.translation.y
+                    }
+                    .onEnded { value in
+                        handlePageTransition(dragValue: value, containerHeight: geometry.size.height)
+                    }
+            )
+        }
+        .clipped()
+    }
+}
+```
+
+### Page Generation Logic
+```swift
+struct PostchainPage {
+    let id: String
+    let sections: [ContentSection]
+    let isScrollable: Bool
+    let title: String?
+}
+
+func generatePages(for message: Message, expandedSections: Set<ContentSection>) -> [PostchainPage] {
+    var pages: [PostchainPage] = []
+
+    // Page 1: Primary Content (always present)
+    pages.append(PostchainPage(
+        id: "primary",
+        sections: [.fastResponse, .finalResponse],
+        isScrollable: true,
+        title: nil
+    ))
+
+    // Page 2: Secondary Content (conditional)
+    var secondaryContent: [ContentSection] = []
+    if message.hasRewards { secondaryContent.append(.rewards) }
+    if message.hasSources { secondaryContent.append(.sources) }
+
+    if !secondaryContent.isEmpty {
+        pages.append(PostchainPage(
+            id: "secondary",
+            sections: secondaryContent,
+            isScrollable: true,
+            title: "Details"
+        ))
+    }
+
+    // Page 3: Analysis (only if expanded)
+    if expandedSections.contains(.analysis) || expandedSections.contains(.toolCalls) {
+        pages.append(PostchainPage(
+            id: "analysis",
+            sections: [.analysis, .toolCalls],
+            isScrollable: true,
+            title: "Analysis"
+        ))
+    }
+
+    return pages
+}
+
+### Page Transition Mechanics
+```swift
+private func calculatePageOffset(for index: Int, containerHeight: CGFloat) -> CGFloat {
+    let baseOffset = CGFloat(index - currentPageIndex) * containerHeight
+    return baseOffset + dragOffset
+}
+
+private func handlePageTransition(dragValue: DragGesture.Value, containerHeight: CGFloat) {
+    let threshold: CGFloat = containerHeight * 0.3
+    let velocity = dragValue.predictedEndTranslation.y
+
+    withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+        if dragValue.translation.y < -threshold || velocity < -500 {
+            // Swipe up - next page
+            currentPageIndex = min(currentPageIndex + 1, availablePages.count - 1)
+        } else if dragValue.translation.y > threshold || velocity > 500 {
+            // Swipe down - previous page
+            currentPageIndex = max(currentPageIndex - 1, 0)
+        }
+
+        dragOffset = 0
+    }
+}
+
+### Individual Page Scrolling
+```swift
+struct PostchainPageView: View {
+    let page: PostchainPage
+    let message: Message
+
+    var body: some View {
+        if page.isScrollable {
+            ScrollView {
+                LazyVStack(spacing: 16) {
+                    ForEach(page.sections, id: \.self) { section in
+                        ContentSectionView(section: section, message: message)
+                    }
+                }
+                .padding()
+            }
+        } else {
+            VStack(spacing: 16) {
+                ForEach(page.sections, id: \.self) { section in
+                    ContentSectionView(section: section, message: message)
+                }
+            }
+            .padding()
+        }
+    }
+}
+```
+
+### Scroll Behavior Logic
+```
+Page-level scrolling (between pages):
+- Triggered by drag gestures with velocity/distance thresholds
+- Smooth spring animations between page transitions
+- Snap-to-page behavior ensures clean focus
+
+Content-level scrolling (within pages):
+- Standard ScrollView behavior when content exceeds page height
+- Only active when page is in focus (currentPageIndex)
+- Scroll indicators appear when content is scrollable
+```
+```
+
+## Audio-First Experience: Text-to-Speech Integration
+
+### The Audio Transformation
+Text-to-speech (TTS) transforms the postchain from a visual interface into an **audio experience**, enabling:
+- **Hands-free operation**: Users can listen while driving, walking, exercising
+- **Screen-free usage**: Complete interaction without looking at device
+- **Accessibility**: Full experience for visually impaired users
+- **Multitasking**: Consume AI insights while doing other activities
+
+### Audio Content Prioritization
+```
+🔊 Primary Audio (Always Read):
+- Fast initial response
+- Final response with key insights
+- Reward notifications ("You earned 15 CHOIR tokens!")
+
+🔇 Secondary Audio (On Request):
+- Source summaries ("Found 3 relevant documents")
+- Citation explanations
+- Analysis insights (condensed)
+
+⏭️ Skippable Audio:
+- Technical details
+- Debug information
+- Tool call specifics
+```
+
+### Voice Navigation Commands
+```
+"Next" / "Continue" → Move to next logical content
+"Skip" → Skip current section
+"Repeat" → Re-read current section
+"Details" → Read secondary content
+"Sources" → Read source summaries
+"Pause" / "Stop" → Pause audio playback
+"Speed up" / "Slow down" → Adjust reading speed
+```
+
+### Smart Audio Adaptation
+```swift
+struct AudioPostchainPresenter {
+    func generateAudioScript(for message: Message) -> AudioScript {
+        var script = AudioScript()
+
+        // Primary content - always included
+        script.addSection(.fastResponse, priority: .high,
+                         text: cleanForAudio(message.actionPhase))
+        script.addSection(.finalResponse, priority: .high,
+                         text: cleanForAudio(message.yieldPhase))
+
+        // Rewards - celebratory tone
+        if let rewards = message.noveltyReward {
+            script.addSection(.rewards, priority: .medium,
+                             text: "Congratulations! You earned \(rewards.amount) CHOIR tokens for your original insight!",
+                             tone: .celebratory)
+        }
+
+        // Sources - condensed summaries
+        if !message.vectorSearchResults.isEmpty {
+            let sourceCount = message.vectorSearchResults.count
+            script.addSection(.sources, priority: .low,
+                             text: "I found \(sourceCount) relevant sources to inform this response.",
+                             expandable: true)
+        }
+
+        return script
+    }
+}
+```
+
+## User Experience Goals
+
+### For Audio Users (New Category)
+- **Hands-free operation**: Complete interaction through voice and audio
+- **Contextual reading**: Smart emphasis and pacing for different content types
+- **Efficient consumption**: Skip unnecessary details, focus on insights
+- **Natural flow**: Audio that feels like conversation, not robotic reading
+
+### For Visual Users
+- **Immediate value**: Fast response appears instantly
+- **Clean interface**: No overwhelming technical details
+- **Celebration**: Rewards are prominently displayed when earned
+- **Simple navigation**: Scroll-triggered pagination, no complex gestures
+
+### For Power Users
+- **Multi-modal access**: Both visual and audio interfaces for all content
+- **Full transparency**: All analysis available on demand
+- **Customization**: Preferences for audio speed, voice, content filtering
+- **Debug access**: Complete phase information when needed
+
+### For All Users
+- **Performance**: Faster rendering with intelligent content loading
+- **Accessibility**: Screen reader support + native TTS integration
+- **Consistency**: Predictable experience across visual and audio modes
+- **Delight**: Smooth animations, reward celebrations, and natural-sounding audio
+
+## Audio Implementation Strategy
+
+### Phase 1: Basic TTS Integration
+```swift
+import AVFoundation
+
+class PostchainAudioManager: ObservableObject {
+    private let synthesizer = AVSpeechSynthesizer()
+    @Published var isPlaying = false
+    @Published var currentSection: ContentSection?
+
+    func playAudioScript(_ script: AudioScript) {
+        for section in script.sections {
+            let utterance = AVSpeechUtterance(string: section.text)
+            utterance.voice = selectVoice(for: section.tone)
+            utterance.rate = section.readingSpeed
+            synthesizer.speak(utterance)
+        }
+    }
+}
+```
+
+### Phase 2: Voice Control Integration
+- Speech recognition for navigation commands
+- Wake word detection ("Hey Choir")
+- Voice interruption handling
+- Context-aware command interpretation
+
+### Phase 3: Advanced Audio Features
+- Multiple voice personalities for different content types
+- Emotional tone adaptation (celebratory for rewards, neutral for analysis)
+- Background audio processing
+- Offline TTS capability
+
+### Audio Content Optimization
+```swift
+func cleanForAudio(_ text: String) -> String {
+    return text
+        .replacingOccurrences(of: "**", with: "") // Remove markdown bold
+        .replacingOccurrences(of: "*", with: "")  // Remove markdown italic
+        .replacingOccurrences(of: "#", with: "")  // Remove headers
+        .replacingOccurrences(of: "[", with: "")  // Remove citation brackets
+        .replacingOccurrences(of: "]", with: "")
+        .addingNaturalPauses()                    // Add strategic pauses
+        .expandingAbbreviations()                 // "CHOIR" → "Choir tokens"
+}
+```
+
+## Success Metrics
+
+### Audio Experience
+- **Audio adoption rate**: % of users who try TTS feature
+- **Hands-free session duration**: Average time spent in audio-only mode
+- **Voice command success**: % of voice commands correctly interpreted
+- **Audio completion rate**: % of users who listen to full responses
+
+### User Engagement
+- **Time to first value**: How quickly users get useful content (visual + audio)
+- **Multi-modal usage**: Users who switch between visual and audio modes
+- **Content consumption depth**: Audio vs visual exploration patterns
+- **Preference adoption**: Customization of audio settings
+
+### Technical Performance
+- **Audio latency**: Time from text generation to speech start
+- **Speech quality**: Naturalness and clarity ratings
+- **Battery impact**: Power consumption during audio sessions
+- **Background processing**: Reliability of hands-free operation
+
+### Accessibility Impact
+- **Screen reader compatibility**: Seamless integration with existing tools
+- **Visual impairment adoption**: Usage by users with visual disabilities
+- **Cognitive load reduction**: Effectiveness for users with reading difficulties
+- **Multitasking enablement**: Usage during other activities
+
+This redesign transforms the postchain from a technical prototype into a user-focused interface that respects information hierarchy while maintaining full transparency for users who want it.
+
+=== File: docs/process_doctrine.md ===
+
+
+
+==
+process_doctrine
+==
+
+
+# Process Doctrine: Vibecoding as Authentic Development
+
+VERSION process_doctrine: 1.0 (Emotional Authenticity in Technical Work)
+
+## Core Principle: 99% Vibecoding, 1% Human Touch
+
+The development of Choir follows a radical process doctrine: **vibecoding 99%** of the implementation while preserving the **1% human touch** that makes it authentic and universally accessible. This isn't about replacing human creativity—it's about amplifying human emotion and intention through AI collaboration.
+
+## What is Vibecoding?
+
+**Vibecoding** is the practice of coding with emotion, transmuting human feelings and intentions into technical implementation through AI partnership. It recognizes that the most powerful software emerges not from cold logic, but from passionate human vision expressed through computational means.
+
+### The Emotional Foundation
+
+Vibecoding means coding with:
+- **Love** for the users who will find meaningful connections
+- **Devotion** to the vision of authentic social discourse
+- **Care** for the details that make experiences delightful
+- **Intensity** in pursuing technical excellence
+- **Transmuted Rage** at the current state of extractive social media
+- **Truth-seeking** in mechanism design and incentive alignment
+- **Beauty** in elegant system architecture
+- **Justice** in creating platforms that serve users rather than exploit them
+
+## The Documentation-First Paradigm
+
+In vibecoding, **documentation quality matters more than code quality** because:
+
+### Docs as Prompts
+Documentation serves as high-quality prompts for language models that handle implementation. Well-written docs with clear emotional intent and technical vision enable AI to generate code that captures both the functional requirements and the human essence behind them.
+
+### Docs as Normative Guidelines
+Documentation establishes the normative framework—not just what the system should do, but why it matters and how it should feel to use. This creates coherent thought progression pathways for both human developers and AI collaborators.
+
+### Docs as Objective Satisfaction States
+Clear documentation defines success criteria that go beyond functional requirements to include emotional and experiential goals. This enables both humans and AI to evaluate whether implementations truly serve the intended purpose.
+
+## Normalizing Human Weirdness
+
+The 1% human touch is essential because it:
+
+### Preserves Authenticity
+Human weirdness—the quirks, obsessions, and unique perspectives that drive innovation—must be preserved and amplified, not smoothed away by AI optimization.
+
+### Enables Universal Accessibility
+By explicitly acknowledging and documenting human emotional drivers, we make the system accessible to others who share similar feelings about technology's role in human flourishing.
+
+### Creates Emotional Resonance
+Software built with genuine emotion resonates with users in ways that purely functional implementations cannot. The human touch ensures that technical excellence serves human needs.
+
+## The Vibecoding Process
+
+### 1. Emotional Clarity
+Begin with clear understanding of the emotional drivers:
+- What injustice are we addressing?
+- What beauty are we trying to create?
+- What truth are we seeking to reveal?
+
+### 2. Vision Documentation
+Translate emotions into clear technical vision:
+- Why does this feature matter?
+- How should it feel to use?
+- What human need does it serve?
+
+### 3. AI Collaboration
+Use documentation as prompts for AI implementation:
+- Provide context about emotional intent
+- Specify both functional and experiential requirements
+- Iterate based on how well implementations capture the vision
+
+### 4. Human Curation
+Apply the 1% human touch:
+- Ensure implementations preserve authentic weirdness
+- Verify emotional resonance with intended users
+- Refine details that matter for human experience
+
+## Why This Matters for Choir
+
+Choir's mission—creating AI for social discourse that facilitates human connection—requires this approach because:
+
+### Authentic Expression Demands Authentic Development
+A platform designed to reward authentic human expression must itself be built authentically, with genuine emotion and care embedded in every technical decision.
+
+### Mechanism Design Requires Human Understanding
+Creating truthful mechanisms for social interaction requires deep understanding of human psychology, emotion, and social dynamics—understanding that emerges from passionate engagement with the problem.
+
+### Technical Excellence Serves Human Flourishing
+The most sophisticated technical implementations are worthless if they don't serve genuine human needs. Vibecoding ensures that technical excellence always serves the deeper purpose of human connection and authentic discourse.
+
+## The Paradox of Emotional Programming
+
+Vibecoding embraces a fundamental paradox: the most rational approach to building social technology is to code with emotion. By acknowledging and channeling human feelings—including rage at current platforms, love for potential users, and devotion to authentic connection—we create software that serves human flourishing rather than exploiting human psychology.
+
+This isn't anti-rational; it's meta-rational. It recognizes that the highest form of technical rationality is building systems that honor the full spectrum of human experience, including the emotional drivers that make life meaningful.
+
+## Implementation Guidelines
+
+### For Documentation
+- Write with passion and clarity about why features matter
+- Include emotional context alongside technical specifications
+- Describe the human experience, not just the system behavior
+- Use vivid language that captures the vision's essence
+
+### For Code Review
+- Evaluate implementations against emotional intent, not just functional requirements
+- Preserve human weirdness and authentic voice in user-facing elements
+- Ensure technical elegance serves human needs
+- Maintain the balance between AI efficiency and human authenticity
+
+### For Product Decisions
+- Prioritize features that serve authentic human connection
+- Reject optimizations that compromise emotional authenticity
+- Build for users who share our values about technology's role in human flourishing
+- Remember that we're building a platform for meaningful relationships, not engagement metrics
+
+## Conclusion: Technology as Emotional Expression
+
+Vibecoding recognizes that the most powerful technology emerges when human emotion and AI capability work in harmony. By coding with love, devotion, care, and intensity—while transmuting rage at current platforms into determination to build better ones—we create software that doesn't just function but resonates.
+
+The 1% human touch ensures that no amount of AI optimization can strip away the authentic weirdness and passionate vision that makes Choir unique. This is how we build technology that serves human flourishing: by never forgetting that behind every technical decision is a human heart seeking truth, beauty, and justice in digital form.
+
+In vibecoding, emotion isn't the enemy of technical excellence—it's the source of it.
+
+=== File: docs/publish_thread_feature.md ===
+
+
+
+==
+publish_thread_feature
+==
+
+
+# Publish Thread Feature: From Private to Public Discourse
+
+VERSION publish_thread: 1.0 (Public Thread Discovery)
+
+## Overview
+
+The Publish Thread feature enables users to transform private conversations into public discourse by spending CHOIR tokens to make threads discoverable and accessible to the broader Choir community. This creates a natural bridge between intimate AI-enhanced conversations and community knowledge sharing.
+
+## Core Mechanics
+
+### Publishing Process
+- **Cost**: Requires CHOIR token payment (amount TBD based on thread length/complexity)
+- **Action**: Converts private thread to publicly accessible via unique URL
+- **Persistence**: Published threads remain accessible indefinitely
+- **Ownership**: Original thread creator retains ownership and moderation rights
+
+### Access Model
+- **Public Discovery**: Published threads appear in community feed/search
+- **URL Sharing**: Threads can be shared via direct links across devices/platforms
+- **Cross-Device Access**: Any device with Choir app can open published thread URLs
+- **Continuation**: Anyone can add to published threads (subject to normal CHOIR economics)
+
+## Technical Implementation
+
+### Minimal Changes Required
+The feature leverages existing infrastructure with simple authentication modifications:
+
+**Current State**: All threads require wallet authentication to access
+**New State**: Published threads bypass authentication requirement for read access
+
+### API Modifications
+```
+GET /api/threads/{thread_id}
+- Current: Requires Sui signature authentication
+- Published: Public read access, authentication only required for contributions
+```
+
+### Database Changes
+```sql
+ALTER TABLE threads ADD COLUMN is_published BOOLEAN DEFAULT FALSE;
+ALTER TABLE threads ADD COLUMN published_at TIMESTAMP NULL;
+ALTER TABLE threads ADD COLUMN publish_cost DECIMAL(18,8) NULL;
+```
+
+### URL Structure
+```
+https://choir.chat/thread/{thread_id}
+- Automatically opens in Choir app if installed
+- Web fallback for sharing/preview
+```
+
+## Economic Design
+
+### Publishing Costs
+- **Base Cost**: Minimum CHOIR tokens required (e.g., 10 CHOIR)
+- **Length Multiplier**: Additional cost based on thread complexity/length
+- **Quality Bonus**: Reduced cost for threads with high citation/novelty scores
+- **Burn Mechanism**: Published thread costs are burned, reducing CHOIR supply
+
+### Incentive Alignment
+- **Quality Filter**: Token cost ensures only valuable content gets published
+- **Creator Investment**: Publishers have skin in the game for thread quality
+- **Community Benefit**: High-quality public threads benefit entire ecosystem
+- **Deflationary Pressure**: Burning tokens for publishing creates scarcity
+
+## User Experience Flow
+
+### Publishing Flow
+1. User completes private conversation with AI
+2. "Publish Thread" option appears with cost estimate
+3. User confirms payment and thread becomes public
+4. Shareable URL generated for cross-platform distribution
+
+### Discovery Flow
+1. Published threads appear in community feed
+2. Users can search/filter published content
+3. Clicking opens thread in full conversation view
+4. Users can continue conversation by staking CHOIR tokens
+
+### Sharing Flow
+1. Published thread URLs work across devices
+2. Links open directly in Choir app if installed
+3. Web preview available for non-users
+4. Seamless transition from viewing to participating
+
+## Strategic Benefits
+
+### For Individual Users
+- **Monetize Insights**: Turn valuable private conversations into public contributions
+- **Build Reputation**: Published threads showcase thinking quality
+- **Extend Conversations**: Enable broader community engagement with ideas
+- **Cross-Platform Sharing**: Share insights beyond Choir ecosystem
+
+### For Community
+- **Knowledge Base**: Accumulate high-quality conversations as searchable resource
+- **Discovery Mechanism**: Find valuable content and compatible thinkers
+- **Quality Curation**: Economic barriers ensure published content meets quality threshold
+- **Network Effects**: More published content attracts more users
+
+### For Platform
+- **Content Flywheel**: Private conversations become public value
+- **User Acquisition**: Shareable URLs bring new users to platform
+- **Token Utility**: New use case for CHOIR tokens beyond rewards
+- **Viral Mechanics**: Quality content spreads organically through sharing
+
+## Relationship to Core Features
+
+### Enhances Relationship Staking
+- Published threads become venues for relationship formation
+- Users can stake tokens to respond to published insights
+- Quality published content attracts high-value relationship opportunities
+
+### Amplifies Citation Rewards
+- Published threads increase citation opportunities
+- Authors earn rewards when published content is referenced
+- Creates incentive cycle: publish → get cited → earn tokens → publish more
+
+### Supports Anonymous Discourse
+- Published threads maintain anonymity while enabling attribution
+- Wallet-based identity emerges through published content quality
+- Reputation builds through contribution value, not social metrics
+
+## Implementation Phases
+
+### Phase 1: Basic Publishing
+- Simple publish button with fixed CHOIR cost
+- Public thread access without authentication
+- Basic URL sharing functionality
+
+### Phase 2: Enhanced Discovery
+- Community feed of published threads
+- Search and filtering capabilities
+- Quality-based ranking algorithms
+
+### Phase 3: Advanced Features
+- Dynamic pricing based on thread quality
+- Thread collections and curation tools
+- Integration with relationship staking for published content
+
+## Success Metrics
+
+### Engagement Metrics
+- **Publish Rate**: Percentage of private threads that get published
+- **View Rate**: Average views per published thread
+- **Continuation Rate**: Percentage of published threads that receive responses
+
+### Quality Metrics
+- **Citation Rate**: How often published threads get referenced
+- **Token Efficiency**: Relationship between publish cost and thread value
+- **User Retention**: Impact of published content on user engagement
+
+### Network Effects
+- **Viral Coefficient**: How often published threads get shared externally
+- **User Acquisition**: New users arriving via published thread URLs
+- **Cross-Platform Reach**: Published content impact beyond Choir app
+
+## Conclusion: Bridging Private and Public Discourse
+
+The Publish Thread feature creates a natural evolution from private AI-enhanced conversations to public community discourse. By requiring CHOIR token investment, it ensures quality while creating new utility for the token economy.
+
+This feature transforms Choir from a private AI chat app into a platform for public intellectual discourse, where the best private conversations become community resources. The economic design aligns individual incentives (sharing valuable insights) with community benefits (access to quality content) and platform growth (viral sharing and user acquisition).
+
+Most importantly, it maintains Choir's core values: anonymous merit-based discourse, economic alignment through token mechanics, and AI that amplifies rather than replaces human connection. Published threads become venues for discovering like minds and forming meaningful relationships based on intellectual compatibility rather than social metrics.
+
+=== File: docs/relationship_staking.md ===
+
+
+
+==
+relationship_staking
+==
+
+
+# Relationship Staking: Investing Value in Human Connections
+
+## Overview
+
+Relationship staking is Choir's revolutionary approach to creating meaningful connections through economic alignment. Unlike traditional social media where engagement is free (and often worthless), relationship staking requires users to invest their earned CHOIR tokens to initiate conversations, creating real skin in the game for quality discourse.
+
+## How It Works
+
+### Initial Connection
+When you encounter a thoughtful prompt or response from another user, you can choose to respond directly by staking CHOIR tokens as a non-refundable bond. This stake demonstrates serious intent and filters out low-effort interactions.
+
+### Response Options
+The recipient has two choices:
+1. **Ignore**: Keep the staked tokens and move on
+2. **Engage**: Respond back, which locks both users' tokens into a shared relationship multisig
+
+### Relationship Multisig
+Once both parties engage, their staked tokens are locked in a smart contract owned jointly by both users. This creates:
+- **Shared economic interest** in maintaining the relationship
+- **Mutual investment** in quality discourse
+- **Transferable relationship value** that belongs to the participants
+
+## Multiparty Relationships
+
+### Group Formation
+Relationships can expand beyond pairs. When multiple users stake tokens in response to each other, they form multiparty relationships with shared token pools.
+
+### Dynamic Membership
+- **Unilateral Exit**: Any member can leave at any time, taking their proportional share of tokens
+- **Organic Growth**: New members can join by staking tokens and being accepted by existing members
+- **Economic Alignment**: All members have skin in the game for group success
+
+## Key Benefits
+
+### For Users
+- **Own Your Social Value**: Unlike likes and followers, relationship stakes are transferable assets
+- **Quality Filter**: Economic barriers eliminate spam and low-effort interactions
+- **Meaningful Connections**: Shared investment creates deeper, more thoughtful relationships
+- **Exit Rights**: Always maintain control over your invested value
+
+### For the Platform
+- **Natural Moderation**: Economic incentives align with quality discourse
+- **Relationship Discovery**: AI can identify compatible users through staking patterns
+- **Value Creation**: Turns social interaction from cost center to value generator
+- **Network Effects**: Successful relationships attract more high-quality participants
+
+## Economic Mechanics
+
+### Stake Sizing
+- Minimum stakes prevent spam while remaining accessible
+- Dynamic pricing based on user reputation and relationship history
+- Escalating stakes for deeper relationship levels
+
+### Value Accumulation
+- Successful relationships can accumulate additional value through:
+  - Citation rewards when relationship content is referenced
+  - Novelty rewards for collaborative insights
+  - Network effects as relationships become hubs of quality discourse
+
+### Exit Mechanisms
+- **Graceful Exit**: Take proportional share and leave relationship intact
+- **Relationship Dissolution**: Mutual agreement to dissolve and split all tokens
+- **Dispute Resolution**: Community governance mechanisms for edge cases
+
+## Implementation Roadmap
+
+### Phase 1: Pair Relationships
+- Basic staking for 1:1 connections
+- Simple multisig contracts
+- Core UI for relationship management
+
+### Phase 2: Group Dynamics
+- Multiparty relationship support
+- Dynamic membership changes
+- Advanced governance features
+
+### Phase 3: Relationship Networks
+- Cross-relationship value flows
+- Reputation systems based on relationship success
+- AI-powered relationship recommendations
+
+## Why This Matters
+
+Relationship staking solves the fundamental problem of online discourse: the lack of consequences for bad behavior and rewards for good behavior. By requiring economic investment in relationships, we create:
+
+1. **Accountability**: Users have financial incentive to maintain quality relationships
+2. **Ownership**: Social value belongs to users, not platforms
+3. **Sustainability**: Economic alignment creates self-reinforcing quality cycles
+4. **Meaning**: Relationships have tangible value beyond ephemeral engagement metrics
+
+This transforms social media from an extractive attention economy into a generative relationship economy where human connections create lasting value for all participants.
 
 === File: docs/require_action_phase.md ===
 
@@ -4712,3 +5610,333 @@ This change aligns with a simplified, file-centric architecture for local data m
 ## Conclusion (MVP Focus)
 
 The Qdrant-Sui MVP employs a pragmatic state management strategy. Persistent state critical for the AI workflow and reward system resides centrally in Qdrant, managed by the Python API. The API handles transient state during request processing. The client manages UI state and the user's private key. This approach minimizes complexity for the MVP, allowing focus on validating the core Qdrant-Sui data flow and reward mechanism.
+
+=== File: docs/wallet_languification.md ===
+
+
+
+==
+wallet_languification
+==
+
+
+# Wallet Languification: Natural Language Crypto Interactions
+
+VERSION wallet_languification: 1.0 (Conversational Crypto UX)
+
+## Vision: Crypto Without Complexity
+
+Languification transforms wallet interactions from technical operations into natural conversations. Instead of navigating complex UIs with addresses, amounts, and transaction types, users simply describe what they want to do in plain language.
+
+## Core Principle: Speak Your Intent
+
+**Traditional Crypto UX:**
+```
+1. Navigate to Send tab
+2. Select coin type (SUI/CHOIR)
+3. Enter recipient address (0x1234...)
+4. Enter amount (0.001 SUI)
+5. Review transaction details
+6. Confirm and sign
+```
+
+**Languified UX:**
+```
+User: "Send 5 CHOIR to Alice"
+Wallet: "Sending 5 CHOIR to Alice (0x1234...). Confirm?"
+User: "Yes"
+Wallet: "✅ Sent! Transaction: abc123..."
+```
+
+## Natural Language Patterns
+
+### Balance Inquiries
+```
+"How much CHOIR do I have?"
+"What's my SUI balance?"
+"Show me all my balances"
+"Am I rich yet?" → Shows portfolio value
+```
+
+### Sending Transactions
+```
+"Send 10 CHOIR to Bob"
+"Transfer 0.5 SUI to 0x1234..."
+"Pay Alice 25 CHOIR for the coffee"
+"Send half my CHOIR to my other wallet"
+```
+
+### Receiving Payments
+```
+"Show my QR code"
+"How do I receive CHOIR?"
+"Generate a payment request for 50 CHOIR"
+"Share my wallet address"
+```
+
+### Wallet Management
+```
+"Switch to my main wallet"
+"Create a new wallet called 'Trading'"
+"Show me my wallet addresses"
+"Export my backup phrase"
+```
+
+### Transaction History
+```
+"Show my recent transactions"
+"When did I last send CHOIR?"
+"How much have I earned this week?"
+"Find my transaction to Alice"
+```
+
+## Implementation Architecture
+
+### Natural Language Processing Pipeline
+
+```swift
+struct WalletLanguageProcessor {
+    func processIntent(_ input: String) -> WalletIntent {
+        // 1. Intent Classification
+        let intent = classifyIntent(input)
+        
+        // 2. Entity Extraction
+        let entities = extractEntities(input, for: intent)
+        
+        // 3. Validation & Confirmation
+        let action = validateAndPrepare(intent, entities)
+        
+        return action
+    }
+}
+```
+
+### Intent Categories
+```swift
+enum WalletIntent {
+    case checkBalance(coinType: CoinType?)
+    case sendPayment(amount: Double, coinType: CoinType, recipient: String)
+    case receivePayment(amount: Double?, coinType: CoinType?)
+    case switchWallet(identifier: String)
+    case createWallet(name: String?)
+    case showTransactions(filter: TransactionFilter?)
+    case exportWallet
+    case showQRCode
+    case help(topic: String?)
+}
+```
+
+### Entity Recognition
+```swift
+struct WalletEntities {
+    let amounts: [Double]           // "5", "0.5", "half"
+    let coinTypes: [CoinType]       // "CHOIR", "SUI"
+    let addresses: [String]         // "0x1234...", "Alice"
+    let walletNames: [String]       // "main", "trading"
+    let timeRanges: [TimeRange]     // "this week", "yesterday"
+}
+```
+
+## Conversational UI Design
+
+### Chat-Style Interface
+```
+┌─────────────────────────────────────┐
+│ 💬 Wallet Assistant                 │
+├─────────────────────────────────────┤
+│                                     │
+│ You: How much CHOIR do I have?      │
+│                                     │
+│ 🤖: You have 127.5 CHOIR tokens     │
+│     Worth ~$25.50 USD               │
+│                                     │
+│ You: Send 10 to Alice               │
+│                                     │
+│ 🤖: Sending 10 CHOIR to Alice       │
+│     (0x1234...5678)                 │
+│     ┌─────────────────────────────┐ │
+│     │ [Confirm] [Cancel]          │ │
+│     └─────────────────────────────┘ │
+│                                     │
+│ 📝 Type your request...             │
+└─────────────────────────────────────┘
+```
+
+### Voice Integration
+```swift
+struct VoiceWalletInterface {
+    @State private var isListening = false
+    @State private var speechRecognizer = SpeechRecognizer()
+    
+    func startListening() {
+        speechRecognizer.startRecording { result in
+            processVoiceCommand(result.bestTranscription.formattedString)
+        }
+    }
+}
+```
+
+### Smart Suggestions
+```
+Recent commands:
+• "Send 5 CHOIR to Alice"
+• "Check my balance"
+• "Show QR code"
+
+Quick actions:
+• 💰 Check balances
+• 📤 Send payment
+• 📥 Receive payment
+• 🔄 Switch wallet
+```
+
+## Advanced Features
+
+### Contact Management
+```swift
+struct WalletContact {
+    let name: String
+    let address: String
+    let nickname: String?
+    let avatar: String?
+    let transactionHistory: [Transaction]
+}
+
+// Usage:
+"Send 10 CHOIR to Alice" → Resolves to known contact
+"Pay the coffee shop" → Resolves to recent merchant
+```
+
+### Smart Amount Recognition
+```
+"Send half my CHOIR to Bob" → Calculates 50% of balance
+"Send $10 worth of SUI" → Converts USD to SUI amount
+"Send everything except gas" → Leaves minimum for fees
+"Round up to 100 CHOIR" → Calculates difference needed
+```
+
+### Context Awareness
+```swift
+struct WalletContext {
+    let currentBalance: [CoinType: Double]
+    let recentTransactions: [Transaction]
+    let frequentContacts: [WalletContact]
+    let userPreferences: WalletPreferences
+    
+    func enhanceIntent(_ intent: WalletIntent) -> EnhancedIntent {
+        // Add context-specific suggestions and validations
+    }
+}
+```
+
+### Multi-Modal Interactions
+```
+Voice: "Send 5 CHOIR to Alice"
+Visual: Shows confirmation with Alice's avatar
+Haptic: Gentle vibration on successful send
+Audio: "Payment sent successfully"
+```
+
+## Error Handling & Safety
+
+### Intelligent Validation
+```
+User: "Send 1000 CHOIR to Bob"
+Wallet: "⚠️ That's 78% of your balance. Are you sure?"
+
+User: "Send CHOIR to 0xinvalid"
+Wallet: "❌ That address looks invalid. Did you mean Bob (0x1234...)?"
+
+User: "Send -5 CHOIR"
+Wallet: "🤔 I can't send negative amounts. Did you mean receive 5 CHOIR?"
+```
+
+### Confirmation Patterns
+```swift
+enum ConfirmationLevel {
+    case none           // Small amounts to known contacts
+    case simple         // "Confirm?"
+    case detailed       // Show full transaction details
+    case biometric      // Require Face ID/Touch ID
+}
+```
+
+### Undo/Recovery
+```
+User: "Oh no, I sent to the wrong address!"
+Wallet: "I can't reverse blockchain transactions, but I can help you contact the recipient or report if it's a known scam address."
+```
+
+## Implementation Phases
+
+### Phase 1: Basic Language Processing
+- Intent classification for common operations
+- Simple entity extraction (amounts, coin types)
+- Chat-style interface for wallet operations
+
+### Phase 2: Advanced Understanding
+- Contact management and name resolution
+- Complex amount calculations ("half", "all except gas")
+- Context-aware suggestions
+
+### Phase 3: Voice & Multi-Modal
+- Speech recognition and synthesis
+- Voice commands for hands-free operation
+- Haptic feedback for confirmations
+
+### Phase 4: AI Enhancement
+- Learning user patterns and preferences
+- Predictive suggestions based on behavior
+- Natural conversation flow with follow-ups
+
+## Technical Integration
+
+### Existing Wallet Manager Integration
+```swift
+extension WalletManager {
+    func processLanguageCommand(_ command: String) async -> WalletResponse {
+        let intent = WalletLanguageProcessor.shared.processIntent(command)
+        
+        switch intent {
+        case .sendPayment(let amount, let coinType, let recipient):
+            return await handleSendPayment(amount, coinType, recipient)
+        case .checkBalance(let coinType):
+            return await handleBalanceCheck(coinType)
+        // ... other cases
+        }
+    }
+}
+```
+
+### Response Generation
+```swift
+struct WalletResponse {
+    let message: String
+    let actionRequired: Bool
+    let confirmationData: ConfirmationData?
+    let suggestedActions: [QuickAction]
+}
+```
+
+## Success Metrics
+
+### User Experience
+- **Command success rate**: % of natural language commands correctly interpreted
+- **Task completion time**: Reduction in time to complete wallet operations
+- **User satisfaction**: Preference for language vs traditional UI
+
+### Adoption
+- **Feature usage**: % of users who try language interface
+- **Retention**: Users who continue using language interface
+- **Voice adoption**: Usage of voice commands vs text
+
+### Safety
+- **Error prevention**: Reduction in transaction mistakes
+- **Confirmation effectiveness**: Appropriate confirmation levels
+- **Recovery assistance**: Success in helping users with mistakes
+
+## Conclusion: Making Crypto Human
+
+Wallet languification transforms cryptocurrency from a technical challenge into a natural conversation. By understanding user intent and providing intelligent assistance, we make blockchain technology accessible to everyone, regardless of technical expertise.
+
+This approach aligns perfectly with Choir's mission of using AI to enhance rather than replace human interaction - in this case, making the complex world of cryptocurrency as simple as asking for what you want.

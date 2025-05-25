@@ -254,7 +254,6 @@
 │   ├── contract_deployment.md
 │   ├── core_core.md
 │   ├── core_economics.md
-│   ├── core_state_transitions.md
 │   ├── data_engine_model.md
 │   ├── e_business.md
 │   ├── e_concept.md
@@ -275,6 +274,10 @@
 │   ├── plan_anonymity_by_default.md
 │   ├── plan_choir_materialization.md
 │   ├── postchain_temporal_logic.md
+│   ├── postchain_ui_redesign.md
+│   ├── process_doctrine.md
+│   ├── publish_thread_feature.md
+│   ├── relationship_staking.md
 │   ├── require_action_phase.md
 │   ├── require_experience_phase.md
 │   ├── require_intention_phase.md
@@ -290,7 +293,8 @@
 │   ├── security_considerations.md
 │   ├── stack_argument.md
 │   ├── state_management_patterns.md
-│   └── tree.md
+│   ├── tree.md
+│   └── wallet_languification.md
 ├── notebooks
 │   ├── post_chain0.ipynb
 │   └── vowel_loop3.ipynb
@@ -309,4 +313,4 @@
     ├── test_postchain_multiturn.sh
     └── test_simulator_notifications.sh
 
-73 directories, 234 files
+73 directories, 238 files
