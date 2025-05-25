@@ -291,6 +291,7 @@ tree.md
 │   ├── postchain_ui_redesign.md
 │   ├── process_doctrine.md
 │   ├── publish_thread_feature.md
+│   ├── refactoring_planning_strategy.md
 │   ├── relationship_staking.md
 │   ├── require_action_phase.md
 │   ├── require_experience_phase.md
@@ -327,7 +328,7 @@ tree.md
     ├── test_postchain_multiturn.sh
     └── test_simulator_notifications.sh
 
-73 directories, 239 files
+73 directories, 240 files
 
 === File: docs/CHANGELOG.md ===
 
