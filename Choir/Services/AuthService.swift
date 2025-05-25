@@ -71,12 +71,21 @@ class AuthService: ObservableObject {
             return
         }
 
-        // We have a token, now try to access it with biometric auth
+        // We have a token, now try to access it
         do {
+            #if DEBUG && targetEnvironment(simulator)
+            // In simulator, load token without biometric prompt
+            guard let token = try keychain.load("auth_token") else {
+                authState = .unauthenticated
+                return
+            }
+            #else
+            // On device, use biometric auth to access token
             guard let token = try keychain.load("auth_token", withPrompt: "Authenticate to access your Choir account") else {
                 authState = .unauthenticated
                 return
             }
+            #endif
 
             let userInfo = try await getUserInfo(token: token)
             self.userInfo = userInfo
@@ -331,6 +340,11 @@ class AuthService: ObservableObject {
 
     /// Verifies biometric authentication using LocalAuthentication framework directly
     private func verifyBiometricAuth() async throws {
+        #if DEBUG && targetEnvironment(simulator)
+        // Skip authentication in simulator for development
+        print("Skipping biometric authentication in simulator")
+        return
+        #else
         // Use LocalAuthentication framework directly
         let context = LAContext()
 
@@ -387,6 +401,7 @@ class AuthService: ObservableObject {
                 }
             }
         }
+        #endif
     }
 
     /// Creates a JSONDecoder with a custom date decoding strategy that can handle various ISO8601 formats

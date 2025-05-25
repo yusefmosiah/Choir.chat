@@ -74,6 +74,11 @@ class KeychainService {
             kSecValueData as String: data
         ]
 
+        #if DEBUG && targetEnvironment(simulator)
+        // In simulator, always use standard protection without biometrics
+        print("Using standard keychain protection in simulator")
+        query[kSecAttrAccessible as String] = kSecAttrAccessibleWhenUnlockedThisDeviceOnly
+        #else
         // Add biometric protection if requested and available
         if useBiometric {
             if let accessControl = biometricAccessControl() {
@@ -90,6 +95,7 @@ class KeychainService {
             // Standard protection without biometrics
             query[kSecAttrAccessible as String] = kSecAttrAccessibleWhenUnlockedThisDeviceOnly
         }
+        #endif
 
         // First try to delete any existing item
         let deleteQuery: [String: Any] = [
@@ -142,6 +148,10 @@ class KeychainService {
             kSecMatchLimit as String: kSecMatchLimitOne
         ]
 
+        #if DEBUG && targetEnvironment(simulator)
+        // In simulator, skip all authentication and load directly
+        print("Loading keychain item without authentication in simulator")
+        #else
         // Create LAContext for authentication
         let context = LAContext()
 
@@ -168,6 +178,7 @@ class KeychainService {
                 throw KeychainError.biometricNotAvailable
             }
         }
+        #endif
 
         var result: AnyObject?
         let status = SecItemCopyMatching(query as CFDictionary, &result)

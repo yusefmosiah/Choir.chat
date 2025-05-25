@@ -94,6 +94,13 @@ struct ImportMnemonicView: View {
         mnemonicPhrase = trimmedMnemonic
         isLoading = true
 
+        #if DEBUG && targetEnvironment(simulator)
+        // In simulator, skip biometric check and proceed directly
+        print("Skipping biometric check in simulator for mnemonic import")
+        Task {
+            await performImport()
+        }
+        #else
         // Check if biometric authentication is available
         let context = LAContext()
         var error: NSError?
@@ -107,6 +114,7 @@ struct ImportMnemonicView: View {
                 await performImport()
             }
         }
+        #endif
     }
 
     private func performImport() async {
