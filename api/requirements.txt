@@ -16,10 +16,10 @@ pytest-asyncio==0.23.5
 httpx>=0.25.2
 
 # Langchain dependencies - pinned to compatible versions
-langchain==0.3.19
-langchain-core==0.3.40
-langchain-openai==0.3.7
-langchain-anthropic==0.3.8
+langchain==0.3.25
+langchain-core==0.3.61
+langchain-openai==0.3.18
+langchain-anthropic==0.3.13
 langchain-google-genai==2.0.11
 langchain-cohere==0.4.2
 langchain-mistralai==0.2.7
@@ -30,7 +30,7 @@ langchain-groq==0.2.4
 
 
 # Additional tools - pinned to compatible versions
-langchain-community==0.3.18
+langchain-community==0.3.24
 markdown==3.4.3
 Jinja2==3.1.6
 pyjwt==2.10.1
