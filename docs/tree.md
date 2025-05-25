@@ -273,6 +273,7 @@
 │   ├── notification_system.md
 │   ├── plan_anonymity_by_default.md
 │   ├── plan_choir_materialization.md
+│   ├── postchain_service_redesign.md
 │   ├── postchain_temporal_logic.md
 │   ├── postchain_ui_redesign.md
 │   ├── process_doctrine.md
@@ -313,4 +314,4 @@
     ├── test_postchain_multiturn.sh
     └── test_simulator_notifications.sh
 
-73 directories, 238 files
+73 directories, 239 files
