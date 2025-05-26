@@ -120,18 +120,7 @@ class AbstractedProviderTester:
 
         return results
 
-    async def test_fireworks_models(self) -> List[Dict[str, Any]]:
-        """Test Fireworks models using the abstraction layer."""
-        if not self.config.FIREWORKS_API_KEY:
-            return [{"status": "skipped", "reason": "API key not configured", "provider": "fireworks"}]
 
-        results = []
-        for model_name in get_fireworks_models(self.config):
-            # No need to add prefix, abstraction layer handles it
-            result = await self.test_model("fireworks", model_name)
-            results.append(result)
-
-        return results
 
     async def test_cohere_models(self) -> List[Dict[str, Any]]:
         """Test Cohere models using the abstraction layer."""

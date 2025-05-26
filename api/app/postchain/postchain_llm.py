@@ -39,7 +39,6 @@ async def initialize_model(model_config: ModelConfig) -> BaseChatModel:
             "mistralai": ("mistral_api_key", global_config.MISTRAL_API_KEY),
             "groq": ("groq_api_key", global_config.GROQ_API_KEY),
             "cohere": ("cohere_api_key", global_config.COHERE_API_KEY),
-            "fireworksai": ("fireworks_api_key", global_config.FIREWORKS_API_KEY),
             "openrouter": ("openrouter_api_key", global_config.OPENROUTER_API_KEY),
             # Add mappings for other providers here if they follow the pattern
             # "provider_name": ("model_config_key_attr", global_config.DEFAULT_KEY_ATTR),
