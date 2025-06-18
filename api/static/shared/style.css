@@ -1,49 +1,54 @@
-/* api/static/shared/style.css - Carbon Fiber Kintsugi Design Theme */
+/* api/static/shared/style.css - Luxurious Futuristic Design Theme */
 :root {
-    /* Base Colors - Carbon Fiber */
-    --background-color: #1a1a1a;
-    /* Deep charcoal with carbon fiber weave texture */
-    --surface-color: #0d0d0d;
-    /* Matte black with subtle directional grain */
-    --text-color-primary: #f5f5f5;
-    /* Platinum white with subtle metallic sheen */
-    --text-color-secondary: #a8a8a8;
-    /* Silver gray with muted luminosity */
-    --shadow-color: rgba(0, 0, 0, 0.6);
-    /* Pure black with medium opacity for depth */
-    --highlight-color: rgba(250, 250, 250, 0.15);
-    /* Warm white with very low opacity */
+    /* Base Colors - Deep Space Luxury */
+    --background-color: #0a0a0a;
+    /* Deep space black with micro-texture patterns */
+    --surface-color: #121212;
+    /* Rich obsidian with subtle holographic undertones */
+    --text-color-primary: #f8f8f8;
+    /* Pure platinum with crisp clarity */
+    --text-color-secondary: #b8b8b8;
+    /* Titanium gray with subtle luminosity */
+    --shadow-color: rgba(0, 0, 0, 0.4);
+    /* Void black with soft opacity for floating effects */
+    --highlight-color: rgba(255, 255, 255, 0.1);
+    /* Cool white with very low opacity */
 
-    /* Metallic Accent Gradients - Kintsugi */
-    --gold-kintsugi-start: #ffd700;
-    --gold-kintsugi-end: #b8860b;
-    --silver-veining-start: #c0c0c0;
-    --silver-veining-end: #808080;
-    --platinum-highlight-start: #e5e4e2;
-    --platinum-highlight-end: #b8b8b8;
-    --copper-patina-start: #b87333;
-    --copper-patina-end: #8b4513;
+    /* Holographic Accent Gradients */
+    --platinum-hologram-start: #f8f8f8;
+    --platinum-hologram-mid: #e0e0e0;
+    --platinum-hologram-end: #c8c8c8;
+    --titanium-shift-start: #d4d4d4;
+    --titanium-shift-mid: #a8a8a8;
+    --titanium-shift-end: #8c8c8c;
+    --chrome-reflection-start: #ffffff;
+    --chrome-reflection-mid: #f0f0f0;
+    --chrome-reflection-end: #e8e8e8;
+    --iridescent-edge-start: #e8e8ff;
+    --iridescent-edge-mid: #ffe8ff;
+    --iridescent-edge-end: #fff8e8;
 
-    /* Status Colors */
-    --error-color: #8b0000;
-    /* Deep red with copper patina gradient */
-    --warning-color: #ffbf00;
-    /* Amber with gold accent */
-    --success-color: #50c878;
-    /* Emerald with silver veining */
+    /* Status Colors - Holographic */
+    --error-color: #ff3366;
+    /* Crimson hologram with red-orange shift */
+    --warning-color: #ffaa00;
+    /* Amber hologram with gold-yellow shift */
+    --success-color: #00ff88;
+    /* Emerald hologram with green-cyan shift */
 
-    /* Carbon Fiber Effects */
-    --carbon-fiber-bg: rgba(13, 13, 13, 0.95);
-    --carbon-fiber-border: rgba(128, 128, 128, 0.3);
-    --carbon-fiber-shadow: rgba(0, 0, 0, 0.8);
+    /* Luxury Effects */
+    --luxury-surface: rgba(18, 18, 18, 0.98);
+    --luxury-border: rgba(248, 248, 248, 0.1);
+    --luxury-shadow: rgba(0, 0, 0, 0.6);
+    --luxury-glow: rgba(255, 255, 255, 0.05);
 
     /* Typography */
     --font-primary: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 
-    /* Border Radius */
-    --border-radius-sm: 12px;
-    --border-radius-md: 16px;
-    --border-radius-lg: 20px;
+    /* Border Radius - Smooth Curves */
+    --border-radius-sm: 16px;
+    --border-radius-md: 24px;
+    --border-radius-lg: 32px;
 }
 
 * {
@@ -60,51 +65,58 @@ body {
     font-family: var(--font-primary);
     color: var(--text-color-primary);
     background-color: var(--background-color);
-    /* Carbon fiber weave pattern background */
+    /* Luxurious micro-texture pattern */
     background-image:
-        linear-gradient(45deg, rgba(0, 0, 0, 0.8) 25%, transparent 25%),
-        linear-gradient(-45deg, rgba(0, 0, 0, 0.8) 25%, transparent 25%),
-        linear-gradient(45deg, transparent 75%, rgba(0, 0, 0, 0.8) 75%),
-        linear-gradient(-45deg, transparent 75%, rgba(0, 0, 0, 0.8) 75%),
-        radial-gradient(circle at 50% 50%, rgba(255, 215, 0, 0.02), transparent 70%);
-    background-size: 4px 4px, 4px 4px, 4px 4px, 4px 4px, 100px 100px;
-    background-position: 0 0, 0 2px, 2px -2px, -2px 0px, 0 0;
+        radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.01) 1px, transparent 1px),
+        radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.008) 1px, transparent 1px),
+        linear-gradient(135deg, rgba(255, 255, 255, 0.003) 0%, transparent 50%, rgba(255, 255, 255, 0.003) 100%);
+    background-size: 40px 40px, 60px 60px, 100% 100%;
+    background-position: 0 0, 20px 20px, 0 0;
     background-attachment: fixed;
-    line-height: 1.7;
-    /* Slightly more spacing for readability */
-    padding: 20px;
+    line-height: 1.8;
+    /* Premium spacing for readability */
+    padding: 24px;
     display: flex;
     justify-content: center;
     /* Center content block */
     min-height: 100vh;
+    /* Subtle ambient glow */
+    box-shadow: inset 0 0 200px rgba(255, 255, 255, 0.02);
 }
 
-/* Main content wrapper - Carbon fiber card with kintsugi veining */
+/* Main content wrapper - Luxurious floating panel */
 .content-wrapper {
-    max-width: 800px;
-    /* Readable width */
+    max-width: 900px;
+    /* Premium readable width */
     width: 100%;
-    background: var(--carbon-fiber-bg);
-    /* Carbon fiber background */
-    padding: 30px 40px;
+    background: var(--luxury-surface);
+    /* Luxury obsidian background */
+    padding: 48px 56px;
     border-radius: var(--border-radius-lg);
     box-shadow:
-        0 15px 35px var(--carbon-fiber-shadow),
-        /* Deep outer shadow */
-        inset 0 1px 2px var(--highlight-color);
-    /* Subtle inner highlight */
-    margin-top: 20px;
-    margin-bottom: 40px;
+        0 32px 64px var(--luxury-shadow),
+        /* Deep floating shadow */
+        0 0 0 1px var(--luxury-border),
+        /* Subtle edge definition */
+        inset 0 1px 0 var(--highlight-color);
+    /* Premium inner highlight */
+    margin-top: 32px;
+    margin-bottom: 64px;
     position: relative;
     overflow: hidden;
-    /* Subtle carbon fiber texture overlay */
+    /* Subtle holographic shimmer overlay */
     background-image:
-        linear-gradient(90deg, rgba(0, 0, 0, 0.9) 50%, rgba(128, 128, 128, 0.05) 50%),
-        linear-gradient(0deg, rgba(0, 0, 0, 0.9) 50%, rgba(128, 128, 128, 0.05) 50%);
-    background-size: 2px 2px, 2px 2px;
+        linear-gradient(135deg,
+            rgba(255, 255, 255, 0.02) 0%,
+            transparent 25%,
+            rgba(255, 255, 255, 0.01) 50%,
+            transparent 75%,
+            rgba(255, 255, 255, 0.02) 100%);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
 }
 
-/* Irregular patina'd metallic border for content wrapper */
+/* Holographic edge lighting for content wrapper */
 .content-wrapper::before {
     content: '';
     position: absolute;
@@ -113,29 +125,16 @@ body {
     right: 0;
     bottom: 0;
     border-radius: var(--border-radius-lg);
-    padding: 2px;
-    /* Border width */
+    padding: 1px;
+    /* Thin edge lighting */
     background:
-        /* Irregular patina pattern with breaks */
-        linear-gradient(90deg,
-            var(--gold-kintsugi-start) 0%,
-            var(--gold-kintsugi-start) 15%,
-            transparent 15%,
-            transparent 18%,
-            var(--silver-veining-start) 18%,
-            var(--silver-veining-start) 35%,
-            transparent 35%,
-            transparent 40%,
-            var(--platinum-highlight-start) 40%,
-            var(--platinum-highlight-start) 60%,
-            transparent 60%,
-            transparent 65%,
-            var(--copper-patina-start) 65%,
-            var(--copper-patina-start) 80%,
-            transparent 80%,
-            transparent 85%,
-            var(--gold-kintsugi-end) 85%,
-            var(--gold-kintsugi-end) 100%);
+        /* Smooth holographic gradient */
+        linear-gradient(45deg,
+            var(--iridescent-edge-start) 0%,
+            var(--platinum-hologram-start) 25%,
+            var(--chrome-reflection-start) 50%,
+            var(--titanium-shift-start) 75%,
+            var(--iridescent-edge-end) 100%);
     -webkit-mask:
         linear-gradient(#fff 0 0) content-box,
         linear-gradient(#fff 0 0);
@@ -144,11 +143,24 @@ body {
         linear-gradient(#fff 0 0) content-box,
         linear-gradient(#fff 0 0);
     mask-composite: exclude;
-    opacity: 0.4;
+    opacity: 0.3;
     z-index: -1;
+    animation: holographicShift 8s ease-in-out infinite;
 }
 
-/* Remove the crack overlay entirely */
+/* Subtle ambient glow */
+.content-wrapper::after {
+    content: '';
+    position: absolute;
+    top: -20px;
+    left: -20px;
+    right: -20px;
+    bottom: -20px;
+    background: radial-gradient(ellipse at center, var(--luxury-glow) 0%, transparent 70%);
+    border-radius: var(--border-radius-lg);
+    z-index: -2;
+    opacity: 0.6;
+}
 
 h1,
 h2,
@@ -165,39 +177,49 @@ h6 {
 }
 
 h1 {
-    font-size: 2.6rem;
-    /* 42pt equivalent */
-    padding-bottom: 0.3em;
+    font-size: 3rem;
+    /* Larger, more premium sizing */
+    font-weight: 300;
+    /* Lighter, more elegant weight */
+    padding-bottom: 0.4em;
     background: linear-gradient(135deg,
-            var(--gold-kintsugi-start),
-            var(--silver-veining-start),
-            var(--platinum-highlight-start));
+            var(--chrome-reflection-start),
+            var(--platinum-hologram-start),
+            var(--titanium-shift-start),
+            var(--chrome-reflection-end));
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
     display: inline-block;
-    text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
-    /* Subtle metallic glow */
+    text-shadow: 0 0 20px rgba(248, 248, 248, 0.2);
+    /* Soft platinum glow */
+    letter-spacing: -0.02em;
+    /* Tight, premium spacing */
 }
 
 h2 {
-    font-size: 2rem;
-    /* 32pt equivalent */
+    font-size: 2.25rem;
+    /* Premium sizing */
+    font-weight: 300;
     color: var(--text-color-primary);
+    letter-spacing: -0.01em;
 }
 
 h3 {
-    font-size: 1.6rem;
-    /* 26pt equivalent */
+    font-size: 1.75rem;
+    /* Refined sizing */
+    font-weight: 400;
     background: linear-gradient(135deg,
-            var(--silver-veining-start),
-            var(--platinum-highlight-start));
+            var(--platinum-hologram-start),
+            var(--titanium-shift-start),
+            var(--platinum-hologram-end));
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
     display: inline-block;
-    text-shadow: 0 0 8px rgba(192, 192, 192, 0.2);
-    /* Subtle silver glow */
+    text-shadow: 0 0 12px rgba(212, 212, 212, 0.15);
+    /* Subtle titanium glow */
+    letter-spacing: -0.005em;
 }
 
 h4 {
@@ -242,38 +264,38 @@ a:hover::after {
     transform-origin: bottom left;
 }
 
-/* Styling for the mailto link to look like a button - Carbon Fiber Kintsugi */
+/* Luxury holographic button styling */
 a[href^="mailto:"],
 .btn-primary {
     display: inline-block;
-    padding: 14px 24px;
+    padding: 18px 32px;
     font-size: 1rem;
-    font-weight: 500;
+    font-weight: 400;
     text-decoration: none;
-    border-radius: var(--border-radius-sm);
+    border-radius: var(--border-radius-md);
     cursor: pointer;
     text-align: center;
-    margin-top: 1em;
-    margin-bottom: 1em;
+    margin-top: 1.5em;
+    margin-bottom: 1.5em;
     position: relative;
     color: var(--text-color-primary);
     background: linear-gradient(135deg,
-            var(--surface-color),
-            var(--background-color));
-    border: 1px solid var(--carbon-fiber-border);
+            var(--luxury-surface),
+            var(--surface-color));
+    border: 1px solid var(--luxury-border);
     box-shadow:
-        0 8px 20px var(--carbon-fiber-shadow),
-        inset 0 1px 2px var(--highlight-color);
-    transition: all 0.4s ease;
+        0 16px 32px var(--luxury-shadow),
+        0 0 0 1px rgba(255, 255, 255, 0.05),
+        inset 0 1px 0 var(--highlight-color);
+    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
     overflow: hidden;
-    /* Carbon fiber texture */
-    background-image:
-        linear-gradient(45deg, rgba(0, 0, 0, 0.9) 25%, transparent 25%),
-        linear-gradient(-45deg, rgba(0, 0, 0, 0.9) 25%, transparent 25%);
-    background-size: 2px 2px, 2px 2px;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    letter-spacing: 0.025em;
+    /* Premium letter spacing */
 }
 
-/* Kintsugi metallic overlay for primary buttons */
+/* Holographic overlay for primary buttons */
 a[href^="mailto:"]::before,
 .btn-primary::before {
     content: '';
@@ -283,17 +305,20 @@ a[href^="mailto:"]::before,
     right: 0;
     bottom: 0;
     background: linear-gradient(135deg,
-            rgba(255, 215, 0, 0.1),
-            rgba(192, 192, 192, 0.08),
-            rgba(229, 228, 226, 0.1));
-    border-radius: var(--border-radius-sm);
+            var(--iridescent-edge-start),
+            var(--chrome-reflection-start),
+            var(--platinum-hologram-start),
+            var(--iridescent-edge-end));
+    background-size: 200% 200%;
+    border-radius: var(--border-radius-md);
     opacity: 0;
-    transition: opacity 0.4s ease;
+    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: holographicShift 4s ease-in-out infinite;
 }
 
 a[href^="mailto:"]:hover::before,
 .btn-primary:hover::before {
-    opacity: 1;
+    opacity: 0.15;
 }
 
 a[href^="mailto:"] span,
@@ -312,21 +337,25 @@ a[href^="mailto:"][href*="TestFlight"] {
 
 a[href^="mailto:"]:hover,
 .btn-primary:hover {
-    transform: translateY(-3px);
+    transform: translateY(-4px) scale(1.02);
     box-shadow:
-        0 12px 25px var(--carbon-fiber-shadow),
-        inset 0 1px 2px var(--highlight-color);
-    border-color: var(--gold-kintsugi-start);
-    color: var(--gold-kintsugi-start);
-    text-shadow: 0 0 8px rgba(255, 215, 0, 0.4);
+        0 24px 48px var(--luxury-shadow),
+        0 0 0 1px var(--platinum-hologram-start),
+        inset 0 1px 0 var(--highlight-color),
+        0 0 20px rgba(248, 248, 248, 0.1);
+    border-color: var(--platinum-hologram-start);
+    color: var(--chrome-reflection-start);
+    text-shadow: 0 0 12px rgba(248, 248, 248, 0.3);
 }
 
 a[href^="mailto:"]:active,
 .btn-primary:active {
-    transform: translateY(1px);
+    transform: translateY(-1px) scale(0.98);
     box-shadow:
-        0 4px 12px var(--carbon-fiber-shadow),
-        inset 0 1px 2px var(--highlight-color);
+        0 8px 16px var(--luxury-shadow),
+        0 0 0 1px var(--luxury-border),
+        inset 0 1px 0 var(--highlight-color);
+    transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Secondary button style - Worn carbon fiber */
@@ -371,35 +400,46 @@ a[href^="mailto:"]:active,
         inset 0 1px 2px var(--highlight-color);
 }
 
-/* Metallic shimmer animation for kintsugi elements */
-@keyframes metallicShimmer {
+/* Holographic shimmer animation for luxury elements */
+@keyframes holographicShift {
     0% {
-        transform: translateX(-100%);
-        opacity: 0;
+        background-position: 0% 50%;
+        filter: hue-rotate(0deg);
+    }
+
+    25% {
+        background-position: 100% 50%;
+        filter: hue-rotate(90deg);
     }
 
     50% {
-        opacity: 0.6;
+        background-position: 100% 100%;
+        filter: hue-rotate(180deg);
+    }
+
+    75% {
+        background-position: 0% 100%;
+        filter: hue-rotate(270deg);
     }
 
     100% {
-        transform: translateX(100%);
-        opacity: 0;
+        background-position: 0% 50%;
+        filter: hue-rotate(360deg);
     }
 }
 
-/* Kintsugi crack pattern animation */
-@keyframes kintsugiGlow {
+/* Subtle ambient pulse for premium elements */
+@keyframes ambientPulse {
 
     0%,
     100% {
         opacity: 0.3;
-        filter: brightness(1);
+        transform: scale(1);
     }
 
     50% {
         opacity: 0.6;
-        filter: brightness(1.2);
+        transform: scale(1.02);
     }
 }
 

@@ -1,35 +1,35 @@
 # Choir Design Style Guide
 
-This document outlines the design principles and visual language for the Choir application, focusing on a carbon fiber kintsugi aesthetic with black/charcoal woven textures, worn patina effects, and gold/silver/platinum metallic accents representing repair and resilience.
+This document outlines the design principles and visual language for the Choir application, focusing on a luxurious futuristic aesthetic with holographic metallics, deep space backgrounds, and premium tech-inspired elements.
 
 ## Core Design Principles
 
-1. **Industrial Minimalism**: Focus on essential content with clean, purposeful interfaces that embrace the beauty of worn, functional materials.
-2. **Carbon Fiber Texture**: Woven carbon fiber patterns as the foundational texture, creating depth through subtle directional weaving.
-3. **Kintsugi Philosophy**: Embrace imperfection and repair as beauty - metallic veining and crack patterns that highlight resilience and growth.
-4. **Typography-Focused**: Clear typographic hierarchy with emphasis on readability against dark, textured backgrounds.
-5. **Metallic Accents**: Gold, silver, and platinum gradients as accent elements representing value, repair, and precious connections.
+1. **Luxurious Minimalism**: Ultra-clean interfaces with premium materials and sophisticated spacing that exude high-end quality.
+2. **Holographic Metallics**: Iridescent gradients that shift and shimmer, creating depth through light interaction and color temperature changes.
+3. **Futuristic Precision**: Perfect geometric forms with subtle technological details that suggest advanced engineering and craftsmanship.
+4. **Typography Excellence**: Crisp, modern typography with subtle metallic treatments and perfect optical spacing.
+5. **Ambient Lighting**: Soft glows, edge lighting, and particle effects that create atmosphere without distraction.
 
 ## Color Palette
 
 ### Base Colors
-- **Background**: Deep charcoal (#1a1a1a) with carbon fiber weave texture
-- **Surface**: Matte black (#0d0d0d) with subtle directional grain
-- **Text Primary**: Platinum white (#f5f5f5) with subtle metallic sheen
-- **Text Secondary**: Silver gray (#a8a8a8) with muted luminosity
-- **Shadows**: Pure black with medium opacity (0.3-0.6) for depth
-- **Highlights**: Warm white (#fafafa) with very low opacity (0.1-0.2)
+- **Background**: Deep space black (#0a0a0a) with micro-texture patterns
+- **Surface**: Rich obsidian (#121212) with subtle holographic undertones
+- **Text Primary**: Pure platinum (#f8f8f8) with crisp clarity
+- **Text Secondary**: Titanium gray (#b8b8b8) with subtle luminosity
+- **Shadows**: Void black with soft opacity (0.2-0.4) for floating effects
+- **Highlights**: Cool white (#ffffff) with very low opacity (0.05-0.15)
 
-### Metallic Accent Gradients
-- **Gold Kintsugi** (#ffd700 → #b8860b): Primary repair lines and value indicators
-- **Silver Veining** (#c0c0c0 → #808080): Secondary connections and pathways
-- **Platinum Highlights** (#e5e4e2 → #b8b8b8): Premium accents and active states
-- **Copper Patina** (#b87333 → #8b4513): Aged elements and worn surfaces
+### Holographic Accent Gradients
+- **Platinum Hologram** (#f8f8f8 → #e0e0e0 → #c8c8c8): Primary luxury accents with rainbow undertones
+- **Titanium Shift** (#d4d4d4 → #a8a8a8 → #8c8c8c): Secondary elements with blue-purple shifts
+- **Chrome Reflection** (#ffffff → #f0f0f0 → #e8e8e8): Premium highlights with pink-gold shifts
+- **Iridescent Edge** (#e8e8ff → #ffe8ff → #fff8e8): Subtle rainbow edge lighting
 
 ### Status Colors
-- **Error/Damage**: Deep red (#8b0000) with copper patina gradient
-- **Warning/Caution**: Amber (#ffbf00) with gold accent
-- **Success/Repair**: Emerald (#50c878) with silver veining
+- **Error/Alert**: Crimson hologram (#ff3366) with red-orange shift
+- **Warning/Caution**: Amber hologram (#ffaa00) with gold-yellow shift
+- **Success/Confirm**: Emerald hologram (#00ff88) with green-cyan shift
 
 ## Typography
 

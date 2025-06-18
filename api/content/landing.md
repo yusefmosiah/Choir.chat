@@ -88,19 +88,24 @@
 <style>
 .choir-hero-section {
   text-align: center;
-  padding: 3rem 1rem;
-  margin-bottom: 2rem;
-  background: linear-gradient(135deg, rgba(13, 13, 13, 0.95), rgba(26, 26, 26, 0.9));
-  color: var(--text-color-primary, #f5f5f5);
-  border-radius: var(--border-radius-lg, 20px);
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8);
+  padding: 4rem 2rem;
+  margin-bottom: 3rem;
+  background: linear-gradient(135deg, rgba(18, 18, 18, 0.98), rgba(10, 10, 10, 0.95));
+  color: var(--text-color-primary, #f8f8f8);
+  border-radius: var(--border-radius-lg, 32px);
+  box-shadow:
+    0 32px 64px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(248, 248, 248, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
   position: relative;
   overflow: hidden;
-  /* Carbon fiber texture */
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  /* Luxury micro-texture */
   background-image:
-    linear-gradient(45deg, rgba(0, 0, 0, 0.9) 25%, transparent 25%),
-    linear-gradient(-45deg, rgba(0, 0, 0, 0.9) 25%, transparent 25%);
-  background-size: 4px 4px, 4px 4px;
+    radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.008) 0%, transparent 50%, rgba(255, 255, 255, 0.008) 100%);
+  background-size: 20px 20px, 100% 100%;
 }
 
 .choir-hero-section::before {
@@ -110,48 +115,66 @@
   left: 0;
   right: 0;
   bottom: 0;
-  border-radius: var(--border-radius-lg, 20px);
-  padding: 2px;
+  border-radius: var(--border-radius-lg, 32px);
+  padding: 1px;
   background:
-    /* Irregular patina border with breaks */
-    linear-gradient(90deg,
-      #ffd700 0%, #ffd700 12%, transparent 12%, transparent 18%,
-      #c0c0c0 18%, #c0c0c0 32%, transparent 32%, transparent 38%,
-      #e5e4e2 38%, #e5e4e2 55%, transparent 55%, transparent 62%,
-      #b87333 62%, #b87333 78%, transparent 78%, transparent 85%,
-      #ffd700 85%, #ffd700 100%);
+    /* Smooth holographic border */
+    linear-gradient(45deg,
+      #e8e8ff 0%, #f8f8f8 25%, #ffffff 50%, #f0f0f0 75%, #fff8e8 100%);
+  background-size: 200% 200%;
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   mask-composite: exclude;
-  opacity: 0.4;
+  opacity: 0.3;
   z-index: -1;
+  animation: holographicShift 6s ease-in-out infinite;
+}
+
+.choir-hero-section::after {
+  content: '';
+  position: absolute;
+  top: -40px;
+  left: -40px;
+  right: -40px;
+  bottom: -40px;
+  background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.05) 0%, transparent 70%);
+  border-radius: var(--border-radius-lg, 32px);
+  z-index: -2;
+  animation: ambientPulse 4s ease-in-out infinite;
 }
 
 /* Remove crack overlay from hero section */
 
 .choir-hero-section h2 {
-  font-size: 2.5rem;
-  margin-bottom: 1rem;
-  background: linear-gradient(90deg, #ffd700, #c0c0c0, #e5e4e2);
+  font-size: 3.5rem;
+  font-weight: 200;
+  margin-bottom: 1.5rem;
+  background: linear-gradient(135deg, #ffffff, #f8f8f8, #e0e0e0, #f0f0f0);
+  background-size: 200% 200%;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
   display: inline-block;
-  text-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+  text-shadow: 0 0 30px rgba(248, 248, 248, 0.2);
   position: relative;
   z-index: 2;
+  letter-spacing: -0.02em;
+  animation: holographicShift 8s ease-in-out infinite;
 }
 
 .choir-tagline {
-  font-size: 1.2rem;
-  margin-bottom: 2rem;
-  max-width: 800px;
+  font-size: 1.4rem;
+  font-weight: 300;
+  margin-bottom: 3rem;
+  max-width: 900px;
   margin-left: auto;
   margin-right: auto;
-  color: var(--text-color-secondary, #a8a8a8);
+  color: var(--text-color-secondary, #b8b8b8);
   position: relative;
   z-index: 2;
+  line-height: 1.6;
+  letter-spacing: 0.01em;
 }
 
 .choir-cta-buttons {
@@ -171,17 +194,21 @@
 }
 
 .choir-cta-button.choir-primary {
-  background: linear-gradient(135deg, rgba(13, 13, 13, 0.95), rgba(26, 26, 26, 0.9));
-  color: #f5f5f5;
-  border: 1px solid rgba(192, 192, 192, 0.3);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.8);
+  background: linear-gradient(135deg, rgba(18, 18, 18, 0.98), rgba(10, 10, 10, 0.95));
+  color: #f8f8f8;
+  border: 1px solid rgba(248, 248, 248, 0.1);
+  box-shadow:
+    0 16px 32px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(255, 255, 255, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
   position: relative;
   overflow: hidden;
-  /* Carbon fiber texture */
-  background-image:
-    linear-gradient(45deg, rgba(0, 0, 0, 0.9) 25%, transparent 25%),
-    linear-gradient(-45deg, rgba(0, 0, 0, 0.9) 25%, transparent 25%);
-  background-size: 2px 2px, 2px 2px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  font-weight: 400;
+  letter-spacing: 0.025em;
+  padding: 20px 40px;
+  border-radius: 24px;
 }
 
 .choir-cta-button.choir-primary::before {
@@ -191,21 +218,30 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(192, 192, 192, 0.08));
+  background: linear-gradient(135deg,
+    rgba(232, 232, 255, 0.1),
+    rgba(248, 248, 248, 0.08),
+    rgba(255, 248, 232, 0.1));
+  background-size: 200% 200%;
   opacity: 0;
-  transition: opacity 0.4s ease;
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: holographicShift 4s ease-in-out infinite;
 }
 
 .choir-cta-button.choir-primary:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.9);
-  border-color: #ffd700;
-  color: #ffd700;
-  text-shadow: 0 0 8px rgba(255, 215, 0, 0.4);
+  transform: translateY(-4px) scale(1.02);
+  box-shadow:
+    0 24px 48px rgba(0, 0, 0, 0.8),
+    0 0 0 1px rgba(248, 248, 248, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15),
+    0 0 20px rgba(248, 248, 248, 0.1);
+  border-color: rgba(248, 248, 248, 0.3);
+  color: #ffffff;
+  text-shadow: 0 0 12px rgba(248, 248, 248, 0.3);
 }
 
 .choir-cta-button.choir-primary:hover::before {
-  opacity: 1;
+  opacity: 0.15;
 }
 
 .choir-features-grid {
