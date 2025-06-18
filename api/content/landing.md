@@ -90,22 +90,57 @@
   text-align: center;
   padding: 3rem 1rem;
   margin-bottom: 2rem;
-  background: linear-gradient(135deg, rgba(0, 200, 83, 0.1), rgba(33, 150, 243, 0.1), rgba(156, 39, 176, 0.1));
-  color: var(--text-color-primary, #1a1a1a);
+  background: linear-gradient(135deg, rgba(13, 13, 13, 0.95), rgba(26, 26, 26, 0.9));
+  color: var(--text-color-primary, #f5f5f5);
   border-radius: var(--border-radius-lg, 20px);
-  backdrop-filter: blur(10px);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.3));
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8);
+  position: relative;
+  overflow: hidden;
+  /* Carbon fiber texture */
+  background-image:
+    linear-gradient(45deg, rgba(0, 0, 0, 0.9) 25%, transparent 25%),
+    linear-gradient(-45deg, rgba(0, 0, 0, 0.9) 25%, transparent 25%);
+  background-size: 4px 4px, 4px 4px;
 }
+
+.choir-hero-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: var(--border-radius-lg, 20px);
+  padding: 2px;
+  background:
+    /* Irregular patina border with breaks */
+    linear-gradient(90deg,
+      #ffd700 0%, #ffd700 12%, transparent 12%, transparent 18%,
+      #c0c0c0 18%, #c0c0c0 32%, transparent 32%, transparent 38%,
+      #e5e4e2 38%, #e5e4e2 55%, transparent 55%, transparent 62%,
+      #b87333 62%, #b87333 78%, transparent 78%, transparent 85%,
+      #ffd700 85%, #ffd700 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  opacity: 0.4;
+  z-index: -1;
+}
+
+/* Remove crack overlay from hero section */
 
 .choir-hero-section h2 {
   font-size: 2.5rem;
   margin-bottom: 1rem;
-  background: linear-gradient(90deg, var(--gradient-green, #00C853), var(--gradient-blue, #2196F3), var(--gradient-purple, #9C27B0));
+  background: linear-gradient(90deg, #ffd700, #c0c0c0, #e5e4e2);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
   display: inline-block;
+  text-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+  position: relative;
+  z-index: 2;
 }
 
 .choir-tagline {
@@ -114,7 +149,9 @@
   max-width: 800px;
   margin-left: auto;
   margin-right: auto;
-  color: var(--text-color-secondary, #4a4a4a);
+  color: var(--text-color-secondary, #a8a8a8);
+  position: relative;
+  z-index: 2;
 }
 
 .choir-cta-buttons {
@@ -134,15 +171,41 @@
 }
 
 .choir-cta-button.choir-primary {
-  background: linear-gradient(135deg, var(--gradient-blue, #2196F3), var(--gradient-purple, #9C27B0));
-  color: white;
-  border: none;
-  box-shadow: 0 4px 15px rgba(33, 150, 243, 0.3);
+  background: linear-gradient(135deg, rgba(13, 13, 13, 0.95), rgba(26, 26, 26, 0.9));
+  color: #f5f5f5;
+  border: 1px solid rgba(192, 192, 192, 0.3);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.8);
+  position: relative;
+  overflow: hidden;
+  /* Carbon fiber texture */
+  background-image:
+    linear-gradient(45deg, rgba(0, 0, 0, 0.9) 25%, transparent 25%),
+    linear-gradient(-45deg, rgba(0, 0, 0, 0.9) 25%, transparent 25%);
+  background-size: 2px 2px, 2px 2px;
+}
+
+.choir-cta-button.choir-primary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(192, 192, 192, 0.08));
+  opacity: 0;
+  transition: opacity 0.4s ease;
 }
 
 .choir-cta-button.choir-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(33, 150, 243, 0.4);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.9);
+  border-color: #ffd700;
+  color: #ffd700;
+  text-shadow: 0 0 8px rgba(255, 215, 0, 0.4);
+}
+
+.choir-cta-button.choir-primary:hover::before {
+  opacity: 1;
 }
 
 .choir-features-grid {
@@ -153,44 +216,86 @@
 }
 
 .choir-feature-card {
-  background: var(--glass-bg, rgba(255, 255, 255, 0.7));
+  background: rgba(13, 13, 13, 0.95);
   border-radius: var(--border-radius-md, 16px);
   padding: 1.5rem;
-  box-shadow: 0 4px 6px var(--glass-shadow, rgba(0, 0, 0, 0.1));
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  backdrop-filter: blur(5px);
-  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.3));
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.8);
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
+  border: 1px solid rgba(128, 128, 128, 0.3);
+  position: relative;
+  /* Carbon fiber texture */
+  background-image:
+    linear-gradient(90deg, rgba(0, 0, 0, 0.9) 50%, rgba(128, 128, 128, 0.05) 50%),
+    linear-gradient(0deg, rgba(0, 0, 0, 0.9) 50%, rgba(128, 128, 128, 0.05) 50%);
+  background-size: 2px 2px, 2px 2px;
 }
 
 .choir-feature-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  transform: translateY(-8px);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.9);
+  border-color: rgba(255, 215, 0, 0.5);
 }
 
 .choir-feature-card h3 {
-  background: linear-gradient(90deg, var(--gradient-green, #00C853), var(--gradient-blue, #2196F3));
+  background: linear-gradient(90deg, #ffd700, #c0c0c0);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
   margin-bottom: 1rem;
   font-size: 1.4rem;
   display: inline-block;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
+}
+
+.choir-feature-card p {
+  color: #a8a8a8;
 }
 
 .choir-future-section {
-  background: var(--glass-bg, rgba(255, 255, 255, 0.7));
+  background: rgba(13, 13, 13, 0.95);
   padding: 3rem 2rem;
   border-radius: var(--border-radius-lg, 20px);
   margin: 3rem 0;
-  backdrop-filter: blur(5px);
-  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.3));
-  box-shadow: 0 4px 15px var(--glass-shadow, rgba(0, 0, 0, 0.1));
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.8);
+  position: relative;
+  /* Carbon fiber texture */
+  background-image:
+    linear-gradient(45deg, rgba(0, 0, 0, 0.9) 25%, transparent 25%),
+    linear-gradient(-45deg, rgba(0, 0, 0, 0.9) 25%, transparent 25%);
+  background-size: 4px 4px, 4px 4px;
 }
+
+.choir-future-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: var(--border-radius-lg, 20px);
+  padding: 2px;
+  background:
+    /* Irregular silver patina border */
+    linear-gradient(45deg,
+      #c0c0c0 0%, #c0c0c0 15%, transparent 15%, transparent 22%,
+      #e5e4e2 22%, #e5e4e2 40%, transparent 40%, transparent 48%,
+      #b87333 48%, #b87333 65%, transparent 65%, transparent 72%,
+      #808080 72%, #808080 88%, transparent 88%, transparent 95%,
+      #c0c0c0 95%, #c0c0c0 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  opacity: 0.3;
+  z-index: -1;
+}
+
+/* Remove the prominent diagonal line from future section */
 
 .choir-future-section h2 {
   text-align: center;
   margin-bottom: 2rem;
-  background: linear-gradient(90deg, var(--gradient-blue, #2196F3), var(--gradient-purple, #9C27B0));
+  background: linear-gradient(90deg, #c0c0c0, #e5e4e2);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -198,50 +303,108 @@
   margin-left: auto;
   margin-right: auto;
   width: fit-content;
+  text-shadow: 0 0 12px rgba(192, 192, 192, 0.3);
+  position: relative;
+  z-index: 2;
 }
 
 .choir-future-features {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 1.5rem;
+  position: relative;
+  z-index: 2;
 }
 
 .choir-future-feature {
-  background: white;
+  background: rgba(26, 26, 26, 0.9);
   padding: 1.5rem;
   border-radius: var(--border-radius-sm, 12px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  transition: transform 0.3s ease;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.6);
+  transition: transform 0.4s ease;
+  border: 1px solid rgba(128, 128, 128, 0.2);
+  /* Subtle carbon fiber texture */
+  background-image:
+    linear-gradient(90deg, rgba(0, 0, 0, 0.9) 50%, rgba(128, 128, 128, 0.03) 50%);
+  background-size: 1px 1px;
 }
 
 .choir-future-feature:hover {
-  transform: translateY(-3px);
+  transform: translateY(-5px);
+  border-color: rgba(255, 215, 0, 0.4);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.8);
 }
 
 .choir-future-feature h4 {
-  color: var(--gradient-purple, #9C27B0);
+  color: #e5e4e2;
   margin-bottom: 0.5rem;
+  text-shadow: 0 0 6px rgba(229, 228, 226, 0.2);
+}
+
+.choir-future-feature p {
+  color: #a8a8a8;
 }
 
 .choir-cta-section {
   text-align: center;
   padding: 3rem 1rem;
-  background: linear-gradient(135deg, rgba(0, 200, 83, 0.1), rgba(33, 150, 243, 0.1), rgba(156, 39, 176, 0.1));
-  color: var(--text-color-primary, #1a1a1a);
+  background: linear-gradient(135deg, rgba(13, 13, 13, 0.95), rgba(26, 26, 26, 0.9));
+  color: var(--text-color-primary, #f5f5f5);
   border-radius: var(--border-radius-lg, 20px);
   margin-top: 3rem;
-  backdrop-filter: blur(10px);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.3));
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8);
+  position: relative;
+  overflow: hidden;
+  /* Carbon fiber texture */
+  background-image:
+    linear-gradient(45deg, rgba(0, 0, 0, 0.9) 25%, transparent 25%),
+    linear-gradient(-45deg, rgba(0, 0, 0, 0.9) 25%, transparent 25%);
+  background-size: 4px 4px, 4px 4px;
 }
+
+.choir-cta-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: var(--border-radius-lg, 20px);
+  padding: 2px;
+  background:
+    /* Irregular platinum patina border */
+    linear-gradient(135deg,
+      #e5e4e2 0%, #e5e4e2 18%, transparent 18%, transparent 25%,
+      #ffd700 25%, #ffd700 42%, transparent 42%, transparent 48%,
+      #c0c0c0 48%, #c0c0c0 65%, transparent 65%, transparent 72%,
+      #b87333 72%, #b87333 85%, transparent 85%, transparent 92%,
+      #e5e4e2 92%, #e5e4e2 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  opacity: 0.4;
+  z-index: -1;
+}
+
+/* Remove the prominent diagonal line from CTA section */
 
 .choir-cta-section h2 {
   margin-bottom: 1rem;
-  background: linear-gradient(90deg, var(--gradient-green, #00C853), var(--gradient-blue, #2196F3), var(--gradient-purple, #9C27B0));
+  background: linear-gradient(90deg, #ffd700, #c0c0c0, #e5e4e2);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
   display: inline-block;
+  text-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+  position: relative;
+  z-index: 2;
+}
+
+.choir-cta-section p {
+  color: #a8a8a8;
+  position: relative;
+  z-index: 2;
 }
 
 @media (max-width: 768px) {

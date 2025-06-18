@@ -1,48 +1,49 @@
 # Choir Design Style Guide
 
-This document outlines the design principles and visual language for the Choir application, focusing on a minimal, neumorphic, glass-like interface with angular green/blue/purple gradients as accents.
+This document outlines the design principles and visual language for the Choir application, focusing on a carbon fiber kintsugi aesthetic with black/charcoal woven textures, worn patina effects, and gold/silver/platinum metallic accents representing repair and resilience.
 
 ## Core Design Principles
 
-1. **Minimalism**: Focus on essential content and functionality with clean, uncluttered interfaces.
-2. **Neumorphism**: Subtle shadows and highlights to create a soft, tactile feel that appears to extrude from the background.
-3. **Glass/Blur Effects**: Translucent surfaces with blur effects to create depth and hierarchy.
-4. **Typography-Focused**: Clear typographic hierarchy with emphasis on readability.
-5. **Angular Gradients**: Distinctive green/blue/purple angular gradients as accent elements for interactive and dynamic components.
+1. **Industrial Minimalism**: Focus on essential content with clean, purposeful interfaces that embrace the beauty of worn, functional materials.
+2. **Carbon Fiber Texture**: Woven carbon fiber patterns as the foundational texture, creating depth through subtle directional weaving.
+3. **Kintsugi Philosophy**: Embrace imperfection and repair as beauty - metallic veining and crack patterns that highlight resilience and growth.
+4. **Typography-Focused**: Clear typographic hierarchy with emphasis on readability against dark, textured backgrounds.
+5. **Metallic Accents**: Gold, silver, and platinum gradients as accent elements representing value, repair, and precious connections.
 
 ## Color Palette
 
 ### Base Colors
-- **Background**: System background with transparency (opacity 0.7-0.9)
-- **Text**: Primary and secondary system colors
-- **Shadows**: Black with low opacity (0.05-0.15)
-- **Highlights**: White with low opacity (0.2-0.3)
+- **Background**: Deep charcoal (#1a1a1a) with carbon fiber weave texture
+- **Surface**: Matte black (#0d0d0d) with subtle directional grain
+- **Text Primary**: Platinum white (#f5f5f5) with subtle metallic sheen
+- **Text Secondary**: Silver gray (#a8a8a8) with muted luminosity
+- **Shadows**: Pure black with medium opacity (0.3-0.6) for depth
+- **Highlights**: Warm white (#fafafa) with very low opacity (0.1-0.2)
 
-### Accent Gradient
-- **Green** (#00C853) at 0.0 location
-- **Blue** (#2196F3) at 0.25 location
-- **Purple** (#9C27B0) at 0.5 location
-- **Blue** (#2196F3) at 0.75 location
-- **Green** (#00C853) at 1.0 location
+### Metallic Accent Gradients
+- **Gold Kintsugi** (#ffd700 → #b8860b): Primary repair lines and value indicators
+- **Silver Veining** (#c0c0c0 → #808080): Secondary connections and pathways
+- **Platinum Highlights** (#e5e4e2 → #b8b8b8): Premium accents and active states
+- **Copper Patina** (#b87333 → #8b4513): Aged elements and worn surfaces
 
 ### Status Colors
-- **Error/Cancel**: Red (#F44336) with angular gradient to orange
-- **Warning**: Orange (#FF9800) with reduced opacity
-- **Success**: Green (#4CAF50) with reduced opacity
+- **Error/Damage**: Deep red (#8b0000) with copper patina gradient
+- **Warning/Caution**: Amber (#ffbf00) with gold accent
+- **Success/Repair**: Emerald (#50c878) with silver veining
 
 ## Typography
 
-- **Headings**: System font, medium weight, sizes 20-42pt
-- **Body Text**: System font, regular weight, sizes 14-16pt
-- **Captions/Secondary**: System font, light weight, sizes 12-14pt
-- **Emphasis**: Achieved through weight and size rather than color when possible
+- **Headings**: System font, medium weight, sizes 20-42pt with subtle metallic sheen
+- **Body Text**: System font, regular weight, sizes 14-16pt in platinum white
+- **Captions/Secondary**: System font, light weight, sizes 12-14pt in silver gray
+- **Emphasis**: Achieved through metallic gradients and weight rather than bright colors
 
 ## Component Styles
 
 ### Cards & Containers
 
 ```swift
-// Neumorphic glass card with gradient background
+// Carbon fiber card with kintsugi metallic veining
 VStack {
     // Content here
 }
@@ -50,120 +51,110 @@ VStack {
 .padding(.horizontal, 25)
 .background(
     ZStack {
-        // Angular gradient shadow (optional, for active/loading states)
+        // Carbon fiber base texture
         RoundedRectangle(cornerRadius: 20)
-            .fill(
-                AngularGradient(
+            .fill(Color(red: 0.05, green: 0.05, blue: 0.05)) // Deep charcoal
+            .overlay(
+                // Subtle carbon fiber weave pattern
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(
+                        LinearGradient(
+                            gradient: Gradient(stops: [
+                                .init(color: Color.black.opacity(0.8), location: 0.0),
+                                .init(color: Color.gray.opacity(0.1), location: 0.5),
+                                .init(color: Color.black.opacity(0.8), location: 1.0),
+                            ]),
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .blendMode(.overlay)
+            )
+
+        // Kintsugi metallic veining (for active/special states)
+        RoundedRectangle(cornerRadius: 20)
+            .stroke(
+                LinearGradient(
                     gradient: Gradient(stops: [
-                        .init(color: .green, location: 0.0),
-                        .init(color: .blue, location: 0.25),
-                        .init(color: .purple, location: 0.5),
-                        .init(color: .blue, location: 0.75),
-                        .init(color: .green, location: 1.0),
+                        .init(color: Color(red: 1.0, green: 0.84, blue: 0.0).opacity(0.8), location: 0.0), // Gold
+                        .init(color: Color(red: 0.75, green: 0.75, blue: 0.75).opacity(0.6), location: 0.5), // Silver
+                        .init(color: Color(red: 0.9, green: 0.89, blue: 0.89).opacity(0.7), location: 1.0), // Platinum
                     ]),
-                    center: .center,
-                    angle: .degrees(gradientRotation)
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
                 )
             )
-            .blur(radius: 8)
-            .opacity(0.7)
-            .scaleEffect(1.05)
-            .offset(y: 2)
-        
-        // Glass card background with neumorphic effect
-        RoundedRectangle(cornerRadius: 20)
-            .fill(Color(UIColor.systemBackground).opacity(0.7))
-            // Add a subtle inner shadow for depth
-            .overlay(
-                RoundedRectangle(cornerRadius: 20)
-                    .stroke(Color.white.opacity(0.3), lineWidth: 1)
-                    .blur(radius: 1)
-                    .offset(x: 0, y: 1)
-                    .mask(RoundedRectangle(cornerRadius: 20).fill(LinearGradient(
-                        gradient: Gradient(colors: [Color.black, Color.clear]),
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )))
-            )
-            .shadow(color: Color.black.opacity(0.15), radius: 10, x: 0, y: 5)
-            .blur(radius: 0.5)
+            .blur(radius: 1)
+            .opacity(0.6)
     }
 )
-.overlay(
-    RoundedRectangle(cornerRadius: 20)
-        .stroke(
-            LinearGradient(
-                gradient: Gradient(colors: [Color.white.opacity(0.3), Color.gray.opacity(0.1)]),
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            ),
-            lineWidth: 1
-        )
-        .blur(radius: 0.5)
-)
+.shadow(color: Color.black.opacity(0.6), radius: 15, x: 0, y: 8)
 ```
 
 ### Buttons
 
 ```swift
-// Standard button with gradient background (for primary actions)
+// Primary button with metallic kintsugi accent (for primary actions)
 Button(action: {}) {
     Text("Button Text")
         .font(.system(size: 16, weight: .medium))
-        .foregroundColor(.white)
+        .foregroundColor(Color(red: 0.96, green: 0.96, blue: 0.96)) // Platinum white
         .frame(maxWidth: .infinity)
         .padding(.vertical, 14)
 }
 .background(
     ZStack {
-        // Angular gradient background
+        // Carbon fiber base
+        RoundedRectangle(cornerRadius: 14)
+            .fill(Color(red: 0.08, green: 0.08, blue: 0.08)) // Matte black
+
+        // Metallic gradient overlay
         RoundedRectangle(cornerRadius: 14)
             .fill(
-                AngularGradient(
+                LinearGradient(
                     gradient: Gradient(stops: [
-                        .init(color: .green, location: 0.0),
-                        .init(color: .blue, location: 0.25),
-                        .init(color: .purple, location: 0.5),
-                        .init(color: .blue, location: 0.75),
-                        .init(color: .green, location: 1.0),
+                        .init(color: Color(red: 1.0, green: 0.84, blue: 0.0).opacity(0.8), location: 0.0), // Gold
+                        .init(color: Color(red: 0.75, green: 0.75, blue: 0.75).opacity(0.6), location: 0.5), // Silver
+                        .init(color: Color(red: 0.9, green: 0.89, blue: 0.89).opacity(0.7), location: 1.0), // Platinum
                     ]),
-                    center: .center
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
                 )
             )
-            .blur(radius: 4)
-            .opacity(0.8)
-        
-        // Glass overlay
-        RoundedRectangle(cornerRadius: 14)
-            .fill(Color(UIColor.systemBackground).opacity(0.3))
-            .blur(radius: 0.5)
+            .blendMode(.overlay)
+            .opacity(0.9)
     }
 )
+.shadow(color: Color.black.opacity(0.5), radius: 8, x: 0, y: 4)
 
-// Secondary button with stroke (for secondary actions)
+// Secondary button with worn carbon fiber texture (for secondary actions)
 Button(action: {}) {
     Text("Button Text")
         .font(.system(size: 16, weight: .medium))
-        .foregroundColor(.primary)
+        .foregroundColor(Color(red: 0.66, green: 0.66, blue: 0.66)) // Silver gray
         .frame(maxWidth: .infinity)
         .padding(.vertical, 14)
 }
 .background(
     RoundedRectangle(cornerRadius: 12)
-        .stroke(Color.gray.opacity(0.3), lineWidth: 1)
-        .blur(radius: 1)
+        .fill(Color(red: 0.05, green: 0.05, blue: 0.05)) // Deep charcoal
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color(red: 0.5, green: 0.5, blue: 0.5).opacity(0.4), lineWidth: 1) // Silver stroke
+        )
 )
+.shadow(color: Color.black.opacity(0.3), radius: 4, x: 0, y: 2)
 ```
 
 ### Input Fields
 
 ```swift
-// Text input with neumorphic styling
+// Text input with carbon fiber texture and metallic focus accent
 ZStack(alignment: .topLeading) {
     // Placeholder text when empty
     if text.isEmpty {
         Text("Placeholder text...")
-            .foregroundColor(.gray.opacity(0.8))
+            .foregroundColor(Color(red: 0.66, green: 0.66, blue: 0.66).opacity(0.6)) // Silver gray
             .padding(.horizontal, 12)
             .padding(.vertical, 10)
     }
@@ -174,117 +165,144 @@ ZStack(alignment: .topLeading) {
         .padding(.vertical, 4)
         .scrollContentBackground(.hidden)
         .background(Color.clear)
+        .foregroundColor(Color(red: 0.96, green: 0.96, blue: 0.96)) // Platinum white
 }
 .padding(.vertical, 4)
 .background(
     ZStack {
-        // Glass background with neumorphic effect
+        // Carbon fiber base
         RoundedRectangle(cornerRadius: 16)
-            .fill(Color(UIColor.systemBackground).opacity(0.7))
-            // Add a subtle inner shadow for depth
+            .fill(Color(red: 0.05, green: 0.05, blue: 0.05)) // Deep charcoal
             .overlay(
+                // Subtle directional grain pattern
                 RoundedRectangle(cornerRadius: 16)
-                    .stroke(Color.white.opacity(0.3), lineWidth: 1)
-                    .blur(radius: 1)
-                    .offset(x: 0, y: 1)
-                    .mask(RoundedRectangle(cornerRadius: 16).fill(LinearGradient(
-                        gradient: Gradient(colors: [Color.black, Color.clear]),
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )))
+                    .fill(
+                        LinearGradient(
+                            gradient: Gradient(stops: [
+                                .init(color: Color.black.opacity(0.9), location: 0.0),
+                                .init(color: Color.gray.opacity(0.05), location: 0.5),
+                                .init(color: Color.black.opacity(0.9), location: 1.0),
+                            ]),
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+                    .blendMode(.overlay)
             )
-            .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
     }
 )
 .overlay(
     RoundedRectangle(cornerRadius: 16)
         .stroke(
             LinearGradient(
-                gradient: Gradient(colors: [Color.white.opacity(0.3), Color.gray.opacity(0.1)]),
+                gradient: Gradient(colors: [
+                    Color(red: 0.5, green: 0.5, blue: 0.5).opacity(0.3), // Silver
+                    Color(red: 0.3, green: 0.3, blue: 0.3).opacity(0.1)  // Dark gray
+                ]),
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             ),
             lineWidth: 1
         )
-        .blur(radius: 0.5)
 )
+.shadow(color: Color.black.opacity(0.4), radius: 6, x: 0, y: 3)
 ```
 
 ## Animation Guidelines
 
-### Gradient Rotation
+### Metallic Shimmer Animation
 
-For dynamic elements that need to indicate processing or activity:
+For dynamic elements that need to indicate processing or activity, use subtle metallic shimmer effects:
 
 ```swift
 // Animation state
-@State private var gradientRotation: Double = 0
-@State private var rotationTimer: Timer?
+@State private var shimmerOffset: CGFloat = -200
+@State private var shimmerTimer: Timer?
 
-// Start rotation animation
-private func startRotationTimer() {
+// Start shimmer animation
+private func startShimmerAnimation() {
     // Stop any existing timer first
-    stopRotationTimer()
+    stopShimmerAnimation()
 
-    // Reset rotation to 0
-    gradientRotation = 0
+    // Reset shimmer position
+    shimmerOffset = -200
 
-    // Create a new timer that updates the rotation angle
-    rotationTimer = Timer.scheduledTimer(withTimeInterval: 0.02, repeats: true) { [self] _ in
-        // Update rotation on the main thread
+    // Create a subtle shimmer effect
+    shimmerTimer = Timer.scheduledTimer(withTimeInterval: 0.05, repeats: true) { [self] _ in
         DispatchQueue.main.async {
-            // Increment rotation by 3 degrees each time for faster rotation
-            withAnimation(.linear(duration: 0.02)) {
-                self.gradientRotation = (self.gradientRotation + 3).truncatingRemainder(dividingBy: 360)
+            withAnimation(.linear(duration: 0.05)) {
+                self.shimmerOffset += 8
+                if self.shimmerOffset > 400 {
+                    self.shimmerOffset = -200
+                }
             }
         }
     }
 }
 
-private func stopRotationTimer() {
-    rotationTimer?.invalidate()
-    rotationTimer = nil
+private func stopShimmerAnimation() {
+    shimmerTimer?.invalidate()
+    shimmerTimer = nil
 }
+
+// Shimmer overlay for active elements
+.overlay(
+    Rectangle()
+        .fill(
+            LinearGradient(
+                gradient: Gradient(stops: [
+                    .init(color: Color.clear, location: 0.0),
+                    .init(color: Color(red: 1.0, green: 0.84, blue: 0.0).opacity(0.3), location: 0.5), // Gold
+                    .init(color: Color.clear, location: 1.0),
+                ]),
+                startPoint: .leading,
+                endPoint: .trailing
+            )
+        )
+        .offset(x: shimmerOffset)
+        .mask(RoundedRectangle(cornerRadius: 16))
+)
 ```
 
 ### Transitions
 
-- Use `.opacity` transitions for elements appearing/disappearing
-- Use `.easeInOut` with short durations (0.15-0.2s) for size changes
-- Use `.spring` with medium response (0.3s) and dampingFraction (0.8) for more natural movements
+- Use `.opacity` transitions for elements appearing/disappearing with slower, more deliberate timing
+- Use `.easeInOut` with medium durations (0.25-0.35s) for size changes to feel more substantial
+- Use `.spring` with slower response (0.4s) and higher dampingFraction (0.9) for weighty, industrial feel
 
 ## Accessibility Considerations
 
-- Maintain sufficient contrast between text and backgrounds
+- Maintain high contrast between platinum/silver text and dark carbon fiber backgrounds
 - Ensure interactive elements have adequate touch targets (minimum 44x44 points)
-- Support dynamic type for text elements
-- Test with VoiceOver and other accessibility features
-- Ensure the design works well in both light and dark mode
+- Support dynamic type for text elements with appropriate metallic color adjustments
+- Test with VoiceOver and other accessibility features, ensuring metallic accents don't interfere
+- Design primarily for dark mode aesthetic while maintaining readability
 
 ## Implementation Examples
 
 ### OnboardingView Authentication Card
 
-The authentication card in the OnboardingView demonstrates the core principles of this design language:
+The authentication card demonstrates the carbon fiber kintsugi design principles:
 
-1. Minimal, typography-focused content
-2. Neumorphic glass card with subtle shadows and highlights
-3. Angular green/blue/purple gradient as a dynamic background element
-4. Animated rotation to indicate processing
+1. Industrial minimalism with typography-focused content
+2. Carbon fiber textured card with deep shadows and metallic highlights
+3. Gold kintsugi veining as dynamic background element indicating value and connection
+4. Subtle metallic shimmer animation to indicate processing
 
 ### ThreadInputBar
 
-The ThreadInputBar implements these design principles for an interactive input component:
+The ThreadInputBar implements carbon fiber kintsugi principles for interactive input:
 
-1. Glass-like text input field with neumorphic styling
-2. Circular send button with the signature angular gradient
-3. Animated cancel button with red/orange gradient during processing
-4. Subtle glass-like notifications for warnings and status messages
+1. Carbon fiber textured input field with worn, patina'd styling
+2. Circular send button with gold/silver/platinum metallic gradient
+3. Animated copper patina button with deep red gradient during processing
+4. Subtle metallic notifications with kintsugi-style crack patterns for status messages
 
 ## Best Practices
 
-1. **Consistency**: Apply these design principles consistently across the app
-2. **Performance**: Be mindful of blur effects and animations on older devices
-3. **Simplicity**: Keep interfaces clean and focused on content
-4. **Feedback**: Provide clear visual feedback for user interactions
-5. **Adaptability**: Ensure designs work well across different device sizes and orientations
+1. **Consistency**: Apply carbon fiber kintsugi principles consistently across the app
+2. **Performance**: Be mindful of texture overlays and metallic effects on older devices
+3. **Industrial Beauty**: Embrace the beauty of worn, functional materials and repair
+4. **Feedback**: Provide clear metallic visual feedback that feels substantial and valuable
+5. **Adaptability**: Ensure carbon fiber textures scale appropriately across device sizes
+6. **Kintsugi Philosophy**: Use metallic accents to highlight connections, repairs, and growth rather than perfection
