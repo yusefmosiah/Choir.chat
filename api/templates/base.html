@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Choir - A luxurious platform for collaborative intelligence where your ideas are truly valued, rewarded, and amplified.">
+    <meta name="theme-color" content="#0a0a0a">
     <!-- Use a dynamic title passed from the route handler -->
     <title>{{ title }} - Choir</title>
     <link rel="stylesheet" href="/static/shared/style.css">
@@ -27,21 +29,43 @@
 
         <style>
             .footer-links {
-                margin-top: 0.5rem;
-                font-size: 0.9rem;
+                margin-top: 1rem;
+                font-size: 0.95rem;
+                font-weight: 300;
             }
             .footer-link {
-                color: var(--gradient-blue, #2196F3);
+                color: var(--titanium-shift-start, #d4d4d4);
                 text-decoration: none;
-                transition: opacity 0.2s ease;
+                transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+                position: relative;
+                letter-spacing: 0.01em;
+            }
+            .footer-link::after {
+                content: '';
+                position: absolute;
+                width: 100%;
+                height: 1px;
+                bottom: -2px;
+                left: 0;
+                background: linear-gradient(90deg,
+                    var(--platinum-hologram-start, #f8f8f8),
+                    var(--chrome-reflection-start, #ffffff));
+                transform: scaleX(0);
+                transform-origin: bottom right;
+                transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             }
             .footer-link:hover {
-                opacity: 0.8;
-                text-decoration: underline;
+                color: var(--chrome-reflection-start, #ffffff);
+                text-shadow: 0 0 8px rgba(248, 248, 248, 0.2);
+            }
+            .footer-link:hover::after {
+                transform: scaleX(1);
+                transform-origin: bottom left;
             }
             .footer-divider {
-                margin: 0 0.5rem;
-                color: var(--text-color-secondary, #4a4a4a);
+                margin: 0 1rem;
+                color: var(--text-color-secondary, #b8b8b8);
+                opacity: 0.6;
             }
         </style>
     </div>
