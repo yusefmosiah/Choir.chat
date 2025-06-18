@@ -383,19 +383,24 @@
 
 .choir-cta-section {
   text-align: center;
-  padding: 3rem 1rem;
-  background: linear-gradient(135deg, rgba(13, 13, 13, 0.95), rgba(26, 26, 26, 0.9));
-  color: var(--text-color-primary, #f5f5f5);
-  border-radius: var(--border-radius-lg, 20px);
-  margin-top: 3rem;
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8);
+  padding: 4rem 2rem;
+  background: linear-gradient(135deg, rgba(18, 18, 18, 0.98), rgba(10, 10, 10, 0.95));
+  color: var(--text-color-primary, #f8f8f8);
+  border-radius: var(--border-radius-lg, 32px);
+  margin-top: 4rem;
+  box-shadow:
+    0 32px 64px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(248, 248, 248, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
   position: relative;
   overflow: hidden;
-  /* Carbon fiber texture */
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  /* Luxury micro-texture */
   background-image:
-    linear-gradient(45deg, rgba(0, 0, 0, 0.9) 25%, transparent 25%),
-    linear-gradient(-45deg, rgba(0, 0, 0, 0.9) 25%, transparent 25%);
-  background-size: 4px 4px, 4px 4px;
+    radial-gradient(circle at 70% 70%, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.008) 0%, transparent 50%, rgba(255, 255, 255, 0.008) 100%);
+  background-size: 20px 20px, 100% 100%;
 }
 
 .choir-cta-section::before {
@@ -405,42 +410,63 @@
   left: 0;
   right: 0;
   bottom: 0;
-  border-radius: var(--border-radius-lg, 20px);
-  padding: 2px;
+  border-radius: var(--border-radius-lg, 32px);
+  padding: 1px;
   background:
-    /* Irregular platinum patina border */
+    /* Smooth holographic border matching hero section */
     linear-gradient(135deg,
-      #e5e4e2 0%, #e5e4e2 18%, transparent 18%, transparent 25%,
-      #ffd700 25%, #ffd700 42%, transparent 42%, transparent 48%,
-      #c0c0c0 48%, #c0c0c0 65%, transparent 65%, transparent 72%,
-      #b87333 72%, #b87333 85%, transparent 85%, transparent 92%,
-      #e5e4e2 92%, #e5e4e2 100%);
+      #e8e8ff 0%, #f8f8f8 25%, #ffffff 50%, #f0f0f0 75%, #fff8e8 100%);
+  background-size: 200% 200%;
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   mask-composite: exclude;
-  opacity: 0.4;
+  opacity: 0.3;
   z-index: -1;
+  animation: holographicShift 6s ease-in-out infinite;
+}
+
+.choir-cta-section::after {
+  content: '';
+  position: absolute;
+  top: -40px;
+  left: -40px;
+  right: -40px;
+  bottom: -40px;
+  background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.05) 0%, transparent 70%);
+  border-radius: var(--border-radius-lg, 32px);
+  z-index: -2;
+  animation: ambientPulse 4s ease-in-out infinite;
 }
 
 /* Remove the prominent diagonal line from CTA section */
 
 .choir-cta-section h2 {
-  margin-bottom: 1rem;
-  background: linear-gradient(90deg, #ffd700, #c0c0c0, #e5e4e2);
+  font-size: 2.75rem;
+  font-weight: 200;
+  margin-bottom: 1.5rem;
+  background: linear-gradient(135deg, #ffffff, #f8f8f8, #e0e0e0, #f0f0f0);
+  background-size: 200% 200%;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
   display: inline-block;
-  text-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+  text-shadow: 0 0 25px rgba(248, 248, 248, 0.2);
   position: relative;
   z-index: 2;
+  letter-spacing: -0.02em;
+  animation: holographicShift 8s ease-in-out infinite;
 }
 
 .choir-cta-section p {
-  color: #a8a8a8;
+  font-size: 1.2rem;
+  font-weight: 300;
+  color: #b8b8b8;
   position: relative;
   z-index: 2;
+  line-height: 1.6;
+  letter-spacing: 0.01em;
+  margin-bottom: 2rem;
 }
 
 @media (max-width: 768px) {
