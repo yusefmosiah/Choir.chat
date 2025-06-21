@@ -282,15 +282,16 @@
   bottom: 0;
   background:
     linear-gradient(45deg,
-      transparent 0%, transparent 65%,
-      var(--gold-kintsugi-start) 65%, var(--gold-kintsugi-start) 70%,
-      transparent 70%, transparent 80%,
-      var(--gold-kintsugi-mid) 80%, var(--gold-kintsugi-mid) 85%,
-      transparent 85%, transparent 95%,
-      var(--gold-kintsugi-end) 95%, var(--gold-kintsugi-end) 100%);
-  opacity: 0.3;
+      transparent 0%, transparent 75%,
+      var(--gold-kintsugi-start) 75%, var(--gold-kintsugi-start) 78%,
+      transparent 78%, transparent 85%,
+      var(--gold-kintsugi-mid) 85%, var(--gold-kintsugi-mid) 88%,
+      transparent 88%, transparent 95%,
+      var(--gold-kintsugi-end) 95%, var(--gold-kintsugi-end) 98%);
+  opacity: 0.15;
   z-index: 0;
   transition: opacity 0.4s ease;
+  mix-blend-mode: overlay;
 }
 
 .choir-feature-card:hover {
@@ -306,19 +307,12 @@
 }
 
 .choir-feature-card h3 {
-  background: linear-gradient(90deg, 
-    var(--gold-kintsugi-start), 
-    var(--silver-veining-start),
-    var(--gold-kintsugi-mid));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: var(--text-color-primary);
   margin-bottom: 1rem;
   font-size: 1.4rem;
-  display: inline-block;
-  text-shadow: 0 0 12px rgba(255, 215, 0, 0.3);
+  font-weight: 500;
+  text-shadow: none;
   position: relative;
-  z-index: 1;
 }
 
 .choir-feature-card p {
