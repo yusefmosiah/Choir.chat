@@ -218,22 +218,23 @@ h3 {
     font-size: 1.75rem;
     /* Refined sizing */
     font-weight: 400;
-    background: linear-gradient(135deg,
-            var(--platinum-hologram-start),
-            var(--titanium-shift-start),
-            var(--platinum-hologram-end));
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    display: inline-block;
-    text-shadow: 0 0 12px rgba(212, 212, 212, 0.15);
-    /* Subtle titanium glow */
+    color: var(--text-color-primary);
     letter-spacing: -0.005em;
 }
 
 h4 {
     font-size: 1.25rem;
     /* 20pt equivalent */
+}
+
+/* Strong/Bold text styling - prevent blur issues */
+strong,
+b {
+    font-weight: 600;
+    color: var(--text-color-primary);
+    text-shadow: none;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 p {
