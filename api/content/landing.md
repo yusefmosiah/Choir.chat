@@ -252,35 +252,73 @@
 }
 
 .choir-feature-card {
-  background: rgba(13, 13, 13, 0.95);
+  background: var(--surface-color);
   border-radius: var(--border-radius-md, 16px);
   padding: 1.5rem;
-  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.8);
-  transition: transform 0.4s ease, box-shadow 0.4s ease;
-  border: 1px solid rgba(128, 128, 128, 0.3);
+  box-shadow: 
+    0 8px 25px var(--carbon-fiber-shadow),
+    inset 0 1px 1px rgba(255, 255, 255, 0.05);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid var(--carbon-fiber-border);
   position: relative;
-  /* Carbon fiber texture */
-  background-image:
-    linear-gradient(90deg, rgba(0, 0, 0, 0.9) 50%, rgba(128, 128, 128, 0.05) 50%),
-    linear-gradient(0deg, rgba(0, 0, 0, 0.9) 50%, rgba(128, 128, 128, 0.05) 50%);
-  background-size: 2px 2px, 2px 2px;
+  overflow: hidden;
+  background-image: 
+    var(--carbon-fiber-bg),
+    linear-gradient(
+      45deg,
+      rgba(0,0,0,0.9) 0%,
+      rgba(64,64,64,0.1) 50%,
+      rgba(0,0,0,0.9) 100%
+    );
+  background-size: 3px 3px, 100% 100%;
+}
+
+.choir-feature-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background:
+    linear-gradient(45deg,
+      transparent 0%, transparent 65%,
+      var(--gold-kintsugi-start) 65%, var(--gold-kintsugi-start) 70%,
+      transparent 70%, transparent 80%,
+      var(--gold-kintsugi-mid) 80%, var(--gold-kintsugi-mid) 85%,
+      transparent 85%, transparent 95%,
+      var(--gold-kintsugi-end) 95%, var(--gold-kintsugi-end) 100%);
+  opacity: 0.3;
+  z-index: 0;
+  transition: opacity 0.4s ease;
 }
 
 .choir-feature-card:hover {
   transform: translateY(-8px);
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.9);
-  border-color: rgba(255, 215, 0, 0.5);
+  box-shadow: 
+    0 15px 35px var(--carbon-fiber-shadow),
+    inset 0 1px 1px rgba(255, 255, 255, 0.1);
+  border-color: var(--gold-kintsugi-mid);
+}
+
+.choir-feature-card:hover::before {
+  opacity: 0.6;
 }
 
 .choir-feature-card h3 {
-  background: linear-gradient(90deg, #ffd700, #c0c0c0);
+  background: linear-gradient(90deg, 
+    var(--gold-kintsugi-start), 
+    var(--silver-veining-start),
+    var(--gold-kintsugi-mid));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
   margin-bottom: 1rem;
   font-size: 1.4rem;
   display: inline-block;
-  text-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
+  text-shadow: 0 0 12px rgba(255, 215, 0, 0.3);
+  position: relative;
+  z-index: 1;
 }
 
 .choir-feature-card p {

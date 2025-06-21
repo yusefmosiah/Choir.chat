@@ -1,32 +1,43 @@
 /* api/static/shared/style.css - Luxurious Futuristic Design Theme */
 :root {
-    /* Base Colors - Deep Space Luxury */
-    --background-color: #0a0a0a;
-    /* Deep space black with micro-texture patterns */
-    --surface-color: #121212;
-    /* Rich obsidian with subtle holographic undertones */
+    /* Base Colors - Carbon Fiber Luxury */
+    --background-color: #050505;
+    /* Absolute black for carbon fiber base */
+    --surface-color: #0a0a0a;
+    /* Slightly lighter black with visible weave */
     --text-color-primary: #f8f8f8;
     /* Pure platinum with crisp clarity */
     --text-color-secondary: #b8b8b8;
     /* Titanium gray with subtle luminosity */
-    --shadow-color: rgba(0, 0, 0, 0.4);
-    /* Void black with soft opacity for floating effects */
-    --highlight-color: rgba(255, 255, 255, 0.1);
-    /* Cool white with very low opacity */
+    --shadow-color: rgba(0, 0, 0, 0.6);
+    /* Deeper shadows for contrast */
+    --highlight-color: rgba(255, 215, 0, 0.1);
+    /* Gold highlights instead of white */
 
-    /* Holographic Accent Gradients */
-    --platinum-hologram-start: #f8f8f8;
-    --platinum-hologram-mid: #e0e0e0;
-    --platinum-hologram-end: #c8c8c8;
-    --titanium-shift-start: #d4d4d4;
-    --titanium-shift-mid: #a8a8a8;
-    --titanium-shift-end: #8c8c8c;
-    --chrome-reflection-start: #ffffff;
-    --chrome-reflection-mid: #f0f0f0;
-    --chrome-reflection-end: #e8e8e8;
-    --iridescent-edge-start: #e8e8ff;
-    --iridescent-edge-mid: #ffe8ff;
-    --iridescent-edge-end: #fff8e8;
+    /* Kintsugi Accent Gradients */
+    --gold-kintsugi-start: #ffd700;
+    --gold-kintsugi-mid: #daa520;
+    --gold-kintsugi-end: #b8860b;
+    --silver-veining-start: #c0c0c0;
+    --silver-veining-mid: #a8a8a8;
+    --silver-veining-end: #909090;
+    --copper-patina-start: #b87333;
+    --copper-patina-mid: #996633;
+    --copper-patina-end: #804d00;
+    --platinum-highlight-start: #e5e4e2;
+    --platinum-highlight-mid: #d8d8d8;
+    --platinum-highlight-end: #c0c0c0;
+
+    /* Carbon Fiber Textures */
+    --carbon-fiber-bg: linear-gradient(
+        45deg, 
+        rgba(0,0,0,0.9) 25%, 
+        transparent 25%, 
+        transparent 75%, 
+        rgba(0,0,0,0.9) 75%
+    );
+    --carbon-fiber-shadow: rgba(0, 0, 0, 0.8);
+    --carbon-fiber-border: rgba(128, 128, 128, 0.3);
 
     /* Status Colors - Holographic */
     --error-color: #ff3366;
@@ -84,39 +95,31 @@ body {
     box-shadow: inset 0 0 200px rgba(255, 255, 255, 0.02);
 }
 
-/* Main content wrapper - Luxurious floating panel */
+/* Main content wrapper - Carbon Fiber Kintsugi Panel */
 .content-wrapper {
     max-width: 900px;
-    /* Premium readable width */
     width: 100%;
-    background: var(--luxury-surface);
-    /* Luxury obsidian background */
+    background: var(--surface-color);
     padding: 48px 56px;
     border-radius: var(--border-radius-lg);
     box-shadow:
-        0 32px 64px var(--luxury-shadow),
-        /* Deep floating shadow */
-        0 0 0 1px var(--luxury-border),
-        /* Subtle edge definition */
+        0 32px 64px var(--carbon-fiber-shadow),
+        0 0 0 1px var(--carbon-fiber-border),
         inset 0 1px 0 var(--highlight-color);
-    /* Premium inner highlight */
     margin-top: 32px;
     margin-bottom: 64px;
     position: relative;
     overflow: hidden;
-    /* Subtle holographic shimmer overlay */
-    background-image:
-        linear-gradient(135deg,
-            rgba(255, 255, 255, 0.02) 0%,
-            transparent 25%,
-            rgba(255, 255, 255, 0.01) 50%,
-            transparent 75%,
-            rgba(255, 255, 255, 0.02) 100%);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    /* Carbon fiber texture */
+    background-image: 
+        var(--carbon-fiber-bg),
+        var(--carbon-fiber-bg);
+    background-size: 4px 4px, 4px 4px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 }
 
-/* Holographic edge lighting for content wrapper */
+/* Kintsugi gold veining for content wrapper */
 .content-wrapper::before {
     content: '';
     position: absolute;
@@ -125,16 +128,17 @@ body {
     right: 0;
     bottom: 0;
     border-radius: var(--border-radius-lg);
-    padding: 1px;
-    /* Thin edge lighting */
+    padding: 2px;
     background:
-        /* Smooth holographic gradient */
+        /* Irregular gold veining pattern */
         linear-gradient(45deg,
-            var(--iridescent-edge-start) 0%,
-            var(--platinum-hologram-start) 25%,
-            var(--chrome-reflection-start) 50%,
-            var(--titanium-shift-start) 75%,
-            var(--iridescent-edge-end) 100%);
+            transparent 0%, transparent 15%,
+            var(--gold-kintsugi-start) 15%, var(--gold-kintsugi-start) 25%,
+            transparent 25%, transparent 40%,
+            var(--gold-kintsugi-mid) 40%, var(--gold-kintsugi-mid) 55%,
+            transparent 55%, transparent 70%,
+            var(--gold-kintsugi-end) 70%, var(--gold-kintsugi-end) 85%,
+            transparent 85%, transparent 100%);
     -webkit-mask:
         linear-gradient(#fff 0 0) content-box,
         linear-gradient(#fff 0 0);
@@ -143,9 +147,20 @@ body {
         linear-gradient(#fff 0 0) content-box,
         linear-gradient(#fff 0 0);
     mask-composite: exclude;
-    opacity: 0.3;
+    opacity: 0.6;
     z-index: -1;
-    animation: holographicShift 8s ease-in-out infinite;
+    animation: kintsugiPulse 12s ease-in-out infinite;
+}
+
+@keyframes kintsugiPulse {
+    0%, 100% {
+        opacity: 0.4;
+        background-position: 0% 50%;
+    }
+    50% {
+        opacity: 0.8;
+        background-position: 100% 50%;
+    }
 }
 
 /* Subtle ambient glow */
@@ -264,7 +279,7 @@ a:hover::after {
     transform-origin: bottom left;
 }
 
-/* Luxury holographic button styling */
+/* Carbon Fiber Kintsugi Button Styling */
 a[href^="mailto:"],
 .btn-primary {
     display: inline-block;
@@ -279,23 +294,23 @@ a[href^="mailto:"],
     margin-bottom: 1.5em;
     position: relative;
     color: var(--text-color-primary);
-    background: linear-gradient(135deg,
-            var(--luxury-surface),
-            var(--surface-color));
-    border: 1px solid var(--luxury-border);
+    background: var(--surface-color);
+    border: 1px solid var(--carbon-fiber-border);
     box-shadow:
-        0 16px 32px var(--luxury-shadow),
-        0 0 0 1px rgba(255, 255, 255, 0.05),
+        0 16px 32px var(--carbon-fiber-shadow),
+        0 0 0 1px rgba(255, 215, 0, 0.1),
         inset 0 1px 0 var(--highlight-color);
-    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     overflow: hidden;
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    /* Carbon fiber texture */
+    background-image: 
+        var(--carbon-fiber-bg),
+        var(--carbon-fiber-bg);
+    background-size: 3px 3px, 3px 3px;
     letter-spacing: 0.025em;
-    /* Premium letter spacing */
 }
 
-/* Holographic overlay for primary buttons */
+/* Kintsugi gold veining overlay for buttons */
 a[href^="mailto:"]::before,
 .btn-primary::before {
     content: '';
@@ -304,16 +319,21 @@ a[href^="mailto:"]::before,
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(135deg,
-            var(--iridescent-edge-start),
-            var(--chrome-reflection-start),
-            var(--platinum-hologram-start),
-            var(--iridescent-edge-end));
+    background: 
+        /* Irregular gold cracks */
+        linear-gradient(45deg,
+            transparent 0%, transparent 20%,
+            var(--gold-kintsugi-start) 20%, var(--gold-kintsugi-start) 30%,
+            transparent 30%, transparent 50%,
+            var(--gold-kintsugi-mid) 50%, var(--gold-kintsugi-mid) 60%,
+            transparent 60%, transparent 80%,
+            var(--gold-kintsugi-end) 80%, var(--gold-kintsugi-end) 90%,
+            transparent 90%, transparent 100%);
     background-size: 200% 200%;
     border-radius: var(--border-radius-md);
     opacity: 0;
-    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-    animation: holographicShift 4s ease-in-out infinite;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: kintsugiPulse 6s ease-in-out infinite;
 }
 
 a[href^="mailto:"]:hover::before,
@@ -339,26 +359,43 @@ a[href^="mailto:"]:hover,
 .btn-primary:hover {
     transform: translateY(-4px) scale(1.02);
     box-shadow:
-        0 24px 48px var(--luxury-shadow),
-        0 0 0 1px var(--platinum-hologram-start),
+        0 24px 48px var(--carbon-fiber-shadow),
+        0 0 0 1px var(--gold-kintsugi-start),
         inset 0 1px 0 var(--highlight-color),
-        0 0 20px rgba(248, 248, 248, 0.1);
-    border-color: var(--platinum-hologram-start);
-    color: var(--chrome-reflection-start);
-    text-shadow: 0 0 12px rgba(248, 248, 248, 0.3);
+        0 0 20px rgba(255, 215, 0, 0.15);
+    border-color: var(--gold-kintsugi-mid);
+    color: var(--text-color-primary);
+    text-shadow: 0 0 8px rgba(255, 215, 0, 0.3);
+    background-image: 
+        var(--carbon-fiber-bg),
+        linear-gradient(
+            45deg,
+            rgba(0,0,0,0.9) 0%,
+            rgba(0,0,0,0.8) 50%,
+            rgba(0,0,0,0.9) 100%
+        );
 }
 
 a[href^="mailto:"]:active,
 .btn-primary:active {
     transform: translateY(-1px) scale(0.98);
     box-shadow:
-        0 8px 16px var(--luxury-shadow),
-        0 0 0 1px var(--luxury-border),
-        inset 0 1px 0 var(--highlight-color);
+        0 8px 16px var(--carbon-fiber-shadow),
+        0 0 0 1px var(--gold-kintsugi-end),
+        inset 0 1px 0 var(--highlight-color),
+        0 0 10px rgba(255, 215, 0, 0.1);
     transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    background-image: 
+        var(--carbon-fiber-bg),
+        linear-gradient(
+            45deg,
+            rgba(0,0,0,0.95) 0%,
+            rgba(0,0,0,0.85) 50%,
+            rgba(0,0,0,0.95) 100%
+        );
 }
 
-/* Secondary button style - Worn carbon fiber */
+/* Secondary button style - Aged carbon fiber with silver veining */
 .btn-secondary {
     display: inline-block;
     padding: 12px 20px;
@@ -373,31 +410,68 @@ a[href^="mailto:"]:active,
     color: var(--text-color-secondary);
     background: var(--surface-color);
     box-shadow:
-        0 6px 15px rgba(0, 0, 0, 0.6),
-        inset 0 1px 2px var(--highlight-color);
+        0 6px 15px var(--carbon-fiber-shadow),
+        inset 0 1px 1px rgba(255, 255, 255, 0.05);
     border: 1px solid var(--carbon-fiber-border);
     transition: all 0.4s ease;
-    /* Worn carbon fiber texture */
+    /* Aged carbon fiber texture */
     background-image:
-        linear-gradient(45deg, rgba(0, 0, 0, 0.95) 25%, transparent 25%),
-        linear-gradient(-45deg, rgba(0, 0, 0, 0.95) 25%, transparent 25%);
-    background-size: 1px 1px, 1px 1px;
+        var(--carbon-fiber-bg),
+        linear-gradient(
+            45deg,
+            rgba(0,0,0,0.9) 0%,
+            rgba(64,64,64,0.1) 50%,
+            rgba(0,0,0,0.9) 100%
+        );
+    background-size: 2px 2px, 100% 100%;
+    position: relative;
+}
+
+/* Silver veining effect */
+.btn-secondary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background:
+        linear-gradient(45deg,
+            transparent 0%, transparent 70%,
+            var(--silver-veining-start) 70%, var(--silver-veining-start) 75%,
+            transparent 75%, transparent 85%,
+            var(--silver-veining-mid) 85%, var(--silver-veining-mid) 90%,
+            transparent 90%, transparent 100%);
+    opacity: 0.2;
+    transition: opacity 0.4s ease;
 }
 
 .btn-secondary:hover {
     transform: translateY(-2px);
     box-shadow:
-        0 10px 20px rgba(0, 0, 0, 0.7),
-        inset 0 1px 2px var(--highlight-color);
-    border-color: var(--silver-veining-start);
-    color: var(--silver-veining-start);
+        0 10px 25px var(--carbon-fiber-shadow),
+        inset 0 1px 1px rgba(255, 255, 255, 0.1);
+    border-color: var(--silver-veining-mid);
+    color: var(--text-color-primary);
+}
+
+.btn-secondary:hover::before {
+    opacity: 0.4;
 }
 
 .btn-secondary:active {
     transform: translateY(1px);
     box-shadow:
-        0 3px 8px rgba(0, 0, 0, 0.6),
-        inset 0 1px 2px var(--highlight-color);
+        0 3px 8px var(--carbon-fiber-shadow),
+        inset 0 1px 1px rgba(255, 255, 255, 0.05);
+    background-image:
+        var(--carbon-fiber-bg),
+        linear-gradient(
+            45deg,
+            rgba(0,0,0,0.95) 0%,
+            rgba(32,32,32,0.1) 50%,
+            rgba(0,0,0,0.95) 100%
+        );
 }
 
 /* Holographic shimmer animation for luxury elements */
