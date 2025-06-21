@@ -1,4 +1,4 @@
-# CHOIR.CHAT
+## *CHOIR.CHAT*
 
 <div class="choir-hero-section">
   <h2>A New Era of Collaborative Intelligence</h2>
@@ -100,11 +100,28 @@
   position: relative;
   overflow: hidden;
 
-  /* Luxury micro-texture */
+  /* Balanced forged carbon texture with subtle gold accents */
   background-image:
-    radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
-    linear-gradient(135deg, rgba(255, 255, 255, 0.008) 0%, transparent 50%, rgba(255, 255, 255, 0.008) 100%);
-  background-size: 20px 20px, 100% 100%;
+    /* Subtle gold veins */
+    radial-gradient(ellipse 12px 8px at 17.3% 23.7%, rgba(184, 115, 51, 0.05) 0%, transparent 60%),
+    radial-gradient(ellipse 9px 6px at 67.1% 41.2%, rgba(255, 215, 0, 0.04) 0%, transparent 70%),
+    radial-gradient(ellipse 10px 14px at 83.8% 72.4%, rgba(218, 165, 32, 0.045) 0%, transparent 65%),
+    radial-gradient(ellipse 8px 11px at 28.9% 81.6%, rgba(184, 115, 51, 0.035) 0%, transparent 75%),
+    /* Carbon fiber fragments */
+    radial-gradient(ellipse 5px 8px at 19.7% 31.2%, rgba(0, 0, 0, 0.75) 0%, transparent 80%),
+    radial-gradient(ellipse 7px 4px at 62.3% 18.9%, rgba(0, 0, 0, 0.65) 0%, transparent 75%),
+    radial-gradient(ellipse 4px 9px at 78.1% 59.4%, rgba(0, 0, 0, 0.8) 0%, transparent 85%),
+    radial-gradient(ellipse 8px 5px at 31.6% 73.8%, rgba(0, 0, 0, 0.55) 0%, transparent 70%),
+    radial-gradient(ellipse 6px 7px at 71.9% 87.2%, rgba(0, 0, 0, 0.7) 0%, transparent 78%),
+    radial-gradient(ellipse 9px 4px at 46.3% 42.7%, rgba(0, 0, 0, 0.5) 0%, transparent 65%),
+    radial-gradient(ellipse 4px 8px at 89.4% 26.1%, rgba(0, 0, 0, 0.75) 0%, transparent 82%),
+    radial-gradient(ellipse 7px 5px at 12.8% 67.5%, rgba(0, 0, 0, 0.6) 0%, transparent 72%),
+    /* Base gradient */
+    linear-gradient(135deg, rgba(12, 12, 12, 0.98), rgba(6, 6, 6, 0.96));
+  background-size: 160px 160px, 160px 160px, 160px 160px, 160px 160px,
+                   60px 60px, 60px 60px, 60px 60px, 60px 60px, 60px 60px, 60px 60px,
+                   60px 60px, 60px 60px,
+                   100% 100%;
 }
 
 .choir-hero-section::before {
@@ -378,32 +395,74 @@
 }
 
 .choir-future-feature {
-  background: rgba(26, 26, 26, 0.9);
+  background: var(--surface-color);
+  border-radius: var(--border-radius-md, 16px);
   padding: 1.5rem;
-  border-radius: var(--border-radius-sm, 12px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.6);
-  transition: transform 0.4s ease;
-  border: 1px solid rgba(128, 128, 128, 0.2);
-  /* Subtle carbon fiber texture */
+  box-shadow:
+    0 8px 25px var(--carbon-fiber-shadow),
+    inset 0 1px 1px rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--carbon-fiber-border);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
   background-image:
-    linear-gradient(90deg, rgba(0, 0, 0, 0.9) 50%, rgba(128, 128, 128, 0.03) 50%);
-  background-size: 1px 1px;
+    var(--carbon-fiber-bg),
+    linear-gradient(
+      45deg,
+      rgba(0,0,0,0.9) 0%,
+      rgba(64,64,64,0.1) 50%,
+      rgba(0,0,0,0.9) 100%
+    );
+  background-size: 3px 3px, 100% 100%;
+}
+
+.choir-future-feature::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background:
+    linear-gradient(45deg,
+      transparent 0%, transparent 75%,
+      var(--gold-kintsugi-start) 75%, var(--gold-kintsugi-start) 78%,
+      transparent 78%, transparent 85%,
+      var(--gold-kintsugi-mid) 85%, var(--gold-kintsugi-mid) 88%,
+      transparent 88%, transparent 95%,
+      var(--gold-kintsugi-end) 95%, var(--gold-kintsugi-end) 98%);
+  opacity: 0.15;
+  z-index: 0;
+  transition: opacity 0.4s ease;
+  mix-blend-mode: overlay;
 }
 
 .choir-future-feature:hover {
-  transform: translateY(-5px);
-  border-color: rgba(255, 215, 0, 0.4);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.8);
+  transform: translateY(-8px);
+  box-shadow:
+    0 15px 35px var(--carbon-fiber-shadow),
+    inset 0 1px 1px rgba(255, 255, 255, 0.1);
+  border-color: var(--gold-kintsugi-mid);
+}
+
+.choir-future-feature:hover::before {
+  opacity: 0.6;
 }
 
 .choir-future-feature h4 {
-  color: #e5e4e2;
-  margin-bottom: 0.5rem;
-  text-shadow: 0 0 6px rgba(229, 228, 226, 0.2);
+  color: var(--text-color-primary);
+  margin-bottom: 1rem;
+  font-size: 1.4rem;
+  font-weight: 500;
+  text-shadow: none;
+  position: relative;
+  z-index: 1;
 }
 
 .choir-future-feature p {
   color: #a8a8a8;
+  position: relative;
+  z-index: 1;
 }
 
 .choir-cta-section {
@@ -419,11 +478,29 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
   position: relative;
   overflow: hidden;
-  /* Luxury micro-texture */
+
+  /* Balanced forged carbon texture with subtle gold accents - variant pattern */
   background-image:
-    radial-gradient(circle at 70% 70%, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
-    linear-gradient(135deg, rgba(255, 255, 255, 0.008) 0%, transparent 50%, rgba(255, 255, 255, 0.008) 100%);
-  background-size: 20px 20px, 100% 100%;
+    /* Subtle gold veins - different positions */
+    radial-gradient(ellipse 11px 7px at 22.8% 29.1%, rgba(255, 215, 0, 0.04) 0%, transparent 65%),
+    radial-gradient(ellipse 8px 10px at 73.4% 19.7%, rgba(184, 115, 51, 0.035) 0%, transparent 75%),
+    radial-gradient(ellipse 13px 6px at 91.2% 68.3%, rgba(218, 165, 32, 0.05) 0%, transparent 60%),
+    radial-gradient(ellipse 9px 12px at 16.7% 79.4%, rgba(255, 215, 0, 0.03) 0%, transparent 78%),
+    /* Carbon fiber fragments - different arrangement */
+    radial-gradient(ellipse 6px 9px at 24.1% 35.8%, rgba(0, 0, 0, 0.7) 0%, transparent 78%),
+    radial-gradient(ellipse 5px 4px at 68.9% 22.4%, rgba(0, 0, 0, 0.75) 0%, transparent 82%),
+    radial-gradient(ellipse 4px 8px at 82.7% 63.1%, rgba(0, 0, 0, 0.65) 0%, transparent 75%),
+    radial-gradient(ellipse 8px 5px at 39.4% 77.6%, rgba(0, 0, 0, 0.6) 0%, transparent 72%),
+    radial-gradient(ellipse 5px 7px at 76.2% 89.3%, rgba(0, 0, 0, 0.8) 0%, transparent 85%),
+    radial-gradient(ellipse 7px 4px at 51.8% 46.7%, rgba(0, 0, 0, 0.55) 0%, transparent 68%),
+    radial-gradient(ellipse 4px 6px at 93.6% 31.2%, rgba(0, 0, 0, 0.73) 0%, transparent 80%),
+    radial-gradient(ellipse 6px 5px at 18.3% 71.9%, rgba(0, 0, 0, 0.67) 0%, transparent 76%),
+    /* Base gradient */
+    linear-gradient(135deg, rgba(12, 12, 12, 0.98), rgba(6, 6, 6, 0.96));
+  background-size: 150px 150px, 150px 150px, 150px 150px, 150px 150px,
+                   55px 55px, 55px 55px, 55px 55px, 55px 55px, 55px 55px, 55px 55px,
+                   55px 55px, 55px 55px,
+                   100% 100%;
 }
 
 .choir-cta-section::before {
