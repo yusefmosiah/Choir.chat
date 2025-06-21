@@ -1,481 +1,362 @@
 # CHOIR.CHAT
 
 <div class="choir-hero-section">
-  <h2>A New Era of Collaborative Intelligence</h2>
-  <p class="choir-tagline">Where your ideas and insights are truly valued, rewarded, and amplified.</p>
+  <h2>Resilient by Design: Collaborative Intelligence Reimagined</h2>
+  <p class="choir-tagline">Experience a platform where your insights gain timeless value, built on antifragile principles and high-tech materiality.</p>
   <div class="choir-cta-buttons">
-    <a href="https://testflight.apple.com/join/bDv6gSEB" class="choir-cta-button choir-primary">Get iOS TestFlight</a>
+    <a href="https://testflight.apple.com/join/bDv6gSEB" class="btn-primary">Get iOS TestFlight Access</a>
   </div>
 </div>
 
 <div class="choir-features-grid">
   <div class="choir-feature-card">
-    <h3>Why Choir?</h3>
-    <p>Choir represents a paradigm shift in how we interact with AI and each other. By orchestrating multiple AI models working in concert, we create a more balanced, nuanced, and reliable platform for knowledge sharing and creation.</p>
+    <h3>Why Choir? The Kintsugi of Collaboration</h3>
+    <p>Choir is not just another platform; it's a new philosophy. Like kintsugi, we find strength in connection, turning disparate AI insights into a harmonious, more valuable whole. We embrace high-tech materiality for robust, enduring performance.</p>
   </div>
 
   <div class="choir-feature-card">
-    <h3>Why Multi-Agent?</h3>
-    <p>Trust emerges from consensus. Our diverse portfolio of AI models provides multiple perspectives, reducing bias and increasing reliability. When multiple independent agents agree, you can trust the result.</p>
+    <h3>Multi-Agent: Strength in Diversity</h3>
+    <p>True confidence arises from verified consensus. Our array of AI agents, crafted from advanced materials of thought, offer varied perspectives, minimizing bias and enhancing reliability. Antifragile by nature, this system grows stronger with complexity.</p>
   </div>
 
   <div class="choir-feature-card">
-    <h3>Why Anonymity?</h3>
-    <p>Clarity of thought requires freedom from social surveillance. On Choir, ideas stand on their own merit, not on who said them. Express yourself freely without fear of judgment or social consequences.</p>
+    <h3>Anonymity: The Purity of the Idea</h3>
+    <p>In the pursuit of unblemished thought, anonymity is luxury. Ideas, free from the weight of identity, are judged on intrinsic merit alone. This is clarity, forged in freedom from social friction, built to last.</p>
   </div>
 
   <div class="choir-feature-card">
-    <h3>Why Rewards?</h3>
-    <p>Unlike other platforms where your likes and followers are valuable but not yours, Choir turns posting into value creation. Earn transferable CHOIR tokens for quality contributions, then stake them in relationships that matter. Your intellectual value belongs to you.</p>
+    <h3>Rewards: Enduring Value for Your Intellect</h3>
+    <p>Your contributions are assets, not fleeting data. Earn CHOIR tokens – digital artifacts of your intellectual craftsmanship – and stake them in relationships that reflect true value. This is timeless ownership in a high-tech ecosystem.</p>
   </div>
 
   <div class="choir-feature-card">
-    <h3>Why Pages?</h3>
-    <p>Scrolling is a mind-killer. Our page-based structure creates focused, digestible content units that enhance engagement and comprehension, moving beyond the endless scroll of traditional platforms.</p>
+    <h3>Pages: Crafted for Clarity</h3>
+    <p>Endless scrolling dulls the edge of insight. Our structured, page-based format presents content as focused, resilient units of knowledge, enhancing comprehension and lasting engagement – a testament to thoughtful design.</p>
   </div>
 
   <div class="choir-feature-card">
-    <h3>Why Blockchain?</h3>
-    <p>Our AI-native transaction ledger provides transparency and reinforces trust. Blockchain technology ensures that contributions are immutably recorded and fairly rewarded, creating a new socioeconomic media paradigm.</p>
+    <h3>Blockchain: The Unyielding Ledger</h3>
+    <p>Our AI-native ledger, built with the precision of advanced engineering, offers immutable transparency. Blockchain technology ensures contributions are permanently recorded and fairly valued, forging a new socio-economic paradigm of timeless trust.</p>
   </div>
 </div>
 
 <div class="choir-future-section">
-  <h2>The Future of Choir</h2>
-  <p>We're building a dynamic, collaborative platform that will continue to evolve with these exciting features:</p>
+  <h2>The Evolution: Forging the Future of Choir</h2>
+  <p>We are meticulously crafting a dynamic, resilient platform. Upcoming enhancements will further embody our commitment to antifragile luxury and high-tech materiality:</p>
 
   <div class="choir-future-features">
     <div class="choir-future-feature">
       <h4>Relationship Staking</h4>
-      <p>Invest your earned CHOIR tokens directly into meaningful connections. Stake tokens to respond to someone's idea—they can engage and lock tokens into a shared relationship, or ignore you and keep them. Real skin in the game for quality discourse.</p>
+      <p>Invest your CHOIR tokens into connections that matter, forging bonds with the strength of kintsugi gold. Stake tokens to initiate dialogue; engagement locks them into a shared, resilient relationship.</p>
     </div>
 
     <div class="choir-future-feature">
       <h4>Multiparty Relationships</h4>
-      <p>Form groups with shared token pools. Members can exit unilaterally, taking their share, creating dynamic communities with real economic alignment.</p>
+      <p>Construct robust communities with shared token pools. Members can divest, taking their share, ensuring dynamic yet stable economic alignment—a feature of enduring, antifragile systems.</p>
     </div>
 
     <div class="choir-future-feature">
       <h4>Multimodality</h4>
-      <p>Voice, image, and eventually video input/output will create more natural and versatile human-AI interactions.</p>
+      <p>Voice, image, and video will seamlessly integrate, creating more natural, versatile interactions – a fusion of human expression and high-tech capability.</p>
     </div>
 
     <div class="choir-future-feature">
       <h4>Local Embeddings</h4>
-      <p>Enhanced contextual understanding through localized knowledge representation.</p>
+      <p>Deepen contextual understanding with localized knowledge representation, enhancing the precision and resilience of information.</p>
     </div>
 
     <div class="choir-future-feature">
       <h4>Per-User Memory</h4>
-      <p>Personalized experiences that remember your preferences and past interactions.</p>
+      <p>Experience a platform that adapts to you, recalling preferences and interactions with enduring precision, like a bespoke, handcrafted tool.</p>
     </div>
 
     <div class="choir-future-feature">
       <h4>Like Minds Discovery</h4>
-      <p>AI identifies intellectual compatibility through citation patterns and conversation quality, introducing you to kindred spirits based on merit, not metrics.</p>
+      <p>Our AI, discerning intellectual resonance, introduces you to kindred spirits based on the timeless merit of ideas, not fleeting metrics.</p>
     </div>
   </div>
 </div>
 
 <div class="choir-cta-section">
-  <h2>Experience Choir</h2>
-  <p>Use a platform that values intelligence, rewards contributions, and creates a more thoughtful digital ecosystem.</p>
+  <h2>Experience Enduring Value</h2>
+  <p>Engage with a platform where intelligence is cherished, contributions are immortalized, and digital interaction achieves timeless luxury.</p>
   <div class="choir-cta-buttons">
-    <a href="https://testflight.apple.com/join/bDv6gSEB" class="choir-cta-button choir-primary">Download on iOS</a>
+    <a href="https://testflight.apple.com/join/bDv6gSEB" class="btn-primary">Access Choir on iOS</a>
   </div>
 </div>
 
 <style>
+/* Landing Page Specific Styles - Aligned with Carbon Fiber Kintsugi Theme */
+
+/* Hero Section: Deep Carbon Background with Kintsugi Gold Accents */
 .choir-hero-section {
   text-align: center;
-  padding: 4rem 2rem;
-  margin-bottom: 3rem;
-  background: linear-gradient(135deg, rgba(18, 18, 18, 0.98), rgba(10, 10, 10, 0.95));
-  color: var(--text-color-primary, #f8f8f8);
-  border-radius: var(--border-radius-lg, 32px);
-  box-shadow:
-    0 32px 64px rgba(0, 0, 0, 0.6),
-    0 0 0 1px rgba(248, 248, 248, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  position: relative;
-  overflow: hidden;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  /* Luxury micro-texture */
+  padding: 5rem 2rem; /* Increased padding for more impact */
+  margin-bottom: 4rem;
+  background-color: var(--obsidian-black);
+  /* Carbon fiber weave using CSS gradients */
   background-image:
-    radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
-    linear-gradient(135deg, rgba(255, 255, 255, 0.008) 0%, transparent 50%, rgba(255, 255, 255, 0.008) 100%);
-  background-size: 20px 20px, 100% 100%;
+    linear-gradient(135deg, rgba(0,0,0,0.15) 25%, transparent 25%),
+    linear-gradient(225deg, rgba(0,0,0,0.15) 25%, transparent 25%),
+    linear-gradient(45deg, rgba(0,0,0,0.15) 25%, transparent 25%),
+    linear-gradient(315deg, rgba(0,0,0,0.15) 25%, transparent 25%);
+  background-size: 10px 10px; /* Adjust for weave density */
+  color: var(--text-primary);
+  border-radius: var(--border-radius-lg);
+  box-shadow: 0 20px 40px var(--shadow-color-strong), /* Deeper shadow */
+              inset 0 1px 2px var(--highlight-soft);
+  position: relative;
+  overflow: hidden; /* For pseudo-elements */
 }
 
-.choir-hero-section::before {
+.choir-hero-section::before { /* Kintsugi gold border accent */
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  border-radius: var(--border-radius-lg, 32px);
-  padding: 1px;
-  background:
-    /* Smooth holographic border */
-    linear-gradient(45deg,
-      #e8e8ff 0%, #f8f8f8 25%, #ffffff 50%, #f0f0f0 75%, #fff8e8 100%);
-  background-size: 200% 200%;
+  top: 0; left: 0; right: 0; bottom: 0;
+  border-radius: var(--border-radius-lg);
+  padding: 2px; /* Thickness of the kintsugi line */
+  background: linear-gradient(135deg, var(--kintsugi-gold), var(--molten-gold) 50%, var(--kintsugi-gold) 100%);
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
   mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
   mask-composite: exclude;
-  opacity: 0.3;
-  z-index: -1;
-  animation: holographicShift 6s ease-in-out infinite;
+  opacity: 0.7;
+  z-index: 1;
+  animation: kintsugiShine 12s ease-in-out infinite alternate; /* Use existing animation */
 }
-
-.choir-hero-section::after {
-  content: '';
-  position: absolute;
-  top: -40px;
-  left: -40px;
-  right: -40px;
-  bottom: -40px;
-  background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.05) 0%, transparent 70%);
-  border-radius: var(--border-radius-lg, 32px);
-  z-index: -2;
-  animation: ambientPulse 4s ease-in-out infinite;
-}
-
-/* Remove crack overlay from hero section */
 
 .choir-hero-section h2 {
-  font-size: 3.5rem;
-  font-weight: 200;
+  font-size: 3rem; /* Adjusted from global h1 for page hierarchy */
+  font-weight: 600; /* Bold for impact */
   margin-bottom: 1.5rem;
-  background: linear-gradient(135deg, #ffffff, #f8f8f8, #e0e0e0, #f0f0f0);
-  background-size: 200% 200%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  display: inline-block;
-  text-shadow: 0 0 30px rgba(248, 248, 248, 0.2);
+  color: var(--kintsugi-gold); /* Kintsugi gold for hero title */
+  text-shadow: 0 2px 5px var(--shadow-color-medium), 0 0 20px rgba(176, 141, 87, 0.4); /* Gold glow */
   position: relative;
   z-index: 2;
-  letter-spacing: -0.02em;
-  animation: holographicShift 8s ease-in-out infinite;
 }
 
 .choir-tagline {
-  font-size: 1.4rem;
-  font-weight: 300;
-  margin-bottom: 3rem;
-  max-width: 900px;
+  font-size: 1.3rem; /* Slightly adjusted */
+  font-weight: 400; /* Regular weight for tagline */
+  margin-bottom: 2.5rem;
+  max-width: 700px; /* Control width */
   margin-left: auto;
   margin-right: auto;
-  color: var(--text-color-secondary, #b8b8b8);
+  color: var(--text-secondary);
   position: relative;
   z-index: 2;
-  line-height: 1.6;
-  letter-spacing: 0.01em;
+  line-height: 1.7;
 }
 
+/* CTA Buttons in Hero & CTA Section */
 .choir-cta-buttons {
   display: flex;
   justify-content: center;
-  gap: 1rem;
-  margin: 2rem 0;
+  gap: 1.5rem; /* Space between buttons if multiple */
+  margin-top: 2rem; /* Ensure it uses btn-primary from global styles */
 }
+/* .choir-cta-button.choir-primary is now just .btn-primary from global style.css */
 
-.choir-cta-button {
-  display: inline-block;
-  padding: 0.8rem 1.5rem;
-  border-radius: 30px;
-  font-weight: bold;
-  text-decoration: none;
-  transition: all 0.3s ease;
-}
 
-.choir-cta-button.choir-primary {
-  background: linear-gradient(135deg, rgba(18, 18, 18, 0.98), rgba(10, 10, 10, 0.95));
-  color: #f8f8f8;
-  border: 1px solid rgba(248, 248, 248, 0.1);
-  box-shadow:
-    0 16px 32px rgba(0, 0, 0, 0.6),
-    0 0 0 1px rgba(255, 255, 255, 0.05),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  position: relative;
-  overflow: hidden;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  font-weight: 400;
-  letter-spacing: 0.025em;
-  padding: 20px 40px;
-  border-radius: 24px;
-}
-
-.choir-cta-button.choir-primary::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(135deg,
-    rgba(232, 232, 255, 0.1),
-    rgba(248, 248, 248, 0.08),
-    rgba(255, 248, 232, 0.1));
-  background-size: 200% 200%;
-  opacity: 0;
-  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-  animation: holographicShift 4s ease-in-out infinite;
-}
-
-.choir-cta-button.choir-primary:hover {
-  transform: translateY(-4px) scale(1.02);
-  box-shadow:
-    0 24px 48px rgba(0, 0, 0, 0.8),
-    0 0 0 1px rgba(248, 248, 248, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.15),
-    0 0 20px rgba(248, 248, 248, 0.1);
-  border-color: rgba(248, 248, 248, 0.3);
-  color: #ffffff;
-  text-shadow: 0 0 12px rgba(248, 248, 248, 0.3);
-}
-
-.choir-cta-button.choir-primary:hover::before {
-  opacity: 0.15;
-}
-
+/* Features Grid: Cards with Carbon Fiber & Kintsugi Accents */
 .choir-features-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2rem;
-  margin: 3rem 0;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Responsive columns */
+  gap: 2.5rem; /* Increased gap */
+  margin: 4rem 0;
 }
 
 .choir-feature-card {
-  background: rgba(13, 13, 13, 0.95);
-  border-radius: var(--border-radius-md, 16px);
-  padding: 1.5rem;
-  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.8);
-  transition: transform 0.4s ease, box-shadow 0.4s ease;
-  border: 1px solid rgba(128, 128, 128, 0.3);
-  position: relative;
-  /* Carbon fiber texture */
+  background-color: var(--charcoal-grey);
+  /* Subtle carbon fiber texture */
   background-image:
-    linear-gradient(90deg, rgba(0, 0, 0, 0.9) 50%, rgba(128, 128, 128, 0.05) 50%),
-    linear-gradient(0deg, rgba(0, 0, 0, 0.9) 50%, rgba(128, 128, 128, 0.05) 50%);
-  background-size: 2px 2px, 2px 2px;
+    linear-gradient(135deg, rgba(0,0,0,0.1) 25%, transparent 25%),
+    linear-gradient(225deg, rgba(0,0,0,0.1) 25%, transparent 25%);
+  background-size: 8px 8px;
+  border-radius: var(--border-radius-md);
+  padding: 2rem; /* Increased padding */
+  box-shadow: 0 10px 25px var(--shadow-color-medium);
+  transition: transform var(--transition-smooth), box-shadow var(--transition-smooth);
+  border: 1px solid var(--graphite);
+  position: relative;
+  overflow: hidden;
+}
+.choir-feature-card::after { /* Kintsugi corner accent */
+    content: '';
+    position: absolute;
+    bottom: -10px; right: -10px;
+    width: 50px; height: 50px;
+    border-radius: 50%;
+    border: 2px solid var(--kintsugi-gold);
+    border-color: transparent transparent var(--kintsugi-gold) var(--kintsugi-gold);
+    transform: rotate(-45deg);
+    opacity: 0;
+    transition: opacity var(--transition-smooth), transform var(--transition-smooth);
 }
 
 .choir-feature-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.9);
-  border-color: rgba(255, 215, 0, 0.5);
+  transform: translateY(-6px);
+  box-shadow: 0 18px 35px var(--shadow-color-strong);
+  border-color: var(--kintsugi-gold);
+}
+.choir-feature-card:hover::after {
+    opacity: 0.5;
+    transform: rotate(-30deg) scale(1.1);
 }
 
+
 .choir-feature-card h3 {
-  background: linear-gradient(90deg, #ffd700, #c0c0c0);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: var(--kintsugi-gold);
   margin-bottom: 1rem;
-  font-size: 1.4rem;
-  display: inline-block;
-  text-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
+  font-size: 1.5rem; /* Consistent with h3 global, or can be specific */
+  font-weight: 600;
+  text-shadow: 0 1px 3px rgba(176, 141, 87, 0.2);
 }
 
 .choir-feature-card p {
-  color: #a8a8a8;
+  color: var(--text-secondary);
+  font-size: 0.95rem; /* Slightly smaller for card content */
+  line-height: 1.65;
 }
 
+/* Future Section: Darker Carbon with Patina/Bronze Accents */
 .choir-future-section {
-  background: rgba(13, 13, 13, 0.95);
-  padding: 3rem 2rem;
-  border-radius: var(--border-radius-lg, 20px);
-  margin: 3rem 0;
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.8);
-  position: relative;
-  /* Carbon fiber texture */
+  background-color: var(--carbon-black); /* Deepest carbon for this section */
+    /* More pronounced carbon fiber texture */
   background-image:
-    linear-gradient(45deg, rgba(0, 0, 0, 0.9) 25%, transparent 25%),
-    linear-gradient(-45deg, rgba(0, 0, 0, 0.9) 25%, transparent 25%);
-  background-size: 4px 4px, 4px 4px;
+    linear-gradient(135deg, rgba(20,20,20,0.2) 25%, transparent 25%),
+    linear-gradient(225deg, rgba(20,20,20,0.2) 25%, transparent 25%),
+    linear-gradient(45deg, rgba(20,20,20,0.2) 25%, transparent 25%),
+    linear-gradient(315deg, rgba(20,20,20,0.2) 25%, transparent 25%);
+  background-size: 12px 12px;
+  padding: 3.5rem 2.5rem;
+  border-radius: var(--border-radius-lg);
+  margin: 4rem 0;
+  box-shadow: 0 18px 40px var(--shadow-color-strong);
+  position: relative;
+  border-top: 3px solid var(--anodized-bronze); /* Bronze top border */
 }
-
-.choir-future-section::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  border-radius: var(--border-radius-lg, 20px);
-  padding: 2px;
-  background:
-    /* Irregular silver patina border */
-    linear-gradient(45deg,
-      #c0c0c0 0%, #c0c0c0 15%, transparent 15%, transparent 22%,
-      #e5e4e2 22%, #e5e4e2 40%, transparent 40%, transparent 48%,
-      #b87333 48%, #b87333 65%, transparent 65%, transparent 72%,
-      #808080 72%, #808080 88%, transparent 88%, transparent 95%,
-      #c0c0c0 95%, #c0c0c0 100%);
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  mask-composite: exclude;
-  opacity: 0.3;
-  z-index: -1;
-}
-
-/* Remove the prominent diagonal line from future section */
 
 .choir-future-section h2 {
   text-align: center;
-  margin-bottom: 2rem;
-  background: linear-gradient(90deg, #c0c0c0, #e5e4e2);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  display: inline-block;
-  margin-left: auto;
-  margin-right: auto;
-  width: fit-content;
-  text-shadow: 0 0 12px rgba(192, 192, 192, 0.3);
-  position: relative;
-  z-index: 2;
+  margin-bottom: 2.5rem;
+  color: var(--brushed-platinum); /* Platinum for this section's title */
+  font-size: 2.2rem; /* Consistent with global h2, or specific */
+  font-weight: 600;
+  text-shadow: 0 1px 4px var(--shadow-color-medium);
+}
+.choir-future-section > p { /* Targeting the main paragraph in future-section */
+    text-align: center;
+    color: var(--text-secondary);
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 3rem;
 }
 
 .choir-future-features {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1.5rem;
-  position: relative;
-  z-index: 2;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 2rem;
 }
 
 .choir-future-feature {
-  background: rgba(26, 26, 26, 0.9);
-  padding: 1.5rem;
-  border-radius: var(--border-radius-sm, 12px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.6);
-  transition: transform 0.4s ease;
-  border: 1px solid rgba(128, 128, 128, 0.2);
-  /* Subtle carbon fiber texture */
-  background-image:
-    linear-gradient(90deg, rgba(0, 0, 0, 0.9) 50%, rgba(128, 128, 128, 0.03) 50%);
-  background-size: 1px 1px;
+  background-color: var(--obsidian-black); /* Slightly lighter than section bg */
+  padding: 1.8rem;
+  border-radius: var(--border-radius-md);
+  box-shadow: 0 8px 18px var(--shadow-color-medium);
+  transition: var(--transition-smooth);
+  border: 1px solid var(--graphite);
+  border-left: 3px solid var(--anodized-bronze); /* Bronze accent line */
 }
 
 .choir-future-feature:hover {
-  transform: translateY(-5px);
-  border-color: rgba(255, 215, 0, 0.4);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.8);
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: 0 12px 25px var(--shadow-color-strong);
+  border-color: var(--anodized-bronze);
 }
 
 .choir-future-feature h4 {
-  color: #e5e4e2;
-  margin-bottom: 0.5rem;
-  text-shadow: 0 0 6px rgba(229, 228, 226, 0.2);
+  color: var(--brushed-platinum);
+  margin-bottom: 0.8rem;
+  font-size: 1.25rem; /* Consistent with global h4 or specific */
+  font-weight: 500;
 }
 
 .choir-future-feature p {
-  color: #a8a8a8;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.6;
 }
 
+/* CTA Section: Similar to Hero but can have variations */
 .choir-cta-section {
   text-align: center;
-  padding: 4rem 2rem;
-  background: linear-gradient(135deg, rgba(18, 18, 18, 0.98), rgba(10, 10, 10, 0.95));
-  color: var(--text-color-primary, #f8f8f8);
-  border-radius: var(--border-radius-lg, 32px);
+  padding: 4.5rem 2rem;
+  background-color: var(--obsidian-black);
+   background-image: /* Same carbon fiber as hero */
+    linear-gradient(135deg, rgba(0,0,0,0.15) 25%, transparent 25%),
+    linear-gradient(225deg, rgba(0,0,0,0.15) 25%, transparent 25%),
+    linear-gradient(45deg, rgba(0,0,0,0.15) 25%, transparent 25%),
+    linear-gradient(315deg, rgba(0,0,0,0.15) 25%, transparent 25%);
+  background-size: 10px 10px;
+  color: var(--text-primary);
+  border-radius: var(--border-radius-lg);
   margin-top: 4rem;
-  box-shadow:
-    0 32px 64px rgba(0, 0, 0, 0.6),
-    0 0 0 1px rgba(248, 248, 248, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  box-shadow: 0 20px 40px var(--shadow-color-strong), inset 0 1px 2px var(--highlight-soft);
   position: relative;
   overflow: hidden;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  /* Luxury micro-texture */
-  background-image:
-    radial-gradient(circle at 70% 70%, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
-    linear-gradient(135deg, rgba(255, 255, 255, 0.008) 0%, transparent 50%, rgba(255, 255, 255, 0.008) 100%);
-  background-size: 20px 20px, 100% 100%;
 }
-
-.choir-cta-section::before {
+.choir-cta-section::before { /* Kintsugi gold border, same as hero */
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  border-radius: var(--border-radius-lg, 32px);
-  padding: 1px;
-  background:
-    /* Smooth holographic border matching hero section */
-    linear-gradient(135deg,
-      #e8e8ff 0%, #f8f8f8 25%, #ffffff 50%, #f0f0f0 75%, #fff8e8 100%);
-  background-size: 200% 200%;
+  top: 0; left: 0; right: 0; bottom: 0;
+  border-radius: var(--border-radius-lg);
+  padding: 2px;
+  background: linear-gradient(135deg, var(--kintsugi-gold), var(--molten-gold) 50%, var(--kintsugi-gold) 100%);
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
   mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
   mask-composite: exclude;
-  opacity: 0.3;
-  z-index: -1;
-  animation: holographicShift 6s ease-in-out infinite;
+  opacity: 0.7;
+  z-index: 1;
+  animation: kintsugiShine 12s ease-in-out infinite alternate;
 }
 
-.choir-cta-section::after {
-  content: '';
-  position: absolute;
-  top: -40px;
-  left: -40px;
-  right: -40px;
-  bottom: -40px;
-  background: radial-gradient(ellipse at center, rgba(255, 255, 255, 0.05) 0%, transparent 70%);
-  border-radius: var(--border-radius-lg, 32px);
-  z-index: -2;
-  animation: ambientPulse 4s ease-in-out infinite;
-}
-
-/* Remove the prominent diagonal line from CTA section */
 
 .choir-cta-section h2 {
-  font-size: 2.75rem;
-  font-weight: 200;
+  font-size: 2.5rem; /* Slightly smaller than hero H2 */
+  font-weight: 600;
   margin-bottom: 1.5rem;
-  background: linear-gradient(135deg, #ffffff, #f8f8f8, #e0e0e0, #f0f0f0);
-  background-size: 200% 200%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  display: inline-block;
-  text-shadow: 0 0 25px rgba(248, 248, 248, 0.2);
+  color: var(--kintsugi-gold);
+  text-shadow: 0 2px 5px var(--shadow-color-medium), 0 0 20px rgba(176, 141, 87, 0.4);
   position: relative;
   z-index: 2;
-  letter-spacing: -0.02em;
-  animation: holographicShift 8s ease-in-out infinite;
 }
 
 .choir-cta-section p {
   font-size: 1.2rem;
-  font-weight: 300;
-  color: #b8b8b8;
+  font-weight: 400;
+  color: var(--text-secondary);
   position: relative;
   z-index: 2;
-  line-height: 1.6;
-  letter-spacing: 0.01em;
-  margin-bottom: 2rem;
+  line-height: 1.7;
+  margin-bottom: 2.5rem;
+  max-width: 650px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
+/* Responsive Adjustments for Landing Page specifics */
 @media (max-width: 768px) {
+  .choir-hero-section h2 { font-size: 2.5rem; }
+  .choir-tagline { font-size: 1.1rem; }
   .choir-features-grid, .choir-future-features {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr; /* Stack cards on mobile */
+    gap: 2rem;
   }
-
-  .choir-hero-section h2 {
-    font-size: 2rem;
-  }
+  .choir-feature-card, .choir-future-feature { padding: 1.5rem; }
+  .choir-future-section, .choir-cta-section, .choir-hero-section { padding: 3rem 1.5rem; }
+  .choir-cta-section h2 { font-size: 2rem; }
 }
 </style>

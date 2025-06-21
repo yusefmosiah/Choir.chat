@@ -4,9 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Choir - A luxurious platform for collaborative intelligence where your ideas are truly valued, rewarded, and amplified.">
-    <meta name="theme-color" content="#0a0a0a">
+    <meta name="theme-color" content="#0C0C0C"> <!-- Updated to --carbon-black -->
     <!-- Use a dynamic title passed from the route handler -->
     <title>{{ title }} - Choir</title>
+    <!-- Recommended: Add links to webfonts (Inter, Manrope) if not relying on system fonts -->
+    <!--
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    -->
     <link rel="stylesheet" href="/static/shared/style.css">
     <!-- Optional: Add favicon link -->
     <!-- <link rel="icon" href="/static/shared/images/favicon.png"> -->
@@ -16,7 +22,7 @@
         <!-- Render the converted Markdown HTML here -->
         {{ content|safe }}
 
-        <!-- Simple footer with lighter copyright text -->
+        <!-- Simple footer. Styles are now primarily in style.css -->
         <footer>
             <p class="copyright">© {{ current_year }} CHOIR HARMONIC INTELLIGENCE PLATFORM</p>
             <p>yusef@choir.chat</p>
@@ -27,47 +33,7 @@
             </div>
         </footer>
 
-        <style>
-            .footer-links {
-                margin-top: 1rem;
-                font-size: 0.95rem;
-                font-weight: 300;
-            }
-            .footer-link {
-                color: var(--titanium-shift-start, #d4d4d4);
-                text-decoration: none;
-                transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-                position: relative;
-                letter-spacing: 0.01em;
-            }
-            .footer-link::after {
-                content: '';
-                position: absolute;
-                width: 100%;
-                height: 1px;
-                bottom: -2px;
-                left: 0;
-                background: linear-gradient(90deg,
-                    var(--platinum-hologram-start, #f8f8f8),
-                    var(--chrome-reflection-start, #ffffff));
-                transform: scaleX(0);
-                transform-origin: bottom right;
-                transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            }
-            .footer-link:hover {
-                color: var(--chrome-reflection-start, #ffffff);
-                text-shadow: 0 0 8px rgba(248, 248, 248, 0.2);
-            }
-            .footer-link:hover::after {
-                transform: scaleX(1);
-                transform-origin: bottom left;
-            }
-            .footer-divider {
-                margin: 0 1rem;
-                color: var(--text-color-secondary, #b8b8b8);
-                opacity: 0.6;
-            }
-        </style>
+        <!-- Removed inline styles for footer as they are now in global style.css -->
     </div>
     <!-- Optional: Add shared JS -->
     <!-- <script src="/static/shared/script.js"></script> -->

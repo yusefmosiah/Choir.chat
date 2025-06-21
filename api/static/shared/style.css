@@ -1,54 +1,54 @@
-/* api/static/shared/style.css - Luxurious Futuristic Design Theme */
+/* api/static/shared/style.css - Carbon Fiber Kintsugi Theme */
 :root {
-    /* Base Colors - Deep Space Luxury */
-    --background-color: #0a0a0a;
-    /* Deep space black with micro-texture patterns */
-    --surface-color: #121212;
-    /* Rich obsidian with subtle holographic undertones */
-    --text-color-primary: #f8f8f8;
-    /* Pure platinum with crisp clarity */
-    --text-color-secondary: #b8b8b8;
-    /* Titanium gray with subtle luminosity */
-    --shadow-color: rgba(0, 0, 0, 0.4);
-    /* Void black with soft opacity for floating effects */
-    --highlight-color: rgba(255, 255, 255, 0.1);
-    /* Cool white with very low opacity */
+    /* Primary Palette: Deep & Rich */
+    --carbon-black: #0C0C0C;
+    --obsidian-black: #141414;
+    --charcoal-grey: #222222;
+    --graphite: #333333;
 
-    /* Holographic Accent Gradients */
-    --platinum-hologram-start: #f8f8f8;
-    --platinum-hologram-mid: #e0e0e0;
-    --platinum-hologram-end: #c8c8c8;
-    --titanium-shift-start: #d4d4d4;
-    --titanium-shift-mid: #a8a8a8;
-    --titanium-shift-end: #8c8c8c;
-    --chrome-reflection-start: #ffffff;
-    --chrome-reflection-mid: #f0f0f0;
-    --chrome-reflection-end: #e8e8e8;
-    --iridescent-edge-start: #e8e8ff;
-    --iridescent-edge-mid: #ffe8ff;
-    --iridescent-edge-end: #fff8e8;
+    /* Accent Palette: Kintsugi & High-Tech Metals */
+    --kintsugi-gold: #B08D57;
+    --molten-gold: #CFB53B;
+    --brushed-platinum: #D0D0D5;
+    --anodized-bronze: #8C7853;
 
-    /* Status Colors - Holographic */
-    --error-color: #ff3366;
-    /* Crimson hologram with red-orange shift */
-    --warning-color: #ffaa00;
-    /* Amber hologram with gold-yellow shift */
-    --success-color: #00ff88;
-    /* Emerald hologram with green-cyan shift */
+    /* Text & UI Colors */
+    --text-primary: #EAEAEA;
+    --text-secondary: #A0A0A0;
+    --subtle-gold-text: #B08D57; /* Use sparingly */
 
-    /* Luxury Effects */
-    --luxury-surface: rgba(18, 18, 18, 0.98);
-    --luxury-border: rgba(248, 248, 248, 0.1);
-    --luxury-shadow: rgba(0, 0, 0, 0.6);
-    --luxury-glow: rgba(255, 255, 255, 0.05);
+    /* Status & Feedback (Inspired by material states) */
+    --status-error: #C77700; /* Deep Amber/Burnt Orange */
+    --status-warning: #D4A017; /* Warm Gold/Brass */
+    --status-success: #6A8A82; /* Muted Jade Green/Patina */
+
+    /* Shadows & Highlights (More subtle, material-focused) */
+    --shadow-color-strong: rgba(0, 0, 0, 0.7);
+    --shadow-color-medium: rgba(0, 0, 0, 0.5);
+    --shadow-color-soft: rgba(0, 0, 0, 0.3);
+    --highlight-soft: rgba(255, 255, 255, 0.05); /* Softer than previous highlight */
+    --highlight-medium: rgba(255, 255, 255, 0.1);
+
 
     /* Typography */
-    --font-primary: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --font-primary: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --font-secondary: "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; /* Optional for specific elements */
 
-    /* Border Radius - Smooth Curves */
-    --border-radius-sm: 16px;
-    --border-radius-md: 24px;
-    --border-radius-lg: 32px;
+    /* Border Radius - Refined Curves */
+    --border-radius-sm: 12px; /* Slightly reduced for sharper feel */
+    --border-radius-md: 18px;
+    --border-radius-lg: 24px;
+
+    /* Transitions */
+    --transition-swift: all 0.2s ease-out;
+    --transition-smooth: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* Carbon Fiber Texture (Example - can be more complex) */
+    --carbon-fiber-texture-dark: linear-gradient(135deg, rgba(0,0,0,0.2) 25%, transparent 25%),
+                                 linear-gradient(225deg, rgba(0,0,0,0.2) 25%, transparent 25%),
+                                 linear-gradient(45deg, rgba(0,0,0,0.2) 25%, transparent 25%),
+                                 linear-gradient(315deg, rgba(0,0,0,0.2) 25%, transparent 25%);
+    --carbon-fiber-bg-size: 8px 8px; /* Adjust for desired weave density */
 }
 
 * {
@@ -59,704 +59,496 @@
 
 html {
     scroll-behavior: smooth;
+    background-color: var(--carbon-black); /* Base background for the entire page */
 }
 
 body {
     font-family: var(--font-primary);
-    color: var(--text-color-primary);
-    background-color: var(--background-color);
-    /* Luxurious micro-texture pattern */
-    background-image:
-        radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.01) 1px, transparent 1px),
-        radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.008) 1px, transparent 1px),
-        linear-gradient(135deg, rgba(255, 255, 255, 0.003) 0%, transparent 50%, rgba(255, 255, 255, 0.003) 100%);
-    background-size: 40px 40px, 60px 60px, 100% 100%;
-    background-position: 0 0, 20px 20px, 0 0;
+    color: var(--text-primary);
+    background-color: var(--carbon-black);
+    /* Subtle carbon weave for overall page background */
+    background-image: var(--carbon-fiber-texture-dark);
+    background-size: var(--carbon-fiber-bg-size);
     background-attachment: fixed;
-    line-height: 1.8;
-    /* Premium spacing for readability */
-    padding: 24px;
+    line-height: 1.7; /* Slightly increased for readability */
+    padding: 32px; /* Increased padding */
     display: flex;
     justify-content: center;
-    /* Center content block */
     min-height: 100vh;
-    /* Subtle ambient glow */
-    box-shadow: inset 0 0 200px rgba(255, 255, 255, 0.02);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
-/* Main content wrapper - Luxurious floating panel */
+/* Main content wrapper - Refined carbon fiber panel */
 .content-wrapper {
-    max-width: 900px;
-    /* Premium readable width */
+    max-width: 860px; /* Slightly narrower for more focus */
     width: 100%;
-    background: var(--luxury-surface);
-    /* Luxury obsidian background */
-    padding: 48px 56px;
+    background-color: var(--obsidian-black);
+    /* More defined carbon fiber texture for the main panel */
+    background-image: linear-gradient(135deg, rgba(20,20,20,0.1) 25%, transparent 25%),
+                      linear-gradient(225deg, rgba(20,20,20,0.1) 25%, transparent 25%),
+                      linear-gradient(45deg, rgba(20,20,20,0.1) 25%, transparent 25%),
+                      linear-gradient(315deg, rgba(20,20,20,0.1) 25%, transparent 25%),
+                      linear-gradient(0deg, rgba(0,0,0,0.8), rgba(5,5,5,0.8)); /* Base color with slight gradient */
+    background-size: 6px 6px, 6px 6px, 6px 6px, 6px 6px, 100% 100%;
+    padding: 40px 48px; /* Adjusted padding */
     border-radius: var(--border-radius-lg);
     box-shadow:
-        0 32px 64px var(--luxury-shadow),
-        /* Deep floating shadow */
-        0 0 0 1px var(--luxury-border),
-        /* Subtle edge definition */
-        inset 0 1px 0 var(--highlight-color);
-    /* Premium inner highlight */
-    margin-top: 32px;
-    margin-bottom: 64px;
+        0 24px 48px var(--shadow-color-strong), /* Stronger, deeper shadow */
+        inset 0 1px 1px var(--highlight-soft), /* Softer inner highlight */
+        0 0 0 1px rgba(50, 50, 50, 0.5); /* Graphite border for definition */
+    margin-top: 40px;
+    margin-bottom: 80px;
     position: relative;
-    overflow: hidden;
-    /* Subtle holographic shimmer overlay */
-    background-image:
-        linear-gradient(135deg,
-            rgba(255, 255, 255, 0.02) 0%,
-            transparent 25%,
-            rgba(255, 255, 255, 0.01) 50%,
-            transparent 75%,
-            rgba(255, 255, 255, 0.02) 100%);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    overflow: hidden; /* Keep for pseudo-elements if any */
 }
 
-/* Holographic edge lighting for content wrapper */
+/* Kintsugi-inspired edge accent for content wrapper */
 .content-wrapper::before {
     content: '';
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    top: 0; left: 0; right: 0; bottom: 0;
     border-radius: var(--border-radius-lg);
-    padding: 1px;
-    /* Thin edge lighting */
-    background:
-        /* Smooth holographic gradient */
-        linear-gradient(45deg,
-            var(--iridescent-edge-start) 0%,
-            var(--platinum-hologram-start) 25%,
-            var(--chrome-reflection-start) 50%,
-            var(--titanium-shift-start) 75%,
-            var(--iridescent-edge-end) 100%);
+    padding: 1.5px; /* Kintsugi line thickness */
+    background: linear-gradient(135deg,
+        var(--kintsugi-gold) 0%,
+        var(--molten-gold) 30%,
+        var(--kintsugi-gold) 70%,
+        var(--anodized-bronze) 100%);
     -webkit-mask:
         linear-gradient(#fff 0 0) content-box,
         linear-gradient(#fff 0 0);
     -webkit-mask-composite: xor;
-    mask:
-        linear-gradient(#fff 0 0) content-box,
-        linear-gradient(#fff 0 0);
-    mask-composite: exclude;
-    opacity: 0.3;
-    z-index: -1;
-    animation: holographicShift 8s ease-in-out infinite;
+    mask-composite: exclude; /* Standard property */
+    opacity: 0.6; /* Subtle but present */
+    z-index: 1; /* Above background, below content */
+    pointer-events: none;
+    animation: kintsugiShine 10s ease-in-out infinite;
 }
 
-/* Subtle ambient glow */
-.content-wrapper::after {
-    content: '';
-    position: absolute;
-    top: -20px;
-    left: -20px;
-    right: -20px;
-    bottom: -20px;
-    background: radial-gradient(ellipse at center, var(--luxury-glow) 0%, transparent 70%);
-    border-radius: var(--border-radius-lg);
-    z-index: -2;
-    opacity: 0.6;
-}
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-secondary); /* Using Manrope for headings */
     font-weight: 500;
-    /* Medium weight as per style guide */
-    margin-top: 1.5em;
-    margin-bottom: 0.8em;
-    line-height: 1.3;
-    color: var(--text-color-primary);
+    margin-top: 1.6em;
+    margin-bottom: 0.7em;
+    line-height: 1.25;
+    color: var(--text-primary);
+    letter-spacing: -0.01em; /* Subtle tightening */
 }
 
 h1 {
-    font-size: 3rem;
-    /* Larger, more premium sizing */
-    font-weight: 300;
-    /* Lighter, more elegant weight */
-    padding-bottom: 0.4em;
-    background: linear-gradient(135deg,
-            var(--chrome-reflection-start),
-            var(--platinum-hologram-start),
-            var(--titanium-shift-start),
-            var(--chrome-reflection-end));
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    display: inline-block;
-    text-shadow: 0 0 20px rgba(248, 248, 248, 0.2);
-    /* Soft platinum glow */
-    letter-spacing: -0.02em;
-    /* Tight, premium spacing */
+    font-size: 2.8rem; /* Slightly adjusted */
+    font-weight: 600; /* Bolder for main titles */
+    padding-bottom: 0.3em;
+    color: var(--kintsugi-gold); /* Direct Kintsugi Gold for H1 */
+    text-shadow: 0 1px 3px var(--shadow-color-medium), 0 0 15px rgba(176, 141, 87, 0.3); /* Gold glow */
+    position: relative;
+}
+/* Optional: Kintsugi underline for H1 */
+h1::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -5px; /* Position below the padding-bottom */
+    height: 2px;
+    width: 50px; /* Short underline */
+    background: var(--molten-gold);
+    opacity: 0.8;
 }
 
+
 h2 {
-    font-size: 2.25rem;
-    /* Premium sizing */
-    font-weight: 300;
-    color: var(--text-color-primary);
-    letter-spacing: -0.01em;
+    font-size: 2rem;
+    font-weight: 500;
+    color: var(--brushed-platinum); /* Brushed platinum for H2 */
+    letter-spacing: -0.005em;
+    border-bottom: 1px solid var(--graphite); /* Subtle separator */
+    padding-bottom: 0.4em;
 }
 
 h3 {
-    font-size: 1.75rem;
-    /* Refined sizing */
-    font-weight: 400;
-    background: linear-gradient(135deg,
-            var(--platinum-hologram-start),
-            var(--titanium-shift-start),
-            var(--platinum-hologram-end));
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    display: inline-block;
-    text-shadow: 0 0 12px rgba(212, 212, 212, 0.15);
-    /* Subtle titanium glow */
-    letter-spacing: -0.005em;
+    font-size: 1.6rem;
+    font-weight: 500;
+    color: var(--text-primary); /* Primary text color for H3 */
 }
 
 h4 {
-    font-size: 1.25rem;
-    /* 20pt equivalent */
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: var(--text-secondary); /* Secondary text for H4 */
 }
 
 p {
-    margin-bottom: 1.2em;
+    margin-bottom: 1.4em; /* Increased spacing */
+    line-height: 1.75; /* More leading for body text */
+    color: var(--text-secondary); /* Default p to secondary, primary for emphasis */
+}
+p.lead { /* For introductory paragraphs */
+    color: var(--text-primary);
+    font-size: 1.1em;
 }
 
+
 a {
-    color: var(--silver-veining-start);
+    color: var(--kintsugi-gold);
     text-decoration: none;
     font-weight: 500;
     position: relative;
-    transition: all 0.3s ease;
+    transition: var(--transition-smooth);
+    text-shadow: 0 0 8px rgba(176, 141, 87, 0.2);
 }
 
+a:hover {
+    color: var(--molten-gold);
+    text-shadow: 0 0 12px rgba(207, 181, 59, 0.5);
+}
+a:hover::after {
+    transform: scaleX(1);
+    transform-origin: bottom left;
+    background: var(--molten-gold);
+}
+/* Subtle underline for links */
 a::after {
     content: '';
     position: absolute;
     width: 100%;
     height: 1px;
-    bottom: -2px;
+    bottom: -3px; /* Adjust position */
     left: 0;
-    background: linear-gradient(90deg,
-            var(--gold-kintsugi-start),
-            var(--silver-veining-start));
+    background: var(--kintsugi-gold);
+    opacity: 0.7;
     transform: scaleX(0);
     transform-origin: bottom right;
-    transition: transform 0.4s ease;
+    transition: var(--transition-smooth);
 }
 
-a:hover {
-    color: var(--gold-kintsugi-start);
-    text-shadow: 0 0 6px rgba(255, 215, 0, 0.4);
-}
 
-a:hover::after {
-    transform: scaleX(1);
-    transform-origin: bottom left;
-}
-
-/* Luxury holographic button styling */
-a[href^="mailto:"],
+/* Primary Button - Carbon Fiber with Kintsugi Gold Accent */
 .btn-primary {
     display: inline-block;
-    padding: 18px 32px;
+    padding: 14px 28px; /* Adjusted padding */
     font-size: 1rem;
-    font-weight: 400;
+    font-weight: 500; /* Medium weight */
     text-decoration: none;
     border-radius: var(--border-radius-md);
     cursor: pointer;
     text-align: center;
-    margin-top: 1.5em;
-    margin-bottom: 1.5em;
+    margin: 1.5em 0.5em 1.5em 0; /* Added right margin for spacing */
     position: relative;
-    color: var(--text-color-primary);
-    background: linear-gradient(135deg,
-            var(--luxury-surface),
-            var(--surface-color));
-    border: 1px solid var(--luxury-border);
-    box-shadow:
-        0 16px 32px var(--luxury-shadow),
-        0 0 0 1px rgba(255, 255, 255, 0.05),
-        inset 0 1px 0 var(--highlight-color);
-    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-    overflow: hidden;
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    letter-spacing: 0.025em;
-    /* Premium letter spacing */
+    color: var(--text-primary);
+    background-color: var(--charcoal-grey); /* Charcoal base */
+    border: 1.5px solid var(--graphite); /* Graphite border */
+    box-shadow: 0 8px 16px var(--shadow-color-medium), inset 0 1px 1px var(--highlight-soft);
+    transition: var(--transition-smooth);
+    overflow: hidden; /* For pseudo-elements */
+    letter-spacing: 0.03em;
 }
-
-/* Holographic overlay for primary buttons */
-a[href^="mailto:"]::before,
-.btn-primary::before {
+.btn-primary::before { /* Kintsugi gold line accent */
     content: '';
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(135deg,
-            var(--iridescent-edge-start),
-            var(--chrome-reflection-start),
-            var(--platinum-hologram-start),
-            var(--iridescent-edge-end));
-    background-size: 200% 200%;
-    border-radius: var(--border-radius-md);
+    top: 50%;
+    left: -10%;
+    width: 120%;
+    height: 2px; /* Thickness of the gold line */
+    background: var(--kintsugi-gold);
     opacity: 0;
-    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-    animation: holographicShift 4s ease-in-out infinite;
+    transform: translateY(-50%) scaleX(0.5) rotate(-20deg);
+    transition: var(--transition-smooth);
+    pointer-events: none;
 }
-
-a[href^="mailto:"]:hover::before,
-.btn-primary:hover::before {
-    opacity: 0.15;
-}
-
-a[href^="mailto:"] span,
-.btn-primary span {
-    position: relative;
-    z-index: 1;
-}
-
-/* Special styling for TestFlight link */
-a[href^="mailto:"][href*="TestFlight"] {
-    font-weight: 600;
-    letter-spacing: 0.5px;
-    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
-    padding: 16px 28px;
-}
-
-a[href^="mailto:"]:hover,
 .btn-primary:hover {
-    transform: translateY(-4px) scale(1.02);
-    box-shadow:
-        0 24px 48px var(--luxury-shadow),
-        0 0 0 1px var(--platinum-hologram-start),
-        inset 0 1px 0 var(--highlight-color),
-        0 0 20px rgba(248, 248, 248, 0.1);
-    border-color: var(--platinum-hologram-start);
-    color: var(--chrome-reflection-start);
-    text-shadow: 0 0 12px rgba(248, 248, 248, 0.3);
+    background-color: var(--graphite); /* Darken on hover */
+    border-color: var(--kintsugi-gold);
+    color: var(--text-primary);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 24px var(--shadow-color-strong), inset 0 1px 1px var(--highlight-soft), 0 0 10px rgba(176, 141, 87, 0.3);
 }
-
-a[href^="mailto:"]:active,
+.btn-primary:hover::before {
+    opacity: 0.7;
+    transform: translateY(-50%) scaleX(1) rotate(0deg);
+}
 .btn-primary:active {
-    transform: translateY(-1px) scale(0.98);
-    box-shadow:
-        0 8px 16px var(--luxury-shadow),
-        0 0 0 1px var(--luxury-border),
-        inset 0 1px 0 var(--highlight-color);
-    transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px var(--shadow-color-medium), inset 0 1px 1px var(--highlight-soft);
+    transition-duration: 0.1s;
 }
 
-/* Secondary button style - Worn carbon fiber */
+
+/* Secondary Button - Brushed Metallic Look */
 .btn-secondary {
     display: inline-block;
-    padding: 12px 20px;
-    font-size: 1rem;
+    padding: 12px 24px;
+    font-size: 0.95rem;
     font-weight: 500;
     text-decoration: none;
     border-radius: var(--border-radius-sm);
     cursor: pointer;
     text-align: center;
-    margin-top: 1em;
-    margin-bottom: 1em;
-    color: var(--text-color-secondary);
-    background: var(--surface-color);
-    box-shadow:
-        0 6px 15px rgba(0, 0, 0, 0.6),
-        inset 0 1px 2px var(--highlight-color);
-    border: 1px solid var(--carbon-fiber-border);
-    transition: all 0.4s ease;
-    /* Worn carbon fiber texture */
-    background-image:
-        linear-gradient(45deg, rgba(0, 0, 0, 0.95) 25%, transparent 25%),
-        linear-gradient(-45deg, rgba(0, 0, 0, 0.95) 25%, transparent 25%);
-    background-size: 1px 1px, 1px 1px;
+    margin: 1em 0.5em 1em 0;
+    color: var(--text-secondary);
+    background-color: var(--obsidian-black); /* Darker base for secondary */
+    border: 1px solid var(--graphite);
+    box-shadow: 0 4px 10px var(--shadow-color-soft), inset 0 1px 0px var(--highlight-soft);
+    transition: var(--transition-smooth);
 }
-
 .btn-secondary:hover {
+    background-color: var(--charcoal-grey);
+    border-color: var(--brushed-platinum);
+    color: var(--brushed-platinum);
     transform: translateY(-2px);
-    box-shadow:
-        0 10px 20px rgba(0, 0, 0, 0.7),
-        inset 0 1px 2px var(--highlight-color);
-    border-color: var(--silver-veining-start);
-    color: var(--silver-veining-start);
+    box-shadow: 0 6px 12px var(--shadow-color-medium), inset 0 1px 0px var(--highlight-soft);
 }
-
 .btn-secondary:active {
-    transform: translateY(1px);
-    box-shadow:
-        0 3px 8px rgba(0, 0, 0, 0.6),
-        inset 0 1px 2px var(--highlight-color);
-}
-
-/* Holographic shimmer animation for luxury elements */
-@keyframes holographicShift {
-    0% {
-        background-position: 0% 50%;
-        filter: hue-rotate(0deg);
-    }
-
-    25% {
-        background-position: 100% 50%;
-        filter: hue-rotate(90deg);
-    }
-
-    50% {
-        background-position: 100% 100%;
-        filter: hue-rotate(180deg);
-    }
-
-    75% {
-        background-position: 0% 100%;
-        filter: hue-rotate(270deg);
-    }
-
-    100% {
-        background-position: 0% 50%;
-        filter: hue-rotate(360deg);
-    }
-}
-
-/* Subtle ambient pulse for premium elements */
-@keyframes ambientPulse {
-
-    0%,
-    100% {
-        opacity: 0.3;
-        transform: scale(1);
-    }
-
-    50% {
-        opacity: 0.6;
-        transform: scale(1.02);
-    }
+    transform: translateY(0px);
+    box-shadow: 0 2px 5px var(--shadow-color-soft), inset 0 1px 0px var(--highlight-soft);
+    transition-duration: 0.1s;
 }
 
 
-ul,
-ol {
-    margin-left: 2em;
-    margin-bottom: 1.2em;
+@keyframes kintsugiShine { /* Subtle animation for kintsugi lines */
+    0% { filter: brightness(0.8) saturate(0.8); }
+    50% { filter: brightness(1.2) saturate(1.2); }
+    100% { filter: brightness(0.8) saturate(0.8); }
+}
+@keyframes subtleGlow { /* For text or small elements */
+    0%, 100% { text-shadow: 0 0 5px rgba(176, 141, 87, 0.2); }
+    50% { text-shadow: 0 0 10px rgba(176, 141, 87, 0.5); }
 }
 
+
+ul, ol {
+    margin-left: 1.5em; /* Adjusted indentation */
+    margin-bottom: 1.4em;
+    padding-left: 0.5em; /* Add some padding for list markers */
+}
 li {
-    margin-bottom: 0.5em;
+    margin-bottom: 0.6em;
+    color: var(--text-secondary);
+}
+li::marker {
+    color: var(--kintsugi-gold); /* Gold markers */
 }
 
-/* Code Blocks - Carbon Fiber with Metallic Accents */
+
+/* Code Blocks - Matte Carbon with Gold Accents */
 pre {
-    background: var(--surface-color);
+    background-color: var(--carbon-black); /* Deepest black for code */
     border-radius: var(--border-radius-md);
-    padding: 1.2em;
-    margin-bottom: 1.5em;
+    padding: 1.5em; /* More padding */
+    margin: 1.8em 0;
     overflow-x: auto;
-    box-shadow:
-        0 12px 25px var(--carbon-fiber-shadow),
-        inset 0 1px 2px var(--highlight-color);
+    box-shadow: 0 8px 20px var(--shadow-color-medium), inset 0 2px 4px rgba(0,0,0,0.3);
     position: relative;
-    border: 1px solid var(--carbon-fiber-border);
-    /* Carbon fiber texture */
-    background-image:
-        linear-gradient(90deg, rgba(0, 0, 0, 0.95) 50%, rgba(128, 128, 128, 0.03) 50%),
-        linear-gradient(0deg, rgba(0, 0, 0, 0.95) 50%, rgba(128, 128, 128, 0.03) 50%);
-    background-size: 1px 1px, 1px 1px;
+    border: 1px solid var(--graphite);
+    /* Subtle carbon texture for pre blocks */
+    background-image: linear-gradient(45deg, rgba(20,20,20,0.05) 25%, transparent 25%, transparent 75%, rgba(20,20,20,0.05) 75%, rgba(20,20,20,0.05)),
+                      linear-gradient(45deg, rgba(20,20,20,0.05) 25%, transparent 25%, transparent 75%, rgba(20,20,20,0.05) 75%, rgba(20,20,20,0.05));
+    background-size: 10px 10px;
+    background-position: 0 0, 5px 5px;
 }
-
-/* Irregular patina'd border for code blocks */
-pre::before {
+pre::before { /* Kintsugi gold top border accent */
     content: '';
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    border-radius: var(--border-radius-md);
-    padding: 1px;
-    /* Border width */
-    background:
-        /* Patina pattern with interruptions */
-        linear-gradient(45deg,
-            var(--silver-veining-start) 0%,
-            var(--silver-veining-start) 25%,
-            transparent 25%,
-            transparent 30%,
-            var(--platinum-highlight-start) 30%,
-            var(--platinum-highlight-start) 55%,
-            transparent 55%,
-            transparent 60%,
-            var(--copper-patina-start) 60%,
-            var(--copper-patina-start) 85%,
-            transparent 85%,
-            transparent 90%,
-            var(--silver-veining-end) 90%,
-            var(--silver-veining-end) 100%);
-    -webkit-mask:
-        linear-gradient(#fff 0 0) content-box,
-        linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask:
-        linear-gradient(#fff 0 0) content-box,
-        linear-gradient(#fff 0 0);
-    mask-composite: exclude;
-    opacity: 0.3;
-    z-index: -1;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--kintsugi-gold), var(--molten-gold), var(--kintsugi-gold));
+    border-top-left-radius: var(--border-radius-md);
+    border-top-right-radius: var(--border-radius-md);
+    opacity: 0.6;
 }
-
 code {
-    font-family: monospace;
-    background-color: rgba(0, 0, 0, 0.05);
-    padding: 0.2em 0.4em;
-    border-radius: 3px;
+    font-family: "SF Mono", "Fira Code", "Source Code Pro", monospace;
+    background-color: var(--charcoal-grey); /* Inline code background */
+    padding: 0.25em 0.5em;
+    border-radius: var(--border-radius-sm);
     font-size: 0.9em;
+    color: var(--brushed-platinum); /* Lighter color for inline code */
 }
-
 pre code {
     background-color: transparent;
     padding: 0;
     border-radius: 0;
-    font-size: 1em;
-    color: var(--text-color-primary);
+    font-size: 0.95em; /* Slightly larger for pre blocks */
+    color: var(--text-primary); /* Primary text for code in pre */
 }
 
-/* Blockquotes - Carbon Fiber with Kintsugi Accent */
+
+/* Blockquotes - Charcoal with Kintsugi Gold Side Accent */
 blockquote {
-    margin: 1.5em 0;
-    padding: 1.5em 2em;
-    background: var(--carbon-fiber-bg);
+    margin: 1.8em 0;
+    padding: 1.5em 1.8em;
+    background-color: var(--charcoal-grey);
     border-radius: var(--border-radius-md);
-    box-shadow:
-        0 10px 20px var(--carbon-fiber-shadow),
-        inset 0 1px 2px var(--highlight-color);
+    box-shadow: 0 6px 15px var(--shadow-color-soft), inset 0 1px 2px rgba(0,0,0,0.2);
     font-style: italic;
-    color: var(--text-color-secondary);
+    color: var(--text-secondary);
     position: relative;
-    border: 1px solid var(--carbon-fiber-border);
-    /* Carbon fiber texture */
-    background-image:
-        linear-gradient(90deg, rgba(0, 0, 0, 0.95) 50%, rgba(128, 128, 128, 0.03) 50%),
-        linear-gradient(0deg, rgba(0, 0, 0, 0.95) 50%, rgba(128, 128, 128, 0.03) 50%);
-    background-size: 1px 1px, 1px 1px;
+    border-left: 4px solid var(--kintsugi-gold); /* Kintsugi gold left border */
 }
-
-/* Irregular patina'd accent line for blockquotes */
-blockquote::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    width: 4px;
-    background:
-        /* Vertical patina with breaks */
-        linear-gradient(to bottom,
-            var(--gold-kintsugi-start) 0%,
-            var(--gold-kintsugi-start) 20%,
-            transparent 20%,
-            transparent 25%,
-            var(--silver-veining-start) 25%,
-            var(--silver-veining-start) 45%,
-            transparent 45%,
-            transparent 50%,
-            var(--copper-patina-start) 50%,
-            var(--copper-patina-start) 70%,
-            transparent 70%,
-            transparent 75%,
-            var(--platinum-highlight-start) 75%,
-            var(--platinum-highlight-start) 100%);
-    border-radius: 4px 0 0 4px;
-    box-shadow: 0 0 6px rgba(255, 215, 0, 0.2);
-}
-
 blockquote p {
-    margin-bottom: 0.5em;
+    margin-bottom: 0.8em;
+    color: var(--text-primary); /* Brighter text inside blockquotes */
 }
+blockquote p:last-child {
+    margin-bottom: 0;
+}
+
 
 img {
     max-width: 100%;
     height: auto;
     display: block;
-    margin: 1.5em auto;
+    margin: 2em auto; /* More margin */
     border-radius: var(--border-radius-md);
-    box-shadow: 0 8px 20px var(--shadow-color);
-    position: relative;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 10px 25px var(--shadow-color-medium);
+    transition: var(--transition-smooth);
+    border: 1px solid var(--graphite); /* Subtle border for images */
 }
-
 img:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 12px 24px var(--shadow-color);
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 15px 30px var(--shadow-color-strong);
 }
 
-/* Optional: Angular gradient border for images */
-.img-gradient {
-    position: relative;
-    padding: 3px;
-    border-radius: var(--border-radius-md);
-    background: linear-gradient(135deg,
-            var(--gradient-green),
-            var(--gradient-blue),
-            var(--gradient-purple));
-    display: inline-block;
-    margin: 1.5em auto;
-}
-
-.img-gradient img {
-    border-radius: calc(var(--border-radius-md) - 3px);
-    margin: 0;
-    display: block;
-}
 
 hr {
     border: none;
-    height: 1px;
-    margin: 2.5em 0;
+    height: 1.5px; /* Thicker HR */
+    margin: 3em 0; /* More margin */
     background: linear-gradient(90deg,
             transparent,
-            var(--gradient-blue),
-            var(--gradient-purple),
-            var(--gradient-blue),
+            var(--graphite) 20%,
+            var(--kintsugi-gold) 50%, /* Gold center */
+            var(--graphite) 80%,
             transparent);
-    opacity: 0.7;
+    opacity: 0.5;
 }
 
-/* Input fields - Carbon fiber styling with metallic focus */
+
+/* Input fields - Carbon Fiber with Gold Focus */
 input[type="text"],
 input[type="email"],
 input[type="password"],
 textarea,
 select {
     width: 100%;
-    padding: 12px 16px;
-    margin-bottom: 1.2em;
-    border: 1px solid var(--carbon-fiber-border);
+    padding: 14px 18px; /* Adjusted padding */
+    margin-bottom: 1.5em;
+    border: 1px solid var(--graphite);
     border-radius: var(--border-radius-md);
-    background: var(--surface-color);
-    box-shadow:
-        0 6px 15px var(--carbon-fiber-shadow),
-        inset 0 1px 2px var(--highlight-color);
-    color: var(--text-color-primary);
+    background-color: var(--carbon-black); /* Dark base for inputs */
+    /* Subtle carbon texture for inputs */
+    background-image: linear-gradient(45deg, rgba(20,20,20,0.1) 25%, transparent 25%, transparent 75%, rgba(20,20,20,0.1) 75%, rgba(20,20,20,0.1)),
+                      linear-gradient(45deg, rgba(20,20,20,0.1) 25%, transparent 25%, transparent 75%, rgba(20,20,20,0.1) 75%, rgba(20,20,20,0.1));
+    background-size: 8px 8px;
+    background-position: 0 0, 4px 4px;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.1);
+    color: var(--text-primary);
     font-family: var(--font-primary);
     font-size: 1rem;
-    transition: all 0.4s ease;
+    transition: var(--transition-smooth);
     position: relative;
-    /* Carbon fiber texture */
-    background-image:
-        linear-gradient(90deg, rgba(0, 0, 0, 0.95) 50%, rgba(128, 128, 128, 0.03) 50%);
-    background-size: 1px 1px;
 }
-
 input[type="text"]:focus,
 input[type="email"]:focus,
 input[type="password"]:focus,
 textarea:focus,
 select:focus {
     outline: none;
-    box-shadow:
-        0 10px 20px var(--carbon-fiber-shadow),
-        inset 0 1px 2px var(--highlight-color);
-    border-color: var(--gold-kintsugi-start);
-    background-image:
-        linear-gradient(90deg, rgba(0, 0, 0, 0.95) 50%, rgba(255, 215, 0, 0.02) 50%);
+    border-color: var(--kintsugi-gold);
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.3), 0 0 0 2px rgba(176, 141, 87, 0.3), 0 0 10px rgba(176, 141, 87, 0.2); /* Gold focus ring */
+    background-image: linear-gradient(45deg, rgba(30,30,30,0.15) 25%, transparent 25%, transparent 75%, rgba(30,30,30,0.15) 75%, rgba(30,30,30,0.15)),
+                      linear-gradient(45deg, rgba(30,30,30,0.15) 25%, transparent 25%, transparent 75%, rgba(30,30,30,0.15) 75%, rgba(30,30,30,0.15));
 }
-
-/* Input field with gradient border on focus */
-.input-gradient {
-    position: relative;
+textarea {
+    min-height: 120px;
+    line-height: 1.6;
 }
-
-.input-gradient::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    border-radius: var(--border-radius-md);
-    padding: 1px;
-    background: linear-gradient(135deg,
-            var(--gradient-green),
-            var(--gradient-blue),
-            var(--gradient-purple));
-    -webkit-mask:
-        linear-gradient(#fff 0 0) content-box,
-        linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask:
-        linear-gradient(#fff 0 0) content-box,
-        linear-gradient(#fff 0 0);
-    mask-composite: exclude;
-    opacity: 0;
-    z-index: 1;
-    transition: opacity 0.3s ease;
-    pointer-events: none;
+select {
+    appearance: none; /* For custom select arrow */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23A0A0A0' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 18px center;
+    background-size: 12px;
 }
+::-webkit-input-placeholder { color: var(--text-secondary); opacity: 0.7; }
+::-moz-placeholder { color: var(--text-secondary); opacity: 0.7; }
+:-ms-input-placeholder { color: var(--text-secondary); opacity: 0.7; }
+::-ms-input-placeholder { color: var(--text-secondary); opacity: 0.7; }
+::placeholder { color: var(--text-secondary); opacity: 0.7; }
 
-.input-gradient:focus-within::after {
-    opacity: 1;
-}
 
-/* Footer styling - simplified and lighter */
+/* Footer styling - Minimalist and elegant */
 footer {
     text-align: center;
-    margin-top: 40px;
-    padding: 15px 0;
-    font-size: 0.8rem;
-    color: var(--text-color-secondary);
-    opacity: 0.5;
+    margin-top: 60px; /* More space above footer */
+    padding: 20px 0;
+    font-size: 0.9rem; /* Slightly larger footer text */
+    color: var(--text-secondary);
+    opacity: 0.7; /* Slightly more visible */
     position: relative;
 }
-
-/* Copyright text - even lighter */
 .copyright {
-    font-size: 0.75rem;
-    opacity: 0.4;
-    color: var(--text-color-secondary);
-    margin: 0;
-    padding: 0;
+    font-size: 0.85rem;
+    opacity: 0.6;
+    color: var(--text-secondary);
+    margin: 0 0 0.5em 0; /* Space below copyright */
 }
+footer p {
+    margin-bottom: 0.5em; /* Reduced margin for footer paragraphs */
+    line-height: 1.5;
+}
+.footer-links {
+    margin-top: 0.8rem;
+}
+.footer-link {
+    color: var(--text-secondary); /* Consistent with footer text */
+    text-decoration: none;
+    transition: var(--transition-swift);
+    margin: 0 0.5em;
+    font-weight: 400;
+}
+.footer-link:hover {
+    color: var(--kintsugi-gold);
+    text-shadow: none; /* Remove general link shadow if not desired here */
+}
+.footer-link::after { /* Remove underline from footer links or make it more subtle */
+    display: none;
+}
+.footer-divider {
+    margin: 0 0.8rem;
+    color: var(--graphite);
+    opacity: 0.8;
+}
+
 
 /* Responsive */
 @media (max-width: 768px) {
     body {
-        padding: 10px;
+        padding: 16px; /* Adjusted padding for smaller screens */
     }
-
     .content-wrapper {
-        padding: 20px;
-        margin-top: 10px;
-        margin-bottom: 20px;
+        padding: 24px 20px; /* Reduced padding */
+        margin-top: 20px;
+        margin-bottom: 40px;
+        border-radius: var(--border-radius-md); /* Smaller radius on mobile */
+    }
+    .content-wrapper::before {
+        border-radius: var(--border-radius-md);
     }
 
-    h1 {
-        font-size: 2rem;
-        /* 32pt equivalent */
-    }
+    h1 { font-size: 2.2rem; }
+    h1::after { width: 40px; bottom: -3px; }
+    h2 { font-size: 1.7rem; }
+    h3 { font-size: 1.4rem; }
 
-    h2 {
-        font-size: 1.6rem;
-        /* 26pt equivalent */
+    .btn-primary, .btn-secondary {
+        width: 100%; /* Full width buttons on mobile */
+        padding: 14px 20px;
+        margin-right: 0;
+        margin-left: 0;
     }
-
-    h3 {
-        font-size: 1.25rem;
-        /* 20pt equivalent */
-    }
-
-    a[href^="mailto:"],
-    .btn-primary,
-    .btn-secondary {
-        width: 100%;
+    input[type="text"], input[type="email"], input[type="password"], textarea, select {
         padding: 12px 16px;
     }
 }
