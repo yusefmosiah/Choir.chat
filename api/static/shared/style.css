@@ -29,13 +29,11 @@
     --platinum-highlight-end: #c0c0c0;
 
     /* Carbon Fiber Textures */
-    --carbon-fiber-bg: linear-gradient(
-        45deg, 
-        rgba(0,0,0,0.9) 25%, 
-        transparent 25%, 
-        transparent 75%, 
-        rgba(0,0,0,0.9) 75%
-    );
+    --carbon-fiber-bg: linear-gradient(45deg,
+            rgba(0, 0, 0, 0.9) 25%,
+            transparent 25%,
+            transparent 75%,
+            rgba(0, 0, 0, 0.9) 75%);
     --carbon-fiber-shadow: rgba(0, 0, 0, 0.8);
     --carbon-fiber-border: rgba(128, 128, 128, 0.3);
 
@@ -111,12 +109,11 @@ body {
     position: relative;
     overflow: hidden;
     /* Carbon fiber texture */
-    background-image: 
+    background-image:
         var(--carbon-fiber-bg),
         var(--carbon-fiber-bg);
     background-size: 4px 4px, 4px 4px;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+
 }
 
 /* Kintsugi gold veining for content wrapper */
@@ -153,10 +150,13 @@ body {
 }
 
 @keyframes kintsugiPulse {
-    0%, 100% {
+
+    0%,
+    100% {
         opacity: 0.4;
         background-position: 0% 50%;
     }
+
     50% {
         opacity: 0.8;
         background-position: 100% 50%;
@@ -197,19 +197,13 @@ h1 {
     font-weight: 300;
     /* Lighter, more elegant weight */
     padding-bottom: 0.4em;
-    background: linear-gradient(135deg,
-            var(--chrome-reflection-start),
-            var(--platinum-hologram-start),
-            var(--titanium-shift-start),
-            var(--chrome-reflection-end));
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+    color: var(--text-color-primary);
     display: inline-block;
-    text-shadow: 0 0 20px rgba(248, 248, 248, 0.2);
-    /* Soft platinum glow */
+    text-shadow: none;
     letter-spacing: -0.02em;
     /* Tight, premium spacing */
+    position: relative;
+    z-index: 10;
 }
 
 h2 {
@@ -303,7 +297,7 @@ a[href^="mailto:"],
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     overflow: hidden;
     /* Carbon fiber texture */
-    background-image: 
+    background-image:
         var(--carbon-fiber-bg),
         var(--carbon-fiber-bg);
     background-size: 3px 3px, 3px 3px;
@@ -319,7 +313,7 @@ a[href^="mailto:"]::before,
     left: 0;
     right: 0;
     bottom: 0;
-    background: 
+    background:
         /* Irregular gold cracks */
         linear-gradient(45deg,
             transparent 0%, transparent 20%,
@@ -366,14 +360,12 @@ a[href^="mailto:"]:hover,
     border-color: var(--gold-kintsugi-mid);
     color: var(--text-color-primary);
     text-shadow: 0 0 8px rgba(255, 215, 0, 0.3);
-    background-image: 
+    background-image:
         var(--carbon-fiber-bg),
-        linear-gradient(
-            45deg,
-            rgba(0,0,0,0.9) 0%,
-            rgba(0,0,0,0.8) 50%,
-            rgba(0,0,0,0.9) 100%
-        );
+        linear-gradient(45deg,
+            rgba(0, 0, 0, 0.9) 0%,
+            rgba(0, 0, 0, 0.8) 50%,
+            rgba(0, 0, 0, 0.9) 100%);
 }
 
 a[href^="mailto:"]:active,
@@ -385,14 +377,12 @@ a[href^="mailto:"]:active,
         inset 0 1px 0 var(--highlight-color),
         0 0 10px rgba(255, 215, 0, 0.1);
     transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-    background-image: 
+    background-image:
         var(--carbon-fiber-bg),
-        linear-gradient(
-            45deg,
-            rgba(0,0,0,0.95) 0%,
-            rgba(0,0,0,0.85) 50%,
-            rgba(0,0,0,0.95) 100%
-        );
+        linear-gradient(45deg,
+            rgba(0, 0, 0, 0.95) 0%,
+            rgba(0, 0, 0, 0.85) 50%,
+            rgba(0, 0, 0, 0.95) 100%);
 }
 
 /* Secondary button style - Aged carbon fiber with silver veining */
@@ -417,12 +407,10 @@ a[href^="mailto:"]:active,
     /* Aged carbon fiber texture */
     background-image:
         var(--carbon-fiber-bg),
-        linear-gradient(
-            45deg,
-            rgba(0,0,0,0.9) 0%,
-            rgba(64,64,64,0.1) 50%,
-            rgba(0,0,0,0.9) 100%
-        );
+        linear-gradient(45deg,
+            rgba(0, 0, 0, 0.9) 0%,
+            rgba(64, 64, 64, 0.1) 50%,
+            rgba(0, 0, 0, 0.9) 100%);
     background-size: 2px 2px, 100% 100%;
     position: relative;
 }
@@ -466,12 +454,10 @@ a[href^="mailto:"]:active,
         inset 0 1px 1px rgba(255, 255, 255, 0.05);
     background-image:
         var(--carbon-fiber-bg),
-        linear-gradient(
-            45deg,
-            rgba(0,0,0,0.95) 0%,
-            rgba(32,32,32,0.1) 50%,
-            rgba(0,0,0,0.95) 100%
-        );
+        linear-gradient(45deg,
+            rgba(0, 0, 0, 0.95) 0%,
+            rgba(32, 32, 32, 0.1) 50%,
+            rgba(0, 0, 0, 0.95) 100%);
 }
 
 /* Holographic shimmer animation for luxury elements */

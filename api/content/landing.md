@@ -99,8 +99,7 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
   position: relative;
   overflow: hidden;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+
   /* Luxury micro-texture */
   background-image:
     radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
@@ -150,17 +149,13 @@
   font-size: 3.5rem;
   font-weight: 200;
   margin-bottom: 1.5rem;
-  background: linear-gradient(135deg, #ffffff, #f8f8f8, #e0e0e0, #f0f0f0);
-  background-size: 200% 200%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: #ffffff;
   display: inline-block;
-  text-shadow: 0 0 30px rgba(248, 248, 248, 0.2);
+  text-shadow: none;
   position: relative;
   z-index: 2;
   letter-spacing: -0.02em;
-  animation: holographicShift 8s ease-in-out infinite;
+
 }
 
 .choir-tagline {
@@ -203,8 +198,6 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
   position: relative;
   overflow: hidden;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
   font-weight: 400;
   letter-spacing: 0.025em;
   padding: 20px 40px;
@@ -255,14 +248,14 @@
   background: var(--surface-color);
   border-radius: var(--border-radius-md, 16px);
   padding: 1.5rem;
-  box-shadow: 
+  box-shadow:
     0 8px 25px var(--carbon-fiber-shadow),
     inset 0 1px 1px rgba(255, 255, 255, 0.05);
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   border: 1px solid var(--carbon-fiber-border);
   position: relative;
   overflow: hidden;
-  background-image: 
+  background-image:
     var(--carbon-fiber-bg),
     linear-gradient(
       45deg,
@@ -296,7 +289,7 @@
 
 .choir-feature-card:hover {
   transform: translateY(-8px);
-  box-shadow: 
+  box-shadow:
     0 15px 35px var(--carbon-fiber-shadow),
     inset 0 1px 1px rgba(255, 255, 255, 0.1);
   border-color: var(--gold-kintsugi-mid);
@@ -426,8 +419,6 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
   position: relative;
   overflow: hidden;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
   /* Luxury micro-texture */
   background-image:
     radial-gradient(circle at 70% 70%, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
