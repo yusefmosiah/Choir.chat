@@ -11,7 +11,12 @@
     <!-- Optional: Add favicon link -->
     <!-- <link rel="icon" href="/static/shared/images/favicon.png"> -->
 </head>
-<body>
+<body class="{{ 'landing-page-active' if is_landing_page else '' }}">
+    {% if is_landing_page %}
+    <div class="scroll-container">
+        {{ content|safe }}
+    </div>
+    {% else %}
     <div class="content-wrapper">
         <!-- Render the converted Markdown HTML here -->
         {{ content|safe }}
@@ -69,7 +74,8 @@
             }
         </style>
     </div>
+    {% endif %}
     <!-- Optional: Add shared JS -->
-    <!-- <script src="/static/shared/script.js"></script> -->
+    <script src="/static/shared/script.js"></script>
 </body>
 </html>
