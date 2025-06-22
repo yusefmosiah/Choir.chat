@@ -127,129 +127,112 @@
                     isScrolling = true;
                     currentPage = pageIndex;
 
-                    pages[pageIndex].scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
+                    // Use transform instead of scroll
+                    const translateY = -pageIndex * 100; // Move by 100vh per page
+                    const content = document.querySelector('.paginated-content');
+                    content.style.transition = 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+                    content.style.transform = `translateY(${translateY}vh)`;
 
                     updateIndicators(pageIndex);
 
                     setTimeout(() => {
                         isScrolling = false;
-                    }, 1000);
+                    }, 600);
                 }
             }
 
-            // Handle wheel events for elastic pagination
-            let elasticOffset = 0;
+            // Handle wheel/touch events for discrete pagination
+            let scrollAccumulator = 0;
             let scrollTimeout;
-            let elasticTimeout;
-            const elasticThreshold = 150; // How far to scroll before committing to page change
-            const maxElasticOffset = 200; // Maximum elastic scroll distance
+            const scrollThreshold = 50; // Reduced threshold for more responsive pagination
+            let lastScrollTime = 0;
 
             function isPageAtBottom(pageElement) {
                 const scrollTop = pageElement.scrollTop;
                 const scrollHeight = pageElement.scrollHeight;
                 const clientHeight = pageElement.clientHeight;
-                return scrollTop + clientHeight >= scrollHeight - 5; // 5px tolerance
+                return scrollTop + clientHeight >= scrollHeight - 10; // 10px tolerance for mobile
             }
 
             function isPageAtTop(pageElement) {
-                return pageElement.scrollTop <= 5; // 5px tolerance
+                return pageElement.scrollTop <= 10; // 10px tolerance for mobile
             }
 
-            function applyElasticScroll(offset) {
-                // Apply elastic scroll effect by translating the container
-                container.style.transform = `translateY(${-offset}px)`;
-                container.style.transition = 'none'; // Disable transition during elastic scroll
+            function hasScrollableContent(pageElement) {
+                return pageElement.scrollHeight > pageElement.clientHeight;
             }
 
-            function resetElasticScroll() {
-                // Smoothly return to original position
-                container.style.transition = 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
-                container.style.transform = 'translateY(0px)';
-                elasticOffset = 0;
+            function resetScrollState() {
+                scrollAccumulator = 0;
+                clearTimeout(scrollTimeout);
             }
 
-            function commitPageChange(direction) {
-                // Commit to page change
-                container.style.transition = 'none';
-                container.style.transform = 'translateY(0px)';
-                elasticOffset = 0;
-
-                if (direction > 0 && currentPage < pages.length - 1) {
-                    scrollToPage(currentPage + 1);
-                } else if (direction < 0 && currentPage > 0) {
-                    scrollToPage(currentPage - 1);
-                }
-            }
-
+            // Discrete wheel handler for desktop - Safari compatible
             container.addEventListener('wheel', function(e) {
                 if (isScrolling) return;
 
+                const currentTime = Date.now();
                 const currentPageElement = pages[currentPage];
                 const isScrollingDown = e.deltaY > 0;
                 const isScrollingUp = e.deltaY < 0;
 
-                // Check if the current page has scrollable content
-                const hasScrollableContent = currentPageElement.scrollHeight > currentPageElement.clientHeight;
+                // Throttle rapid scroll events
+                if (currentTime - lastScrollTime < 100) {
+                    e.preventDefault();
+                    return;
+                }
 
-                if (hasScrollableContent) {
+                // Check if the current page has scrollable content
+                if (hasScrollableContent(currentPageElement)) {
                     const atBottom = isPageAtBottom(currentPageElement);
                     const atTop = isPageAtTop(currentPageElement);
 
                     // If page has scrollable content and not at boundaries, allow normal scrolling
                     if (isScrollingDown && !atBottom) {
-                        // Reset elastic state and allow normal scrolling
-                        if (elasticOffset !== 0) {
-                            resetElasticScroll();
-                        }
+                        resetScrollState();
                         return;
                     } else if (isScrollingUp && !atTop) {
-                        // Reset elastic state and allow normal scrolling
-                        if (elasticOffset !== 0) {
-                            resetElasticScroll();
-                        }
+                        resetScrollState();
                         return;
                     }
 
-                    // We're at a boundary - handle elastic scrolling
+                    // We're at a boundary - check for page change
                     if ((isScrollingDown && atBottom && currentPage < pages.length - 1) ||
                         (isScrollingUp && atTop && currentPage > 0)) {
 
-                        e.preventDefault(); // Prevent default scrolling
+                        e.preventDefault();
+                        lastScrollTime = currentTime;
 
-                        // Accumulate elastic offset with diminishing returns
-                        const scrollDelta = e.deltaY * 0.3; // Reduce scroll sensitivity for elastic effect
-                        elasticOffset += scrollDelta;
-
-                        // Clamp elastic offset to maximum
-                        elasticOffset = Math.max(-maxElasticOffset, Math.min(maxElasticOffset, elasticOffset));
-
-                        // Apply elastic scroll
-                        applyElasticScroll(elasticOffset);
+                        // Accumulate scroll delta
+                        scrollAccumulator += Math.abs(e.deltaY);
 
                         // Clear existing timeout
-                        clearTimeout(elasticTimeout);
+                        clearTimeout(scrollTimeout);
 
-                        // Check if we've scrolled far enough to commit to page change
-                        if (Math.abs(elasticOffset) >= elasticThreshold) {
-                            commitPageChange(elasticOffset);
+                        // Check if we've scrolled enough to commit to page change
+                        if (scrollAccumulator >= scrollThreshold) {
+                            if (isScrollingDown && currentPage < pages.length - 1) {
+                                scrollToPage(currentPage + 1);
+                            } else if (isScrollingUp && currentPage > 0) {
+                                scrollToPage(currentPage - 1);
+                            }
+                            resetScrollState();
                             return;
                         }
 
-                        // Set timeout to snap back if user stops scrolling
-                        elasticTimeout = setTimeout(() => {
-                            resetElasticScroll();
-                        }, 200);
+                        // Set timeout to reset if user stops scrolling
+                        scrollTimeout = setTimeout(() => {
+                            resetScrollState();
+                        }, 150);
 
                         return;
                     }
                 }
 
-                // For pages without scrollable content, use direct pagination
-                if (!hasScrollableContent) {
+                // For pages without scrollable content, use immediate pagination
+                if (!hasScrollableContent(currentPageElement)) {
                     e.preventDefault();
+                    lastScrollTime = currentTime;
 
                     if (isScrollingDown && currentPage < pages.length - 1) {
                         scrollToPage(currentPage + 1);
@@ -258,6 +241,58 @@
                     }
                 }
             }, { passive: false });
+
+            // Touch handling for mobile Safari
+            let touchStartY = 0;
+            let touchStartTime = 0;
+            let isTouching = false;
+
+            container.addEventListener('touchstart', function(e) {
+                if (isScrolling) return;
+                touchStartY = e.touches[0].clientY;
+                touchStartTime = Date.now();
+                isTouching = true;
+                resetScrollState();
+            }, { passive: true });
+
+            container.addEventListener('touchend', function(e) {
+                if (isScrolling || !isTouching) return;
+
+                const touchEndY = e.changedTouches[0].clientY;
+                const deltaY = touchStartY - touchEndY;
+                const touchDuration = Date.now() - touchStartTime;
+                const velocity = Math.abs(deltaY) / touchDuration;
+
+                const currentPageElement = pages[currentPage];
+
+                // Only handle pagination for significant swipes
+                if (Math.abs(deltaY) > 80 && velocity > 0.5) {
+                    if (hasScrollableContent(currentPageElement)) {
+                        const atBottom = isPageAtBottom(currentPageElement);
+                        const atTop = isPageAtTop(currentPageElement);
+
+                        if ((deltaY > 0 && atBottom && currentPage < pages.length - 1) ||
+                            (deltaY < 0 && atTop && currentPage > 0)) {
+
+                            if (deltaY > 0 && currentPage < pages.length - 1) {
+                                scrollToPage(currentPage + 1);
+                            } else if (deltaY < 0 && currentPage > 0) {
+                                scrollToPage(currentPage - 1);
+                            }
+                        }
+                    } else {
+                        // No scrollable content, direct pagination
+                        if (deltaY > 0 && currentPage < pages.length - 1) {
+                            scrollToPage(currentPage + 1);
+                        } else if (deltaY < 0 && currentPage > 0) {
+                            scrollToPage(currentPage - 1);
+                        }
+                    }
+                }
+
+                isTouching = false;
+                resetScrollState();
+            }, { passive: true });
 
             // Handle pagination dot clicks
             indicators.forEach((dot, index) => {
@@ -281,40 +316,23 @@
                 }
             });
 
-            // Update current page based on scroll position
-            function updateCurrentPage() {
-                if (isScrolling) return;
-
-                const scrollTop = container.scrollTop;
-                const windowHeight = window.innerHeight;
-
-                // Find which page is most visible
-                let mostVisiblePage = 0;
-                let maxVisibility = 0;
-
-                pages.forEach((page, index) => {
-                    const rect = page.getBoundingClientRect();
-                    const visibleHeight = Math.min(rect.bottom, windowHeight) - Math.max(rect.top, 0);
-                    const visibility = Math.max(0, visibleHeight) / windowHeight;
-
-                    if (visibility > maxVisibility) {
-                        maxVisibility = visibility;
-                        mostVisiblePage = index;
+            // Check for overflow content and apply appropriate classes
+            function checkPageOverflow() {
+                pages.forEach(page => {
+                    if (hasScrollableContent(page)) {
+                        page.classList.add('has-overflow');
+                    } else {
+                        page.classList.remove('has-overflow');
                     }
                 });
-
-                if (currentPage !== mostVisiblePage) {
-                    currentPage = mostVisiblePage;
-                    updateIndicators(mostVisiblePage);
-                }
             }
 
-            // Throttled scroll listener on container
-            let scrollThrottle;
-            container.addEventListener('scroll', function() {
-                clearTimeout(scrollThrottle);
-                scrollThrottle = setTimeout(updateCurrentPage, 50);
-            });
+            // Initialize overflow detection and first page
+            checkPageOverflow();
+            scrollToPage(0);
+
+            // Re-check overflow on window resize
+            window.addEventListener('resize', checkPageOverflow);
         });
     </script>
     {% endif %}
