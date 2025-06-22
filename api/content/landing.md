@@ -1,6 +1,6 @@
 <div class="page-section">
   <div class="choir-hero-section">
-    <h1>*CHOIR.CHAT*</h1>
+    <i><h1>CHOIR.CHAT</h1></i>
     <h2>A New Era of Collaborative Intelligence</h2>
     <p class="choir-tagline">Where your ideas and insights are truly valued, rewarded, and amplified.</p>
     <div class="choir-cta-buttons">
@@ -90,6 +90,17 @@
       <a href="https://testflight.apple.com/join/bDv6gSEB" class="choir-cta-button choir-primary">Download on iOS</a>
     </div>
   </div>
+
+  <!-- Footer at bottom of last page -->
+  <footer class="page-footer">
+    <p class="copyright">© 2025 CHOIR HARMONIC INTELLIGENCE PLATFORM</p>
+    <p>yusef@choir.chat</p>
+    <div class="footer-links">
+      <a href="/privacy" class="footer-link">Privacy</a>
+      <span class="footer-divider">|</span>
+      <a href="/support" class="footer-link">Support</a>
+    </div>
+  </footer>
 </div>
 
 <style>
