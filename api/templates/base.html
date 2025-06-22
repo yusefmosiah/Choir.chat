@@ -12,6 +12,36 @@
     <!-- <link rel="icon" href="/static/shared/images/favicon.png"> -->
 </head>
 <body>
+    <!-- Check if this is a paginated page (like landing) -->
+    {% if paginated %}
+    <div class="pagination-container">
+        <!-- Pagination indicators -->
+        <div class="pagination-indicators">
+            <div class="pagination-dot active" data-page="0"></div>
+            <div class="pagination-dot" data-page="1"></div>
+            <div class="pagination-dot" data-page="2"></div>
+            <div class="pagination-dot" data-page="3"></div>
+        </div>
+
+        <!-- Paginated content wrapper -->
+        <div class="paginated-content">
+            {{ content|safe }}
+        </div>
+
+        <!-- Footer on last page -->
+        <div class="page-section footer-page">
+            <footer>
+                <p class="copyright">© {{ current_year }} CHOIR HARMONIC INTELLIGENCE PLATFORM</p>
+                <p>yusef@choir.chat</p>
+                <div class="footer-links">
+                    <a href="/privacy" class="footer-link">Privacy</a>
+                    <span class="footer-divider">|</span>
+                    <a href="/support" class="footer-link">Support</a>
+                </div>
+            </footer>
+        </div>
+    </div>
+    {% else %}
     <div class="content-wrapper">
         <!-- Render the converted Markdown HTML here -->
         {{ content|safe }}
@@ -26,6 +56,8 @@
                 <a href="/support" class="footer-link">Support</a>
             </div>
         </footer>
+    </div>
+    {% endif %}
 
         <style>
             .footer-links {
@@ -69,6 +101,110 @@
             }
         </style>
     </div>
+
+    <!-- Pagination JavaScript -->
+    {% if paginated %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const container = document.querySelector('.paginated-content');
+            const indicators = document.querySelectorAll('.pagination-dot');
+            const pages = document.querySelectorAll('.page-section');
+            let currentPage = 0;
+            let isScrolling = false;
+
+            // Update pagination indicators
+            function updateIndicators(pageIndex) {
+                indicators.forEach((dot, index) => {
+                    dot.classList.toggle('active', index === pageIndex);
+                });
+            }
+
+            // Smooth scroll to page
+            function scrollToPage(pageIndex) {
+                if (pageIndex >= 0 && pageIndex < pages.length && !isScrolling) {
+                    isScrolling = true;
+                    currentPage = pageIndex;
+
+                    pages[pageIndex].scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+
+                    updateIndicators(pageIndex);
+
+                    setTimeout(() => {
+                        isScrolling = false;
+                    }, 1000);
+                }
+            }
+
+            // Handle wheel events for pagination
+            let scrollTimeout;
+            container.addEventListener('wheel', function(e) {
+                if (isScrolling) return;
+
+                clearTimeout(scrollTimeout);
+                scrollTimeout = setTimeout(() => {
+                    if (e.deltaY > 0 && currentPage < pages.length - 1) {
+                        // Scroll down
+                        scrollToPage(currentPage + 1);
+                    } else if (e.deltaY < 0 && currentPage > 0) {
+                        // Scroll up
+                        scrollToPage(currentPage - 1);
+                    }
+                }, 50);
+            });
+
+            // Handle pagination dot clicks
+            indicators.forEach((dot, index) => {
+                dot.addEventListener('click', () => {
+                    scrollToPage(index);
+                });
+            });
+
+            // Handle keyboard navigation
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'ArrowDown' || e.key === 'PageDown') {
+                    e.preventDefault();
+                    if (currentPage < pages.length - 1) {
+                        scrollToPage(currentPage + 1);
+                    }
+                } else if (e.key === 'ArrowUp' || e.key === 'PageUp') {
+                    e.preventDefault();
+                    if (currentPage > 0) {
+                        scrollToPage(currentPage - 1);
+                    }
+                }
+            });
+
+            // Update current page based on scroll position
+            function updateCurrentPage() {
+                if (isScrolling) return;
+
+                const scrollTop = window.pageYOffset;
+                const windowHeight = window.innerHeight;
+
+                pages.forEach((page, index) => {
+                    const rect = page.getBoundingClientRect();
+                    if (rect.top <= windowHeight / 2 && rect.bottom >= windowHeight / 2) {
+                        if (currentPage !== index) {
+                            currentPage = index;
+                            updateIndicators(index);
+                        }
+                    }
+                });
+            }
+
+            // Throttled scroll listener
+            let scrollThrottle;
+            window.addEventListener('scroll', function() {
+                clearTimeout(scrollThrottle);
+                scrollThrottle = setTimeout(updateCurrentPage, 100);
+            });
+        });
+    </script>
+    {% endif %}
+
     <!-- Optional: Add shared JS -->
     <!-- <script src="/static/shared/script.js"></script> -->
 </body>

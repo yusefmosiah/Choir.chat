@@ -30,7 +30,7 @@ app.add_middleware(
 )
 
 # --- Helper Function to Read and Convert Markdown ---
-def render_markdown_to_html(request: Request, md_file_path: Path, page_title: str) -> HTMLResponse:
+def render_markdown_to_html(request: Request, md_file_path: Path, page_title: str, paginated: bool = False) -> HTMLResponse:
     if not md_file_path.is_file():
         raise HTTPException(status_code=404, detail=f"{md_file_path.name} not found")
     try:
@@ -47,7 +47,8 @@ def render_markdown_to_html(request: Request, md_file_path: Path, page_title: st
                 "request": request,
                 "title": page_title,
                 "content": html_content,
-                "current_year": datetime.now().year
+                "current_year": datetime.now().year,
+                "paginated": paginated
             }
         )
     except Exception as e:
@@ -63,7 +64,7 @@ async def read_landing_page(request: Request):
     """Serves the landing page rendered from Markdown."""
     root_dir = Path(__file__).parent
     md_path = root_dir / "content" / "landing.md"
-    return render_markdown_to_html(request, md_path, "Welcome to Choir")
+    return render_markdown_to_html(request, md_path, "Welcome to Choir", paginated=True)
 
 # --- Privacy Policy ---
 @app.get("/privacy", response_class=HTMLResponse)
