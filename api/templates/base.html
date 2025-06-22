@@ -134,8 +134,7 @@
                     // Restore body overflow
                     document.body.style.overflow = '';
 
-                    // Remove debug border
-                    container.style.border = '';
+
 
                     // Use transform instead of scroll
                     const translateY = -pageIndex * 100; // Move by 100vh per page
@@ -208,10 +207,6 @@
                 document.body.style.overflow = 'visible';
 
                 container.style.transform = `translateY(${totalOffset}vh)`;
-
-                // Add visual debugging - temporary border on container
-                container.style.border = '2px solid red';
-                console.log(`Applied transform: ${totalOffset}vh, overflow set to visible`);
             }
 
             // Snap back to current page with smooth animation
@@ -226,8 +221,7 @@
                 // Restore body overflow
                 document.body.style.overflow = '';
 
-                // Remove debug border
-                container.style.border = '';
+
 
                 container.style.transition = 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
                 container.style.transform = `translateY(-${currentPage * 100}vh)`;
