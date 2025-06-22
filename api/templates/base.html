@@ -127,6 +127,16 @@
                     isScrolling = true;
                     currentPage = pageIndex;
 
+                    // Restore overflow hidden when committing to page change
+                    const paginationContainer = document.querySelector('.pagination-container');
+                    paginationContainer.style.overflow = 'hidden';
+
+                    // Restore body overflow
+                    document.body.style.overflow = '';
+
+                    // Remove debug border
+                    container.style.border = '';
+
                     // Use transform instead of scroll
                     const translateY = -pageIndex * 100; // Move by 100vh per page
                     const content = document.querySelector('.paginated-content');
@@ -141,11 +151,14 @@
                 }
             }
 
-            // Handle wheel/touch events for discrete pagination
+            // Handle wheel/touch events for elastic pagination with peek
             let scrollAccumulator = 0;
             let scrollTimeout;
-            const scrollThreshold = 50; // Reduced threshold for more responsive pagination
+            const scrollThreshold = 200; // Pixels needed to commit to page change
             let lastScrollTime = 0;
+            let isInElasticMode = false;
+            let elasticDirection = 0; // 1 for down/next, -1 for up/previous
+            const maxElasticOffset = 300; // Maximum pixels to show of adjacent page
 
             function isPageAtBottom(pageElement) {
                 const scrollTop = pageElement.scrollTop;
@@ -164,7 +177,65 @@
 
             function resetScrollState() {
                 scrollAccumulator = 0;
+                isInElasticMode = false;
+                elasticDirection = 0;
                 clearTimeout(scrollTimeout);
+            }
+
+            // Calculate elastic offset with easing for natural feel
+            function calculateElasticOffset(scrollAmount, direction) {
+                // Use more aggressive dampening for more visible peek
+                const dampening = 0.8; // Increase for more visible effect
+                const rawOffset = scrollAmount * dampening;
+
+                // Cap the maximum offset
+                const clampedOffset = Math.min(rawOffset, maxElasticOffset);
+
+                // Apply direction: negative for next page, positive for previous page
+                return direction === 1 ? -clampedOffset : clampedOffset;
+            }
+
+            // Apply elastic transform to show peek of adjacent page
+            function applyElasticTransform(elasticOffset) {
+                const baseTransform = -currentPage * 100;
+                const totalOffset = baseTransform + (elasticOffset / window.innerHeight * 100);
+
+                // Allow overflow during elastic mode to show adjacent pages
+                const paginationContainer = document.querySelector('.pagination-container');
+                paginationContainer.style.overflow = 'visible';
+
+                // Also ensure body doesn't clip
+                document.body.style.overflow = 'visible';
+
+                container.style.transform = `translateY(${totalOffset}vh)`;
+
+                // Add visual debugging - temporary border on container
+                container.style.border = '2px solid red';
+                console.log(`Applied transform: ${totalOffset}vh, overflow set to visible`);
+            }
+
+            // Snap back to current page with smooth animation
+            function snapBackToCurrentPage() {
+                isInElasticMode = false;
+                elasticDirection = 0;
+
+                // Restore overflow hidden
+                const paginationContainer = document.querySelector('.pagination-container');
+                paginationContainer.style.overflow = 'hidden';
+
+                // Restore body overflow
+                document.body.style.overflow = '';
+
+                // Remove debug border
+                container.style.border = '';
+
+                container.style.transition = 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+                container.style.transform = `translateY(-${currentPage * 100}vh)`;
+
+                // Remove transition after animation
+                setTimeout(() => {
+                    container.style.transition = '';
+                }, 300);
             }
 
             // Discrete wheel handler for desktop - Safari compatible
@@ -196,15 +267,25 @@
                         return;
                     }
 
-                    // We're at a boundary - check for page change
+                    // We're at a boundary - start elastic scrolling with peek
                     if ((isScrollingDown && atBottom && currentPage < pages.length - 1) ||
                         (isScrollingUp && atTop && currentPage > 0)) {
 
                         e.preventDefault();
                         lastScrollTime = currentTime;
 
-                        // Accumulate scroll delta
-                        scrollAccumulator += Math.abs(e.deltaY);
+                        // Set elastic mode and direction
+                        isInElasticMode = true;
+                        elasticDirection = isScrollingDown ? 1 : -1;
+
+                        // Accumulate scroll delta more aggressively
+                        scrollAccumulator += Math.abs(e.deltaY) * 2; // Multiply for more responsive accumulation
+
+                        // Apply elastic transform to show peek of adjacent page
+                        const elasticOffset = calculateElasticOffset(scrollAccumulator, elasticDirection);
+                        applyElasticTransform(elasticOffset);
+
+
 
                         // Clear existing timeout
                         clearTimeout(scrollTimeout);
@@ -220,10 +301,11 @@
                             return;
                         }
 
-                        // Set timeout to reset if user stops scrolling
+                        // Set timeout to snap back if user stops scrolling
                         scrollTimeout = setTimeout(() => {
+                            snapBackToCurrentPage();
                             resetScrollState();
-                        }, 150);
+                        }, 200);
 
                         return;
                     }
@@ -255,6 +337,50 @@
                 resetScrollState();
             }, { passive: true });
 
+            container.addEventListener('touchmove', function(e) {
+                if (isScrolling || !isTouching) return;
+
+                const currentTouchY = e.touches[0].clientY;
+                const deltaY = touchStartY - currentTouchY;
+                const currentPageElement = pages[currentPage];
+
+                // Check if we're at boundaries and should show elastic effect
+                if (hasScrollableContent(currentPageElement)) {
+                    const atBottom = isPageAtBottom(currentPageElement);
+                    const atTop = isPageAtTop(currentPageElement);
+
+                    // Check for elastic scrolling conditions
+                    if ((deltaY > 0 && atBottom && currentPage < pages.length - 1) ||
+                        (deltaY < 0 && atTop && currentPage > 0)) {
+
+                        e.preventDefault();
+
+                        // Set elastic mode and direction
+                        isInElasticMode = true;
+                        elasticDirection = deltaY > 0 ? 1 : -1;
+
+                        // Use touch delta for elastic effect with multiplier
+                        const elasticOffset = calculateElasticOffset(Math.abs(deltaY) * 1.5, elasticDirection);
+                        applyElasticTransform(elasticOffset);
+
+
+                    }
+                } else {
+                    // For non-scrollable pages, show elastic effect immediately
+                    if ((deltaY > 0 && currentPage < pages.length - 1) ||
+                        (deltaY < 0 && currentPage > 0)) {
+
+                        e.preventDefault();
+
+                        isInElasticMode = true;
+                        elasticDirection = deltaY > 0 ? 1 : -1;
+
+                        const elasticOffset = calculateElasticOffset(Math.abs(deltaY) * 1.5, elasticDirection);
+                        applyElasticTransform(elasticOffset);
+                    }
+                }
+            }, { passive: false });
+
             container.addEventListener('touchend', function(e) {
                 if (isScrolling || !isTouching) return;
 
@@ -265,27 +391,47 @@
 
                 const currentPageElement = pages[currentPage];
 
-                // Only handle pagination for significant swipes
-                if (Math.abs(deltaY) > 80 && velocity > 0.5) {
-                    if (hasScrollableContent(currentPageElement)) {
-                        const atBottom = isPageAtBottom(currentPageElement);
-                        const atTop = isPageAtTop(currentPageElement);
+                // If we were in elastic mode, decide whether to commit or snap back
+                if (isInElasticMode) {
+                    // Check if swipe was significant enough to commit to page change
+                    const shouldCommit = Math.abs(deltaY) > (scrollThreshold * 0.75) || velocity > 0.8; // Slightly lower threshold for touch
 
-                        if ((deltaY > 0 && atBottom && currentPage < pages.length - 1) ||
-                            (deltaY < 0 && atTop && currentPage > 0)) {
+                    if (shouldCommit) {
+                        // Commit to page change
+                        if (deltaY > 0 && currentPage < pages.length - 1) {
+                            scrollToPage(currentPage + 1);
+                        } else if (deltaY < 0 && currentPage > 0) {
+                            scrollToPage(currentPage - 1);
+                        } else {
+                            snapBackToCurrentPage();
+                        }
+                    } else {
+                        // Snap back to current page
+                        snapBackToCurrentPage();
+                    }
+                } else {
+                    // Handle normal pagination for quick swipes without elastic mode
+                    if (Math.abs(deltaY) > 80 && velocity > 0.5) {
+                        if (hasScrollableContent(currentPageElement)) {
+                            const atBottom = isPageAtBottom(currentPageElement);
+                            const atTop = isPageAtTop(currentPageElement);
 
+                            if ((deltaY > 0 && atBottom && currentPage < pages.length - 1) ||
+                                (deltaY < 0 && atTop && currentPage > 0)) {
+
+                                if (deltaY > 0 && currentPage < pages.length - 1) {
+                                    scrollToPage(currentPage + 1);
+                                } else if (deltaY < 0 && currentPage > 0) {
+                                    scrollToPage(currentPage - 1);
+                                }
+                            }
+                        } else {
+                            // No scrollable content, direct pagination
                             if (deltaY > 0 && currentPage < pages.length - 1) {
                                 scrollToPage(currentPage + 1);
                             } else if (deltaY < 0 && currentPage > 0) {
                                 scrollToPage(currentPage - 1);
                             }
-                        }
-                    } else {
-                        // No scrollable content, direct pagination
-                        if (deltaY > 0 && currentPage < pages.length - 1) {
-                            scrollToPage(currentPage + 1);
-                        } else if (deltaY < 0 && currentPage > 0) {
-                            scrollToPage(currentPage - 1);
                         }
                     }
                 }
