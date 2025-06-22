@@ -846,6 +846,17 @@ footer {
     perspective: 1000px;
     /* Ensure smooth transforms on Safari */
     will-change: transform;
+
+    /* Hide scrollbars while keeping functionality */
+    scrollbar-width: none;
+    /* Firefox */
+    -ms-overflow-style: none;
+    /* Internet Explorer 10+ */
+}
+
+/* Hide scrollbars for WebKit browsers (Chrome, Safari, Edge) */
+.paginated-content::-webkit-scrollbar {
+    display: none;
 }
 
 .page-section {
@@ -870,6 +881,17 @@ footer {
     -webkit-overflow-scrolling: touch;
     flex-shrink: 0;
     /* Prevent shrinking in flex container */
+
+    /* Hide scrollbars while keeping functionality */
+    scrollbar-width: none;
+    /* Firefox */
+    -ms-overflow-style: none;
+    /* Internet Explorer 10+ */
+}
+
+/* Hide scrollbars for WebKit browsers (Chrome, Safari, Edge) */
+.page-section::-webkit-scrollbar {
+    display: none;
 }
 
 /* Last page section with footer */
