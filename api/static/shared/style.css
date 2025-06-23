@@ -74,13 +74,36 @@ body {
     font-family: var(--font-primary);
     color: var(--text-color-primary);
     background-color: var(--background-color);
-    /* Luxurious micro-texture pattern */
+    /* Luxurious micro-texture pattern - Updated to Wood Grain Forged Carbon */
     background-image:
-        radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.01) 1px, transparent 1px),
-        radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.008) 1px, transparent 1px),
+        /* Layer 1: Darker, broader strokes for depth */
+        linear-gradient(
+            170deg, /* Angle for flow */
+            rgba(10, 10, 10, 0) 0%, /* Transparent start */
+            rgba(10, 10, 10, 0.03) 10%, /* Subtle dark gray */
+            rgba(10, 10, 10, 0.02) 30%,
+            rgba(5, 5, 5, 0.04) 50%,  /* Slightly darker core */
+            rgba(10, 10, 10, 0.02) 70%,
+            rgba(10, 10, 10, 0.03) 90%,
+            rgba(10, 10, 10, 0) 100% /* Transparent end */
+        ),
+        /* Layer 2: Finer, lighter grain details */
+        linear-gradient(
+            10deg, /* Different angle for variation */
+            rgba(20, 20, 20, 0) 0%,
+            rgba(20, 20, 20, 0.02) 20%, /* Very subtle light gray */
+            rgba(15, 15, 15, 0.01) 40%,
+            rgba(20, 20, 20, 0.03) 60%, /* Slightly more visible */
+            rgba(15, 15, 15, 0.01) 80%,
+            rgba(20, 20, 20, 0) 100%
+        ),
+        /* Layer 3: Existing subtle overall gradient (kept for consistency) */
         linear-gradient(135deg, rgba(255, 255, 255, 0.003) 0%, transparent 50%, rgba(255, 255, 255, 0.003) 100%);
-    background-size: 40px 40px, 60px 60px, 100% 100%;
-    background-position: 0 0, 20px 20px, 0 0;
+    background-size:
+        150px 300px, /* Layer 1: Larger, stretched size for broad strokes */
+        80px 200px,  /* Layer 2: Smaller, stretched size for finer details */
+        100% 100%;   /* Layer 3: Full cover */
+    background-position: 0 0, 20px 20px, 0 0; /* Keep existing positions or adjust if needed */
     background-attachment: fixed;
     line-height: 1.8;
     /* Premium spacing for readability */
