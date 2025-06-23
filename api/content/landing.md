@@ -120,28 +120,45 @@
   width: 100%;
   max-width: 900px;
 
-  /* Balanced forged carbon texture with subtle gold accents */
+  /* Forged carbon texture - grey dots, organic swirls, and wood grain */
   background-image:
-    /* Subtle gold veins */
-    radial-gradient(ellipse 12px 8px at 17.3% 23.7%, rgba(184, 115, 51, 0.05) 0%, transparent 60%),
-    radial-gradient(ellipse 9px 6px at 67.1% 41.2%, rgba(255, 215, 0, 0.04) 0%, transparent 70%),
-    radial-gradient(ellipse 10px 14px at 83.8% 72.4%, rgba(218, 165, 32, 0.045) 0%, transparent 65%),
-    radial-gradient(ellipse 8px 11px at 28.9% 81.6%, rgba(184, 115, 51, 0.035) 0%, transparent 75%),
-    /* Carbon fiber fragments */
-    radial-gradient(ellipse 5px 8px at 19.7% 31.2%, rgba(0, 0, 0, 0.75) 0%, transparent 80%),
-    radial-gradient(ellipse 7px 4px at 62.3% 18.9%, rgba(0, 0, 0, 0.65) 0%, transparent 75%),
-    radial-gradient(ellipse 4px 9px at 78.1% 59.4%, rgba(0, 0, 0, 0.8) 0%, transparent 85%),
-    radial-gradient(ellipse 8px 5px at 31.6% 73.8%, rgba(0, 0, 0, 0.55) 0%, transparent 70%),
-    radial-gradient(ellipse 6px 7px at 71.9% 87.2%, rgba(0, 0, 0, 0.7) 0%, transparent 78%),
-    radial-gradient(ellipse 9px 4px at 46.3% 42.7%, rgba(0, 0, 0, 0.5) 0%, transparent 65%),
-    radial-gradient(ellipse 4px 8px at 89.4% 26.1%, rgba(0, 0, 0, 0.75) 0%, transparent 82%),
-    radial-gradient(ellipse 7px 5px at 12.8% 67.5%, rgba(0, 0, 0, 0.6) 0%, transparent 72%),
+    /* Grey dots pattern (top layer) - irrational positioning */
+    radial-gradient(ellipse 5px 8px at 23.14% 41.42%, rgba(0, 0, 0, 0.4) 0%, transparent 80%),
+    radial-gradient(ellipse 7px 4px at 67.32% 28.28%, rgba(0, 0, 0, 0.35) 0%, transparent 75%),
+    radial-gradient(ellipse 4px 9px at 84.85% 63.66%, rgba(0, 0, 0, 0.45) 0%, transparent 85%),
+    radial-gradient(ellipse 8px 5px at 36.06% 77.46%, rgba(0, 0, 0, 0.3) 0%, transparent 70%),
+    radial-gradient(ellipse 6px 7px at 73.21% 91.92%, rgba(0, 0, 0, 0.4) 0%, transparent 78%),
+    radial-gradient(ellipse 9px 4px at 51.96% 47.14%, rgba(0, 0, 0, 0.25) 0%, transparent 65%),
+    radial-gradient(ellipse 4px 8px at 94.28% 31.83%, rgba(0, 0, 0, 0.42) 0%, transparent 82%),
+    radial-gradient(ellipse 7px 5px at 18.03% 72.11%, rgba(0, 0, 0, 0.32) 0%, transparent 72%),
+    /* Organic flowing patterns (middle layer) - irrational positioning */
+    radial-gradient(ellipse 40px 20px at 27.18% 35.36%, transparent 0%, transparent 30%, rgba(0, 0, 0, 0.08) 30%, rgba(0, 0, 0, 0.12) 50%, rgba(0, 0, 0, 0.08) 70%, transparent 70%),
+    radial-gradient(ellipse 30px 60px at 70.71% 22.36%, transparent 0%, transparent 25%, rgba(0, 0, 0, 0.06) 25%, rgba(0, 0, 0, 0.10) 50%, rgba(0, 0, 0, 0.06) 75%, transparent 75%),
+    radial-gradient(ellipse 50px 15px at 92.39% 76.39%, transparent 0%, transparent 35%, rgba(0, 0, 0, 0.09) 35%, rgba(0, 0, 0, 0.13) 50%, rgba(0, 0, 0, 0.09) 65%, transparent 65%),
+    radial-gradient(ellipse 60px 30px at 22.36% 45.25%, transparent 0%, transparent 20%, rgba(0, 0, 0, 0.07) 20%, rgba(0, 0, 0, 0.11) 50%, rgba(0, 0, 0, 0.07) 80%, transparent 80%),
+    /* Subtle gold veining following wood grain (bottom layer) */
+    repeating-linear-gradient(92deg, transparent 0px, transparent 8px, rgba(184, 115, 51, 0.015) 8px, rgba(184, 115, 51, 0.015) 9px, transparent 9px, transparent 24px),
+    repeating-linear-gradient(88deg, transparent 0px, transparent 12px, rgba(255, 215, 0, 0.01) 12px, rgba(255, 215, 0, 0.01) 13px, transparent 13px, transparent 31px),
+    /* Wood grain lines - varying spacing */
+    repeating-linear-gradient(90deg, transparent 0px, transparent 3px, rgba(0, 0, 0, 0.12) 3px, rgba(0, 0, 0, 0.12) 4px, transparent 4px, transparent 12px),
+    repeating-linear-gradient(91deg, transparent 0px, transparent 7px, rgba(0, 0, 0, 0.09) 7px, rgba(0, 0, 0, 0.09) 8px, transparent 8px, transparent 18px),
+    repeating-linear-gradient(89deg, transparent 0px, transparent 5px, rgba(0, 0, 0, 0.14) 5px, rgba(0, 0, 0, 0.14) 6px, transparent 6px, transparent 15px),
+    repeating-linear-gradient(93deg, transparent 0px, transparent 9px, rgba(0, 0, 0, 0.11) 9px, rgba(0, 0, 0, 0.11) 10px, transparent 10px, transparent 22px),
+    /* Wider grain bands */
+    repeating-linear-gradient(91deg, transparent 0px, transparent 25px, rgba(0, 0, 0, 0.06) 25px, rgba(0, 0, 0, 0.06) 28px, transparent 28px, transparent 45px),
     /* Base gradient */
     linear-gradient(135deg, rgba(12, 12, 12, 0.98), rgba(6, 6, 6, 0.96));
-  background-size: 160px 160px, 160px 160px, 160px 160px, 160px 160px,
-                   60px 60px, 60px 60px, 60px 60px, 60px 60px, 60px 60px, 60px 60px,
-                   60px 60px, 60px 60px,
-                   100% 100%;
+  /* Phase 1: Prime numbers + Golden ratio scaling */
+  background-size:
+    /* Layer 1 (Grey dots): Base scale - prime numbers */
+    59px 67px, 71px 53px, 83px 97px, 61px 73px, 79px 89px, 101px 47px, 67px 103px, 43px 107px,
+    /* Layer 2 (Organic swirls): φ scale (×1.618) */
+    243px 162px, 202px 283px, 324px 121px, 283px 202px,
+    /* Layer 3 (Wood grain): φ² scale (×2.618) */
+    100% 100%, 100% 100%,
+    100% 100%, 100% 100%, 100% 100%, 100% 100%,
+    100% 100%,
+    100% 100%;
 }
 
 .choir-hero-section::before {
@@ -505,27 +522,39 @@
   width: 100%;
   max-width: 900px;
 
-  /* Balanced forged carbon texture with subtle gold accents - variant pattern */
+  /* Forged carbon texture - grey dots, organic swirls, and wood grain - variant */
   background-image:
-    /* Subtle gold veins - different positions */
-    radial-gradient(ellipse 11px 7px at 22.8% 29.1%, rgba(255, 215, 0, 0.04) 0%, transparent 65%),
-    radial-gradient(ellipse 8px 10px at 73.4% 19.7%, rgba(184, 115, 51, 0.035) 0%, transparent 75%),
-    radial-gradient(ellipse 13px 6px at 91.2% 68.3%, rgba(218, 165, 32, 0.05) 0%, transparent 60%),
-    radial-gradient(ellipse 9px 12px at 16.7% 79.4%, rgba(255, 215, 0, 0.03) 0%, transparent 78%),
-    /* Carbon fiber fragments - different arrangement */
-    radial-gradient(ellipse 6px 9px at 24.1% 35.8%, rgba(0, 0, 0, 0.7) 0%, transparent 78%),
-    radial-gradient(ellipse 5px 4px at 68.9% 22.4%, rgba(0, 0, 0, 0.75) 0%, transparent 82%),
-    radial-gradient(ellipse 4px 8px at 82.7% 63.1%, rgba(0, 0, 0, 0.65) 0%, transparent 75%),
-    radial-gradient(ellipse 8px 5px at 39.4% 77.6%, rgba(0, 0, 0, 0.6) 0%, transparent 72%),
-    radial-gradient(ellipse 5px 7px at 76.2% 89.3%, rgba(0, 0, 0, 0.8) 0%, transparent 85%),
-    radial-gradient(ellipse 7px 4px at 51.8% 46.7%, rgba(0, 0, 0, 0.55) 0%, transparent 68%),
-    radial-gradient(ellipse 4px 6px at 93.6% 31.2%, rgba(0, 0, 0, 0.73) 0%, transparent 80%),
-    radial-gradient(ellipse 6px 5px at 18.3% 71.9%, rgba(0, 0, 0, 0.67) 0%, transparent 76%),
+    /* Grey dots pattern (top layer) - different arrangement */
+    radial-gradient(ellipse 6px 9px at 24.1% 35.8%, rgba(0, 0, 0, 0.38) 0%, transparent 78%),
+    radial-gradient(ellipse 5px 4px at 68.9% 22.4%, rgba(0, 0, 0, 0.42) 0%, transparent 82%),
+    radial-gradient(ellipse 4px 8px at 82.7% 63.1%, rgba(0, 0, 0, 0.36) 0%, transparent 75%),
+    radial-gradient(ellipse 8px 5px at 39.4% 77.6%, rgba(0, 0, 0, 0.33) 0%, transparent 72%),
+    radial-gradient(ellipse 5px 7px at 76.2% 89.3%, rgba(0, 0, 0, 0.44) 0%, transparent 85%),
+    radial-gradient(ellipse 7px 4px at 51.8% 46.7%, rgba(0, 0, 0, 0.28) 0%, transparent 68%),
+    radial-gradient(ellipse 4px 6px at 93.6% 31.2%, rgba(0, 0, 0, 0.41) 0%, transparent 80%),
+    radial-gradient(ellipse 6px 5px at 18.3% 71.9%, rgba(0, 0, 0, 0.37) 0%, transparent 76%),
+    /* Organic flowing patterns (middle layer) - different positions - scaled down 2x */
+    radial-gradient(ellipse 35px 25px at 29% 37%, transparent 0%, transparent 30%, rgba(0, 0, 0, 0.09) 30%, rgba(0, 0, 0, 0.13) 50%, rgba(0, 0, 0, 0.09) 70%, transparent 70%),
+    radial-gradient(ellipse 45px 55px at 73% 23%, transparent 0%, transparent 25%, rgba(0, 0, 0, 0.07) 25%, rgba(0, 0, 0, 0.11) 50%, rgba(0, 0, 0, 0.07) 75%, transparent 75%),
+    radial-gradient(ellipse 55px 17px at 91% 79%, transparent 0%, transparent 35%, rgba(0, 0, 0, 0.10) 35%, rgba(0, 0, 0, 0.14) 50%, rgba(0, 0, 0, 0.10) 65%, transparent 65%),
+    radial-gradient(ellipse 65px 35px at 24% 48%, transparent 0%, transparent 20%, rgba(0, 0, 0, 0.08) 20%, rgba(0, 0, 0, 0.12) 50%, rgba(0, 0, 0, 0.08) 80%, transparent 80%),
+    /* Subtle gold veining following wood grain - different spacing (bottom layer) */
+    repeating-linear-gradient(88deg, transparent 0px, transparent 10px, rgba(255, 215, 0, 0.015) 10px, rgba(255, 215, 0, 0.015) 11px, transparent 11px, transparent 26px),
+    repeating-linear-gradient(92deg, transparent 0px, transparent 14px, rgba(184, 115, 51, 0.01) 14px, rgba(184, 115, 51, 0.01) 15px, transparent 15px, transparent 33px),
+    /* Wood grain lines - different spacing pattern */
+    repeating-linear-gradient(89deg, transparent 0px, transparent 4px, rgba(0, 0, 0, 0.13) 4px, rgba(0, 0, 0, 0.13) 5px, transparent 5px, transparent 13px),
+    repeating-linear-gradient(93deg, transparent 0px, transparent 8px, rgba(0, 0, 0, 0.10) 8px, rgba(0, 0, 0, 0.10) 9px, transparent 9px, transparent 19px),
+    repeating-linear-gradient(87deg, transparent 0px, transparent 6px, rgba(0, 0, 0, 0.15) 6px, rgba(0, 0, 0, 0.15) 7px, transparent 7px, transparent 16px),
+    repeating-linear-gradient(91deg, transparent 0px, transparent 11px, rgba(0, 0, 0, 0.12) 11px, rgba(0, 0, 0, 0.12) 12px, transparent 12px, transparent 24px),
+    /* Wider grain bands - different pattern */
+    repeating-linear-gradient(89deg, transparent 0px, transparent 28px, rgba(0, 0, 0, 0.07) 28px, rgba(0, 0, 0, 0.07) 31px, transparent 31px, transparent 48px),
     /* Base gradient */
     linear-gradient(135deg, rgba(12, 12, 12, 0.98), rgba(6, 6, 6, 0.96));
-  background-size: 150px 150px, 150px 150px, 150px 150px, 150px 150px,
-                   55px 55px, 55px 55px, 55px 55px, 55px 55px, 55px 55px, 55px 55px,
-                   55px 55px, 55px 55px,
+  background-size: 55px 55px, 55px 55px, 55px 55px, 55px 55px, 55px 55px, 55px 55px, 55px 55px, 55px 55px,
+                   140px 110px, 160px 190px, 220px 85px, 190px 140px,
+                   100% 100%, 100% 100%,
+                   100% 100%, 100% 100%, 100% 100%, 100% 100%,
+                   100% 100%,
                    100% 100%;
 }
 
