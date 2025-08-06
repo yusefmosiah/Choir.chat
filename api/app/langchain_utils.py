@@ -22,7 +22,7 @@ from langchain_anthropic import ChatAnthropic
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_mistralai import ChatMistralAI
 from langchain_aws import ChatBedrock
-from langchain_cohere import ChatCohere
+
 from langchain_groq import ChatGroq
 
 from .config import Config
@@ -102,11 +102,7 @@ def get_bedrock_models(config: Config) -> List[str]:
         config.BEDROCK_LLAMA_3_2_11B
     ]
 
-def get_cohere_models(config: Config) -> List[str]:
-    """Get available Cohere models"""
-    return [
-        config.COHERE_COMMAND_R7B
-    ]
+
 
 def get_groq_models(config: Config) -> List[str]:
     """Get available Groq models that support tool calling"""
@@ -237,12 +233,7 @@ def get_base_model(model_config: ModelConfig) -> BaseChatModel:
             credentials_profile_name=None,  # Use environment variables or IAM role
             model_kwargs={"temperature": temp}
         )
-    elif provider == "cohere":
-        return ChatCohere(
-            api_key=model_config.cohere_api_key,
-            model=model_name,
-            temperature=temp
-        )
+
     elif provider == "openrouter":
         return ChatOpenAI(
             api_key=model_config.openrouter_api_key,

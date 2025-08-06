@@ -213,34 +213,35 @@ tree.md
 │   │   └── base.html
 │   ├── test_push_notification.py
 │   ├── test_push_notification_e2e.py
-│   └── tests
-│       ├── __init__.py
-│       ├── conftest.py
-│       ├── postchain
-│       │   ├── __init__.py
-│       │   ├── models_test.py
-│       │   ├── random_gen_prompts.md
-│       │   ├── test_cases.json
-│       │   ├── test_langchain_workflow.py
-│       │   ├── test_providers.py
-│       │   ├── test_providers_abstracted.py
-│       │   ├── test_simple_multimodel_stream.py
-│       │   ├── test_structured_output.py
-│       │   └── test_utils.py
-│       ├── test_main.py
-│       ├── test_sui_service.py
-│       ├── test_user_thread_endpoints.py
-│       └── tools
-│           ├── __init__.py
-│           ├── direct_search_diagnostic.py
-│           ├── direct_search_test.py
-│           ├── test_brave_search.py
-│           ├── test_calculator.py
-│           ├── test_multimodel_with_tools.py
-│           ├── test_recent_events.py
-│           ├── test_search_tools_report.py
-│           ├── test_tavily_search.py
-│           └── test_updated_search.py
+│   ├── tests
+│   │   ├── __init__.py
+│   │   ├── conftest.py
+│   │   ├── postchain
+│   │   │   ├── __init__.py
+│   │   │   ├── models_test.py
+│   │   │   ├── random_gen_prompts.md
+│   │   │   ├── test_cases.json
+│   │   │   ├── test_langchain_workflow.py
+│   │   │   ├── test_providers.py
+│   │   │   ├── test_providers_abstracted.py
+│   │   │   ├── test_simple_multimodel_stream.py
+│   │   │   ├── test_structured_output.py
+│   │   │   └── test_utils.py
+│   │   ├── test_main.py
+│   │   ├── test_sui_service.py
+│   │   ├── test_user_thread_endpoints.py
+│   │   └── tools
+│   │       ├── __init__.py
+│   │       ├── direct_search_diagnostic.py
+│   │       ├── direct_search_test.py
+│   │       ├── test_brave_search.py
+│   │       ├── test_calculator.py
+│   │       ├── test_multimodel_with_tools.py
+│   │       ├── test_recent_events.py
+│   │       ├── test_search_tools_report.py
+│   │       ├── test_tavily_search.py
+│   │       └── test_updated_search.py
+│   └── uv.lock
 ├── choir_coin
 │   └── choir_coin
 │       ├── Move.lock
@@ -335,7 +336,7 @@ tree.md
     ├── test_postchain_multiturn.sh
     └── test_simulator_notifications.sh
 
-73 directories, 247 files
+73 directories, 248 files
 
 === File: docs/CHANGELOG.md ===
 

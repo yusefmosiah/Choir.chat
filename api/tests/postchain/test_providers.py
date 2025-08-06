@@ -13,7 +13,7 @@ from langchain_anthropic import ChatAnthropic
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_mistralai import ChatMistralAI
 from langchain_aws import ChatBedrock
-from langchain_cohere import ChatCohere
+
 from langchain_core.messages import HumanMessage
 
 from app.config import Config
@@ -59,10 +59,7 @@ def get_mistral_models(config: Config) -> List[str]:
         # config.MISTRAL_CODESTRAL  # Requires paid credits
     ]
 
-def get_cohere_models(config: Config) -> List[str]:
-    return [
-        config.COHERE_COMMAND_R7B
-    ]
+
 
 def get_bedrock_models(config: Config) -> List[str]:
     return [
@@ -215,22 +212,7 @@ class ProviderTester:
 
         return results
 
-    async def test_cohere_models(self) -> List[Dict[str, Any]]:
-        """Test Cohere models."""
-        if not self.config.COHERE_API_KEY:
-            return [{"status": "skipped", "reason": "API key not configured", "provider": "Cohere"}]
 
-        results = []
-        for model_name in get_cohere_models(self.config):
-            result = await self.test_model(
-                "Cohere",
-                model_name,
-                ChatCohere,
-                self.config.COHERE_API_KEY
-            )
-            results.append(result)
-
-        return results
 
     async def run_all_tests(self) -> Dict[str, List[Dict[str, Any]]]:
         """Run all provider tests."""
@@ -239,8 +221,7 @@ class ProviderTester:
             self.test_anthropic_models(),
             self.test_google_models(),
             self.test_mistral_models(),
-            self.test_bedrock_models(),
-            self.test_cohere_models()
+            self.test_bedrock_models()
         ]
 
         all_results = await asyncio.gather(*test_tasks)
@@ -250,8 +231,7 @@ class ProviderTester:
             "Anthropic": all_results[1],
             "Google": all_results[2],
             "Mistral": all_results[3],
-            "Bedrock": all_results[4],
-            "Cohere": all_results[5]
+            "Bedrock": all_results[4]
         }
 
         return self.results

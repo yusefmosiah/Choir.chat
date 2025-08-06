@@ -43,7 +43,7 @@ class Config:
     AWS_ACCESS_KEY_ID: str = os.getenv("AWS_ACCESS_KEY_ID", "")
     AWS_SECRET_ACCESS_KEY: str = os.getenv("AWS_SECRET_ACCESS_KEY", "")
     AWS_REGION: str = os.getenv("AWS_REGION", "us-east-1")
-    COHERE_API_KEY: str = os.getenv("COHERE_API_KEY", "")
+
     GROQ_API_KEY: str = os.getenv("GROQ_API_KEY", "")
 
     # Azure configuration
@@ -81,8 +81,7 @@ class Config:
     MISTRAL_LARGE_LATEST: str = "mistral-large-latest"
     MISTRAL_CODESTRAL: str = "codestral-latest"
 
-    # Cohere models
-    COHERE_COMMAND_R7B: str = "command-r7b-12-2024"
+
 
     # AWS Bedrock models
     BEDROCK_CLAUDE_3_5_SONNET: str = "anthropic.claude-3-5-sonnet-20241022-v2:0"

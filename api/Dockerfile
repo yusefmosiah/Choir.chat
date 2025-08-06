@@ -1,41 +1,26 @@
-# Cache bust: 2025-03-02
+# Cache bust: 2025-08-06
 FROM python:3.12-slim
 
 WORKDIR /app
 
-# Install system dependencies and Rust in a single layer
+# Install system dependencies and uv
 RUN apt-get update && apt-get install -y \
     gcc \
     python3-dev \
     libyaml-dev \
     curl \
     build-essential \
-    && curl https://sh.rustup.rs -sSf | bash -s -- -y \
+    && curl -LsSf https://astral.sh/uv/install.sh | sh \
     && rm -rf /var/lib/apt/lists/*
 
-ENV PATH="/root/.cargo/bin:${PATH}"
+# Add uv to PATH
+ENV PATH="/root/.local/bin:${PATH}"
 
-# Create and activate virtual environment
-ENV VIRTUAL_ENV=/app/venv
-RUN python -m venv $VIRTUAL_ENV
-ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+# Copy dependency files
+COPY api/pyproject.toml api/uv.lock* ./
 
-# Install latest build tools
-COPY api/requirements.txt requirements.txt
-RUN pip install --no-cache-dir --upgrade wheel setuptools pip
-
-# Create a filtered requirements file excluding packages we'll install separately
-RUN grep -v -E "^(fastapi|pydantic|pydantic-settings|httpx|gunicorn|python-dotenv|PyYAML|pysui)" requirements.txt > filtered_requirements.txt
-
-# Install packages in stages to help with dependency resolution
-# 1. Core dependencies (web framework and basic utilities)
-RUN pip install --no-cache-dir fastapi pydantic pydantic-settings httpx gunicorn python-dotenv PyYAML
-
-# 2. Install pysui separately because of Rust dependencies
-RUN pip install --no-cache-dir pysui
-
-# 3. Install remaining dependencies from filtered requirements file
-RUN pip install --no-cache-dir -r filtered_requirements.txt
+# Install dependencies with uv (much faster than pip)
+RUN uv sync --frozen --no-dev
 
 # Copy application code
 COPY api/ .
@@ -45,4 +30,5 @@ HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
 
 EXPOSE 8000
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Use uv to run the application
+CMD ["uv", "run", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

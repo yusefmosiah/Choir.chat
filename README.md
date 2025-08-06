@@ -69,9 +69,15 @@ Explore the documentation sections above to understand how Choir's Qdrant-Sui MV
 
 ## Getting Started (API Backend)
 
-1.  **Prerequisites:** Docker, Docker Compose, Python 3.12+, Rust (for `pysui`).
-2.  **Environment:** Create a `.env` file in the `api/` directory with necessary API keys (OpenAI, Anthropic, Google, Mistral, Fireworks, Cohere, Groq, OpenRouter, Qdrant, Brave, Tavily) and your `SUI_PRIVATE_KEY`.
-3.  **Build & Run (Docker):**
+1.  **Prerequisites:** Docker, Docker Compose, Python 3.12+, [uv](https://docs.astral.sh/uv/) (Python package manager).
+2.  **Environment:** Create a `.env` file in the `api/` directory with necessary API keys (OpenAI, Anthropic, Google, Mistral, Fireworks, Groq, OpenRouter, Qdrant, Brave, Tavily) and your `SUI_PRIVATE_KEY`.
+3.  **Local Development:**
+    ```bash
+    cd api
+    uv sync                           # Install dependencies
+    uv run uvicorn main:app --reload  # Start development server
+    ```
+4.  **Build & Run (Docker):**
     ```bash
     docker-compose up --build api
     ```
@@ -83,8 +89,5 @@ Ensure necessary API keys are set in your environment.
 
 ```bash
 cd api
-# Optional: Create and activate a virtual environment
-# python -m venv venv
-# source venv/bin/activate
-pip install -r requirements.txt
-pytest -v
+uv sync      # Install dependencies
+uv run pytest -v
