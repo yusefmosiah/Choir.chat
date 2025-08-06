@@ -15,7 +15,109 @@ tree.md
 ## Output of $ tree -I 'venv|archive|__pycache__|iOS_Example|dependencies' | pbcopy
 
 .
-├── CLAUDE.md
+├── api
+│   ├── __init__.py
+│   ├── app
+│   │   ├── __init__.py
+│   │   ├── config.py
+│   │   ├── database.py
+│   │   ├── langchain_utils.py
+│   │   ├── middleware
+│   │   │   ├── __init__.py
+│   │   │   └── auth.py
+│   │   ├── models
+│   │   │   ├── __init__.py
+│   │   │   ├── api.py
+│   │   │   ├── auth.py
+│   │   │   └── user.py
+│   │   ├── postchain
+│   │   │   ├── __init__.py
+│   │   │   ├── langchain_workflow.py
+│   │   │   ├── phases
+│   │   │   ├── postchain_llm.py
+│   │   │   ├── prompts
+│   │   │   │   └── prompts.py
+│   │   │   ├── README.md
+│   │   │   ├── schemas
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── rewards.py
+│   │   │   │   └── state.py
+│   │   │   ├── state
+│   │   │   └── utils.py
+│   │   ├── routers
+│   │   │   ├── auth.py
+│   │   │   ├── balance.py
+│   │   │   ├── notifications.py
+│   │   │   ├── postchain.py
+│   │   │   ├── threads.py
+│   │   │   ├── users.py
+│   │   │   └── vectors.py
+│   │   ├── services
+│   │   │   ├── __init__.py
+│   │   │   ├── auth_service.py
+│   │   │   ├── notification_service.py
+│   │   │   ├── push_notification_service.py
+│   │   │   ├── rewards_service.py
+│   │   │   └── sui_service.py
+│   │   ├── tools
+│   │   │   ├── __init__.py
+│   │   │   ├── base.py
+│   │   │   ├── brave_search.py
+│   │   │   ├── calculator.py
+│   │   │   ├── qdrant.py
+│   │   │   ├── tavily_search.py
+│   │   │   └── web_search.py
+│   │   └── utils.py
+│   ├── blog
+│   │   ├── business_model.md
+│   │   ├── inverse_scaling_law.md
+│   │   └── loop_of_thought.md
+│   ├── content
+│   │   ├── landing.md
+│   │   ├── marketing.md
+│   │   ├── privacy.md
+│   │   └── support.md
+│   ├── Dockerfile
+│   ├── main.py
+│   ├── pyproject.toml
+│   ├── pytest.ini
+│   ├── requirements.txt
+│   ├── static
+│   │   └── shared
+│   │       ├── script.js
+│   │       └── style.css
+│   ├── templates
+│   │   └── base.html
+│   ├── test_push_notification_e2e.py
+│   ├── test_push_notification.py
+│   └── tests
+│       ├── __init__.py
+│       ├── conftest.py
+│       ├── postchain
+│       │   ├── __init__.py
+│       │   ├── models_test.py
+│       │   ├── random_gen_prompts.md
+│       │   ├── test_cases.json
+│       │   ├── test_langchain_workflow.py
+│       │   ├── test_providers_abstracted.py
+│       │   ├── test_providers.py
+│       │   ├── test_simple_multimodel_stream.py
+│       │   ├── test_structured_output.py
+│       │   └── test_utils.py
+│       ├── test_main.py
+│       ├── test_sui_service.py
+│       ├── test_user_thread_endpoints.py
+│       └── tools
+│           ├── __init__.py
+│           ├── direct_search_diagnostic.py
+│           ├── direct_search_test.py
+│           ├── test_brave_search.py
+│           ├── test_calculator.py
+│           ├── test_multimodel_with_tools.py
+│           ├── test_recent_events.py
+│           ├── test_search_tools_report.py
+│           ├── test_tavily_search.py
+│           └── test_updated_search.py
 ├── Choir
 │   ├── App
 │   │   ├── AppDelegate.swift
@@ -27,12 +129,12 @@ tree.md
 │   │   ├── AppIcon.appiconset
 │   │   │   ├── Contents.json
 │   │   │   └── Icon-App-1024x1024@2x.png
+│   │   ├── choir-logo.imageset
+│   │   │   └── Contents.json
 │   │   ├── Contents.json
-│   │   ├── Icon-App-1024x1024.imageset
-│   │   │   ├── Contents.json
-│   │   │   └── Icon-App-1024x1024@2x.png
-│   │   └── choir-logo.imageset
-│   │       └── Contents.json
+│   │   └── Icon-App-1024x1024.imageset
+│   │       ├── Contents.json
+│   │       └── Icon-App-1024x1024@2x.png
 │   ├── Choir.entitlements
 │   ├── Config
 │   │   └── ApiConfig.swift
@@ -46,8 +148,8 @@ tree.md
 │   ├── Extensions
 │   ├── Info.plist
 │   ├── Models
-│   │   ├── APITypes.swift
 │   │   ├── AnyCodable.swift
+│   │   ├── APITypes.swift
 │   │   ├── AuthModels.swift
 │   │   ├── CoinType.swift
 │   │   ├── ConversationModels.swift
@@ -111,14 +213,33 @@ tree.md
 │       ├── WalletCardView.swift
 │       ├── WalletSelectionView.swift
 │       └── WalletView.swift
+├── choir_coin
+│   └── choir_coin
+│       ├── build
+│       │   ├── choir
+│       │   │   ├── BuildInfo.yaml
+│       │   │   ├── bytecode_modules
+│       │   │   │   └── choir.mv
+│       │   │   ├── debug_info
+│       │   │   │   ├── choir.json
+│       │   │   │   └── choir.mvd
+│       │   │   └── sources
+│       │   │       └── choir.move
+│       │   └── locks
+│       ├── Move.lock
+│       ├── Move.toml
+│       ├── sources
+│       │   └── choir_coin.move
+│       └── tests
+│           └── choir_coin_tests.move
 ├── Choir.xcodeproj
 │   ├── project.pbxproj
 │   ├── project.xcworkspace
 │   │   ├── contents.xcworkspacedata
 │   │   ├── xcshareddata
 │   │   │   └── swiftpm
-│   │   │       ├── Package.resolved
-│   │   │       └── configuration
+│   │   │       ├── configuration
+│   │   │       └── Package.resolved
 │   │   └── xcuserdata
 │   │       └── wiz.xcuserdatad
 │   │           ├── IDEFindNavigatorScopes.plist
@@ -137,134 +258,13 @@ tree.md
 ├── ChoirUITests
 │   ├── ChoirUITests.swift
 │   └── ChoirUITestsLaunchTests.swift
-├── README.md
-├── api
-│   ├── Dockerfile
-│   ├── __init__.py
-│   ├── app
-│   │   ├── __init__.py
-│   │   ├── config.py
-│   │   ├── database.py
-│   │   ├── langchain_utils.py
-│   │   ├── middleware
-│   │   │   ├── __init__.py
-│   │   │   └── auth.py
-│   │   ├── models
-│   │   │   ├── __init__.py
-│   │   │   ├── api.py
-│   │   │   ├── auth.py
-│   │   │   └── user.py
-│   │   ├── postchain
-│   │   │   ├── README.md
-│   │   │   ├── __init__.py
-│   │   │   ├── langchain_workflow.py
-│   │   │   ├── phases
-│   │   │   ├── postchain_llm.py
-│   │   │   ├── prompts
-│   │   │   │   └── prompts.py
-│   │   │   ├── schemas
-│   │   │   │   ├── __init__.py
-│   │   │   │   ├── rewards.py
-│   │   │   │   └── state.py
-│   │   │   ├── state
-│   │   │   └── utils.py
-│   │   ├── routers
-│   │   │   ├── auth.py
-│   │   │   ├── balance.py
-│   │   │   ├── notifications.py
-│   │   │   ├── postchain.py
-│   │   │   ├── threads.py
-│   │   │   ├── users.py
-│   │   │   └── vectors.py
-│   │   ├── services
-│   │   │   ├── __init__.py
-│   │   │   ├── auth_service.py
-│   │   │   ├── notification_service.py
-│   │   │   ├── push_notification_service.py
-│   │   │   ├── rewards_service.py
-│   │   │   └── sui_service.py
-│   │   ├── tools
-│   │   │   ├── __init__.py
-│   │   │   ├── base.py
-│   │   │   ├── brave_search.py
-│   │   │   ├── calculator.py
-│   │   │   ├── qdrant.py
-│   │   │   ├── tavily_search.py
-│   │   │   └── web_search.py
-│   │   └── utils.py
-│   ├── blog
-│   │   ├── business_model.md
-│   │   ├── inverse_scaling_law.md
-│   │   └── loop_of_thought.md
-│   ├── content
-│   │   ├── landing.md
-│   │   ├── marketing.md
-│   │   ├── privacy.md
-│   │   └── support.md
-│   ├── main.py
-│   ├── pyproject.toml
-│   ├── pytest.ini
-│   ├── requirements.txt
-│   ├── static
-│   │   └── shared
-│   │       ├── script.js
-│   │       └── style.css
-│   ├── templates
-│   │   └── base.html
-│   ├── test_push_notification.py
-│   ├── test_push_notification_e2e.py
-│   └── tests
-│       ├── __init__.py
-│       ├── conftest.py
-│       ├── postchain
-│       │   ├── __init__.py
-│       │   ├── models_test.py
-│       │   ├── random_gen_prompts.md
-│       │   ├── test_cases.json
-│       │   ├── test_langchain_workflow.py
-│       │   ├── test_providers.py
-│       │   ├── test_providers_abstracted.py
-│       │   ├── test_simple_multimodel_stream.py
-│       │   ├── test_structured_output.py
-│       │   └── test_utils.py
-│       ├── test_main.py
-│       ├── test_sui_service.py
-│       ├── test_user_thread_endpoints.py
-│       └── tools
-│           ├── __init__.py
-│           ├── direct_search_diagnostic.py
-│           ├── direct_search_test.py
-│           ├── test_brave_search.py
-│           ├── test_calculator.py
-│           ├── test_multimodel_with_tools.py
-│           ├── test_recent_events.py
-│           ├── test_search_tools_report.py
-│           ├── test_tavily_search.py
-│           └── test_updated_search.py
-├── choir_coin
-│   └── choir_coin
-│       ├── Move.lock
-│       ├── Move.toml
-│       ├── build
-│       │   ├── choir
-│       │   │   ├── BuildInfo.yaml
-│       │   │   ├── bytecode_modules
-│       │   │   │   └── choir.mv
-│       │   │   ├── debug_info
-│       │   │   │   ├── choir.json
-│       │   │   │   └── choir.mvd
-│       │   │   └── sources
-│       │   │       └── choir.move
-│       │   └── locks
-│       ├── sources
-│       │   └── choir_coin.move
-│       └── tests
-│           └── choir_coin_tests.move
+├── CLAUDE.md
 ├── docker-compose.yml
 ├── docs
+│   ├── 4phases.md
+│   ├── blockchain_integration.md
 │   ├── CHANGELOG.md
 │   ├── ChoirPushNotificationsImplementationGuide.md
-│   ├── blockchain_integration.md
 │   ├── contract_deployment.md
 │   ├── core_core.md
 │   ├── core_economics.md
@@ -309,14 +309,17 @@ tree.md
 │   ├── security_considerations.md
 │   ├── stack_argument.md
 │   ├── state_management_patterns.md
+│   ├── substacks.md
 │   ├── tree.md
-│   └── wallet_languification.md
+│   ├── wallet_languification.md
+│   └── whitepaper.md
 ├── notebooks
 │   ├── post_chain0.ipynb
 │   └── vowel_loop3.ipynb
+├── README.md
 ├── render.yaml
-├── reward_function.py
 ├── reward_function_simplified.py
+├── reward_function.py
 └── scripts
     ├── generate_provider_reports.sh
     ├── generate_quick_search_report.sh
@@ -328,7 +331,7 @@ tree.md
     ├── test_postchain_multiturn.sh
     └── test_simulator_notifications.sh
 
-73 directories, 240 files
+73 directories, 243 files
 
 === File: docs/CHANGELOG.md ===
 
