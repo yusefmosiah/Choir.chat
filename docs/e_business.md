@@ -1,66 +1,66 @@
 # File: docs/e_business.md
 
-# Choir Business Model: Truthful Mechanism Design for Social Discourse
+# Choir Business Model: Infrastructure for the Learning Economy
 
-Choir's business model emerges from deep thinking about mechanism design theory. At its core, Choir is what happens when you design a DSIC (Dominant Strategy Incentive Compatible) truthful mechanism for social media, treating posting as bidding in a Vickrey auction where authentic expression is the dominant strategy.
+Choir's business model emerges from recognizing the fundamental economic transformation as AI handles execution while human value concentrates around originality, interdisciplinary fluency, and collaborative intelligence. The economy is evolving from rewarding skill performance to rewarding insight generation, and Choir provides the infrastructure for this inevitable transition.
 
-## The Revenue Sequence: App → Relationships → Finance
+## The Revenue Sequence: Individual → Institutional → Educational
 
-Our business model follows a clear progression that aligns with user value creation:
+Our business model follows a clear progression that aligns with learning economy development:
 
-**App Subscriptions** → **Relationship/Group Multisig Funds** → **Onchain Finance Agents** (with transaction fees)
+**Individual Subscriptions** → **Institutional Sales** → **Educational Integration** (with licensing fees)
 
-This sequence ensures that revenue grows naturally with user engagement and relationship formation, creating sustainable alignment between business success and community value.
+This sequence ensures that revenue grows naturally with learning economy adoption, creating sustainable alignment between business success and intellectual contribution value.
 
-## Phase 1: App Subscription Model
+## Phase 1: Individual Subscription Model
 
-**Free Tier (Beta Only):**
-During beta, core functionality is free to validate product-market fit:
+**Free Tier (Learning Economy Validation):**
+During initial phase, core functionality is free to validate learning economy product-market fit:
 
-*   **Anonymous Discourse:** Full access to AI-enhanced conversations with complete anonymity
+*   **Conversation-to-Publication:** Transform natural dialogue into citable articles
 *   **CHOIR Coin Earning:** Earn tokens for novel contributions and citations
-*   **Relationship Staking:** Invest earned tokens in meaningful connections
-*   **Basic AI Processing:** Standard PostChain workflow with rate limits
+*   **Citation Economics:** Receive ongoing compensation when others reference your work
+*   **Basic AI Processing:** Standard conversation enhancement with rate limits
 
-**Subscription Tiers (Post-Beta):**
-Exponential price-to-rate-limit ratios ensure sustainable AI model costs and Sui transaction fees:
+**Subscription Tiers (Post-Validation):**
+Exponential price-to-capability ratios ensure sustainable AI model costs and advanced features:
 
-*   **Basic ($9/month):** 100 AI conversations, standard processing speed
-*   **Pro ($29/month):** 500 conversations, priority processing, advanced AI models
-*   **Expert ($99/month):** 2000 conversations, fastest processing, premium model access
-*   **Unlimited ($299/month):** No rate limits, experimental features, dedicated support
+*   **Creator ($19/month):** 200 publications, standard AI enhancement, basic citation tracking
+*   **Scholar ($59/month):** 1000 publications, advanced AI models, detailed analytics, priority processing
+*   **Researcher ($199/month):** 5000 publications, premium models, collaborative features, API access
+*   **Institution ($599/month):** Unlimited publications, white-label options, custom integrations, dedicated support
 
-**Full Anonymity by Design:**
-Identity emerges naturally from wallet activity and Sui's built-in nameserver. No persistent identities or KYC required - reputation is built through contribution quality, not social credentials.
+**Anonymous by Default:**
+Identity emerges naturally from intellectual contribution quality. No persistent identities required - reputation builds through citation networks and collaborative intelligence rather than social credentials.
 
-## Phase 2: Relationship/Group Multisig Funds
+## Phase 2: Institutional Sales
 
-As users form meaningful relationships through staking, these connections become economic entities:
+As learning economy adoption grows, institutions need infrastructure for intellectual contribution:
 
-**Relationship Multisigs:**
-*   **Shared Treasury:** Successful relationships accumulate CHOIR tokens through collaborative insights and citations
-*   **Investment Decisions:** Groups can collectively decide how to deploy their shared funds
-*   **Value Appreciation:** Relationship funds grow through continued quality discourse and community recognition
+**Educational Institution Licensing:**
+*   **Campus-Wide Access:** Universities license platform access for students and faculty
+*   **Intellectual Property Management:** Institutions track and monetize research output through citation economics
+*   **Collaborative Research:** Cross-institutional collaboration through shared knowledge commons
 
-**Group Formation:**
-*   **Natural Evolution:** Pair relationships expand into groups with shared economic interests
-*   **Collective Intelligence:** Groups become economic entities that can make investment decisions together
-*   **Exit Rights:** Members can always leave and take their proportional share
+**Corporate Knowledge Management:**
+*   **Internal Knowledge Sharing:** Companies use platform for capturing and sharing institutional knowledge
+*   **Innovation Tracking:** Organizations track and reward employee intellectual contributions
+*   **Competitive Intelligence:** Businesses monitor industry knowledge development through citation networks
 
-## Phase 3: Onchain Finance Agents (Revenue Generation)
+## Phase 3: Educational Integration (Revenue Generation)
 
-The ultimate revenue driver: providing AI-powered financial services to relationship/group funds:
+The ultimate revenue driver: transforming educational systems through learning economy infrastructure:
 
-**Financial Agent Services (2-5% transaction fees):**
-*   **Portfolio Management:** AI agents help groups optimize their CHOIR and other crypto holdings
-*   **DeFi Strategies:** Automated yield farming, liquidity provision, and risk management
-*   **Cross-Chain Operations:** Bridge assets and execute strategies across multiple blockchains
-*   **Tax Optimization:** AI-driven strategies for minimizing tax burden on group investments
+**Educational Platform Integration (10-20% revenue share):**
+*   **Curriculum Development:** AI-assisted creation of learning materials that generate citation rewards
+*   **Assessment Innovation:** Replace standardized testing with intellectual contribution tracking
+*   **Student Portfolio Building:** Help students build demonstrable intellectual property portfolios
+*   **Faculty Research Enhancement:** Amplify academic research through AI collaboration and citation networks
 
 **Revenue Model:**
-*   **Transaction Fees:** 2-5% on all financial operations executed by our AI agents
-*   **Management Fees:** Annual fees for ongoing portfolio management services
-*   **Performance Fees:** Share of profits generated above benchmark returns
+*   **Licensing Fees:** Annual fees for educational institution access to platform infrastructure
+*   **Citation Revenue Share:** Percentage of citation rewards generated through educational content
+*   **Custom Development:** Fees for specialized educational integrations and white-label solutions
 
 ## CHOIR Coin Treasury Strategy & Financial Engineering
 

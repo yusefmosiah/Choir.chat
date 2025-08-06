@@ -15,109 +15,7 @@ tree.md
 ## Output of $ tree -I 'venv|archive|__pycache__|iOS_Example|dependencies' | pbcopy
 
 .
-├── api
-│   ├── __init__.py
-│   ├── app
-│   │   ├── __init__.py
-│   │   ├── config.py
-│   │   ├── database.py
-│   │   ├── langchain_utils.py
-│   │   ├── middleware
-│   │   │   ├── __init__.py
-│   │   │   └── auth.py
-│   │   ├── models
-│   │   │   ├── __init__.py
-│   │   │   ├── api.py
-│   │   │   ├── auth.py
-│   │   │   └── user.py
-│   │   ├── postchain
-│   │   │   ├── __init__.py
-│   │   │   ├── langchain_workflow.py
-│   │   │   ├── phases
-│   │   │   ├── postchain_llm.py
-│   │   │   ├── prompts
-│   │   │   │   └── prompts.py
-│   │   │   ├── README.md
-│   │   │   ├── schemas
-│   │   │   │   ├── __init__.py
-│   │   │   │   ├── rewards.py
-│   │   │   │   └── state.py
-│   │   │   ├── state
-│   │   │   └── utils.py
-│   │   ├── routers
-│   │   │   ├── auth.py
-│   │   │   ├── balance.py
-│   │   │   ├── notifications.py
-│   │   │   ├── postchain.py
-│   │   │   ├── threads.py
-│   │   │   ├── users.py
-│   │   │   └── vectors.py
-│   │   ├── services
-│   │   │   ├── __init__.py
-│   │   │   ├── auth_service.py
-│   │   │   ├── notification_service.py
-│   │   │   ├── push_notification_service.py
-│   │   │   ├── rewards_service.py
-│   │   │   └── sui_service.py
-│   │   ├── tools
-│   │   │   ├── __init__.py
-│   │   │   ├── base.py
-│   │   │   ├── brave_search.py
-│   │   │   ├── calculator.py
-│   │   │   ├── qdrant.py
-│   │   │   ├── tavily_search.py
-│   │   │   └── web_search.py
-│   │   └── utils.py
-│   ├── blog
-│   │   ├── business_model.md
-│   │   ├── inverse_scaling_law.md
-│   │   └── loop_of_thought.md
-│   ├── content
-│   │   ├── landing.md
-│   │   ├── marketing.md
-│   │   ├── privacy.md
-│   │   └── support.md
-│   ├── Dockerfile
-│   ├── main.py
-│   ├── pyproject.toml
-│   ├── pytest.ini
-│   ├── requirements.txt
-│   ├── static
-│   │   └── shared
-│   │       ├── script.js
-│   │       └── style.css
-│   ├── templates
-│   │   └── base.html
-│   ├── test_push_notification_e2e.py
-│   ├── test_push_notification.py
-│   └── tests
-│       ├── __init__.py
-│       ├── conftest.py
-│       ├── postchain
-│       │   ├── __init__.py
-│       │   ├── models_test.py
-│       │   ├── random_gen_prompts.md
-│       │   ├── test_cases.json
-│       │   ├── test_langchain_workflow.py
-│       │   ├── test_providers_abstracted.py
-│       │   ├── test_providers.py
-│       │   ├── test_simple_multimodel_stream.py
-│       │   ├── test_structured_output.py
-│       │   └── test_utils.py
-│       ├── test_main.py
-│       ├── test_sui_service.py
-│       ├── test_user_thread_endpoints.py
-│       └── tools
-│           ├── __init__.py
-│           ├── direct_search_diagnostic.py
-│           ├── direct_search_test.py
-│           ├── test_brave_search.py
-│           ├── test_calculator.py
-│           ├── test_multimodel_with_tools.py
-│           ├── test_recent_events.py
-│           ├── test_search_tools_report.py
-│           ├── test_tavily_search.py
-│           └── test_updated_search.py
+├── CLAUDE.md
 ├── Choir
 │   ├── App
 │   │   ├── AppDelegate.swift
@@ -129,12 +27,12 @@ tree.md
 │   │   ├── AppIcon.appiconset
 │   │   │   ├── Contents.json
 │   │   │   └── Icon-App-1024x1024@2x.png
-│   │   ├── choir-logo.imageset
-│   │   │   └── Contents.json
 │   │   ├── Contents.json
-│   │   └── Icon-App-1024x1024.imageset
-│   │       ├── Contents.json
-│   │       └── Icon-App-1024x1024@2x.png
+│   │   ├── Icon-App-1024x1024.imageset
+│   │   │   ├── Contents.json
+│   │   │   └── Icon-App-1024x1024@2x.png
+│   │   └── choir-logo.imageset
+│   │       └── Contents.json
 │   ├── Choir.entitlements
 │   ├── Config
 │   │   └── ApiConfig.swift
@@ -148,8 +46,8 @@ tree.md
 │   ├── Extensions
 │   ├── Info.plist
 │   ├── Models
-│   │   ├── AnyCodable.swift
 │   │   ├── APITypes.swift
+│   │   ├── AnyCodable.swift
 │   │   ├── AuthModels.swift
 │   │   ├── CoinType.swift
 │   │   ├── ConversationModels.swift
@@ -213,33 +111,14 @@ tree.md
 │       ├── WalletCardView.swift
 │       ├── WalletSelectionView.swift
 │       └── WalletView.swift
-├── choir_coin
-│   └── choir_coin
-│       ├── build
-│       │   ├── choir
-│       │   │   ├── BuildInfo.yaml
-│       │   │   ├── bytecode_modules
-│       │   │   │   └── choir.mv
-│       │   │   ├── debug_info
-│       │   │   │   ├── choir.json
-│       │   │   │   └── choir.mvd
-│       │   │   └── sources
-│       │   │       └── choir.move
-│       │   └── locks
-│       ├── Move.lock
-│       ├── Move.toml
-│       ├── sources
-│       │   └── choir_coin.move
-│       └── tests
-│           └── choir_coin_tests.move
 ├── Choir.xcodeproj
 │   ├── project.pbxproj
 │   ├── project.xcworkspace
 │   │   ├── contents.xcworkspacedata
 │   │   ├── xcshareddata
 │   │   │   └── swiftpm
-│   │   │       ├── configuration
-│   │   │       └── Package.resolved
+│   │   │       ├── Package.resolved
+│   │   │       └── configuration
 │   │   └── xcuserdata
 │   │       └── wiz.xcuserdatad
 │   │           ├── IDEFindNavigatorScopes.plist
@@ -258,13 +137,135 @@ tree.md
 ├── ChoirUITests
 │   ├── ChoirUITests.swift
 │   └── ChoirUITestsLaunchTests.swift
-├── CLAUDE.md
+├── README.md
+├── api
+│   ├── Dockerfile
+│   ├── __init__.py
+│   ├── app
+│   │   ├── __init__.py
+│   │   ├── config.py
+│   │   ├── database.py
+│   │   ├── langchain_utils.py
+│   │   ├── middleware
+│   │   │   ├── __init__.py
+│   │   │   └── auth.py
+│   │   ├── models
+│   │   │   ├── __init__.py
+│   │   │   ├── api.py
+│   │   │   ├── auth.py
+│   │   │   └── user.py
+│   │   ├── postchain
+│   │   │   ├── README.md
+│   │   │   ├── __init__.py
+│   │   │   ├── langchain_workflow.py
+│   │   │   ├── phases
+│   │   │   ├── postchain_llm.py
+│   │   │   ├── prompts
+│   │   │   │   └── prompts.py
+│   │   │   ├── schemas
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── rewards.py
+│   │   │   │   └── state.py
+│   │   │   ├── state
+│   │   │   └── utils.py
+│   │   ├── routers
+│   │   │   ├── auth.py
+│   │   │   ├── balance.py
+│   │   │   ├── notifications.py
+│   │   │   ├── postchain.py
+│   │   │   ├── threads.py
+│   │   │   ├── users.py
+│   │   │   └── vectors.py
+│   │   ├── services
+│   │   │   ├── __init__.py
+│   │   │   ├── auth_service.py
+│   │   │   ├── notification_service.py
+│   │   │   ├── push_notification_service.py
+│   │   │   ├── rewards_service.py
+│   │   │   └── sui_service.py
+│   │   ├── tools
+│   │   │   ├── __init__.py
+│   │   │   ├── base.py
+│   │   │   ├── brave_search.py
+│   │   │   ├── calculator.py
+│   │   │   ├── qdrant.py
+│   │   │   ├── tavily_search.py
+│   │   │   └── web_search.py
+│   │   └── utils.py
+│   ├── blog
+│   │   ├── business_model.md
+│   │   ├── inverse_scaling_law.md
+│   │   └── loop_of_thought.md
+│   ├── content
+│   │   ├── landing.md
+│   │   ├── marketing.md
+│   │   ├── privacy.md
+│   │   └── support.md
+│   ├── main.py
+│   ├── pyproject.toml
+│   ├── pytest.ini
+│   ├── requirements.txt
+│   ├── static
+│   │   └── shared
+│   │       ├── script.js
+│   │       └── style.css
+│   ├── templates
+│   │   └── base.html
+│   ├── test_push_notification.py
+│   ├── test_push_notification_e2e.py
+│   └── tests
+│       ├── __init__.py
+│       ├── conftest.py
+│       ├── postchain
+│       │   ├── __init__.py
+│       │   ├── models_test.py
+│       │   ├── random_gen_prompts.md
+│       │   ├── test_cases.json
+│       │   ├── test_langchain_workflow.py
+│       │   ├── test_providers.py
+│       │   ├── test_providers_abstracted.py
+│       │   ├── test_simple_multimodel_stream.py
+│       │   ├── test_structured_output.py
+│       │   └── test_utils.py
+│       ├── test_main.py
+│       ├── test_sui_service.py
+│       ├── test_user_thread_endpoints.py
+│       └── tools
+│           ├── __init__.py
+│           ├── direct_search_diagnostic.py
+│           ├── direct_search_test.py
+│           ├── test_brave_search.py
+│           ├── test_calculator.py
+│           ├── test_multimodel_with_tools.py
+│           ├── test_recent_events.py
+│           ├── test_search_tools_report.py
+│           ├── test_tavily_search.py
+│           └── test_updated_search.py
+├── choir_coin
+│   └── choir_coin
+│       ├── Move.lock
+│       ├── Move.toml
+│       ├── build
+│       │   ├── choir
+│       │   │   ├── BuildInfo.yaml
+│       │   │   ├── bytecode_modules
+│       │   │   │   └── choir.mv
+│       │   │   ├── debug_info
+│       │   │   │   ├── choir.json
+│       │   │   │   └── choir.mvd
+│       │   │   └── sources
+│       │   │       └── choir.move
+│       │   └── locks
+│       ├── sources
+│       │   └── choir_coin.move
+│       └── tests
+│           └── choir_coin_tests.move
 ├── docker-compose.yml
 ├── docs
 │   ├── 4phases.md
-│   ├── blockchain_integration.md
 │   ├── CHANGELOG.md
 │   ├── ChoirPushNotificationsImplementationGuide.md
+│   ├── blockchain_integration.md
 │   ├── contract_deployment.md
 │   ├── core_core.md
 │   ├── core_economics.md
@@ -273,6 +274,7 @@ tree.md
 │   ├── e_concept.md
 │   ├── evolution_naming.md
 │   ├── evolution_token.md
+│   ├── evolution_token_economics.md
 │   ├── issues
 │   │   └── retry.md
 │   ├── levels
@@ -286,7 +288,10 @@ tree.md
 │   ├── mainnet_migration.md
 │   ├── notification_system.md
 │   ├── plan_anonymity_by_default.md
+│   ├── plan_anonymous_publishing.md
 │   ├── plan_choir_materialization.md
+│   ├── plan_educational_integration.md
+│   ├── plan_phase1_foundation.md
 │   ├── postchain_service_redesign.md
 │   ├── postchain_temporal_logic.md
 │   ├── postchain_ui_redesign.md
@@ -316,10 +321,9 @@ tree.md
 ├── notebooks
 │   ├── post_chain0.ipynb
 │   └── vowel_loop3.ipynb
-├── README.md
 ├── render.yaml
-├── reward_function_simplified.py
 ├── reward_function.py
+├── reward_function_simplified.py
 └── scripts
     ├── generate_provider_reports.sh
     ├── generate_quick_search_report.sh
@@ -331,7 +335,7 @@ tree.md
     ├── test_postchain_multiturn.sh
     └── test_simulator_notifications.sh
 
-73 directories, 243 files
+73 directories, 247 files
 
 === File: docs/CHANGELOG.md ===
 
@@ -782,79 +786,80 @@ core_core
 ==
 
 
-# Core System Overview: AI for Social Discourse
+# Core System Overview: Infrastructure for the Learning Economy
 
-VERSION core_system: 9.0 (Relationship-Focused Architecture)
+VERSION core_system: 10.0 (Learning Economy Architecture)
 
 ## Overview
 
-Choir is a language game that uses AI to facilitate meaningful social discourse. Our system architecture is designed around a core insight: turning posting from a liability into value creation through relationship staking and merit-based rewards. The MVP validates this concept through **Qdrant** for semantic understanding, **Sui** for economic alignment via CHOIR tokens, and a **Python API** that orchestrates AI-driven conversations that connect like minds.
+Choir provides the technological infrastructure enabling transition from traditional education toward learning economy participation. The platform transforms natural conversation into publication-quality content, making intellectual discourse accessible to anyone regardless of writing skill, technical expertise, or institutional access. Our system architecture implements the **Conductor + 5 Instruments** model that orchestrates conversation-to-publication workflows through AI-enhanced collaborative intelligence.
 
-## Foundational Principles: Enabling Human Connection Through AI
+## Foundational Principles: Learning Economy Infrastructure
 
-Choir's architecture embodies core principles that prioritize human relationships over algorithmic engagement:
+Choir's architecture embodies core principles that enable the transition from credential theater to intellectual contribution:
 
-1.  **Economic Alignment (Sui):** The **Sui blockchain** manages CHOIR tokens that create real skin in the game for quality discourse. Beyond basic rewards, it enables **relationship staking** where users invest tokens in meaningful connections, creating shared economic interest in maintaining quality relationships.
-2.  **Semantic Understanding (Qdrant):** **Qdrant** stores not just content but the semantic relationships that help AI identify intellectual compatibility. It powers the discovery of "like minds" through citation patterns and conversation quality rather than superficial metrics.
-3.  **Conversational Intelligence (AEIOU-Y PostChain):** The **PostChain workflow** creates conversations that get smarter over time, helping users express ideas more clearly and connecting them with relevant prior thoughts from the community.
-4.  **Merit-Based Discovery:** Anonymous by default, ideas compete on merit rather than social status, enabling authentic discourse free from social surveillance and reputation management.
+1.  **Conversation-to-Publication Workflow:** The core experience eliminates barriers between having insights and contributing to collective knowledge. Record conversations about any topic, AI research assistants gather relevant sources, collaborative editing transforms dialogue into citable articles.
+2.  **Citation Economics:** When others reference your contributions in their work, you receive ongoing compensation through citation rewards. Original insights generate appreciating assets rather than disappearing posts.
+3.  **Collaborative Intelligence:** AI serves as research assistant, writing collaborator, and intellectual partner rather than replacement. Humans provide creativity and judgment while AI handles execution and technical implementation.
+4.  **Intellectual Property Rights:** The platform creates genuine intellectual property rights through citation economics, inverting traditional social platforms that provide ephemeral rewards while capturing lasting economic value.
 
-## Core Components: Building Blocks for Social Discourse
+## Core Components: Conductor + 5 Instruments Architecture
 
-1.  **Qdrant (Semantic Relationship Engine):**
-    *   **Role:** Powers the discovery of intellectual compatibility and meaningful connections. Stores conversation content, user interaction patterns, and the semantic relationships that enable AI to identify "like minds."
-    *   **Function:** Enables semantic search for relevant prior thoughts, calculates novelty scores for original contributions, and provides the data foundation for relationship recommendations based on citation patterns and conversation quality.
+1.  **The Conductor (Python API):**
+    *   **Role:** Central orchestration layer that coordinates all system components and manages the conversation-to-publication workflow.
+    *   **Function:** Authenticates users through Sui signatures, orchestrates AI processing phases, manages file input processing (txt, md, pdf, epub, YouTube transcripts), and coordinates between semantic understanding and economic rewards.
 
-2.  **Sui Blockchain (Economic Alignment Layer):**
-    *   **Role:** Manages CHOIR tokens that create economic alignment in relationships. Handles both individual rewards and the upcoming relationship staking features that enable users to invest in meaningful connections.
-    *   **Function:** Executes reward distributions for quality contributions, manages relationship multisigs for staked connections, and provides the economic infrastructure for a platform where social value belongs to users, not the platform.
+2.  **Instrument 1: Semantic Engine (Qdrant):**
+    *   **Role:** Powers semantic understanding and knowledge discovery through vector storage and retrieval.
+    *   **Function:** Stores conversation content and embeddings, enables semantic search for relevant prior knowledge, calculates novelty scores for original contributions, and provides context for AI-enhanced conversations.
 
-3.  **Python API (Conversation Orchestrator):**
-    *   **Role:** The central intelligence that connects human input with AI processing, semantic understanding, and economic rewards.
-    *   **Function:** Authenticates users through Sui signatures, orchestrates the PostChain workflow that makes conversations smarter over time, and triggers both individual rewards and relationship-based economic interactions.
+3.  **Instrument 2: Economic Layer (Sui Blockchain):**
+    *   **Role:** Manages CHOIR tokens and implements citation economics for intellectual property rights.
+    *   **Function:** Executes reward distributions for quality contributions, manages citation rewards when insights prove foundational for others, and provides economic infrastructure where participants co-own intellectual value.
 
-4.  **PostChain Workflow (Conversational Intelligence):**
-    *   **Role:** The AI system that helps users express ideas clearly and connects them with relevant community knowledge.
-    *   **Function:** Processes conversations through multiple phases to identify valuable insights, find relevant prior contributions, and create responses that facilitate meaningful discourse rather than mere information exchange.
+4.  **Instrument 3: AI Processing (PostChain Workflow):**
+    *   **Role:** Transforms conversations into publication-quality content through structured AI enhancement.
+    *   **Function:** Processes input through multiple phases (Action, Experience, Intention, Observation, Understanding, Yield), integrates research assistance and collaborative editing, and produces citable articles with proper attribution.
 
-5.  **Supporting Technologies:**
-    *   **Langchain Utils (`langchain_utils.py`):** LLM abstraction.
-    *   **Pydantic:** Data validation.
-    *   **Docker:** API containerization.
-    *   **SwiftUI & Keychain:** Client UI and secure Sui key storage.
-    *   **Python Async/await:** Used within the API and LCEL workflow for efficient concurrent operations.
+5.  **Instrument 4: Content Processing (Multi-Format Input):**
+    *   **Role:** Handles diverse input formats to democratize intellectual contribution.
+    *   **Function:** Processes text files, PDFs, EPUBs, YouTube transcripts, and audio/video content, automatically switches to high-context models on overflow, and enables text-to-speech for accessibility.
 
-## Architecture Flow: From Thought to Connection
+6.  **Instrument 5: Publication Infrastructure (Client Interface):**
+    *   **Role:** Provides accessible interface for conversation-to-publication workflow.
+    *   **Function:** SwiftUI client with secure Sui key storage, real-time collaboration features, and seamless transition from conversation to published content.
 
-The system creates a flow that transforms individual thoughts into community connections:
+## Architecture Flow: From Conversation to Publication
 
-1.  **Authentic Expression**: User shares thoughts via **SwiftUI Client** with Sui-based authentication ensuring ownership.
-2.  **AI Enhancement**: **Python API** orchestrates the **PostChain Workflow** to help clarify and contextualize the user's ideas.
-3.  **Semantic Discovery**: PostChain phases interact with **Qdrant** to find relevant prior thoughts and identify potential intellectual connections.
-4.  **Quality Recognition**: AI calculates novelty and citation scores, identifying valuable contributions worthy of rewards.
-5.  **Community Building**: Final response includes not just AI insights but potential connection points with like-minded users.
-6.  **Economic Alignment**: **Sui Service** distributes rewards and enables relationship staking for meaningful connections.
-7.  **Relationship Formation**: Users can invest earned tokens in relationships, creating shared economic interest in quality discourse.
+The system creates a flow that transforms natural conversation into publication-quality intellectual contribution:
 
-This architecture validates the core insight: **Individual Thought -> AI Enhancement -> Community Discovery -> Economic Alignment -> Meaningful Relationships**.
+1.  **Content Input**: User provides conversation, text files, PDFs, EPUBs, or YouTube URLs via **SwiftUI Client** with Sui-based authentication ensuring ownership.
+2.  **AI Research Assistance**: **Conductor** orchestrates **AI Processing** to gather relevant sources and context from **Semantic Engine**.
+3.  **Collaborative Enhancement**: **PostChain Workflow** transforms dialogue through structured phases, enhancing clarity and adding professional formatting.
+4.  **Quality Assessment**: AI calculates novelty scores and identifies original insights worthy of citation rewards.
+5.  **Publication Generation**: Final output becomes citable article with proper attribution and professional presentation.
+6.  **Citation Economics**: **Economic Layer** distributes ongoing compensation when others reference the published work.
+7.  **Knowledge Commons**: Published content contributes to collective knowledge while generating intellectual property rights for creators.
 
-## Strategic Focus: Validating Social Discourse Through AI
+This architecture validates the core insight: **Natural Conversation -> AI Enhancement -> Publication Quality -> Citation Economics -> Intellectual Property Rights**.
 
-*   **Relationship Discovery:** Validate that AI can identify intellectual compatibility and facilitate meaningful connections between users.
-*   **Economic Alignment:** Establish that token-based incentives create better discourse quality and relationship formation.
-*   **Merit-Based Community:** Demonstrate that anonymous, merit-based interactions lead to more authentic and valuable conversations.
-*   **Value Ownership:** Prove that users can own and transfer their social value rather than being locked into platform-specific metrics.
+## Strategic Focus: Validating Learning Economy Infrastructure
 
-## The Combined Result: AI That Amplifies Human Community
+*   **Conversation-to-Publication:** Validate that AI can transform natural dialogue into publication-quality content accessible to anyone regardless of writing skill.
+*   **Citation Economics:** Establish that ongoing compensation for referenced work creates sustainable intellectual property rights and quality incentives.
+*   **Collaborative Intelligence:** Demonstrate that AI-human collaboration generates insights neither could achieve independently.
+*   **Educational Transformation:** Prove that intellectual contribution can become economic activity, transforming education from credential theater to value creation.
 
-The MVP delivers a new paradigm for online interaction:
+## The Combined Result: Infrastructure for Intellectual Contribution
 
-*   **Economic Relationships (CHOIR tokens):** Users invest in connections, creating shared stakes in relationship quality and discourse outcomes.
-*   **Semantic Compatibility (Qdrant):** AI identifies like minds through conversation patterns rather than demographic or behavioral targeting.
-*   **Enhanced Expression (PostChain):** Conversations become collaborative intelligence sessions that help users articulate and develop ideas.
-*   **Authentic Community:** Anonymous merit-based interactions free from social surveillance enable genuine intellectual connection.
+The system delivers a new paradigm for learning and knowledge creation:
 
-This architecture demonstrates that AI can facilitate human relationships rather than replace them, creating a platform where technology serves community building rather than attention extraction.
+*   **Democratized Publishing (Conversation-to-Publication):** Anyone can contribute to collective knowledge regardless of writing expertise or institutional access.
+*   **Intellectual Property Rights (Citation Economics):** Original insights generate appreciating assets through ongoing citation rewards rather than ephemeral social media engagement.
+*   **Amplified Intelligence (AI Collaboration):** Human creativity combines with AI execution to produce insights and content impossible for individuals alone.
+*   **Learning Economy Participation:** Intellectual contribution becomes immediate economic activity rather than delayed value through credential signaling.
+
+This architecture demonstrates that technology can serve intellectual flourishing rather than exploit psychological vulnerabilities, creating infrastructure where learning becomes economic opportunity and insights gain the recognition they merit.
 
 === File: docs/core_economics.md ===
 
@@ -950,67 +955,67 @@ e_business
 
 # File: docs/e_business.md
 
-# Choir Business Model: Truthful Mechanism Design for Social Discourse
+# Choir Business Model: Infrastructure for the Learning Economy
 
-Choir's business model emerges from deep thinking about mechanism design theory. At its core, Choir is what happens when you design a DSIC (Dominant Strategy Incentive Compatible) truthful mechanism for social media, treating posting as bidding in a Vickrey auction where authentic expression is the dominant strategy.
+Choir's business model emerges from recognizing the fundamental economic transformation as AI handles execution while human value concentrates around originality, interdisciplinary fluency, and collaborative intelligence. The economy is evolving from rewarding skill performance to rewarding insight generation, and Choir provides the infrastructure for this inevitable transition.
 
-## The Revenue Sequence: App → Relationships → Finance
+## The Revenue Sequence: Individual → Institutional → Educational
 
-Our business model follows a clear progression that aligns with user value creation:
+Our business model follows a clear progression that aligns with learning economy development:
 
-**App Subscriptions** → **Relationship/Group Multisig Funds** → **Onchain Finance Agents** (with transaction fees)
+**Individual Subscriptions** → **Institutional Sales** → **Educational Integration** (with licensing fees)
 
-This sequence ensures that revenue grows naturally with user engagement and relationship formation, creating sustainable alignment between business success and community value.
+This sequence ensures that revenue grows naturally with learning economy adoption, creating sustainable alignment between business success and intellectual contribution value.
 
-## Phase 1: App Subscription Model
+## Phase 1: Individual Subscription Model
 
-**Free Tier (Beta Only):**
-During beta, core functionality is free to validate product-market fit:
+**Free Tier (Learning Economy Validation):**
+During initial phase, core functionality is free to validate learning economy product-market fit:
 
-*   **Anonymous Discourse:** Full access to AI-enhanced conversations with complete anonymity
+*   **Conversation-to-Publication:** Transform natural dialogue into citable articles
 *   **CHOIR Coin Earning:** Earn tokens for novel contributions and citations
-*   **Relationship Staking:** Invest earned tokens in meaningful connections
-*   **Basic AI Processing:** Standard PostChain workflow with rate limits
+*   **Citation Economics:** Receive ongoing compensation when others reference your work
+*   **Basic AI Processing:** Standard conversation enhancement with rate limits
 
-**Subscription Tiers (Post-Beta):**
-Exponential price-to-rate-limit ratios ensure sustainable AI model costs and Sui transaction fees:
+**Subscription Tiers (Post-Validation):**
+Exponential price-to-capability ratios ensure sustainable AI model costs and advanced features:
 
-*   **Basic ($9/month):** 100 AI conversations, standard processing speed
-*   **Pro ($29/month):** 500 conversations, priority processing, advanced AI models
-*   **Expert ($99/month):** 2000 conversations, fastest processing, premium model access
-*   **Unlimited ($299/month):** No rate limits, experimental features, dedicated support
+*   **Creator ($19/month):** 200 publications, standard AI enhancement, basic citation tracking
+*   **Scholar ($59/month):** 1000 publications, advanced AI models, detailed analytics, priority processing
+*   **Researcher ($199/month):** 5000 publications, premium models, collaborative features, API access
+*   **Institution ($599/month):** Unlimited publications, white-label options, custom integrations, dedicated support
 
-**Full Anonymity by Design:**
-Identity emerges naturally from wallet activity and Sui's built-in nameserver. No persistent identities or KYC required - reputation is built through contribution quality, not social credentials.
+**Anonymous by Default:**
+Identity emerges naturally from intellectual contribution quality. No persistent identities required - reputation builds through citation networks and collaborative intelligence rather than social credentials.
 
-## Phase 2: Relationship/Group Multisig Funds
+## Phase 2: Institutional Sales
 
-As users form meaningful relationships through staking, these connections become economic entities:
+As learning economy adoption grows, institutions need infrastructure for intellectual contribution:
 
-**Relationship Multisigs:**
-*   **Shared Treasury:** Successful relationships accumulate CHOIR tokens through collaborative insights and citations
-*   **Investment Decisions:** Groups can collectively decide how to deploy their shared funds
-*   **Value Appreciation:** Relationship funds grow through continued quality discourse and community recognition
+**Educational Institution Licensing:**
+*   **Campus-Wide Access:** Universities license platform access for students and faculty
+*   **Intellectual Property Management:** Institutions track and monetize research output through citation economics
+*   **Collaborative Research:** Cross-institutional collaboration through shared knowledge commons
 
-**Group Formation:**
-*   **Natural Evolution:** Pair relationships expand into groups with shared economic interests
-*   **Collective Intelligence:** Groups become economic entities that can make investment decisions together
-*   **Exit Rights:** Members can always leave and take their proportional share
+**Corporate Knowledge Management:**
+*   **Internal Knowledge Sharing:** Companies use platform for capturing and sharing institutional knowledge
+*   **Innovation Tracking:** Organizations track and reward employee intellectual contributions
+*   **Competitive Intelligence:** Businesses monitor industry knowledge development through citation networks
 
-## Phase 3: Onchain Finance Agents (Revenue Generation)
+## Phase 3: Educational Integration (Revenue Generation)
 
-The ultimate revenue driver: providing AI-powered financial services to relationship/group funds:
+The ultimate revenue driver: transforming educational systems through learning economy infrastructure:
 
-**Financial Agent Services (2-5% transaction fees):**
-*   **Portfolio Management:** AI agents help groups optimize their CHOIR and other crypto holdings
-*   **DeFi Strategies:** Automated yield farming, liquidity provision, and risk management
-*   **Cross-Chain Operations:** Bridge assets and execute strategies across multiple blockchains
-*   **Tax Optimization:** AI-driven strategies for minimizing tax burden on group investments
+**Educational Platform Integration (10-20% revenue share):**
+*   **Curriculum Development:** AI-assisted creation of learning materials that generate citation rewards
+*   **Assessment Innovation:** Replace standardized testing with intellectual contribution tracking
+*   **Student Portfolio Building:** Help students build demonstrable intellectual property portfolios
+*   **Faculty Research Enhancement:** Amplify academic research through AI collaboration and citation networks
 
 **Revenue Model:**
-*   **Transaction Fees:** 2-5% on all financial operations executed by our AI agents
-*   **Management Fees:** Annual fees for ongoing portfolio management services
-*   **Performance Fees:** Share of profits generated above benchmark returns
+*   **Licensing Fees:** Annual fees for educational institution access to platform infrastructure
+*   **Citation Revenue Share:** Percentage of citation rewards generated through educational content
+*   **Custom Development:** Fees for specialized educational integrations and white-label solutions
 
 ## CHOIR Coin Treasury Strategy & Financial Engineering
 
@@ -1138,17 +1143,17 @@ e_concept
 ==
 
 
-# Choir: A Harmonic Intelligence Platform - Where Knowledge Resonates and Value Flows
+# Choir: Infrastructure for the Learning Economy - Where Intellectual Contribution Becomes Economic Opportunity
 
-Choir is more than just a platform; it's a **harmonic intelligence ecosystem**, a digital space designed to amplify human potential and unlock new forms of collective understanding.  Imagine a place where ideas resonate like musical notes, where collaboration flows like a river, and where knowledge crystallizes into structures of lasting value – this is the essence of Choir.
+Choir is more than just a platform; it's **infrastructure for the learning economy**, a digital space designed to transform the relationship between learning and economic value creation. Imagine a place where every conversation becomes potential intellectual property, where insights gain the presentation they deserve and the recognition they merit, and where collaborative intelligence enhances human capability rather than replacing it – this is the essence of Choir.
 
-**Natural Value Flows - Like Energy Through a System:**
+**Conversation-to-Publication Workflow - Democratizing Intellectual Contribution:**
 
-At its core, Choir operates on the principle of **natural value flows**.  Just as energy seeks the path of least resistance and water finds its level, value in Choir flows organically towards quality, insight, and meaningful contribution.  This is not a system of forced metrics or artificial incentives, but one where value emerges naturally from the inherent dynamics of the platform.
+At its core, Choir operates on the principle of **eliminating barriers between having insights and contributing to collective knowledge**. The platform transforms natural conversation into publication-quality content, making intellectual discourse accessible to anyone regardless of writing skill, technical expertise, or institutional access.
 
-*   **Individual Recognition - Organic and Tangible:**  Recognition for valuable contributions is immediate and tangible, like a clear note resonating in a concert hall. Quality insights naturally attract attention and rewards, driven by the platform's inherent mechanisms, not arbitrary likes or upvotes. Value recognition is earned through genuine participation and meaningful stake.
-*   **Team Crystallization - Natural Alignment of Minds:**  Teams in Choir form organically, like crystals forming in a solution.  Valuable conversations naturally attract compatible minds, creating teams based on shared interests, complementary skills, and a collective drive to build knowledge. Threads become shared spaces where value accumulates for all participants, forging natural bonds between contributors.
-*   **Knowledge Networks - Interconnected Ecosystems of Understanding:**  Threads in Choir don't exist in isolation; they connect and interweave through citations, creating **knowledge networks** that resemble natural ecosystems.  Value flows between threads and communities, like streams feeding into rivers and oceans, creating a rich and interconnected web of understanding. Each citation strengthens both the source and destination threads, building a network of long-range correlations and emergent insights.
+*   **Individual Empowerment - From Conversation to Citation:**  Anyone can record conversations about any topic and transform them into comprehensive, citable articles. Quality insights naturally attract citations and rewards, driven by intellectual merit rather than social status or institutional affiliation. Value recognition emerges through genuine contribution to collective knowledge.
+*   **Collaborative Intelligence - AI as Partner, Not Replacement:**  AI serves as research assistant, writing collaborator, and intellectual partner rather than replacement. Humans provide creativity, judgment, and insight while AI handles execution, formatting, and technical implementation. The combination generates insights that neither humans nor AI achieve independently.
+*   **Citation Economics - Intellectual Property Rights:**  Published contributions don't disappear into social media feeds; they become intellectual property that generates ongoing compensation when others reference the work. Each citation creates shared ownership relationships where collaborative intelligence generates value for all participants.
 
 **Evolving Through Natural Phases - Mirroring Physical Processes:**
 
@@ -1241,6 +1246,213 @@ Anonymity is not just a feature of Choir; it's a fundamental principle, a design
 **Conclusion:**
 
 Anonymity by default is a core design principle of Choir, one that reflects the platform's commitment to privacy, freedom of expression, and the creation of a truly meritocratic space for the exchange of ideas. It's a bold choice in a world where online platforms increasingly demand real-name identification, but it's a choice that has the potential to unlock new levels of creativity, honesty, and collective intelligence. By prioritizing anonymity, Choir is not just building a platform; it's building a new model for online interaction, one that empowers individuals and fosters a more open and equitable exchange of ideas.
+
+=== File: docs/plan_anonymous_publishing.md ===
+
+
+
+==
+plan_anonymous_publishing
+==
+
+
+# Plan: Anonymous Publishing Infrastructure
+
+VERSION anonymous_publishing: 1.0 (Learning Economy Foundation)
+
+## Overview
+
+Anonymous publishing represents a core innovation of Choir's learning economy infrastructure. By separating ideas from their authors' social identities, the platform creates a merit-based intellectual environment where quality ideas find audiences regardless of their source. This document outlines the technical and social architecture for implementing anonymous publishing that serves intellectual contribution rather than social surveillance.
+
+## The Problem with Identity-Based Publishing
+
+Traditional publishing platforms—both academic and social—create perverse incentives that prioritize social positioning over intellectual merit:
+
+**Academic Publishing:**
+- Institutional affiliation determines publication opportunities
+- Established researchers receive preferential treatment regardless of idea quality
+- Geographic and demographic barriers limit participation
+- Peer review often reflects social networks rather than intellectual merit
+
+**Social Media Publishing:**
+- Follower counts and engagement metrics determine reach
+- Algorithmic amplification favors controversy over insight
+- Social surveillance creates self-censorship and conformity pressure
+- Platform economics extract value from user creativity while providing ephemeral rewards
+
+## Anonymous Publishing as Merit-Based Infrastructure
+
+Choir's anonymous publishing system inverts these dynamics by creating infrastructure where intellectual merit determines recognition:
+
+### Core Principles
+
+1. **Ideas Compete on Merit:** Without author identity, readers evaluate contributions based on intrinsic value rather than social status or institutional affiliation.
+
+2. **Reduced Bias:** Anonymous contribution helps mitigate unconscious bias based on gender, race, age, or other personal characteristics.
+
+3. **Intellectual Risk-Taking:** Authors can explore unconventional ideas without fear of professional or social repercussions.
+
+4. **Democratic Access:** Anyone can contribute to collective knowledge regardless of credentials, geography, or institutional access.
+
+### Technical Implementation
+
+**Wallet-Based Identity:**
+- Users authenticate through Sui wallet signatures
+- Wallet addresses serve as persistent but anonymous identifiers
+- No personal information collection or KYC requirements
+- Identity emerges through contribution quality rather than social credentials
+
+**Citation Networks:**
+- Anonymous contributions build reputation through citation patterns
+- Quality work attracts references regardless of author identity
+- Citation rewards flow to wallet addresses, creating economic incentives for quality
+- Intellectual property rights exist independently of social identity
+
+**Content Attribution:**
+- All published content cryptographically signed by author wallet
+- Immutable attribution prevents plagiarism while maintaining anonymity
+- Citation tracking enables ongoing compensation for referenced work
+- Collaborative contributions properly attribute all participants
+
+## Conversation-to-Publication Workflow
+
+The anonymous publishing system integrates seamlessly with Choir's conversation-to-publication infrastructure:
+
+### Input Processing
+- Record conversations about any topic
+- Upload text files, PDFs, EPUBs, or YouTube transcripts
+- AI processes input regardless of author identity or credentials
+- Content quality determines processing priority, not social status
+
+### AI Enhancement
+- Research assistants gather relevant sources and context
+- Collaborative editing transforms dialogue into publication-quality content
+- Professional formatting and citation management
+- Quality assessment based on intellectual merit rather than author reputation
+
+### Publication Output
+- Citable articles with proper attribution to anonymous wallet addresses
+- Professional presentation that competes with traditional academic publishing
+- Immediate availability to global audience without institutional gatekeepers
+- Citation tracking enables ongoing compensation for valuable contributions
+
+## Economic Model for Anonymous Publishing
+
+Anonymous publishing requires economic mechanisms that reward quality without relying on social validation:
+
+### Citation Economics
+- Authors receive ongoing compensation when others reference their work
+- Citation rewards scale with the value and reach of referencing work
+- Economic incentives align with intellectual virtue rather than social positioning
+- Quality contributions generate appreciating assets rather than ephemeral engagement
+
+### Novelty Rewards
+- AI calculates semantic novelty scores for original contributions
+- Rewards flow to genuinely innovative insights regardless of author identity
+- Prevents gaming through social manipulation or engagement farming
+- Encourages intellectual exploration and creative synthesis
+
+### Quality Filtering
+- Economic stakes in publication prevent spam and low-effort content
+- Community moderation based on intellectual merit rather than social popularity
+- Reputation systems track contribution quality over time
+- Natural selection for valuable content through citation patterns
+
+## Addressing Anonymous Publishing Challenges
+
+### Accountability Without Identity
+- Economic stakes create accountability through financial consequences
+- Citation networks provide reputation tracking without revealing identity
+- Community moderation addresses problematic content
+- Cryptographic signatures prevent impersonation and ensure attribution
+
+### Quality Assurance
+- AI-assisted quality assessment evaluates intellectual merit
+- Citation patterns reveal valuable contributions over time
+- Economic incentives reward quality over quantity
+- Collaborative editing improves content before publication
+
+### Preventing Abuse
+- Publication costs prevent spam and low-effort content
+- Community reporting mechanisms address harmful content
+- Economic penalties for consistently low-quality contributions
+- Technical measures prevent automated content generation
+
+## Integration with Learning Economy
+
+Anonymous publishing serves as foundational infrastructure for the broader learning economy transformation:
+
+### Educational Applications
+- Students can contribute to collective knowledge without credential barriers
+- Faculty can explore controversial ideas without institutional pressure
+- Cross-disciplinary collaboration without departmental politics
+- Merit-based evaluation of intellectual contribution
+
+### Professional Development
+- Professionals can share insights without employer restrictions
+- Industry knowledge sharing without competitive concerns
+- Career advancement based on intellectual contribution rather than social networking
+- Portfolio building through demonstrable intellectual property
+
+### Research Innovation
+- Researchers can pursue unconventional hypotheses without career risk
+- International collaboration without institutional barriers
+- Rapid publication without traditional peer review delays
+- Open access to global intellectual community
+
+## Implementation Roadmap
+
+### Phase 1: Core Infrastructure (Months 1-3)
+- Wallet-based authentication system
+- Anonymous content publishing pipeline
+- Basic citation tracking and attribution
+- Economic reward distribution for citations
+
+### Phase 2: AI Enhancement (Months 4-6)
+- Conversation-to-publication workflow integration
+- AI-assisted quality assessment
+- Automated research assistance and source gathering
+- Professional formatting and presentation tools
+
+### Phase 3: Community Features (Months 7-9)
+- Collaborative editing and peer review
+- Community moderation and quality assurance
+- Advanced citation network analysis
+- Cross-reference and knowledge graph visualization
+
+### Phase 4: Educational Integration (Months 10-12)
+- Educational institution partnerships
+- Curriculum integration tools
+- Student portfolio development features
+- Faculty research collaboration platforms
+
+## Success Metrics
+
+### Quality Indicators
+- Citation rates for anonymous vs. identified content
+- Novelty scores and intellectual diversity measures
+- Cross-disciplinary collaboration frequency
+- Long-term value of published contributions
+
+### Participation Metrics
+- Number of active anonymous contributors
+- Geographic and demographic diversity of participants
+- Frequency of publication and citation activity
+- Growth in collective knowledge commons
+
+### Economic Indicators
+- Citation reward distribution patterns
+- Economic value generated through intellectual property
+- Platform sustainability through quality-based economics
+- User retention and engagement with anonymous publishing features
+
+## Conclusion
+
+Anonymous publishing represents a fundamental shift from social media's attention economy toward the learning economy's merit-based intellectual contribution. By eliminating barriers between having insights and contributing to collective knowledge, Choir creates infrastructure where quality ideas find audiences regardless of their source.
+
+This system serves not just individual empowerment but collective intelligence advancement. When intellectual merit determines recognition rather than social positioning, the platform naturally evolves toward higher signal-to-noise ratio and more valuable discourse.
+
+Anonymous publishing is not just a feature of Choir—it's foundational infrastructure for the learning economy where intellectual contribution becomes economic opportunity and insights gain the recognition they merit.
 
 === File: docs/plan_choir_materialization.md ===
 
@@ -1341,6 +1553,496 @@ The marketing and messaging for the CHOIR coin and data marketplace should empha
 5.  **Implement Governance Framework:** Design and deploy the initial governance mechanisms for CHOIR holders.
 
 The "CHOIR Materialization" plan represents a comprehensive approach to creating tangible utility and value for the CHOIR coin through a robust data economy. By focusing on fair compensation for intellectual contributions, programmable data agreements, and community governance, Choir is positioned to create a sustainable and valuable ecosystem for knowledge creation and exchange.
+
+=== File: docs/plan_educational_integration.md ===
+
+
+
+==
+plan_educational_integration
+==
+
+
+# Plan: Educational Integration for the Learning Economy
+
+VERSION educational_integration: 1.0 (Learning Economy Foundation)
+
+## Overview
+
+Educational integration represents Choir's strategic approach to transforming traditional education from credential theater to intellectual contribution. By providing infrastructure that enables students and faculty to generate genuine intellectual property through collaborative intelligence, Choir creates pathways for educational institutions to embrace learning economy principles while maintaining institutional value.
+
+## The Educational Transformation Challenge
+
+Traditional educational institutions face an impossible choice: continue optimizing for standardized test performance while their graduates become economically irrelevant, or transform into infrastructure for genuine intellectual development. Most attempt incremental reform—adding technology to existing structures—while missing the fundamental transition required.
+
+### Current Educational Problems
+
+**Credential Theater:**
+- Students optimize for grade performance rather than knowledge advancement
+- Assignments disappear into filing cabinets rather than contributing to collective understanding
+- Success measured through compliance rather than contribution
+- Billions of hours of intellectual labor wasted annually
+
+**Economic Misalignment:**
+- Learning serves as preparation for separate economic activity
+- Delayed value through credential signaling rather than immediate intellectual contribution
+- Students accumulate debt without building intellectual property
+- Faculty research trapped in academic repositories with limited broader impact
+
+**Institutional Constraints:**
+- Artificial boundaries between disciplines prevent valuable synthesis
+- Geographic and demographic barriers limit participation
+- Peer review reflects social networks rather than intellectual merit
+- Innovation constrained by institutional politics and funding structures
+
+## Choir's Educational Integration Strategy
+
+Choir provides infrastructure that enables educational institutions to transition toward learning economy principles while maintaining institutional identity and value:
+
+### Core Integration Principles
+
+1. **Transform Assignments into Intellectual Property:** Every student assignment becomes potential intellectual property that contributes to collective knowledge while generating economic value for creators.
+
+2. **Enable Collaborative Intelligence:** Students and faculty collaborate with AI systems to produce insights and content impossible for individuals alone.
+
+3. **Create Citation Networks:** Academic work generates ongoing compensation through citation economics, aligning educational incentives with intellectual contribution.
+
+4. **Democratize Publishing:** Remove barriers between having insights and contributing to collective knowledge, regardless of institutional affiliation or credentials.
+
+## Technical Integration Architecture
+
+### Campus-Wide Platform Access
+- **Institutional Licensing:** Universities purchase CHOIR tokens for campus-wide access
+- **Single Sign-On Integration:** Seamless integration with existing campus authentication systems
+- **Departmental Customization:** Specialized workflows for different academic disciplines
+- **Privacy Controls:** Institutional oversight while maintaining student intellectual property rights
+
+### Assignment-to-Publication Pipeline
+- **Course Integration:** Professors can assign conversation-to-publication projects
+- **Collaborative Editing:** Students work with AI to transform assignments into citable articles
+- **Peer Review Integration:** Structured peer review processes using platform tools
+- **Citation Tracking:** Automatic tracking of how student work influences broader knowledge
+
+### Research Enhancement Tools
+- **Faculty Collaboration:** Cross-institutional research partnerships through platform
+- **Student Research Participation:** Undergraduates contribute to faculty research through AI-enhanced collaboration
+- **Grant Writing Assistance:** AI-assisted proposal development and funding applications
+- **Publication Pipeline:** Transform research conversations into publication-ready articles
+
+## Educational Use Cases
+
+### Undergraduate Education
+
+**Freshman Composition:**
+- Students record conversations about local community issues
+- AI research assistants gather relevant sources and context
+- Collaborative editing transforms dialogue into policy analysis articles
+- Published work contributes to local knowledge while building student portfolios
+
+**Science Courses:**
+- Laboratory discussions become collaborative research articles
+- Students contribute to ongoing scientific discourse through AI-enhanced analysis
+- Cross-disciplinary synthesis encouraged through citation bonus rewards
+- Original insights recognized through novelty rewards regardless of student level
+
+**Liberal Arts:**
+- Creative interpretations contribute to cultural knowledge
+- Historical analysis builds on existing scholarship through citation networks
+- Philosophical discussions become structured arguments with proper attribution
+- Interdisciplinary connections generate bonus rewards
+
+### Graduate Education
+
+**Thesis Development:**
+- Dissertation conversations transformed into publication-ready chapters
+- AI assistance with literature review and source integration
+- Collaborative editing with advisors through platform tools
+- Citation tracking shows real-world impact of research
+
+**Research Collaboration:**
+- Cross-institutional partnerships through platform networking
+- Shared intellectual property through collaborative citation rewards
+- International collaboration without geographic barriers
+- Merit-based recognition regardless of institutional prestige
+
+### Faculty Development
+
+**Research Amplification:**
+- Faculty conversations become publication-ready articles
+- AI assistance with grant writing and proposal development
+- Cross-disciplinary collaboration through platform networking
+- Citation economics provide ongoing compensation for influential work
+
+**Teaching Innovation:**
+- Course development conversations become educational resources
+- Pedagogical insights shared across institutions
+- Student feedback integrated into teaching improvement
+- Educational research conducted through platform analytics
+
+## Economic Model for Educational Integration
+
+### Institutional Revenue Streams
+- **Citation Revenue Sharing:** Institutions receive percentage of citation rewards generated by affiliated users
+- **Intellectual Property Management:** Universities track and monetize research output
+- **Licensing Fees:** Revenue from other institutions using university-developed content
+- **Research Funding:** Enhanced grant success through AI-assisted proposal development
+
+### Student Benefits
+- **Intellectual Property Ownership:** Students retain rights to their published contributions
+- **Portfolio Development:** Demonstrable intellectual property for career advancement
+- **Citation Income:** Ongoing compensation when others reference student work
+- **Collaborative Opportunities:** Networking through intellectual compatibility rather than social connections
+
+### Faculty Incentives
+- **Research Amplification:** AI assistance increases research productivity and impact
+- **Citation Tracking:** Clear metrics for intellectual influence and contribution
+- **Collaboration Tools:** Enhanced ability to work across institutional boundaries
+- **Economic Recognition:** Citation rewards provide additional compensation for influential work
+
+## Implementation Roadmap
+
+### Phase 1: Pilot Programs (Months 1-6)
+- **Partner Institution Selection:** Identify forward-thinking universities for initial pilots
+- **Course Integration:** Implement conversation-to-publication assignments in select courses
+- **Faculty Training:** Develop training programs for platform integration
+- **Student Onboarding:** Create orientation materials for student users
+
+### Phase 2: Departmental Integration (Months 7-12)
+- **Discipline-Specific Workflows:** Customize platform for different academic fields
+- **Research Integration:** Connect platform to existing research infrastructure
+- **Assessment Innovation:** Develop new evaluation methods based on intellectual contribution
+- **Cross-Institutional Collaboration:** Enable partnerships between pilot institutions
+
+### Phase 3: Campus-Wide Deployment (Months 13-18)
+- **Full University Integration:** Expand successful pilots to entire institutions
+- **Administrative Tools:** Develop management interfaces for institutional oversight
+- **Analytics and Reporting:** Provide institutions with impact metrics and analytics
+- **Policy Development:** Help institutions develop policies for intellectual property management
+
+### Phase 4: Network Effects (Months 19-24)
+- **Multi-Institutional Networks:** Create consortiums of participating universities
+- **Global Expansion:** International partnerships and localization
+- **Industry Integration:** Connect educational outputs to professional opportunities
+- **Policy Influence:** Work with educational policymakers on learning economy adoption
+
+## Success Metrics
+
+### Educational Impact
+- **Student Engagement:** Increased participation in intellectual contribution activities
+- **Quality Improvement:** Enhancement in average quality of student work
+- **Cross-Disciplinary Collaboration:** Frequency of interdisciplinary projects and citations
+- **Graduate Outcomes:** Career success of students with intellectual property portfolios
+
+### Institutional Benefits
+- **Research Productivity:** Increased faculty research output and impact
+- **Citation Networks:** Growth in institutional intellectual influence
+- **Revenue Generation:** Economic benefits from citation economics and licensing
+- **Competitive Advantage:** Enhanced institutional reputation through learning economy leadership
+
+### Platform Growth
+- **User Adoption:** Number of students and faculty actively using platform
+- **Content Quality:** Improvement in average contribution quality over time
+- **Citation Activity:** Growth in citation networks and intellectual property value
+- **Global Reach:** Geographic expansion of educational partnerships
+
+## Addressing Implementation Challenges
+
+### Institutional Resistance
+- **Gradual Integration:** Start with willing faculty and departments
+- **Demonstrated Value:** Show clear benefits before requesting major changes
+- **Policy Alignment:** Work within existing institutional frameworks
+- **Change Management:** Provide support for cultural transformation
+
+### Quality Assurance
+- **Academic Standards:** Maintain rigorous quality standards for published content
+- **Peer Review Integration:** Incorporate traditional academic review processes
+- **Plagiarism Prevention:** Cryptographic attribution and originality verification
+- **Assessment Innovation:** Develop new evaluation methods for intellectual contribution
+
+### Economic Concerns
+- **Revenue Sharing:** Clear agreements on citation reward distribution
+- **Intellectual Property Rights:** Protect both student and institutional interests
+- **Sustainable Economics:** Ensure long-term viability of economic model
+- **Competitive Fairness:** Prevent advantages based on institutional resources rather than merit
+
+## Long-Term Vision
+
+Educational integration serves as a pathway toward broader learning economy adoption. As educational institutions demonstrate the value of intellectual contribution over credential acquisition, the model expands to:
+
+### Professional Development
+- **Corporate Training:** Companies adopt similar models for employee development
+- **Industry Knowledge Sharing:** Professional insights contribute to collective knowledge
+- **Career Advancement:** Intellectual property portfolios become standard for hiring
+- **Continuous Learning:** Lifelong intellectual contribution rather than front-loaded education
+
+### Social Transformation
+- **Democratic Knowledge Creation:** Intellectual contribution accessible regardless of background
+- **Global Collaboration:** International cooperation through shared knowledge commons
+- **Economic Evolution:** Transition from skill performance to insight generation
+- **Cultural Change:** Intellectual virtue valued over social positioning
+
+## Conclusion
+
+Educational integration represents Choir's strategic approach to catalyzing the learning economy transition. By providing infrastructure that enables educational institutions to transform assignments into intellectual property and students into genuine contributors to collective knowledge, Choir creates pathways for conscious evolution rather than disruptive replacement.
+
+This integration serves not just platform growth but educational transformation. When students graduate with demonstrated intellectual contribution records rather than just test scores, when faculty research reaches broader audiences through AI amplification, and when institutions benefit economically from intellectual property generation, the entire educational ecosystem evolves toward learning economy principles.
+
+Educational integration is not just a business strategy—it's infrastructure for conscious transformation of how human societies develop intellectual capability and create economic value through collaborative intelligence.
+
+=== File: docs/plan_phase1_foundation.md ===
+
+
+
+==
+plan_phase1_foundation
+==
+
+
+# Plan: Phase 1 Foundation Sequence - Learning Economy Infrastructure
+
+VERSION phase1_foundation: 1.0 (Learning Economy Roadmap)
+
+## Overview
+
+Phase 1 establishes the foundational infrastructure for Choir's learning economy platform. This sequence prioritizes development environment setup, documentation alignment, and core technical infrastructure that enables conversation-to-publication workflows. The foundation sequence ensures the team has current documentation and solid development infrastructure before building advanced features.
+
+## The Revised Phase 1 Foundation Sequence
+
+### 🏗️ CHI-12: Setup Development Environment - MCP + uv Migration (Priority 1 - Urgent)
+
+**Objective:** Establish solid development environment first
+
+**Technical Requirements:**
+- **Model Context Protocol (MCP) Integration:** Implement Anthropic's tool standard for enhanced AI capabilities
+- **uv Package Manager Migration:** Transition from pip/poetry to uv for faster dependency management
+- **Development Tooling:** Set up consistent development environment across team
+- **CI/CD Pipeline:** Automated testing and deployment infrastructure
+
+**Deliverables:**
+- MCP client implementation for tool integration
+- uv-based dependency management system
+- Development environment documentation
+- Automated testing and deployment pipeline
+
+**Success Criteria:**
+- All team members can set up development environment in under 30 minutes
+- MCP tools integrate seamlessly with AI processing pipeline
+- uv provides faster dependency resolution and installation
+- CI/CD pipeline automatically tests and deploys changes
+
+### 📚 CHI-17: Update Documentation Based on Current Whitepaper (Priority 1.5 - Foundation)
+
+**Objective:** Audit and update all project documentation
+
+**Documentation Updates:**
+- **Extract Technical Sections:** Move technical details from whitepaper into developer docs
+- **Document Conductor + 5 Instruments Architecture:** Clear technical architecture documentation
+- **Update Business Strategy:** Reflect institutional sales focus and learning economy positioning
+- **Create New Documentation:** Anonymous publishing, token economics, educational integration
+
+**Deliverables:**
+- Updated core system documentation aligned with whitepaper vision
+- New documentation for anonymous publishing infrastructure
+- Token economics documentation for learning economy
+- Educational integration strategy and implementation plans
+- Business model documentation reflecting institutional focus
+
+**Success Criteria:**
+- All documentation reflects current whitepaper vision and roadmap
+- Technical architecture clearly documented for development team
+- Business strategy aligned with learning economy positioning
+- New team members can understand project vision from documentation alone
+
+### 🔬 CHI-13: Experiment with LangChain LangGraph - Open Deep Research (Priority 2 - Research)
+
+**Objective:** Study their architecture vs our Conductor vision
+
+**Research Areas:**
+- **LangGraph Architecture Analysis:** Compare with Choir's Conductor + 5 Instruments model
+- **Performance Benchmarking:** Evaluate LangGraph vs current LCEL implementation
+- **Integration Possibilities:** Assess potential for hybrid approach
+- **Custom vs Framework Decision:** Make informed decision about custom development vs LangGraph adoption
+
+**Deliverables:**
+- Comprehensive LangGraph evaluation report
+- Performance comparison with current system
+- Integration feasibility analysis
+- Recommendation for custom vs LangGraph approach
+
+**Success Criteria:**
+- Team has current documentation to reference during research
+- Clear understanding of LangGraph capabilities and limitations
+- Informed decision about development approach
+- Technical foundation for Phase 2 development decisions
+
+### ☁️ CHI-14: Setup Claude on AWS Bedrock Integration (Priority 3 - Infrastructure)
+
+**Objective:** Production-ready AI infrastructure
+
+**Technical Implementation:**
+- **AWS Bedrock Adapter:** LangChain integration for cost optimization
+- **Claude Integration:** Anthropic's Claude models via Bedrock
+- **Cost Management:** Intelligent model routing based on query complexity
+- **Fallback Systems:** Robust error handling and provider switching
+
+**Deliverables:**
+- AWS Bedrock provider implementation
+- Claude model integration with cost optimization
+- Intelligent routing system for model selection
+- Monitoring and cost tracking infrastructure
+
+**Success Criteria:**
+- Claude models accessible via AWS Bedrock
+- Cost optimization through intelligent routing
+- Reliable fallback systems for high availability
+- Production-ready AI infrastructure for scaling
+
+## Phase 1 Success Metrics
+
+### Development Environment
+- **Setup Time:** New developers can start contributing within 30 minutes
+- **Tool Integration:** MCP tools work seamlessly with AI processing
+- **Dependency Management:** uv provides faster and more reliable package management
+- **CI/CD Reliability:** Automated testing and deployment with 99%+ success rate
+
+### Documentation Quality
+- **Alignment Score:** 100% of documentation reflects current whitepaper vision
+- **Completeness:** All major system components documented with implementation details
+- **Accessibility:** New team members can understand project from documentation alone
+- **Currency:** Documentation updated within 24 hours of major changes
+
+### Research Foundation
+- **LangGraph Understanding:** Clear evaluation of capabilities vs Choir's needs
+- **Decision Quality:** Informed choice about custom vs framework development
+- **Technical Foundation:** Solid basis for Phase 2 architecture decisions
+- **Team Alignment:** Shared understanding of development approach
+
+### Infrastructure Readiness
+- **AI Provider Integration:** Multiple AI providers with intelligent routing
+- **Cost Optimization:** Measurable reduction in AI processing costs
+- **Reliability:** 99.9% uptime for AI processing infrastructure
+- **Scalability:** Infrastructure ready for user growth and feature expansion
+
+## Dependencies and Sequencing
+
+### Sequential Dependencies
+1. **CHI-12 → CHI-17:** Development environment must be ready before documentation updates
+2. **CHI-17 → CHI-13:** Current documentation needed for informed LangGraph research
+3. **CHI-13 → CHI-14:** Research conclusions inform infrastructure decisions
+
+### Parallel Opportunities
+- **CHI-12 and CHI-17:** Can be worked on simultaneously by different team members
+- **CHI-14 Infrastructure:** Can begin while CHI-13 research is ongoing
+
+### Critical Path
+The critical path runs through documentation updates (CHI-17) since this provides the foundation for all subsequent development work. Without current documentation, research and infrastructure decisions lack proper context.
+
+## Risk Management
+
+### Technical Risks
+- **MCP Integration Complexity:** Mitigation through incremental implementation and testing
+- **uv Migration Issues:** Mitigation through parallel development and gradual transition
+- **AWS Bedrock Limitations:** Mitigation through multi-provider architecture
+- **LangGraph Learning Curve:** Mitigation through dedicated research time and documentation
+
+### Project Risks
+- **Documentation Drift:** Mitigation through automated documentation testing and review processes
+- **Team Alignment:** Mitigation through regular reviews and shared documentation
+- **Scope Creep:** Mitigation through clear Phase 1 boundaries and success criteria
+- **Timeline Pressure:** Mitigation through realistic estimates and parallel work streams
+
+## Phase 1 Timeline
+Perfect! **CHI-18** captures your deep research experiments beautifully. Here's your **updated Phase 1 foundation sequence**:
+
+## 🏗️ **Phase 1: Foundation Setup & Research (Priority 1 - Urgent)**
+
+**CHI-12: Setup Development Environment - MCP + uv Migration**
+
+**CHI-17: Update Documentation Based on Current Whitepaper**
+
+**CHI-13: Experiment with LangChain LangGraph - Open Deep Research**
+
+**CHI-18: Deep Research Experiments - LangGraph vs Ember Framework** *(the critical comparison)*
+- Build parallel **Scribe** agents in both frameworks
+- Test meta-planning vs hardcoded workflows  
+- Explore agent factorization (monolithic vs Research+Citation+Style+Planning agents)
+- Multi-model orchestration experiments
+- **GPT-OSS fine-tuning** for essay writing capabilities
+
+**CHI-14: Setup Claude on AWS Bedrock Integration**
+
+## 🎯 **The Scribe Agent as Architecture Testbed**
+
+Your stream-of-consciousness → well-researched content transformation is the **perfect test case** for evaluating frameworks. It requires:
+
+**Complex Orchestration**: Research → Citation → Style → Planning → Synthesis
+**Multi-Model Coordination**: Claude for reasoning, GPT for creativity, specialized models for research  
+**Meta-Planning**: Models deciding their own research strategies vs fixed workflows
+**Citation Tracking**: Core to Choir's IP economics
+**Quality Assessment**: Essential for token rewards
+
+## 🔬 **Key Research Questions You're Exploring:**
+
+### **Architecture Philosophy**
+- **LangGraph**: Mature, graph-based, established patterns
+- **Ember**: Newer, theoretically solid, compound AI systems
+
+### **Planning Paradigms**
+- **Hardcoded**: Fixed workflow steps and decision trees
+- **Meta-Planning**: Prompts giving models planning degrees of freedom
+- **Dynamic**: Models decide their own strategies
+
+### **Agent Granularity**
+- **Monolithic Scribe**: One model handles entire transformation
+- **Factored Subagents**: Research + Citation + Style + Planning + Synthesis
+
+### **GPT-OSS Integration**
+- Fine-tuning amenability for essay writing
+- RL integration with learning economy
+- Sample efficiency in compound agent ecosystems
+
+## 🏛️ **Strategic Impact**
+
+This research directly informs:
+- **CHI-5**: Conductor Architecture (which framework to build on)
+- **CHI-11**: Ghostwriter Instrument (scribe becomes the ghostwriter)
+- **CHI-6**: Token Economics (citation quality affects rewards)
+- **CHI-7**: All 5 Instruments (orchestration patterns)
+
+The **meta-planning breakthrough** could be huge—giving models agentic planning freedom while maintaining quality and consistency. This moves beyond hardcoded workflows toward true collaborative intelligence.
+
+Your approach of building the same functionality in parallel frameworks is brilliant for making informed architectural decisions rather than theoretical speculation.
+
+Ready to dive into this deep research phase after the foundational setup?
+## Transition to Phase 2
+
+Phase 1 completion enables Phase 2 development with:
+
+### Solid Foundation
+- **Development Environment:** Team can develop efficiently with modern tooling
+- **Current Documentation:** Clear understanding of project vision and architecture
+- **Research Foundation:** Informed decisions about development approach
+- **Production Infrastructure:** Scalable AI processing infrastructure
+
+### Clear Direction
+- **Technical Architecture:** Conductor + 5 Instruments model clearly documented
+- **Business Strategy:** Learning economy positioning with institutional focus
+- **Development Approach:** Custom vs framework decision based on research
+- **Infrastructure Choices:** Production-ready AI provider integration
+
+### Team Alignment
+- **Shared Vision:** All team members understand learning economy goals
+- **Technical Understanding:** Clear architecture and implementation approach
+- **Development Process:** Efficient tooling and automated testing
+- **Quality Standards:** Documentation and code quality processes established
+
+## Conclusion
+
+Phase 1 Foundation Sequence establishes the essential infrastructure for building Choir's learning economy platform. By prioritizing development environment, documentation alignment, and technical research, this phase ensures the team has a solid foundation for subsequent development phases.
+
+The sequence recognizes that sustainable development requires proper tooling, clear documentation, and informed technical decisions. Phase 1 completion provides the foundation for efficient Phase 2 development and long-term project success.
+
+This foundation-first approach prevents technical debt accumulation and ensures all subsequent development aligns with the learning economy vision documented in the whitepaper.
 # Level 4 Documentation
 
 
@@ -1509,6 +2211,221 @@ The evolution of CHOIR points towards a **new paradigm for tokenized value and A
 *   **Sustainable and Self-Improving AI Ecosystems - A New Model for the Future of AI:**  CHOIR, as the heart of the Choir ecosystem, represents a step towards building **sustainable and self-improving AI ecosystems** that are driven by user contributions, guided by economic incentives, and focused on generating collective intelligence and long-term value for all participants.
 
 The evolution of CHOIR is a journey from a simple utility token to a **fundamental building block of a revolutionary AI-powered knowledge ecosystem.** It represents a shift from extractive platforms to **value-aligned, user-empowering, and self-improving systems** that have the potential to reshape the future of online interaction and collective intelligence.
+
+=== File: docs/evolution_token_economics.md ===
+
+
+
+==
+evolution_token_economics
+==
+
+
+# Evolution: Token Economics for the Learning Economy
+
+VERSION token_economics: 1.0 (Learning Economy Foundation)
+
+## Overview
+
+CHOIR token economics serve as the foundational infrastructure for transforming intellectual contribution into economic opportunity. Unlike traditional social media tokens that optimize for engagement or attention, CHOIR tokens create economic incentives aligned with intellectual virtue and collaborative intelligence. This document outlines the token economic model that enables the learning economy transition.
+
+## The Learning Economy Token Model
+
+Traditional economic models reward skill performance and credential acquisition. The learning economy rewards insight generation, collaborative intelligence, and intellectual contribution. CHOIR tokens provide the economic infrastructure for this fundamental shift.
+
+### Core Economic Principles
+
+1. **Intellectual Property Rights:** CHOIR tokens enable genuine intellectual property ownership through citation economics, where original insights generate appreciating assets rather than ephemeral social media engagement.
+
+2. **Collaborative Value Creation:** Token rewards flow to contributors when their insights prove foundational for others, creating shared ownership relationships where collaborative intelligence generates value for all participants.
+
+3. **Merit-Based Distribution:** Token allocation based on intellectual merit rather than social status, engagement metrics, or demographic targeting.
+
+4. **Sustainable Economics:** Token economics serve intellectual flourishing rather than exploiting psychological vulnerabilities for platform growth.
+
+## Citation Economics: The Core Value Driver
+
+Citation economics represent the primary innovation in CHOIR token distribution, creating ongoing compensation when others reference your contributions:
+
+### Citation Reward Mechanism
+- **5 CHOIR tokens per citation** when others reference your published work
+- Rewards flow automatically when citations are detected in new publications
+- No time limit on citation rewards—valuable insights generate ongoing compensation
+- Cryptographic attribution ensures proper credit and payment
+
+### Citation Value Scaling
+- Citations in highly-cited work generate bonus rewards
+- Cross-disciplinary citations receive multiplier bonuses
+- Collaborative citations share rewards among all contributors
+- Citation networks create compound value for foundational insights
+
+### Intellectual Property Rights
+- Published content becomes intellectual property generating ongoing revenue
+- Citation tracking creates verifiable contribution records
+- Collaborative ownership through shared citation rewards
+- Transferable intellectual property rights through token mechanics
+
+## Novelty Rewards: Incentivizing Original Thinking
+
+Novelty rewards recognize genuinely original contributions that expand collective knowledge into unexplored semantic territory:
+
+### Novelty Calculation
+- AI calculates semantic similarity to existing content in knowledge base
+- Exponential reward scaling: higher novelty generates disproportionately higher rewards
+- Novelty scores range from 0.0 (complete duplication) to 1.0 (entirely novel)
+- Rewards scale exponentially to incentivize breakthrough insights
+
+### Reward Distribution Scale
+- **0.01 CHOIR** at 0.95 similarity (minor variations)
+- **0.1 CHOIR** at 0.9 similarity (modest improvements)
+- **1.0 CHOIR** at 0.85 similarity (significant contributions)
+- **10.0 CHOIR** at 0.8 similarity (major innovations)
+- **100.0 CHOIR** at 0.75 similarity (breakthrough insights)
+
+### Quality Assurance
+- Novelty rewards require minimum quality thresholds
+- Community validation through citation patterns
+- Economic penalties for consistently low-quality novel content
+- AI-assisted quality assessment to prevent gaming
+
+## Token Utility and Demand Drivers
+
+CHOIR tokens serve multiple utility functions that create sustainable demand:
+
+### Platform Access
+- **Subscription Payments:** Monthly subscriptions paid in CHOIR tokens
+- **Premium Features:** Advanced AI models and processing capabilities
+- **Priority Processing:** Faster response times for token holders
+- **Storage Expansion:** Additional content storage and archival services
+
+### Publication Costs
+- **Quality Filtering:** Small token cost to publish prevents spam
+- **Professional Formatting:** Premium presentation options
+- **Research Assistance:** Enhanced AI research and source gathering
+- **Collaborative Features:** Multi-author editing and attribution tools
+
+### Educational Integration
+- **Institutional Licensing:** Educational institutions purchase tokens for campus-wide access
+- **Student Portfolios:** Token-based intellectual property portfolio development
+- **Faculty Research:** Enhanced research collaboration and citation tracking
+- **Curriculum Development:** AI-assisted educational content creation
+
+## Token Supply and Distribution
+
+### Initial Distribution
+- **40% Community Rewards:** Citation and novelty rewards for contributors
+- **25% Development Fund:** Platform development and infrastructure
+- **20% Educational Partnerships:** Institutional adoption and integration
+- **10% Team Allocation:** Core team incentives with vesting schedules
+- **5% Ecosystem Development:** Third-party integrations and partnerships
+
+### Ongoing Issuance
+- **Citation Rewards:** Ongoing token minting for citation compensation
+- **Novelty Rewards:** Token minting for original contributions
+- **Educational Grants:** Token allocation for educational institution partnerships
+- **Research Funding:** Token grants for high-value research collaborations
+
+### Deflationary Mechanisms
+- **Subscription Burns:** Portion of subscription payments permanently removed from circulation
+- **Quality Penalties:** Tokens burned for consistently low-quality contributions
+- **Platform Fees:** Transaction fees for premium services
+- **Buyback Programs:** Corporate revenue used to purchase and burn tokens
+
+## Economic Alignment with Learning Economy
+
+CHOIR token economics align individual incentives with collective intelligence advancement:
+
+### Individual Benefits
+- **Intellectual Property Ownership:** Published contributions generate ongoing revenue
+- **Merit-Based Recognition:** Quality contributions receive economic validation
+- **Collaborative Opportunities:** Token-based networking and partnership formation
+- **Educational Advancement:** Portfolio building through demonstrable intellectual property
+
+### Collective Benefits
+- **Knowledge Commons Growth:** Economic incentives for contributing to shared knowledge
+- **Quality Improvement:** Token rewards naturally filter for valuable contributions
+- **Cross-Disciplinary Synthesis:** Bonus rewards for interdisciplinary collaboration
+- **Global Access:** Economic model enables worldwide participation regardless of geography
+
+### Institutional Benefits
+- **Research ROI:** Institutions can monetize research output through citation economics
+- **Student Engagement:** Economic incentives for genuine intellectual contribution
+- **Faculty Collaboration:** Token-based research partnership formation
+- **Knowledge Management:** Institutional intellectual property tracking and monetization
+
+## Implementation Phases
+
+### Phase 1: Basic Citation Economics (Months 1-3)
+- Citation detection and reward distribution
+- Basic novelty calculation and rewards
+- Wallet-based token management
+- Simple subscription payment processing
+
+### Phase 2: Advanced Tokenomics (Months 4-6)
+- Sophisticated novelty algorithms
+- Citation value scaling and bonuses
+- Educational institution integration
+- Token utility expansion
+
+### Phase 3: Ecosystem Development (Months 7-9)
+- Third-party integrations and partnerships
+- Advanced collaboration features
+- Institutional licensing programs
+- Research funding mechanisms
+
+### Phase 4: Global Scaling (Months 10-12)
+- International educational partnerships
+- Multi-language support and localization
+- Advanced economic modeling and optimization
+- Governance token functionality
+
+## Risk Management and Sustainability
+
+### Economic Sustainability
+- **Revenue Diversification:** Multiple token utility functions prevent single-point-of-failure
+- **Demand Growth:** Educational adoption creates sustainable long-term demand
+- **Value Accrual:** Citation economics ensure tokens capture value from intellectual property
+- **Inflation Control:** Deflationary mechanisms balance ongoing issuance
+
+### Quality Assurance
+- **Gaming Prevention:** Economic penalties for manipulation attempts
+- **Community Moderation:** Token-based governance for quality standards
+- **AI Assistance:** Automated quality assessment and fraud detection
+- **Reputation Systems:** Long-term contributor tracking and validation
+
+### Regulatory Compliance
+- **Utility Token Design:** Clear utility functions rather than investment securities
+- **Educational Focus:** Emphasis on learning and intellectual contribution
+- **Global Compliance:** Design compatible with international educational regulations
+- **Transparency:** Open-source economics and clear token distribution
+
+## Success Metrics
+
+### Economic Indicators
+- **Citation Reward Distribution:** Volume and frequency of citation-based payments
+- **Token Velocity:** Circulation and utility usage patterns
+- **Educational Adoption:** Institutional licensing and integration growth
+- **Value Stability:** Token price stability and sustainable economics
+
+### Quality Metrics
+- **Content Quality:** Improvement in average contribution quality over time
+- **Citation Networks:** Growth and sophistication of knowledge connections
+- **Cross-Disciplinary Collaboration:** Frequency of interdisciplinary citations
+- **Educational Impact:** Student and faculty engagement with token-based intellectual property
+
+### Participation Metrics
+- **Active Contributors:** Number of users earning citation and novelty rewards
+- **Global Reach:** Geographic distribution of token-earning contributors
+- **Educational Integration:** Number of institutions using token-based systems
+- **Knowledge Growth:** Expansion of collective knowledge commons
+
+## Conclusion
+
+CHOIR token economics provide the foundational infrastructure for the learning economy transition. By creating genuine intellectual property rights through citation economics and rewarding original thinking through novelty mechanisms, the token model aligns individual incentives with collective intelligence advancement.
+
+This economic model serves not just platform sustainability but educational transformation. When intellectual contribution becomes immediate economic activity rather than delayed value through credential signaling, the entire relationship between learning and economic value creation fundamentally shifts.
+
+CHOIR tokens represent more than cryptocurrency—they represent the economic infrastructure for a future where collaborative intelligence becomes a tangible force for positive change in the world, where quality emerges naturally, and where value flows to those who create it.
 
 === File: docs/4phases.md ===
 
@@ -1806,135 +2723,6 @@ The question remains whether we build that future consciously or stumble into it
 57. Clayton M. Christensen, *Disrupting Class: How Disruptive Innovation Will Change the Way the World Learns* (New York: McGraw-Hill, 2008), explores educational transformation through networked communication.
 58. Historical timelines for communication revolution institutionalization are documented in Harold Innis, *The Bias of Communication* (Toronto: University of Toronto Press, 1951).
 
-=== File: docs/blockchain_integration.md ===
-
-
-
-==
-blockchain_integration
-==
-
-
-# Blockchain Integration in Choir (Qdrant-Sui MVP)
-
-VERSION blockchain_integration: 8.0 (Qdrant-Sui MVP Focus)
-
-## Overview
-
-This document outlines the blockchain integration strategy for the Choir Qdrant-Sui MVP. This approach centralizes blockchain interactions within the main Python API backend, specifically using a dedicated service module (`sui_service.py`) to interact with the Sui blockchain via the PySUI SDK.
-
-## Core Blockchain Integration Goals
-
-The core goals of blockchain integration for the MVP and beyond remain:
-
-1.  **Immutable Record of Economic Actions:** Utilize the Sui blockchain for a transparent record of key economic events, primarily simplified token rewards for the MVP.
-2.  **Decentralized and Verifiable Token Economy:** Implement the basic CHIP token using a Sui smart contract (`choir_coin.move`).
-3.  **Secure and Transparent Reward Distribution:** Ensure that CHIP token rewards (simplified for MVP) are distributed verifiably on-chain.
-4.  **(Future)** Enable On-Chain Governance: Lay the groundwork for future on-chain governance by CHIP token holders.
-
-## MVP Blockchain Integration Architecture: Centralized API Service
-
-In the Qdrant-Sui MVP architecture, blockchain integration is handled by the **Python API backend** via its `sui_service.py` module. This service acts as the *sole interface* between the Choir application logic and the Sui blockchain.
-
-**Key Components:**
-
-*   **Python API Backend (FastAPI/Uvicorn):**
-    *   **Orchestrates Workflow:** Manages the PostChain workflow execution.
-    *   **Contains Blockchain Logic:** Includes the `sui_service.py` module responsible for all Sui interactions.
-    *   **Triggers Rewards:** After the PostChain workflow completes (Yield phase), the API calls functions within `sui_service.py` to process rewards based on data stored in Qdrant.
-
-*   **`sui_service.py` (within API Backend):**
-    *   **PySUI Integration (Encapsulated):** The PySUI SDK for interacting with the Sui blockchain is exclusively used within this service module.
-    *   **Handles Transactions:** Constructs, signs (using keys managed by the API's environment/secrets), and submits transactions to the Sui network.
-    *   **Exposes Service Functions:** Provides functions (e.g., `record_reward`, `get_balance`) called internally by the API's orchestration logic.
-
-*   **PostChain Workflow (LCEL - within API Backend):**
-    *   **No Direct Blockchain Interaction:** The AEIOU-Y phase logic **does not directly interact with the Sui blockchain or PySUI.**
-    *   **Provides Reward Inputs:** The workflow (specifically data gathered by Experience and finalized by Yield) provides the necessary inputs (author ID, prior IDs, scores) for the API to trigger the reward calculation in `sui_service.py`.
-
-*   **Sui Blockchain:**
-    *   **Hosts CHIP Token Contract:** Runs the `choir_coin.move` smart contract defining the basic CHIP token.
-    *   **Records Transactions:** Stores the history of token transfers/mints executed by `sui_service.py`.
-
-**Architecture Diagram (Qdrant-Sui MVP):**
-
-```mermaid
-graph LR
-    A[Client (SwiftUI)] --> B{Python API (FastAPI)};
-    B --> C[PostChain Workflow (LCEL)];
-    C -- Interacts via database.py --> D[(Qdrant)];
-    C -- Returns final data --> B;
-    B -- Triggers reward --> E[sui_service.py];
-    E -- Uses PySUI --> F[(Sui Blockchain)];
-    B -- Streams results --> A;
-
-    style B fill:#ccf,stroke:#333,stroke-width:2px;
-    style C,E fill:#f9f,stroke:#333,stroke-width:2px;
-    style D,F fill:#bfc,stroke:#333,stroke-width:2px;
-
-    subgraph API Backend Container
-        B
-        C
-        E
-    end
-
-    Communication Flow for Blockchain Operations (MVP):
-
-PostChain Completion: The PostChain workflow (running within the API) completes its final (Yield) phase. It returns the final AI message structure, including author ID, cited prior IDs, novelty score, and similarity scores.
-
-API Trigger: The main API logic receives the completed PostChain data.
-
-Data Persistence: The API saves the final AI message to the choir collection in Qdrant.
-
-Call Sui Service: The API calls the appropriate function within sui_service.py (e.g., process_rewards), passing the relevant data fetched from the newly saved Qdrant message (or held from the workflow result).
-
-Sui Service Execution: The sui_service.py function:
-
-Performs the (simplified for MVP) reward calculation.
-
-Looks up recipient Sui addresses if necessary (using Qdrant users collection via database.py).
-
-Uses PySUI to construct and sign the necessary Sui transaction(s) (e.g., calling a basic mint_reward function in the choir_coin contract).
-
-Submits the transaction to the Sui blockchain.
-
-Result Handling: The sui_service.py function returns the transaction result (e.g., digest, success/failure) to the main API logic. The API logs this result. (Note: For MVP, the result might not be directly propagated back to the client UI).
-
-Service Functions Exposed by sui_service.py (MVP):
-
-The sui_service.py module exposes internal functions called by the API orchestrator. Key functions for the MVP include:
-
-process_rewards(message_id, author_user_id, cited_prior_ids, novelty_score, similarity_scores): Calculates (simplified) rewards and calls the mint/transfer function.
-
-_call_sui_mint(recipient_address, amount): Internal helper to interact with the Sui contract's mint function.
-
-get_balance(sui_address): Queries the SUI balance (primarily for testing/diagnostics in MVP). (Already implemented)
-
-(Future) get_chip_balance(sui_address): Queries the CHIP token balance.
-
-(Future) get_thread_stake_price(thread_id): Fetches economic state from potential future contract.
-
-Security Considerations (MVP):
-
-With blockchain interactions centralized in the API backend's sui_service.py:
-
-API Key Management: The primary security concern is protecting the Sui private key used by the API backend. This key must be managed securely using environment variables, platform secrets management (e.g., Render secrets), or a dedicated secrets manager. It must not be hardcoded.
-
-Input Validation: The API must rigorously validate all data passed to sui_service.py functions, especially recipient addresses and amounts, to prevent manipulation or unintended transactions.
-
-Service Isolation (Logical): While not physically isolated like a separate server/TEE, sui_service.py provides logical isolation. All blockchain interaction code is contained within this module, making it easier to audit and secure compared to scattering PySUI calls throughout the codebase.
-
-Standard API Security: General API security practices (authentication, authorization, rate limiting, HTTPS) are essential to protect the endpoints that trigger the workflows leading to blockchain interactions.
-
-Deployment Considerations (MVP):
-
-API Container Deployment: The Python API, including sui_service.py and its PySUI dependency, is deployed as a single Docker container (e.g., on Render).
-
-Secure Key Provisioning: The Sui private key required by sui_service.py must be securely provisioned to the deployed container's environment (e.g., using Render's secret management).
-
-Conclusion (MVP Focus)
-The Qdrant-Sui MVP utilizes a centralized approach for blockchain integration, embedding the logic within the main Python API backend via the sui_service.py module. This simplifies the architecture for the MVP, allowing focus on the core Qdrant data structures and the basic reward triggering mechanism. While deferring the complexities of distributed servers and TEEs, this approach provides a clear path to validating the fundamental interaction between AI-analyzed data in Qdrant and the Sui blockchain-based token economy. Secure management of the API's Sui key is paramount in this model.
-
 === File: docs/ChoirPushNotificationsImplementationGuide.md ===
 
 
@@ -2125,6 +2913,135 @@ curl -X POST https://your-production-server.com/api/notifications/test-push \
 ```
 
 This implementation provides a complete solution for sending push notifications when users' content is cited, enhancing the user experience and engagement with the app.
+
+=== File: docs/blockchain_integration.md ===
+
+
+
+==
+blockchain_integration
+==
+
+
+# Blockchain Integration in Choir (Qdrant-Sui MVP)
+
+VERSION blockchain_integration: 8.0 (Qdrant-Sui MVP Focus)
+
+## Overview
+
+This document outlines the blockchain integration strategy for the Choir Qdrant-Sui MVP. This approach centralizes blockchain interactions within the main Python API backend, specifically using a dedicated service module (`sui_service.py`) to interact with the Sui blockchain via the PySUI SDK.
+
+## Core Blockchain Integration Goals
+
+The core goals of blockchain integration for the MVP and beyond remain:
+
+1.  **Immutable Record of Economic Actions:** Utilize the Sui blockchain for a transparent record of key economic events, primarily simplified token rewards for the MVP.
+2.  **Decentralized and Verifiable Token Economy:** Implement the basic CHIP token using a Sui smart contract (`choir_coin.move`).
+3.  **Secure and Transparent Reward Distribution:** Ensure that CHIP token rewards (simplified for MVP) are distributed verifiably on-chain.
+4.  **(Future)** Enable On-Chain Governance: Lay the groundwork for future on-chain governance by CHIP token holders.
+
+## MVP Blockchain Integration Architecture: Centralized API Service
+
+In the Qdrant-Sui MVP architecture, blockchain integration is handled by the **Python API backend** via its `sui_service.py` module. This service acts as the *sole interface* between the Choir application logic and the Sui blockchain.
+
+**Key Components:**
+
+*   **Python API Backend (FastAPI/Uvicorn):**
+    *   **Orchestrates Workflow:** Manages the PostChain workflow execution.
+    *   **Contains Blockchain Logic:** Includes the `sui_service.py` module responsible for all Sui interactions.
+    *   **Triggers Rewards:** After the PostChain workflow completes (Yield phase), the API calls functions within `sui_service.py` to process rewards based on data stored in Qdrant.
+
+*   **`sui_service.py` (within API Backend):**
+    *   **PySUI Integration (Encapsulated):** The PySUI SDK for interacting with the Sui blockchain is exclusively used within this service module.
+    *   **Handles Transactions:** Constructs, signs (using keys managed by the API's environment/secrets), and submits transactions to the Sui network.
+    *   **Exposes Service Functions:** Provides functions (e.g., `record_reward`, `get_balance`) called internally by the API's orchestration logic.
+
+*   **PostChain Workflow (LCEL - within API Backend):**
+    *   **No Direct Blockchain Interaction:** The AEIOU-Y phase logic **does not directly interact with the Sui blockchain or PySUI.**
+    *   **Provides Reward Inputs:** The workflow (specifically data gathered by Experience and finalized by Yield) provides the necessary inputs (author ID, prior IDs, scores) for the API to trigger the reward calculation in `sui_service.py`.
+
+*   **Sui Blockchain:**
+    *   **Hosts CHIP Token Contract:** Runs the `choir_coin.move` smart contract defining the basic CHIP token.
+    *   **Records Transactions:** Stores the history of token transfers/mints executed by `sui_service.py`.
+
+**Architecture Diagram (Qdrant-Sui MVP):**
+
+```mermaid
+graph LR
+    A[Client (SwiftUI)] --> B{Python API (FastAPI)};
+    B --> C[PostChain Workflow (LCEL)];
+    C -- Interacts via database.py --> D[(Qdrant)];
+    C -- Returns final data --> B;
+    B -- Triggers reward --> E[sui_service.py];
+    E -- Uses PySUI --> F[(Sui Blockchain)];
+    B -- Streams results --> A;
+
+    style B fill:#ccf,stroke:#333,stroke-width:2px;
+    style C,E fill:#f9f,stroke:#333,stroke-width:2px;
+    style D,F fill:#bfc,stroke:#333,stroke-width:2px;
+
+    subgraph API Backend Container
+        B
+        C
+        E
+    end
+
+    Communication Flow for Blockchain Operations (MVP):
+
+PostChain Completion: The PostChain workflow (running within the API) completes its final (Yield) phase. It returns the final AI message structure, including author ID, cited prior IDs, novelty score, and similarity scores.
+
+API Trigger: The main API logic receives the completed PostChain data.
+
+Data Persistence: The API saves the final AI message to the choir collection in Qdrant.
+
+Call Sui Service: The API calls the appropriate function within sui_service.py (e.g., process_rewards), passing the relevant data fetched from the newly saved Qdrant message (or held from the workflow result).
+
+Sui Service Execution: The sui_service.py function:
+
+Performs the (simplified for MVP) reward calculation.
+
+Looks up recipient Sui addresses if necessary (using Qdrant users collection via database.py).
+
+Uses PySUI to construct and sign the necessary Sui transaction(s) (e.g., calling a basic mint_reward function in the choir_coin contract).
+
+Submits the transaction to the Sui blockchain.
+
+Result Handling: The sui_service.py function returns the transaction result (e.g., digest, success/failure) to the main API logic. The API logs this result. (Note: For MVP, the result might not be directly propagated back to the client UI).
+
+Service Functions Exposed by sui_service.py (MVP):
+
+The sui_service.py module exposes internal functions called by the API orchestrator. Key functions for the MVP include:
+
+process_rewards(message_id, author_user_id, cited_prior_ids, novelty_score, similarity_scores): Calculates (simplified) rewards and calls the mint/transfer function.
+
+_call_sui_mint(recipient_address, amount): Internal helper to interact with the Sui contract's mint function.
+
+get_balance(sui_address): Queries the SUI balance (primarily for testing/diagnostics in MVP). (Already implemented)
+
+(Future) get_chip_balance(sui_address): Queries the CHIP token balance.
+
+(Future) get_thread_stake_price(thread_id): Fetches economic state from potential future contract.
+
+Security Considerations (MVP):
+
+With blockchain interactions centralized in the API backend's sui_service.py:
+
+API Key Management: The primary security concern is protecting the Sui private key used by the API backend. This key must be managed securely using environment variables, platform secrets management (e.g., Render secrets), or a dedicated secrets manager. It must not be hardcoded.
+
+Input Validation: The API must rigorously validate all data passed to sui_service.py functions, especially recipient addresses and amounts, to prevent manipulation or unintended transactions.
+
+Service Isolation (Logical): While not physically isolated like a separate server/TEE, sui_service.py provides logical isolation. All blockchain interaction code is contained within this module, making it easier to audit and secure compared to scattering PySUI calls throughout the codebase.
+
+Standard API Security: General API security practices (authentication, authorization, rate limiting, HTTPS) are essential to protect the endpoints that trigger the workflows leading to blockchain interactions.
+
+Deployment Considerations (MVP):
+
+API Container Deployment: The Python API, including sui_service.py and its PySUI dependency, is deployed as a single Docker container (e.g., on Render).
+
+Secure Key Provisioning: The Sui private key required by sui_service.py must be securely provisioned to the deployed container's environment (e.g., using Render's secret management).
+
+Conclusion (MVP Focus)
+The Qdrant-Sui MVP utilizes a centralized approach for blockchain integration, embedding the logic within the main Python API backend via the sui_service.py module. This simplifies the architecture for the MVP, allowing focus on the core Qdrant data structures and the basic reward triggering mechanism. While deferring the complexities of distributed servers and TEEs, this approach provides a clear path to validating the fundamental interaction between AI-analyzed data in Qdrant and the Sui blockchain-based token economy. Secure management of the API's Sui key is paramount in this model.
 
 === File: docs/contract_deployment.md ===
 
@@ -3000,38 +3917,38 @@ postchain_service_redesign
 ==
 
 
-# PostChain Service Redesign: From Prototype to Production
+# PostChain Service Redesign: Conversation-to-Publication Infrastructure
 
-VERSION postchain_service_redesign: 1.0 (Heart and Soul Refactor)
+VERSION postchain_service_redesign: 2.0 (Learning Economy Architecture)
 
 ## Current State Analysis
 
-The existing `langchain_workflow.py` has evolved into a complex, monolithic system with several critical issues:
+The existing `langchain_workflow.py` requires transformation from a prototype conversation system into production-ready conversation-to-publication infrastructure that serves the learning economy:
 
 ### Technical Debt
 - **Monolithic structure**: 1591 lines in a single file
-- **Hardcoded phase logic**: No flexibility for user customization
-- **No retry mechanisms**: Single points of failure
-- **Limited tool integration**: Basic tool calling without MCP support
+- **Conversation-focused design**: Built for chat rather than publication-quality output
+- **No publication pipeline**: Missing infrastructure for citable article generation
+- **Limited content processing**: Basic text input without multi-format support
 - **Provider-specific hacks**: Gemini/OpenAI message preparation scattered throughout
-- **Performance bottlenecks**: No intelligent routing based on query complexity
+- **Performance bottlenecks**: No intelligent routing based on content complexity
 
-### Missing Core Features
-- **AWS Bedrock integration**: No LangChain adapter for cost optimization
-- **Model Context Protocol (MCP)**: No support for Anthropic's tool standard
-- **Client-side prompt editing**: Users can't customize or share phase configurations
-- **Intelligent routing**: Simple queries get same treatment as complex analysis
-- **Retry and forking**: No resilience for failed phases
-- **Looping capabilities**: No iterative refinement
+### Missing Learning Economy Features
+- **Multi-format input processing**: No support for PDFs, EPUBs, YouTube transcripts
+- **Publication-quality output**: No professional formatting or citation management
+- **Collaborative editing**: No infrastructure for AI-human content collaboration
+- **Research assistance**: Limited source gathering and context integration
+- **Citation tracking**: No infrastructure for intellectual property management
+- **Educational integration**: No tools for assignment-to-publication workflows
 
 ## Redesign Architecture
 
 ### Core Principles
-1. **Modularity**: Each phase as independent, composable service
-2. **Intelligence**: Route queries based on complexity and requirements
-3. **Resilience**: Retry, fallback, and forking mechanisms
-4. **Extensibility**: Plugin architecture for tools and models
-5. **User Control**: Client-side prompt configuration and sharing
+1. **Publication Focus**: Transform conversations into citable, professional-quality articles
+2. **Multi-Format Input**: Process text, PDFs, EPUBs, YouTube transcripts, and audio/video
+3. **Collaborative Intelligence**: AI serves as research assistant and writing collaborator
+4. **Citation Economics**: Generate intellectual property with proper attribution and tracking
+5. **Educational Integration**: Support assignment-to-publication workflows for institutions
 
 ### New Service Structure
 

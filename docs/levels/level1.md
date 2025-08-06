@@ -11,79 +11,80 @@ core_core
 ==
 
 
-# Core System Overview: AI for Social Discourse
+# Core System Overview: Infrastructure for the Learning Economy
 
-VERSION core_system: 9.0 (Relationship-Focused Architecture)
+VERSION core_system: 10.0 (Learning Economy Architecture)
 
 ## Overview
 
-Choir is a language game that uses AI to facilitate meaningful social discourse. Our system architecture is designed around a core insight: turning posting from a liability into value creation through relationship staking and merit-based rewards. The MVP validates this concept through **Qdrant** for semantic understanding, **Sui** for economic alignment via CHOIR tokens, and a **Python API** that orchestrates AI-driven conversations that connect like minds.
+Choir provides the technological infrastructure enabling transition from traditional education toward learning economy participation. The platform transforms natural conversation into publication-quality content, making intellectual discourse accessible to anyone regardless of writing skill, technical expertise, or institutional access. Our system architecture implements the **Conductor + 5 Instruments** model that orchestrates conversation-to-publication workflows through AI-enhanced collaborative intelligence.
 
-## Foundational Principles: Enabling Human Connection Through AI
+## Foundational Principles: Learning Economy Infrastructure
 
-Choir's architecture embodies core principles that prioritize human relationships over algorithmic engagement:
+Choir's architecture embodies core principles that enable the transition from credential theater to intellectual contribution:
 
-1.  **Economic Alignment (Sui):** The **Sui blockchain** manages CHOIR tokens that create real skin in the game for quality discourse. Beyond basic rewards, it enables **relationship staking** where users invest tokens in meaningful connections, creating shared economic interest in maintaining quality relationships.
-2.  **Semantic Understanding (Qdrant):** **Qdrant** stores not just content but the semantic relationships that help AI identify intellectual compatibility. It powers the discovery of "like minds" through citation patterns and conversation quality rather than superficial metrics.
-3.  **Conversational Intelligence (AEIOU-Y PostChain):** The **PostChain workflow** creates conversations that get smarter over time, helping users express ideas more clearly and connecting them with relevant prior thoughts from the community.
-4.  **Merit-Based Discovery:** Anonymous by default, ideas compete on merit rather than social status, enabling authentic discourse free from social surveillance and reputation management.
+1.  **Conversation-to-Publication Workflow:** The core experience eliminates barriers between having insights and contributing to collective knowledge. Record conversations about any topic, AI research assistants gather relevant sources, collaborative editing transforms dialogue into citable articles.
+2.  **Citation Economics:** When others reference your contributions in their work, you receive ongoing compensation through citation rewards. Original insights generate appreciating assets rather than disappearing posts.
+3.  **Collaborative Intelligence:** AI serves as research assistant, writing collaborator, and intellectual partner rather than replacement. Humans provide creativity and judgment while AI handles execution and technical implementation.
+4.  **Intellectual Property Rights:** The platform creates genuine intellectual property rights through citation economics, inverting traditional social platforms that provide ephemeral rewards while capturing lasting economic value.
 
-## Core Components: Building Blocks for Social Discourse
+## Core Components: Conductor + 5 Instruments Architecture
 
-1.  **Qdrant (Semantic Relationship Engine):**
-    *   **Role:** Powers the discovery of intellectual compatibility and meaningful connections. Stores conversation content, user interaction patterns, and the semantic relationships that enable AI to identify "like minds."
-    *   **Function:** Enables semantic search for relevant prior thoughts, calculates novelty scores for original contributions, and provides the data foundation for relationship recommendations based on citation patterns and conversation quality.
+1.  **The Conductor (Python API):**
+    *   **Role:** Central orchestration layer that coordinates all system components and manages the conversation-to-publication workflow.
+    *   **Function:** Authenticates users through Sui signatures, orchestrates AI processing phases, manages file input processing (txt, md, pdf, epub, YouTube transcripts), and coordinates between semantic understanding and economic rewards.
 
-2.  **Sui Blockchain (Economic Alignment Layer):**
-    *   **Role:** Manages CHOIR tokens that create economic alignment in relationships. Handles both individual rewards and the upcoming relationship staking features that enable users to invest in meaningful connections.
-    *   **Function:** Executes reward distributions for quality contributions, manages relationship multisigs for staked connections, and provides the economic infrastructure for a platform where social value belongs to users, not the platform.
+2.  **Instrument 1: Semantic Engine (Qdrant):**
+    *   **Role:** Powers semantic understanding and knowledge discovery through vector storage and retrieval.
+    *   **Function:** Stores conversation content and embeddings, enables semantic search for relevant prior knowledge, calculates novelty scores for original contributions, and provides context for AI-enhanced conversations.
 
-3.  **Python API (Conversation Orchestrator):**
-    *   **Role:** The central intelligence that connects human input with AI processing, semantic understanding, and economic rewards.
-    *   **Function:** Authenticates users through Sui signatures, orchestrates the PostChain workflow that makes conversations smarter over time, and triggers both individual rewards and relationship-based economic interactions.
+3.  **Instrument 2: Economic Layer (Sui Blockchain):**
+    *   **Role:** Manages CHOIR tokens and implements citation economics for intellectual property rights.
+    *   **Function:** Executes reward distributions for quality contributions, manages citation rewards when insights prove foundational for others, and provides economic infrastructure where participants co-own intellectual value.
 
-4.  **PostChain Workflow (Conversational Intelligence):**
-    *   **Role:** The AI system that helps users express ideas clearly and connects them with relevant community knowledge.
-    *   **Function:** Processes conversations through multiple phases to identify valuable insights, find relevant prior contributions, and create responses that facilitate meaningful discourse rather than mere information exchange.
+4.  **Instrument 3: AI Processing (PostChain Workflow):**
+    *   **Role:** Transforms conversations into publication-quality content through structured AI enhancement.
+    *   **Function:** Processes input through multiple phases (Action, Experience, Intention, Observation, Understanding, Yield), integrates research assistance and collaborative editing, and produces citable articles with proper attribution.
 
-5.  **Supporting Technologies:**
-    *   **Langchain Utils (`langchain_utils.py`):** LLM abstraction.
-    *   **Pydantic:** Data validation.
-    *   **Docker:** API containerization.
-    *   **SwiftUI & Keychain:** Client UI and secure Sui key storage.
-    *   **Python Async/await:** Used within the API and LCEL workflow for efficient concurrent operations.
+5.  **Instrument 4: Content Processing (Multi-Format Input):**
+    *   **Role:** Handles diverse input formats to democratize intellectual contribution.
+    *   **Function:** Processes text files, PDFs, EPUBs, YouTube transcripts, and audio/video content, automatically switches to high-context models on overflow, and enables text-to-speech for accessibility.
 
-## Architecture Flow: From Thought to Connection
+6.  **Instrument 5: Publication Infrastructure (Client Interface):**
+    *   **Role:** Provides accessible interface for conversation-to-publication workflow.
+    *   **Function:** SwiftUI client with secure Sui key storage, real-time collaboration features, and seamless transition from conversation to published content.
 
-The system creates a flow that transforms individual thoughts into community connections:
+## Architecture Flow: From Conversation to Publication
 
-1.  **Authentic Expression**: User shares thoughts via **SwiftUI Client** with Sui-based authentication ensuring ownership.
-2.  **AI Enhancement**: **Python API** orchestrates the **PostChain Workflow** to help clarify and contextualize the user's ideas.
-3.  **Semantic Discovery**: PostChain phases interact with **Qdrant** to find relevant prior thoughts and identify potential intellectual connections.
-4.  **Quality Recognition**: AI calculates novelty and citation scores, identifying valuable contributions worthy of rewards.
-5.  **Community Building**: Final response includes not just AI insights but potential connection points with like-minded users.
-6.  **Economic Alignment**: **Sui Service** distributes rewards and enables relationship staking for meaningful connections.
-7.  **Relationship Formation**: Users can invest earned tokens in relationships, creating shared economic interest in quality discourse.
+The system creates a flow that transforms natural conversation into publication-quality intellectual contribution:
 
-This architecture validates the core insight: **Individual Thought -> AI Enhancement -> Community Discovery -> Economic Alignment -> Meaningful Relationships**.
+1.  **Content Input**: User provides conversation, text files, PDFs, EPUBs, or YouTube URLs via **SwiftUI Client** with Sui-based authentication ensuring ownership.
+2.  **AI Research Assistance**: **Conductor** orchestrates **AI Processing** to gather relevant sources and context from **Semantic Engine**.
+3.  **Collaborative Enhancement**: **PostChain Workflow** transforms dialogue through structured phases, enhancing clarity and adding professional formatting.
+4.  **Quality Assessment**: AI calculates novelty scores and identifies original insights worthy of citation rewards.
+5.  **Publication Generation**: Final output becomes citable article with proper attribution and professional presentation.
+6.  **Citation Economics**: **Economic Layer** distributes ongoing compensation when others reference the published work.
+7.  **Knowledge Commons**: Published content contributes to collective knowledge while generating intellectual property rights for creators.
 
-## Strategic Focus: Validating Social Discourse Through AI
+This architecture validates the core insight: **Natural Conversation -> AI Enhancement -> Publication Quality -> Citation Economics -> Intellectual Property Rights**.
 
-*   **Relationship Discovery:** Validate that AI can identify intellectual compatibility and facilitate meaningful connections between users.
-*   **Economic Alignment:** Establish that token-based incentives create better discourse quality and relationship formation.
-*   **Merit-Based Community:** Demonstrate that anonymous, merit-based interactions lead to more authentic and valuable conversations.
-*   **Value Ownership:** Prove that users can own and transfer their social value rather than being locked into platform-specific metrics.
+## Strategic Focus: Validating Learning Economy Infrastructure
 
-## The Combined Result: AI That Amplifies Human Community
+*   **Conversation-to-Publication:** Validate that AI can transform natural dialogue into publication-quality content accessible to anyone regardless of writing skill.
+*   **Citation Economics:** Establish that ongoing compensation for referenced work creates sustainable intellectual property rights and quality incentives.
+*   **Collaborative Intelligence:** Demonstrate that AI-human collaboration generates insights neither could achieve independently.
+*   **Educational Transformation:** Prove that intellectual contribution can become economic activity, transforming education from credential theater to value creation.
 
-The MVP delivers a new paradigm for online interaction:
+## The Combined Result: Infrastructure for Intellectual Contribution
 
-*   **Economic Relationships (CHOIR tokens):** Users invest in connections, creating shared stakes in relationship quality and discourse outcomes.
-*   **Semantic Compatibility (Qdrant):** AI identifies like minds through conversation patterns rather than demographic or behavioral targeting.
-*   **Enhanced Expression (PostChain):** Conversations become collaborative intelligence sessions that help users articulate and develop ideas.
-*   **Authentic Community:** Anonymous merit-based interactions free from social surveillance enable genuine intellectual connection.
+The system delivers a new paradigm for learning and knowledge creation:
 
-This architecture demonstrates that AI can facilitate human relationships rather than replace them, creating a platform where technology serves community building rather than attention extraction.
+*   **Democratized Publishing (Conversation-to-Publication):** Anyone can contribute to collective knowledge regardless of writing expertise or institutional access.
+*   **Intellectual Property Rights (Citation Economics):** Original insights generate appreciating assets through ongoing citation rewards rather than ephemeral social media engagement.
+*   **Amplified Intelligence (AI Collaboration):** Human creativity combines with AI execution to produce insights and content impossible for individuals alone.
+*   **Learning Economy Participation:** Intellectual contribution becomes immediate economic activity rather than delayed value through credential signaling.
+
+This architecture demonstrates that technology can serve intellectual flourishing rather than exploit psychological vulnerabilities, creating infrastructure where learning becomes economic opportunity and insights gain the recognition they merit.
 
 === File: docs/core_economics.md ===
 

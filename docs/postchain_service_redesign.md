@@ -1,35 +1,35 @@
-# PostChain Service Redesign: From Prototype to Production
+# PostChain Service Redesign: Conversation-to-Publication Infrastructure
 
-VERSION postchain_service_redesign: 1.0 (Heart and Soul Refactor)
+VERSION postchain_service_redesign: 2.0 (Learning Economy Architecture)
 
 ## Current State Analysis
 
-The existing `langchain_workflow.py` has evolved into a complex, monolithic system with several critical issues:
+The existing `langchain_workflow.py` requires transformation from a prototype conversation system into production-ready conversation-to-publication infrastructure that serves the learning economy:
 
 ### Technical Debt
 - **Monolithic structure**: 1591 lines in a single file
-- **Hardcoded phase logic**: No flexibility for user customization
-- **No retry mechanisms**: Single points of failure
-- **Limited tool integration**: Basic tool calling without MCP support
+- **Conversation-focused design**: Built for chat rather than publication-quality output
+- **No publication pipeline**: Missing infrastructure for citable article generation
+- **Limited content processing**: Basic text input without multi-format support
 - **Provider-specific hacks**: Gemini/OpenAI message preparation scattered throughout
-- **Performance bottlenecks**: No intelligent routing based on query complexity
+- **Performance bottlenecks**: No intelligent routing based on content complexity
 
-### Missing Core Features
-- **AWS Bedrock integration**: No LangChain adapter for cost optimization
-- **Model Context Protocol (MCP)**: No support for Anthropic's tool standard
-- **Client-side prompt editing**: Users can't customize or share phase configurations
-- **Intelligent routing**: Simple queries get same treatment as complex analysis
-- **Retry and forking**: No resilience for failed phases
-- **Looping capabilities**: No iterative refinement
+### Missing Learning Economy Features
+- **Multi-format input processing**: No support for PDFs, EPUBs, YouTube transcripts
+- **Publication-quality output**: No professional formatting or citation management
+- **Collaborative editing**: No infrastructure for AI-human content collaboration
+- **Research assistance**: Limited source gathering and context integration
+- **Citation tracking**: No infrastructure for intellectual property management
+- **Educational integration**: No tools for assignment-to-publication workflows
 
 ## Redesign Architecture
 
 ### Core Principles
-1. **Modularity**: Each phase as independent, composable service
-2. **Intelligence**: Route queries based on complexity and requirements
-3. **Resilience**: Retry, fallback, and forking mechanisms
-4. **Extensibility**: Plugin architecture for tools and models
-5. **User Control**: Client-side prompt configuration and sharing
+1. **Publication Focus**: Transform conversations into citable, professional-quality articles
+2. **Multi-Format Input**: Process text, PDFs, EPUBs, YouTube transcripts, and audio/video
+3. **Collaborative Intelligence**: AI serves as research assistant and writing collaborator
+4. **Citation Economics**: Generate intellectual property with proper attribution and tracking
+5. **Educational Integration**: Support assignment-to-publication workflows for institutions
 
 ### New Service Structure
 

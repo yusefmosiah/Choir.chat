@@ -13,67 +13,67 @@ e_business
 
 # File: docs/e_business.md
 
-# Choir Business Model: Truthful Mechanism Design for Social Discourse
+# Choir Business Model: Infrastructure for the Learning Economy
 
-Choir's business model emerges from deep thinking about mechanism design theory. At its core, Choir is what happens when you design a DSIC (Dominant Strategy Incentive Compatible) truthful mechanism for social media, treating posting as bidding in a Vickrey auction where authentic expression is the dominant strategy.
+Choir's business model emerges from recognizing the fundamental economic transformation as AI handles execution while human value concentrates around originality, interdisciplinary fluency, and collaborative intelligence. The economy is evolving from rewarding skill performance to rewarding insight generation, and Choir provides the infrastructure for this inevitable transition.
 
-## The Revenue Sequence: App → Relationships → Finance
+## The Revenue Sequence: Individual → Institutional → Educational
 
-Our business model follows a clear progression that aligns with user value creation:
+Our business model follows a clear progression that aligns with learning economy development:
 
-**App Subscriptions** → **Relationship/Group Multisig Funds** → **Onchain Finance Agents** (with transaction fees)
+**Individual Subscriptions** → **Institutional Sales** → **Educational Integration** (with licensing fees)
 
-This sequence ensures that revenue grows naturally with user engagement and relationship formation, creating sustainable alignment between business success and community value.
+This sequence ensures that revenue grows naturally with learning economy adoption, creating sustainable alignment between business success and intellectual contribution value.
 
-## Phase 1: App Subscription Model
+## Phase 1: Individual Subscription Model
 
-**Free Tier (Beta Only):**
-During beta, core functionality is free to validate product-market fit:
+**Free Tier (Learning Economy Validation):**
+During initial phase, core functionality is free to validate learning economy product-market fit:
 
-*   **Anonymous Discourse:** Full access to AI-enhanced conversations with complete anonymity
+*   **Conversation-to-Publication:** Transform natural dialogue into citable articles
 *   **CHOIR Coin Earning:** Earn tokens for novel contributions and citations
-*   **Relationship Staking:** Invest earned tokens in meaningful connections
-*   **Basic AI Processing:** Standard PostChain workflow with rate limits
+*   **Citation Economics:** Receive ongoing compensation when others reference your work
+*   **Basic AI Processing:** Standard conversation enhancement with rate limits
 
-**Subscription Tiers (Post-Beta):**
-Exponential price-to-rate-limit ratios ensure sustainable AI model costs and Sui transaction fees:
+**Subscription Tiers (Post-Validation):**
+Exponential price-to-capability ratios ensure sustainable AI model costs and advanced features:
 
-*   **Basic ($9/month):** 100 AI conversations, standard processing speed
-*   **Pro ($29/month):** 500 conversations, priority processing, advanced AI models
-*   **Expert ($99/month):** 2000 conversations, fastest processing, premium model access
-*   **Unlimited ($299/month):** No rate limits, experimental features, dedicated support
+*   **Creator ($19/month):** 200 publications, standard AI enhancement, basic citation tracking
+*   **Scholar ($59/month):** 1000 publications, advanced AI models, detailed analytics, priority processing
+*   **Researcher ($199/month):** 5000 publications, premium models, collaborative features, API access
+*   **Institution ($599/month):** Unlimited publications, white-label options, custom integrations, dedicated support
 
-**Full Anonymity by Design:**
-Identity emerges naturally from wallet activity and Sui's built-in nameserver. No persistent identities or KYC required - reputation is built through contribution quality, not social credentials.
+**Anonymous by Default:**
+Identity emerges naturally from intellectual contribution quality. No persistent identities required - reputation builds through citation networks and collaborative intelligence rather than social credentials.
 
-## Phase 2: Relationship/Group Multisig Funds
+## Phase 2: Institutional Sales
 
-As users form meaningful relationships through staking, these connections become economic entities:
+As learning economy adoption grows, institutions need infrastructure for intellectual contribution:
 
-**Relationship Multisigs:**
-*   **Shared Treasury:** Successful relationships accumulate CHOIR tokens through collaborative insights and citations
-*   **Investment Decisions:** Groups can collectively decide how to deploy their shared funds
-*   **Value Appreciation:** Relationship funds grow through continued quality discourse and community recognition
+**Educational Institution Licensing:**
+*   **Campus-Wide Access:** Universities license platform access for students and faculty
+*   **Intellectual Property Management:** Institutions track and monetize research output through citation economics
+*   **Collaborative Research:** Cross-institutional collaboration through shared knowledge commons
 
-**Group Formation:**
-*   **Natural Evolution:** Pair relationships expand into groups with shared economic interests
-*   **Collective Intelligence:** Groups become economic entities that can make investment decisions together
-*   **Exit Rights:** Members can always leave and take their proportional share
+**Corporate Knowledge Management:**
+*   **Internal Knowledge Sharing:** Companies use platform for capturing and sharing institutional knowledge
+*   **Innovation Tracking:** Organizations track and reward employee intellectual contributions
+*   **Competitive Intelligence:** Businesses monitor industry knowledge development through citation networks
 
-## Phase 3: Onchain Finance Agents (Revenue Generation)
+## Phase 3: Educational Integration (Revenue Generation)
 
-The ultimate revenue driver: providing AI-powered financial services to relationship/group funds:
+The ultimate revenue driver: transforming educational systems through learning economy infrastructure:
 
-**Financial Agent Services (2-5% transaction fees):**
-*   **Portfolio Management:** AI agents help groups optimize their CHOIR and other crypto holdings
-*   **DeFi Strategies:** Automated yield farming, liquidity provision, and risk management
-*   **Cross-Chain Operations:** Bridge assets and execute strategies across multiple blockchains
-*   **Tax Optimization:** AI-driven strategies for minimizing tax burden on group investments
+**Educational Platform Integration (10-20% revenue share):**
+*   **Curriculum Development:** AI-assisted creation of learning materials that generate citation rewards
+*   **Assessment Innovation:** Replace standardized testing with intellectual contribution tracking
+*   **Student Portfolio Building:** Help students build demonstrable intellectual property portfolios
+*   **Faculty Research Enhancement:** Amplify academic research through AI collaboration and citation networks
 
 **Revenue Model:**
-*   **Transaction Fees:** 2-5% on all financial operations executed by our AI agents
-*   **Management Fees:** Annual fees for ongoing portfolio management services
-*   **Performance Fees:** Share of profits generated above benchmark returns
+*   **Licensing Fees:** Annual fees for educational institution access to platform infrastructure
+*   **Citation Revenue Share:** Percentage of citation rewards generated through educational content
+*   **Custom Development:** Fees for specialized educational integrations and white-label solutions
 
 ## CHOIR Coin Treasury Strategy & Financial Engineering
 
@@ -201,17 +201,17 @@ e_concept
 ==
 
 
-# Choir: A Harmonic Intelligence Platform - Where Knowledge Resonates and Value Flows
+# Choir: Infrastructure for the Learning Economy - Where Intellectual Contribution Becomes Economic Opportunity
 
-Choir is more than just a platform; it's a **harmonic intelligence ecosystem**, a digital space designed to amplify human potential and unlock new forms of collective understanding.  Imagine a place where ideas resonate like musical notes, where collaboration flows like a river, and where knowledge crystallizes into structures of lasting value – this is the essence of Choir.
+Choir is more than just a platform; it's **infrastructure for the learning economy**, a digital space designed to transform the relationship between learning and economic value creation. Imagine a place where every conversation becomes potential intellectual property, where insights gain the presentation they deserve and the recognition they merit, and where collaborative intelligence enhances human capability rather than replacing it – this is the essence of Choir.
 
-**Natural Value Flows - Like Energy Through a System:**
+**Conversation-to-Publication Workflow - Democratizing Intellectual Contribution:**
 
-At its core, Choir operates on the principle of **natural value flows**.  Just as energy seeks the path of least resistance and water finds its level, value in Choir flows organically towards quality, insight, and meaningful contribution.  This is not a system of forced metrics or artificial incentives, but one where value emerges naturally from the inherent dynamics of the platform.
+At its core, Choir operates on the principle of **eliminating barriers between having insights and contributing to collective knowledge**. The platform transforms natural conversation into publication-quality content, making intellectual discourse accessible to anyone regardless of writing skill, technical expertise, or institutional access.
 
-*   **Individual Recognition - Organic and Tangible:**  Recognition for valuable contributions is immediate and tangible, like a clear note resonating in a concert hall. Quality insights naturally attract attention and rewards, driven by the platform's inherent mechanisms, not arbitrary likes or upvotes. Value recognition is earned through genuine participation and meaningful stake.
-*   **Team Crystallization - Natural Alignment of Minds:**  Teams in Choir form organically, like crystals forming in a solution.  Valuable conversations naturally attract compatible minds, creating teams based on shared interests, complementary skills, and a collective drive to build knowledge. Threads become shared spaces where value accumulates for all participants, forging natural bonds between contributors.
-*   **Knowledge Networks - Interconnected Ecosystems of Understanding:**  Threads in Choir don't exist in isolation; they connect and interweave through citations, creating **knowledge networks** that resemble natural ecosystems.  Value flows between threads and communities, like streams feeding into rivers and oceans, creating a rich and interconnected web of understanding. Each citation strengthens both the source and destination threads, building a network of long-range correlations and emergent insights.
+*   **Individual Empowerment - From Conversation to Citation:**  Anyone can record conversations about any topic and transform them into comprehensive, citable articles. Quality insights naturally attract citations and rewards, driven by intellectual merit rather than social status or institutional affiliation. Value recognition emerges through genuine contribution to collective knowledge.
+*   **Collaborative Intelligence - AI as Partner, Not Replacement:**  AI serves as research assistant, writing collaborator, and intellectual partner rather than replacement. Humans provide creativity, judgment, and insight while AI handles execution, formatting, and technical implementation. The combination generates insights that neither humans nor AI achieve independently.
+*   **Citation Economics - Intellectual Property Rights:**  Published contributions don't disappear into social media feeds; they become intellectual property that generates ongoing compensation when others reference the work. Each citation creates shared ownership relationships where collaborative intelligence generates value for all participants.
 
 **Evolving Through Natural Phases - Mirroring Physical Processes:**
 
