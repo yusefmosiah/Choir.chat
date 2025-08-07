@@ -24,7 +24,6 @@ from tests.postchain.test_providers import (
     get_google_models,
     get_mistral_models,
     get_fireworks_models,
-    get_cohere_models
 )
 
 # Configure logging with colors and formatting

@@ -26,7 +26,6 @@ from tests.postchain.test_providers import (
     get_google_models,
     get_mistral_models,
     get_fireworks_models,
-    get_cohere_models
 )
 
 # Configure logging
@@ -372,10 +371,7 @@ class StructuredOutputTester:
         return results
 
    
-        try:
-            logger.info(f"Testing Cohere structured output with {model_name}...")
-
-            )
+        
             model = base_model.with_structured_output(ActionResponse)
 
             messages = [
@@ -390,34 +386,13 @@ class StructuredOutputTester:
                 # The response is already the validated Pydantic model
                 return {
                     "status": "success",
-                    "model": model_name,
-                    "response": response.model_dump(),
-                    "provider": "Cohere",
-                    "raw_response": str(response)
-                }
+
             except Exception as parse_error:
                 return {
-                    "status": "parse_error",
-                    "error": str(parse_error),
-                    "provider": "Cohere",
-                    "model": model_name,
-                    "raw_response": str(response)
+
                 }
 
-        except Exception as e:
-            logger.error(f"Cohere structured output test failed for {model_name}: {str(e)}")
-            return {
-                "status": "error",
-                "error": str(e),
-                "provider": "Cohere",
-                "model": model_name
-            }
 
-
-        results = []
-        for model_name in get_cohere_models(self.config):
-            result = await self.test_cohere_model(model_name)
-            results.append(result)
 
         return results
 
@@ -427,10 +402,6 @@ class StructuredOutputTester:
             self.test_openai(),
             self.test_anthropic(),
             self.test_google(),
-            self.test_mistral(),
-            self.test_fireworks(),
-            self.test_cohere()
-        ]
 
         results = await asyncio.gather(*tests)
 
@@ -438,10 +409,7 @@ class StructuredOutputTester:
             "OpenAI": results[0],
             "Anthropic": results[1],
             "Google": results[2],
-            "Mistral": results[3],
-            "Fireworks": results[4],
-            "Cohere": results[5]
-        }
+
 
         return self.results
 

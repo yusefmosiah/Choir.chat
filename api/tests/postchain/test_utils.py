@@ -17,7 +17,6 @@ from tests.postchain.test_providers import (
     get_google_models,
     get_mistral_models,
     get_fireworks_models,
-    get_cohere_models
 )
 
 logger = logging.getLogger(__name__)

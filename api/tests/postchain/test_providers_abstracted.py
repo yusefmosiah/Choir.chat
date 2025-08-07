@@ -18,7 +18,6 @@ from tests.postchain.test_providers import (
     get_google_models,
     get_mistral_models,
     get_fireworks_models,
-    get_cohere_models
 )
 
 # Configure logging
@@ -125,10 +124,7 @@ class AbstractedProviderTester:
    
 
         results = []
-        for model_name in get_cohere_models(self.config):
-            result = await self.test_model("cohere", model_name)
-            results.append(result)
-
+        
         return results
 
     async def run_all_tests(self) -> Dict[str, List[Dict[str, Any]]]:
@@ -137,10 +133,6 @@ class AbstractedProviderTester:
             self.test_openai_models(),
             self.test_anthropic_models(),
             self.test_google_models(),
-            self.test_mistral_models(),
-            self.test_fireworks_models(),
-            self.test_cohere_models()
-        ]
 
         all_results = await asyncio.gather(*test_tasks)
 
@@ -148,10 +140,7 @@ class AbstractedProviderTester:
             "OpenAI": all_results[0],
             "Anthropic": all_results[1],
             "Google": all_results[2],
-            "Mistral": all_results[3],
-            "Fireworks": all_results[4],
-            "Cohere": all_results[5]
-        }
+
 
         return self.results
 

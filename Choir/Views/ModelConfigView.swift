@@ -251,7 +251,6 @@ struct ModelConfigView: View {
                 config.awsAccessKeyId = apiKeys["bedrock_access_key"]
                 config.awsSecretAccessKey = apiKeys["bedrock_secret_key"]
                 config.awsRegion = apiKeys["bedrock_region"]
-                config.cohereApiKey = apiKeys["cohere"]
                 config.openrouterApiKey = apiKeys["openrouter"]
                 config.groqApiKey = apiKeys["groq"]
                 currentConfigs[phase] = config

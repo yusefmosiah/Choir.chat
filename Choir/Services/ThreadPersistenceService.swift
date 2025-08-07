@@ -494,7 +494,6 @@ struct ModelConfigData: Codable {
     let awsAccessKeyId: String?
     let awsSecretAccessKey: String?
     let awsRegion: String?
-    let cohereApiKey: String?
     let openrouterApiKey: String?
     let groqApiKey: String?
 
@@ -522,7 +521,6 @@ struct ModelConfigData: Codable {
         self.awsAccessKeyId = modelConfig.awsAccessKeyId
         self.awsSecretAccessKey = modelConfig.awsSecretAccessKey
         self.awsRegion = modelConfig.awsRegion
-        self.cohereApiKey = modelConfig.cohereApiKey
         self.openrouterApiKey = modelConfig.openrouterApiKey
         self.groqApiKey = modelConfig.groqApiKey
     }
@@ -539,7 +537,6 @@ struct ModelConfigData: Codable {
             awsAccessKeyId: awsAccessKeyId,
             awsSecretAccessKey: awsSecretAccessKey,
             awsRegion: awsRegion,
-            cohereApiKey: cohereApiKey,
             openrouterApiKey: openrouterApiKey,
             groqApiKey: groqApiKey
         )

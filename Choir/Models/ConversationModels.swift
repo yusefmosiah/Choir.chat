@@ -71,7 +71,6 @@ struct ModelConfig: Codable, Equatable, Hashable {
     var awsAccessKeyId: String?
     var awsSecretAccessKey: String?
     var awsRegion: String?
-    var cohereApiKey: String?
     var openrouterApiKey: String?
     var groqApiKey: String?
 
@@ -85,7 +84,6 @@ struct ModelConfig: Codable, Equatable, Hashable {
          awsAccessKeyId: String? = nil,
          awsSecretAccessKey: String? = nil,
          awsRegion: String? = nil,
-         cohereApiKey: String? = nil,
          openrouterApiKey: String? = nil,
          groqApiKey: String? = nil) {
         self.provider = provider
@@ -98,7 +96,6 @@ struct ModelConfig: Codable, Equatable, Hashable {
         self.awsAccessKeyId = awsAccessKeyId
         self.awsSecretAccessKey = awsSecretAccessKey
         self.awsRegion = awsRegion
-        self.cohereApiKey = cohereApiKey
         self.openrouterApiKey = openrouterApiKey
         self.groqApiKey = groqApiKey
     }
