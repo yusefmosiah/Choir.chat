@@ -1,8 +1,8 @@
 <div class="page-section">
   <div class="choir-hero-section">
     <i><h1>CHOIR.CHAT</h1></i>
-    <h2>A New Era of Collaborative Intelligence</h2>
-    <p class="choir-tagline">Where your ideas and insights are truly valued, rewarded, and amplified.</p>
+    <h2>Language Game for the Learning Economy</h2>
+    <p class="choir-tagline">Transform conversations into intellectual property. Where insights become assets and collaboration creates value.</p>
     <div class="choir-cta-buttons">
       <a href="https://testflight.apple.com/join/bDv6gSEB" class="choir-cta-button choir-primary">Get iOS TestFlight</a>
     </div>
@@ -12,71 +12,71 @@
 <div class="page-section">
   <div class="choir-features-grid">
     <div class="choir-feature-card">
-      <h3>Why Choir?</h3>
-      <p>Choir represents a paradigm shift in how we interact with AI and each other. By orchestrating multiple AI models working in concert, we create a more balanced, nuanced, and reliable platform for knowledge sharing and creation.</p>
+      <h3>Conversation to Publication</h3>
+      <p>Record conversations about any topic and transform them into citable articles with proper attribution. AI research assistants gather sources while collaborative editing creates publication-quality content from natural dialogue.</p>
     </div>
 
     <div class="choir-feature-card">
-      <h3>Why Multi-Agent?</h3>
-      <p>Trust emerges from consensus. Our diverse portfolio of AI models provides multiple perspectives, reducing bias and increasing reliability. When multiple independent agents agree, you can trust the result.</p>
+      <h3>Intellectual Property Rights</h3>
+      <p>Your insights become genuine intellectual property through citation economics. When others reference your contributions, you receive ongoing compensation. Quality analysis earns recognition through platform economics aligned with intellectual virtue.</p>
     </div>
 
     <div class="choir-feature-card">
-      <h3>Why Anonymity?</h3>
-      <p>Clarity of thought requires freedom from social surveillance. On Choir, ideas stand on their own merit, not on who said them. Express yourself freely without fear of judgment or social consequences.</p>
+      <h3>Democratized Knowledge Creation</h3>
+      <p>Separate content generation from execution skill. Anyone can contribute to collective knowledge regardless of writing expertise, technical skills, or institutional access. Ideas stand on merit, not credentials.</p>
     </div>
 
     <div class="choir-feature-card">
-      <h3>Why Rewards?</h3>
-      <p>Unlike other platforms where your likes and followers are valuable but not yours, Choir turns posting into value creation. Earn transferable CHOIR tokens for quality contributions, then stake them in relationships that matter. Your intellectual value belongs to you.</p>
+      <h3>Collaborative Intelligence</h3>
+      <p>AI serves as research assistant and intellectual partner rather than replacement. Humans provide creativity and judgment while AI handles execution and formatting. The combination generates insights neither achieves independently.</p>
     </div>
 
     <div class="choir-feature-card">
-      <h3>Why Pages?</h3>
-      <p>Scrolling is a mind-killer. Our page-based structure creates focused, digestible content units that enhance engagement and comprehension, moving beyond the endless scroll of traditional platforms.</p>
+      <h3>Learning Economy Participation</h3>
+      <p>Transform learning from preparation for economic activity into economic activity itself. Intellectual contribution generates immediate value through collaborative knowledge building rather than delayed value through credential signaling.</p>
     </div>
 
     <div class="choir-feature-card">
-      <h3>Why Blockchain?</h3>
-      <p>Our AI-native transaction ledger provides transparency and reinforces trust. Blockchain technology ensures that contributions are immutably recorded and fairly rewarded, creating a new socioeconomic media paradigm.</p>
+      <h3>Cross-Disciplinary Synthesis</h3>
+      <p>Break down artificial boundaries between disciplines. Novel connections between previously separate domains generate high novelty rewards. Intellectual diversity is rewarded over credential conformity.</p>
     </div>
   </div>
 </div>
 
 <div class="page-section">
   <div class="choir-future-section">
-    <h2>The Future of Choir</h2>
-    <p>We're building a dynamic, collaborative platform that will continue to evolve with these exciting features:</p>
+    <h2>Building the Learning Economy</h2>
+    <p>We're creating infrastructure for the inevitable transformation where intellectual contribution becomes economic opportunity:</p>
 
     <div class="choir-future-features">
       <div class="choir-future-feature">
-        <h4>Relationship Staking</h4>
-        <p>Invest your earned CHOIR tokens directly into meaningful connections. Stake tokens to respond to someone's idea—they can engage and lock tokens into a shared relationship, or ignore you and keep them. Real skin in the game for quality discourse.</p>
+        <h4>Text-to-Speech Integration</h4>
+        <p>Make results accessible to non-readers while automatic transcription captures spoken insights. Every participant can both contribute to and consume from the learning economy regardless of literacy level.</p>
       </div>
 
       <div class="choir-future-feature">
-        <h4>Multiparty Relationships</h4>
-        <p>Form groups with shared token pools. Members can exit unilaterally, taking their share, creating dynamic communities with real economic alignment.</p>
+        <h4>File Input Processing</h4>
+        <p>Support for txt, md, pdf, epub files and YouTube transcript processing. Automatic switching to high-context models on context overflow errors enables comprehensive knowledge integration.</p>
       </div>
 
       <div class="choir-future-feature">
-        <h4>Multimodality</h4>
-        <p>Voice, image, and eventually video input/output will create more natural and versatile human-AI interactions.</p>
+        <h4>Research Infrastructure</h4>
+        <p>Develop proprietary intellectual infrastructure through conversations, insights, and collaborative synthesis. Citation networks reveal knowledge connections invisible to traditional search systems.</p>
       </div>
 
       <div class="choir-future-feature">
-        <h4>Local Embeddings</h4>
-        <p>Enhanced contextual understanding through localized knowledge representation.</p>
+        <h4>Institutional Integration</h4>
+        <p>Educational institutions can integrate student insights into research programs while mentoring real knowledge creation. Students graduate with demonstrated intellectual contribution records.</p>
       </div>
 
       <div class="choir-future-feature">
-        <h4>Per-User Memory</h4>
-        <p>Personalized experiences that remember your preferences and past interactions.</p>
+        <h4>Collaborative Ownership</h4>
+        <p>Citation economics provide ongoing compensation when insights prove foundational. Collaborative ownership emerges through shared intellectual property rather than platform dependency.</p>
       </div>
 
       <div class="choir-future-feature">
-        <h4>Like Minds Discovery</h4>
-        <p>AI identifies intellectual compatibility through citation patterns and conversation quality, introducing you to kindred spirits based on merit, not metrics.</p>
+        <h4>Quality-Based Rewards</h4>
+        <p>Sophisticated algorithms measure genuine intellectual contribution rather than engagement optimization. Economic incentives naturally drive platform evolution toward higher signal-to-noise ratio.</p>
       </div>
     </div>
   </div>
@@ -84,8 +84,8 @@
 
 <div class="page-section">
   <div class="choir-cta-section">
-    <h2>Experience Choir</h2>
-    <p>Use a platform that values intelligence, rewards contributions, and creates a more thoughtful digital ecosystem.</p>
+    <h2>Join the Learning Economy</h2>
+    <p>Where intellectual contribution becomes economic opportunity—where insights gain the presentation they deserve and the recognition they merit.</p>
     <div class="choir-cta-buttons">
       <a href="https://testflight.apple.com/join/bDv6gSEB" class="choir-cta-button choir-primary">Download on iOS</a>
     </div>

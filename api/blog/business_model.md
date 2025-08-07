@@ -1,8 +1,8 @@
-# Choir's Blueprint: Truthful Mechanism Design for Social Discourse
+# Choir's Blueprint: Learning Economy Infrastructure Through Mechanism Design
 
-## Vision: AI for Social Discourse
+## Vision: Infrastructure for Intellectual Contribution
 
-Choir is building the first social platform based on mechanism design theory, where AI facilitates meaningful human connections rather than replacing them. Our goal is to create a DSIC (Dominant Strategy Incentive Compatible) truthful mechanism where authentic expression is the optimal strategy.
+Choir is building the first social platform based on mechanism design theory that serves the learning economy—where intellectual contribution becomes economic activity. Our goal is to create a DSIC (Dominant Strategy Incentive Compatible) truthful mechanism where authentic expression and genuine insight generation are the optimal strategies for economic success.
 
 ## Core Innovation: The Revenue Sequence
 
@@ -10,23 +10,25 @@ Choir is building the first social platform based on mechanism design theory, wh
 
 This progression ensures that revenue grows naturally with user engagement and relationship formation, creating sustainable alignment between business success and community value.
 
-## Theoretical Foundation
+## Theoretical Foundation: Learning Economy Meets Mechanism Design
 
-Choir emerges from deep thinking about mechanism design theory. At its core, we're solving the problem of how to create a social platform where posting creates value rather than liability, treating social media posting as bidding in a Vickrey auction where truthful bidding (authentic expression) is the dominant strategy.
+Choir emerges from the intersection of mechanism design theory and learning economy principles. At its core, we're solving the problem of how to create a platform where intellectual contribution creates value rather than liability, treating knowledge sharing as bidding in a Vickrey auction where truthful expression (authentic insight) is the dominant strategy.
+
+The learning economy rewards different capabilities than traditional education: the ability to generate original insights, combine knowledge across disciplines, collaborate with both humans and AI systems, and contribute to collective intelligence. These capabilities cannot be taught through traditional methods because they emerge through practice, iteration, and real contribution to knowledge creation.
 
 ## Three-Phase Revenue Model
 
-### Phase 1: App Subscription Model
+### Phase 1: App Subscription Model - Learning Economy Access
 
-**Free Tier (Beta Only):** Core functionality free during beta to validate product-market fit
-**Subscription Tiers (Post-Beta):** Exponential price-to-rate-limit ratios covering AI model costs and Sui transaction fees:
+**Free Tier (Beta Only):** Core conversation-to-publication functionality free during beta to validate learning economy product-market fit
+**Subscription Tiers (Post-Beta):** Exponential price-to-rate-limit ratios covering AI model costs, research infrastructure, and Sui transaction fees:
 
-*   **Basic ($9/month):** 100 AI conversations, standard processing
-*   **Pro ($29/month):** 500 conversations, priority processing, advanced models
-*   **Expert ($99/month):** 2000 conversations, fastest processing, premium features
-*   **Unlimited ($299/month):** No rate limits, experimental features, dedicated support
+*   **Basic ($9/month):** 100 AI conversations, standard processing, basic citation tracking
+*   **Pro ($29/month):** 500 conversations, priority processing, advanced models, enhanced research tools
+*   **Expert ($99/month):** 2000 conversations, fastest processing, premium features, cross-disciplinary synthesis tools
+*   **Unlimited ($299/month):** No rate limits, experimental features, dedicated support, institutional collaboration tools
 
-**Full Anonymity:** Identity emerges from wallet activity and Sui's nameserver. No KYC or persistent identities required.
+**Full Anonymity:** Identity emerges from intellectual contribution patterns and wallet activity. Ideas stand on merit, not credentials. No KYC or persistent identities required.
 
 ### Phase 2: Relationship/Group Multisig Funds
 
@@ -48,31 +50,36 @@ As users form meaningful relationships through staking, these connections become
 ## The CHOIR Coin Ecosystem
 
 **Earning CHOIR:**
-*   **Novelty Rewards:** Contributing original ideas and perspectives
-*   **Citation Rewards:** Having contributions referenced by others
-*   **Relationship Value:** Shared appreciation in successful relationship multisigs
+*   **Novelty Rewards:** Contributing original insights that expand collective knowledge into unexplored semantic territory
+*   **Citation Rewards:** Having contributions referenced by others as foundational knowledge (ongoing compensation for intellectual property)
+*   **Quality Rewards:** Peer recognition and collaborative building rather than viral spread
+*   **Cross-Disciplinary Synthesis:** Novel connections between previously separate domains
 
 **Using CHOIR:**
-*   **Relationship Staking:** Invest tokens in meaningful connections with other users
-*   **Group Formation:** Pool resources with like-minded individuals for collective decisions
-*   **Financial Services:** Access AI-powered portfolio management and DeFi strategies
+*   **Research Infrastructure Access:** Enhanced AI research assistants and collaborative editing tools
+*   **Publication Services:** Transform conversations into citable articles with proper attribution
+*   **Relationship Staking:** Invest tokens in meaningful intellectual connections
+*   **Group Formation:** Pool resources with like-minded individuals for collective knowledge creation
+*   **Financial Services:** Access AI-powered portfolio management for intellectual capital
 
 **Mainnet Status:** CHOIR is live on Sui mainnet with package ID `0x4f83f1cd85aefd0254e5b6f93bd344f49dd434269af698998dd5f4baec612898::choir::CHOIR`.
 
-## Mechanism Design Innovation
+## Mechanism Design Innovation for the Learning Economy
 
-**DSIC Social Media:** Choir creates the first social platform where authentic expression is the dominant strategy, solving the fundamental incentive problems of traditional social media.
+**DSIC Learning Platform:** Choir creates the first platform where authentic intellectual contribution is the dominant strategy, solving the fundamental incentive problems of both traditional social media and educational systems.
 
-**Vickrey Auction Analogy:**
-*   **Posting = Bidding:** Users contribute their authentic thoughts
-*   **Anonymity = Sealed Bids:** Removes social signaling and status games
-*   **Citation Rewards = Second-Price Auction:** Value flows based on community recognition, not self-promotion
+**Learning Economy Vickrey Auction:**
+*   **Knowledge Contribution = Bidding:** Users contribute their authentic insights and intellectual labor
+*   **Anonymity = Sealed Bids:** Ideas stand on merit, removing credential signaling and institutional bias
+*   **Citation Rewards = Second-Price Auction:** Value flows based on intellectual merit and community recognition
+*   **Conversation-to-Publication = Value Creation:** Every interaction potentially contributes to collective knowledge commons
 
-## Path Forward
+## Path Forward: Building Learning Economy Infrastructure
 
-1.  **Beta Launch:** Free tier to validate product-market fit and relationship formation
-2.  **Subscription Model:** Implement tiered pricing to cover AI and blockchain costs
-3.  **Relationship Economy:** Enable group multisigs and collective decision-making
-4.  **Financial Services:** Launch AI-powered financial agents for relationship funds
+1.  **Beta Launch:** Free tier to validate learning economy product-market fit and intellectual contribution patterns
+2.  **Subscription Model:** Implement tiered pricing to cover AI research infrastructure and conversation-to-publication tools
+3.  **Intellectual Property Economy:** Enable citation tracking, collaborative ownership, and ongoing compensation for foundational insights
+4.  **Institutional Integration:** Partner with educational institutions to transform student work into genuine intellectual contribution
+5.  **Research Infrastructure:** Develop proprietary knowledge networks that enhance collaborative intelligence capabilities
 
-This model represents the first practical implementation of mechanism design theory for social media, creating a sustainable platform where technology serves human flourishing rather than exploiting human psychology.
+This model represents the first practical implementation of mechanism design theory for the learning economy, creating sustainable infrastructure where technology serves intellectual flourishing and genuine knowledge creation rather than exploiting psychological vulnerabilities for attention extraction.
