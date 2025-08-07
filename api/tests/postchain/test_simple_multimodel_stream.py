@@ -83,8 +83,6 @@ class SimpleMultiModelStreamTester:
             models.extend([ModelConfig("mistral", m) for m in get_mistral_models(self.config)])
         if self.config.FIREWORKS_API_KEY:
             models.extend([ModelConfig("fireworks", m) for m in get_fireworks_models(self.config)])
-        if self.config.COHERE_API_KEY:
-            models.extend([ModelConfig("cohere", m) for m in get_cohere_models(self.config)])
         logger.info(f"Initialized {len(models)} models for testing")
         return models
 

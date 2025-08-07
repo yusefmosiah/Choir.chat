@@ -47,7 +47,6 @@ class ModelConfig(BaseModel):
     aws_access_key_id: Optional[str] = Field(None, description="AWS Access Key ID")
     aws_secret_access_key: Optional[str] = Field(None, description="AWS Secret Access Key")
     aws_region: Optional[str] = Field(None, description="AWS Region")
-    cohere_api_key: Optional[str] = Field(None, description="Cohere API Key")
     openrouter_api_key: Optional[str] = Field(None, description="OpenRouter API Key")
     groq_api_key: Optional[str] = Field(None, description="Groq API Key")
 

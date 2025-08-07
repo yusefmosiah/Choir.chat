@@ -147,7 +147,6 @@ tree.md
 │   │   └── PostchainCoordinatorImpl.swift
 │   ├── Documentation
 │   │   └── DesignStyleGuide.md
-│   ├── Extensions
 │   ├── Info.plist
 │   ├── Models
 │   │   ├── AnyCodable.swift
@@ -190,7 +189,6 @@ tree.md
 │   │   └── PostchainViewModel.swift
 │   └── Views
 │       ├── ChoirThreadDetailView.swift
-│       ├── Components
 │       ├── EnhancedSendCoinView.swift
 │       ├── GlassPageControl.swift
 │       ├── ImportMnemonicView.swift
@@ -204,7 +202,6 @@ tree.md
 │       ├── PostchainView.swift
 │       ├── QRScannerView.swift
 │       ├── SettingsView.swift
-│       ├── Styles
 │       ├── Thread
 │       │   └── Components
 │       │       ├── ThreadInputBar.swift
@@ -337,7 +334,7 @@ tree.md
     ├── test_postchain_multiturn.sh
     └── test_simulator_notifications.sh
 
-73 directories, 249 files
+70 directories, 249 files
 
 === File: docs/CHANGELOG.md ===
 

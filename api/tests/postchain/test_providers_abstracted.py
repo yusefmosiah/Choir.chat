@@ -122,10 +122,7 @@ class AbstractedProviderTester:
 
 
 
-    async def test_cohere_models(self) -> List[Dict[str, Any]]:
-        """Test Cohere models using the abstraction layer."""
-        if not self.config.COHERE_API_KEY:
-            return [{"status": "skipped", "reason": "API key not configured", "provider": "cohere"}]
+   
 
         results = []
         for model_name in get_cohere_models(self.config):

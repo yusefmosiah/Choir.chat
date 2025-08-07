@@ -112,7 +112,6 @@ struct ModelConfig: Codable, Equatable, Hashable {
         case awsAccessKeyId = "aws_access_key_id"
         case awsSecretAccessKey = "aws_secret_access_key"
         case awsRegion = "aws_region"
-        case cohereApiKey = "cohere_api_key" // Keep this as snake_case since it's used in API requests
         case openrouterApiKey = "openrouter_api_key" // Keep this as snake_case since it's used in API requests
         case groqApiKey = "groq_api_key" // Keep this as snake_case since it's used in API requests
     }

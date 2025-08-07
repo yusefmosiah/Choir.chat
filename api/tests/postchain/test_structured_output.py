@@ -371,18 +371,10 @@ class StructuredOutputTester:
 
         return results
 
-    async def test_cohere_model(self, model_name: str) -> Dict[str, Any]:
-        """Test structured output capabilities of a specific Cohere model."""
-        if not self.config.COHERE_API_KEY:
-            return {"status": "skipped", "reason": "API key not configured", "model": model_name}
-
+   
         try:
             logger.info(f"Testing Cohere structured output with {model_name}...")
 
-            base_model = ChatCohere(
-                api_key=self.config.COHERE_API_KEY,
-                model=model_name,
-                temperature=0
             )
             model = base_model.with_structured_output(ActionResponse)
 
@@ -421,10 +413,6 @@ class StructuredOutputTester:
                 "model": model_name
             }
 
-    async def test_cohere(self) -> List[Dict[str, Any]]:
-        """Test structured output capabilities of all Cohere models."""
-        if not self.config.COHERE_API_KEY:
-            return [{"status": "skipped", "reason": "API key not configured", "provider": "Cohere"}]
 
         results = []
         for model_name in get_cohere_models(self.config):

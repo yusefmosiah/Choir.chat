@@ -1,162 +1,269 @@
-# PostChain UI Redesign: Carbon Fiber Kintsugi Strategy
+# Refactor Plan: Horizontal Carousel → Vertical Phases → Theming → UX
 
-VERSION postchain_redesign: 3.1 (iOS 17.6, Carbon Fiber Kintsugi)
+Audience: AI coding agent familiar with SwiftUI and this repository.
+Scope: Replace the horizontal, card-based phase carousel with vertical, phase-grouped pages (Stage 1), then apply Carbon Fiber Kintsugi theming (Stage 2), followed by iterative UX improvements (Stage 3).
 
-## Overview
+Codebase anchors referenced below exist in this repo:
+- Views: `Choir/Views/PostchainView.swift`, `Choir/Views/PaginatedMarkdownView.swift`, `Choir/Views/PhaseCard.swift`, `Choir/Views/GlassPageControl.swift`, `Choir/Views/MessageRow.swift`
+- Models: `Choir/Models/ConversationModels.swift` (`Phase`, `Message`)
+- ViewModel: `Choir/ViewModels/PostchainViewModel.swift`
+- Utils: `Choir/Utils/PaginationCacheManager.swift`
 
-- **Core Vision**: Full-screen, page-based PostChain experience with vertical, TikTok-style paging. Long content scrolls inside a page; elastic page turning at top/bottom. Visual language is carbon fiber kintsugi: pressed/forged and woven carbon textures with gold, rose gold, and platinum accents.
-- **Platform**: iOS 17.6, SwiftUI-first. iPhone-first; runs on iPad but no iPad-specific layouts until iPhone is finalized.
-- **Scope Update**: Remove audio/TTS entirely for this iteration.
-- **Timeline**: 8–12 focused hours for Phase 1 visuals and navigation, followed by polish passes.
+## Goals & Non‑Goals
 
-## UX Structure
+- Goal: Ship Stage 1 by preserving current content rendering/behavior while changing navigation from horizontal carousel to vertical, phase-grouped pages.
+- Goal: Keep streaming, deep links, and pagination performance parity in Stage 1.
+- Non‑Goal (Stage 1): No carbon/kintsugi visuals, no major layout restyle, no prompt-edit page.
+- Non‑Goal: Do not change backend or API contracts.
 
-- **Pages (in order)**:
-  1) Prompt (editable inline; replaces input bar)
-  2) Action (fast response)
-  3) Experience (vectors + web) with collapsible sections: Sources and Experience Rewards
-  4) Intention + Observation + Understanding with collapsible sections
-  5) Yield (final response), with citations shown as footnotes (to minimize visual disruption)
-- **Population**: Each page streams content as it arrives. A page becomes “complete” when all its contributing phases for that page report `status == complete`.
-- **Auto-advance**: Auto-scroll forward to the next page only when that page is complete and the user has not interacted for ≥ 3s. Never auto-scroll backward. If user is ahead of content, show a small “New content ready” pill to jump.
-- **Missing Phases**: Skip pages whose content is absent; no empty placeholders.
-- **Prompt Editing**: The input bar is removed. Users edit the prompt directly on the Prompt page. Additionally, users can always scroll beyond the last rendered page to access a dedicated “New Prompt” page for composing a new prompt (starts a new message/thread entry). Edits create a new message to preserve history (no destructive mutation).
+## Stage 1 — Vertical Phase Pages (ship first)
 
-## Navigation & Gestures
+Outcome: Replace the horizontal carousel of per‑phase cards with a vertically scrolling stack of pages, where certain phases are grouped. Keep existing markdown rendering and data flow intact.
 
-- **Vertical Pager**: Custom vertical pager with elastic, snap-to-page behavior. Each page contains its own `ScrollView` for long content.
-- **Nested Scroll Handoff**: When a page’s inner scroll reaches its top/bottom, over-scroll can trigger page turns.
-  - Defaults: over-scroll ≥ 80pt or vertical fling velocity ≥ 600pt/s triggers a page change. These are tunable constants; may be set to “disabled” to require explicit page drags ≥ 30% of height.
-- **Haptics**: Light impact on page snap, soft boundary haptic at first/last page. Respect Reduced Motion.
-- **Horizontal Gestures**: Disabled for now (reserved for potential thread switching later).
-- **Chrome & Indicators**:
-  - Chrome: Chrome-less by default. Top-left Back and top-right Overflow (share/more) fade in on tap.
-  - Page Indicator: Optional. Default OFF. If enabled, show minimal numeric “current/total” at right edge with subtle metallic accent.
-- **New Prompt Access**: Scrolling beyond the last rendered page reveals a full-screen “New Prompt” page for input (replaces any bottom input bar UX).
+Phase grouping for Stage 1:
+- Page A: `action`
+- Page B: `experience` (merge content from `experienceVectors` + `experienceWeb`)
+- Page C: `iou` (merge `intention`, `observation`, `understanding`)
+- Page D: `yield`
 
-## Content & Sections
+Behavioral rules:
+- Only render a page if it has any content or the app is currently streaming that phase.
+- Within each page, long content scrolls vertically in a `ScrollView`. No snap paging in Stage 1.
+- Preserve deep-link handling and tap/long‑press behavior from `PaginatedMarkdownView`.
+- Preserve existing pagination performance via `PaginationCacheManager` where helpful for very long markdown.
 
-- **Experience Page**:
-  - Sections: Sources (vectors + web) and Experience Rewards (collapsible). Sources can include expandable details.
-  - Rewards: Shown as a collapsible metallic card. First reveal uses subtle shimmer; no particles. Respect Reduced Motion.
-- **IOU Page (Intention/Observation/Understanding)**:
-  - Three collapsible sections. Default collapsed; expand with smooth spring. Streaming inserts new content within its section.
-- **Yield Page**:
-  - Final response with citations rendered as footnotes, placed after the main text to avoid disrupting flow.
-- **Long Content**: Comfortable line lengths; code blocks styled and height-capped; tables horizontally scroll within the page; images tap to zoom.
-- **Streaming Visuals**: Progressive paragraph reveals (no typewriter). Subtle metallic accent lines are acceptable; avoid heavy shimmer.
-- **Persistent Scroll Memory**: Persist per-page scroll offset per message and restore when returning.
-- **Cards vs Pages**: Pages are full-screen. “Cards” are no longer page containers; they are used only within multi-phase pages (Experience, IOU) to differentiate collapsible sections. Action and Yield pages display pure, borderless full-screen text with no card/border treatment.
+### Stage 1: Implementation Steps
 
-## Visual System
+1) Add feature flag
+- Create `UseVerticalPhasesUI` (Bool) in `UserDefaults` with helper:
+  - File: `Choir/Utils/FeatureFlags.swift` (new)
+  - API:
+    - `FeatureFlags.useVerticalPhasesUI` (computed Bool with default `false`)
+    - `FeatureFlags.toggleVerticalPhasesUI()`
+- Optional: expose a toggle in `SettingsView` to switch between UIs at runtime.
 
-- **Textures**: Pressed/forged and woven carbon only. Use pre-rendered, raster assets for performance; optional subtle procedural overlay for depth.
-- **Metals**: Gold, rose gold, platinum. Prefer gradient metallics with gentle highlights; limit shimmer to rewards/accents.
-- **Dark Theme**: Dark-only for v1; target WCAG AA contrast. Light theme later.
+2) Introduce vertical pages container
+- File: `Choir/Views/VerticalPostchainView.swift` (new)
+- Purpose: Replacement for `PostchainView` when flag is ON.
+- Structure:
+  - `enum PhasePage: CaseIterable { case action, experience, iou, yield }`
+  - Map `Phase` → `PhasePage` with helpers:
+    - `func hasContent(page: PhasePage, message: Message) -> Bool` combines existing `message.getPhaseContent(_:)`, `vectorSearchResults`, `webSearchResults`, and `message.isStreaming`.
+  - Build a `VStack`/`ScrollViewReader` containing 0–4 pages in order; each page is a full‑width section with its own content view and per‑page vertical scrolling.
+  - Respect Dynamic Type and Reduced Motion (no animations required in Stage 1).
 
-### Design Tokens (initial)
+3) Page views
+- Files (new):
+  - `Choir/Views/Pages/ActionPageView.swift`
+  - `Choir/Views/Pages/ExperiencePageView.swift`
+  - `Choir/Views/Pages/IOUPageView.swift`
+  - `Choir/Views/Pages/YieldPageView.swift`
+- Content guidelines:
+  - Use existing `PaginatedMarkdownView` for textual sections where applicable to keep rendering parity. Pass `currentMessage: Message` so deep links work.
+  - Experience page: concatenate text from `experienceVectors` + `experienceWeb` and append formatted sources using existing helpers `message.formatVectorResultsToMarkdown()` and `message.formatWebResultsToMarkdown()`. No collapsibles yet.
+  - IOU page: concatenate `intention`, `observation`, `understanding` markdown in that order with clear H2 headings between them.
+  - Yield page: render yield markdown. Keep citations inline as they exist today (footnote restyle is Stage 3).
+  - All pages should tolerate empty sections and simply omit them.
 
-- **Colors**:
-  - `carbon.base`: #0B0B0B
-  - `carbon.depth`: #060606
-  - `text.primary`: #F2F2F2
-  - `text.secondary`: #A6A6A6
-  - `kintsugi.gold[0..1]`: #E6C200 → #FFDC73
-  - `kintsugi.rose[0..1]`: #E5B1B1 → #FFC2B2
-  - `kintsugi.platinum[0..1]`: #D8D8D8 → #F0F0F0
-- **Gradients**:
-  - `metal.gold`: linear(topLeading→bottomTrailing, stops: gold[0], gold[1])
-  - `metal.rose`: linear(topLeading→bottomTrailing, stops: rose[0], rose[1])
-  - `metal.platinum`: linear(topLeading→bottomTrailing, stops: platinum[0], platinum[1])
-- **Radii**: xs 8, s 12, m 16, l 20, xl 28
-- **Spacing**: 4, 8, 12, 16, 20, 24, 32
-- **Shadows**: base (black 0.6, r: 12, y: 6), lift (black 0.4, r: 20, y: 10)
-- **Motion**:
-  - `spring.page`: response 0.4, damping 0.8
-  - `spring.expand`: response 0.35, damping 0.85
-  - Durations: snap 0.22s, fade 0.18s
+4) Wire up the new view
+- Update `Choir/Views/MessageRow.swift`:
+  - When `FeatureFlags.useVerticalPhasesUI == true` and `!message.isUser`, render `VerticalPostchainView(message:isProcessing:viewModel: ...)` instead of `PostchainView`.
+  - Keep lazy load behavior intact (placeholder → load full view) to preserve perf.
+- Do not delete `PostchainView`/`PhaseCard`/`GlassPageControl` in Stage 1; they remain the fallback when flag OFF.
 
-## Performance Budget
+5) Data flow and streaming
+- Reuse existing `Message` and `PostchainViewModel` without signature changes.
+- Ensure `VerticalPostchainView` listens for `message.objectWillChange` and `message.phaseResults` changes similarly to `PostchainView` so pages refresh during streaming.
+- No auto‑advance in Stage 1; users scroll manually between pages.
 
-- **Targets**: 60 FPS on iPhone 12+; <16ms frame time. Memory stable with textures cached.
-- **Animation Budget**: Max 2 live animated layers per screen. Prefer opacity/offset; avoid scale on large layers when possible.
-- **Textures**: Pre-render pressed/forged/woven carbon at app start; reuse across views. Keep total raster memory for textures < 12 MB.
-- **Shaders**: If used, keep to low-cost overlays; no heavy noise/particles.
+6) Pagination/perf
+- For very long markdown, reuse `PaginationCacheManager` by invoking `getPaginatedContentSync` to split text per page’s available height and render via `PaginatedMarkdownView` page-by-page, or fallback to a single `PaginatedMarkdownView` if unnecessary. Keep this minimal to avoid churn; correctness > micro‑perf.
 
-## Accessibility
+7) Telemetry and logging
+- Add lightweight debug logs for page composition (which pages render for a message) and page heights; gate logs behind `#if DEBUG`.
+- No analytics schema change in Stage 1.
 
-- **VoiceOver**: Order by page; rotor to navigate sections within page. Clear labels for collapsibles and footnotes.
-- **Dynamic Type**: Support up to Extra Large; reflow content and maintain paging thresholds.
-- **Reduced Motion**: Disable shimmer and large-scale transforms; use metallic gradients and subtle opacity fades.
-- **Color**: Do not rely solely on color to denote metals/status; incorporate icons or patterns where needed.
+8) Acceptance criteria (Stage 1)
+- Horizontal carousel is not used when flag is ON; vertical pages render instead.
+- All existing content renders with parity, including vector/web deep links and long‑press selection.
+- Streaming updates appear on the correct page without flicker or layout jumps.
+- Dynamic Type up to Extra Large preserves readability and scrollability.
+- No crashes across iPhone 12+; performance roughly on par with current view.
 
-## Data & State Integration
+### Stage 1: Files to Add/Modify
 
-- **Adapter**: Introduce `PostChainPage` as a thin adapter that maps existing `Phase`-based streaming events into page models.
-- **Completeness**: A page is complete when all of its mapped phases emit `status == complete`.
-- **Streaming Updates**: Append content progressively (paragraph blocks) rather than character-by-character.
-- **Persistence**: Store per-message, per-page scroll offset. Restore on re-entry.
-- **Errors**: Show inline banners within the relevant page; do not add a separate error page.
+- Add: `Choir/Utils/FeatureFlags.swift`
+- Add: `Choir/Views/VerticalPostchainView.swift`
+- Add: `Choir/Views/Pages/ActionPageView.swift`
+- Add: `Choir/Views/Pages/ExperiencePageView.swift`
+- Add: `Choir/Views/Pages/IOUPageView.swift`
+- Add: `Choir/Views/Pages/YieldPageView.swift`
+- Modify: `Choir/Views/MessageRow.swift` to conditionally use vertical view
+- Optional: `Choir/Views/SettingsView.swift` to expose a toggle
 
-## Rewards Model
+### Stage 1: Code Sketches
 
-- **Experience Rewards**: Collapsible section on the Experience page. Metallic card; first reveal shimmer only; respects Reduced Motion.
-- **Yield Citation Rewards**: Displayed as footnotes within the Yield page. Clarify that rewards are issued to cited prior authors, not the current prompt author.
+Feature flags (new file):
+```
+// Choir/Utils/FeatureFlags.swift
+import Foundation
 
-## Rollout & Analytics
+enum FeatureFlags {
+    private static let key = "UseVerticalPhasesUI"
+    static var useVerticalPhasesUI: Bool {
+        get { UserDefaults.standard.bool(forKey: key) }
+        set { UserDefaults.standard.set(newValue, forKey: key) }
+    }
+    static func toggleVerticalPhasesUI() { useVerticalPhasesUI.toggle() }
+}
+```
 
-- **Feature Flag**: Toggle “New PostChain UI”. Fallback to current carousel.
-- **Analytics**: Log page dwell time, successful page snaps, auto-advance usage, early exits, and collapsible toggles (anonymized/local).
+Map pages and render (skeleton):
+```
+// Choir/Views/VerticalPostchainView.swift
+import SwiftUI
 
-## Risks & Mitigations
+enum PhasePage: CaseIterable { case action, experience, iou, yield }
 
-- **Gesture Conflicts**: Nested scroll handoff may feel sticky. Mitigate with tunable thresholds and clear haptics.
-- **Performance**: Textures and shimmer risk dropped frames. Use raster caches, limit animated layers, and honor Reduced Motion.
-- **Streaming Jitter**: Rapid updates can cause layout shifts. Buffer by paragraph and coalesce updates on a short debounce.
-- **Dynamic Type Expansion**: Large text can blow layout. Cap line length, allow vertical growth, maintain snap bounds.
+struct VerticalPostchainView: View {
+  @ObservedObject var message: Message
+  let isProcessing: Bool
+  @ObservedObject var viewModel: PostchainViewModel
 
-## Success Criteria
+  var pages: [PhasePage] {
+    PhasePage.allCases.filter { hasContent($0) }
+  }
 
-- **Interaction**: Page snap latency ≤ 16ms budget; no visible stutter on iPhone 12+.
-- **Gestures**: Reliable nested handoff with default thresholds; 0 missed snaps in manual QA across 30 swipes.
-- **Streaming**: Content updates append smoothly without jumping; auto-advance respects user intent.
-- **Accessibility**: VoiceOver navigable by page/section; Reduced Motion honored; contrast AA.
-- **Visual**: Carbon fiber and metals feel premium without overpowering readability.
+  var body: some View {
+    ScrollViewReader { proxy in
+      ScrollView { LazyVStack(spacing: 24) {
+        ForEach(pages.indices, id: \._self) { i in
+          switch pages[i] {
+          case .action: ActionPageView(message: message)
+          case .experience: ExperiencePageView(message: message)
+          case .iou: IOUPageView(message: message)
+          case .yield: YieldPageView(message: message)
+          }
+        }
+      }.padding(.horizontal) }
+    }
+  }
 
-## Implementation Plan
+  private func hasContent(_ page: PhasePage) -> Bool {
+    switch page {
+    case .action:
+      return !message.getPhaseContent(.action).isEmpty || message.isStreaming
+    case .experience:
+      return !message.getPhaseContent(.experienceVectors).isEmpty ||
+             !message.getPhaseContent(.experienceWeb).isEmpty ||
+             !message.vectorSearchResults.isEmpty ||
+             !message.webSearchResults.isEmpty || message.isStreaming
+    case .iou:
+      return !message.getPhaseContent(.intention).isEmpty ||
+             !message.getPhaseContent(.observation).isEmpty ||
+             !message.getPhaseContent(.understanding).isEmpty || message.isStreaming
+    case .yield:
+      return !message.getPhaseContent(.yield).isEmpty || message.isStreaming
+    }
+  }
+}
+```
 
-### Phase 1: Pager + Visual Foundation (Hours 1–3)
+Message row selection (diff intent):
+```
+// In Choir/Views/MessageRow.swift body
+if shouldLoadFullContent {
+  if FeatureFlags.useVerticalPhasesUI {
+    VerticalPostchainView(
+      message: message,
+      isProcessing: isProcessing,
+      viewModel: viewModel
+    )
+  } else {
+    PostchainView(
+      message: message,
+      isProcessing: isProcessing,
+      viewModel: viewModel,
+      localThreadIDs: [],
+      forceShowAllPhases: true,
+      coordinator: viewModel.coordinator as? PostchainCoordinatorImpl,
+      viewId: message.id
+    )
+  }
+}
+```
 
-- Build `CarbonFiberTexture` (pressed/forged/woven) as reusable backgrounds using raster assets with optional subtle overlay.
-- Create `KintsugiAccent` (gold/rose/platinum gradients) for borders, dividers, and highlights.
-- Implement `VerticalPostChainPager` with snap-to-page, haptics, and nested scroll handoff (defaults: 80pt, 600pt/s; flag to disable).
-- Define `PostChainPage` adapter mapping from existing `Phase` into page models and completeness rules.
-- Scaffold pages: Prompt (editable), Action (borderless), Experience (collapsible sections), IOU (collapsible sections), Yield (borderless with footnotes). Integrate per-page `ScrollView` and persistent scroll memory. Add “New Prompt” terminal page revealed on overscroll past the last page.
+Page views can wrap current markdown renderer:
+```
+// Choir/Views/Pages/ActionPageView.swift
+struct ActionPageView: View {
+  @ObservedObject var message: Message
+  var body: some View {
+    let text = message.getPhaseContent(.action)
+    PaginatedMarkdownView(pageContent: text, currentMessage: message)
+  }
+}
+```
 
-### Phase 1a: Hard Refactor Cleanup
+## Stage 2 — Carbon Fiber Kintsugi Theming (after Stage 1 deploy)
 
-- Remove legacy pagination and card abstractions:
-  - Delete `MarkdownPaginator`, `PaginationUtils`, and `PaginationCacheManager` usage; migrate any pagination-dependent code to the new pager.
-  - Delete `PhaseCard` and `PhaseCardContextMenu`; replace with collapsible section components used only inside Experience/IOU pages.
-  - Update `PostchainView` and any callers to use `VerticalPostChainPager` and full-screen page components. Remove the bottom input bar.
+Outcome: Apply the new visual language without structural changes.
 
-### Phase 2: Sections, Rewards, Streaming Polish (Hours 4–6)
+Design tokens (SwiftUI):
+- File: `Choir/Utils/Theme/Tokens.swift` (new)
+- Provide colors, gradients, spacing, radii, shadows, motion constants. Dark theme only.
 
-- Experience page: Collapsible Sources + Experience Rewards section; settled metallic card; first-reveal shimmer with Reduced Motion fallback.
-- IOU page: Collapsible sections with spring expand/collapse and streaming-friendly inserts.
-- Yield page: Final response with footnote citations; clear “issued to cited authors” copy for citation rewards.
-- Optional page indicator (OFF by default) as numeric “current/total” at right edge.
-- Auto-advance integration based on completeness + 3s idle; “New content ready” jump pill when user is ahead.
-- Prompt editing polish: Inline editing ergonomics and confirmation flow; ensure edits create a new message entry and preserve history.
+Assets:
+- Add pre‑rendered raster textures for pressed/forged/woven carbon into `Assets.xcassets/Carbon/*.imageset`.
+- Do not exceed ~12MB total for texture assets.
 
-### Phase 3: Perf, Accessibility, Rollout (Hours 7–12)
+Application:
+- Add background decorators (textures) and metallic accents to the new vertical page views and section dividers.
+- Keep content contrast AA. Respect Reduced Motion; avoid shimmer except optional subtle reward highlight later.
+- Keep old horizontal UI unstyled (fallback only).
 
-- Performance pass: texture caching, animation layer audit, shader removal if needed.
-- Accessibility pass: VoiceOver labels, rotor ordering, Dynamic Type validation, Reduced Motion audit.
-- Feature flag + fallback wiring; basic analytics for dwell and snaps.
-- Token finalization: color, gradients, radii, spacing, shadows, motion; document usage.
+Acceptance criteria (Stage 2):
+- Theming behind a separate `FeatureFlags.useKintsugiTheme` (default OFF) or piggyback on Stage 1 flag as agreed.
+- No functional regressions; text remains legible; A11y focus and Dynamic Type remain good.
 
-## Notes
+## Stage 3 — Iterative UX Tweaks
 
-- Audio/TTS removed for this iteration; defer until after iPhone UI stabilization.
-- iPad runs the same UI for now; no split/dual-pane variants until the iPhone experience is finalized.
+Candidate improvements (ship in small PRs):
+- Collapsible sections in Experience (Sources, Rewards) and IOU with smooth spring.
+- Auto‑advance to next page when a page’s contributing phases complete and user is idle for ≥3s.
+- Page index indicator (optional), keyboard shortcuts, sticky TOC for long pages.
+- Yield citations as footnotes at bottom; link tap scrolls to footnote.
+- Haptics on significant interactions; Reduced Motion safe.
+
+Acceptance criteria (Stage 3):
+- Each tweak has a measurable usability or clarity benefit; no perf regressions.
+
+## Risks & Safeguards
+
+- Risk: Streaming updates causing layout jumps.
+  - Mitigation: Recompute page visibility on main thread; avoid transient empty headings; coalesce updates with short debounce only if needed.
+- Risk: Deep link handling divergence between views.
+  - Mitigation: Centralize link handling inside `PaginatedMarkdownView` (already present); reuse everywhere.
+- Safeguards: Feature flags for Stage 1 and Stage 2; easy rollback by flipping flags.
+
+## Test & QA Checklist
+
+- Content parity across phases vs. current `PostchainView`.
+- Vector and web deep links open sheets and external URLs correctly.
+- Large markdown: no truncation; pagination still works; scrolling is smooth.
+- Dynamic Type XL: text reflows without clipped content.
+- VoiceOver: page sections announced logically; links actionable.
+- iPhone 12+ devices: no crashes, acceptable scroll performance.
+
+## Deployment Plan
+
+- Stage 1: Land behind `UseVerticalPhasesUI` flag. Canary by enabling flag locally; then default ON in TestFlight; flip ON in prod after validation.
+- Stage 2: Land theming behind separate flag; canary → roll out.
+- Stage 3: Ship small, reversible UX enhancements behind guarded toggles where prudent.
+
+## Agent Notes
+
+- Keep diffs focused. Do not remove old carousel code in Stage 1.
+- Reuse existing models and streaming pathways; avoid API or ViewModel signature changes.
+- Prefer small PRs: add files → wire flag → verify parity → iterate.
+
