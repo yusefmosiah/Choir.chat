@@ -15,7 +15,111 @@ tree.md
 ## Output of $ tree -I 'venv|archive|__pycache__|iOS_Example|dependencies' | pbcopy
 
 .
-├── CLAUDE.md
+├── AGENT.md
+├── api
+│   ├── __init__.py
+│   ├── app
+│   │   ├── __init__.py
+│   │   ├── config.py
+│   │   ├── database.py
+│   │   ├── langchain_utils.py
+│   │   ├── middleware
+│   │   │   ├── __init__.py
+│   │   │   └── auth.py
+│   │   ├── models
+│   │   │   ├── __init__.py
+│   │   │   ├── api.py
+│   │   │   ├── auth.py
+│   │   │   └── user.py
+│   │   ├── postchain
+│   │   │   ├── __init__.py
+│   │   │   ├── langchain_workflow.py
+│   │   │   ├── phases
+│   │   │   ├── postchain_llm.py
+│   │   │   ├── prompts
+│   │   │   │   └── prompts.py
+│   │   │   ├── README.md
+│   │   │   ├── schemas
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── rewards.py
+│   │   │   │   └── state.py
+│   │   │   ├── state
+│   │   │   └── utils.py
+│   │   ├── routers
+│   │   │   ├── auth.py
+│   │   │   ├── balance.py
+│   │   │   ├── notifications.py
+│   │   │   ├── postchain.py
+│   │   │   ├── threads.py
+│   │   │   ├── users.py
+│   │   │   └── vectors.py
+│   │   ├── services
+│   │   │   ├── __init__.py
+│   │   │   ├── auth_service.py
+│   │   │   ├── notification_service.py
+│   │   │   ├── push_notification_service.py
+│   │   │   ├── rewards_service.py
+│   │   │   └── sui_service.py
+│   │   ├── tools
+│   │   │   ├── __init__.py
+│   │   │   ├── base.py
+│   │   │   ├── brave_search.py
+│   │   │   ├── calculator.py
+│   │   │   ├── qdrant.py
+│   │   │   ├── tavily_search.py
+│   │   │   └── web_search.py
+│   │   └── utils.py
+│   ├── blog
+│   │   ├── business_model.md
+│   │   ├── inverse_scaling_law.md
+│   │   └── loop_of_thought.md
+│   ├── content
+│   │   ├── landing.md
+│   │   ├── marketing.md
+│   │   ├── privacy.md
+│   │   └── support.md
+│   ├── Dockerfile
+│   ├── main.py
+│   ├── pyproject.toml
+│   ├── pytest.ini
+│   ├── requirements.txt
+│   ├── static
+│   │   └── shared
+│   │       ├── script.js
+│   │       └── style.css
+│   ├── templates
+│   │   └── base.html
+│   ├── test_push_notification_e2e.py
+│   ├── test_push_notification.py
+│   ├── tests
+│   │   ├── __init__.py
+│   │   ├── conftest.py
+│   │   ├── postchain
+│   │   │   ├── __init__.py
+│   │   │   ├── models_test.py
+│   │   │   ├── random_gen_prompts.md
+│   │   │   ├── test_cases.json
+│   │   │   ├── test_langchain_workflow.py
+│   │   │   ├── test_providers_abstracted.py
+│   │   │   ├── test_providers.py
+│   │   │   ├── test_simple_multimodel_stream.py
+│   │   │   ├── test_structured_output.py
+│   │   │   └── test_utils.py
+│   │   ├── test_main.py
+│   │   ├── test_sui_service.py
+│   │   ├── test_user_thread_endpoints.py
+│   │   └── tools
+│   │       ├── __init__.py
+│   │       ├── direct_search_diagnostic.py
+│   │       ├── direct_search_test.py
+│   │       ├── test_brave_search.py
+│   │       ├── test_calculator.py
+│   │       ├── test_multimodel_with_tools.py
+│   │       ├── test_recent_events.py
+│   │       ├── test_search_tools_report.py
+│   │       ├── test_tavily_search.py
+│   │       └── test_updated_search.py
+│   └── uv.lock
 ├── Choir
 │   ├── App
 │   │   ├── AppDelegate.swift
@@ -27,12 +131,12 @@ tree.md
 │   │   ├── AppIcon.appiconset
 │   │   │   ├── Contents.json
 │   │   │   └── Icon-App-1024x1024@2x.png
+│   │   ├── choir-logo.imageset
+│   │   │   └── Contents.json
 │   │   ├── Contents.json
-│   │   ├── Icon-App-1024x1024.imageset
-│   │   │   ├── Contents.json
-│   │   │   └── Icon-App-1024x1024@2x.png
-│   │   └── choir-logo.imageset
-│   │       └── Contents.json
+│   │   └── Icon-App-1024x1024.imageset
+│   │       ├── Contents.json
+│   │       └── Icon-App-1024x1024@2x.png
 │   ├── Choir.entitlements
 │   ├── Config
 │   │   └── ApiConfig.swift
@@ -46,8 +150,8 @@ tree.md
 │   ├── Extensions
 │   ├── Info.plist
 │   ├── Models
-│   │   ├── APITypes.swift
 │   │   ├── AnyCodable.swift
+│   │   ├── APITypes.swift
 │   │   ├── AuthModels.swift
 │   │   ├── CoinType.swift
 │   │   ├── ConversationModels.swift
@@ -111,14 +215,33 @@ tree.md
 │       ├── WalletCardView.swift
 │       ├── WalletSelectionView.swift
 │       └── WalletView.swift
+├── choir_coin
+│   └── choir_coin
+│       ├── build
+│       │   ├── choir
+│       │   │   ├── BuildInfo.yaml
+│       │   │   ├── bytecode_modules
+│       │   │   │   └── choir.mv
+│       │   │   ├── debug_info
+│       │   │   │   ├── choir.json
+│       │   │   │   └── choir.mvd
+│       │   │   └── sources
+│       │   │       └── choir.move
+│       │   └── locks
+│       ├── Move.lock
+│       ├── Move.toml
+│       ├── sources
+│       │   └── choir_coin.move
+│       └── tests
+│           └── choir_coin_tests.move
 ├── Choir.xcodeproj
 │   ├── project.pbxproj
 │   ├── project.xcworkspace
 │   │   ├── contents.xcworkspacedata
 │   │   ├── xcshareddata
 │   │   │   └── swiftpm
-│   │   │       ├── Package.resolved
-│   │   │       └── configuration
+│   │   │       ├── configuration
+│   │   │       └── Package.resolved
 │   │   └── xcuserdata
 │   │       └── wiz.xcuserdatad
 │   │           ├── IDEFindNavigatorScopes.plist
@@ -137,136 +260,13 @@ tree.md
 ├── ChoirUITests
 │   ├── ChoirUITests.swift
 │   └── ChoirUITestsLaunchTests.swift
-├── README.md
-├── api
-│   ├── Dockerfile
-│   ├── __init__.py
-│   ├── app
-│   │   ├── __init__.py
-│   │   ├── config.py
-│   │   ├── database.py
-│   │   ├── langchain_utils.py
-│   │   ├── middleware
-│   │   │   ├── __init__.py
-│   │   │   └── auth.py
-│   │   ├── models
-│   │   │   ├── __init__.py
-│   │   │   ├── api.py
-│   │   │   ├── auth.py
-│   │   │   └── user.py
-│   │   ├── postchain
-│   │   │   ├── README.md
-│   │   │   ├── __init__.py
-│   │   │   ├── langchain_workflow.py
-│   │   │   ├── phases
-│   │   │   ├── postchain_llm.py
-│   │   │   ├── prompts
-│   │   │   │   └── prompts.py
-│   │   │   ├── schemas
-│   │   │   │   ├── __init__.py
-│   │   │   │   ├── rewards.py
-│   │   │   │   └── state.py
-│   │   │   ├── state
-│   │   │   └── utils.py
-│   │   ├── routers
-│   │   │   ├── auth.py
-│   │   │   ├── balance.py
-│   │   │   ├── notifications.py
-│   │   │   ├── postchain.py
-│   │   │   ├── threads.py
-│   │   │   ├── users.py
-│   │   │   └── vectors.py
-│   │   ├── services
-│   │   │   ├── __init__.py
-│   │   │   ├── auth_service.py
-│   │   │   ├── notification_service.py
-│   │   │   ├── push_notification_service.py
-│   │   │   ├── rewards_service.py
-│   │   │   └── sui_service.py
-│   │   ├── tools
-│   │   │   ├── __init__.py
-│   │   │   ├── base.py
-│   │   │   ├── brave_search.py
-│   │   │   ├── calculator.py
-│   │   │   ├── qdrant.py
-│   │   │   ├── tavily_search.py
-│   │   │   └── web_search.py
-│   │   └── utils.py
-│   ├── blog
-│   │   ├── business_model.md
-│   │   ├── inverse_scaling_law.md
-│   │   └── loop_of_thought.md
-│   ├── content
-│   │   ├── landing.md
-│   │   ├── marketing.md
-│   │   ├── privacy.md
-│   │   └── support.md
-│   ├── main.py
-│   ├── pyproject.toml
-│   ├── pytest.ini
-│   ├── requirements.txt
-│   ├── static
-│   │   └── shared
-│   │       ├── script.js
-│   │       └── style.css
-│   ├── templates
-│   │   └── base.html
-│   ├── test_push_notification.py
-│   ├── test_push_notification_e2e.py
-│   ├── tests
-│   │   ├── __init__.py
-│   │   ├── conftest.py
-│   │   ├── postchain
-│   │   │   ├── __init__.py
-│   │   │   ├── models_test.py
-│   │   │   ├── random_gen_prompts.md
-│   │   │   ├── test_cases.json
-│   │   │   ├── test_langchain_workflow.py
-│   │   │   ├── test_providers.py
-│   │   │   ├── test_providers_abstracted.py
-│   │   │   ├── test_simple_multimodel_stream.py
-│   │   │   ├── test_structured_output.py
-│   │   │   └── test_utils.py
-│   │   ├── test_main.py
-│   │   ├── test_sui_service.py
-│   │   ├── test_user_thread_endpoints.py
-│   │   └── tools
-│   │       ├── __init__.py
-│   │       ├── direct_search_diagnostic.py
-│   │       ├── direct_search_test.py
-│   │       ├── test_brave_search.py
-│   │       ├── test_calculator.py
-│   │       ├── test_multimodel_with_tools.py
-│   │       ├── test_recent_events.py
-│   │       ├── test_search_tools_report.py
-│   │       ├── test_tavily_search.py
-│   │       └── test_updated_search.py
-│   └── uv.lock
-├── choir_coin
-│   └── choir_coin
-│       ├── Move.lock
-│       ├── Move.toml
-│       ├── build
-│       │   ├── choir
-│       │   │   ├── BuildInfo.yaml
-│       │   │   ├── bytecode_modules
-│       │   │   │   └── choir.mv
-│       │   │   ├── debug_info
-│       │   │   │   ├── choir.json
-│       │   │   │   └── choir.mvd
-│       │   │   └── sources
-│       │   │       └── choir.move
-│       │   └── locks
-│       ├── sources
-│       │   └── choir_coin.move
-│       └── tests
-│           └── choir_coin_tests.move
+├── CLAUDE.md
 ├── docker-compose.yml
 ├── docs
 │   ├── 4phases.md
+│   ├── blockchain_integration.md
 │   ├── CHANGELOG.md
 │   ├── ChoirPushNotificationsImplementationGuide.md
-│   ├── blockchain_integration.md
 │   ├── contract_deployment.md
 │   ├── core_core.md
 │   ├── core_economics.md
@@ -274,8 +274,8 @@ tree.md
 │   ├── e_business.md
 │   ├── e_concept.md
 │   ├── evolution_naming.md
-│   ├── evolution_token.md
 │   ├── evolution_token_economics.md
+│   ├── evolution_token.md
 │   ├── issues
 │   │   └── retry.md
 │   ├── levels
@@ -322,9 +322,10 @@ tree.md
 ├── notebooks
 │   ├── post_chain0.ipynb
 │   └── vowel_loop3.ipynb
+├── README.md
 ├── render.yaml
-├── reward_function.py
 ├── reward_function_simplified.py
+├── reward_function.py
 └── scripts
     ├── generate_provider_reports.sh
     ├── generate_quick_search_report.sh
@@ -336,7 +337,7 @@ tree.md
     ├── test_postchain_multiturn.sh
     └── test_simulator_notifications.sh
 
-73 directories, 248 files
+73 directories, 249 files
 
 === File: docs/CHANGELOG.md ===
 
@@ -2159,60 +2160,6 @@ The shift from Chorus Cycle to Post Chain also marks a crucial conceptual evolut
 This evolution is not merely semantic. It reflects a deeper understanding of the system's core principles, a refinement of its purpose, a recognition of its potential. **Post Chain** is the name that embodies the platform's essence: a simple, powerful, and elegant system for building collective intelligence, one post at a time. It is easy to say, and means what it says. It is direct.
 
 
-=== File: docs/evolution_token.md ===
-
-
-
-==
-evolution_token
-==
-
-
-# The Evolution of CHOIR: From Utility Token to the Heart of a Learning Ecosystem
-
-The CHOIR coin has undergone a remarkable evolution, transcending its initial conception as a mere utility token to become something far more significant: **the very heart of the Choir ecosystem, a representation of value, participation, ownership, and the driving force behind a self-improving AI knowledge engine.**
-
-**Beyond "Utility" - CHOIR as a Multifaceted Representation of Value:**
-
-The term "utility token" no longer fully captures the essence of CHOIR.  It is not simply a means to access features or perform actions; CHOIR has evolved into a multifaceted representation of value within Choir:
-
-*   **A Stake in Collective Intelligence:** CHOIR represents a **stake in the collective intelligence of Choir**, a share in a dynamic and ever-evolving knowledge ecosystem.  Holding CHOIR is not just about accessing a platform; it's about owning a piece of a growing, intelligent network.
-*   **A Symbol of Participation and Contribution:** CHOIR is earned through **genuine participation and valuable contributions** to the Choir ecosystem.  It's a tangible recognition of intellectual effort, insightful prompts, and salient citations that enrich the collective knowledge base.  Holding CHOIR signifies active engagement and a commitment to building a high-quality knowledge commons.
-*   **A Key to Unlocking Data Value:** CHOIR coins are the **exclusive currency for accessing and contributing to the Choir data marketplace.**  They represent "data purchase power," enabling users to buy access to valuable, human-labeled training data generated within the platform and to contribute their own data for economic benefit.
-*   **A Governance Right and a Voice in the Future:** CHOIR coins empower holders with **governance rights**, giving them a direct voice in shaping the future of the Choir platform, the rules of the data marketplace, and the evolution of the CHOIR coin economy itself.
-*   **A Training Signal for AI - Driving Self-Improvement:**  Most profoundly, CHOIR coins are the **driving force behind a self-improving AI ecosystem.**  Coin rewards (novelty and citation) act as **training signals for AI models within Choir**, incentivizing them to learn, adapt, and optimize for behaviors that contribute to the platform's quality, coherence, and value creation.
-
-**The Poker Chip Analogy - Commitment, Engagement, and a Positive-Sum Game:**
-
-The analogy to poker chips remains apt, but with a deeper understanding: CHOIR, like a poker chip, represents a **commitment to engage, a willingness to participate in the game of knowledge creation.**  However, unlike poker, Choir is not a zero-sum game. It's a **positive-sum environment** where collaboration, knowledge sharing, and collective intelligence benefit all participants.  CHOIR represents your stake in this positive-sum game.
-
-**The Liminal Space - Currency, Equity, and a Bet on the Future:**
-
-CHOIR exists in the liminal space between a currency and an equity, reflecting its multifaceted nature.  It's not intended as a general-purpose medium of exchange, but it holds value far beyond its immediate utility.  CHOIR is a **"bet" on the future of Choir**, an **investment in the potential of collective intelligence**, and a **claim on the value generated by a self-improving AI knowledge engine.**
-
-**ICM and Long-Term Value - Beyond Short-Term Speculation, Towards Sustainable Growth:**
-
-The Independent Chip Model (ICM) framework, borrowed from poker, remains relevant, guiding us to focus on **long-term expected value** rather than short-term speculative gains.  CHOIR is designed to incentivize contributions that enhance the platform's overall worth, build a sustainable ecosystem, and drive long-term value accrual for all stakeholders.
-
-**Mainnet Status - From Concept to Reality:**
-
-The CHOIR coin has now been minted and deployed on the Sui mainnet, marking a significant milestone in its evolution from concept to reality. This mainnet deployment (with package ID `0x4f83f1cd85aefd0254e5b6f93bd344f49dd434269af698998dd5f4baec612898::choir::CHOIR`) represents the transition of CHOIR from a theoretical construct to a functioning digital asset with real utility and value within the Choir ecosystem.
-
-**Beyond Speculation - Building a Real-World Data Economy and a Thriving Ecosystem:**
-
-By emphasizing CHOIR's role in participation, value representation, ownership, and AI-driven learning, we actively **discourage purely speculative behavior** and focus on building a **real-world data economy** within Choir.  CHOIR is not designed to be a "get-rich-quick scheme," but a **tool for building and sharing knowledge, for empowering users, and for creating a sustainable and thriving ecosystem for collective intelligence.**
-
-**Implications for the Future - A New Paradigm for Tokenized Value and AI-Driven Growth:**
-
-The evolution of CHOIR points towards a **new paradigm for tokenized value and AI-driven growth** in online platforms:
-
-*   **Token Utility Beyond Access - Training Signals for AI:**  CHOIR demonstrates that token utility can go far beyond simple access or governance. Tokens can become **active components in the AI system itself**, driving learning, incentivizing desired behaviors, and shaping the evolution of AI models.
-*   **User Ownership and Data Empowerment - A Counter-Narrative to Data Extraction:**  CHOIR embodies a counter-narrative to the data-extractive models of traditional platforms.  It empowers users with **ownership and control over their data contributions** and allows them to **benefit economically** from the value they create.
-*   **Decentralized Governance of Data Marketplaces - User-Driven Data Ethics:**  CHOIR holder governance of the data marketplace establishes a **decentralized and user-driven approach to data ethics and data governance**, ensuring that data is used responsibly and in alignment with community values.
-*   **Sustainable and Self-Improving AI Ecosystems - A New Model for the Future of AI:**  CHOIR, as the heart of the Choir ecosystem, represents a step towards building **sustainable and self-improving AI ecosystems** that are driven by user contributions, guided by economic incentives, and focused on generating collective intelligence and long-term value for all participants.
-
-The evolution of CHOIR is a journey from a simple utility token to a **fundamental building block of a revolutionary AI-powered knowledge ecosystem.** It represents a shift from extractive platforms to **value-aligned, user-empowering, and self-improving systems** that have the potential to reshape the future of online interaction and collective intelligence.
-
 === File: docs/evolution_token_economics.md ===
 
 
@@ -2427,6 +2374,60 @@ CHOIR token economics provide the foundational infrastructure for the learning e
 This economic model serves not just platform sustainability but educational transformation. When intellectual contribution becomes immediate economic activity rather than delayed value through credential signaling, the entire relationship between learning and economic value creation fundamentally shifts.
 
 CHOIR tokens represent more than cryptocurrency—they represent the economic infrastructure for a future where collaborative intelligence becomes a tangible force for positive change in the world, where quality emerges naturally, and where value flows to those who create it.
+
+=== File: docs/evolution_token.md ===
+
+
+
+==
+evolution_token
+==
+
+
+# The Evolution of CHOIR: From Utility Token to the Heart of a Learning Ecosystem
+
+The CHOIR coin has undergone a remarkable evolution, transcending its initial conception as a mere utility token to become something far more significant: **the very heart of the Choir ecosystem, a representation of value, participation, ownership, and the driving force behind a self-improving AI knowledge engine.**
+
+**Beyond "Utility" - CHOIR as a Multifaceted Representation of Value:**
+
+The term "utility token" no longer fully captures the essence of CHOIR.  It is not simply a means to access features or perform actions; CHOIR has evolved into a multifaceted representation of value within Choir:
+
+*   **A Stake in Collective Intelligence:** CHOIR represents a **stake in the collective intelligence of Choir**, a share in a dynamic and ever-evolving knowledge ecosystem.  Holding CHOIR is not just about accessing a platform; it's about owning a piece of a growing, intelligent network.
+*   **A Symbol of Participation and Contribution:** CHOIR is earned through **genuine participation and valuable contributions** to the Choir ecosystem.  It's a tangible recognition of intellectual effort, insightful prompts, and salient citations that enrich the collective knowledge base.  Holding CHOIR signifies active engagement and a commitment to building a high-quality knowledge commons.
+*   **A Key to Unlocking Data Value:** CHOIR coins are the **exclusive currency for accessing and contributing to the Choir data marketplace.**  They represent "data purchase power," enabling users to buy access to valuable, human-labeled training data generated within the platform and to contribute their own data for economic benefit.
+*   **A Governance Right and a Voice in the Future:** CHOIR coins empower holders with **governance rights**, giving them a direct voice in shaping the future of the Choir platform, the rules of the data marketplace, and the evolution of the CHOIR coin economy itself.
+*   **A Training Signal for AI - Driving Self-Improvement:**  Most profoundly, CHOIR coins are the **driving force behind a self-improving AI ecosystem.**  Coin rewards (novelty and citation) act as **training signals for AI models within Choir**, incentivizing them to learn, adapt, and optimize for behaviors that contribute to the platform's quality, coherence, and value creation.
+
+**The Poker Chip Analogy - Commitment, Engagement, and a Positive-Sum Game:**
+
+The analogy to poker chips remains apt, but with a deeper understanding: CHOIR, like a poker chip, represents a **commitment to engage, a willingness to participate in the game of knowledge creation.**  However, unlike poker, Choir is not a zero-sum game. It's a **positive-sum environment** where collaboration, knowledge sharing, and collective intelligence benefit all participants.  CHOIR represents your stake in this positive-sum game.
+
+**The Liminal Space - Currency, Equity, and a Bet on the Future:**
+
+CHOIR exists in the liminal space between a currency and an equity, reflecting its multifaceted nature.  It's not intended as a general-purpose medium of exchange, but it holds value far beyond its immediate utility.  CHOIR is a **"bet" on the future of Choir**, an **investment in the potential of collective intelligence**, and a **claim on the value generated by a self-improving AI knowledge engine.**
+
+**ICM and Long-Term Value - Beyond Short-Term Speculation, Towards Sustainable Growth:**
+
+The Independent Chip Model (ICM) framework, borrowed from poker, remains relevant, guiding us to focus on **long-term expected value** rather than short-term speculative gains.  CHOIR is designed to incentivize contributions that enhance the platform's overall worth, build a sustainable ecosystem, and drive long-term value accrual for all stakeholders.
+
+**Mainnet Status - From Concept to Reality:**
+
+The CHOIR coin has now been minted and deployed on the Sui mainnet, marking a significant milestone in its evolution from concept to reality. This mainnet deployment (with package ID `0x4f83f1cd85aefd0254e5b6f93bd344f49dd434269af698998dd5f4baec612898::choir::CHOIR`) represents the transition of CHOIR from a theoretical construct to a functioning digital asset with real utility and value within the Choir ecosystem.
+
+**Beyond Speculation - Building a Real-World Data Economy and a Thriving Ecosystem:**
+
+By emphasizing CHOIR's role in participation, value representation, ownership, and AI-driven learning, we actively **discourage purely speculative behavior** and focus on building a **real-world data economy** within Choir.  CHOIR is not designed to be a "get-rich-quick scheme," but a **tool for building and sharing knowledge, for empowering users, and for creating a sustainable and thriving ecosystem for collective intelligence.**
+
+**Implications for the Future - A New Paradigm for Tokenized Value and AI-Driven Growth:**
+
+The evolution of CHOIR points towards a **new paradigm for tokenized value and AI-driven growth** in online platforms:
+
+*   **Token Utility Beyond Access - Training Signals for AI:**  CHOIR demonstrates that token utility can go far beyond simple access or governance. Tokens can become **active components in the AI system itself**, driving learning, incentivizing desired behaviors, and shaping the evolution of AI models.
+*   **User Ownership and Data Empowerment - A Counter-Narrative to Data Extraction:**  CHOIR embodies a counter-narrative to the data-extractive models of traditional platforms.  It empowers users with **ownership and control over their data contributions** and allows them to **benefit economically** from the value they create.
+*   **Decentralized Governance of Data Marketplaces - User-Driven Data Ethics:**  CHOIR holder governance of the data marketplace establishes a **decentralized and user-driven approach to data ethics and data governance**, ensuring that data is used responsibly and in alignment with community values.
+*   **Sustainable and Self-Improving AI Ecosystems - A New Model for the Future of AI:**  CHOIR, as the heart of the Choir ecosystem, represents a step towards building **sustainable and self-improving AI ecosystems** that are driven by user contributions, guided by economic incentives, and focused on generating collective intelligence and long-term value for all participants.
+
+The evolution of CHOIR is a journey from a simple utility token to a **fundamental building block of a revolutionary AI-powered knowledge ecosystem.** It represents a shift from extractive platforms to **value-aligned, user-empowering, and self-improving systems** that have the potential to reshape the future of online interaction and collective intelligence.
 
 === File: docs/4phases.md ===
 
@@ -2724,6 +2725,135 @@ The question remains whether we build that future consciously or stumble into it
 57. Clayton M. Christensen, *Disrupting Class: How Disruptive Innovation Will Change the Way the World Learns* (New York: McGraw-Hill, 2008), explores educational transformation through networked communication.
 58. Historical timelines for communication revolution institutionalization are documented in Harold Innis, *The Bias of Communication* (Toronto: University of Toronto Press, 1951).
 
+=== File: docs/blockchain_integration.md ===
+
+
+
+==
+blockchain_integration
+==
+
+
+# Blockchain Integration in Choir (Qdrant-Sui MVP)
+
+VERSION blockchain_integration: 8.0 (Qdrant-Sui MVP Focus)
+
+## Overview
+
+This document outlines the blockchain integration strategy for the Choir Qdrant-Sui MVP. This approach centralizes blockchain interactions within the main Python API backend, specifically using a dedicated service module (`sui_service.py`) to interact with the Sui blockchain via the PySUI SDK.
+
+## Core Blockchain Integration Goals
+
+The core goals of blockchain integration for the MVP and beyond remain:
+
+1.  **Immutable Record of Economic Actions:** Utilize the Sui blockchain for a transparent record of key economic events, primarily simplified token rewards for the MVP.
+2.  **Decentralized and Verifiable Token Economy:** Implement the basic CHIP token using a Sui smart contract (`choir_coin.move`).
+3.  **Secure and Transparent Reward Distribution:** Ensure that CHIP token rewards (simplified for MVP) are distributed verifiably on-chain.
+4.  **(Future)** Enable On-Chain Governance: Lay the groundwork for future on-chain governance by CHIP token holders.
+
+## MVP Blockchain Integration Architecture: Centralized API Service
+
+In the Qdrant-Sui MVP architecture, blockchain integration is handled by the **Python API backend** via its `sui_service.py` module. This service acts as the *sole interface* between the Choir application logic and the Sui blockchain.
+
+**Key Components:**
+
+*   **Python API Backend (FastAPI/Uvicorn):**
+    *   **Orchestrates Workflow:** Manages the PostChain workflow execution.
+    *   **Contains Blockchain Logic:** Includes the `sui_service.py` module responsible for all Sui interactions.
+    *   **Triggers Rewards:** After the PostChain workflow completes (Yield phase), the API calls functions within `sui_service.py` to process rewards based on data stored in Qdrant.
+
+*   **`sui_service.py` (within API Backend):**
+    *   **PySUI Integration (Encapsulated):** The PySUI SDK for interacting with the Sui blockchain is exclusively used within this service module.
+    *   **Handles Transactions:** Constructs, signs (using keys managed by the API's environment/secrets), and submits transactions to the Sui network.
+    *   **Exposes Service Functions:** Provides functions (e.g., `record_reward`, `get_balance`) called internally by the API's orchestration logic.
+
+*   **PostChain Workflow (LCEL - within API Backend):**
+    *   **No Direct Blockchain Interaction:** The AEIOU-Y phase logic **does not directly interact with the Sui blockchain or PySUI.**
+    *   **Provides Reward Inputs:** The workflow (specifically data gathered by Experience and finalized by Yield) provides the necessary inputs (author ID, prior IDs, scores) for the API to trigger the reward calculation in `sui_service.py`.
+
+*   **Sui Blockchain:**
+    *   **Hosts CHIP Token Contract:** Runs the `choir_coin.move` smart contract defining the basic CHIP token.
+    *   **Records Transactions:** Stores the history of token transfers/mints executed by `sui_service.py`.
+
+**Architecture Diagram (Qdrant-Sui MVP):**
+
+```mermaid
+graph LR
+    A[Client (SwiftUI)] --> B{Python API (FastAPI)};
+    B --> C[PostChain Workflow (LCEL)];
+    C -- Interacts via database.py --> D[(Qdrant)];
+    C -- Returns final data --> B;
+    B -- Triggers reward --> E[sui_service.py];
+    E -- Uses PySUI --> F[(Sui Blockchain)];
+    B -- Streams results --> A;
+
+    style B fill:#ccf,stroke:#333,stroke-width:2px;
+    style C,E fill:#f9f,stroke:#333,stroke-width:2px;
+    style D,F fill:#bfc,stroke:#333,stroke-width:2px;
+
+    subgraph API Backend Container
+        B
+        C
+        E
+    end
+
+    Communication Flow for Blockchain Operations (MVP):
+
+PostChain Completion: The PostChain workflow (running within the API) completes its final (Yield) phase. It returns the final AI message structure, including author ID, cited prior IDs, novelty score, and similarity scores.
+
+API Trigger: The main API logic receives the completed PostChain data.
+
+Data Persistence: The API saves the final AI message to the choir collection in Qdrant.
+
+Call Sui Service: The API calls the appropriate function within sui_service.py (e.g., process_rewards), passing the relevant data fetched from the newly saved Qdrant message (or held from the workflow result).
+
+Sui Service Execution: The sui_service.py function:
+
+Performs the (simplified for MVP) reward calculation.
+
+Looks up recipient Sui addresses if necessary (using Qdrant users collection via database.py).
+
+Uses PySUI to construct and sign the necessary Sui transaction(s) (e.g., calling a basic mint_reward function in the choir_coin contract).
+
+Submits the transaction to the Sui blockchain.
+
+Result Handling: The sui_service.py function returns the transaction result (e.g., digest, success/failure) to the main API logic. The API logs this result. (Note: For MVP, the result might not be directly propagated back to the client UI).
+
+Service Functions Exposed by sui_service.py (MVP):
+
+The sui_service.py module exposes internal functions called by the API orchestrator. Key functions for the MVP include:
+
+process_rewards(message_id, author_user_id, cited_prior_ids, novelty_score, similarity_scores): Calculates (simplified) rewards and calls the mint/transfer function.
+
+_call_sui_mint(recipient_address, amount): Internal helper to interact with the Sui contract's mint function.
+
+get_balance(sui_address): Queries the SUI balance (primarily for testing/diagnostics in MVP). (Already implemented)
+
+(Future) get_chip_balance(sui_address): Queries the CHIP token balance.
+
+(Future) get_thread_stake_price(thread_id): Fetches economic state from potential future contract.
+
+Security Considerations (MVP):
+
+With blockchain interactions centralized in the API backend's sui_service.py:
+
+API Key Management: The primary security concern is protecting the Sui private key used by the API backend. This key must be managed securely using environment variables, platform secrets management (e.g., Render secrets), or a dedicated secrets manager. It must not be hardcoded.
+
+Input Validation: The API must rigorously validate all data passed to sui_service.py functions, especially recipient addresses and amounts, to prevent manipulation or unintended transactions.
+
+Service Isolation (Logical): While not physically isolated like a separate server/TEE, sui_service.py provides logical isolation. All blockchain interaction code is contained within this module, making it easier to audit and secure compared to scattering PySUI calls throughout the codebase.
+
+Standard API Security: General API security practices (authentication, authorization, rate limiting, HTTPS) are essential to protect the endpoints that trigger the workflows leading to blockchain interactions.
+
+Deployment Considerations (MVP):
+
+API Container Deployment: The Python API, including sui_service.py and its PySUI dependency, is deployed as a single Docker container (e.g., on Render).
+
+Secure Key Provisioning: The Sui private key required by sui_service.py must be securely provisioned to the deployed container's environment (e.g., using Render's secret management).
+
+Conclusion (MVP Focus)
+The Qdrant-Sui MVP utilizes a centralized approach for blockchain integration, embedding the logic within the main Python API backend via the sui_service.py module. This simplifies the architecture for the MVP, allowing focus on the core Qdrant data structures and the basic reward triggering mechanism. While deferring the complexities of distributed servers and TEEs, this approach provides a clear path to validating the fundamental interaction between AI-analyzed data in Qdrant and the Sui blockchain-based token economy. Secure management of the API's Sui key is paramount in this model.
+
 === File: docs/ChoirPushNotificationsImplementationGuide.md ===
 
 
@@ -2914,135 +3044,6 @@ curl -X POST https://your-production-server.com/api/notifications/test-push \
 ```
 
 This implementation provides a complete solution for sending push notifications when users' content is cited, enhancing the user experience and engagement with the app.
-
-=== File: docs/blockchain_integration.md ===
-
-
-
-==
-blockchain_integration
-==
-
-
-# Blockchain Integration in Choir (Qdrant-Sui MVP)
-
-VERSION blockchain_integration: 8.0 (Qdrant-Sui MVP Focus)
-
-## Overview
-
-This document outlines the blockchain integration strategy for the Choir Qdrant-Sui MVP. This approach centralizes blockchain interactions within the main Python API backend, specifically using a dedicated service module (`sui_service.py`) to interact with the Sui blockchain via the PySUI SDK.
-
-## Core Blockchain Integration Goals
-
-The core goals of blockchain integration for the MVP and beyond remain:
-
-1.  **Immutable Record of Economic Actions:** Utilize the Sui blockchain for a transparent record of key economic events, primarily simplified token rewards for the MVP.
-2.  **Decentralized and Verifiable Token Economy:** Implement the basic CHIP token using a Sui smart contract (`choir_coin.move`).
-3.  **Secure and Transparent Reward Distribution:** Ensure that CHIP token rewards (simplified for MVP) are distributed verifiably on-chain.
-4.  **(Future)** Enable On-Chain Governance: Lay the groundwork for future on-chain governance by CHIP token holders.
-
-## MVP Blockchain Integration Architecture: Centralized API Service
-
-In the Qdrant-Sui MVP architecture, blockchain integration is handled by the **Python API backend** via its `sui_service.py` module. This service acts as the *sole interface* between the Choir application logic and the Sui blockchain.
-
-**Key Components:**
-
-*   **Python API Backend (FastAPI/Uvicorn):**
-    *   **Orchestrates Workflow:** Manages the PostChain workflow execution.
-    *   **Contains Blockchain Logic:** Includes the `sui_service.py` module responsible for all Sui interactions.
-    *   **Triggers Rewards:** After the PostChain workflow completes (Yield phase), the API calls functions within `sui_service.py` to process rewards based on data stored in Qdrant.
-
-*   **`sui_service.py` (within API Backend):**
-    *   **PySUI Integration (Encapsulated):** The PySUI SDK for interacting with the Sui blockchain is exclusively used within this service module.
-    *   **Handles Transactions:** Constructs, signs (using keys managed by the API's environment/secrets), and submits transactions to the Sui network.
-    *   **Exposes Service Functions:** Provides functions (e.g., `record_reward`, `get_balance`) called internally by the API's orchestration logic.
-
-*   **PostChain Workflow (LCEL - within API Backend):**
-    *   **No Direct Blockchain Interaction:** The AEIOU-Y phase logic **does not directly interact with the Sui blockchain or PySUI.**
-    *   **Provides Reward Inputs:** The workflow (specifically data gathered by Experience and finalized by Yield) provides the necessary inputs (author ID, prior IDs, scores) for the API to trigger the reward calculation in `sui_service.py`.
-
-*   **Sui Blockchain:**
-    *   **Hosts CHIP Token Contract:** Runs the `choir_coin.move` smart contract defining the basic CHIP token.
-    *   **Records Transactions:** Stores the history of token transfers/mints executed by `sui_service.py`.
-
-**Architecture Diagram (Qdrant-Sui MVP):**
-
-```mermaid
-graph LR
-    A[Client (SwiftUI)] --> B{Python API (FastAPI)};
-    B --> C[PostChain Workflow (LCEL)];
-    C -- Interacts via database.py --> D[(Qdrant)];
-    C -- Returns final data --> B;
-    B -- Triggers reward --> E[sui_service.py];
-    E -- Uses PySUI --> F[(Sui Blockchain)];
-    B -- Streams results --> A;
-
-    style B fill:#ccf,stroke:#333,stroke-width:2px;
-    style C,E fill:#f9f,stroke:#333,stroke-width:2px;
-    style D,F fill:#bfc,stroke:#333,stroke-width:2px;
-
-    subgraph API Backend Container
-        B
-        C
-        E
-    end
-
-    Communication Flow for Blockchain Operations (MVP):
-
-PostChain Completion: The PostChain workflow (running within the API) completes its final (Yield) phase. It returns the final AI message structure, including author ID, cited prior IDs, novelty score, and similarity scores.
-
-API Trigger: The main API logic receives the completed PostChain data.
-
-Data Persistence: The API saves the final AI message to the choir collection in Qdrant.
-
-Call Sui Service: The API calls the appropriate function within sui_service.py (e.g., process_rewards), passing the relevant data fetched from the newly saved Qdrant message (or held from the workflow result).
-
-Sui Service Execution: The sui_service.py function:
-
-Performs the (simplified for MVP) reward calculation.
-
-Looks up recipient Sui addresses if necessary (using Qdrant users collection via database.py).
-
-Uses PySUI to construct and sign the necessary Sui transaction(s) (e.g., calling a basic mint_reward function in the choir_coin contract).
-
-Submits the transaction to the Sui blockchain.
-
-Result Handling: The sui_service.py function returns the transaction result (e.g., digest, success/failure) to the main API logic. The API logs this result. (Note: For MVP, the result might not be directly propagated back to the client UI).
-
-Service Functions Exposed by sui_service.py (MVP):
-
-The sui_service.py module exposes internal functions called by the API orchestrator. Key functions for the MVP include:
-
-process_rewards(message_id, author_user_id, cited_prior_ids, novelty_score, similarity_scores): Calculates (simplified) rewards and calls the mint/transfer function.
-
-_call_sui_mint(recipient_address, amount): Internal helper to interact with the Sui contract's mint function.
-
-get_balance(sui_address): Queries the SUI balance (primarily for testing/diagnostics in MVP). (Already implemented)
-
-(Future) get_chip_balance(sui_address): Queries the CHIP token balance.
-
-(Future) get_thread_stake_price(thread_id): Fetches economic state from potential future contract.
-
-Security Considerations (MVP):
-
-With blockchain interactions centralized in the API backend's sui_service.py:
-
-API Key Management: The primary security concern is protecting the Sui private key used by the API backend. This key must be managed securely using environment variables, platform secrets management (e.g., Render secrets), or a dedicated secrets manager. It must not be hardcoded.
-
-Input Validation: The API must rigorously validate all data passed to sui_service.py functions, especially recipient addresses and amounts, to prevent manipulation or unintended transactions.
-
-Service Isolation (Logical): While not physically isolated like a separate server/TEE, sui_service.py provides logical isolation. All blockchain interaction code is contained within this module, making it easier to audit and secure compared to scattering PySUI calls throughout the codebase.
-
-Standard API Security: General API security practices (authentication, authorization, rate limiting, HTTPS) are essential to protect the endpoints that trigger the workflows leading to blockchain interactions.
-
-Deployment Considerations (MVP):
-
-API Container Deployment: The Python API, including sui_service.py and its PySUI dependency, is deployed as a single Docker container (e.g., on Render).
-
-Secure Key Provisioning: The Sui private key required by sui_service.py must be securely provisioned to the deployed container's environment (e.g., using Render's secret management).
-
-Conclusion (MVP Focus)
-The Qdrant-Sui MVP utilizes a centralized approach for blockchain integration, embedding the logic within the main Python API backend via the sui_service.py module. This simplifies the architecture for the MVP, allowing focus on the core Qdrant data structures and the basic reward triggering mechanism. While deferring the complexities of distributed servers and TEEs, this approach provides a clear path to validating the fundamental interaction between AI-analyzed data in Qdrant and the Sui blockchain-based token economy. Secure management of the API's Sui key is paramount in this model.
 
 === File: docs/contract_deployment.md ===
 
@@ -5434,361 +5435,168 @@ refactoring_planning_strategy
 ==
 
 
-# Refactoring Planning Strategy: Interface-First Vibecoding
+# PostChain UI Redesign: Carbon Fiber Kintsugi Strategy
 
-VERSION refactoring_planning: 2.0 (Interface-First Approach)
+VERSION postchain_redesign: 3.1 (iOS 17.6, Carbon Fiber Kintsugi)
 
-## Overview: Interface-First Development Strategy
+## Overview
 
-**Core Insight**: Start with the interface redesign while keeping the service constant. This resets the interaction paradigm immediately, looks pretty, and informs what backend features we actually need.
+- **Core Vision**: Full-screen, page-based PostChain experience with vertical, TikTok-style paging. Long content scrolls inside a page; elastic page turning at top/bottom. Visual language is carbon fiber kintsugi: pressed/forged and woven carbon textures with gold, rose gold, and platinum accents.
+- **Platform**: iOS 17.6, SwiftUI-first. iPhone-first; runs on iPad but no iPad-specific layouts until iPhone is finalized.
+- **Scope Update**: Remove audio/TTS entirely for this iteration.
+- **Timeline**: 8–12 focused hours for Phase 1 visuals and navigation, followed by polish passes.
 
-**Vibecoding Timeline**: Hours, not weeks. Immediate visual impact, progressive enhancement.
+## UX Structure
 
-## Day 1: Interface-First Foundation
+- **Pages (in order)**:
+  1) Prompt (editable inline; replaces input bar)
+  2) Action (fast response)
+  3) Experience (vectors + web) with collapsible sections: Sources and Experience Rewards
+  4) Intention + Observation + Understanding with collapsible sections
+  5) Yield (final response), with citations shown as footnotes (to minimize visual disruption)
+- **Population**: Each page streams content as it arrives. A page becomes “complete” when all its contributing phases for that page report `status == complete`.
+- **Auto-advance**: Auto-scroll forward to the next page only when that page is complete and the user has not interacted for ≥ 3s. Never auto-scroll backward. If user is ahead of content, show a small “New content ready” pill to jump.
+- **Missing Phases**: Skip pages whose content is absent; no empty placeholders.
+- **Prompt Editing**: The input bar is removed. Users edit the prompt directly on the Prompt page. Additionally, users can always scroll beyond the last rendered page to access a dedicated “New Prompt” page for composing a new prompt (starts a new message/thread entry). Edits create a new message to preserve history (no destructive mutation).
 
-### Hour 0: Bedrock Foundation (30 minutes)
-- [ ] Add AWS environment variables to config
-- [ ] Test Bedrock provider integration
-- [ ] Verify basic functionality works
+## Navigation & Gestures
 
-### Environment Variables Needed
-```bash
-AWS_ACCESS_KEY_ID=your_access_key
-AWS_SECRET_ACCESS_KEY=your_secret_key
-AWS_REGION=us-east-1
-```
+- **Vertical Pager**: Custom vertical pager with elastic, snap-to-page behavior. Each page contains its own `ScrollView` for long content.
+- **Nested Scroll Handoff**: When a page’s inner scroll reaches its top/bottom, over-scroll can trigger page turns.
+  - Defaults: over-scroll ≥ 80pt or vertical fling velocity ≥ 600pt/s triggers a page change. These are tunable constants; may be set to “disabled” to require explicit page drags ≥ 30% of height.
+- **Haptics**: Light impact on page snap, soft boundary haptic at first/last page. Respect Reduced Motion.
+- **Horizontal Gestures**: Disabled for now (reserved for potential thread switching later).
+- **Chrome & Indicators**:
+  - Chrome: Chrome-less by default. Top-left Back and top-right Overflow (share/more) fade in on tap.
+  - Page Indicator: Optional. Default OFF. If enabled, show minimal numeric “current/total” at right edge with subtle metallic accent.
+- **New Prompt Access**: Scrolling beyond the last rendered page reveals a full-screen “New Prompt” page for input (replaces any bottom input bar UX).
 
-### Hours 1-8: PostChain UI Redesign (Interface-First)
+## Content & Sections
 
-### Why Interface First?
-- **Immediate Impact**: Users see improvement right away
-- **UX Validation**: Test new interaction paradigm before complex backend
-- **Momentum**: Pretty UI keeps energy high during development
-- **Informed Development**: Interface tells us what backend features matter
+- **Experience Page**:
+  - Sections: Sources (vectors + web) and Experience Rewards (collapsible). Sources can include expandable details.
+  - Rewards: Shown as a collapsible metallic card. First reveal uses subtle shimmer; no particles. Respect Reduced Motion.
+- **IOU Page (Intention/Observation/Understanding)**:
+  - Three collapsible sections. Default collapsed; expand with smooth spring. Streaming inserts new content within its section.
+- **Yield Page**:
+  - Final response with citations rendered as footnotes, placed after the main text to avoid disrupting flow.
+- **Long Content**: Comfortable line lengths; code blocks styled and height-capped; tables horizontally scroll within the page; images tap to zoom.
+- **Streaming Visuals**: Progressive paragraph reveals (no typewriter). Subtle metallic accent lines are acceptable; avoid heavy shimmer.
+- **Persistent Scroll Memory**: Persist per-page scroll offset per message and restore when returning.
+- **Cards vs Pages**: Pages are full-screen. “Cards” are no longer page containers; they are used only within multi-phase pages (Experience, IOU) to differentiate collapsible sections. Action and Yield pages display pure, borderless full-screen text with no card/border treatment.
 
-### Hours 1-2: Smart Content Categorization
+## Visual System
 
-**Goal**: Implement intelligent content hierarchy using existing postchain data
+- **Textures**: Pressed/forged and woven carbon only. Use pre-rendered, raster assets for performance; optional subtle procedural overlay for depth.
+- **Metals**: Gold, rose gold, platinum. Prefer gradient metallics with gentle highlights; limit shimmer to rewards/accents.
+- **Dark Theme**: Dark-only for v1; target WCAG AA contrast. Light theme later.
 
-**Current State**: All phase content treated equally in carousel
-**New State**: Primary content prominent, secondary contextual, tertiary hidden
+### Design Tokens (initial)
 
-```swift
-// New file: Choir/Views/PostChain/ContentCategorization.swift
-enum ContentCategory {
-    case primary    // Fast response, final response - always visible
-    case secondary  // Rewards, sources - contextual display
-    case tertiary   // Analysis phases - hidden by default
-}
+- **Colors**:
+  - `carbon.base`: #0B0B0B
+  - `carbon.depth`: #060606
+  - `text.primary`: #F2F2F2
+  - `text.secondary`: #A6A6A6
+  - `kintsugi.gold[0..1]`: #E6C200 → #FFDC73
+  - `kintsugi.rose[0..1]`: #E5B1B1 → #FFC2B2
+  - `kintsugi.platinum[0..1]`: #D8D8D8 → #F0F0F0
+- **Gradients**:
+  - `metal.gold`: linear(topLeading→bottomTrailing, stops: gold[0], gold[1])
+  - `metal.rose`: linear(topLeading→bottomTrailing, stops: rose[0], rose[1])
+  - `metal.platinum`: linear(topLeading→bottomTrailing, stops: platinum[0], platinum[1])
+- **Radii**: xs 8, s 12, m 16, l 20, xl 28
+- **Spacing**: 4, 8, 12, 16, 20, 24, 32
+- **Shadows**: base (black 0.6, r: 12, y: 6), lift (black 0.4, r: 20, y: 10)
+- **Motion**:
+  - `spring.page`: response 0.4, damping 0.8
+  - `spring.expand`: response 0.35, damping 0.85
+  - Durations: snap 0.22s, fade 0.18s
 
-struct CategorizedContent {
-    let primary: [PostchainPhase]
-    let secondary: [PostchainPhase]
-    let tertiary: [PostchainPhase]
+## Performance Budget
 
-    init(from message: Message) {
-        // Categorize existing phases into hierarchy
-        primary = [message.actionPhase, message.yieldPhase].compactMap { $0 }
-        secondary = [message.noveltyReward, message.vectorResults].compactMap { $0 }
-        tertiary = [message.intentionPhase, message.observationPhase, message.understandingPhase].compactMap { $0 }
-    }
-}
-```
+- **Targets**: 60 FPS on iPhone 12+; <16ms frame time. Memory stable with textures cached.
+- **Animation Budget**: Max 2 live animated layers per screen. Prefer opacity/offset; avoid scale on large layers when possible.
+- **Textures**: Pre-render pressed/forged/woven carbon at app start; reuse across views. Keep total raster memory for textures < 12 MB.
+- **Shaders**: If used, keep to low-cost overlays; no heavy noise/particles.
 
-**Implementation Tasks**:
-- [ ] Create content categorization logic
-- [ ] Design smart card layout components
-- [ ] Implement conditional rendering based on content availability
-- [ ] Add celebration UI for rewards
+## Accessibility
 
-### Hours 3-4: Scroll-Triggered Pagination
+- **VoiceOver**: Order by page; rotor to navigate sections within page. Clear labels for collapsibles and footnotes.
+- **Dynamic Type**: Support up to Extra Large; reflow content and maintain paging thresholds.
+- **Reduced Motion**: Disable shimmer and large-scale transforms; use metallic gradients and subtle opacity fades.
+- **Color**: Do not rely solely on color to denote metals/status; incorporate icons or patterns where needed.
 
-**Goal**: Replace carousel with frameless paginated scrolling
+## Data & State Integration
 
-**Current State**: Horizontal carousel with visible frame constraints
-**New State**: Vertical scroll where whole pages slide into focus smoothly
+- **Adapter**: Introduce `PostChainPage` as a thin adapter that maps existing `Phase`-based streaming events into page models.
+- **Completeness**: A page is complete when all of its mapped phases emit `status == complete`.
+- **Streaming Updates**: Append content progressively (paragraph blocks) rather than character-by-character.
+- **Persistence**: Store per-message, per-page scroll offset. Restore on re-entry.
+- **Errors**: Show inline banners within the relevant page; do not add a separate error page.
 
-```swift
-// New file: Choir/Views/PostChain/ScrollPaginatedView.swift
-struct ScrollPaginatedPostchainView: View {
-    let message: Message
-    @State private var currentPageIndex: Int = 0
-    @State private var expandedSections: Set<ContentSection> = []
-    @State private var dragOffset: CGFloat = 0
+## Rewards Model
 
-    var availablePages: [PostchainPage] {
-        generatePages(for: message, expandedSections: expandedSections)
-    }
+- **Experience Rewards**: Collapsible section on the Experience page. Metallic card; first reveal shimmer only; respects Reduced Motion.
+- **Yield Citation Rewards**: Displayed as footnotes within the Yield page. Clarify that rewards are issued to cited prior authors, not the current prompt author.
 
-    var body: some View {
-        GeometryReader { geometry in
-            ZStack {
-                ForEach(Array(availablePages.enumerated()), id: \.offset) { index, page in
-                    PostchainPageView(page: page, message: message)
-                        .frame(width: geometry.size.width, height: geometry.size.height)
-                        .offset(y: calculatePageOffset(for: index, containerHeight: geometry.size.height))
-                        .opacity(calculatePageOpacity(for: index))
-                        .allowsHitTesting(index == currentPageIndex)
-                }
-            }
-            .gesture(
-                DragGesture()
-                    .onChanged { value in dragOffset = value.translation.y }
-                    .onEnded { value in handlePageTransition(dragValue: value, containerHeight: geometry.size.height) }
-            )
-        }
-    }
-}
-```
+## Rollout & Analytics
 
-**Implementation Tasks**:
-- [ ] Create page generation logic from existing message data
-- [ ] Implement smooth page transitions with spring animations
-- [ ] Add page indicators and navigation hints
-- [ ] Ensure individual pages can scroll internally
+- **Feature Flag**: Toggle “New PostChain UI”. Fallback to current carousel.
+- **Analytics**: Log page dwell time, successful page snaps, auto-advance usage, early exits, and collapsible toggles (anonymized/local).
 
-### Hours 5-6: Collapsible Sections & Reward Celebrations
+## Risks & Mitigations
 
-**Goal**: Add expand/collapse functionality and prominent reward display
-
-**Current State**: All content always visible, rewards buried in data
-**New State**: Tertiary content collapsible, rewards celebrated prominently
-
-```swift
-// New file: Choir/Views/PostChain/CollapsibleSection.swift
-struct CollapsibleSection: View {
-    let title: String
-    let content: String
-    let isExpanded: Binding<Bool>
-    let category: ContentCategory
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Button(action: { isExpanded.wrappedValue.toggle() }) {
-                HStack {
-                    Text(title)
-                        .font(.headline)
-                    Spacer()
-                    Image(systemName: isExpanded.wrappedValue ? "chevron.up" : "chevron.down")
-                        .foregroundColor(.secondary)
-                }
-            }
-
-            if isExpanded.wrappedValue {
-                Text(content)
-                    .transition(.opacity.combined(with: .move(edge: .top)))
-            }
-        }
-        .animation(.easeInOut(duration: 0.3), value: isExpanded.wrappedValue)
-    }
-}
-
-// Reward celebration component
-struct RewardCelebration: View {
-    let reward: RewardInfo
-
-    var body: some View {
-        HStack {
-            Text("🎉")
-                .font(.title)
-            VStack(alignment: .leading) {
-                Text("Novelty Reward!")
-                    .font(.headline)
-                    .foregroundColor(.green)
-                Text("+\(reward.formattedAmount) CHOIR")
-                    .font(.title2)
-                    .fontWeight(.bold)
-            }
-            Spacer()
-        }
-        .padding()
-        .background(Color.green.opacity(0.1))
-        .cornerRadius(12)
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(Color.green.opacity(0.3), lineWidth: 1)
-        )
-    }
-}
-```
-
-**Implementation Tasks**:
-- [ ] Create collapsible section components
-- [ ] Design reward celebration animations
-- [ ] Implement smooth expand/collapse transitions
-- [ ] Add user preferences for default expanded state
-
-### Hours 7-8: Audio-First Experience (TTS Integration)
-
-**Goal**: Enable hands-free, screen-free interaction with postchain content
-
-**Current State**: Visual-only interface requiring screen attention
-**New State**: Audio-first experience with TTS and voice navigation
-
-```swift
-// New file: Choir/Services/PostchainAudioManager.swift
-import AVFoundation
-
-class PostchainAudioManager: ObservableObject {
-    private let synthesizer = AVSpeechSynthesizer()
-    @Published var isPlaying = false
-    @Published var currentSection: ContentSection?
-
-    func playAudioScript(for message: Message) {
-        let script = generateAudioScript(for: message)
-
-        for section in script.sections {
-            let utterance = AVSpeechUtterance(string: section.text)
-            utterance.voice = selectVoice(for: section.tone)
-            utterance.rate = section.readingSpeed
-            synthesizer.speak(utterance)
-        }
-    }
-
-    private func generateAudioScript(for message: Message) -> AudioScript {
-        var script = AudioScript()
-
-        // Primary content - always included
-        if let actionContent = message.actionPhase {
-            script.addSection(.fastResponse, priority: .high,
-                             text: cleanForAudio(actionContent))
-        }
-
-        if let yieldContent = message.yieldPhase {
-            script.addSection(.finalResponse, priority: .high,
-                             text: cleanForAudio(yieldContent))
-        }
-
-        // Rewards - celebratory tone
-        if let reward = message.noveltyReward {
-            script.addSection(.rewards, priority: .medium,
-                             text: "Congratulations! You earned \(reward.formattedAmount) CHOIR tokens!",
-                             tone: .celebratory)
-        }
-
-        return script
-    }
-
-    private func cleanForAudio(_ text: String) -> String {
-        return text
-            .replacingOccurrences(of: "**", with: "") // Remove markdown
-            .replacingOccurrences(of: "*", with: "")
-            .replacingOccurrences(of: "#", with: "")
-            .replacingOccurrences(of: "[", with: "")
-            .replacingOccurrences(of: "]", with: "")
-    }
-}
-```
-
-**Implementation Tasks**:
-- [ ] Create audio script generation from existing message data
-- [ ] Implement TTS with natural voice selection
-- [ ] Add audio controls (play, pause, skip, speed)
-- [ ] Design audio-first navigation patterns
-
-## Day 2: Backend Enhancement
-
-**Now that the interface is beautiful and functional, enhance the backend progressively**
-
-### Hours 1-2: MCP Integration (markdownify-mcp)
-- [ ] Implement basic MCP client for tool discovery
-- [ ] Integrate markdownify-mcp server for file processing
-- [ ] Add file upload UI that flows through new interface
-- [ ] Test end-to-end file processing workflow
-
-### Hours 3-4: Query Complexity Routing
-- [ ] Create simple complexity classifier (file upload = complex)
-- [ ] Implement basic execution plans (simple vs complex)
-- [ ] Route file uploads through complex path automatically
-- [ ] Add cost optimization for simple queries
-
-### Hours 5-8: Advanced Features
-- [ ] Context management and overflow handling
-- [ ] Retry mechanisms with model switching
-- [ ] Advanced MCP tool integration
-- [ ] Performance optimization and monitoring
-
-## Day 3+: Production Features
-
-### Day 3: Relationship Staking & Wallet Languification
-- [ ] Implement relationship staking UI and smart contracts
-- [ ] Add natural language wallet interface
-- [ ] Create voice-controlled wallet operations
-- [ ] Test economic mechanics and user flows
-
-### Day 4: Publish Thread Feature
-- [ ] Build thread publishing mechanism with CHOIR token costs
-- [ ] Create public thread discovery and sharing
-- [ ] Implement cross-platform URL sharing
-- [ ] Add community feed and search functionality
-
-### Day 5+: Advanced Platform Features
-- [ ] Multi-modal content processing (audio, video)
-- [ ] Advanced AI orchestration and tool chains
-- [ ] Performance optimization and scaling
-- [ ] Analytics and user behavior insights
-
-## Interface-First Benefits
-
-### Immediate User Impact
-- **Visual Improvement**: Modern, clean interface immediately
-- **Better UX**: Content hierarchy makes information digestible
-- **Audio Experience**: Hands-free operation for accessibility
-- **Reward Celebration**: Users feel good about earning tokens
-
-### Development Benefits
-- **Momentum**: Pretty UI keeps energy high during backend work
-- **User Feedback**: Can test UX patterns before complex backend
-- **Informed Priorities**: Interface tells us what backend features matter
-- **Parallel Development**: UI and backend teams can work simultaneously
-
-### Technical Benefits
-- **Backward Compatibility**: Existing backend continues working
-- **Progressive Enhancement**: Add features without breaking existing
-- **Risk Mitigation**: Interface changes are lower risk than service changes
-- **Faster Iteration**: UI changes deploy faster than backend changes
-
-## Risk Mitigation
-
-### Technical Risks
-1. **MCP Server Reliability**: Implement circuit breakers and fallbacks
-2. **Context Window Management**: Gradual rollout with monitoring
-3. **Performance Regression**: Benchmark each phase against current system
-4. **Complexity Creep**: Strict scope boundaries for each phase
-
-### User Experience Risks
-1. **Feature Regression**: Comprehensive testing of existing workflows
-2. **Response Time Increase**: Performance budgets for each phase
-3. **Reliability Concerns**: Gradual rollout with feature flags
+- **Gesture Conflicts**: Nested scroll handoff may feel sticky. Mitigate with tunable thresholds and clear haptics.
+- **Performance**: Textures and shimmer risk dropped frames. Use raster caches, limit animated layers, and honor Reduced Motion.
+- **Streaming Jitter**: Rapid updates can cause layout shifts. Buffer by paragraph and coalesce updates on a short debounce.
+- **Dynamic Type Expansion**: Large text can blow layout. Cap line length, allow vertical growth, maintain snap bounds.
 
 ## Success Criteria
 
-### Phase 1 Success
-- [ ] Users can upload and process files via MCP
-- [ ] File content integrates seamlessly with existing postchain
-- [ ] MCP tool calls visible in UI
-- [ ] No regression in existing functionality
+- **Interaction**: Page snap latency ≤ 16ms budget; no visible stutter on iPhone 12+.
+- **Gestures**: Reliable nested handoff with default thresholds; 0 missed snaps in manual QA across 30 swipes.
+- **Streaming**: Content updates append smoothly without jumping; auto-advance respects user intent.
+- **Accessibility**: VoiceOver navigable by page/section; Reduced Motion honored; contrast AA.
+- **Visual**: Carbon fiber and metals feel premium without overpowering readability.
 
-### Phase 2 Success
-- [ ] Simple queries complete 50% faster
-- [ ] Complex queries get appropriate tool access
-- [ ] Cost per query reduced by 30% overall
-- [ ] User satisfaction maintained or improved
+## Implementation Plan
 
-### Phase 3 Success
-- [ ] System handles 10x current load
-- [ ] Individual phase failures don't crash entire workflow
-- [ ] New phases can be added without core changes
-- [ ] Development velocity increased
+### Phase 1: Pager + Visual Foundation (Hours 1–3)
 
-### Phase 4 Success
-- [ ] System handles files up to 100MB
-- [ ] Context overflow handled gracefully
-- [ ] 99.9% uptime maintained
-- [ ] Ready for advanced features (relationship staking, etc.)
+- Build `CarbonFiberTexture` (pressed/forged/woven) as reusable backgrounds using raster assets with optional subtle overlay.
+- Create `KintsugiAccent` (gold/rose/platinum gradients) for borders, dividers, and highlights.
+- Implement `VerticalPostChainPager` with snap-to-page, haptics, and nested scroll handoff (defaults: 80pt, 600pt/s; flag to disable).
+- Define `PostChainPage` adapter mapping from existing `Phase` into page models and completeness rules.
+- Scaffold pages: Prompt (editable), Action (borderless), Experience (collapsible sections), IOU (collapsible sections), Yield (borderless with footnotes). Integrate per-page `ScrollView` and persistent scroll memory. Add “New Prompt” terminal page revealed on overscroll past the last page.
 
+### Phase 1a: Hard Refactor Cleanup
 
-This approach ensures we build incrementally while maintaining system stability and delivering continuous user value.
+- Remove legacy pagination and card abstractions:
+  - Delete `MarkdownPaginator`, `PaginationUtils`, and `PaginationCacheManager` usage; migrate any pagination-dependent code to the new pager.
+  - Delete `PhaseCard` and `PhaseCardContextMenu`; replace with collapsible section components used only inside Experience/IOU pages.
+  - Update `PostchainView` and any callers to use `VerticalPostChainPager` and full-screen page components. Remove the bottom input bar.
+
+### Phase 2: Sections, Rewards, Streaming Polish (Hours 4–6)
+
+- Experience page: Collapsible Sources + Experience Rewards section; settled metallic card; first-reveal shimmer with Reduced Motion fallback.
+- IOU page: Collapsible sections with spring expand/collapse and streaming-friendly inserts.
+- Yield page: Final response with footnote citations; clear “issued to cited authors” copy for citation rewards.
+- Optional page indicator (OFF by default) as numeric “current/total” at right edge.
+- Auto-advance integration based on completeness + 3s idle; “New content ready” jump pill when user is ahead.
+- Prompt editing polish: Inline editing ergonomics and confirmation flow; ensure edits create a new message entry and preserve history.
+
+### Phase 3: Perf, Accessibility, Rollout (Hours 7–12)
+
+- Performance pass: texture caching, animation layer audit, shader removal if needed.
+- Accessibility pass: VoiceOver labels, rotor ordering, Dynamic Type validation, Reduced Motion audit.
+- Feature flag + fallback wiring; basic analytics for dwell and snaps.
+- Token finalization: color, gradients, radii, spacing, shadows, motion; document usage.
+
+## Notes
+
+- Audio/TTS removed for this iteration; defer until after iPhone UI stabilization.
+- iPad runs the same UI for now; no split/dual-pane variants until the iPhone experience is finalized.
 
 === File: docs/relationship_staking.md ===
 
