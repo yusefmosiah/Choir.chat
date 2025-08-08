@@ -72,33 +72,35 @@
 │   ├── ViewModels
 │   │   └── PostchainViewModel.swift
 │   └── Views
-│       ├── ChoirThreadDetailView.swift
+│       ├── Components
+│       │   ├── CollapsibleSection.swift
+│       │   ├── HorizontalTurnController.swift
+│       │   ├── PageAwareScrollView.swift
+│       │   ├── PageNavigationController.swift
+│       │   ├── TurnAutoAdvanceManager.swift
+│       │   └── TurnContainerView.swift
+│       ├── ConversationPageView.swift
 │       ├── EnhancedSendCoinView.swift
-│       ├── GlassPageControl.swift
 │       ├── ImportMnemonicView.swift
 │       ├── LoginView.swift
-│       ├── MessageRow.swift
 │       ├── ModelConfigView.swift
 │       ├── OnboardingView.swift
 │       ├── Pages
+│       │   ├── AIResponsePageView.swift
 │       │   ├── ActionPageView.swift
 │       │   ├── ExperiencePageView.swift
 │       │   ├── IOUPageView.swift
+│       │   ├── UserMessagePageView.swift
 │       │   └── YieldPageView.swift
 │       ├── PaginatedMarkdownView.swift
-│       ├── PhaseCard.swift
-│       ├── PhaseCardContextMenu.swift
-│       ├── PostchainView.swift
 │       ├── QRScannerView.swift
 │       ├── SettingsView.swift
 │       ├── Thread
 │       │   └── Components
-│       │       ├── ThreadInputBar.swift
-│       │       └── ThreadMessageList.swift
+│       │       └── ThreadInputBar.swift
 │       ├── ThreadExportView.swift
 │       ├── ThreadImportView.swift
 │       ├── TransactionsView.swift
-│       ├── VerticalPostchainView.swift
 │       ├── WalletCardView.swift
 │       ├── WalletSelectionView.swift
 │       └── WalletView.swift
@@ -124,7 +126,7 @@
 │   ├── APIResponseTests.swift
 │   ├── ChoirTests.swift
 │   ├── ChoirThreadTests.swift
-│   └── RESTPostchainAPIClientTests.swift
+│   └── TurnContainerViewTests.swift
 ├── ChoirUITests
 │   ├── ChoirUITests.swift
 │   └── ChoirUITestsLaunchTests.swift
@@ -327,4 +329,4 @@
     ├── test_postchain_multiturn.sh
     └── test_simulator_notifications.sh
 
-71 directories, 254 files
+72 directories, 255 files

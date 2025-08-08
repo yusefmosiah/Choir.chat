@@ -46,7 +46,7 @@ class AppCoordinator: ObservableObject {
         authService.$authState.sink { [weak self] newState in
             guard let self = self else { return }
             Task { @MainActor in
-                if case .authenticated(let userInfo) = newState,
+                if case .authenticated(_) = newState,
                    let walletAddress = try? self.walletManager.wallet?.accounts[0].address() {
                     // When authenticated, switch to the current wallet's threads
                     self.threadManager.switchWallet(to: walletAddress)
@@ -117,13 +117,10 @@ struct MainTabView: View {
     @State private var previousTab: Int? = nil
     @StateObject private var transactionService = TransactionService()
 
-    // Reference to ContentView to control thread selection
-    @State private var contentViewModel = ContentViewModel()
-
     var body: some View {
         TabView(selection: $selectedTab) {
             // Chat tab (ContentView)
-            ContentView(viewModel: contentViewModel)
+            ContentView()
                 .tag(3)
                 .tabItem {
                     Label("Chat", systemImage: "message")
@@ -162,8 +159,8 @@ struct MainTabView: View {
 
             // If switching to the Chat tab (3), reset thread selection
             if newValue == 3 && oldValue != 3 {
-                // Reset thread selection to show thread list
-                contentViewModel.resetThreadSelection()
+                // Thread selection reset is now handled by ContentView's @StateObject
+                // No action needed here since ContentView manages its own state
             }
 
             // If switching to the Transactions tab (4), fetch transactions
@@ -174,21 +171,6 @@ struct MainTabView: View {
         .onAppear {
             // Fetch transactions when the view appears
             transactionService.fetchTransactions()
-        }
-    }
-}
-
-// View model to control ContentView's thread selection
-class ContentViewModel: ObservableObject {
-    @Published var shouldResetThreadSelection = false
-
-    func resetThreadSelection() {
-        // Trigger thread selection reset
-        shouldResetThreadSelection = true
-
-        // Reset the flag after a short delay to allow for future resets
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            self.shouldResetThreadSelection = false
         }
     }
 }

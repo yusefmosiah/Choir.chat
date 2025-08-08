@@ -5,6 +5,13 @@ struct ExperiencePageView: View {
     @ObservedObject var message: Message
     @ObservedObject var viewModel: PostchainViewModel
 
+    // Optional callback for page navigation requests
+    var onPageNavigationRequest: ((PageAwareScrollView<AnyView>.PageNavigationDirection) -> Void)? = nil
+
+    // State for collapsible sections
+    @State private var isVectorSectionExpanded: Bool = true
+    @State private var isWebSectionExpanded: Bool = true
+
     private var vectorContent: String {
         message.getPhaseContent(.experienceVectors)
     }
@@ -62,25 +69,32 @@ struct ExperiencePageView: View {
     }
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
-                // Page header
-                pageHeader
+        PageAwareScrollView(
+            content: {
+                AnyView(
+                    VStack(alignment: .leading, spacing: 16) {
+                        // Page header
+                        pageHeader
 
-                // Content area
-                if hasContent {
-                    contentView
-                } else if isStreaming {
-                    streamingPlaceholder
-                } else {
-                    emptyStateView
-                }
+                        // Content area
+                        if hasContent {
+                            contentView
+                        } else if isStreaming {
+                            streamingPlaceholder
+                        } else {
+                            emptyStateView
+                        }
 
-                Spacer(minLength: 20)
+                        Spacer(minLength: 20)
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.top, 8)
+                )
+            },
+            onPageNavigationRequest: { direction in
+                onPageNavigationRequest?(direction)
             }
-            .padding(.horizontal, 16)
-            .padding(.top, 8)
-        }
+        )
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 
@@ -121,84 +135,156 @@ struct ExperiencePageView: View {
 
     private var contentView: some View {
         VStack(alignment: .leading, spacing: 16) {
-            // Search results summary
-            searchResultsSummary
+            // Vector search section
+            if hasVectorContent || isStreamingVector {
+                CollapsibleSection(
+                    title: "Vector Search",
+                    icon: "doc.text.magnifyingglass",
+                    isExpanded: $isVectorSectionExpanded
+                ) {
+                    vectorSectionContent
+                }
+                .headerBackground(Color.blue.opacity(0.1))
+            }
 
-            // Main content
-            if !combinedContent.isEmpty {
+            // Web search section
+            if hasWebContent || isStreamingWeb {
+                CollapsibleSection(
+                    title: "Web Search",
+                    icon: "network",
+                    isExpanded: $isWebSectionExpanded
+                ) {
+                    webSectionContent
+                }
+                .headerBackground(Color.green.opacity(0.1))
+            }
+
+
+        }
+    }
+
+    // MARK: - Helper Properties
+
+    private var hasVectorContent: Bool {
+        !vectorContent.isEmpty || !message.vectorSearchResults.isEmpty
+    }
+
+    private var hasWebContent: Bool {
+        !webContent.isEmpty || !message.webSearchResults.isEmpty
+    }
+
+    private var isStreamingVector: Bool {
+        message.isStreaming && message.phaseResults[.experienceVectors] != nil
+    }
+
+    private var isStreamingWeb: Bool {
+        message.isStreaming && message.phaseResults[.experienceWeb] != nil
+    }
+
+    // MARK: - Section Content Views
+
+    private var vectorSectionContent: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            // Vector search results summary
+            if !message.vectorSearchResults.isEmpty {
+                vectorResultsSummary
+            }
+
+            // Vector search content
+            if !vectorContent.isEmpty {
                 PaginatedMarkdownView(
-                    pageContent: combinedContent,
+                    pageContent: vectorContent,
+                    currentMessage: message
+                )
+                .frame(maxWidth: .infinity, alignment: .topLeading)
+            } else if isStreamingVector {
+                streamingIndicator(for: "Vector search")
+            }
+        }
+    }
+
+    private var webSectionContent: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            // Web search results summary
+            if !message.webSearchResults.isEmpty {
+                webResultsSummary
+            }
+
+            // Web search content
+            if !webContent.isEmpty {
+                PaginatedMarkdownView(
+                    pageContent: webContent,
+                    currentMessage: message
+                )
+                .frame(maxWidth: .infinity, alignment: .topLeading)
+            } else if isStreamingWeb {
+                streamingIndicator(for: "Web search")
+            }
+        }
+    }
+
+    private func streamingIndicator(for type: String) -> some View {
+        HStack(spacing: 8) {
+            ProgressView()
+                .scaleEffect(0.8)
+
+            Text("Searching \(type.lowercased())...")
+                .font(.caption)
+                .foregroundColor(.secondary)
+        }
+        .padding(.vertical, 8)
+    }
+
+    private var vectorResultsSummary: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 8) {
+                Image(systemName: "doc.text.magnifyingglass")
+                    .font(.caption)
+                    .foregroundColor(.blue)
+
+                Text("\(message.vectorSearchResults.count) documents found")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+
+                Spacer()
+            }
+
+            // Show formatted vector results if available
+            let vectorResults = message.formatVectorResultsToMarkdown()
+            if !vectorResults.isEmpty {
+                PaginatedMarkdownView(
+                    pageContent: vectorResults,
                     currentMessage: message
                 )
                 .frame(maxWidth: .infinity, alignment: .topLeading)
             }
-
-            // Phase metadata
-            phaseMetadata
         }
     }
 
-    private var searchResultsSummary: some View {
+    private var webResultsSummary: some View {
         VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Text("Search Results")
-                    .font(.subheadline)
-                    .fontWeight(.medium)
-                    .foregroundColor(.primary)
+            HStack(spacing: 8) {
+                Image(systemName: "network")
+                    .font(.caption)
+                    .foregroundColor(.green)
+
+                Text("\(message.webSearchResults.count) web results found")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
 
                 Spacer()
             }
 
-            HStack(spacing: 16) {
-                // Vector search results count
-                if !message.vectorSearchResults.isEmpty {
-                    HStack(spacing: 4) {
-                        Image(systemName: "doc.text.magnifyingglass")
-                            .font(.caption)
-                            .foregroundColor(.blue)
-
-                        Text("\(message.vectorSearchResults.count) docs")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                }
-
-                // Web search results count
-                if !message.webSearchResults.isEmpty {
-                    HStack(spacing: 4) {
-                        Image(systemName: "network")
-                            .font(.caption)
-                            .foregroundColor(.green)
-
-                        Text("\(message.webSearchResults.count) web")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                }
-
-                Spacer()
-            }
-
-            // Novelty reward if available
-            if let reward = message.noveltyReward, reward.success {
-                HStack(spacing: 4) {
-                    Image(systemName: "gift.fill")
-                        .font(.caption)
-                        .foregroundColor(.orange)
-
-                    Text("Earned \(reward.formattedAmount) CHOIR")
-                        .font(.caption)
-                        .foregroundColor(.orange)
-                        .fontWeight(.medium)
-                }
+            // Show formatted web results if available
+            let webResults = message.formatWebResultsToMarkdown()
+            if !webResults.isEmpty {
+                PaginatedMarkdownView(
+                    pageContent: webResults,
+                    currentMessage: message
+                )
+                .frame(maxWidth: .infinity, alignment: .topLeading)
             }
         }
-        .padding(.vertical, 8)
-        .padding(.horizontal, 12)
-        .background(
-            RoundedRectangle(cornerRadius: 8)
-                .fill(Color.secondary.opacity(0.1))
-        )
     }
 
     private var streamingPlaceholder: some View {
@@ -246,76 +332,7 @@ struct ExperiencePageView: View {
         .padding(.vertical, 40)
     }
 
-    // MARK: - Metadata
 
-    private var phaseMetadata: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Divider()
-                .padding(.vertical, 4)
-
-            HStack {
-                Text("Phase Details")
-                    .font(.caption)
-                    .fontWeight(.medium)
-                    .foregroundColor(.secondary)
-
-                Spacer()
-            }
-
-            VStack(alignment: .leading, spacing: 4) {
-                // Vector phase metadata
-                if let vectorPhase = message.phaseResults[.experienceVectors] {
-                    metadataSection(title: "Vector Search", phaseResult: vectorPhase)
-                }
-
-                // Web phase metadata
-                if let webPhase = message.phaseResults[.experienceWeb] {
-                    metadataSection(title: "Web Search", phaseResult: webPhase)
-                }
-
-                // Combined content length
-                if !combinedContent.isEmpty {
-                    metadataRow(label: "Total Content", value: "\(combinedContent.count) characters")
-                }
-            }
-        }
-        .padding(.top, 8)
-    }
-
-    private func metadataSection(title: String, phaseResult: PhaseResult) -> some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text(title)
-                .font(.caption2)
-                .fontWeight(.medium)
-                .foregroundColor(.primary)
-
-            if let provider = phaseResult.provider {
-                metadataRow(label: "Provider", value: provider)
-            }
-
-            if let modelName = phaseResult.modelName {
-                metadataRow(label: "Model", value: modelName)
-            }
-
-            metadataRow(label: "Content", value: "\(phaseResult.content.count) chars")
-        }
-        .padding(.leading, 8)
-    }
-
-    private func metadataRow(label: String, value: String) -> some View {
-        HStack {
-            Text(label + ":")
-                .font(.caption2)
-                .foregroundColor(.secondary)
-                .frame(width: 80, alignment: .leading)
-
-            Text(value)
-                .font(.caption2)
-                .foregroundColor(.primary)
-
-            Spacer()
-        }
-    }
 }
 
 #Preview {

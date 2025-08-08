@@ -18,6 +18,9 @@ class PostchainViewModel: ObservableObject {
     @Published var processingStatus: String = ""
     @Published var isProcessingLargeInput: Bool = false
 
+    // Track which phases are currently being processed
+    @Published private(set) var processingPhases: Set<Phase> = []
+
     // Track current active message ID
     @Published private(set) var activeMessageId: String = UUID().uuidString
 
@@ -64,18 +67,22 @@ class PostchainViewModel: ObservableObject {
         self.responses = coordinator.responses
         self.isProcessing = coordinator.isProcessing
 
-        // Update active message ID if changed in coordinator
-        if let coordinator = coordinator as? PostchainCoordinatorImpl,
-           let activeId = coordinator.activeMessageId?.uuidString {
-            self.activeMessageId = activeId
+        // Update processing phases if coordinator supports it
+        if let coordinator = coordinator as? PostchainCoordinatorImpl {
+            self.processingPhases = coordinator.processingPhases
 
-            // Update structured results for this message if they exist in coordinator
-            if !coordinator.vectorResults.isEmpty {
-                self.vectorResultsByMessage[activeId] = coordinator.vectorResults
-            }
+            // Update active message ID if changed in coordinator
+            if let activeId = coordinator.activeMessageId?.uuidString {
+                self.activeMessageId = activeId
 
-            if !coordinator.webResults.isEmpty {
-                self.webResultsByMessage[activeId] = coordinator.webResults
+                // Update structured results for this message if they exist in coordinator
+                if !coordinator.vectorResults.isEmpty {
+                    self.vectorResultsByMessage[activeId] = coordinator.vectorResults
+                }
+
+                if !coordinator.webResults.isEmpty {
+                    self.webResultsByMessage[activeId] = coordinator.webResults
+                }
             }
         }
 
@@ -101,11 +108,11 @@ class PostchainViewModel: ObservableObject {
         }
     }
 
-    func process(_ input: String) async throws {
+    func process(_ input: String, aiMessageId: UUID? = nil) async throws {
         error = nil
 
-        // Set a new active message ID for this process
-        activeMessageId = UUID().uuidString
+        // Use provided AI message ID or generate a new one
+        activeMessageId = aiMessageId?.uuidString ?? UUID().uuidString
 
         // Clear state before starting new process
         currentPhase = .action
@@ -257,6 +264,11 @@ class PostchainViewModel: ObservableObject {
             if isLastPhaseComplete {
                 self.isProcessing = false
 
+                // Mark the AI message as no longer streaming
+                if let msg = self.findMessage(by: targetMessageId) {
+                    msg.isStreaming = false
+                }
+
                 // Explicitly dismiss keyboard when processing completes
                 UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
 
@@ -264,6 +276,11 @@ class PostchainViewModel: ObservableObject {
                 // Let the user manually select the phase they want to view
             } else if status == "error" {
                 self.isProcessing = false // Also stop on error
+
+                // Mark the AI message as no longer streaming on error
+                if let msg = self.findMessage(by: targetMessageId) {
+                    msg.isStreaming = false
+                }
 
                 // Also dismiss keyboard on error
                 UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)

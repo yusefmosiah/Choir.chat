@@ -119,8 +119,14 @@ class PostchainCoordinatorImpl: PostchainCoordinator, ObservableObject {
         // Set active thread
         let thread = currentChoirThread
 
-        // Set the active message ID to the latest message in the thread
-        activeMessageId = thread?.messages.last?.id
+        // Set the active message ID from the view model (should be the AI message ID)
+        if let viewModel = viewModel {
+            let messageIdString = viewModel.activeMessageId
+            activeMessageId = UUID(uuidString: messageIdString)
+        } else {
+            // Fallback: use the latest message in the thread
+            activeMessageId = thread?.messages.last?.id
+        }
 
         // Reset all state
         responses = [:]
@@ -285,9 +291,20 @@ class PostchainCoordinatorImpl: PostchainCoordinator, ObservableObject {
         // Update the current phase
         currentPhase = phaseEnum
 
+        // Update processing phases set based on status
+        if event.status == "running" {
+            processingPhases.insert(phaseEnum)
+        } else if event.status == "complete" || event.status == "error" {
+            processingPhases.remove(phaseEnum)
+        }
+
+        // Notify view model of processing phases change
+        viewModel?.updateState()
+
         // --- BEGIN VECTOR RESULTS DEBUG ---
         if phaseEnum == .experienceVectors {
-            if let results = event.vectorResults {
+            if event.vectorResults != nil {
+                // Vector results available for experience vectors phase
             }
         }
         // --- END VECTOR RESULTS DEBUG ---
@@ -300,7 +317,8 @@ class PostchainCoordinatorImpl: PostchainCoordinator, ObservableObject {
         if let vectorResults = event.vectorResults {
 
             // Enhanced logging for vector results inspection
-            for (i, vector) in vectorResults.enumerated() {
+            for _ in vectorResults.enumerated() {
+                // Process vector results
             }
 
             self.vectorResults = vectorResults
@@ -329,7 +347,8 @@ class PostchainCoordinatorImpl: PostchainCoordinator, ObservableObject {
             // Add extra debugging specifically for model name issue
 
             // Check if the event.modelName is defined but empty
-            if let modelName = event.modelName {
+            if event.modelName != nil {
+                // Model name is available
             }
 
             // Update the message with the streaming content, even if it's incomplete
@@ -405,7 +424,7 @@ class PostchainCoordinatorImpl: PostchainCoordinator, ObservableObject {
                 if thread.messages.count > 0 && thread.messages[0].isUser {
                     let userMessage = thread.messages[0]
                     let userPrompt = userMessage.content
-                    var generatedTitle = userPrompt.prefixWords(10)
+                    let generatedTitle = userPrompt.prefixWords(10)
                     let finalTitle = generatedTitle.isEmpty ? "New Thread" : generatedTitle
 
                     // Check for duplicate titles and append an incrementing number if needed

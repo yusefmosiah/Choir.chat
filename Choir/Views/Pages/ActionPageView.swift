@@ -5,6 +5,9 @@ struct ActionPageView: View {
     @ObservedObject var message: Message
     @ObservedObject var viewModel: PostchainViewModel
 
+    // Optional callback for page navigation requests
+    var onPageNavigationRequest: ((PageAwareScrollView<AnyView>.PageNavigationDirection) -> Void)? = nil
+
     private var actionContent: String {
         message.getPhaseContent(.action)
     }
@@ -14,25 +17,32 @@ struct ActionPageView: View {
     }
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
-                // Page header
-                pageHeader
+        PageAwareScrollView(
+            content: {
+                AnyView(
+                    VStack(alignment: .leading, spacing: 16) {
+                        // Page header
+                        pageHeader
 
-                // Content area
-                if hasContent {
-                    contentView
-                } else if message.isStreaming {
-                    streamingPlaceholder
-                } else {
-                    emptyStateView
-                }
+                        // Content area
+                        if hasContent {
+                            contentView
+                        } else if message.isStreaming {
+                            streamingPlaceholder
+                        } else {
+                            emptyStateView
+                        }
 
-                Spacer(minLength: 20)
+                        Spacer(minLength: 20)
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.top, 8)
+                )
+            },
+            onPageNavigationRequest: { direction in
+                onPageNavigationRequest?(direction)
             }
-            .padding(.horizontal, 16)
-            .padding(.top, 8)
-        }
+        )
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 
@@ -80,10 +90,7 @@ struct ActionPageView: View {
             )
             .frame(maxWidth: .infinity, alignment: .topLeading)
 
-            // Phase metadata if available
-            if let phaseResult = message.phaseResults[.action] {
-                phaseMetadata(for: phaseResult)
-            }
+
         }
     }
 
@@ -132,51 +139,7 @@ struct ActionPageView: View {
         .padding(.vertical, 40)
     }
 
-    // MARK: - Metadata
 
-    private func phaseMetadata(for phaseResult: PhaseResult) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Divider()
-                .padding(.vertical, 4)
-
-            HStack {
-                Text("Phase Details")
-                    .font(.caption)
-                    .fontWeight(.medium)
-                    .foregroundColor(.secondary)
-
-                Spacer()
-            }
-
-            VStack(alignment: .leading, spacing: 4) {
-                if let provider = phaseResult.provider {
-                    metadataRow(label: "Provider", value: provider)
-                }
-
-                if let modelName = phaseResult.modelName {
-                    metadataRow(label: "Model", value: modelName)
-                }
-
-                metadataRow(label: "Content Length", value: "\(phaseResult.content.count) characters")
-            }
-        }
-        .padding(.top, 8)
-    }
-
-    private func metadataRow(label: String, value: String) -> some View {
-        HStack {
-            Text(label + ":")
-                .font(.caption2)
-                .foregroundColor(.secondary)
-                .frame(width: 80, alignment: .leading)
-
-            Text(value)
-                .font(.caption2)
-                .foregroundColor(.primary)
-
-            Spacer()
-        }
-    }
 }
 
 #Preview {

@@ -5,6 +5,14 @@ struct IOUPageView: View {
     @ObservedObject var message: Message
     @ObservedObject var viewModel: PostchainViewModel
 
+    // Optional callback for page navigation requests
+    var onPageNavigationRequest: ((PageAwareScrollView<AnyView>.PageNavigationDirection) -> Void)? = nil
+
+    // State for collapsible sections
+    @State private var isIntentionExpanded: Bool = true
+    @State private var isObservationExpanded: Bool = true
+    @State private var isUnderstandingExpanded: Bool = true
+
     private var intentionContent: String {
         message.getPhaseContent(.intention)
     }
@@ -54,25 +62,32 @@ struct IOUPageView: View {
     }
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
-                // Page header
-                pageHeader
+        PageAwareScrollView(
+            content: {
+                AnyView(
+                    VStack(alignment: .leading, spacing: 16) {
+                        // Page header
+                        pageHeader
 
-                // Content area
-                if hasContent {
-                    contentView
-                } else if isStreaming {
-                    streamingPlaceholder
-                } else {
-                    emptyStateView
-                }
+                        // Content area
+                        if hasContent {
+                            contentView
+                        } else if isStreaming {
+                            streamingPlaceholder
+                        } else {
+                            emptyStateView
+                        }
 
-                Spacer(minLength: 20)
+                        Spacer(minLength: 20)
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.top, 8)
+                )
+            },
+            onPageNavigationRequest: { direction in
+                onPageNavigationRequest?(direction)
             }
-            .padding(.horizontal, 16)
-            .padding(.top, 8)
-        }
+        )
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 
@@ -113,21 +128,126 @@ struct IOUPageView: View {
 
     private var contentView: some View {
         VStack(alignment: .leading, spacing: 16) {
-            // Phase progress indicator
-            phaseProgressIndicator
+            // Intention section
+            if hasIntentionContent || isStreamingIntention {
+                CollapsibleSection(
+                    title: "Intention",
+                    icon: "target",
+                    isExpanded: $isIntentionExpanded
+                ) {
+                    intentionSectionContent
+                }
+                .headerBackground(Color.purple.opacity(0.1))
+            }
 
-            // Main content
-            if !combinedContent.isEmpty {
+            // Observation section
+            if hasObservationContent || isStreamingObservation {
+                CollapsibleSection(
+                    title: "Observation",
+                    icon: "eye.fill",
+                    isExpanded: $isObservationExpanded
+                ) {
+                    observationSectionContent
+                }
+                .headerBackground(Color.orange.opacity(0.1))
+            }
+
+            // Understanding section
+            if hasUnderstandingContent || isStreamingUnderstanding {
+                CollapsibleSection(
+                    title: "Understanding",
+                    icon: "checkmark.circle.fill",
+                    isExpanded: $isUnderstandingExpanded
+                ) {
+                    understandingSectionContent
+                }
+                .headerBackground(Color.green.opacity(0.1))
+            }
+
+
+        }
+    }
+
+    // MARK: - Helper Properties
+
+    private var hasIntentionContent: Bool {
+        !intentionContent.isEmpty
+    }
+
+    private var hasObservationContent: Bool {
+        !observationContent.isEmpty
+    }
+
+    private var hasUnderstandingContent: Bool {
+        !understandingContent.isEmpty
+    }
+
+    private var isStreamingIntention: Bool {
+        message.isStreaming && message.phaseResults[.intention] != nil
+    }
+
+    private var isStreamingObservation: Bool {
+        message.isStreaming && message.phaseResults[.observation] != nil
+    }
+
+    private var isStreamingUnderstanding: Bool {
+        message.isStreaming && message.phaseResults[.understanding] != nil
+    }
+
+    // MARK: - Section Content Views
+
+    private var intentionSectionContent: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            if !intentionContent.isEmpty {
                 PaginatedMarkdownView(
-                    pageContent: combinedContent,
+                    pageContent: intentionContent,
                     currentMessage: message
                 )
                 .frame(maxWidth: .infinity, alignment: .topLeading)
+            } else if isStreamingIntention {
+                streamingIndicator(for: "Analyzing intention")
             }
-
-            // Phase metadata
-            phaseMetadata
         }
+    }
+
+    private var observationSectionContent: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            if !observationContent.isEmpty {
+                PaginatedMarkdownView(
+                    pageContent: observationContent,
+                    currentMessage: message
+                )
+                .frame(maxWidth: .infinity, alignment: .topLeading)
+            } else if isStreamingObservation {
+                streamingIndicator(for: "Making observations")
+            }
+        }
+    }
+
+    private var understandingSectionContent: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            if !understandingContent.isEmpty {
+                PaginatedMarkdownView(
+                    pageContent: understandingContent,
+                    currentMessage: message
+                )
+                .frame(maxWidth: .infinity, alignment: .topLeading)
+            } else if isStreamingUnderstanding {
+                streamingIndicator(for: "Building understanding")
+            }
+        }
+    }
+
+    private func streamingIndicator(for type: String) -> some View {
+        HStack(spacing: 8) {
+            ProgressView()
+                .scaleEffect(0.8)
+
+            Text(type + "...")
+                .font(.caption)
+                .foregroundColor(.secondary)
+        }
+        .padding(.vertical, 8)
     }
 
     private var phaseProgressIndicator: some View {
@@ -245,81 +365,7 @@ struct IOUPageView: View {
         .padding(.vertical, 40)
     }
 
-    // MARK: - Metadata
 
-    private var phaseMetadata: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Divider()
-                .padding(.vertical, 4)
-
-            HStack {
-                Text("Phase Details")
-                    .font(.caption)
-                    .fontWeight(.medium)
-                    .foregroundColor(.secondary)
-
-                Spacer()
-            }
-
-            VStack(alignment: .leading, spacing: 4) {
-                // Intention phase metadata
-                if let intentionPhase = message.phaseResults[.intention] {
-                    metadataSection(title: "Intention", phaseResult: intentionPhase)
-                }
-
-                // Observation phase metadata
-                if let observationPhase = message.phaseResults[.observation] {
-                    metadataSection(title: "Observation", phaseResult: observationPhase)
-                }
-
-                // Understanding phase metadata
-                if let understandingPhase = message.phaseResults[.understanding] {
-                    metadataSection(title: "Understanding", phaseResult: understandingPhase)
-                }
-
-                // Combined content length
-                if !combinedContent.isEmpty {
-                    metadataRow(label: "Total Content", value: "\(combinedContent.count) characters")
-                }
-            }
-        }
-        .padding(.top, 8)
-    }
-
-    private func metadataSection(title: String, phaseResult: PhaseResult) -> some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text(title)
-                .font(.caption2)
-                .fontWeight(.medium)
-                .foregroundColor(.primary)
-
-            if let provider = phaseResult.provider {
-                metadataRow(label: "Provider", value: provider)
-            }
-
-            if let modelName = phaseResult.modelName {
-                metadataRow(label: "Model", value: modelName)
-            }
-
-            metadataRow(label: "Content", value: "\(phaseResult.content.count) chars")
-        }
-        .padding(.leading, 8)
-    }
-
-    private func metadataRow(label: String, value: String) -> some View {
-        HStack {
-            Text(label + ":")
-                .font(.caption2)
-                .foregroundColor(.secondary)
-                .frame(width: 80, alignment: .leading)
-
-            Text(value)
-                .font(.caption2)
-                .foregroundColor(.primary)
-
-            Spacer()
-        }
-    }
 }
 
 #Preview {

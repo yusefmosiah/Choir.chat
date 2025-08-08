@@ -18,16 +18,10 @@ struct ContentView: View {
     @State private var showingImportSheet = false
     @State private var isLoadingThreads = false
 
-    // View model for controlling thread selection from MainTabView
-    @ObservedObject var viewModel: ContentViewModel
+
 
     // For notification handling
     @State private var notificationCancellable: AnyCancellable?
-
-    // Initialize with default ContentViewModel if none provided
-    init(viewModel: ContentViewModel = ContentViewModel()) {
-        self.viewModel = viewModel
-    }
 
     var body: some View {
         NavigationSplitView {
@@ -119,11 +113,11 @@ struct ContentView: View {
             if let thread = selectedChoirThread {
                 // If we have a thread ID, load the full thread content before displaying
                 if let fullThread = threadManager.loadFullThread(threadId: thread.id) {
-                    ChoirThreadDetailView(thread: fullThread, viewModel: postchainViewModel)
+                    ConversationPageView(thread: fullThread, viewModel: postchainViewModel)
                         .modifier(HideTabBarModifier(onlyOnIPhone: true))
                 } else {
                     // Fallback to using the metadata-only thread if full content can't be loaded
-                    ChoirThreadDetailView(thread: thread, viewModel: postchainViewModel)
+                    ConversationPageView(thread: thread, viewModel: postchainViewModel)
                         .modifier(HideTabBarModifier(onlyOnIPhone: true))
                 }
             } else {
@@ -207,12 +201,7 @@ struct ContentView: View {
             notificationCancellable?.cancel()
             notificationCancellable = nil
         }
-        .onChange(of: viewModel.shouldResetThreadSelection) { _, shouldReset in
-            if shouldReset {
-                // Reset thread selection when signaled from tab change
-                selectedChoirThread = nil
-            }
-        }
+
         .onChange(of: selectedChoirThread) { _, newThread in
             guard let thread = newThread else { return }
             // No need to update lastModified since we're sorting by createdAt
@@ -315,7 +304,7 @@ struct ChoirThreadRow: View {
 }
 
 #Preview {
-    ContentView(viewModel: ContentViewModel())
+    ContentView()
 }
 
 // MARK: - Hide Tab Bar Modifier

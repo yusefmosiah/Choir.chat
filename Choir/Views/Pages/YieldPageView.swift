@@ -5,6 +5,9 @@ struct YieldPageView: View {
     @ObservedObject var message: Message
     @ObservedObject var viewModel: PostchainViewModel
 
+    // Optional callback for page navigation requests
+    var onPageNavigationRequest: ((PageAwareScrollView<AnyView>.PageNavigationDirection) -> Void)? = nil
+
     private var yieldContent: String {
         message.getPhaseContent(.yield)
     }
@@ -18,25 +21,32 @@ struct YieldPageView: View {
     }
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
-                // Page header
-                pageHeader
+        PageAwareScrollView(
+            content: {
+                AnyView(
+                    VStack(alignment: .leading, spacing: 16) {
+                        // Page header
+                        pageHeader
 
-                // Content area
-                if hasContent {
-                    contentView
-                } else if isStreaming {
-                    streamingPlaceholder
-                } else {
-                    emptyStateView
-                }
+                        // Content area
+                        if hasContent {
+                            contentView
+                        } else if isStreaming {
+                            streamingPlaceholder
+                        } else {
+                            emptyStateView
+                        }
 
-                Spacer(minLength: 20)
+                        Spacer(minLength: 20)
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.top, 8)
+                )
+            },
+            onPageNavigationRequest: { direction in
+                onPageNavigationRequest?(direction)
             }
-            .padding(.horizontal, 16)
-            .padding(.top, 8)
-        }
+        )
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 
@@ -90,8 +100,7 @@ struct YieldPageView: View {
             // Citations and rewards section
             citationsAndRewards
 
-            // Phase metadata
-            phaseMetadata
+
         }
     }
 
@@ -285,56 +294,7 @@ struct YieldPageView: View {
         .padding(.vertical, 40)
     }
 
-    // MARK: - Metadata
 
-    private var phaseMetadata: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Divider()
-                .padding(.vertical, 4)
-
-            HStack {
-                Text("Phase Details")
-                    .font(.caption)
-                    .fontWeight(.medium)
-                    .foregroundColor(.secondary)
-
-                Spacer()
-            }
-
-            if let phaseResult = message.phaseResults[.yield] {
-                VStack(alignment: .leading, spacing: 4) {
-                    if let provider = phaseResult.provider {
-                        metadataRow(label: "Provider", value: provider)
-                    }
-
-                    if let modelName = phaseResult.modelName {
-                        metadataRow(label: "Model", value: modelName)
-                    }
-
-                    metadataRow(label: "Content Length", value: "\(phaseResult.content.count) characters")
-
-                    // Processing time if available
-                    metadataRow(label: "Generated", value: DateFormatter.localizedString(from: message.timestamp, dateStyle: .none, timeStyle: .short))
-                }
-            }
-        }
-        .padding(.top, 8)
-    }
-
-    private func metadataRow(label: String, value: String) -> some View {
-        HStack {
-            Text(label + ":")
-                .font(.caption2)
-                .foregroundColor(.secondary)
-                .frame(width: 80, alignment: .leading)
-
-            Text(value)
-                .font(.caption2)
-                .foregroundColor(.primary)
-
-            Spacer()
-        }
-    }
 }
 
 #Preview {
