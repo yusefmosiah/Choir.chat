@@ -302,7 +302,7 @@ tree.md
 │   ├── postchain_service_redesign.md
 │   ├── postchain_temporal_logic.md
 │   ├── postchain_ui_redesign.md
-│   ├── postchain_ui_refactor_checklist.md
+│   ├── postchain_ui_refactor_vertical_scroll_with_virtual_pages_checklist.md
 │   ├── process_doctrine.md
 │   ├── publish_thread_feature.md
 │   ├── relationship_staking.md
