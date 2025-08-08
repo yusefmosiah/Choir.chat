@@ -97,16 +97,16 @@ struct MessageRow: View {
                             }
                     }
 
-                    // Full PostchainView loaded lazily
+                    // Full VerticalPostchainView loaded lazily
                     if shouldLoadFullContent {
-                        PostchainView(
+                        VerticalPostchainView(
                             message: message,
                             isProcessing: isProcessing,
                             viewModel: viewModel,
                             localThreadIDs: [],
                             forceShowAllPhases: true,
                             coordinator: viewModel.coordinator as? PostchainCoordinatorImpl,
-                            viewId: message.id
+                            viewId: message.id.uuidString
                         )
                         .id("postchain_\(message.id)_\(message.phases.hashValue)")
                     }
