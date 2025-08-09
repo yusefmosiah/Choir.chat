@@ -41,9 +41,9 @@ struct ConversationPageView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // Main turn navigation area
+            // Main conversation area: unified vertical tape navigation
             if !thread.messages.isEmpty {
-                HorizontalTurnController(
+                VerticalTapeController(
                     thread: thread,
                     viewModel: viewModel
                 )
@@ -101,15 +101,9 @@ struct ConversationPageView: View {
         .sheet(isPresented: $showModelConfig) {
             ModelConfigView()
         }
-        .onAppear {
-            // Turn controller handles navigation automatically
-        }
-        .onChange(of: thread.messages) { _, _ in
-            // Turn controller handles message updates automatically
-        }
-        .onChange(of: viewModel.isProcessing) { _, _ in
-            // Turn controller handles processing updates automatically
-        }
+        .onAppear { }
+        .onChange(of: thread.messages) { _, _ in }
+        .onChange(of: viewModel.isProcessing) { _, _ in }
         .onDisappear {
             saveThread()
             cleanup()

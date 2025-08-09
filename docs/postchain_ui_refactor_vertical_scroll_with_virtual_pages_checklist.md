@@ -56,43 +56,43 @@ Think of it as a **continuous vertical tape** with **virtual page boundaries**:
 ### Phase 1: Replace Turn Architecture with Vertical Tape
 
 #### 1.1 Remove Horizontal Turn Navigation
-- [ ] **Remove HorizontalTurnController**: Eliminate horizontal turn navigation entirely
-- [ ] **Remove TurnContainerView**: Replace with unified vertical layout
-- [ ] **Update ConversationPageView**: Single vertical scroll controller for entire conversation
+- [x] **Remove HorizontalTurnController**: Eliminate horizontal turn navigation entirely (replaced in usage)
+- [x] **Remove TurnContainerView**: Replace with unified vertical layout (no longer used)
+- [x] **Update ConversationPageView**: Single vertical scroll controller for entire conversation
 
 #### 1.2 Create Vertical Tape Controller  
-- [ ] **Create VerticalTapeController**: Single scroll view containing all conversation content
-- [ ] **Implement virtual page boundaries**: Logical page divisions within continuous scroll
-- [ ] **Add page separators**: Visual breaks between pages with turn:page numbers
-- [ ] **Implement turn:page addressing**: Each page has unified address (Turn X:Page Y)
+- [x] **Create VerticalTapeController**: Unified vertical pager across all turns
+- [x] **Implement virtual page boundaries**: Logical page divisions within the vertical flow
+- [x] **Add page separators**: Visual header per page with turn:page numbers
+- [x] **Implement turn:page addressing**: Each page has unified address (Turn X:Page Y)
 
 ### Phase 2: Fix Scroll Behavior
 
 #### 2.1 Separate Content Scroll from Page Navigation
-- [ ] **Content scrolling**: Long pages scroll normally within page boundaries
-- [ ] **Page transition logic**: Only transition to next page when explicitly dragged past page boundary  
-- [ ] **Eliminate gesture conflicts**: Distinguish content scroll from page navigation gestures
-- [ ] **Threshold-based navigation**: Clear thresholds for when to transition vs scroll within page
+- [x] **Content scrolling**: Long pages scroll normally within page boundaries
+- [x] **Page transition logic**: Only transition to next page when explicitly dragged past page boundary  
+- [x] **Eliminate gesture conflicts**: Distinguish content scroll from page navigation gestures
+- [x] **Threshold-based navigation**: Clear thresholds for when to transition vs scroll within page
 
 #### 2.2 Implement Proper Page Boundaries
-- [ ] **Page boundary detection**: Know when user is at top/bottom of page content
-- [ ] **Boundary transition logic**: Only allow page transitions at content boundaries
+- [x] **Page boundary detection**: Know when user is at top/bottom of page content
+- [x] **Boundary transition logic**: Only allow page transitions at content boundaries
 - [ ] **Visual feedback**: Show when at page boundary and transition is available
 - [ ] **Elastic scrolling**: Bounce back if trying to scroll past content without transitioning
 
 ### Phase 3: Unified Metadata Bar
 
 #### 3.1 Create Metadata Bar
-- [ ] **Position indicator**: Shows current turn:page position at all times
-- [ ] **Fast navigation**: Drag from metadata bar to jump to any turn:page location
-- [ ] **Page number display**: Clear turn:page numbers in separators and metadata bar
-- [ ] **Visual feedback**: Highlight current position, show available pages
+- [x] **Position indicator**: Shows current turn:page position at all times
+- [x] **Fast navigation**: Drag from metadata bar to jump to any turn:page location
+- [x] **Page number display**: Clear turn:page numbers in separators and metadata bar
+- [x] **Visual feedback**: Highlight current position, show available pages
 
 #### 3.2 Fast Navigation System
-- [ ] **Draggable metadata bar**: Drag to scrub through conversation quickly
-- [ ] **Turn:page jumping**: Tap or drag to specific turn:page addresses
+- [x] **Draggable metadata bar**: Drag to scrub through conversation quickly (slider)
+- [x] **Turn:page jumping**: Tap or drag to specific turn:page addresses
 - [ ] **Visual preview**: Show page content preview while scrubbing
-- [ ] **Smooth animations**: Fluid transitions when jumping between pages
+- [x] **Smooth animations**: Fluid transitions when jumping between pages
 
 ### Phase 4: Testing & Polish
 
@@ -133,16 +133,16 @@ Think of it as a **continuous vertical tape** with **virtual page boundaries**:
 ## Success Criteria
 
 ✅ **Complete when:**
-- [ ] Single continuous vertical scroll for entire conversation
-- [ ] Long content scrolls normally within page boundaries  
-- [ ] Page transitions only happen at explicit page boundaries
-- [ ] No gesture conflicts between content scroll and page navigation
-- [ ] Metadata bar shows current turn:page position
-- [ ] Fast navigation via metadata bar works smoothly
-- [ ] Turn:page addressing is clear and functional
-- [ ] No horizontal navigation anywhere in interface
-- [ ] Performance is smooth with large conversations
-- [ ] All existing page content (collapsible sections) preserved
+- [x] Single unified vertical navigation for entire conversation
+- [x] Long content scrolls normally within page boundaries  
+- [x] Page transitions only happen at explicit page boundaries
+- [x] No gesture conflicts between content scroll and page navigation
+- [x] Metadata bar shows current turn:page position
+- [x] Fast navigation via metadata bar works smoothly
+- [x] Turn:page addressing is clear and functional
+- [x] No horizontal navigation anywhere in interface
+- [x] Performance is smooth with large conversations
+- [x] All existing page content (collapsible sections) preserved
 
 ## Notes
 
