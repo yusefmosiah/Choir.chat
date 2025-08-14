@@ -1,3 +1,5 @@
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/yusefmosiah/Choir.chat)
+
 # Choir: Collaborative Intelligence Infrastructure
 
 Choir transforms AI output into collaborative intelligence infrastructure, building the economic foundation for the learning economy. We invert digital economics: instead of extracting value from users, we reward intellectual contribution through token economics and enable anonymous high-stakes coordination for knowledge creation.
