@@ -1,4 +1,37 @@
 # Changelog
+
+## [2025-08-18] - 2025-08-18
+
+### Added
+
+- Company incorporation: Choir Harmonic Intelligence Platform, Inc. (CHI) formed in early May 2025
+- TestFlight beta launch (early May 2025); shared with early users for feedback
+- Conductor + Instruments (Agents) architecture: client-side Conductor orchestrating server agents (Ghostwriter, Publisher, Revision)
+- Privacy-first Conductor: planning to run Conductor in Phala Network TEE with GPU LLM for private inference and orchestration
+
+### Changed
+
+- Product/positioning pivot: from “new kind of social media” to “the language game for the learning economy” focused on conversation-to-publication with citations and rewards
+- Execution focus narrowed: 80/20 on Ghostwriter writing agent (research/drafting/citation) instead of “do everything”
+- Economics updated:
+  - Credits (IAP-compliant) gate Ghostwriter compute; no subscription plans
+  - Tokens issued only on Ghostwriter invocations (not per prompt)
+  - Publication investment (pay to publish; ranking by spend)
+  - Revision markets (stake to propose revisions; accepted → co-authorship; split decisions route to Treasury)
+  - Citation rewards currently 5 tokens per citation; treasury-based scaling planned
+- Architecture/docs migration: deprecated PostChain/AEIOU terminology in favor of Conductor + Agents across content and docs
+- Provider updates: add AWS Bedrock; remove Fireworks
+
+### Feedback Summary (May–Aug 2025)
+
+- Mixed feedback on beta: strong resonance with the idea (+), concerns about execution and clarity (–)
+- Action: simplified onboarding/messaging and refocused feature set to clarify “what Choir is” and “how to use it”
+
+### Notes
+
+- Mainnet status unchanged: CHOIR live on Sui mainnet
+- Wallet-based identity with anonymity by default; attribution on publish
+
 ## [2025-04-28] - 2025-04-28
 
 ### Added
