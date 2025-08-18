@@ -19,14 +19,14 @@ The Social Discourse Engine creates a flywheel effect where individual expressio
     *   **Citation Network Analysis:** AI tracks which ideas prove valuable to others, creating a reputation system based on intellectual contribution.
     *   **Relationship Recommendations:** AI suggests potential connections based on intellectual compatibility rather than social graph proximity.
 
-**Economic Alignment Through Relationship Staking:**
+**Economic Alignment Through Publication Investment and Revision Markets:**
 
 The Social Discourse Engine's key innovation is using economic incentives to align users toward quality discourse and meaningful relationships:
 
 *   **CHOIR Tokens as Relationship Investment:**  Users earn tokens through quality contributions and can invest them in relationships with other users, creating shared economic interest in maintaining quality discourse.
     *   **Novelty Rewards:** Recognize original thinking and authentic perspectives that add value to community knowledge.
     *   **Citation Rewards:** Reward users whose ideas prove valuable to others, creating a merit-based reputation system.
-    *   **Relationship Staking:** Enable users to invest earned tokens in connections with like-minded individuals.
+    *   **Publication Investment:** Users pay to publish to choir.chat/<permalink>; ranking increases with spend. **Revision Markets:** Users stake to propose revisions; accept → stake to the piece + co‑authorship; reject → author keeps stake; unanimity required; split decisions route to Treasury for citation emissions.
 *   **Economic Filtering for Quality:**  Token requirements create natural barriers to low-effort interactions while enabling meaningful connections:
     *   **Spam Prevention:** Economic cost of relationship initiation filters out automated and low-effort interactions.
     *   **Serious Intent Signaling:** Staking tokens demonstrates genuine interest in forming meaningful connections.
@@ -58,7 +58,7 @@ By focusing on:
 
 *   **Facilitating Authentic Expression Through Anonymity and Merit-Based Evaluation**
 *   **Using AI to Identify Intellectual Compatibility Rather Than Demographic Similarity**
-*   **Creating Economic Alignment Through Relationship Staking and Quality Rewards**
+*   **Creating Economic Alignment Through Publication Investment, Revision Markets, and Quality Rewards**
 *   **Building a Platform Where Users Own Their Social Value and Relationships**
 
 Choir aims to create a new paradigm for social platforms – one where AI amplifies human connection rather than replacing it, where quality discourse is rewarded over engagement farming, and where meaningful relationships are the measure of success. The Social Discourse Engine theory provides the conceptual foundation for building technology that serves human community rather than extracting value from it.

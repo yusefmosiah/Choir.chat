@@ -4,7 +4,7 @@ VERSION core_system: 10.0 (Learning Economy Architecture)
 
 ## Overview
 
-Choir provides the technological infrastructure enabling transition from traditional education toward learning economy participation. The platform transforms natural conversation into publication-quality content, making intellectual discourse accessible to anyone regardless of writing skill, technical expertise, or institutional access. Our system architecture implements the **Conductor + 5 Instruments** model that orchestrates conversation-to-publication workflows through AI-enhanced collaborative intelligence.
+Choir provides the technological infrastructure enabling transition from traditional education toward learning economy participation. The platform transforms natural conversation into publication-quality content, making intellectual discourse accessible to anyone regardless of writing skill, technical expertise, or institutional access. Our system architecture implements the **Conductor + Agents** model—where "instruments" are agents with no fixed number—that orchestrates conversation-to-publication workflows through AI-enhanced collaborative intelligence.
 
 ## Foundational Principles: Learning Economy Infrastructure
 
@@ -15,39 +15,42 @@ Choir's architecture embodies core principles that enable the transition from cr
 3.  **Collaborative Intelligence:** AI serves as research assistant, writing collaborator, and intellectual partner rather than replacement. Humans provide creativity and judgment while AI handles execution and technical implementation.
 4.  **Intellectual Property Rights:** The platform creates genuine intellectual property rights through citation economics, inverting traditional social platforms that provide ephemeral rewards while capturing lasting economic value.
 
-## Core Components: Conductor + 5 Instruments Architecture
+## Core Components: Conductor + Agents Architecture
 
 1.  **The Conductor (Python API):**
     *   **Role:** Central orchestration layer that coordinates all system components and manages the conversation-to-publication workflow.
     *   **Function:** Authenticates users through Sui signatures, orchestrates AI processing phases, manages file input processing (txt, md, pdf, epub, YouTube transcripts), and coordinates between semantic understanding and economic rewards.
 
-2.  **Instrument 1: Semantic Engine (Qdrant):**
+2.  **Semantic Engine (Qdrant):**
     *   **Role:** Powers semantic understanding and knowledge discovery through vector storage and retrieval.
     *   **Function:** Stores conversation content and embeddings, enables semantic search for relevant prior knowledge, calculates novelty scores for original contributions, and provides context for AI-enhanced conversations.
 
-3.  **Instrument 2: Economic Layer (Sui Blockchain):**
+3.  **Economic Layer (Sui Blockchain):**
     *   **Role:** Manages CHOIR tokens and implements citation economics for intellectual property rights.
     *   **Function:** Executes reward distributions for quality contributions, manages citation rewards when insights prove foundational for others, and provides economic infrastructure where participants co-own intellectual value.
 
-4.  **Instrument 3: AI Processing (PostChain Workflow):**
-    *   **Role:** Transforms conversations into publication-quality content through structured AI enhancement.
-    *   **Function:** Processes input through multiple phases (Action, Experience, Intention, Observation, Understanding, Yield), integrates research assistance and collaborative editing, and produces citable articles with proper attribution.
+4.  **AI Processing (Conductor + Agents):**
+    *   **Role:** Transforms conversations into publication-quality content through agent specialization (no fixed phases)
+    *   **Function:** Conductor orchestrates server agents (Ghostwriter/Publisher/Revision) to plan, research, draft, cite, review, revise, and finalize outputs.
 
-5.  **Instrument 4: Content Processing (Multi-Format Input):**
+5.  **Content Processing (Multi-Format Input):**
     *   **Role:** Handles diverse input formats to democratize intellectual contribution.
     *   **Function:** Processes text files, PDFs, EPUBs, YouTube transcripts, and audio/video content, automatically switches to high-context models on overflow, and enables text-to-speech for accessibility.
 
-6.  **Instrument 5: Publication Infrastructure (Client Interface):**
+6.  **Publication Infrastructure (Client Interface):**
     *   **Role:** Provides accessible interface for conversation-to-publication workflow.
     *   **Function:** SwiftUI client with secure Sui key storage, real-time collaboration features, and seamless transition from conversation to published content.
 
+7.  **Agents ("Instruments")**
+    *   **Ghostwriter (first agent):** Transcribes, structures, and rewards raw thought; focuses on novelty and clarity.
+    *   Additional agents will be introduced over time.
 ## Architecture Flow: From Conversation to Publication
 
 The system creates a flow that transforms natural conversation into publication-quality intellectual contribution:
 
 1.  **Content Input**: User provides conversation, text files, PDFs, EPUBs, or YouTube URLs via **SwiftUI Client** with Sui-based authentication ensuring ownership.
-2.  **AI Research Assistance**: **Conductor** orchestrates **AI Processing** to gather relevant sources and context from **Semantic Engine**.
-3.  **Collaborative Enhancement**: **PostChain Workflow** transforms dialogue through structured phases, enhancing clarity and adding professional formatting.
+2.  **AI Research & Drafting**: **Conductor** orchestrates **Ghostwriter** to gather sources from **Semantic Engine**, draft, cite, review, and refine outputs.
+3.  **Collaborative Enhancement**: **Conductor + Agents** refine dialogue through collaborative editing toward publication‑quality results.
 4.  **Quality Assessment**: AI calculates novelty scores and identifies original insights worthy of citation rewards.
 5.  **Publication Generation**: Final output becomes citable article with proper attribution and professional presentation.
 6.  **Citation Economics**: **Economic Layer** distributes ongoing compensation when others reference the published work.

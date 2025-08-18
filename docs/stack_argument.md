@@ -4,15 +4,15 @@ VERSION stack_argument: 8.0 (Qdrant-Sui MVP Focus)
 
 ## Executive Summary
 
-This document argues for the focused technology stack selected for the **Choir Qdrant-Sui Minimum Viable Product (MVP)**. The primary goal of this MVP is to establish and validate the core data flow using Qdrant as the central data and vector store, integrated with a basic Sui blockchain mechanism for the CHIP token and reward structure. This stack leverages existing components where possible (like the current LCEL-based PostChain workflow) to accelerate MVP development while laying the foundation for future scalability.
+This document argues for the focused technology stack selected for the **Choir Qdrant-Sui Minimum Viable Product (MVP)**. The primary goal of this MVP is to validate the data flow using Qdrant as the vector store (with a migration path to XTrace under evaluation) and Sui for token issuance, while transitioning from a PostChain pipeline to a Conductor + Agents architecture.
 
 The core technologies for the Qdrant-Sui MVP are:
 
-1.  **Qdrant:** Central data layer for users, threads, messages (including embedded phase outputs), and phase-specific memory. Handles vector storage and semantic search.
-2.  **Sui (via PySUI Service):** Blockchain layer for the CHIP token and reward distribution mechanism (simplified for MVP).
-3.  **Python API (FastAPI/Uvicorn):** Orchestration layer handling client requests, PostChain execution, Qdrant interactions, and Sui service calls.
-4.  **PostChain Workflow (LCEL Implementation):** The existing `langchain_workflow.py` implementing the AEIOU-Y phases, adapted for refined Qdrant interactions.
-5.  **Langchain Utils (`langchain_utils.py`):** LLM abstraction layer used by the PostChain workflow.
+1.  **Qdrant:** Central data layer for users, threads, messages, and memory. Handles vector storage and semantic search (migration path to XTrace HE under evaluation).
+2.  **Sui (via PySUI Service):** Blockchain layer for the CHOIR token and reward distribution mechanism (simplified for MVP).
+3.  **Python API (FastAPI/Uvicorn):** Orchestration layer handling client requests, Conductor‑initiated agent calls (e.g., Ghostwriter), Qdrant interactions, and Sui service calls.
+4.  **Agent Orchestration:** Replace rigid phase pipeline with Conductor + Agents specialization (Ghostwriter/Publisher/Revision) without fixed phases.
+5.  **LLM Utils:** Provider abstraction with AWS Bedrock added; Fireworks removed.
 6.  **Pydantic:** Data validation for API and internal structures.
 7.  **Docker:** Containerization for deployment of the Python API.
 8.  **(Client Side) SwiftUI & Keychain:** User interface and secure Sui private key storage.
@@ -21,11 +21,11 @@ The core technologies for the Qdrant-Sui MVP are:
 
 The objective is to build a functional slice of the Choir system that demonstrates:
 
-1.  **Core Data Structure:** Storing users, threads, messages, and phase outputs in Qdrant using a refined schema.
-2.  **Semantic Search:** Utilizing Qdrant vector search within the Experience phase to find relevant priors.
-3.  **Phase-Specific Memory:** Implementing `intention_memory` and `observation_memory` in Qdrant.
-4.  **Reward Triggering:** Calculating basic novelty/similarity scores and triggering a (potentially simulated or basic) reward distribution via the Sui service based on message creation and citation.
-5.  **End-to-End Flow:** A user interacting via the SwiftUI client, triggering the PostChain workflow via the API, interacting with Qdrant, and potentially initiating a basic Sui reward action.
+1.  **Core Data Structure:** Storing users, threads, messages, and memory in Qdrant using a refined schema.
+2.  **Semantic Search:** Utilizing Qdrant vector search to find relevant priors (novelty and recall); migration to XTrace HE under evaluation.
+3.  **Agent Calls:** Conductor‑initiated server agent calls (Ghostwriter) for research/drafting/citation; no fixed phases.
+4.  **Reward Triggering:** Calculating novelty/similarity per Ghostwriter invocation; trigger reward distribution via the Sui service based on novelty and citations.
+5.  **End-to-End Flow:** A user interacting via the SwiftUI client, with Conductor calling Ghostwriter via the API, interacting with Qdrant, and triggering Sui reward actions.
 
 ## The Core MVP Stack & Rationale
 

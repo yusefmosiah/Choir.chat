@@ -17,7 +17,7 @@ VERSION core_system: 10.0 (Learning Economy Architecture)
 
 ## Overview
 
-Choir provides the technological infrastructure enabling transition from traditional education toward learning economy participation. The platform transforms natural conversation into publication-quality content, making intellectual discourse accessible to anyone regardless of writing skill, technical expertise, or institutional access. Our system architecture implements the **Conductor + 5 Instruments** model that orchestrates conversation-to-publication workflows through AI-enhanced collaborative intelligence.
+Choir provides the technological infrastructure enabling transition from traditional education toward learning economy participation. The platform transforms natural conversation into publication-quality content, making intellectual discourse accessible to anyone regardless of writing skill, technical expertise, or institutional access. Our system architecture implements the **Conductor + Agents** model—where "instruments" are agents with no fixed number—that orchestrates conversation-to-publication workflows through AI-enhanced collaborative intelligence.
 
 ## Foundational Principles: Learning Economy Infrastructure
 
@@ -28,39 +28,42 @@ Choir's architecture embodies core principles that enable the transition from cr
 3.  **Collaborative Intelligence:** AI serves as research assistant, writing collaborator, and intellectual partner rather than replacement. Humans provide creativity and judgment while AI handles execution and technical implementation.
 4.  **Intellectual Property Rights:** The platform creates genuine intellectual property rights through citation economics, inverting traditional social platforms that provide ephemeral rewards while capturing lasting economic value.
 
-## Core Components: Conductor + 5 Instruments Architecture
+## Core Components: Conductor + Agents Architecture
 
 1.  **The Conductor (Python API):**
     *   **Role:** Central orchestration layer that coordinates all system components and manages the conversation-to-publication workflow.
     *   **Function:** Authenticates users through Sui signatures, orchestrates AI processing phases, manages file input processing (txt, md, pdf, epub, YouTube transcripts), and coordinates between semantic understanding and economic rewards.
 
-2.  **Instrument 1: Semantic Engine (Qdrant):**
+2.  **Semantic Engine (Qdrant):**
     *   **Role:** Powers semantic understanding and knowledge discovery through vector storage and retrieval.
     *   **Function:** Stores conversation content and embeddings, enables semantic search for relevant prior knowledge, calculates novelty scores for original contributions, and provides context for AI-enhanced conversations.
 
-3.  **Instrument 2: Economic Layer (Sui Blockchain):**
+3.  **Economic Layer (Sui Blockchain):**
     *   **Role:** Manages CHOIR tokens and implements citation economics for intellectual property rights.
     *   **Function:** Executes reward distributions for quality contributions, manages citation rewards when insights prove foundational for others, and provides economic infrastructure where participants co-own intellectual value.
 
-4.  **Instrument 3: AI Processing (PostChain Workflow):**
-    *   **Role:** Transforms conversations into publication-quality content through structured AI enhancement.
-    *   **Function:** Processes input through multiple phases (Action, Experience, Intention, Observation, Understanding, Yield), integrates research assistance and collaborative editing, and produces citable articles with proper attribution.
+4.  **AI Processing (Conductor + Agents):**
+    *   **Role:** Transforms conversations into publication-quality content through agent specialization (no fixed phases)
+    *   **Function:** Conductor orchestrates server agents (Ghostwriter/Publisher/Revision) to plan, research, draft, cite, review, revise, and finalize outputs.
 
-5.  **Instrument 4: Content Processing (Multi-Format Input):**
+5.  **Content Processing (Multi-Format Input):**
     *   **Role:** Handles diverse input formats to democratize intellectual contribution.
     *   **Function:** Processes text files, PDFs, EPUBs, YouTube transcripts, and audio/video content, automatically switches to high-context models on overflow, and enables text-to-speech for accessibility.
 
-6.  **Instrument 5: Publication Infrastructure (Client Interface):**
+6.  **Publication Infrastructure (Client Interface):**
     *   **Role:** Provides accessible interface for conversation-to-publication workflow.
     *   **Function:** SwiftUI client with secure Sui key storage, real-time collaboration features, and seamless transition from conversation to published content.
 
+7.  **Agents ("Instruments")**
+    *   **Ghostwriter (first agent):** Transcribes, structures, and rewards raw thought; focuses on novelty and clarity.
+    *   Additional agents will be introduced over time.
 ## Architecture Flow: From Conversation to Publication
 
 The system creates a flow that transforms natural conversation into publication-quality intellectual contribution:
 
 1.  **Content Input**: User provides conversation, text files, PDFs, EPUBs, or YouTube URLs via **SwiftUI Client** with Sui-based authentication ensuring ownership.
-2.  **AI Research Assistance**: **Conductor** orchestrates **AI Processing** to gather relevant sources and context from **Semantic Engine**.
-3.  **Collaborative Enhancement**: **PostChain Workflow** transforms dialogue through structured phases, enhancing clarity and adding professional formatting.
+2.  **AI Research & Drafting**: **Conductor** orchestrates **Ghostwriter** to gather sources from **Semantic Engine**, draft, cite, review, and refine outputs.
+3.  **Collaborative Enhancement**: **Conductor + Agents** refine dialogue through collaborative editing toward publication‑quality results.
 4.  **Quality Assessment**: AI calculates novelty scores and identifies original insights worthy of citation rewards.
 5.  **Publication Generation**: Final output becomes citable article with proper attribution and professional presentation.
 6.  **Citation Economics**: **Economic Layer** distributes ongoing compensation when others reference the published work.
@@ -95,73 +98,50 @@ core_economics
 ==
 
 
-# Core Economic Model: Turning Social Interaction Into Value Creation
+# Core Economic Model: Tokenized Ghostwriting, Publication Investment, and Revision Markets
 
-VERSION core_economics: 9.0 (Relationship-Focused Economy)
+VERSION core_economics: 10.0 (Conductor + Agents Economy)
 
-The economic model of Choir solves a fundamental problem: on traditional social media, posting creates liability (cancel culture, reputation risk) while platforms capture all the value. Choir flips this by turning every thoughtful contribution into transferable value through CHOIR tokens, and enabling users to invest that value in meaningful relationships. This creates the first social platform where your intellectual contributions belong to you.
+Choir converts high‑quality communication into economic value through a service‑first model. Users pay for premium compute via credits to invoke the Ghostwriter agent, and may earn CHOIR tokens based on novelty and citations. Publishing requires payment that determines discovery ranking, and revision markets enable collaborative ownership with principled token flows.
 
-## CHOIR: The Currency of Meaningful Relationships
+## CHOIR Tokens as Compute Options (with Credits)
+- CHOIR tokens function as crypto assets representing compute options
+- Tokens are not sold via IAP; the app sells centralized credits that gate Ghostwriter invocations (IAP‑compliant)
+- When a Ghostwriter call is made using credits, users may earn CHOIR tokens via novelty and citation rewards
+- Tokens can be exchanged for credits (policy TBD); initially we may operate without charging credits
 
-The CHOIR coin represents a fundamental shift from platform-owned metrics to user-owned value:
+## Issuance Scope and Rewards
+- Tokens are issued only on Ghostwriter invocations (not per user prompt)
+- Novelty Rewards: reuse existing novelty scaling curve and eligibility thresholds
+- Citation Rewards: 5 tokens per citation for now; later scaled via Choir Treasury moving averages of daily citations and split‑decision inflows
+- No rewards to wallet_address='unknown'
 
-*   **Transferable Social Value:** Unlike likes, followers, or karma that disappear when you leave a platform, CHOIR tokens are yours to keep, transfer, or invest in relationships that matter.
-*   **Relationship Investment Currency:** CHOIR tokens enable relationship staking - the ability to invest your earned value directly in meaningful connections with other users, creating shared economic interest in quality discourse.
-*   **Merit-Based Rewards:** Tokens are earned through quality contributions (novelty rewards) and community recognition (citation rewards), not engagement farming or algorithmic manipulation.
-*   **Economic Alignment Tool:** By requiring token investment for relationship formation, CHOIR creates real skin in the game for meaningful discourse, filtering out low-effort interactions while rewarding thoughtful engagement.
+## Publication Investment
+- Pay to publish to a permalink: choir.chat/<permalink>
+- Explore/search ranking increases with amount paid
+- Anonymous publishing can exist separately; identity publishing is wallet‑based
 
-## Relationship Staking: Economic Alignment in Human Connections
+## Revision Markets
+- Anyone may stake to propose a revision to a published piece (discoverable via explore/search/autocite/link)
+- Acceptance → staked tokens go to the piece; co‑authorship created
+- Rejection → author keeps the staked tokens
+- Multi‑author rule: acceptance requires unanimity; split decisions count as rejection
+- Split‑decision routing: tokens that would have gone to rejecting co‑authors go to the Choir Treasury (hypothetical)
 
-The relationship staking system creates economic alignment between users who want to form meaningful connections:
+## Choir Treasury (Planned)
+- Treasury is not yet deployed
+- Receives tokens from split decisions in revision markets
+- Redistributes tokens as citation rewards (dynamic scaling once live)
 
-*   **Investment-Based Connections:** When you want to respond to someone's thoughtful contribution, you stake CHOIR tokens as a non-refundable bond, demonstrating serious intent and filtering out spam.
-*   **Mutual Economic Interest:** If both parties engage, their tokens are locked in a shared relationship multisig, creating joint ownership of the relationship's economic value.
-*   **Dynamic Relationship Value:** Successful relationships can accumulate additional value through citation rewards when relationship content is referenced, and novelty rewards for collaborative insights.
-*   **Exit Rights and Ownership:** Users always maintain the right to exit relationships and take their proportional share of tokens, ensuring that social value remains owned by participants, not platforms.
+## Data & Providers (Economic Context)
+- Vector DB: MVP uses Qdrant; migration path to XTrace (homomorphic encryption) under evaluation; novelty query approach TBD
+- Providers: remove Fireworks; add AWS Bedrock
 
-## Reward Mechanisms: Recognizing Quality and Building Community
+## Why This Works
+- Service value first: users see tangible Ghostwriter improvements vs generic AI
+- Economic alignment: publishing spend drives discovery ranking; revision markets create shared ownership
+- Quality compounding: novelty and citations reward foundational ideas; Treasury links revision dynamics to citation emissions
 
-The CHOIR economy rewards two types of valuable contributions that build better discourse:
-
-1.  **Novelty Rewards - Rewarding Original Thinking:**
-    *   **Purpose:** Recognize and reward users who contribute genuinely original ideas and perspectives, encouraging intellectual diversity and creative thinking.
-    *   **Mechanism:** AI analyzes new contributions for semantic novelty compared to existing community knowledge, identifying truly fresh insights.
-    *   **Impact:** Creates incentives for users to think deeply and share authentic perspectives rather than repeating common talking points or engagement farming.
-
-2.  **Citation Rewards - Recognizing Community Value:**
-    *   **Purpose:** Reward users whose contributions prove valuable to others, as demonstrated when their ideas are referenced in subsequent conversations.
-    *   **Mechanism:** When AI identifies that a user's prior contribution informed a response to someone else, the original author receives citation rewards.
-    *   **Impact:** Creates a reputation system based on actual intellectual contribution rather than social metrics, encouraging users to share insights that genuinely help others.
-
-These mechanisms work together to create a community where quality thinking is recognized and rewarded, while AI learns to identify the types of contributions that facilitate meaningful discourse and intellectual connection.
-
-## Data Marketplace Dynamics: CHOIR as Data Purchase Power
-
-The CHOIR coin economy creates a dynamic **data marketplace** within Choir, where:
-
-*   **CHOIR Coins are the Currency of Data Access:** AI companies, researchers, developers, and even individual users who want to access the high-quality, human-generated data within Choir must **purchase CHOIR coins** to participate in the data marketplace.
-*   **Data is "Sold" at a Granular Level (Thread-Specific Contracts):** Data access and contribution pricing are governed by the contract at a granular, thread-specific level. Each thread effectively has its own "data contract" that determines the terms of data access and contribution within that thread.
-*   **Data Scarcity and Privacy Drive Value:** The deliberate emphasis on **data scarcity and user privacy** within Choir is a key driver of CHOIR coin value.  By limiting data sales and prioritizing user control, Choir creates a marketplace for *premium, high-quality, and ethically sourced data*, which is increasingly valuable in the AI age.
-*   **CHOIR Holder Governance of Data Marketplace Terms:** CHOIR coin holders have **governance rights to shape the rules and policies of the data marketplace**, ensuring that it remains aligned with the community's values and long-term interests.
-
-## Business Sustainability and the Data Economy Model
-
-The CHOIR coin economy is designed to create a **self-sustaining ecosystem** where value flows naturally and benefits all participants. The Data Marketplace and the IDaaS premium features are key components of the business model, designed to:
-
-*   **Drive CHOIR Coin Demand and Utility:** Create tangible use cases for CHOIR coins, increasing their demand and utility beyond just platform-internal rewards.
-*   **Generate Revenue to Support Platform Operations:** Revenue from IDaaS subscriptions and data marketplace transaction fees will fund the ongoing development, maintenance, and operational costs of the Choir platform and the coin economy.
-*   **Value Proposition for Users:** The Choir ecosystem is designed to provide value to users through:
-    *   **Financial Rewards for Quality Contributions:** Earn CHOIR coins for novel ideas and cited content.
-    *   **Access to a Thriving Data Marketplace:** Exchange valuable data and insights.
-    *   **Enhanced Identity and Reputation:** Build credibility through the IDaaS offering.
-
-## Conclusion: A New Model for Social Value Creation
-
-The core economic model of Choir represents a fundamental shift from extractive to generative social platforms:
-
-*   **User Ownership of Social Value:** For the first time, users own their social contributions as transferable assets rather than platform-locked metrics that disappear when they leave.
-*   **Economic Alignment in Relationships:** Relationship staking creates shared economic interest in maintaining quality discourse, transforming social interaction from cost center to value generator.
-*   **Merit-Based Community Building:** Anonymous, merit-based rewards enable authentic intellectual connection free from social surveillance and reputation management.
-*   **AI That Amplifies Human Connection:** Rather than replacing human relationships, AI facilitates better discourse and helps compatible minds find each other based on intellectual compatibility rather than demographic targeting.
-
-This model demonstrates that social platforms can create value for users rather than extracting it, building communities based on shared intellectual interest rather than engagement addiction.
+## Out of Scope (Removed)
+- Relationship staking terminology is deprecated; ideas are captured as publication investment and revision markets
+- Phase terminology (AEIOU‑Y) and PostChain architecture are deprecated and removed

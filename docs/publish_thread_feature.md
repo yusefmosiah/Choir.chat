@@ -105,7 +105,7 @@ https://choir.chat/thread/{thread_id}
 
 ## Relationship to Core Features
 
-### Enhances Relationship Staking
+### Enhances Publication Investment and Revision Markets
 - Published threads become venues for relationship formation
 - Users can stake tokens to respond to published insights
 - Quality published content attracts high-value relationship opportunities
@@ -135,7 +135,7 @@ https://choir.chat/thread/{thread_id}
 ### Phase 3: Advanced Features
 - Dynamic pricing based on thread quality
 - Thread collections and curation tools
-- Integration with relationship staking for published content
+- Integration with publication investment and revision markets for published content
 
 ## Success Metrics
 

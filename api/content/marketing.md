@@ -43,3 +43,11 @@ The learning economy represents economic evolution rather than technological dis
 Choir provides infrastructure for this inevitable transformation. The question isn't whether the learning economy will emerge—the technological capabilities and economic pressures make this transition inevitable. The question is whether we build conscious infrastructure that serves human flourishing or allow extractive platforms to capture value while providing diminishing returns to intellectual contributors.
 
 Join the platform where intellectual contribution becomes economic opportunity—where insights gain the presentation they deserve and the recognition they merit. The learning economy rewards those who enhance collective human understanding while developing their own intellectual capabilities.
+
+## Tokenomics at a Glance
+
+- **Ghostwriter‑only issuance**: Tokens are issued only on Ghostwriter calls (not per prompt)
+- **Credits gate compute**: Purchase IAP‑compliant credits; Ghostwriter consumes credits and may earn tokens
+- **Publication investment**: Pay to publish to choir.chat/<permalink>; ranking rises with spend
+- **Revision markets**: Stake to propose revisions; accept → stake to the piece + co‑authorship; reject → author keeps stake; unanimity required; split decisions route to Treasury for citation emissions
+- **Treasury (planned)**: Citation rewards (5 per citation now) will be funded from split decisions; later scaled by moving averages

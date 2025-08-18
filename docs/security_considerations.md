@@ -14,8 +14,8 @@ The system addresses the following potential threats:
 2.  **Contract Manipulation**: Unauthorized modification of the basic CHIP token contract parameters or execution (less likely with MVP's simple contract).
 3.  **Token Theft**: Unauthorized triggering of reward distributions or transfers via the API.
 4.  **Data Exfiltration**: Unauthorized access to or extraction of sensitive user or conversation data stored in Qdrant.
-5.  **System Manipulation**: Unauthorized alterations to the API's behavior, PostChain workflow logic, or state stored in Qdrant.
-6.  **Model Attacks**: Prompt injection, jailbreaking, or other attacks targeting the LLMs used within the PostChain workflow.
+5.  **System Manipulation**: Unauthorized alterations to the API's behavior, agent orchestration logic, or state stored in Qdrant.
+6.  **Model Attacks**: Prompt injection, jailbreaking, or other attacks targeting the LLMs used within the Conductor + Agents architecture.
 7.  **Resource Exhaustion**: Denial of service against the API backend or Qdrant through excessive requests.
 8.  **Identity Spoofing**: Impersonation of legitimate users via compromised Sui keys or authentication bypass.
 9.  **Infrastructure Compromise**: Attacks on the underlying infrastructure hosting the API backend and Qdrant (e.g., Render).
@@ -57,11 +57,11 @@ The system addresses the following potential threats:
 4.  **Vulnerability Scanning:** Integrate vulnerability scanning into the CI/CD pipeline for the Docker image.
 5.  **Secret Management:** Inject secrets (like the Sui private key, Qdrant API key) securely into the container environment at runtime, not during the build process.
 
-## Model Security (PostChain Workflow)
+## Model Security (Conductor + Agents)
 
-1.  **Input Validation/Sanitization:** Sanitize user input passed to the PostChain workflow and subsequently to LLMs to mitigate prompt injection risks.
-2.  **Output Filtering:** Filter or sanitize outputs from LLMs, especially if they might be displayed directly or used in sensitive contexts (though less critical if outputs primarily feed other phases or are stored).
-3.  **Prompt Security:** Be mindful of prompt engineering techniques to make models less susceptible to jailbreaking or instruction hijacking, particularly for phases that might execute tools based on LLM output (deferred post-MVP).
+1.  **Input Validation/Sanitization:** Sanitize user input passed through the Conductor and to server agents to mitigate prompt injection risks.
+2.  **Output Filtering:** Filter or sanitize outputs from LLMs, especially if they might be displayed directly or used in sensitive contexts.
+3.  **Prompt Security:** Harden prompts for Conductor and Ghostwriter, and gate any tool‑executing outputs behind explicit user confirmations (Wordbank) or strict service rules (Sui tool).
 4.  **Rate Limiting:** Implement rate limiting at the API gateway or within FastAPI to prevent abuse of LLM resources.
 5.  **Model Usage Monitoring:** Monitor LLM usage for anomalies that might indicate attacks or misuse.
 

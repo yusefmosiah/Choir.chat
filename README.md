@@ -10,29 +10,21 @@ As AI generates infinite content at zero marginal cost, the attention economy co
 
 ## The Conductor Architecture
 
-Choir operates through a **single AI Conductor** that orchestrates five specialized instruments, providing users with seamless access to collaborative intelligence capabilities:
+Choir operates through a **single AI Conductor** that orchestrates specialized agents ("instruments")—with no fixed number. The first agent is the Ghostwriter.
 
-### The Five Instruments
+### First Agent: Ghostwriter
 
-1. **Ghostwriter Instrument**: Listens to raw thoughts and rewards novelty with CHOIR tokens. No judgment on grammar or polish—focus on genuine insights that transform into structured, citable knowledge.
+- **Ghostwriter Agent**: Listens to raw thoughts and rewards novelty with CHOIR tokens. No judgment on grammar or polish—focus on genuine insights that transform into structured, citable knowledge.
 
-2. **Publisher Instrument**: Manages private-to-public publishing workflow with two paths:
-   - **Anonymous Publishing**: Zero cost, zero social risk, joins the commons
-   - **Identity Publishing**: Requires token staking, enables reputation building
-
-3. **Revision Instrument**: Creates collaborative improvement markets where others stake tokens to propose improvements, creating co-owned intellectual property.
-
-4. **Citation Instrument**: Tracks intellectual property usage across the platform, calculating ongoing royalties for foundational work and managing attribution networks.
-
-5. **Wallet Instrument**: Provides seamless crypto infrastructure with invisible token operations, built-in mixing for anonymity, and balance management.
-
+Additional agents will be introduced over time.
 ## Core Concepts
 
 Explore the foundational concepts that drive Choir's collaborative intelligence:
 
-*   **[PostChain Temporal Logic](docs/postchain_temporal_logic.md):** The temporal essence of each AEIOU-Y phase, driving dynamic and context-aware AI workflows.
-*   **[Core Economics](docs/core_economics.md):** The economic principles and tokenomics of CHOIR, designed to create a sustainable and equitable ecosystem for knowledge creation.
-*   **[Core State Transitions](docs/core_state_transitions.md):** The carefully defined state transitions that govern the evolution of threads and the flow of value within Choir.
+*   **[Conductor + Agents Overview](docs/conductor_agents_overview.md):** How the client-side Conductor orchestrates server-side agents (Ghostwriter, Publisher, Revision)
+*   **[Agents and Tools](docs/agents_and_tools.md):** Agent responsibilities and tool boundaries (Wordbank, Vector DB, Sui, Web Search, File Mgmt)
+*   **[Rewards Model](docs/rewards_model.md):** Ghostwriter-only issuance, publication investment, revision markets, and Treasury-funded citations
+*   **[Core Economics](docs/core_economics.md):** The broader economic principles and tokenomics of CHOIR
 *   **[Evolution: Naming](docs/evolution_naming.md):** The story behind the evolution of Choir's name, reflecting the project's journey and vision.
 *   **[Evolution: Token](docs/evolution_token.md):** The evolution of the CHOIR coin concept.
 
@@ -63,9 +55,10 @@ Natural immunity to AI-generated low-quality content through:
 
 ## Technical Architecture
 
-*   **[Core System Overview](docs/core_core.md):** Description of the current architecture and components.
-*   **[Stack Argument](docs/stack_argument.md):** The compelling rationale behind the technology choices.
-*   **[Security Considerations](docs/security_considerations.md):** Security architecture for centralized API and data stores.
+*   **[Core System Overview](docs/core_core.md):** Description of the current architecture and components
+*   **[Conductor + Agents Overview](docs/conductor_agents_overview.md):** Client Conductor orchestrating server agents
+*   **[Stack Argument](docs/stack_argument.md):** The compelling rationale behind the technology choices
+*   **[Security Considerations](docs/security_considerations.md):** Privacy & security posture and roadmap
 
 ## Anonymous Publishing & Privacy Infrastructure
 
@@ -78,30 +71,18 @@ Choir enables true anonymity while maintaining economic accountability:
 - **Cryptographic Intermediation**: Users contract with Choir, Choir contracts with others
 - **Matching Only on Approval**: Anonymity until explicit collaboration consent
 
-### Publishing Workflows
+### Publishing & Revision Workflows
 
-- **Anonymous Publishing**: Zero cost, zero social risk, joins commons
-- **Identity Publishing**: Requires token staking, enables reputation building
-- **Collaborative Approval**: Anonymous users become co-authors through approval
-- **Discovery Ranking**: Stake amount drives visibility, not engagement
+- **Publication Investment**: Pay to publish to choir.chat/<permalink>; ranking in explore/search increases with spend
+- **Revision Markets**: Stake to propose a revision; accept → stake goes to the piece and co‑authorship is created; reject → author keeps the stake; unanimity required among co‑authors; split decisions route to Treasury (for citation emissions)
+- **Anonymity**: Minimal anonymity by default; wallet‑based identity for attributed publishing
 
 ## Implementation
 
 *   **[State Management Patterns](docs/state_management_patterns.md):** How state is managed within the central API and data persistence.
 *   **[Blockchain Integration](docs/blockchain_integration.md):** Integration with Sui blockchain for token economics.
 
-## Context Management in the PostChain Workflow
 
-Choir leverages the AEIOU-Y PostChain workflow to enable sophisticated context management, with each phase playing a specialized role in orchestrating the flow of knowledge within the API backend:
-
-| Phase         | Temporal Focus       | Context Responsibility (within API Workflow)                                 | Requirements                                           |
-| ------------- | -------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------ |
-| Action        | Immediate present    | Initial framing and response.                                                | [Action Requirements](docs/require_action_phase.md)    |
-| Experience    | Past knowledge       | Enriching context via Qdrant search (priors).                                | [Experience Requirements](docs/require_experience_phase.md) |
-| Intention     | Desired future       | Focusing on user goals (using `intention_memory` in Qdrant).                 | [Intention Requirements](docs/require_intention_phase.md) |
-| Observation   | Future preservation  | Structuring thread knowledge (using `observation_memory` in Qdrant).         | [Observation Requirements](docs/require_observation_phase.md) |
-| Understanding | Temporal integration | Deciding what information to prune from memory collections (Qdrant).         | [Understanding Requirements](docs/require_understanding_phase.md) |
-| Yield         | Process completion   | Generating the final response and preparing data for Qdrant/rewards.         | [Yield Requirements](docs/require_yield_phase.md)      |
 
 ## Educational Revolution
 
@@ -176,12 +157,12 @@ Economic rewards for clear thinking create training data with transparent reason
 
 ## Directory Structure
 
-*   `api/`: Python backend (FastAPI application, PostChain logic, database interactions, tests).
-*   `Choir/`: Swift iOS client application.
-*   `choir_coin/`: Sui Move smart contract for the CHOIR coin.
-*   `docs/`: Project documentation (including detailed phase requirements, architecture, etc.).
-*   `notebooks/`: Jupyter notebooks for experimentation.
-*   `scripts/`: Utility scripts.
+*   `api/`: Python backend (FastAPI application, service agents, database interactions, tests)
+*   `Choir/`: Swift iOS client application (client‑side Conductor)
+*   `choir_coin/`: Sui Move smart contract for the CHOIR coin
+*   `docs/`: Project documentation (Conductor + Agents architecture, rewards, migration plan, privacy & security)
+*   `notebooks/`: Jupyter notebooks for experimentation
+*   `scripts/`: Utility scripts
 
 ## Getting Started
 

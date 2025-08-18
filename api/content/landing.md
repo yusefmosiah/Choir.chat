@@ -40,6 +40,17 @@
       <h3>Cross-Disciplinary Synthesis</h3>
       <p>Break down artificial boundaries between disciplines. Novel connections between previously separate domains generate high novelty rewards. Intellectual diversity is rewarded over credential conformity.</p>
     </div>
+
+  <div class="choir-feature-card">
+    <h3>Publication Investment</h3>
+    <p>Pay to publish to a permalink at choir.chat/&lt;your‑title&gt;. The more you pay, the higher your ranking in explore and search.</p>
+  </div>
+
+  <div class="choir-feature-card">
+    <h3>Revision Markets</h3>
+    <p>Stake to propose revisions to any published piece. Accepted revisions create co‑authorship; split decisions route stakes to the Choir Treasury for citation rewards.</p>
+  </div>
+
   </div>
 </div>
 

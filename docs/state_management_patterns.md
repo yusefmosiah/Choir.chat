@@ -10,16 +10,16 @@ State management is crucial for the Choir platform. In the Qdrant-Sui MVP, the p
 
 The state is primarily managed in two locations:
 
-1.  **Python API (In-Memory during Request Processing):** The FastAPI application manages the *transient state* of a single PostChain execution cycle for a given user request.
-2.  **Qdrant (Persistent State):** Qdrant serves as the **persistent source of truth** for all core data entities required for the AI workflow and the reward system.
+1.  **Python API (In-Memory during Request Processing):** The FastAPI application manages transient state for agent calls on a given request.
+2.  **Qdrant (Persistent State):** Qdrant serves as the persistent source of truth for core entities (users, threads, messages, memory) in the MVP.
 
 ## 1. Python API: Orchestration & Transient State
 
-*   **Role:** The Python API acts as the central orchestrator. For each incoming user request, it manages the flow through the PostChain (AEIOU-Y) phases implemented in `langchain_workflow.py`.
+*   **Role:** The Python API acts as the central orchestrator. For each incoming request, it manages Conductor‑initiated calls to server agents (e.g., Ghostwriter) rather than a fixed phase pipeline.
 *   **Transient State Handling:**
-    *   **Workflow Context:** During a single PostChain cycle triggered by a user message, the API holds the intermediate outputs from each phase (Action, Experience, etc.) in memory. This context (including text outputs, calculated scores, potential citations) is passed sequentially from one phase function to the next within the `langchain_workflow.py`.
-    *   **Stateless Between Requests:** The API itself aims to be largely stateless *between* distinct user requests/PostChain cycles. All necessary persistent state is fetched from or saved to Qdrant at the beginning or end of the request processing cycle.
-    *   **Concurrency:** FastAPI and Python's `asyncio` handle concurrent user requests. Care must be taken within the workflow logic if shared resources (beyond Qdrant/Sui services which handle their own concurrency) are accessed, but the primary state (conversation history, memory) is managed via Qdrant, pushing concurrency control largely to the database/service layer.
+    *   **Workflow Context:** During a Ghostwriter invocation, the API coordinates tool usage and holds intermediate outputs as needed for planning, research, drafting, citations, and revision steps (amorphous, may merge/split across calls).
+    *   **Stateless Between Requests:** The API itself aims to be largely stateless between distinct requests. All necessary persistent state is fetched from or saved to Qdrant at the beginning or end of processing.
+    *   **Concurrency:** FastAPI/asyncio handle concurrency. Primary state (history, memory) is managed via Qdrant, pushing concurrency control to the database/service layer.
 
 ## 2. Qdrant: Persistent State Management
 

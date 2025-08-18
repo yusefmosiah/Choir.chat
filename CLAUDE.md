@@ -4,7 +4,7 @@ This file provides guidelines for agentic coding agents working in the Choir rep
 
 ## Project Structure
 
-- `api/`: Python FastAPI backend using LangChain for the PostChain workflow.
+- `api/`: Python FastAPI backend with service agents (legacy PostChain code path exists during migration).
 - `Choir/`: Swift iOS client application.
 - `choir_coin/`: Sui Move smart contract for the CHOIR coin.
 - `docs/`: Project documentation.

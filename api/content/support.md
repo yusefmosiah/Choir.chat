@@ -12,10 +12,10 @@ Welcome to Choir Support. We're here to help you make the most of your experienc
 Choir is infrastructure for the learning economy—a platform that transforms conversations into intellectual property. It combines conversation-to-publication workflows with citation economics on the Sui blockchain, where intellectual contribution becomes economic activity.
 
 #### How do I earn rewards?
-You earn CHOIR tokens through intellectual contribution:
-- **Novelty Rewards**: When you contribute original insights that expand collective knowledge into unexplored semantic territory
-- **Citation Rewards**: When your contributions are referenced by others as foundational knowledge, providing ongoing compensation for your intellectual property
-- **Quality Rewards**: Through peer recognition and collaborative building rather than viral engagement
+You earn CHOIR tokens on Ghostwriter invocations:
+- **Novelty Rewards**: Reuse the existing novelty scaling curve; rewards are issued only when you call the Ghostwriter
+- **Citation Rewards**: 5 tokens per citation for now (later scaled by the Choir Treasury); tracked when your work is cited by others
+- Note: Rewards are not issued per user prompt; only on Ghostwriter calls
 
 ### Account & Wallet
 
@@ -39,8 +39,8 @@ Threads are separate conversations that can potentially become intellectual prop
 #### Can I export my conversations?
 Yes, you can export your threads securely. This gives you full control over your intellectual property and allows you to back up your conversations or transfer them to another device.
 
-#### What is the PostChain workflow?
-PostChain is Choir's multi-phase AI processing system that analyzes your messages through Action, Experience, Intention, Observation, Understanding, and Yield phases. This structured approach enables the generation of publication-quality responses while identifying valuable contributions worthy of citation rewards.
+#### How does the architecture work now?
+Choir uses a Conductor + Agents architecture. A fast client-side Conductor agent orchestrates server-side agents like Ghostwriter, Publisher, and Revision. Ghostwriter calls are credit‑gated and may earn tokens for novelty and citations. We removed all "phase" terminology and the legacy PostChain system.
 
 ### Intellectual Property & Economics
 

@@ -22,18 +22,18 @@ In the Qdrant-Sui MVP architecture, blockchain integration is handled by the **P
 **Key Components:**
 
 *   **Python API Backend (FastAPI/Uvicorn):**
-    *   **Orchestrates Workflow:** Manages the PostChain workflow execution.
+    *   **Orchestrates Agents:** Manages Conductor‑initiated calls to server agents (e.g., Ghostwriter) and overall workflow.
     *   **Contains Blockchain Logic:** Includes the `sui_service.py` module responsible for all Sui interactions.
-    *   **Triggers Rewards:** After the PostChain workflow completes (Yield phase), the API calls functions within `sui_service.py` to process rewards based on data stored in Qdrant.
+    *   **Triggers Rewards:** After a Ghostwriter invocation completes, the API calls functions within `sui_service.py` to process rewards based on novelty and citations.
 
 *   **`sui_service.py` (within API Backend):**
     *   **PySUI Integration (Encapsulated):** The PySUI SDK for interacting with the Sui blockchain is exclusively used within this service module.
     *   **Handles Transactions:** Constructs, signs (using keys managed by the API's environment/secrets), and submits transactions to the Sui network.
-    *   **Exposes Service Functions:** Provides functions (e.g., `record_reward`, `get_balance`) called internally by the API's orchestration logic.
+    *   **Exposes Service Functions:** Provides functions (e.g., `mint_choir`, `get_balance`) called internally by the API's orchestration logic.
 
-*   **PostChain Workflow (LCEL - within API Backend):**
-    *   **No Direct Blockchain Interaction:** The AEIOU-Y phase logic **does not directly interact with the Sui blockchain or PySUI.**
-    *   **Provides Reward Inputs:** The workflow (specifically data gathered by Experience and finalized by Yield) provides the necessary inputs (author ID, prior IDs, scores) for the API to trigger the reward calculation in `sui_service.py`.
+*   **Conductor + Agents (within API Backend):**
+    *   **No Direct Blockchain Interaction in Agents:** Agent logic does not call PySUI directly. All blockchain interactions happen via `sui_service.py`.
+    *   **Provides Reward Inputs:** Ghostwriter provides the necessary inputs (author ID, cited prior IDs, novelty/similarity measurements) for the API to trigger reward calculation in `sui_service.py`.
 
 *   **Sui Blockchain:**
     *   **Hosts CHIP Token Contract:** Runs the `choir_coin.move` smart contract defining the basic CHIP token.
@@ -43,13 +43,13 @@ In the Qdrant-Sui MVP architecture, blockchain integration is handled by the **P
 
 ```mermaid
 graph LR
-    A[Client (SwiftUI)] --> B{Python API (FastAPI)};
-    B --> C[PostChain Workflow (LCEL)];
-    C -- Interacts via database.py --> D[(Qdrant)];
+    A[Client (SwiftUI, Conductor)] --> B{Python API (FastAPI)};
+    B --> C[Server Agents (Ghostwriter/Publisher/Revision)];
+    C -- Interacts via database.py --> D[(Qdrant → XTrace TBD)];
     C -- Returns final data --> B;
     B -- Triggers reward --> E[sui_service.py];
     E -- Uses PySUI --> F[(Sui Blockchain)];
-    B -- Streams results --> A;
+    B -- Streams results (SSE) --> A;
 
     style B fill:#ccf,stroke:#333,stroke-width:2px;
     style C,E fill:#f9f,stroke:#333,stroke-width:2px;

@@ -18,42 +18,32 @@ However, this simple "OODA + LLM" concept quickly runs into practical difficulti
 *   **Integration Complexity:** Managing interactions with databases, APIs, or blockchains within a single, monolithic loop step becomes difficult and error-prone.
 *   **Context Management:** Feeding *all* potentially relevant information into one LLM call risks exceeding limits or causing the model to lose focus.
 
-## 2. AEIOU-Y PostChain: A Structured Cycle for Robustness and Integration
+## 2. Beyond OODA: A Pragmatic Conductor + Agents Approach
 
-Recognizing these limitations, Choir developed the **AEIOU-Y PostChain**. It's not just *an* OODA-inspired loop; it's a *critically refined, engineered cycle* that **factors intelligence** into distinct phases: **Action, Experience, Intention, Observation, Understanding, and Yield.** This structure specifically addresses the shortcomings of the simpler approach:
+Rather than building a monolithic phase pipeline, Choir now uses a **Conductor + Agents** architecture. A fast client‑side **Conductor** agent handles responsiveness and privacy‑sensitive operations, escalating substantial work to server‑side agents like **Ghostwriter** (for research/drafting/citation), **Publisher**, and **Revision**. This avoids hardcoding phases while keeping clear integration points for vector search and blockchain rewards.
 
-*   **Action First (Responsiveness):** Unlike a strict OODA sequence, AEIOU-Y often starts with **Action**. This provides immediate feedback or handles quick tasks while subsequent, potentially slower orientation phases execute. It prioritizes perceived responsiveness.
-*   **Multiple Orientation Phases (Factoring Cognition):** AEIOU-Y tackles the "Orient" bottleneck by breaking it down into specialized stages:
-    *   **Experience:** Observes/Orients based on *past* context (memory retrieval via vector search, RAG).
-    *   **Intention:** Orients towards *future* goals, clarifying purpose.
-    *   **Observation:** Orients by structuring *present* context and identifying relationships for future memory (potentially using hypergraph-like representations).
-    *   **Understanding:** Orients by *integrating* information across time and critically *pruning* irrelevant context (essential for long-term thread coherence and "creative destruction").
-    This factoring allows for focused processing and better context management.
-*   **Multi-Model Strategy (Specialization):** The distinct phases naturally allow using *different AI models* best suited for each task (e.g., fast model for Action, retrieval-focused for Experience, strong reasoner for Understanding/Yield). This leverages diverse AI strengths.
-*   **Deterministic Integration Points (Reliability):** Clear phases provide defined points to interact reliably with external systems like vector databases (Qdrant) and blockchains (Sui), crucial for memory, state management, and features like tokenized rewards.
-*   **Managed Recursion (Control):** The **Yield** phase explicitly decides whether the loop terminates or recurses, potentially directing the flow to a specific phase for targeted refinement (e.g., back to Experience for more info).
+Key advantages:
+*   **Responsiveness:** Conductor gives quick feedback and routes work as needed
+*   **Specialization without rigidity:** Ghostwriter can combine/split planning, research, drafting, citation, review, style, and finalization across multiple LLM calls
+*   **Deterministic integration points:** Clean boundaries for vector DB (Qdrant → XTrace) and Sui rewards tooling
+*   **Transparent economics:** Tokens issued only on Ghostwriter calls; credits gate expensive compute; publishing spend drives ranking; revision markets govern collaboration
 
-## 3. Engineering the Phases: Building Blocks of the Loop
+## 3. Engineering the System: Building Blocks without Phases
 
-This structured approach translates into concrete engineering tasks for each part of the cycle:
+This approach translates into practical engineering components:
 
-*   **Observe (Experience Phase):** Requires robust data connectors, RAG strategies, and vector database integration for effective context retrieval.
-*   **Orient (Intention, Observation, Understanding Phases):** Demands sophisticated memory architectures (combining vectors with richer context representations), goal tracking mechanisms, relationship extraction, context synthesis, and intelligent pruning logic. This remains the most challenging and crucial area.
-*   **Decide (Yield Phase & within other phases):** Involves implementing clear decision logic (convergence criteria, confidence thresholds), planning algorithms (potentially via LLM calls within Yield or Action), and goal/policy enforcement.
-*   **Act (Action Phase):** Needs resilient tool execution frameworks, error handling, result parsing, and seamless feedback into the next Observe/Experience phase.
+*   **Conductor (Client):** Lightweight agent with tool routing (Wordbank wallet, web search, file mgmt); SSE streams; privacy‑sensitive UX
+*   **Ghostwriter (Service):** Orchestrates planning, research, drafting, citation, review, revisions (amorphous); issues rewards via Sui tool per invocation
+*   **Publisher (Service):** Pay‑to‑publish permalink creation; ranking by spend; responsive web delivery
+*   **Revision (Service):** Stake to propose; accept → co‑ownership (unanimity); split decisions route to Treasury for citation emissions
+*   **Vector DB:** MVP Qdrant; migration path to XTrace (HE); novelty query method TBD
 
 ## 4. Delivering a Richer Experience
 
-While technically robust, the AEIOU-Y structure is ultimately in service of a better interaction:
+*   **Engaging Depth:** Long‑form, cited outputs with verifiable sources
+*   **Transparency:** Show when Conductor escalates to Ghostwriter and why
+*   **Contextual Coherence:** Maintain thread context through vector recall and source tracking; reward foundations via citations
 
-*   **Engaging Depth:** Enables the generation of longer, multi-faceted responses that explore context and reasoning.
-*   **Transparency:** Allows showing intermediate steps, making the AI less of a black box.
-*   **Contextual Coherence:** Facilitates weaving in past context and maintaining focus over extended interactions or threads.
+## 5. Conclusion: Pragmatism over Pipelines
 
-The structure manages the underlying complexity to deliver this richer output smoothly. The ~6 phases offer a practical level of granularity for both AI processing and human comprehension/development.
-
-## 5. Conclusion: Engineered Cycles Beat Simple Loops
-
-The intuitive appeal of "OODA + LLM" masks significant practical challenges, particularly around the complex task of Orientation. The AEIOU-Y PostChain represents a more deliberate, engineered approach. By factoring intelligence into specialized phases, prioritizing responsiveness, enabling multi-model strategies, ensuring reliable integration points, and providing explicit control flow, it creates a robust and adaptable framework.
-
-This structured cycle is essential not just for managing complexity but for building AI systems capable of the deep contextual understanding and engaging interaction needed for the next generation of collaborative intelligence. It’s about moving beyond simple loops to thoughtfully engineered cycles.
+The Conductor + Agents model preserves responsiveness and privacy while enabling robust research, drafting, and economic alignment. It replaces rigid phase pipelines with agent specialization and clear tool boundaries—simpler to reason about, easier to evolve, and better aligned with user value.

@@ -6,9 +6,9 @@ Choir is building the first social platform based on mechanism design theory tha
 
 ## Core Innovation: The Revenue Sequence
 
-**App Subscriptions** → **Relationship/Group Multisig Funds** → **Onchain Finance Agents**
+**Credits (Ghostwriter)** → **Publication Investment (Paid Publishing)** → **Revision Markets** → **Future: Onchain Finance Agents (optional)**
 
-This progression ensures that revenue grows naturally with user engagement and relationship formation, creating sustainable alignment between business success and community value.
+This sequence aligns revenue with valuable compute usage and knowledge publishing: users buy credits to call Ghostwriter; pay to publish for ranked discovery; and stake in revision markets. Onchain finance agents may be explored later.
 
 ## Theoretical Foundation: Learning Economy Meets Mechanism Design
 
@@ -18,26 +18,22 @@ The learning economy rewards different capabilities than traditional education: 
 
 ## Three-Phase Revenue Model
 
-### Phase 1: App Subscription Model - Learning Economy Access
+### Phase 1: Credits for Ghostwriter
 
-**Free Tier (Beta Only):** Core conversation-to-publication functionality free during beta to validate learning economy product-market fit
-**Subscription Tiers (Post-Beta):** Exponential price-to-rate-limit ratios covering AI model costs, research infrastructure, and Sui transaction fees:
+**Credits (IAP‑compliant):** Users purchase centralized credits via IAP. Ghostwriter calls consume credits and may earn CHOIR tokens for novelty and citations (issued only on Ghostwriter invocations)
 
-*   **Basic ($9/month):** 100 AI conversations, standard processing, basic citation tracking
-*   **Pro ($29/month):** 500 conversations, priority processing, advanced models, enhanced research tools
-*   **Expert ($99/month):** 2000 conversations, fastest processing, premium features, cross-disciplinary synthesis tools
-*   **Unlimited ($299/month):** No rate limits, experimental features, dedicated support, institutional collaboration tools
+**No Subscription Plans:** We do not use tiered subscription pricing; value is driven by per‑call compute and earned tokens
 
-**Full Anonymity:** Identity emerges from intellectual contribution patterns and wallet activity. Ideas stand on merit, not credentials. No KYC or persistent identities required.
+**Anonymity:** Minimal anonymity by default; wallet‑based identity for attribution when publishing
 
-### Phase 2: Relationship/Group Multisig Funds
+### Phase 2: Publication Investment & Revision Markets
 
-As users form meaningful relationships through staking, these connections become economic entities with shared treasuries that can make collective investment decisions.
+**Pay to Publish:** Users pay to publish to choir.chat/<permalink>; explore/search ranking is based on spend
+**Stake to Revise:** Anyone can stake to propose revisions; accept → stake goes to the piece and co‑authorship is created; reject → author keeps the stake; unanimity required among co‑authors; split decisions route to the Choir Treasury
 
-### Phase 3: Onchain Finance Agents (Primary Revenue Driver)
+### Phase 3: Future Onchain Finance Agents (Optional)
 
-**Financial Agent Services:** AI-powered portfolio management, DeFi strategies, cross-chain operations, and tax optimization for relationship/group funds.
-**Revenue:** 2-5% transaction fees on all financial operations executed by our AI agents.
+We may explore onchain finance agents in the future, but the primary business model is credits for Ghostwriter, publication investment, and revision markets.
 
 ### CHOIR Coin Treasury Strategy & Financial Engineering
 
@@ -50,17 +46,15 @@ As users form meaningful relationships through staking, these connections become
 ## The CHOIR Coin Ecosystem
 
 **Earning CHOIR:**
-*   **Novelty Rewards:** Contributing original insights that expand collective knowledge into unexplored semantic territory
-*   **Citation Rewards:** Having contributions referenced by others as foundational knowledge (ongoing compensation for intellectual property)
-*   **Quality Rewards:** Peer recognition and collaborative building rather than viral spread
-*   **Cross-Disciplinary Synthesis:** Novel connections between previously separate domains
+*   **Novelty Rewards:** Issued only on Ghostwriter invocations; reuse existing scaling curve and eligibility thresholds
+*   **Citation Rewards:** 5 tokens per citation for now; later scaled by the Choir Treasury using moving averages
+*   **Cross-Disciplinary Synthesis:** Novel connections and citations remain core to value creation
 
 **Using CHOIR:**
-*   **Research Infrastructure Access:** Enhanced AI research assistants and collaborative editing tools
-*   **Publication Services:** Transform conversations into citable articles with proper attribution
-*   **Relationship Staking:** Invest tokens in meaningful intellectual connections
-*   **Group Formation:** Pool resources with like-minded individuals for collective knowledge creation
-*   **Financial Services:** Access AI-powered portfolio management for intellectual capital
+*   **Credits & Compute:** Credits are purchased via IAP; tokens are earned via Ghostwriter calls; these are distinct
+*   **Publication Investment:** Pay to publish; ranking by spend; better discovery and influence through investment
+*   **Revision Markets:** Stake to propose revisions; accepted revisions create co‑authorship; rejected revisions return stake to the author; split decisions feed the Treasury
+*   **Group Formation:** Pool resources for collective knowledge creation and joint publishing
 
 **Mainnet Status:** CHOIR is live on Sui mainnet with package ID `0x4f83f1cd85aefd0254e5b6f93bd344f49dd434269af698998dd5f4baec612898::choir::CHOIR`.
 
@@ -76,10 +70,10 @@ As users form meaningful relationships through staking, these connections become
 
 ## Path Forward: Building Learning Economy Infrastructure
 
-1.  **Beta Launch:** Free tier to validate learning economy product-market fit and intellectual contribution patterns
-2.  **Subscription Model:** Implement tiered pricing to cover AI research infrastructure and conversation-to-publication tools
+1.  **Beta Launch:** Free access period to validate product-market fit and contribution patterns
+2.  **Credits Model:** Launch IAP‑compliant credits for Ghostwriter; remove subscription plan language
 3.  **Intellectual Property Economy:** Enable citation tracking, collaborative ownership, and ongoing compensation for foundational insights
-4.  **Institutional Integration:** Partner with educational institutions to transform student work into genuine intellectual contribution
-5.  **Research Infrastructure:** Develop proprietary knowledge networks that enhance collaborative intelligence capabilities
+4.  **Publication Investment & Revision Markets:** Roll out paid publishing and staking‑based revision markets
+5.  **Provider Roadmap:** Add AWS Bedrock provider; remove Fireworks; evaluate XTrace migration for HE
 
 This model represents the first practical implementation of mechanism design theory for the learning economy, creating sustainable infrastructure where technology serves intellectual flourishing and genuine knowledge creation rather than exploiting psychological vulnerabilities for attention extraction.

@@ -23,7 +23,7 @@ Choir's evolution mirrors natural physical processes, unfolding through distinct
 Unlike traditional platforms that often extract value from users, Choir creates spaces where value **naturally accumulates and amplifies** through multiple channels:
 
 *   **Threads as Resonant Cavities:** Threads act as resonant cavities, accumulating energy and value through high-quality interactions and insightful contributions.
-*   **Denials as Strengthening Forces:**  Even "denials" (disagreements, challenges) within the PostChain workflow are not wasted energy; they serve to strengthen the thread itself, refining ideas and improving the overall quality of knowledge.
+*   **Denials as Strengthening Forces:**  Even "denials" (disagreements, challenges) within collaborative editing are not wasted energy; they serve to strengthen the thread itself, refining ideas and improving the overall quality of knowledge.
 *   **Teams Share in Thread Value Growth:** Teams of co-authors share in the growing value of their threads, creating a direct incentive for collaboration and collective success.
 *   **Network Value Through Citations:** Network value grows exponentially as citations create flows between threads, knowledge networks emerge organically, teams build on each other's work, and system-wide coherence develops naturally.
 *   **Sustainable Treasury - Perpetual Value Flow:** The Choir treasury maintains a sustainable value flow by capturing value from split decisions and funding ongoing citation rewards, enabling perpetual rewards that benefit the entire ecosystem and ensure long-term viability.
