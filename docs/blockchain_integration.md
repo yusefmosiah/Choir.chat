@@ -1,10 +1,10 @@
-# Blockchain Integration in Choir (Qdrant-Sui MVP)
+# Blockchain Integration in Choir (Conductor + Agents)
 
-VERSION blockchain_integration: 8.0 (Qdrant-Sui MVP Focus)
+VERSION blockchain_integration: 9.0 (Credits + Rewards)
 
 ## Overview
 
-This document outlines the blockchain integration strategy for the Choir Qdrant-Sui MVP. This approach centralizes blockchain interactions within the main Python API backend, specifically using a dedicated service module (`sui_service.py`) to interact with the Sui blockchain via the PySUI SDK.
+This document outlines blockchain integration under the Conductor + Agents architecture. The Python API backend centralizes on-chain interactions via `sui_service.py` using the PySUI SDK. Rewards are issued only on Ghostwriter invocations; credits gate compute; publishing and revision markets drive discovery and co‑authorship.
 
 ## Core Blockchain Integration Goals
 
@@ -61,27 +61,24 @@ graph LR
         E
     end
 
-    Communication Flow for Blockchain Operations (MVP):
+    Communication Flow for Blockchain Operations
 
-PostChain Completion: The PostChain workflow (running within the API) completes its final (Yield) phase. It returns the final AI message structure, including author ID, cited prior IDs, novelty score, and similarity scores.
+Ghostwriter Invocation: Conductor triggers Ghostwriter for research/drafting/citation. Ghostwriter returns a structured output with citations and novelty measurements.
 
-API Trigger: The main API logic receives the completed PostChain data.
+API Trigger: The API receives the Ghostwriter result.
 
-Data Persistence: The API saves the final AI message to the choir collection in Qdrant.
+Data Persistence: The API saves the final Ghostwriter output to the choir collection in Qdrant.
 
-Call Sui Service: The API calls the appropriate function within sui_service.py (e.g., process_rewards), passing the relevant data fetched from the newly saved Qdrant message (or held from the workflow result).
+Call Sui Service: The API calls a function within `sui_service.py` (e.g., `process_rewards`) with author ID, cited prior IDs, and novelty/similarity metrics.
 
-Sui Service Execution: The sui_service.py function:
+Sui Service Execution: `sui_service.py`:
 
-Performs the (simplified for MVP) reward calculation.
+- Calculates rewards (novelty/citation per current policy)
+- Looks up recipient Sui addresses (via Qdrant `users` mapping)
+- Uses PySUI to construct/sign transactions (e.g., `mint_choir`)
+- Submits transactions to Sui and returns the digest(s)
 
-Looks up recipient Sui addresses if necessary (using Qdrant users collection via database.py).
-
-Uses PySUI to construct and sign the necessary Sui transaction(s) (e.g., calling a basic mint_reward function in the choir_coin contract).
-
-Submits the transaction to the Sui blockchain.
-
-Result Handling: The sui_service.py function returns the transaction result (e.g., digest, success/failure) to the main API logic. The API logs this result. (Note: For MVP, the result might not be directly propagated back to the client UI).
+Result Handling: The API logs the transaction result(s) and may attach digests back to the saved record.
 
 Service Functions Exposed by sui_service.py (MVP):
 

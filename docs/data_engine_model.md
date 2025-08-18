@@ -1,64 +1,45 @@
-# Social Discourse Engine: AI That Facilitates Human Connection
+# Data Engine Model: The Language Game for the Learning Economy
 
-VERSION social_discourse: 9.0 (Relationship-Focused Design)
+VERSION data_engine_model: 10.0 (Conductor + Agents)
 
-The Social Discourse Engine represents a fundamental shift from AI systems designed to replace human interaction to AI that enhances and facilitates meaningful human connections. This framework emerged from recognizing that the most valuable use of AI isn't to be a better chatbot, but to help humans have better conversations with each other.
+Choir’s data engine frames the product as a language game where intellectual contribution becomes economic activity. Instead of optimizing for engagement or data extraction, we optimize for publication-quality output with citations and rewards. The architecture centers on a privacy-first Conductor orchestrating specialized server agents (starting with Ghostwriter) that transform conversations and files into citable artifacts.
 
-Rather than optimizing for engagement metrics or data extraction, the Social Discourse Engine prioritizes **the quality of human relationships and discourse** as the primary measure of success. It recognizes that in an age of increasing digital isolation and polarization, the most important role for AI is to help compatible minds find each other and engage in meaningful dialogue.
+**From Conversation to Publication:**
 
-**The Relationship Flywheel: From Individual Expression to Community Formation:**
+The data engine moves user input toward citable output via agent specialization:
 
-The Social Discourse Engine creates a flywheel effect where individual expression leads to community formation through AI-facilitated connections:
+*   **Authentic Expression First:** Users speak or write freely; identity is wallet-based and anonymous by default; ideas compete on merit
+*   **Conductor Orchestrates:** A fast, private client-side Conductor handles responsiveness and privacy; it escalates substantial tasks to server agents
+*   **Ghostwriter (Server Agent):** Plans, researches, drafts, cites, reviews, and optionally revises; issues token rewards on invocation (novelty, citations)
+*   **Citation Network:** Tracks which ideas prove foundational to others, enabling an IP economy via ongoing citation rewards
+*   **Discovery via Publishing:** Pay to publish to a permalink; ranking is based on spend; revision markets enable stake-based co‑authorship
 
-*   **Authentic Expression Enabled by Anonymity:** Users share genuine thoughts without social surveillance, creating more honest and valuable discourse than reputation-managed social media.
-    *   **Merit-Based Evaluation:** Ideas compete on quality rather than social status, enabling breakthrough insights from unexpected sources.
-    *   **Freedom from Cancel Culture:** Anonymous contribution removes the liability of posting, encouraging intellectual risk-taking and authentic expression.
-    *   **Quality Over Engagement:** Without follower counts or viral metrics, users focus on thoughtful contribution rather than attention-seeking behavior.
-*   **AI-Enhanced Understanding:** The PostChain workflow helps users articulate ideas more clearly while identifying intellectual connections:
-    *   **Semantic Compatibility Detection:** AI identifies users with complementary thinking patterns through conversation analysis rather than demographic targeting.
-    *   **Citation Network Analysis:** AI tracks which ideas prove valuable to others, creating a reputation system based on intellectual contribution.
-    *   **Relationship Recommendations:** AI suggests potential connections based on intellectual compatibility rather than social graph proximity.
+**Economic Alignment: Credits, Publishing, and Revisions**
 
-**Economic Alignment Through Publication Investment and Revision Markets:**
+We align incentives around valuable compute and knowledge publishing:
 
-The Social Discourse Engine's key innovation is using economic incentives to align users toward quality discourse and meaningful relationships:
+*   **Credits (IAP) for Ghostwriter:** Users purchase credits for Ghostwriter calls; credits gate compute, tokens are earned (distinct)
+    *   **Novelty Rewards:** Issued only on Ghostwriter invocation; existing scaling curve reused
+    *   **Citation Rewards:** 5 tokens per citation now; treasury‑scaled later
+    *   **Treasury Feeds:** Split decisions in revision markets fund citation emissions
+*   **Publication Investment:** Pay to publish to choir.chat/<permalink>; ranking rises with spend
+*   **Revision Markets:** Stake to propose revisions; accepted → co‑authorship + stake to the piece; rejected → author keeps stake; unanimity required; split decisions → Treasury
 
-*   **CHOIR Tokens as Relationship Investment:**  Users earn tokens through quality contributions and can invest them in relationships with other users, creating shared economic interest in maintaining quality discourse.
-    *   **Novelty Rewards:** Recognize original thinking and authentic perspectives that add value to community knowledge.
-    *   **Citation Rewards:** Reward users whose ideas prove valuable to others, creating a merit-based reputation system.
-    *   **Publication Investment:** Users pay to publish to choir.chat/<permalink>; ranking increases with spend. **Revision Markets:** Users stake to propose revisions; accept → stake to the piece + co‑authorship; reject → author keeps stake; unanimity required; split decisions route to Treasury for citation emissions.
-*   **Economic Filtering for Quality:**  Token requirements create natural barriers to low-effort interactions while enabling meaningful connections:
-    *   **Spam Prevention:** Economic cost of relationship initiation filters out automated and low-effort interactions.
-    *   **Serious Intent Signaling:** Staking tokens demonstrates genuine interest in forming meaningful connections.
-    *   **Shared Value Creation:** Successful relationships accumulate value through collaborative insights and mutual citations.
-*   **Self-Reinforcing Quality Cycles:**  Economic alignment creates positive feedback loops that improve discourse quality over time:
-    *   **Quality Attracts Quality:** Users with valuable insights attract other thoughtful contributors, creating high-quality conversation clusters.
-    *   **Economic Incentives for Thoughtfulness:** Token rewards encourage users to contribute meaningfully rather than seeking engagement through controversy.
-    *   **Community Self-Moderation:** Economic stakes in relationships create natural incentives for maintaining discourse quality.
+**Beyond Engagement Metrics — Value Flows Through Publication and Citations**
 
-**Beyond Engagement Metrics - Value Flows Through Relationship Quality:**
+We optimize for publication quality, verifiable sources, and enduring intellectual property:
 
-The Social Discourse Engine moves beyond the attention-driven models of traditional social media to focus on relationship quality and intellectual connection:
+*   **Success Measures:** Publication quality, citation flows, and earned tokens — not follower counts or time‑on‑page
+*   **Compatibility by Content:** Semantic resonance and citation patterns replace demographic targeting
+*   **Collaborative Output:** Co‑authorship and revisions produce better artifacts than either party alone
 
-*   **Relationship Quality as the Measure of Success:**  Value is not measured by clicks, likes, or time-on-platform, but by **the quality and depth of relationships formed** through meaningful discourse. Successful connections that lead to ongoing collaboration and mutual intellectual growth represent true platform success.
-*   **Intellectual Compatibility Over Demographic Targeting:**  Rather than connecting users based on age, location, or behavioral patterns, the system identifies intellectual compatibility through:
-    *   **Semantic Resonance:** Users whose ideas build on each other's thinking in meaningful ways.
-    *   **Citation Patterns:** Users who consistently find value in each other's contributions.
-    *   **Collaborative Potential:** Users whose different perspectives could create valuable synthesis when combined.
-*   **Long-Term Relationship Value:**  The system optimizes for relationships that create lasting value rather than momentary engagement:
-    *   **Sustained Discourse Quality:** Relationships that maintain high-quality conversation over time.
-    *   **Mutual Growth:** Connections where both parties develop their thinking through interaction.
-    *   **Collaborative Output:** Relationships that produce insights neither party could have reached alone.
-
-**Choir - A Practical Embodiment of the Social Discourse Engine:**
-
-Choir is designed as a practical embodiment of the Social Discourse Engine theory. It is not just another social platform or AI chat app, but an **attempt to build a system that fundamentally transforms how humans connect and communicate online through AI-facilitated meaningful relationships.**
+**Choir — Practical Data Engine for the Language Game**
 
 By focusing on:
 
-*   **Facilitating Authentic Expression Through Anonymity and Merit-Based Evaluation**
-*   **Using AI to Identify Intellectual Compatibility Rather Than Demographic Similarity**
-*   **Creating Economic Alignment Through Publication Investment, Revision Markets, and Quality Rewards**
-*   **Building a Platform Where Users Own Their Social Value and Relationships**
+*   **Conductor + Agents (Ghostwriter first) for research/drafting/citation**
+*   **Privacy‑first Conductor in Phala TEE (GPU LLM) for orchestration**
+*   **Credits for compute; tokens on Ghostwriter; publishing and revision economics**
+*   **Wallet‑based identity; attribution on publish**
 
-Choir aims to create a new paradigm for social platforms – one where AI amplifies human connection rather than replacing it, where quality discourse is rewarded over engagement farming, and where meaningful relationships are the measure of success. The Social Discourse Engine theory provides the conceptual foundation for building technology that serves human community rather than extracting value from it.
+Choir converges conversation into publication‑quality artifacts with clear economics, rewarding foundational ideas and enabling collaborative authorship.
